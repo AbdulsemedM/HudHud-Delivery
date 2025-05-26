@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
 class SignupTitle extends StatelessWidget {
+  const SignupTitle({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return const Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
@@ -30,7 +32,10 @@ class SignupTitle extends StatelessWidget {
 }
 
 class SignupForm extends StatefulWidget {
+  const SignupForm({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _SignupFormState createState() => _SignupFormState();
 }
 
@@ -47,7 +52,8 @@ class _SignupFormState extends State<SignupForm> {
     if (_password.length < 8) return 'Medium';
     bool hasUppercase = _password.contains(RegExp(r'[A-Z]'));
     bool hasDigits = _password.contains(RegExp(r'[0-9]'));
-    bool hasSpecialCharacters = _password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
+    bool hasSpecialCharacters =
+        _password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
     if (hasUppercase && hasDigits && hasSpecialCharacters) return 'Strong';
     return 'Medium';
   }
@@ -74,32 +80,35 @@ class _SignupFormState extends State<SignupForm> {
           icon: Icons.person_outline,
           hint: 'Enter your full name',
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         _buildInputField(
           label: 'Phone Number',
           icon: Icons.phone_outlined,
           hint: 'Enter your phone number',
           keyboardType: TextInputType.phone,
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         _buildInputField(
           label: 'Email',
           icon: Icons.email_outlined,
           hint: 'Enter your email',
           keyboardType: TextInputType.emailAddress,
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         _buildPasswordField(),
-        SizedBox(height: 5),
+        const SizedBox(height: 5),
         LinearProgressIndicator(
-          value: _getPasswordStrength() == 'Strong' ? 1 : 
-                 _getPasswordStrength() == 'Medium' ? 0.5 : 0.2,
+          value: _getPasswordStrength() == 'Strong'
+              ? 1
+              : _getPasswordStrength() == 'Medium'
+                  ? 0.5
+                  : 0.2,
           backgroundColor: Colors.grey[200],
           color: _getStrengthColor(),
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         _buildConfirmPasswordField(),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         Row(
           children: [
             Checkbox(
@@ -109,9 +118,9 @@ class _SignupFormState extends State<SignupForm> {
                   _isChecked = value ?? false;
                 });
               },
-              activeColor: Color(0xFF3498DB),
+              activeColor: const Color(0xFF3498DB),
             ),
-            Expanded(
+            const Expanded(
               child: Text(
                 'I agree to the Terms of Service and Privacy Policy',
                 style: TextStyle(
@@ -136,7 +145,7 @@ class _SignupFormState extends State<SignupForm> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(15),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: Colors.black12,
             blurRadius: 8,
@@ -144,14 +153,14 @@ class _SignupFormState extends State<SignupForm> {
           ),
         ],
       ),
-      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
       child: TextField(
         keyboardType: keyboardType,
         decoration: InputDecoration(
           labelText: label,
           hintText: hint,
-          labelStyle: TextStyle(color: Color(0xFF34495E)),
-          prefixIcon: Icon(icon, color: Color(0xFF3498DB)),
+          labelStyle: const TextStyle(color: Color(0xFF34495E)),
+          prefixIcon: Icon(icon, color: const Color(0xFF3498DB)),
           border: InputBorder.none,
         ),
       ),
@@ -163,7 +172,7 @@ class _SignupFormState extends State<SignupForm> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(15),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: Colors.black12,
             blurRadius: 8,
@@ -171,7 +180,7 @@ class _SignupFormState extends State<SignupForm> {
           ),
         ],
       ),
-      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
       child: TextField(
         obscureText: _obscurePassword,
         onChanged: (value) {
@@ -182,12 +191,12 @@ class _SignupFormState extends State<SignupForm> {
         decoration: InputDecoration(
           labelText: 'Password',
           hintText: 'Enter your password',
-          labelStyle: TextStyle(color: Color(0xFF34495E)),
-          prefixIcon: Icon(Icons.lock_outline, color: Color(0xFF3498DB)),
+          labelStyle: const TextStyle(color: Color(0xFF34495E)),
+          prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF3498DB)),
           suffixIcon: IconButton(
             icon: Icon(
               _obscurePassword ? Icons.visibility_off : Icons.visibility,
-              color: Color(0xFF3498DB),
+              color: const Color(0xFF3498DB),
             ),
             onPressed: () {
               setState(() {
@@ -206,7 +215,7 @@ class _SignupFormState extends State<SignupForm> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(15),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: Colors.black12,
             blurRadius: 8,
@@ -214,7 +223,7 @@ class _SignupFormState extends State<SignupForm> {
           ),
         ],
       ),
-      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
       child: TextField(
         obscureText: _obscureConfirmPassword,
         onChanged: (value) {
@@ -225,12 +234,12 @@ class _SignupFormState extends State<SignupForm> {
         decoration: InputDecoration(
           labelText: 'Confirm Password',
           hintText: 'Re-enter your password',
-          labelStyle: TextStyle(color: Color(0xFF34495E)),
-          prefixIcon: Icon(Icons.lock_outline, color: Color(0xFF3498DB)),
+          labelStyle: const TextStyle(color: Color(0xFF34495E)),
+          prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF3498DB)),
           suffixIcon: IconButton(
             icon: Icon(
               _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
-              color: Color(0xFF3498DB),
+              color: const Color(0xFF3498DB),
             ),
             onPressed: () {
               setState(() {
@@ -239,9 +248,10 @@ class _SignupFormState extends State<SignupForm> {
             },
           ),
           border: InputBorder.none,
-          errorText: _confirmPassword.isNotEmpty && _password != _confirmPassword 
-              ? 'Passwords do not match' 
-              : null,
+          errorText:
+              _confirmPassword.isNotEmpty && _password != _confirmPassword
+                  ? 'Passwords do not match'
+                  : null,
         ),
       ),
     );
@@ -249,22 +259,24 @@ class _SignupFormState extends State<SignupForm> {
 }
 
 class SignupButton extends StatelessWidget {
+  const SignupButton({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: double.infinity,
       height: 50,
       child: ElevatedButton(
         onPressed: () {},
         style: ElevatedButton.styleFrom(
-          backgroundColor: Color(0xFF3498DB),
+          backgroundColor: const Color(0xFF3498DB),
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(25),
           ),
           elevation: 3,
         ),
-        child: Text(
+        child: const Text(
           'SIGN UP',
           style: TextStyle(
             fontSize: 16,

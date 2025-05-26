@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import '../widgets/signup_widget.dart';
 
 class SignupScreen extends StatelessWidget {
+  const SignupScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
           Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               gradient: LinearGradient(
                 colors: [
                   Color(0xFFE6E6FA),
@@ -27,14 +29,15 @@ class SignupScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     IconButton(
-                      icon: Icon(Icons.arrow_back_ios, color: Color(0xFF2C3E50)),
+                      icon: const Icon(Icons.arrow_back_ios,
+                          color: Color(0xFF2C3E50)),
                       onPressed: () => Navigator.pop(context),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     SignupTitle(),
-                    SizedBox(height: 40),
+                    const SizedBox(height: 40),
                     SignupForm(),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     SignupButton(),
                   ],
                 ),
