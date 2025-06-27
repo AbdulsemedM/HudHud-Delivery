@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import '../../../home/presentation/screen/home_screen.dart';
 import '../../../orders/presentation/screen/orders_screen.dart';
-import '../../../wallet/presentation/screens/profile_screen.dart';
+import '../../../wallet/presentation/screens/wallet_screen.dart';
 import '../../../settings/presentation/screen/settings_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -18,7 +18,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final List<Widget> _screens = [
     const HomeScreen(),
     const OrdersScreen(),
-    const ProfileScreen(),
+    const WalletScreen(),
     const SettingsScreen(),
   ];
 
