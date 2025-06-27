@@ -1,30 +1,48 @@
 import 'package:flutter/material.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:intl_phone_field/country_picker_dialog.dart';
 
 class SignupTitle extends StatelessWidget {
   const SignupTitle({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Create Account',
-          style: TextStyle(
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF2C3E50),
-            letterSpacing: 1,
-          ),
-        ),
-        SizedBox(height: 8),
-        Text(
-          'Please fill in the form to continue',
+        const Text(
+          'Excited to see you',
           style: TextStyle(
             fontSize: 16,
             color: Color(0xFF7F8C8D),
-            letterSpacing: 0.5,
           ),
+        ),
+        const SizedBox(height: 8),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Create a New',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.only(top: 4),
+              child: const Text(
+                'Account',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                  decoration: TextDecoration.underline,
+                  decorationThickness: 2,
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -35,132 +53,128 @@ class SignupForm extends StatefulWidget {
   const SignupForm({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _SignupFormState createState() => _SignupFormState();
 }
 
 class _SignupFormState extends State<SignupForm> {
-  bool _isChecked = false;
   bool _obscurePassword = true;
-  String _password = '';
-  String _confirmPassword = '';
-  bool _obscureConfirmPassword = true;
-
-  String _getPasswordStrength() {
-    if (_password.isEmpty) return '';
-    if (_password.length < 6) return 'Weak';
-    if (_password.length < 8) return 'Medium';
-    bool hasUppercase = _password.contains(RegExp(r'[A-Z]'));
-    bool hasDigits = _password.contains(RegExp(r'[0-9]'));
-    bool hasSpecialCharacters =
-        _password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
-    if (hasUppercase && hasDigits && hasSpecialCharacters) return 'Strong';
-    return 'Medium';
-  }
-
-  Color _getStrengthColor() {
-    switch (_getPasswordStrength()) {
-      case 'Weak':
-        return Colors.red;
-      case 'Medium':
-        return Colors.orange;
-      case 'Strong':
-        return Colors.green;
-      default:
-        return Colors.transparent;
-    }
-  }
+  String _phoneNumber = '';
+  String _countryCode = '+92';
 
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildInputField(
-          label: 'Full Name',
-          icon: Icons.person_outline,
-          hint: 'Enter your full name',
+        const Text(
+          'Phone Number',
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.black87,
+          ),
         ),
-        const SizedBox(height: 20),
-        _buildInputField(
-          label: 'Phone Number',
-          icon: Icons.phone_outlined,
-          hint: 'Enter your phone number',
-          keyboardType: TextInputType.phone,
-        ),
-        const SizedBox(height: 20),
-        _buildInputField(
-          label: 'Email',
-          icon: Icons.email_outlined,
-          hint: 'Enter your email',
-          keyboardType: TextInputType.emailAddress,
-        ),
-        const SizedBox(height: 20),
-        _buildPasswordField(),
-        const SizedBox(height: 5),
-        LinearProgressIndicator(
-          value: _getPasswordStrength() == 'Strong'
-              ? 1
-              : _getPasswordStrength() == 'Medium'
-                  ? 0.5
-                  : 0.2,
-          backgroundColor: Colors.grey[200],
-          color: _getStrengthColor(),
-        ),
-        const SizedBox(height: 20),
-        _buildConfirmPasswordField(),
-        const SizedBox(height: 20),
-        Row(
-          children: [
-            Checkbox(
-              value: _isChecked,
-              onChanged: (value) {
-                setState(() {
-                  _isChecked = value ?? false;
-                });
-              },
-              activeColor: const Color(0xFF3498DB),
+        const SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.grey[100],
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: IntlPhoneField(
+            decoration: const InputDecoration(
+              hintText: '3069278009',
+              border: InputBorder.none,
+              contentPadding:
+                  EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             ),
-            const Expanded(
-              child: Text(
-                'I agree to the Terms of Service and Privacy Policy',
-                style: TextStyle(
-                  color: Color(0xFF7F8C8D),
-                  fontSize: 14,
+            initialCountryCode: 'PK',
+            disableLengthCheck: true,
+            dropdownIconPosition: IconPosition.trailing,
+            flagsButtonPadding: const EdgeInsets.symmetric(horizontal: 16),
+            showDropdownIcon: true,
+            dropdownIcon: const Icon(Icons.arrow_drop_down),
+            onChanged: (phone) {
+              setState(() {
+                _phoneNumber = phone.number;
+                _countryCode = phone.countryCode;
+              });
+            },
+            pickerDialogStyle: PickerDialogStyle(
+              backgroundColor: Colors.white,
+              searchFieldInputDecoration: InputDecoration(
+                hintText: 'Search country',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
               ),
             ),
-          ],
+          ),
         ),
+        const SizedBox(height: 16),
+        const Text(
+          'First Name',
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 8),
+        _buildSimpleInputField(
+          hint: 'Samara',
+        ),
+        const SizedBox(height: 16),
+        const Text(
+          'Last Name',
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 8),
+        _buildSimpleInputField(
+          hint: 'Mehmood',
+        ),
+        const SizedBox(height: 16),
+        const Text(
+          'Email',
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 8),
+        _buildSimpleInputField(
+          hint: 'debbie.baker@example.com',
+          keyboardType: TextInputType.emailAddress,
+        ),
+        const SizedBox(height: 16),
+        const Text(
+          'Your Password',
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 8),
+        _buildPasswordField(),
       ],
     );
   }
 
-  Widget _buildInputField({
-    required String label,
-    required IconData icon,
+  Widget _buildSimpleInputField({
     required String hint,
     TextInputType? keyboardType,
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
-        ],
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(8),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: TextField(
         keyboardType: keyboardType,
         decoration: InputDecoration(
-          labelText: label,
           hintText: hint,
-          labelStyle: const TextStyle(color: Color(0xFF34495E)),
-          prefixIcon: Icon(icon, color: const Color(0xFF3498DB)),
+          hintStyle: TextStyle(color: Colors.grey[600]),
           border: InputBorder.none,
         ),
       ),
@@ -170,33 +184,20 @@ class _SignupFormState extends State<SignupForm> {
   Widget _buildPasswordField() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
-        ],
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(8),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: TextField(
         obscureText: _obscurePassword,
-        onChanged: (value) {
-          setState(() {
-            _password = value;
-          });
-        },
         decoration: InputDecoration(
-          labelText: 'Password',
-          hintText: 'Enter your password',
-          labelStyle: const TextStyle(color: Color(0xFF34495E)),
-          prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF3498DB)),
+          hintText: '********',
+          hintStyle: TextStyle(color: Colors.grey[600]),
+          border: InputBorder.none,
           suffixIcon: IconButton(
             icon: Icon(
               _obscurePassword ? Icons.visibility_off : Icons.visibility,
-              color: const Color(0xFF3498DB),
+              color: Colors.grey[600],
             ),
             onPressed: () {
               setState(() {
@@ -204,54 +205,6 @@ class _SignupFormState extends State<SignupForm> {
               });
             },
           ),
-          border: InputBorder.none,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildConfirmPasswordField() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-      child: TextField(
-        obscureText: _obscureConfirmPassword,
-        onChanged: (value) {
-          setState(() {
-            _confirmPassword = value;
-          });
-        },
-        decoration: InputDecoration(
-          labelText: 'Confirm Password',
-          hintText: 'Re-enter your password',
-          labelStyle: const TextStyle(color: Color(0xFF34495E)),
-          prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF3498DB)),
-          suffixIcon: IconButton(
-            icon: Icon(
-              _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
-              color: const Color(0xFF3498DB),
-            ),
-            onPressed: () {
-              setState(() {
-                _obscureConfirmPassword = !_obscureConfirmPassword;
-              });
-            },
-          ),
-          border: InputBorder.none,
-          errorText:
-              _confirmPassword.isNotEmpty && _password != _confirmPassword
-                  ? 'Passwords do not match'
-                  : null,
         ),
       ),
     );
@@ -263,28 +216,57 @@ class SignupButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      height: 50,
-      child: ElevatedButton(
-        onPressed: () {},
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF3498DB),
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(25),
+    return Column(
+      children: [
+        SizedBox(
+          width: double.infinity,
+          height: 50,
+          child: ElevatedButton(
+            onPressed: () {},
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF6C3EE9),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              elevation: 0,
+            ),
+            child: const Text(
+              'Signup Now',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
+            ),
           ),
-          elevation: 3,
         ),
-        child: const Text(
-          'SIGN UP',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.5,
-          ),
+        const SizedBox(height: 20),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'Have an Account? ',
+              style: TextStyle(
+                color: Colors.black87,
+                fontSize: 14,
+              ),
+            ),
+            GestureDetector(
+              onTap: () {
+                // Handle navigation to login screen
+              },
+              child: const Text(
+                'Login Instead',
+                style: TextStyle(
+                  color: Color(0xFF6C3EE9),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
         ),
-      ),
+      ],
     );
   }
 }

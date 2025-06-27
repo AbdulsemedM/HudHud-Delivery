@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/features/dashboard/presentation/screen/dashboard_screen.dart';
 // import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class LogoWidget extends StatelessWidget {
@@ -132,7 +133,12 @@ class LoginButton extends StatelessWidget {
           width: double.infinity,
           height: 50,
           child: ElevatedButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const DashboardScreen()));
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF3498DB),
               foregroundColor: Colors.white,
