@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/features/restaurants/presentation/screens/favorite_restaurants_screen.dart';
 import '../widgets/restaurants_widget.dart';
 
 class ListOfRestaurantsScreen extends StatelessWidget {
@@ -100,7 +101,14 @@ class ListOfRestaurantsScreen extends StatelessWidget {
                             ),
                           ),
                           TextButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const FavoriteRestaurantsScreen(),
+                                ),
+                              );
+                            },
                             child: const Text(
                               'See Favorites',
                               style: TextStyle(
