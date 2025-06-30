@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/features/orders/presentation/widgets/orders_widget.dart';
 
 class WalletHeader extends StatelessWidget {
   const WalletHeader({super.key});
@@ -8,9 +9,11 @@ class WalletHeader extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const CircleAvatar(
-          radius: 20,
-          backgroundImage: NetworkImage('https://via.placeholder.com/40'),
+        const StoryRing(
+            child: CircleAvatar(
+              radius: 20,
+            backgroundImage: AssetImage('assets/images/profile.png'),
+          ),
         ),
         IconButton(
           icon: const Icon(

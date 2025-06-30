@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/features/orders/presentation/widgets/orders_widget.dart';
+import 'package:lottie/lottie.dart';
 
 class UserProfileHeader extends StatelessWidget {
   final String name;
@@ -19,9 +21,11 @@ class UserProfileHeader extends StatelessWidget {
       children: [
         Row(
           children: [
-            const CircleAvatar(
-              radius: 20,
-              backgroundImage: NetworkImage('https://via.placeholder.com/40'),
+            const StoryRing(
+              child: CircleAvatar(
+                radius: 20,
+                backgroundImage: AssetImage('assets/images/profile.png'),
+              ),
             ),
             const Spacer(),
             IconButton(
@@ -100,40 +104,49 @@ class ServiceCategory extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
           color: backgroundColor,
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
+        child:
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              subtitle,
-              style: const TextStyle(
-                fontSize: 12,
-                color: Colors.black87,
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.black87,
+                ),
               ),
-            ),
-            const Spacer(),
-            Align(
-              alignment: Alignment.bottomRight,
+              // const Spacer(),
+            ],
+          ),
+          Align(
+            alignment: Alignment.bottomRight,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(30),
+              ),
               child: Image.asset(
                 imagePath,
                 width: 48,
                 height: 48,
               ),
             ),
-          ],
-        ),
+          ),
+        ]),
       ),
     );
   }
@@ -159,10 +172,7 @@ class SeeAllServicesCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Image.asset(
-              'assets/images/girl_laptop.png',
-              height: 120,
-            ),
+            Lottie.asset('assets/animations/browse.json', width: 200),
             const SizedBox(width: 16),
             Expanded(
               child: Column(

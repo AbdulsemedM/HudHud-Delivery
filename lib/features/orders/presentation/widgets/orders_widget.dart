@@ -1,5 +1,34 @@
 import 'package:flutter/material.dart';
 
+class StoryRing extends StatelessWidget {
+  const StoryRing({
+    super.key,
+    required this.child,
+  });
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(2), // Border width
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          begin: Alignment.topRight,
+          end: Alignment.bottomLeft,
+          colors: [
+            Colors.purple,
+            Colors.pink,
+            Colors.orange,
+          ],
+        ),
+      ),
+      child: child,
+    );
+  }
+}
+
 class OrdersHeader extends StatelessWidget {
   final VoidCallback onFilterTap;
 
@@ -13,11 +42,14 @@ class OrdersHeader extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
+        const Row(
           children: [
-            const CircleAvatar(
-              radius: 20,
-              backgroundImage: NetworkImage('https://via.placeholder.com/40'),
+            StoryRing(
+              child: CircleAvatar(
+                radius: 20,
+                backgroundColor: Colors.white,
+                backgroundImage: AssetImage('assets/images/profile.png'),
+              ),
             ),
           ],
         ),

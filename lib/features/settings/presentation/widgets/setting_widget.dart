@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/features/orders/presentation/widgets/orders_widget.dart';
 
 class SettingsHeader extends StatelessWidget {
   const SettingsHeader({super.key});
@@ -8,9 +9,11 @@ class SettingsHeader extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const CircleAvatar(
-          radius: 25,
-          backgroundImage: NetworkImage('https://via.placeholder.com/50'),
+        const StoryRing(
+          child: CircleAvatar(
+            radius: 25,
+            backgroundImage: AssetImage('assets/images/profile.png'),
+          ),
         ),
         IconButton(
           icon: const Icon(
@@ -75,9 +78,11 @@ class AccountSettingsSection extends StatelessWidget {
           ),
           child: Row(
             children: [
-              const CircleAvatar(
-                radius: 30,
-                backgroundImage: NetworkImage('https://via.placeholder.com/60'),
+              const StoryRing(
+                child: CircleAvatar(
+                  radius: 30,
+                  backgroundImage: AssetImage('assets/images/profile.png'),
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(

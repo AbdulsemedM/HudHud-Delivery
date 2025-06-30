@@ -35,7 +35,7 @@ class HomeScreen extends StatelessWidget {
                 crossAxisCount: 2,
                 mainAxisSpacing: 16,
                 crossAxisSpacing: 16,
-                childAspectRatio: 1.1,
+                childAspectRatio: 1.5,
                 children: [
                   ServiceCategory(
                     title: 'Groceries',
