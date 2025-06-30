@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/features/restaurants/presentation/screens/list_of_restaurants_screen.dart';
 import '../widgets/home_widget.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -52,7 +53,12 @@ class HomeScreen extends StatelessWidget {
                     imagePath: 'assets/images/food.png',
                     backgroundColor: Colors.orange[50]!,
                     onTap: () {
-                      // Handle food
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ListOfRestaurantsScreen(),
+                        ),
+                      );
                     },
                   ),
                   ServiceCategory(
