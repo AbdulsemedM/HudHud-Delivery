@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:country_picker/country_picker.dart';
 
 class ProfileImagePicker extends StatelessWidget {
   final String imageUrl;
@@ -103,14 +104,14 @@ class PhoneNumberField extends StatelessWidget {
   final String countryCode;
   final String number;
   final ValueChanged<String> onNumberChanged;
-  final VoidCallback onCountryTap;
+  final ValueChanged<Country> onCountryChanged;
 
   const PhoneNumberField({
     super.key,
     required this.countryCode,
     required this.number,
     required this.onNumberChanged,
-    required this.onCountryTap,
+    required this.onCountryChanged,
   });
 
   @override
@@ -119,7 +120,26 @@ class PhoneNumberField extends StatelessWidget {
       children: [
         // Country Code Selector
         GestureDetector(
-          onTap: onCountryTap,
+          onTap: () {
+            showCountryPicker(
+              context: context,
+              showPhoneCode: true,
+              onSelect: onCountryChanged,
+              countryListTheme: CountryListThemeData(
+                borderRadius: BorderRadius.circular(12),
+                inputDecoration: InputDecoration(
+                  hintText: 'Search country',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                ),
+              ),
+            );
+          },
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             decoration: BoxDecoration(
@@ -128,12 +148,6 @@ class PhoneNumberField extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Image.asset(
-                  'assets/images/pk_flag.png',
-                  width: 24,
-                  height: 16,
-                ),
-                const SizedBox(width: 4),
                 Text(
                   countryCode,
                   style: const TextStyle(

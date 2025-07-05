@@ -1,3 +1,4 @@
+import 'package:country_picker/country_picker.dart';
 import 'package:flutter/material.dart';
 import '../widgets/edit_profile_widget.dart';
 
@@ -76,8 +77,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   number: phoneNumber,
                   onNumberChanged: (value) =>
                       setState(() => phoneNumber = value),
-                  onCountryTap: () {
-                    // Handle country selection
+                  onCountryChanged: (Country value) {
+                    setState(() {
+                      countryCode = value.phoneCode;
+                    });
                   },
                 ),
               ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/features/settings/presentation/screen/edit_profile_screen.dart';
 import '../widgets/setting_widget.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -28,7 +29,12 @@ class SettingsScreen extends StatelessWidget {
                 phone: '+92-3069278009',
                 email: 'alma.lawson@example.com',
                 onEditTap: () {
-                  // Handle edit tap
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const EditProfileScreen(),
+                    ),
+                  );
                 },
               ),
               const SizedBox(height: 24),
