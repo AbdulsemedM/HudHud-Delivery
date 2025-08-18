@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/user_model.dart';
-import '../services/auth_service.dart';
+import '../app/services/auth_service.dart';
 import '../core/api/api_service.dart';
 
 class AuthController extends ChangeNotifier {
@@ -304,7 +304,7 @@ class AuthController extends ChangeNotifier {
   
   // Check if user has specific role or permission
   bool hasRole(String role) {
-    return _currentUser?.role == role;
+    return _currentUser?.permissions?.contains(role) == true;
   }
   
   // Get user display name
@@ -317,8 +317,4 @@ class AuthController extends ChangeNotifier {
     return _currentUser?.email ?? '';
   }
   
-  // Check if user email is verified
-  bool get isEmailVerified {
-    return _currentUser?.isEmailVerified ?? false;
-  }
 }

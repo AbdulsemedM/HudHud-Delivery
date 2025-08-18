@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -14,29 +15,29 @@ import 'controllers/theme_controller.dart';
 import 'controllers/auth_controller.dart';
 
 // Services
-import 'services/auth_service.dart';
+import 'app/services/auth_service.dart';
 
 // Widgets
-import 'widgets/primary_button.dart';
-import 'widgets/secondary_button.dart';
-import 'widgets/custom_snackbar.dart';
+import 'app/widgets/primary_button.dart';
+import 'app/widgets/secondary_button.dart';
+import 'app/widgets/custom_snackbar.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize secure storage
   const secureStorage = FlutterSecureStorage();
-  
+
   // Initialize API service
   // DioClient.initialize(); // Will be implemented when needed
-  
+
   // Initialize theme controller
   final themeController = ThemeController();
   await themeController.init();
-  
+
   // Initialize auth service
   final authService = AuthService();
-  
+
   runApp(MyApp(
     themeController: themeController,
     authService: authService,
@@ -46,7 +47,7 @@ void main() async {
 class MyApp extends StatelessWidget {
   final ThemeController themeController;
   final AuthService authService;
-  
+
   const MyApp({
     Key? key,
     required this.themeController,
@@ -70,7 +71,7 @@ class MyApp extends StatelessWidget {
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
             themeMode: themeController.themeMode,
-            home: const SampleHomePage(),
+            home: LoginScreen(),
             builder: (context, child) {
               // Update system UI overlay style when theme changes
               themeController.updateSystemUIOverlayStyle();
@@ -98,7 +99,7 @@ class _SampleHomePageState extends State<SampleHomePage> {
   Widget build(BuildContext context) {
     final themeController = Provider.of<ThemeController>(context);
     final authController = Provider.of<AuthController>(context);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('HudHud Delivery Demo'),
@@ -106,9 +107,7 @@ class _SampleHomePageState extends State<SampleHomePage> {
           // Theme toggle button
           IconButton(
             icon: Icon(
-              themeController.isDarkMode 
-                  ? Icons.light_mode 
-                  : Icons.dark_mode,
+              themeController.isDarkMode ? Icons.light_mode : Icons.dark_mode,
             ),
             onPressed: () {
               themeController.toggleTheme();
@@ -205,9 +204,9 @@ class _SampleHomePageState extends State<SampleHomePage> {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Counter Section
             Card(
               child: Padding(
@@ -235,7 +234,8 @@ class _SampleHomePageState extends State<SampleHomePage> {
                             setState(() {
                               _counter--;
                             });
-                            SnackbarUtil.showInfo(context, 'Counter decreased to $_counter');
+                            SnackbarUtil.showInfo(
+                                context, 'Counter decreased to $_counter');
                           },
                         ),
                         PrimaryButton(
@@ -246,7 +246,8 @@ class _SampleHomePageState extends State<SampleHomePage> {
                             setState(() {
                               _counter++;
                             });
-                            SnackbarUtil.showSuccess(context, 'Counter increased to $_counter');
+                            SnackbarUtil.showSuccess(
+                                context, 'Counter increased to $_counter');
                           },
                         ),
                       ],
@@ -255,9 +256,9 @@ class _SampleHomePageState extends State<SampleHomePage> {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Button Showcase
             Card(
               child: Padding(
@@ -271,63 +272,70 @@ class _SampleHomePageState extends State<SampleHomePage> {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 16),
-                    
+
                     // Primary Buttons
                     PrimaryButton(
                       text: 'Primary Button',
-                      onPressed: () => SnackbarUtil.showSuccess(context, 'Primary button pressed!'),
+                      onPressed: () => SnackbarUtil.showSuccess(
+                          context, 'Primary button pressed!'),
                     ),
                     const SizedBox(height: 12),
-                    
+
                     PrimaryButtonLarge(
                       text: 'Large Primary Button',
                       icon: Icons.star,
-                      onPressed: () => SnackbarUtil.showInfo(context, 'Large primary button with icon pressed!'),
+                      onPressed: () => SnackbarUtil.showInfo(
+                          context, 'Large primary button with icon pressed!'),
                     ),
                     const SizedBox(height: 12),
-                    
+
                     Row(
                       children: [
                         Expanded(
                           child: PrimaryButtonSmall(
                             text: 'Small',
                             isFullWidth: true,
-                            onPressed: () => SnackbarUtil.showWarning(context, 'Small button pressed!'),
+                            onPressed: () => SnackbarUtil.showWarning(
+                                context, 'Small button pressed!'),
                           ),
                         ),
                         const SizedBox(width: 12),
                         PrimaryButtonIcon(
                           icon: Icons.favorite,
-                          onPressed: () => SnackbarUtil.showError(context, 'Icon button pressed!'),
+                          onPressed: () => SnackbarUtil.showError(
+                              context, 'Icon button pressed!'),
                         ),
                       ],
                     ),
-                    
+
                     const SizedBox(height: 16),
                     const Divider(),
                     const SizedBox(height: 16),
-                    
+
                     // Secondary Buttons
                     SecondaryButton(
                       text: 'Secondary Button',
-                      onPressed: () => SnackbarUtil.showInfo(context, 'Secondary button pressed!'),
+                      onPressed: () => SnackbarUtil.showInfo(
+                          context, 'Secondary button pressed!'),
                     ),
                     const SizedBox(height: 12),
-                    
+
                     SecondaryButtonLarge(
                       text: 'Large Secondary Button',
                       icon: Icons.settings,
-                      onPressed: () => SnackbarUtil.showSuccess(context, 'Large secondary button pressed!'),
+                      onPressed: () => SnackbarUtil.showSuccess(
+                          context, 'Large secondary button pressed!'),
                     ),
                     const SizedBox(height: 12),
-                    
+
                     Row(
                       children: [
                         Expanded(
                           child: SecondaryButtonSmall(
                             text: 'Small Secondary',
                             isFullWidth: true,
-                            onPressed: () => SnackbarUtil.showWarning(context, 'Small secondary button pressed!'),
+                            onPressed: () => SnackbarUtil.showWarning(
+                                context, 'Small secondary button pressed!'),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -335,7 +343,8 @@ class _SampleHomePageState extends State<SampleHomePage> {
                           child: GhostButton(
                             text: 'Ghost Button',
                             isFullWidth: true,
-                            onPressed: () => SnackbarUtil.showInfo(context, 'Ghost button pressed!'),
+                            onPressed: () => SnackbarUtil.showInfo(
+                                context, 'Ghost button pressed!'),
                           ),
                         ),
                       ],
@@ -344,9 +353,9 @@ class _SampleHomePageState extends State<SampleHomePage> {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Snackbar Showcase
             Card(
               child: Padding(
@@ -360,7 +369,6 @@ class _SampleHomePageState extends State<SampleHomePage> {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 16),
-                    
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
@@ -371,7 +379,8 @@ class _SampleHomePageState extends State<SampleHomePage> {
                             'This is a success message!',
                             action: SnackBarAction(
                               label: 'UNDO',
-                              onPressed: () => SnackbarUtil.showInfo(context, 'Undo action pressed'),
+                              onPressed: () => SnackbarUtil.showInfo(
+                                  context, 'Undo action pressed'),
                             ),
                           ),
                           icon: const Icon(Icons.check_circle),
@@ -381,7 +390,6 @@ class _SampleHomePageState extends State<SampleHomePage> {
                             foregroundColor: Colors.white,
                           ),
                         ),
-                        
                         ElevatedButton.icon(
                           onPressed: () => SnackbarUtil.showError(
                             context,
@@ -394,7 +402,6 @@ class _SampleHomePageState extends State<SampleHomePage> {
                             foregroundColor: Colors.white,
                           ),
                         ),
-                        
                         ElevatedButton.icon(
                           onPressed: () => SnackbarUtil.showWarning(
                             context,
@@ -407,7 +414,6 @@ class _SampleHomePageState extends State<SampleHomePage> {
                             foregroundColor: Colors.white,
                           ),
                         ),
-                        
                         ElevatedButton.icon(
                           onPressed: () => SnackbarUtil.showInfo(
                             context,
@@ -422,9 +428,7 @@ class _SampleHomePageState extends State<SampleHomePage> {
                         ),
                       ],
                     ),
-                    
                     const SizedBox(height: 16),
-                    
                     Row(
                       children: [
                         Expanded(
@@ -432,11 +436,13 @@ class _SampleHomePageState extends State<SampleHomePage> {
                             width: double.infinity,
                             child: ElevatedButton.icon(
                               onPressed: () {
-                                SnackbarUtil.showLoading(context, 'Loading data...');
+                                SnackbarUtil.showLoading(
+                                    context, 'Loading data...');
                                 // Simulate loading
                                 Future.delayed(const Duration(seconds: 3), () {
                                   SnackbarUtil.hideSnackbar(context);
-                                  SnackbarUtil.showSuccess(context, 'Data loaded successfully!');
+                                  SnackbarUtil.showSuccess(
+                                      context, 'Data loaded successfully!');
                                 });
                               },
                               icon: const Icon(Icons.download),
@@ -449,7 +455,8 @@ class _SampleHomePageState extends State<SampleHomePage> {
                           child: SizedBox(
                             width: double.infinity,
                             child: ElevatedButton.icon(
-                              onPressed: () => SnackbarUtil.hideSnackbar(context),
+                              onPressed: () =>
+                                  SnackbarUtil.hideSnackbar(context),
                               icon: const Icon(Icons.close),
                               label: const Text('Hide Snackbar'),
                             ),
@@ -461,9 +468,9 @@ class _SampleHomePageState extends State<SampleHomePage> {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // API Demo Section
             Card(
               child: Padding(
@@ -477,7 +484,6 @@ class _SampleHomePageState extends State<SampleHomePage> {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 16),
-                    
                     if (authController.isLoading)
                       const Center(
                         child: CircularProgressIndicator(),
@@ -491,14 +497,14 @@ class _SampleHomePageState extends State<SampleHomePage> {
                           setState(() {
                             _isLoading = true;
                           });
-                          
+
                           try {
                             // Sample login call
                             await authController.login(
                               'demo@example.com',
                               'password123',
                             );
-                            
+
                             if (authController.currentUser != null) {
                               SnackbarUtil.showSuccess(
                                 context,
@@ -517,28 +523,27 @@ class _SampleHomePageState extends State<SampleHomePage> {
                           }
                         },
                       ),
-                      
                       const SizedBox(height: 12),
-                      
                       SecondaryButton(
                         text: 'Get User Profile',
                         icon: Icons.person,
-                        onPressed: authController.currentUser == null ? null : () async {
-                          try {
-                            await authController.refreshUserProfile();
-                            SnackbarUtil.showSuccess(
-                              context,
-                              'Profile refreshed successfully!',
-                            );
-                          } catch (e) {
-                            SnackbarUtil.showError(
-                              context,
-                              'Failed to refresh profile: ${e.toString()}',
-                            );
-                          }
-                        },
+                        onPressed: authController.currentUser == null
+                            ? null
+                            : () async {
+                                try {
+                                  await authController.refreshUserProfile();
+                                  SnackbarUtil.showSuccess(
+                                    context,
+                                    'Profile refreshed successfully!',
+                                  );
+                                } catch (e) {
+                                  SnackbarUtil.showError(
+                                    context,
+                                    'Failed to refresh profile: ${e.toString()}',
+                                  );
+                                }
+                              },
                       ),
-                      
                       if (authController.currentUser != null) ...[
                         const SizedBox(height: 16),
                         Container(
@@ -556,25 +561,24 @@ class _SampleHomePageState extends State<SampleHomePage> {
                               ),
                               const SizedBox(height: 4),
                               Text('Name: ${authController.currentUser!.name}'),
-                              Text('Email: ${authController.currentUser!.email}'),
-                              Text('Role: ${authController.currentUser!.role}'),
+                              Text(
+                                  'Email: ${authController.currentUser!.email}'),
+                              Text('Role: ${authController.currentUser!.permissions}'),
                             ],
                           ),
                         ),
-                        
                         const SizedBox(height: 12),
-                        
                         SecondaryButton(
                           text: 'Logout',
                           icon: Icons.logout,
                           onPressed: () async {
                             await authController.logout();
-                            SnackbarUtil.showInfo(context, 'Logged out successfully!');
+                            SnackbarUtil.showInfo(
+                                context, 'Logged out successfully!');
                           },
                         ),
                       ],
                     ],
-                    
                     if (authController.errorMessage != null) ...[
                       const SizedBox(height: 16),
                       Container(
@@ -586,7 +590,8 @@ class _SampleHomePageState extends State<SampleHomePage> {
                         child: Text(
                           'Error: ${authController.errorMessage}',
                           style: TextStyle(
-                            color: Theme.of(context).colorScheme.onErrorContainer,
+                            color:
+                                Theme.of(context).colorScheme.onErrorContainer,
                           ),
                         ),
                       ),
@@ -595,9 +600,9 @@ class _SampleHomePageState extends State<SampleHomePage> {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Utility Buttons Demo
             Card(
               child: Padding(
@@ -611,21 +616,18 @@ class _SampleHomePageState extends State<SampleHomePage> {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 16),
-                    
                     ButtonUtil.primaryButton(
                       text: 'Utility Primary Button',
-                      onPressed: () => SnackbarUtil.showSuccess(context, 'Utility primary button pressed!'),
+                      onPressed: () => SnackbarUtil.showSuccess(
+                          context, 'Utility primary button pressed!'),
                     ),
-                    
                     const SizedBox(height: 12),
-                    
                     ButtonUtil.secondaryButton(
                       text: 'Utility Secondary Button',
-                      onPressed: () => SnackbarUtil.showInfo(context, 'Utility secondary button pressed!'),
+                      onPressed: () => SnackbarUtil.showInfo(
+                          context, 'Utility secondary button pressed!'),
                     ),
-                    
                     const SizedBox(height: 12),
-                    
                     Row(
                       children: [
                         Expanded(
@@ -633,30 +635,31 @@ class _SampleHomePageState extends State<SampleHomePage> {
                             width: double.infinity,
                             child: ButtonUtil.textButton(
                               text: 'Text Button',
-                              onPressed: () => SnackbarUtil.showWarning(context, 'Text button pressed!'),
+                              onPressed: () => SnackbarUtil.showWarning(
+                                  context, 'Text button pressed!'),
                             ),
                           ),
                         ),
                         const SizedBox(width: 12),
                         ButtonUtil.iconButton(
                           icon: Icons.share,
-                          onPressed: () => SnackbarUtil.showInfo(context, 'Share button pressed!'),
+                          onPressed: () => SnackbarUtil.showInfo(
+                              context, 'Share button pressed!'),
                         ),
                       ],
                     ),
-                    
                     const SizedBox(height: 12),
-                    
                     ButtonUtil.gradientButton(
                       text: 'Gradient Button',
                       gradientColors: [Colors.purple, Colors.blue],
-                      onPressed: () => SnackbarUtil.showSuccess(context, 'Gradient button pressed!'),
+                      onPressed: () => SnackbarUtil.showSuccess(
+                          context, 'Gradient button pressed!'),
                     ),
                   ],
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 32),
           ],
         ),

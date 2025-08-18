@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/features/orders/presentation/widgets/orders_widget.dart';
+import 'package:hudhud_delivery/core/widgets/custom_text_field.dart';
 
 class DeliverySummaryCard extends StatelessWidget {
   final double amount;
@@ -325,20 +326,15 @@ class CommentSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        TextField(
+        CustomTextField(
           controller: controller,
+          hintText: 'Your Comments if any....',
           maxLines: 3,
-          decoration: InputDecoration(
-            hintText: 'Your Comments if any....',
-            hintStyle: TextStyle(color: Colors.grey[400]),
-            filled: true,
-            fillColor: Colors.grey[50],
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            contentPadding: const EdgeInsets.all(16),
-          ),
+          fillColor: Colors.grey[50],
+          borderRadius: 12,
+          showBorder: true,
+          borderColor: Colors.grey[300],
+          contentPadding: const EdgeInsets.all(16),
         ),
         const SizedBox(height: 16),
         ElevatedButton(

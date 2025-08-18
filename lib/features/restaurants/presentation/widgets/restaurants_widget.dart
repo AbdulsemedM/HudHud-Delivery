@@ -1,33 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/features/restaurants/presentation/screens/restaurant_screen.dart';
+import 'package:hudhud_delivery/core/widgets/custom_text_field.dart';
 
 class SearchRestaurantBar extends StatelessWidget {
   const SearchRestaurantBar({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.search, color: Colors.grey[600]),
-          const SizedBox(width: 12),
-          Expanded(
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Search restaurants by name',
-                hintStyle: TextStyle(color: Colors.grey[500]),
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-            ),
-          ),
-        ],
-      ),
+    return CustomTextFieldStyles.searchField(
+      hintText: 'Search restaurants by name',
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/features/dashboard/presentation/screen/dashboard_screen.dart';
+import 'package:hudhud_delivery/core/widgets/custom_text_field.dart';
 // import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class LogoWidget extends StatelessWidget {
@@ -67,55 +68,18 @@ class LoginForm extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(15),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 8,
-                offset: Offset(0, 2),
-              ),
-            ],
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-          child: const TextField(
-            decoration: InputDecoration(
-              labelText: 'Email',
-              labelStyle: TextStyle(color: Color(0xFF34495E)),
-              prefixIcon: Icon(Icons.email_outlined, color: Color(0xFF3498DB)),
-              border: InputBorder.none,
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
-            ),
-          ),
+        CustomTextFieldStyles.authField(
+          label: 'Email',
+          hintText: 'Enter your email',
+          prefixIcon: Icons.email_outlined,
+          keyboardType: TextInputType.emailAddress,
         ),
         const SizedBox(height: 20),
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(15),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 8,
-                offset: Offset(0, 2),
-              ),
-            ],
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-          child: const TextField(
-            obscureText: true,
-            decoration: InputDecoration(
-              labelText: 'Password',
-              labelStyle: TextStyle(color: Color(0xFF34495E)),
-              prefixIcon: Icon(Icons.lock_outline, color: Color(0xFF3498DB)),
-              border: InputBorder.none,
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
-            ),
-          ),
+        CustomTextFieldStyles.authField(
+          label: 'Password',
+          hintText: 'Enter your password',
+          prefixIcon: Icons.lock_outline,
+          isPassword: true,
         ),
       ],
     );
