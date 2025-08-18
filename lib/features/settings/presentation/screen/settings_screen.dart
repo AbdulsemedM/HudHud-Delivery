@@ -1,9 +1,60 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:hudhud_delivery/features/settings/presentation/screen/edit_profile_screen.dart';
+import 'package:hudhud_delivery/controllers/theme_controller.dart';
+import 'package:hudhud_delivery/app/services/auth_service.dart';
+import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
 import '../widgets/setting_widget.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
+
+  Future<void> _handleLogout(BuildContext context) async {
+    try {
+      // Show confirmation dialog
+      final shouldLogout = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Logout'),
+          content: const Text('Are you sure you want to logout?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Logout'),
+            ),
+          ],
+        ),
+      );
+
+      if (shouldLogout == true) {
+        // Clear all stored data
+        final authService = AuthService();
+        await authService.clearAllData();
+
+        // Navigate to login screen and clear navigation stack
+        if (context.mounted) {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
+            (route) => false,
+          );
+        }
+      }
+    } catch (e) {
+      // Show error message
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error during logout: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +111,20 @@ class SettingsScreen extends StatelessWidget {
                     onTap: () {},
                   ),
                 ],
+              ),
+              const SizedBox(height: 16),
+              Consumer<ThemeController>(
+                builder: (context, themeController, child) {
+                  return ThemeToggleItem(
+                    icon: themeController.themeModeIcon,
+                    title: 'Theme Mode',
+                    subtitle: themeController.themeModeDisplayName,
+                    isDarkMode: themeController.isDarkMode,
+                    onToggle: () async {
+                      await themeController.toggleTheme();
+                    },
+                  );
+                },
               ),
               const SizedBox(height: 24),
               const Text(
@@ -120,7 +185,9 @@ class SettingsScreen extends StatelessWidget {
                   SettingsItem(
                     icon: Icons.logout,
                     title: 'Logout',
-                    onTap: () {},
+                    onTap: () async {
+                      await _handleLogout(context);
+                    },
                   ),
                 ],
               ),

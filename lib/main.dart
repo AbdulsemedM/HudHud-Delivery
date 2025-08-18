@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
+import 'package:hudhud_delivery/app/widgets/auth_wrapper.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -71,7 +72,7 @@ class MyApp extends StatelessWidget {
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
             themeMode: themeController.themeMode,
-            home: LoginScreen(),
+            home: const AuthWrapper(),
             builder: (context, child) {
               // Update system UI overlay style when theme changes
               themeController.updateSystemUIOverlayStyle();

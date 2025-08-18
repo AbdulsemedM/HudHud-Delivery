@@ -50,12 +50,12 @@ class UserModel {
 
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
-      id: map['user']['id'] != null ? map['user']['id'] as int : null,
-      name: map['user']['name'] != null ? map['user']['name'] as String : null,
-      email: map['user']['email'] != null ? map['user']['email'] as String : null,
-      phone: map['user']['phone'] != null ? map['user']['phone'] as String : null,
-      type: map['user']['type'] != null ? map['user']['type'] as String : null,
-      permissions: map['permissions'] != null ? List<dynamic>.from(map['permissions'] as List<dynamic>) : null,
+      id: map['id'] != null ? map['id'] as int : null,
+      name: map['name'] != null ? map['name'] as String : null,
+      email: map['email'] != null ? map['email'] as String : null,
+      phone: map['phone'] != null ? map['phone'] as String : null,
+      type: map['type'] != null ? map['type'] as String : null,
+      permissions: map['permissions'] != null ? List<String>.from(map['permissions'] as List<dynamic>) : null,
     );
   }
 

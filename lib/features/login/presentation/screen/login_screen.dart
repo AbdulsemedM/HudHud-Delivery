@@ -1,129 +1,139 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../signup/presentation/screen/signup_screen.dart';
 import '../widgets/login_widget.dart';
+import '../../bloc/login_bloc.dart';
+import '../../data/repository/login_repository.dart';
+import '../../data/data_provider/login_data_provider.dart';
+import '../../../../core/api/api_service.dart';
 
 class LoginScreen extends StatelessWidget {
+  const LoginScreen({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          // Background gradient
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xFFE6E6FA),
-                  Color(0xFFB2DFEE),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-            ),
-          ),
-          // Top wave
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: CustomPaint(
-              size: Size(
-                  MediaQuery.of(context).size.width, 400), // Increased height
-              painter: CurvePainter(
-                color: Colors.white.withOpacity(0.3), // Increased opacity
-                isTop: true,
-              ),
-            ),
-          ),
-          // Bottom wave
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: CustomPaint(
-              size: Size(
-                  MediaQuery.of(context).size.width, 400), // Increased height
-              painter: CurvePainter(
-                color: Colors.white.withOpacity(0.4), // Increased opacity
-                isTop: false,
-              ),
-            ),
-          ),
-          // Content
-          SafeArea(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 30.0, vertical: 40.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Container(
-                        width: 120,
-                        height: 120,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              spreadRadius: 2,
-                              blurRadius: 10,
-                              offset: Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        padding: EdgeInsets.all(15),
-                        child: Image.asset(
-                          'assets/images/logo.png',
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 40),
-                    LoginTitle(),
-                    SizedBox(height: 40),
-                    LoginForm(),
-                    SizedBox(height: 30),
-                    LoginButton(),
-                    SizedBox(height: 30),
-                    Center(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "Don't have an account? ",
-                            style: TextStyle(
-                              color: Color(0xFF7F8C8D),
-                              fontSize: 16,
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => SignupScreen()));
-                            },
-                            child: Text(
-                              'Sign up',
-                              style: TextStyle(
-                                color: Color(0xFF3498DB),
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+    return BlocProvider(
+      create: (context) => LoginBloc(
+        LoginRepository(LoginDataProvider(apiService: ApiService.instance)),
+      ),
+      child: Scaffold(
+        body: Stack(
+          children: [
+            // Background gradient
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Color(0xFFE6E6FA),
+                    Color(0xFFB2DFEE),
                   ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
               ),
             ),
-          ),
-        ],
+            // Top wave
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: CustomPaint(
+                size: Size(
+                    MediaQuery.of(context).size.width, 400), // Increased height
+                painter: CurvePainter(
+                  color: Colors.white.withOpacity(0.3), // Increased opacity
+                  isTop: true,
+                ),
+              ),
+            ),
+            // Bottom wave
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: CustomPaint(
+                size: Size(
+                    MediaQuery.of(context).size.width, 400), // Increased height
+                painter: CurvePainter(
+                  color: Colors.white.withOpacity(0.4), // Increased opacity
+                  isTop: false,
+                ),
+              ),
+            ),
+            // Content
+            SafeArea(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 30.0, vertical: 40.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                spreadRadius: 2,
+                                blurRadius: 10,
+                                offset: Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          padding: EdgeInsets.all(15),
+                          child: Image.asset(
+                            'assets/images/logo.png',
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 40),
+                      LoginTitle(),
+                      SizedBox(height: 40),
+                      LoginForm(),
+                      SizedBox(height: 30),
+                      Center(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Don't have an account? ",
+                              style: TextStyle(
+                                color: Color(0xFF7F8C8D),
+                                fontSize: 16,
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => SignupScreen()));
+                              },
+                              child: Text(
+                                'Sign up',
+                                style: TextStyle(
+                                  color: Color(0xFF3498DB),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

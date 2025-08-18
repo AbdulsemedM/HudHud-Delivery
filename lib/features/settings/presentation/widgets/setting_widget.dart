@@ -215,3 +215,66 @@ class SettingsItem extends StatelessWidget {
     );
   }
 }
+
+class ThemeToggleItem extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final bool isDarkMode;
+  final VoidCallback onToggle;
+
+  const ThemeToggleItem({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.isDarkMode,
+    required this.onToggle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onToggle,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              size: 24,
+              color: Colors.grey[700],
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Switch(
+              value: isDarkMode,
+              onChanged: (value) => onToggle(),
+              activeColor: const Color(0xFF3498DB),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

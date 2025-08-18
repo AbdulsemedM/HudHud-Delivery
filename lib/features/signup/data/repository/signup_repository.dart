@@ -24,11 +24,12 @@ class SignupRepository {
         password,
         confirmPassword,
       );
-      if (response['statusCode'] == 200) {
-        final user = UserModel.fromJson(response['data']);
+      if (response['statusCode'] == 201) {
+        // Extract user data from nested 'user' object
+        final user = UserModel.fromMap(response['data']['user']);
         
         // Store token and user data using AuthService
-        // Extract token from response if available
+        // Extract token from root level of response data
         if (response['data']['token'] != null) {
           await authService.storeUserSession(
             user: user,
