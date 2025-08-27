@@ -4,7 +4,8 @@ part of 'login_bloc.dart';
 sealed class LoginEvent {}
 
 class LoginFormSubmitted extends LoginEvent {
-  final String email;
+  final String emailOrPhone;
   final String password;
-  LoginFormSubmitted(this.email, this.password);
+  final String fieldType; // 'email' or 'phone'
+  LoginFormSubmitted(this.emailOrPhone, this.password, this.fieldType);
 }

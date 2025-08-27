@@ -6,10 +6,10 @@ class LoginRepository {
   final LoginDataProvider loginDataProvider;
   LoginRepository(this.loginDataProvider);
 
-  Future<UserModel> login(String email, String password) async {
+  Future<UserModel> login(String emailOrPhone, String password, String fieldType) async {
     AuthService authService = AuthService();
     try {
-      final response = await loginDataProvider.login(email, password);
+      final response = await loginDataProvider.login(emailOrPhone, password, fieldType);
       if (response['statusCode'] == 200) {
         final user = UserModel.fromMap(response['data']['user']);
 
@@ -25,10 +25,33 @@ class LoginRepository {
         }
         return user;
       } else {
-        throw Exception(response['message']);
+        // Get clean error message from data provider
+        String errorMessage = response['errorMessage'] ?? 'Login failed';
+        // Clean any prefixes that might exist
+        errorMessage = _cleanErrorMessage(errorMessage);
+        throw errorMessage; // Throw string directly instead of Exception
       }
     } catch (e) {
-      throw Exception(e.toString());
+      if (e is String) {
+        throw e; // Re-throw clean string errors
+      }
+      // Clean any exception messages
+      String errorMessage = _cleanErrorMessage(e.toString());
+      throw errorMessage;
     }
+  }
+  
+  String _cleanErrorMessage(String message) {
+    // Remove various prefixes that might appear
+    if (message.startsWith('Exception: ')) {
+      message = message.substring(11);
+    }
+    if (message.startsWith('ApiException: ')) {
+      message = message.substring(14);
+    }
+    if (message.startsWith('FormatException: ')) {
+      message = message.substring(17);
+    }
+    return message;
   }
 }

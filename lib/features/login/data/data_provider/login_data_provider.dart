@@ -6,10 +6,10 @@ class LoginDataProvider {
   ApiService apiService;
   LoginDataProvider({required this.apiService});
 
-  Future<Map<String, dynamic>> login(String email, String password) async {
+  Future<Map<String, dynamic>> login(String emailOrPhone, String password, String fieldType) async {
     try {
       final body = {
-        'email': email,
+        fieldType: emailOrPhone, // Use 'email' or 'phone' as key
         'password': password,
       };
       final response = await apiService.post(

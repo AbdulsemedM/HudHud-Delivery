@@ -41,10 +41,33 @@ class SignupRepository {
         
         return user;
       } else {
-        throw Exception(response['message']);
+        // Get clean error message from data provider
+        String errorMessage = response['errorMessage'] ?? 'Signup failed';
+        // Clean any prefixes that might exist
+        errorMessage = _cleanErrorMessage(errorMessage);
+        throw errorMessage; // Throw string directly instead of Exception
       }
     } catch (e) {
-      throw Exception(e);
+      if (e is String) {
+        throw e; // Re-throw clean string errors
+      }
+      // Clean any exception messages
+      String errorMessage = _cleanErrorMessage(e.toString());
+      throw errorMessage;
     }
+  }
+  
+  String _cleanErrorMessage(String message) {
+    // Remove various prefixes that might appear
+    if (message.startsWith('Exception: ')) {
+      message = message.substring(11);
+    }
+    if (message.startsWith('ApiException: ')) {
+      message = message.substring(14);
+    }
+    if (message.startsWith('FormatException: ')) {
+      message = message.substring(17);
+    }
+    return message;
   }
 }

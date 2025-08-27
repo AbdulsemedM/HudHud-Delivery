@@ -12,7 +12,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     on<LoginFormSubmitted>((event, emit) async {
       emit(LoginLoading());
       try {
-        await loginRepository.login(event.email, event.password);
+        await loginRepository.login(event.emailOrPhone, event.password, event.fieldType);
         emit(LoginSuccess());
       } catch (e) {
         emit(LoginFailure(e.toString()));

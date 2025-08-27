@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
 import '../../../../app/widgets/primary_button.dart';
 import '../../../dashboard/presentation/screen/dashboard_screen.dart';
 import '../../bloc/signup_bloc.dart';
@@ -92,6 +93,9 @@ class _SignupFormState extends State<SignupForm> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _phoneController = TextEditingController();
+  String _phoneNumber = '';
+  bool _isPasswordVisible = false;
+  bool _isConfirmPasswordVisible = false;
 
   // Ethiopian phone number validation
   String? validateAndFormatPhoneNumber(String input) {
@@ -123,7 +127,7 @@ class _SignupFormState extends State<SignupForm> {
       email: _emailController.text.trim(),
       password: _passwordController.text.trim(),
       confirmPassword: _confirmPasswordController.text.trim(),
-      phoneNumber: _phoneController.text.trim(),
+      phoneNumber: _phoneNumber.isNotEmpty ? _phoneNumber : _phoneController.text.trim(),
     );
   }
 
@@ -158,28 +162,37 @@ class _SignupFormState extends State<SignupForm> {
             ),
           ),
           const SizedBox(height: 8),
-          TextFormField(
-            controller: _phoneController,
-            keyboardType: TextInputType.phone,
-            style: const TextStyle(color: Colors.black),
+          IntlPhoneField(
             decoration: InputDecoration(
-              hintText: '987654321',
+              hintText: 'Enter your phone number',
+              prefixIcon: const Icon(Icons.phone_rounded, color: Color(0xFF3498DB)),
               filled: true,
-              fillColor: Colors.grey[100],
+              fillColor: Colors.grey.shade50,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide.none,
               ),
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(color: Colors.grey.shade200),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: Color(0xFF3498DB), width: 2),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: Colors.red, width: 2),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             ),
-            validator: (value) {
-              if (value == null || value.trim().isEmpty) {
+            initialCountryCode: 'ET',
+            onChanged: (phone) {
+              _phoneNumber = phone.completeNumber;
+            },
+            validator: (phone) {
+              if (phone == null || phone.number.isEmpty) {
                 return 'Phone number is required';
-              }
-              final formatted = validateAndFormatPhoneNumber(value);
-              if (formatted == null) {
-                return 'Please enter a valid Ethiopian phone number';
               }
               return null;
             },
@@ -200,14 +213,26 @@ class _SignupFormState extends State<SignupForm> {
             style: const TextStyle(color: Colors.black),
             decoration: InputDecoration(
               hintText: 'Abdu',
+              prefixIcon: const Icon(Icons.person_rounded, color: Color(0xFF3498DB)),
               filled: true,
-              fillColor: Colors.grey[100],
+              fillColor: Colors.grey.shade50,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide.none,
               ),
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(color: Colors.grey.shade200),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: Color(0xFF3498DB), width: 2),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: Colors.red, width: 2),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             ),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
@@ -232,14 +257,26 @@ class _SignupFormState extends State<SignupForm> {
             style: const TextStyle(color: Colors.black),
             decoration: InputDecoration(
               hintText: 'Musa',
+              prefixIcon: const Icon(Icons.person_outline_rounded, color: Color(0xFF3498DB)),
               filled: true,
-              fillColor: Colors.grey[100],
+              fillColor: Colors.grey.shade50,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide.none,
               ),
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(color: Colors.grey.shade200),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: Color(0xFF3498DB), width: 2),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: Colors.red, width: 2),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             ),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
@@ -265,14 +302,26 @@ class _SignupFormState extends State<SignupForm> {
             style: const TextStyle(color: Colors.black),
             decoration: InputDecoration(
               hintText: 'abdu.musa@example.com',
+              prefixIcon: const Icon(Icons.email_rounded, color: Color(0xFF3498DB)),
               filled: true,
-              fillColor: Colors.grey[100],
+              fillColor: Colors.grey.shade50,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide.none,
               ),
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(color: Colors.grey.shade200),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: Color(0xFF3498DB), width: 2),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: Colors.red, width: 2),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             ),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
@@ -298,18 +347,41 @@ class _SignupFormState extends State<SignupForm> {
           const SizedBox(height: 8),
           TextFormField(
             controller: _passwordController,
-            obscureText: true,
+            obscureText: !_isPasswordVisible,
             style: const TextStyle(color: Colors.black),
             decoration: InputDecoration(
               hintText: '********',
+              prefixIcon: const Icon(Icons.lock_rounded, color: Color(0xFF3498DB)),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _isPasswordVisible ? Icons.visibility_rounded : Icons.visibility_off_rounded,
+                  color: Colors.grey.shade600,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _isPasswordVisible = !_isPasswordVisible;
+                  });
+                },
+              ),
               filled: true,
-              fillColor: Colors.grey[100],
+              fillColor: Colors.grey.shade50,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide.none,
               ),
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(color: Colors.grey.shade200),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: Color(0xFF3498DB), width: 2),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: Colors.red, width: 2),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             ),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
@@ -334,18 +406,41 @@ class _SignupFormState extends State<SignupForm> {
           const SizedBox(height: 8),
           TextFormField(
             controller: _confirmPasswordController,
-            obscureText: true,
+            obscureText: !_isConfirmPasswordVisible,
             style: const TextStyle(color: Colors.black),
             decoration: InputDecoration(
               hintText: '********',
+              prefixIcon: const Icon(Icons.lock_outline_rounded, color: Color(0xFF3498DB)),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _isConfirmPasswordVisible ? Icons.visibility_rounded : Icons.visibility_off_rounded,
+                  color: Colors.grey.shade600,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
+                  });
+                },
+              ),
               filled: true,
-              fillColor: Colors.grey[100],
+              fillColor: Colors.grey.shade50,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide.none,
               ),
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(color: Colors.grey.shade200),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: Color(0xFF3498DB), width: 2),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: Colors.red, width: 2),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             ),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
