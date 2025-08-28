@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'api_constants.dart';
 import 'interceptors/logger_interceptor.dart';
+import '../../app/services/auth_service.dart';
 
 class DioClient {
   static DioClient? _instance;
@@ -60,14 +61,37 @@ class DioClient {
   }
 
   Future<String?> _getAuthToken() async {
-    // Implement token retrieval from secure storage
-    // This will be implemented in auth_service.dart
-    return null;
+    try {
+      final authService = AuthService();
+      return await authService.getStoredToken();
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error retrieving auth token: $e');
+      }
+      return null;
+    }
   }
 
   Future<void> _handleUnauthorized() async {
-    // Handle unauthorized access (logout, redirect to login, etc.)
-    // This will be implemented based on your auth flow
+    try {
+      final authService = AuthService();
+      
+      // Try to refresh the token first
+      final refreshed = await authService.refreshToken();
+      
+      if (!refreshed) {
+        // If refresh fails, clear the session
+        await authService.clearAllData();
+        
+        if (kDebugMode) {
+          print('Token refresh failed, session cleared');
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error handling unauthorized access: $e');
+      }
+    }
   }
 
   void updateBaseUrl(String newBaseUrl) {

@@ -9,22 +9,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:hudhud_delivery/main.dart';
+import 'package:hudhud_delivery/controllers/theme_controller.dart';
+import 'package:hudhud_delivery/app/services/auth_service.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+  testWidgets('App initialization test', (WidgetTester tester) async {
+    // Initialize required services for testing
+    final themeController = ThemeController();
+    final authService = AuthService();
+    
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(MyApp(
+      themeController: themeController,
+      authService: authService,
+    ));
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Verify that the app loads without errors
+    expect(find.byType(MaterialApp), findsOneWidget);
   });
 }

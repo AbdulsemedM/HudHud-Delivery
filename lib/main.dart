@@ -17,6 +17,7 @@ import 'controllers/auth_controller.dart';
 
 // Services
 import 'app/services/auth_service.dart';
+import 'app/services/custom_location_service.dart';
 
 // Widgets
 import 'app/widgets/primary_button.dart';
@@ -31,6 +32,9 @@ void main() async {
 
   // Initialize API service
   // DioClient.initialize(); // Will be implemented when needed
+
+  // Initialize location permissions at startup
+  await CustomLocationService.initializeLocationPermissions();
 
   // Initialize theme controller
   final themeController = ThemeController();

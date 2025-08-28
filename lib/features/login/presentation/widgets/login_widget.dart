@@ -503,13 +503,15 @@ class _LoginFormState extends State<LoginForm> {
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
-      final emailOrPhone = _emailPhoneController.text.trim();
-      final password = _passwordController.text.trim();
-      final fieldType = _isPhoneMode ? 'phone' : 'email';
-      
+      final emailOrPhone =
+          _isPhoneMode ? _phoneNumber : _emailPhoneController.text.trim();
       context.read<LoginBloc>().add(
-        LoginFormSubmitted(emailOrPhone, password, fieldType),
-      );
+            LoginFormSubmitted(
+              emailOrPhone,
+              _passwordController.text.trim(),
+              _isPhoneMode ? "phone" : "email",
+            ),
+          );
     }
   }
 

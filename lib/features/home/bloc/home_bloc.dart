@@ -1,13 +1,23 @@
-import 'package:bloc/bloc.dart';
-import 'package:meta/meta.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/foundation.dart';
+
+import '../data/repository/home_repository.dart';
+import '../model/category_model.dart';
 
 part 'home_event.dart';
 part 'home_state.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
-  HomeBloc() : super(HomeInitial()) {
-    on<HomeEvent>((event, emit) {
-      // TODO: implement event handler
+  final HomeRepository homeRepository;
+  HomeBloc({required this.homeRepository}) : super(HomeInitial()) {
+    on<GetCategoriesEvent>((event, emit) async {
+      emit(GetCategoriesLoadingState());
+      try {
+        final categories = await homeRepository.getCategories();
+        emit(GetCategoriesSuccessState(categories: categories));
+      } catch (e) {
+        emit(GetCategoriesErrorState(errorMessage: e.toString()));
+      }
     });
   }
 }
