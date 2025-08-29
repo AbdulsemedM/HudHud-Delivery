@@ -1,0 +1,378 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../bloc/categories_bloc.dart';
+import '../widgets/categories_widget.dart';
+import '../../model/categories_products_model.dart';
+
+class CategoriesScreen extends StatefulWidget {
+  final int categoryId;
+  final String categoryName;
+  final String categoryImage;
+  
+  const CategoriesScreen({
+    super.key,
+    required this.categoryId,
+    required this.categoryName,
+    required this.categoryImage,
+  });
+
+  @override
+  State<CategoriesScreen> createState() => _CategoriesScreenState();
+}
+
+class _CategoriesScreenState extends State<CategoriesScreen> {
+  final Map<String, int> _cartItems = {};
+  List<CategoriesProductsModel> _products = [];
+  List<CategoriesProductsModel> _filteredProducts = [];
+
+  List<String> _availableFilters = [];
+  List<String> _selectedFilters = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchProducts();
+  }
+
+  void _fetchProducts() {
+    context.read<CategoriesBloc>().add(
+      FetchCategoriesProductsEvent(widget.categoryId.toString()),
+    );
+  }
+
+
+
+  void _onFiltersChanged(List<String> selectedFilters) {
+    setState(() {
+      _selectedFilters = selectedFilters;
+      _filterProducts();
+    });
+  }
+
+  void _generateAvailableFilters() {
+    Set<String> filters = {};
+    
+    for (var product in _products) {
+      // Check for discount/sale
+      if (product.discount_price != null && product.discount_price!.isNotEmpty) {
+        filters.add('On Sale');
+      }
+      
+      // Check for ingredients
+      if (product.ingredients != null && product.ingredients!.isNotEmpty) {
+        filters.add('With Ingredients');
+      }
+      
+      // Check for allergens
+      if (product.allergens != null && product.allergens!.isNotEmpty) {
+        filters.add('Contains Allergens');
+      }
+      
+      // Check for customization (addons)
+      if (product.addons != null && product.addons!.isNotEmpty) {
+        filters.add('Customizable');
+      }
+      
+      // Check preparation time categories
+      if (product.preparation_time != null) {
+        int prepTime = int.tryParse(product.preparation_time.toString()) ?? 0;
+        if (prepTime <= 15) {
+          filters.add('Quick (≤15 min)');
+        } else if (prepTime <= 30) {
+          filters.add('Medium (16-30 min)');
+        } else {
+          filters.add('Slow (>30 min)');
+        }
+      }
+      
+      // Check for nutrition info
+      if (product.calories != null || product.protein != null) {
+        filters.add('Nutrition Info');
+      }
+    }
+    
+    _availableFilters = filters.toList();
+  }
+
+  void _filterProducts() {
+    setState(() {
+      _filteredProducts = _products.toList();
+
+      // Apply multiple filters
+      if (_selectedFilters.isNotEmpty) {
+        _filteredProducts = _filteredProducts.where((product) {
+          // Product must match ALL selected filters
+          return _selectedFilters.every((filter) {
+            switch (filter) {
+              case 'On Sale':
+                return product.discount_price != null && product.discount_price!.isNotEmpty;
+              case 'With Ingredients':
+                return product.ingredients != null && product.ingredients!.isNotEmpty;
+              case 'Contains Allergens':
+                return product.allergens != null && product.allergens!.isNotEmpty;
+              case 'Customizable':
+                return product.addons != null && product.addons!.isNotEmpty;
+              case 'Quick (≤15 min)':
+                int prepTime = int.tryParse(product.preparation_time.toString()) ?? 0;
+                return prepTime > 0 && prepTime <= 15;
+              case 'Medium (16-30 min)':
+                int prepTime = int.tryParse(product.preparation_time.toString()) ?? 0;
+                return prepTime > 15 && prepTime <= 30;
+              case 'Slow (>30 min)':
+                int prepTime = int.tryParse(product.preparation_time.toString()) ?? 0;
+                return prepTime > 30;
+              case 'Nutrition Info':
+                return product.calories != null || product.protein != null;
+              default:
+                return true;
+            }
+          });
+        }).toList();
+      }
+    });
+  }
+
+  void _addToCart(String productId) {
+    setState(() {
+      _cartItems[productId] = (_cartItems[productId] ?? 0) + 1;
+    });
+  }
+
+  void _removeFromCart(String productId) {
+    setState(() {
+      _cartItems.remove(productId);
+    });
+  }
+
+  void _incrementQuantity(String productId) {
+    setState(() {
+      _cartItems[productId] = (_cartItems[productId] ?? 0) + 1;
+    });
+  }
+
+  void _decrementQuantity(String productId) {
+    setState(() {
+      if (_cartItems[productId] == 1) {
+        _cartItems.remove(productId);
+      } else {
+        _cartItems[productId] = _cartItems[productId]! - 1;
+      }
+    });
+  }
+
+  void _showProductDetails(CategoriesProductsModel product) {
+    print('Showing product details for: ${product.name}');
+    print('Product ID: ${product.id}');
+    print('Product description: ${product.description}');
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => ProductDetailsModal(product: product),
+    );
+  }
+
+  int get _totalItems =>
+      _cartItems.values.fold(0, (sum, quantity) => sum + quantity);
+
+  double get _totalPrice {
+    double total = 0;
+    _cartItems.forEach((productId, quantity) {
+      final product = _products.firstWhere(
+        (product) => product.id.toString() == productId,
+        orElse: () => CategoriesProductsModel(),
+      );
+      if (product.id != null) {
+        final price = product.discount_price?.isNotEmpty == true 
+          ? double.tryParse(product.discount_price!) ?? 0
+          : double.tryParse(product.price ?? '0') ?? 0;
+        total += price * quantity;
+      }
+    });
+    return total;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: BlocListener<CategoriesBloc, CategoriesState>(
+        listener: (context, state) {
+          if (state is FetchCategoriesProductsSuccess) {
+            setState(() {
+              _products = state.categoriesProducts;
+              _generateAvailableFilters();
+              _filterProducts();
+            });
+          }
+        },
+        child: BlocBuilder<CategoriesBloc, CategoriesState>(
+          builder: (context, state) {
+            return Stack(
+              children: [
+                SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CategoryHeader(
+                        imageUrl: widget.categoryImage,
+                        categoryLogo: 'assets/images/cook_nature.jpg',
+                        onBackPressed: () => Navigator.pop(context),
+                      ),
+                      CategoryInfo(
+                        name: widget.categoryName,
+                        totalProducts: _products.length,
+                        onFavoritePressed: () {},
+                      ),
+
+                      ProductFilters(
+                        filters: _availableFilters,
+                        selectedFilters: _selectedFilters,
+                        onFiltersChanged: _onFiltersChanged,
+                      ),
+                      if (state is FetchCategoriesProductsLoading)
+                        const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(32.0),
+                            child: CircularProgressIndicator(),
+                          ),
+                        )
+                      else if (state is FetchCategoriesProductsFailure)
+                          Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(32.0),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    'Error: ${state.errorMessage}',
+                                    style: const TextStyle(color: Colors.red),
+                                  ),
+                                const SizedBox(height: 16),
+                                ElevatedButton(
+                                  onPressed: _fetchProducts,
+                                  child: const Text('Retry'),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      else
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: _filteredProducts.length,
+                          itemBuilder: (context, index) {
+                            final product = _filteredProducts[index];
+                            final productId = product.id.toString();
+                            final quantity = _cartItems[productId] ?? 0;
+                            final isAdded = quantity > 0;
+
+                            return ProductItem(
+                              name: product.name ?? 'Unknown Product',
+                              description: product.description ?? 'No description available',
+                              imageUrl: product.image_path ?? '',
+                              price: product.price ?? '0',
+                              discountPrice: product.discount_price?.isNotEmpty == true 
+                                ? product.discount_price 
+                                : null,
+                              isAdded: isAdded,
+                              quantity: quantity,
+                              onAddPressed: () => _addToCart(productId),
+                              onRemovePressed: () => _removeFromCart(productId),
+                              onIncrementPressed: () => _incrementQuantity(productId),
+                              onDecrementPressed: () => _decrementQuantity(productId),
+                              onTap: () => _showProductDetails(product),
+                            );
+                          },
+                        ),
+                      // Add extra padding at bottom for cart bar
+                      if (_totalItems > 0) const SizedBox(height: 80),
+                    ],
+                  ),
+                ),
+                if (_totalItems > 0)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF4A148C),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 10,
+                            offset: const Offset(0, -5),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.shopping_bag_outlined,
+                                color: Colors.white,
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                'TOTAL ITEMS: $_totalItems',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                'ETB${_totalPrice.toStringAsFixed(1)}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              TextButton(
+                                onPressed: () {
+                                  // Navigate to cart/checkout screen
+                                  // You can implement this navigation later
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Cart functionality to be implemented'),
+                                    ),
+                                  );
+                                },
+                                style: TextButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 8,
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Go to cart',
+                                  style: TextStyle(
+                                    color: Color(0xFF4A148C),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+}

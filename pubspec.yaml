@@ -34,6 +34,11 @@ dependencies:
   permission_handler: ^12.0.1
   geocoding: ^3.0.0
 
+  # Map and HTTP
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
+  http: ^1.1.0
+
   # UI Components
   cupertino_icons: ^1.0.2
   shimmer: ^3.0.0

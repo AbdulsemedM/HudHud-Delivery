@@ -12,6 +12,11 @@ import '../../data/repository/home_repository.dart';
 import '../../data/data_provider/home_data_provider.dart';
 import '../../model/category_model.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
+import 'map_location_screen.dart';
+import '../../../categories/presentation/screens/categories_screen.dart';
+import '../../../categories/bloc/categories_bloc.dart';
+import '../../../categories/data/repository/categories_repository.dart';
+import '../../../categories/data/data_provider/categories_data_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -116,8 +121,21 @@ class _HomeScreenState extends State<HomeScreen> {
                 name: _currentUser?.name ?? 'User',
                 location: _currentLocation,
                 isLoadingLocation: _isLoadingLocation,
-                onLocationTap: () {
-                  _requestLocationAndUpdate();
+                onLocationTap: () async {
+                  final selectedAddress = await Navigator.push<String>(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => MapLocationScreen(
+                        currentLocation: _currentLocation,
+                      ),
+                    ),
+                  );
+
+                  if (selectedAddress != null) {
+                    setState(() {
+                      _currentLocation = selectedAddress;
+                    });
+                  }
                 },
               ),
               const SizedBox(height: 24),
@@ -165,7 +183,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           title: category.name ?? '',
                           subtitle: category.description ?? '',
                           imagePath: category.image_path ??
-                              'assets/images/groceries.png',
+                              'assets/images/categories.png',
                           backgroundColor:
                               _getCategoryColor(category.color ?? ''),
                           onTap: () {
@@ -180,8 +198,28 @@ class _HomeScreenState extends State<HomeScreen> {
                                       const ListOfRestaurantsScreen(),
                                 ),
                               );
+                            } else {
+                              // Navigate to categories screen for other categories
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => BlocProvider(
+                                     create: (context) => CategoriesBloc(
+                                       CategoriesRepository(
+                                         categoriesDataProvider: CategoriesDataProvider(
+                                           apiService: ApiService.instance,
+                                         ),
+                                       ),
+                                     ),
+                                    child: CategoriesScreen(
+                                      categoryId: category.id ?? 0,
+                                      categoryName: category.name ?? 'Category',
+                                      categoryImage: category.image_path ?? 'assets/images/categories.png',
+                                    ),
+                                  ),
+                                ),
+                              );
                             }
-                            // Handle other categories
                           },
                         );
                       },
