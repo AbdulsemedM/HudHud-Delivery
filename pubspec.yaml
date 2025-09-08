@@ -13,6 +13,7 @@ dependencies:
 
   # State Management
   provider: ^6.1.1
+  equatable: ^2.0.5
 
   # HTTP Client
   dio: ^5.4.0

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import '../../../../app/widgets/primary_button.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../dashboard/presentation/screen/dashboard_screen.dart';
 import '../../bloc/signup_bloc.dart';
 
@@ -165,7 +166,7 @@ class _SignupFormState extends State<SignupForm> {
           IntlPhoneField(
             decoration: InputDecoration(
               hintText: 'Enter your phone number',
-              prefixIcon: const Icon(Icons.phone_rounded, color: Color(0xFF3498DB)),
+              prefixIcon: const Icon(Icons.phone_rounded, color: AppColors.primaryColor),
               filled: true,
               fillColor: Colors.grey.shade50,
               border: OutlineInputBorder(
@@ -177,9 +178,9 @@ class _SignupFormState extends State<SignupForm> {
                 borderSide: BorderSide(color: Colors.grey.shade200),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(color: Color(0xFF3498DB), width: 2),
-              ),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: AppColors.primaryColor, width: 2),
+        ),
               errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: const BorderSide(color: Colors.red, width: 2),
@@ -213,7 +214,7 @@ class _SignupFormState extends State<SignupForm> {
             style: const TextStyle(color: Colors.black),
             decoration: InputDecoration(
               hintText: 'Abdu',
-              prefixIcon: const Icon(Icons.person_rounded, color: Color(0xFF3498DB)),
+              prefixIcon: const Icon(Icons.person_rounded, color: AppColors.primaryColor),
               filled: true,
               fillColor: Colors.grey.shade50,
               border: OutlineInputBorder(
@@ -225,9 +226,9 @@ class _SignupFormState extends State<SignupForm> {
                 borderSide: BorderSide(color: Colors.grey.shade200),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(color: Color(0xFF3498DB), width: 2),
-              ),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: AppColors.primaryColor, width: 2),
+        ),
               errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: const BorderSide(color: Colors.red, width: 2),
@@ -257,7 +258,7 @@ class _SignupFormState extends State<SignupForm> {
             style: const TextStyle(color: Colors.black),
             decoration: InputDecoration(
               hintText: 'Musa',
-              prefixIcon: const Icon(Icons.person_outline_rounded, color: Color(0xFF3498DB)),
+              prefixIcon: const Icon(Icons.person_outline_rounded, color: AppColors.primaryColor),
               filled: true,
               fillColor: Colors.grey.shade50,
               border: OutlineInputBorder(
@@ -269,9 +270,9 @@ class _SignupFormState extends State<SignupForm> {
                 borderSide: BorderSide(color: Colors.grey.shade200),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(color: Color(0xFF3498DB), width: 2),
-              ),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: AppColors.primaryColor, width: 2),
+        ),
               errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: const BorderSide(color: Colors.red, width: 2),
@@ -302,7 +303,7 @@ class _SignupFormState extends State<SignupForm> {
             style: const TextStyle(color: Colors.black),
             decoration: InputDecoration(
               hintText: 'abdu.musa@example.com',
-              prefixIcon: const Icon(Icons.email_rounded, color: Color(0xFF3498DB)),
+              prefixIcon: const Icon(Icons.email_rounded, color: AppColors.primaryColor),
               filled: true,
               fillColor: Colors.grey.shade50,
               border: OutlineInputBorder(
@@ -314,9 +315,9 @@ class _SignupFormState extends State<SignupForm> {
                 borderSide: BorderSide(color: Colors.grey.shade200),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(color: Color(0xFF3498DB), width: 2),
-              ),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: AppColors.primaryColor, width: 2),
+        ),
               errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: const BorderSide(color: Colors.red, width: 2),
@@ -351,7 +352,7 @@ class _SignupFormState extends State<SignupForm> {
             style: const TextStyle(color: Colors.black),
             decoration: InputDecoration(
               hintText: '********',
-              prefixIcon: const Icon(Icons.lock_rounded, color: Color(0xFF3498DB)),
+              prefixIcon: const Icon(Icons.lock_rounded, color: AppColors.primaryColor),
               suffixIcon: IconButton(
                 icon: Icon(
                   _isPasswordVisible ? Icons.visibility_rounded : Icons.visibility_off_rounded,
@@ -374,9 +375,9 @@ class _SignupFormState extends State<SignupForm> {
                 borderSide: BorderSide(color: Colors.grey.shade200),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(color: Color(0xFF3498DB), width: 2),
-              ),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: AppColors.primaryColor, width: 2),
+        ),
               errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: const BorderSide(color: Colors.red, width: 2),
@@ -410,7 +411,7 @@ class _SignupFormState extends State<SignupForm> {
             style: const TextStyle(color: Colors.black),
             decoration: InputDecoration(
               hintText: '********',
-              prefixIcon: const Icon(Icons.lock_outline_rounded, color: Color(0xFF3498DB)),
+              prefixIcon: const Icon(Icons.lock_outline_rounded, color: AppColors.primaryColor),
               suffixIcon: IconButton(
                 icon: Icon(
                   _isConfirmPasswordVisible ? Icons.visibility_rounded : Icons.visibility_off_rounded,
@@ -433,9 +434,9 @@ class _SignupFormState extends State<SignupForm> {
                 borderSide: BorderSide(color: Colors.grey.shade200),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(color: Color(0xFF3498DB), width: 2),
-              ),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: AppColors.primaryColor, width: 2),
+        ),
               errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: const BorderSide(color: Colors.red, width: 2),
@@ -557,7 +558,7 @@ class SignupButton extends StatelessWidget {
                 child: const Text(
                   'Login Instead',
                   style: TextStyle(
-                    color: Color(0xFF6C3EE9),
+                    color: AppColors.primaryColor,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),

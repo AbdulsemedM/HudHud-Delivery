@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/dashboard/presentation/screen/dashboard_screen.dart';
 import 'package:hudhud_delivery/features/login/bloc/login_bloc.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
@@ -160,8 +161,8 @@ class _LoginFormState extends State<LoginForm> {
                       decoration: BoxDecoration(
                         gradient: _isPhoneMode
                             ? null
-                            : const LinearGradient(
-                                colors: [Color(0xFF3498DB), Color(0xFF2980B9)],
+                            : LinearGradient(
+                                colors: [AppColors.primaryColor, AppColors.primaryDarkColor],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
@@ -172,7 +173,7 @@ class _LoginFormState extends State<LoginForm> {
                             : [
                                 BoxShadow(
                                   color:
-                                      const Color(0xFF3498DB).withOpacity(0.3),
+                                      AppColors.primaryColor.withOpacity(0.3),
                                   spreadRadius: 1,
                                   blurRadius: 4,
                                   offset: const Offset(0, 2),
@@ -231,8 +232,8 @@ class _LoginFormState extends State<LoginForm> {
                       curve: Curves.easeInOut,
                       decoration: BoxDecoration(
                         gradient: _isPhoneMode
-                            ? const LinearGradient(
-                                colors: [Color(0xFF3498DB), Color(0xFF2980B9)],
+                            ? LinearGradient(
+                                colors: [AppColors.primaryColor, AppColors.primaryDarkColor],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               )
@@ -243,7 +244,7 @@ class _LoginFormState extends State<LoginForm> {
                             ? [
                                 BoxShadow(
                                   color:
-                                      const Color(0xFF3498DB).withOpacity(0.3),
+                                      AppColors.primaryColor.withOpacity(0.3),
                                   spreadRadius: 1,
                                   blurRadius: 4,
                                   offset: const Offset(0, 2),
@@ -325,7 +326,7 @@ class _LoginFormState extends State<LoginForm> {
                         labelText: 'Phone Number',
                         hintText: 'Enter your phone number',
                         prefixIcon: const Icon(Icons.phone_rounded,
-                            color: Color(0xFF3498DB)),
+                            color: AppColors.primaryColor),
                         filled: true,
                         fillColor: Colors.grey.shade50,
                         border: OutlineInputBorder(
@@ -339,7 +340,7 @@ class _LoginFormState extends State<LoginForm> {
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
                           borderSide: const BorderSide(
-                              color: Color(0xFF3498DB), width: 2),
+                              color: AppColors.primaryColor, width: 2),
                         ),
                         errorBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
@@ -368,7 +369,7 @@ class _LoginFormState extends State<LoginForm> {
                         labelText: 'Email Address',
                         hintText: 'Enter your email address',
                         prefixIcon: const Icon(Icons.email_rounded,
-                            color: Color(0xFF3498DB)),
+                            color: AppColors.primaryColor),
                         filled: true,
                         fillColor: Colors.grey.shade50,
                         border: OutlineInputBorder(
@@ -382,7 +383,7 @@ class _LoginFormState extends State<LoginForm> {
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
                           borderSide: const BorderSide(
-                              color: Color(0xFF3498DB), width: 2),
+                              color: AppColors.primaryColor, width: 2),
                         ),
                         errorBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
@@ -403,7 +404,7 @@ class _LoginFormState extends State<LoginForm> {
                 labelText: 'Password',
                 hintText: 'Enter your password',
                 prefixIcon:
-                    const Icon(Icons.lock_rounded, color: Color(0xFF3498DB)),
+                    const Icon(Icons.lock_rounded, color: AppColors.primaryColor),
                 suffixIcon: IconButton(
                   icon: Icon(
                     _isPasswordVisible
@@ -430,7 +431,7 @@ class _LoginFormState extends State<LoginForm> {
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
                   borderSide:
-                      const BorderSide(color: Color(0xFF3498DB), width: 2),
+                      const BorderSide(color: AppColors.primaryColor, width: 2),
                 ),
                 errorBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
@@ -456,7 +457,7 @@ class _LoginFormState extends State<LoginForm> {
                   return ElevatedButton(
                     onPressed: state is LoginLoading ? null : _submitForm,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF3498DB),
+                      backgroundColor: AppColors.primaryColor,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -489,7 +490,7 @@ class _LoginFormState extends State<LoginForm> {
               child: const Text(
                 'Forgot Password?',
                 style: TextStyle(
-                  color: Color(0xFF3498DB),
+                  color: AppColors.secondaryColor,
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),

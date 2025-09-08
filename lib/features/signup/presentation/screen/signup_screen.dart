@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/api/api_service.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../widgets/signup_widget.dart';
 import '../../bloc/signup_bloc.dart';
 import '../../data/repository/signup_repository.dart';
@@ -21,11 +22,11 @@ class SignupScreen extends StatelessWidget {
         body: Stack(
           children: [
             Container(
-              decoration: const BoxDecoration(
+              decoration:  BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    Color(0xFFE6E6FA),
-                    Color(0xFFB2DFEE),
+                    AppColors.primaryColor.withOpacity(0.1),
+                    AppColors.secondaryColor.withOpacity(0.1),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,

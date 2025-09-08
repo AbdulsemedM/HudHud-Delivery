@@ -8,6 +8,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 // Core imports
 import 'core/theme/app_theme.dart';
 import 'core/api/dio_client.dart';
+import 'core/api/api_service.dart';
 import 'core/utils/snackbar_util.dart';
 import 'core/utils/button_util.dart';
 
@@ -18,6 +19,10 @@ import 'controllers/auth_controller.dart';
 // Services
 import 'app/services/auth_service.dart';
 import 'app/services/custom_location_service.dart';
+
+// Orders feature
+import 'features/orders/data/providers/orders_data_provider.dart';
+import 'features/orders/data/repositories/orders_repository.dart';
 
 // Widgets
 import 'app/widgets/primary_button.dart';
@@ -43,20 +48,27 @@ void main() async {
   // Initialize auth service
   final authService = AuthService();
 
+  // Initialize orders repository
+  final ordersDataProvider = OrdersDataProvider(apiService: ApiService.instance);
+  final ordersRepository = OrdersRepositoryImpl(dataProvider: ordersDataProvider);
+
   runApp(MyApp(
     themeController: themeController,
     authService: authService,
+    ordersRepository: ordersRepository,
   ));
 }
 
 class MyApp extends StatelessWidget {
   final ThemeController themeController;
   final AuthService authService;
+  final OrdersRepository ordersRepository;
 
   const MyApp({
     Key? key,
     required this.themeController,
     required this.authService,
+    required this.ordersRepository,
   }) : super(key: key);
 
   @override
@@ -67,6 +79,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => AuthController(),
         ),
+        Provider<OrdersRepository>.value(value: ordersRepository),
       ],
       child: Consumer<ThemeController>(
         builder: (context, themeController, child) {

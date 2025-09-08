@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../bloc/categories_bloc.dart';
 import '../widgets/categories_widget.dart';
 import '../../model/categories_products_model.dart';
+import '../../../checkout/presentation/screen/checkout_screen.dart';
 
 class CategoriesScreen extends StatefulWidget {
   final int categoryId;
@@ -176,20 +177,59 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       _cartItems.values.fold(0, (sum, quantity) => sum + quantity);
 
   double get _totalPrice {
-    double total = 0;
+     double total = 0;
+     _cartItems.forEach((productId, quantity) {
+       final product = _products.firstWhere(
+         (product) => product.id.toString() == productId,
+         orElse: () => CategoriesProductsModel(),
+       );
+       if (product.id != null) {
+         final price = product.discount_price?.isNotEmpty == true 
+           ? double.tryParse(product.discount_price!) ?? 0
+           : double.tryParse(product.price ?? '0') ?? 0;
+         total += price * quantity;
+       }
+     });
+     return total;
+   }
+
+  void _navigateToCheckout() {
+    // Convert cart items to the format expected by checkout screen
+    List<Map<String, dynamic>> checkoutItems = [];
+    double subtotal = 0.0;
+
     _cartItems.forEach((productId, quantity) {
       final product = _products.firstWhere(
         (product) => product.id.toString() == productId,
         orElse: () => CategoriesProductsModel(),
       );
+      
       if (product.id != null) {
         final price = product.discount_price?.isNotEmpty == true 
           ? double.tryParse(product.discount_price!) ?? 0
           : double.tryParse(product.price ?? '0') ?? 0;
-        total += price * quantity;
+        
+        subtotal += price * quantity;
+        
+        checkoutItems.add({
+            'product_id': product.id,
+            'name': product.name ?? '',
+            'price': price,
+            'quantity': quantity,
+            'image': product.image_path ?? '',
+          });
       }
     });
-    return total;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CheckoutScreen(
+          cartItems: checkoutItems,
+          subtotal: subtotal,
+        ),
+      ),
+    );
   }
 
   @override
@@ -339,13 +379,16 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                               const SizedBox(width: 16),
                               TextButton(
                                 onPressed: () {
-                                  // Navigate to cart/checkout screen
-                                  // You can implement this navigation later
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Cart functionality to be implemented'),
-                                    ),
-                                  );
+                                  // Navigate to checkout screen with cart items
+                                  if (_cartItems.isNotEmpty) {
+                                    _navigateToCheckout();
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Your cart is empty'),
+                                      ),
+                                    );
+                                  }
                                 },
                                 style: TextButton.styleFrom(
                                   backgroundColor: Colors.white,

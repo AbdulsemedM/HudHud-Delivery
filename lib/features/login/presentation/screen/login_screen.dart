@@ -6,6 +6,7 @@ import '../../bloc/login_bloc.dart';
 import '../../data/repository/login_repository.dart';
 import '../../data/data_provider/login_data_provider.dart';
 import '../../../../core/api/api_service.dart';
+import '../../../../core/theme/app_colors.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -24,8 +25,8 @@ class LoginScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    Color(0xFFE6E6FA),
-                    Color(0xFFB2DFEE),
+                    AppColors.primaryColor.withOpacity(0.1),
+                    AppColors.secondaryColor.withOpacity(0.1),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -41,7 +42,7 @@ class LoginScreen extends StatelessWidget {
                 size: Size(
                     MediaQuery.of(context).size.width, 400), // Increased height
                 painter: CurvePainter(
-                  color: Colors.white.withOpacity(0.3), // Increased opacity
+                  color: AppColors.primaryColor.withOpacity(0.2),
                   isTop: true,
                 ),
               ),
@@ -55,7 +56,7 @@ class LoginScreen extends StatelessWidget {
                 size: Size(
                     MediaQuery.of(context).size.width, 400), // Increased height
                 painter: CurvePainter(
-                  color: Colors.white.withOpacity(0.4), // Increased opacity
+                  color: AppColors.secondaryColor.withOpacity(0.2),
                   isTop: false,
                 ),
               ),
@@ -118,7 +119,7 @@ class LoginScreen extends StatelessWidget {
                               child: Text(
                                 'Sign up',
                                 style: TextStyle(
-                                  color: Color(0xFF3498DB),
+                                  color: AppColors.primaryColor,
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                 ),
