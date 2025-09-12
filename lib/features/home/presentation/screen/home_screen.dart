@@ -13,6 +13,7 @@ import '../../data/data_provider/home_data_provider.dart';
 import '../../model/category_model.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'map_location_screen.dart';
+import 'location_search_screen.dart';
 import '../../../categories/presentation/screens/categories_screen.dart';
 import '../../../categories/bloc/categories_bloc.dart';
 import '../../../categories/data/repository/categories_repository.dart';
@@ -125,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   final selectedAddress = await Navigator.push<String>(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => MapLocationScreen(
+                      builder: (context) => LocationSearchScreen(
                         currentLocation: _currentLocation,
                       ),
                     ),

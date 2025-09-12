@@ -2,6 +2,12 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 
+// Import for distance calculation
+import 'package:latlong2/latlong.dart' show Distance;
+
+// Import mock service for fallback
+import 'mock_location_service.dart';
+
 class PlaceResult {
   final String displayName;
   final LatLng coordinates;
@@ -64,6 +70,7 @@ class NominatimService {
   static const String _userAgent = 'HudHudDeliveryApp/1.0 (contact@hudhuddelivery.com)';
   
   /// Search for places using Nominatim API
+  /// Falls back to mock data if the API call fails
   static Future<List<PlaceResult>> searchPlaces(String query) async {
     if (query.trim().isEmpty) {
       return [];
@@ -80,7 +87,7 @@ class NominatimService {
           'User-Agent': _userAgent,
           'Accept': 'application/json',
         },
-      );
+      ).timeout(const Duration(seconds: 5)); // Add timeout to prevent long waits
       
       if (response.statusCode == 200) {
         final List<dynamic> results = jsonDecode(response.body);
@@ -91,19 +98,49 @@ class NominatimService {
             .toList();
       } else {
         print('Nominatim API error: ${response.statusCode}');
-        return [];
+        // Fall back to mock data
+        return _getFallbackLocations(query);
       }
     } catch (e) {
       print('Error searching places: $e');
-      return [];
+      // Fall back to mock data
+      return _getFallbackLocations(query);
     }
   }
   
+  /// Get fallback locations from mock data based on search query
+  static List<PlaceResult> _getFallbackLocations(String query) {
+    return MockLocationService.getMockLocations(query);
+  }
+  
+  /// Get fallback locations near specified coordinates
+  static List<PlaceResult> _getFallbackLocationsNearby(double latitude, double longitude) {
+    // Get all mock locations
+    final allMockLocations = MockLocationService.getMockLocations("");
+    
+    // Sort by distance to the given coordinates
+    allMockLocations.sort((a, b) {
+      final distA = Distance().distance(
+        LatLng(latitude, longitude),
+        a.coordinates
+      );
+      final distB = Distance().distance(
+        LatLng(latitude, longitude),
+        b.coordinates
+      );
+      return distA.compareTo(distB);
+    });
+    
+    // Return the closest location or all if there are few
+    return allMockLocations.take(3).toList();
+  }
+  
   /// Reverse geocoding - get place from coordinates
-  static Future<PlaceResult?> reverseGeocode(LatLng coordinates) async {
+  /// Returns a list of places near the given coordinates
+  static Future<List<PlaceResult>> reverseGeocode(double latitude, double longitude) async {
     try {
       final url = Uri.parse(
-        '$_baseUrl/reverse?lat=${coordinates.latitude}&lon=${coordinates.longitude}&format=json&addressdetails=1'
+        '$_baseUrl/reverse?lat=$latitude&lon=$longitude&format=json&addressdetails=1'
       );
       
       final response = await http.get(
@@ -112,22 +149,28 @@ class NominatimService {
           'User-Agent': _userAgent,
           'Accept': 'application/json',
         },
-      );
+      ).timeout(const Duration(seconds: 5)); // Add timeout to prevent long waits
       
       if (response.statusCode == 200) {
         final Map<String, dynamic> result = jsonDecode(response.body);
         
         if (result.containsKey('display_name')) {
-          return PlaceResult.fromJson(result);
+          final place = PlaceResult.fromJson(result);
+          return [place];
         }
       } else {
         print('Reverse geocoding error: ${response.statusCode}');
+        // Fall back to mock data
+        return _getFallbackLocationsNearby(latitude, longitude);
       }
     } catch (e) {
       print('Error in reverse geocoding: $e');
+      // Fall back to mock data
+      return _getFallbackLocationsNearby(latitude, longitude);
     }
     
-    return null;
+    // If we get here, something went wrong but we didn't catch it
+    return _getFallbackLocationsNearby(latitude, longitude);
   }
   
   /// Get suggestions for autocomplete

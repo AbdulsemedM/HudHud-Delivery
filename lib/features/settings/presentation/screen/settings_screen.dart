@@ -4,10 +4,36 @@ import 'package:hudhud_delivery/features/settings/presentation/screen/edit_profi
 import 'package:hudhud_delivery/controllers/theme_controller.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
+import 'package:hudhud_delivery/models/user_model.dart';
 import '../widgets/setting_widget.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}  
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  UserModel? _user;
+  final AuthService _authService = AuthService();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    print('Loading user data...');
+    final user = await _authService.getStoredUser();
+    print('User data loaded: $user');
+    if (mounted) {
+      setState(() {
+        _user = user;
+      });
+    }
+  }
 
   Future<void> _handleLogout(BuildContext context) async {
     try {
@@ -76,16 +102,16 @@ class SettingsScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               AccountSettingsSection(
-                name: 'Samara Mehmood',
-                phone: '+92-3069278009',
-                email: 'alma.lawson@example.com',
+                name: _user?.name ?? 'Loading...',
+                phone: _user?.phone ?? 'Loading...',
+                email: _user?.email ?? 'Loading...',
                 onEditTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => const EditProfileScreen(),
                     ),
-                  );
+                  ).then((_) => _loadUserData()); // Refresh data when returning from edit screen
                 },
               ),
               const SizedBox(height: 24),
