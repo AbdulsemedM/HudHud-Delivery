@@ -28,7 +28,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
       body: _screens[_selectedIndex],
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).brightness == Brightness.dark 
+              ? Theme.of(context).bottomNavigationBarTheme.backgroundColor 
+              : Colors.white,
           boxShadow: [
             BoxShadow(
               blurRadius: 20,
@@ -40,15 +42,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8),
             child: GNav(
-              rippleColor: Colors.grey[300]!,
-              hoverColor: Colors.grey[100]!,
+              rippleColor: Theme.of(context).brightness == Brightness.dark 
+                  ? Colors.grey[800]! 
+                  : Colors.grey[300]!,
+              hoverColor: Theme.of(context).brightness == Brightness.dark 
+                  ? Colors.grey[700]! 
+                  : Colors.grey[100]!,
               gap: 8,
               activeColor: Colors.white,
               iconSize: 24,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               duration: const Duration(milliseconds: 400),
               tabBackgroundColor: const Color(0xFF6C3EE9),
-              color: Colors.black,
+              color: Theme.of(context).brightness == Brightness.dark 
+                  ? Colors.white 
+                  : Colors.black,
               tabs: const [
                 GButton(
                   icon: Icons.home_outlined,

@@ -17,17 +17,21 @@ class CheckoutProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDarkMode ? AppColors.darkSurfaceVariant : Colors.white,
         borderRadius: BorderRadius.circular(8),
+        border: isDarkMode ? Border.all(color: AppColors.darkBorder, width: 1) : null,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 4,
+            color: isDarkMode 
+                ? Colors.black.withOpacity(0.4) 
+                : Colors.grey.withOpacity(0.1),
+            spreadRadius: isDarkMode ? 0 : 1,
+            blurRadius: isDarkMode ? 6 : 4,
             offset: const Offset(0, 2),
           ),
         ],
@@ -37,7 +41,7 @@ class CheckoutProductCard extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: Image.network(
-              productImage,
+              productImage.startsWith('http') ? productImage : 'https://via.placeholder.com/60',
               width: 60,
               height: 60,
               fit: BoxFit.cover,
@@ -58,18 +62,18 @@ class CheckoutProductCard extends StatelessWidget {
               children: [
                 Text(
                   productName,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.lightTextPrimary,
+                    color: isDarkMode ? AppColors.darkOnSurface : AppColors.lightTextPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   '${quantity}X ${price.toStringAsFixed(1)}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
-                    color: AppColors.lightTextSecondary,
+                    color: isDarkMode ? AppColors.darkOnSurface.withOpacity(0.7) : AppColors.lightTextSecondary,
                   ),
                 ),
               ],
@@ -103,12 +107,14 @@ class _PromoCodeSectionState extends State<PromoCodeSection> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Promo Code',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: AppColors.lightTextPrimary,
+              color: Theme.of(context).brightness == Brightness.dark 
+                  ? AppColors.darkOnSurface 
+                  : AppColors.lightTextPrimary,
             ),
           ),
           const SizedBox(height: 8),
@@ -120,24 +126,36 @@ class _PromoCodeSectionState extends State<PromoCodeSection> {
                   decoration: InputDecoration(
                     hintText: 'Enter Promo Code',
                     hintStyle: TextStyle(
-                      color: AppColors.lightTextSecondary.withOpacity(0.7),
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? AppColors.darkOnSurface.withOpacity(0.6)
+                          : AppColors.lightTextSecondary.withOpacity(0.7),
                     ),
+                    filled: Theme.of(context).brightness == Brightness.dark,
+                    fillColor: Theme.of(context).brightness == Brightness.dark
+                        ? AppColors.darkSurface
+                        : null,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                       borderSide: BorderSide(
-                        color: Colors.grey.withOpacity(0.3),
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? AppColors.darkBorder
+                            : Colors.grey.withOpacity(0.3),
                       ),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                       borderSide: BorderSide(
-                        color: Colors.grey.withOpacity(0.3),
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? AppColors.darkBorder
+                            : Colors.grey.withOpacity(0.3),
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(
-                        color: AppColors.primaryColor,
+                      borderSide: BorderSide(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? AppColors.primaryLightColor
+                            : AppColors.primaryColor,
                       ),
                     ),
                     contentPadding: const EdgeInsets.symmetric(
@@ -155,12 +173,15 @@ class _PromoCodeSectionState extends State<PromoCodeSection> {
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.lightTextSecondary,
+                  backgroundColor: Theme.of(context).brightness == Brightness.dark 
+                      ? AppColors.primaryLightColor 
+                      : AppColors.primaryColor,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 20,
                     vertical: 12,
                   ),
+                  elevation: Theme.of(context).brightness == Brightness.dark ? 4 : 2,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -203,20 +224,27 @@ class DeliveryAddressSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Deliver To',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: AppColors.lightTextPrimary,
+              color: Theme.of(context).brightness == Brightness.dark 
+                  ? AppColors.darkOnSurface 
+                  : AppColors.lightTextPrimary,
             ),
           ),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
+              color: Theme.of(context).brightness == Brightness.dark 
+                  ? AppColors.darkSurface 
+                  : Colors.white,
               border: Border.all(
-                color: Colors.grey.withOpacity(0.3),
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? Colors.grey.withOpacity(0.5) 
+                    : Colors.grey.withOpacity(0.3),
               ),
               borderRadius: BorderRadius.circular(8),
             ),
@@ -232,20 +260,24 @@ class DeliveryAddressSection extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Current Location',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.lightTextPrimary,
+                          color: Theme.of(context).brightness == Brightness.dark 
+                              ? AppColors.darkOnSurface 
+                              : AppColors.lightTextPrimary,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         currentAddress,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
-                          color: AppColors.lightTextSecondary,
+                          color: Theme.of(context).brightness == Brightness.dark 
+                              ? AppColors.darkOnSurface.withOpacity(0.7) 
+                              : AppColors.lightTextSecondary,
                         ),
                       ),
                     ],
@@ -253,9 +285,11 @@ class DeliveryAddressSection extends StatelessWidget {
                 ),
                 IconButton(
                   onPressed: onChangeAddress,
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.edit,
-                    color: AppColors.lightTextSecondary,
+                    color: Theme.of(context).brightness == Brightness.dark 
+                        ? AppColors.darkOnSurface.withOpacity(0.7) 
+                        : AppColors.lightTextSecondary,
                   ),
                 ),
               ],
@@ -288,18 +322,28 @@ class NotesSection extends StatelessWidget {
             decoration: InputDecoration(
               hintText: 'Additional note',
               hintStyle: TextStyle(
-                color: AppColors.lightTextSecondary.withOpacity(0.7),
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? AppColors.darkOnSurface.withOpacity(0.5) 
+                    : AppColors.lightTextSecondary.withOpacity(0.7),
               ),
+              filled: Theme.of(context).brightness == Brightness.dark,
+              fillColor: Theme.of(context).brightness == Brightness.dark 
+                  ? AppColors.darkSurface 
+                  : null,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(
-                  color: Colors.grey.withOpacity(0.3),
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.grey.withOpacity(0.5) 
+                      : Colors.grey.withOpacity(0.3),
                 ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(
-                  color: Colors.grey.withOpacity(0.3),
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.grey.withOpacity(0.5) 
+                      : Colors.grey.withOpacity(0.3),
                 ),
               ),
               focusedBorder: OutlineInputBorder(
@@ -360,28 +404,42 @@ class OrderSummarySection extends StatelessWidget {
     bool isDiscount = false,
     bool showPlus = false,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: isTotal ? 18 : 14,
-              fontWeight: isTotal ? FontWeight.bold : FontWeight.w500,
-              color: isTotal ? AppColors.primaryColor : AppColors.lightTextPrimary,
+    return Builder(
+      builder: (context) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: isTotal ? 18 : 14,
+                fontWeight: isTotal ? FontWeight.bold : FontWeight.w500,
+                color: isTotal 
+                    ? (Theme.of(context).brightness == Brightness.dark 
+                        ? AppColors.primaryLightColor 
+                        : AppColors.primaryColor) 
+                    : (Theme.of(context).brightness == Brightness.dark 
+                        ? AppColors.darkOnSurface 
+                        : AppColors.lightTextPrimary),
+              ),
             ),
-          ),
-          Text(
-            '${isDiscount ? '(-)' : showPlus ? '(+)' : ''} ${amount.toStringAsFixed(2)} Br',
-            style: TextStyle(
-              fontSize: isTotal ? 18 : 14,
-              fontWeight: isTotal ? FontWeight.bold : FontWeight.w500,
-              color: isTotal ? AppColors.primaryColor : AppColors.lightTextPrimary,
+            Text(
+              '${isDiscount ? '(-)' : showPlus ? '(+)' : ''} ${amount.toStringAsFixed(2)} Br',
+              style: TextStyle(
+                fontSize: isTotal ? 18 : 14,
+                fontWeight: isTotal ? FontWeight.bold : FontWeight.w500,
+                color: isTotal 
+                    ? (Theme.of(context).brightness == Brightness.dark 
+                        ? AppColors.primaryLightColor 
+                        : AppColors.primaryColor) 
+                    : (Theme.of(context).brightness == Brightness.dark 
+                        ? AppColors.darkOnSurface 
+                        : AppColors.lightTextPrimary),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -405,13 +463,15 @@ class ConfirmOrderButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryColor,
+          backgroundColor: Theme.of(context).brightness == Brightness.dark 
+              ? AppColors.primaryLightColor 
+              : AppColors.primaryColor,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          elevation: 2,
+          elevation: Theme.of(context).brightness == Brightness.dark ? 4 : 2,
         ),
         child: isLoading
             ? const SizedBox(

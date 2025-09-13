@@ -121,9 +121,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         ),
       ),
       child: Scaffold(
-        backgroundColor: Colors.grey[50],
+        backgroundColor: Theme.of(context).brightness == Brightness.dark
+            ? AppColors.darkBackground
+            : Colors.grey[50],
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.darkSurface
+              : Colors.white,
           elevation: 0,
           leading: IconButton(
             icon: const Icon(
@@ -168,12 +172,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Products Section
-                const Text(
+                Text(
                   'Products',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.lightTextPrimary,
+                    color: Theme.of(context).brightness == Brightness.dark 
+                        ? AppColors.darkOnSurface 
+                        : AppColors.lightTextPrimary,
                   ),
                 ),
                 const SizedBox(height: 12),

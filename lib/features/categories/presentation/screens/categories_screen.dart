@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/snackbar_util.dart';
 import '../../bloc/categories_bloc.dart';
-import '../widgets/categories_widget.dart';
 import '../../model/categories_products_model.dart';
+import '../widgets/categories_widget.dart';
+// import '../widgets/product_item.dart';
+// import 'product_details_screen.dart';
+import '../../../checkout/presentation/screen/checkout_screen.dart';
 
 class CategoriesScreen extends StatefulWidget {
   final int categoryId;
@@ -339,11 +344,34 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                               const SizedBox(width: 16),
                               TextButton(
                                 onPressed: () {
-                                  // Navigate to cart/checkout screen
-                                  // You can implement this navigation later
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Cart functionality to be implemented'),
+                                  // Navigate to checkout screen with cart items
+                                  final List<Map<String, dynamic>> cartItems = _cartItems.entries.map((entry) {
+                                    final productId = entry.key;
+                                    final quantity = entry.value;
+                                    final product = _filteredProducts.firstWhere(
+                                      (p) => p.id.toString() == productId,
+                                      orElse: () => _products.firstWhere(
+                                        (p) => p.id.toString() == productId,
+                                        orElse: () => throw Exception('Product not found'),
+                                      ),
+                                    );
+                                    
+                                    return {
+                                      'id': product.id,
+                                      'name': product.name,
+                                      'image': product.image_path,
+                                      'price': double.tryParse(product.price ?? '0') ?? 0.0,
+                                      'quantity': quantity,
+                                    };
+                                  }).toList();
+                                  
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => CheckoutScreen(
+                                        cartItems: cartItems,
+                                        subtotal: _totalPrice,
+                                      ),
                                     ),
                                   );
                                 },

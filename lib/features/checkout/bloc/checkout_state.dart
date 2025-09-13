@@ -1,6 +1,6 @@
 part of 'checkout_bloc.dart';
 
-@immutable
+// @immutable
 sealed class CheckoutState {}
 
 final class CheckoutInitial extends CheckoutState {}

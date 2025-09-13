@@ -33,9 +33,11 @@ class UserProfileHeader extends StatelessWidget {
             ),
             const Spacer(),
             IconButton(
-              icon: const Icon(
+              icon: Icon(
                 Icons.notifications_outlined,
-                color: Colors.black,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white
+                    : Colors.black,
               ),
               onPressed: () {},
             ),
@@ -64,7 +66,9 @@ class UserProfileHeader extends StatelessWidget {
                         Text(
                           'Getting location...',
                           style: TextStyle(
-                            color: Colors.grey.shade600,
+                            color: Theme.of(context).brightness == Brightness.dark
+                                ? Colors.grey.shade400
+                                : Colors.grey.shade600,
                             fontSize: 14,
                           ),
                         ),
@@ -72,8 +76,8 @@ class UserProfileHeader extends StatelessWidget {
                     )
                   : Text(
                       location,
-                      style: const TextStyle(
-                        color: Colors.black87,
+                      style: TextStyle(
+                        color: Theme.of(context).textTheme.bodyMedium?.color,
                         fontSize: 14,
                       ),
                     ),
@@ -93,16 +97,19 @@ class UserProfileHeader extends StatelessWidget {
         const SizedBox(height: 16),
         Text(
           GreetingUtils.getGreetingWithName(name),
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
+            color: Theme.of(context).textTheme.headlineSmall?.color,
           ),
         ),
         const SizedBox(height: 8),
-        const Text(
+        Text(
           'What would you like to have delivered at your doorstep today? Just let us know.',
           style: TextStyle(
-            color: Colors.grey,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.grey.shade400
+                : Colors.grey,
             fontSize: 14,
           ),
         ),
@@ -129,12 +136,13 @@ class ServiceCategory extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: backgroundColor,
+          color: isDarkMode ? Theme.of(context).cardColor : backgroundColor,
           borderRadius: BorderRadius.circular(12),
         ),
         child:
@@ -146,9 +154,10 @@ class ServiceCategory extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
+                    color: Theme.of(context).textTheme.titleLarge?.color,
                   ),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
@@ -156,9 +165,9 @@ class ServiceCategory extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: Colors.black87,
+                    color: Theme.of(context).textTheme.bodySmall?.color,
                   ),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 2,
@@ -169,7 +178,7 @@ class ServiceCategory extends StatelessWidget {
           const SizedBox(width: 8),
           Container(
             decoration: BoxDecoration(
-              color: Colors.grey[300],
+              color: isDarkMode ? Colors.grey[800] : Colors.grey[300],
               borderRadius: BorderRadius.circular(30),
             ),
             child: Image.asset(

@@ -44,10 +44,12 @@ class AppColors {
   static const Color lightOnError = Color(0xFFFFFFFF);
 
   // Neutral Colors - Dark Theme
-  static const Color darkBackground = Color(0xFF121212);
-  static const Color darkSurface = Color(0xFF1E1E1E);
+  static const Color darkBackground = Color(0xFF0A0A0A); // Darker background
+  static const Color darkSurface = Color(0xFF121212); // Darker surface
+  static const Color darkSurfaceVariant = Color(0xFF1A1A1A); // Darker surface variant
   static const Color darkOnBackground = Color(0xFFE6E1E5);
   static const Color darkOnSurface = Color(0xFFE6E1E5);
+  static const Color darkBorder = Color(0xFF3D3D3D);
   static const Color darkOnPrimary = Color(0xFF003300);
   static const Color darkOnSecondary = Color(0xFF4A2800);
   static const Color darkOnError = Color(0xFF690005);
@@ -66,7 +68,6 @@ class AppColors {
 
   // Border Colors
   static const Color lightBorder = Color(0xFFE0E0E0);
-  static const Color darkBorder = Color(0xFF424242);
 
   // Divider Colors
   static const Color lightDivider = Color(0xFFBDBDBD);
@@ -78,13 +79,13 @@ class AppColors {
 
   // Card Colors
   static const Color lightCard = Color(0xFFFFFFFF);
-  static const Color darkCard = Color(0xFF2C2C2C);
+  static const Color darkCard = Color(0xFF151515); // Darker card color
 
   // Input Colors
   static const Color lightInputFill = Color(0xFFF5F5F5);
-  static const Color darkInputFill = Color(0xFF2C2C2C);
+  static const Color darkInputFill = Color(0xFF151515); // Darker input fill
   static const Color lightInputBorder = Color(0xFFE0E0E0);
-  static const Color darkInputBorder = Color(0xFF424242);
+  static const Color darkInputBorder = Color(0xFF303030); // Darker input border
 
   // Button Colors
   static const Color disabledButton = Color(0xFFE0E0E0);
