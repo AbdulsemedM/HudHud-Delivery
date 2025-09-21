@@ -29,12 +29,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   double _extras = 0.0;
   double _serviceCharge = 16.90;
   double _deliveryFee = 47.00;
+  double _tipAmount = 0.0;
   String _deliveryAddress = 'KCK+MCP, Bole, Addis Ababa, Ethiopia';
   String _paymentMethod = 'card';
   int _vendorId = 7; // Default vendor ID
 
   double get _total {
-    return widget.subtotal - _discount + _extras + _serviceCharge + _deliveryFee;
+    return widget.subtotal - _discount + _extras + _serviceCharge + _deliveryFee + _tipAmount;
   }
 
   void _onPromoCodeApplied(String promoCode) {
@@ -93,6 +94,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       'discount': _discount,
       'service_charge': _serviceCharge,
       'delivery_fee': _deliveryFee,
+      'tip_amount': _tipAmount,
       'delivery_address': _deliveryAddress,
       'notes': _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
     };
@@ -207,6 +209,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 NotesSection(
                   notesController: _notesController,
                 ),
+                
+                // Tip Section
+                TipSection(
+                  currentTip: _tipAmount,
+                  onTipChanged: (value) {
+                    setState(() {
+                      _tipAmount = value;
+                    });
+                  },
+                ),
 
                 // Order Summary Section
                 OrderSummarySection(
@@ -215,6 +227,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   extras: _extras,
                   serviceCharge: _serviceCharge,
                   deliveryFee: _deliveryFee,
+                  tipAmount: _tipAmount,
                   total: _total,
                 ),
 
