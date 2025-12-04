@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/dashboard/presentation/screen/dashboard_screen.dart';
 import 'package:hudhud_delivery/features/login/bloc/login_bloc.dart';
-import 'package:intl_phone_field/intl_phone_field.dart';
 
 class LogoWidget extends StatelessWidget {
   const LogoWidget({super.key});
@@ -37,25 +36,25 @@ class LoginTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Welcome Back!',
+          'Sign In',
           style: TextStyle(
-            fontSize: 32,
+            fontSize: 28,
             fontWeight: FontWeight.bold,
             color: Color(0xFF2C3E50),
-            letterSpacing: 1,
+            letterSpacing: 0.5,
           ),
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         Text(
-          'Sign in to continue',
+          'Please enter your credentials to access your account and all available services',
           style: TextStyle(
-            fontSize: 16,
-            color: Color(0xFF7F8C8D),
-            letterSpacing: 0.5,
+            fontSize: 13,
+            color: Colors.grey[600],
+            height: 1.4,
           ),
         ),
       ],
@@ -74,8 +73,6 @@ class _LoginFormState extends State<LoginForm> {
   final _emailPhoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  bool _isPhoneMode = false;
-  String _phoneNumber = '';
   bool _isPasswordVisible = false;
 
   // Email validation
@@ -132,285 +129,81 @@ class _LoginFormState extends State<LoginForm> {
       child: Form(
         key: _formKey,
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Beautiful Animated Toggle Selector
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.grey.shade50, Colors.white],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+            // Email or Phone Input
+            Text(
+              'Email address or Phone number',
+              style: TextStyle(
+                fontSize: 13,
+                color: Colors.grey[700],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 6),
+            TextFormField(
+              controller: _emailPhoneController,
+              keyboardType: TextInputType.text,
+              decoration: InputDecoration(
+                hintText: 'Eg. JohnDoe@gmail.com',
+                hintStyle: TextStyle(
+                  color: Colors.grey[400],
+                  fontSize: 14,
                 ),
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
-                    spreadRadius: 1,
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                filled: true,
+                fillColor: Colors.grey[50],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey[200]!),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide:
+                      BorderSide(color: AppColors.primaryColor, width: 2),
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.red, width: 2),
+                ),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               ),
-              padding: const EdgeInsets.all(4),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                      decoration: BoxDecoration(
-                        gradient: _isPhoneMode
-                            ? null
-                            : LinearGradient(
-                                colors: [AppColors.primaryColor, AppColors.primaryDarkColor],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                        color: _isPhoneMode ? Colors.transparent : null,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: _isPhoneMode
-                            ? null
-                            : [
-                                BoxShadow(
-                                  color:
-                                      AppColors.primaryColor.withOpacity(0.3),
-                                  spreadRadius: 1,
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                      ),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(12),
-                          onTap: () {
-                            if (_isPhoneMode) {
-                              setState(() {
-                                _isPhoneMode = false;
-                                _phoneNumber = '';
-                              });
-                            }
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 12, horizontal: 16),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.email_rounded,
-                                  color: _isPhoneMode
-                                      ? Colors.grey.shade600
-                                      : Colors.white,
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'Email',
-                                  style: TextStyle(
-                                    color: _isPhoneMode
-                                        ? Colors.grey.shade600
-                                        : Colors.white,
-                                    fontWeight: _isPhoneMode
-                                        ? FontWeight.w500
-                                        : FontWeight.w600,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                      decoration: BoxDecoration(
-                        gradient: _isPhoneMode
-                            ? LinearGradient(
-                                colors: [AppColors.primaryColor, AppColors.primaryDarkColor],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              )
-                            : null,
-                        color: _isPhoneMode ? null : Colors.transparent,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: _isPhoneMode
-                            ? [
-                                BoxShadow(
-                                  color:
-                                      AppColors.primaryColor.withOpacity(0.3),
-                                  spreadRadius: 1,
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ]
-                            : null,
-                      ),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(12),
-                          onTap: () {
-                            if (!_isPhoneMode) {
-                              setState(() {
-                                _isPhoneMode = true;
-                                _emailPhoneController.clear();
-                              });
-                            }
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 12, horizontal: 16),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.phone_rounded,
-                                  color: _isPhoneMode
-                                      ? Colors.white
-                                      : Colors.grey.shade600,
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'Phone',
-                                  style: TextStyle(
-                                    color: _isPhoneMode
-                                        ? Colors.white
-                                        : Colors.grey.shade600,
-                                    fontWeight: _isPhoneMode
-                                        ? FontWeight.w600
-                                        : FontWeight.w500,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+              style: TextStyle(
+                color: Colors.grey[800],
+                fontSize: 14,
               ),
+              validator: validateEmailOrPhone,
             ),
             const SizedBox(height: 16),
-            // Input Field
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 400),
-              transitionBuilder: (Widget child, Animation<double> animation) {
-                return SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0.0, 0.3),
-                    end: Offset.zero,
-                  ).animate(CurvedAnimation(
-                    parent: animation,
-                    curve: Curves.easeInOut,
-                  )),
-                  child: FadeTransition(
-                    opacity: animation,
-                    child: child,
-                  ),
-                );
-              },
-              child: _isPhoneMode
-                  ? IntlPhoneField(
-                      key: const ValueKey('phone'),
-                      decoration: InputDecoration(
-                        labelText: 'Phone Number',
-                        hintText: 'Enter your phone number',
-                        prefixIcon: const Icon(Icons.phone_rounded,
-                            color: AppColors.primaryColor),
-                        filled: true,
-                        fillColor: Colors.grey.shade50,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide.none,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Colors.grey.shade200),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(
-                              color: AppColors.primaryColor, width: 2),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide:
-                              const BorderSide(color: Colors.red, width: 2),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 16),
-                      ),
-                      initialCountryCode: 'ET',
-                      onChanged: (phone) {
-                        _phoneNumber = phone.completeNumber;
-                      },
-                      validator: (phone) {
-                        if (phone == null || phone.number.isEmpty) {
-                          return 'Please enter your phone number';
-                        }
-                        return null;
-                      },
-                    )
-                  : TextFormField(
-                      key: const ValueKey('email'),
-                      controller: _emailPhoneController,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        labelText: 'Email Address',
-                        hintText: 'Enter your email address',
-                        prefixIcon: const Icon(Icons.email_rounded,
-                            color: AppColors.primaryColor),
-                        filled: true,
-                        fillColor: Colors.grey.shade50,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide.none,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Colors.grey.shade200),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(
-                              color: AppColors.primaryColor, width: 2),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide:
-                              const BorderSide(color: Colors.red, width: 2),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 16),
-                      ),
-                      validator: validateEmailOrPhone,
-                    ),
+            // Password Input
+            Text(
+              'Password',
+              style: TextStyle(
+                fontSize: 13,
+                color: Colors.grey[700],
+                fontWeight: FontWeight.w500,
+              ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 6),
             TextFormField(
               controller: _passwordController,
               obscureText: !_isPasswordVisible,
               decoration: InputDecoration(
-                labelText: 'Password',
-                hintText: 'Enter your password',
-                prefixIcon:
-                    const Icon(Icons.lock_rounded, color: AppColors.primaryColor),
+                hintText: 'Enter password',
+                hintStyle: TextStyle(
+                  color: Colors.grey[400],
+                  fontSize: 14,
+                ),
                 suffixIcon: IconButton(
                   icon: Icon(
                     _isPasswordVisible
-                        ? Icons.visibility_rounded
-                        : Icons.visibility_off_rounded,
-                    color: Colors.grey.shade600,
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                    color: Colors.grey[600],
                   ),
                   onPressed: () {
                     setState(() {
@@ -419,26 +212,30 @@ class _LoginFormState extends State<LoginForm> {
                   },
                 ),
                 filled: true,
-                fillColor: Colors.grey.shade50,
+                fillColor: Colors.grey[50],
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(color: Colors.grey.shade200),
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey[200]!),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(12),
                   borderSide:
-                      const BorderSide(color: AppColors.primaryColor, width: 2),
+                      BorderSide(color: AppColors.primaryColor, width: 2),
                 ),
                 errorBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(color: Colors.red, width: 2),
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.red, width: 2),
                 ),
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              ),
+              style: TextStyle(
+                color: Colors.grey[800],
+                fontSize: 14,
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -447,11 +244,11 @@ class _LoginFormState extends State<LoginForm> {
                 return null;
               },
             ),
-
-            const SizedBox(height: 30),
+            const SizedBox(height: 24),
+            // Sign In Button
             SizedBox(
               width: double.infinity,
-              height: 50,
+              height: 48,
               child: BlocBuilder<LoginBloc, LoginState>(
                 builder: (context, state) {
                   return ElevatedButton(
@@ -461,6 +258,7 @@ class _LoginFormState extends State<LoginForm> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
+                      elevation: 0,
                     ),
                     child: state is LoginLoading
                         ? const SizedBox(
@@ -472,28 +270,15 @@ class _LoginFormState extends State<LoginForm> {
                             ),
                           )
                         : const Text(
-                            'Login',
+                            'Sign In',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1.5,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                   );
                 },
-              ),
-            ),
-            const SizedBox(height: 15),
-            TextButton(
-              onPressed: () {},
-              child: const Text(
-                'Forgot Password?',
-                style: TextStyle(
-                  color: AppColors.secondaryColor,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
               ),
             ),
           ],
@@ -504,13 +289,16 @@ class _LoginFormState extends State<LoginForm> {
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
-      final emailOrPhone =
-          _isPhoneMode ? _phoneNumber : _emailPhoneController.text.trim();
+      final emailOrPhone = _emailPhoneController.text.trim();
+      // Determine if it's email or phone
+      final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+      final isEmail = emailRegex.hasMatch(emailOrPhone);
+
       context.read<LoginBloc>().add(
             LoginFormSubmitted(
               emailOrPhone,
               _passwordController.text.trim(),
-              _isPhoneMode ? "phone" : "email",
+              isEmail ? "email" : "phone",
             ),
           );
     }

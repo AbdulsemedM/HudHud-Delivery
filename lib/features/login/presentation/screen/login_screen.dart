@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../signup/presentation/screen/signup_screen.dart';
 import '../widgets/login_widget.dart';
@@ -8,8 +9,54 @@ import '../../data/data_provider/login_data_provider.dart';
 import '../../../../core/api/api_service.dart';
 import '../../../../core/theme/app_colors.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  Future<bool> _onWillPop() async {
+    final shouldExit = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Exit App'),
+        content: const Text('Are you sure you want to exit the app?'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: Colors.grey[700]),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text(
+              'Exit',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldExit == true) {
+      SystemNavigator.pop();
+      return true;
+    }
+    return false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,120 +64,165 @@ class LoginScreen extends StatelessWidget {
       create: (context) => LoginBloc(
         LoginRepository(LoginDataProvider(apiService: ApiService.instance)),
       ),
-      child: Scaffold(
-        body: Stack(
-          children: [
-            // Background gradient
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    AppColors.primaryColor.withOpacity(0.1),
-                    AppColors.secondaryColor.withOpacity(0.1),
+      child: PopScope(
+        canPop: false,
+        onPopInvoked: (didPop) async {
+          if (!didPop) {
+            await _onWillPop();
+          }
+        },
+        child: Scaffold(
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: Column(
+            children: [
+              // Top Navigation Bar
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Back Button
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: IconButton(
+                        icon: Icon(Icons.arrow_back, color: Colors.grey[700]),
+                        onPressed: () => _onWillPop(),
+                      ),
+                    ),
+                    // Logo
+                    Image.asset(
+                      'assets/images/logo.png',
+                      width: 100,
+                      fit: BoxFit.contain,
+                    ),
                   ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
                 ),
               ),
-            ),
-            // Top wave
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: CustomPaint(
-                size: Size(
-                    MediaQuery.of(context).size.width, 400), // Increased height
-                painter: CurvePainter(
-                  color: AppColors.primaryColor.withOpacity(0.2),
-                  isTop: true,
-                ),
-              ),
-            ),
-            // Bottom wave
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: CustomPaint(
-                size: Size(
-                    MediaQuery.of(context).size.width, 400), // Increased height
-                painter: CurvePainter(
-                  color: AppColors.secondaryColor.withOpacity(0.2),
-                  isTop: false,
-                ),
-              ),
-            ),
-            // Content
-            SafeArea(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 30.0, vertical: 40.0),
+              // Content
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Center(
-                        child: Container(
-                          width: 120,
-                          height: 120,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                spreadRadius: 2,
-                                blurRadius: 10,
-                                offset: Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          padding: EdgeInsets.all(15),
-                          child: Image.asset(
-                            'assets/images/logo.png',
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 40),
+                      // Sign In Header
                       LoginTitle(),
-                      SizedBox(height: 40),
+                      const SizedBox(height: 20),
+                      // Login Form
                       LoginForm(),
-                      SizedBox(height: 30),
+                      const SizedBox(height: 16),
+                      // Sign Up Link
                       Center(
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              "Don't have an account? ",
+                              "Already have an account? ",
                               style: TextStyle(
-                                color: Color(0xFF7F8C8D),
-                                fontSize: 16,
+                                color: Colors.grey[700],
+                                fontSize: 14,
                               ),
                             ),
-                            TextButton(
-                              onPressed: () {
+                            GestureDetector(
+                              onTap: () {
                                 Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => SignupScreen()));
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => SignupScreen(),
+                                  ),
+                                );
                               },
                               child: Text(
-                                'Sign up',
+                                'Sign Up',
                                 style: TextStyle(
                                   color: AppColors.primaryColor,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ),
                           ],
                         ),
                       ),
+                      const SizedBox(height: 16),
+                      // Divider
+                      Row(
+                        children: [
+                          Expanded(child: Divider(color: Colors.grey[300])),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            child: Text(
+                              'or continue with',
+                              style: TextStyle(
+                                color: Colors.grey[700],
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                          Expanded(child: Divider(color: Colors.grey[300])),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      // Google Sign In Button
+                      _GoogleSignInButton(),
+                      const SizedBox(height: 8),
                     ],
                   ),
                 ),
+              ),
+            ],
+          ),
+        ),
+        ),
+      ),
+    );
+  }
+}
+
+// Google Sign In Button Widget
+class _GoogleSignInButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 48,
+      child: OutlinedButton(
+        onPressed: () {
+          // TODO: Implement Google Sign In
+        },
+        style: OutlinedButton.styleFrom(
+          side: BorderSide(color: AppColors.primaryColor, width: 1.5),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          backgroundColor: Colors.white,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Google Logo
+            Image.asset(
+              'assets/images/Google_Favicon_2025.svg.png',
+              width: 20,
+              height: 20,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) {
+                return Icon(Icons.g_mobiledata, size: 20, color: Colors.grey[700]);
+              },
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'Continue with Google',
+              style: TextStyle(
+                color: Colors.grey[800],
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ],
@@ -138,60 +230,4 @@ class LoginScreen extends StatelessWidget {
       ),
     );
   }
-}
-
-class CurvePainter extends CustomPainter {
-  final Color color;
-  final bool isTop;
-
-  CurvePainter({required this.color, required this.isTop});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.fill;
-
-    final path = Path();
-
-    if (isTop) {
-      path.moveTo(0, 0);
-      path.lineTo(0, size.height * 0.6);
-      path.quadraticBezierTo(
-        size.width * 0.25,
-        size.height * 0.3,
-        size.width * 0.5,
-        size.height * 0.6,
-      );
-      path.quadraticBezierTo(
-        size.width * 0.75,
-        size.height * 0.9,
-        size.width,
-        size.height * 0.4,
-      );
-      path.lineTo(size.width, 0);
-    } else {
-      path.moveTo(0, size.height);
-      path.lineTo(0, size.height * 0.5);
-      path.quadraticBezierTo(
-        size.width * 0.35,
-        size.height * 0.8,
-        size.width * 0.65,
-        size.height * 0.3,
-      );
-      path.quadraticBezierTo(
-        size.width * 0.85,
-        size.height * 0.1,
-        size.width,
-        size.height * 0.5,
-      );
-      path.lineTo(size.width, size.height);
-    }
-
-    path.close();
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
