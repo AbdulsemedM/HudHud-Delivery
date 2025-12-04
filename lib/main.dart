@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
-import 'package:hudhud_delivery/app/widgets/auth_wrapper.dart';
+import 'package:hudhud_delivery/features/splash/presentation/screen/splash_screen.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 // Core imports
 import 'core/theme/app_theme.dart';
-import 'core/api/dio_client.dart';
 import 'core/api/api_service.dart';
 import 'core/utils/snackbar_util.dart';
 import 'core/utils/button_util.dart';
@@ -27,13 +24,9 @@ import 'features/orders/data/repositories/orders_repository.dart';
 // Widgets
 import 'app/widgets/primary_button.dart';
 import 'app/widgets/secondary_button.dart';
-import 'app/widgets/custom_snackbar.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Initialize secure storage
-  const secureStorage = FlutterSecureStorage();
 
   // Initialize API service
   // DioClient.initialize(); // Will be implemented when needed
@@ -89,7 +82,7 @@ class MyApp extends StatelessWidget {
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
             themeMode: themeController.themeMode,
-            home: const AuthWrapper(),
+            home: SplashScreen(),
             builder: (context, child) {
               // Update system UI overlay style when theme changes
               themeController.updateSystemUIOverlayStyle();

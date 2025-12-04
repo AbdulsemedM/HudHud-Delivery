@@ -214,7 +214,7 @@ class AppTheme {
     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
   );
 
-  static const CardTheme _lightCardTheme = CardTheme(
+  static const CardThemeData _lightCardTheme = CardThemeData(
     color: AppColors.lightCard,
     elevation: 2,
     shape: RoundedRectangleBorder(
@@ -287,7 +287,7 @@ class AppTheme {
     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
   );
 
-  static const CardTheme _darkCardTheme = CardTheme(
+  static const CardThemeData _darkCardTheme = CardThemeData(
     color: AppColors.darkCard,
     elevation: 2,
     shape: RoundedRectangleBorder(
@@ -312,7 +312,7 @@ class AppTheme {
     type: BottomNavigationBarType.fixed,
   );
 
-  static const TabBarTheme _lightTabBarTheme = TabBarTheme(
+  static const TabBarThemeData _lightTabBarTheme = TabBarThemeData(
     labelColor: AppColors.primaryColor,
     unselectedLabelColor: AppColors.lightTextSecondary,
     indicator: UnderlineTabIndicator(
@@ -320,7 +320,7 @@ class AppTheme {
     ),
   );
 
-  static const TabBarTheme _darkTabBarTheme = TabBarTheme(
+  static const TabBarThemeData _darkTabBarTheme = TabBarThemeData(
     labelColor: AppColors.primaryLightColor,
     unselectedLabelColor: AppColors.darkTextSecondary,
     indicator: UnderlineTabIndicator(
@@ -372,14 +372,14 @@ class AppTheme {
     ),
   );
 
-  static const DialogTheme _lightDialogTheme = DialogTheme(
+  static const DialogThemeData _lightDialogTheme = DialogThemeData(
     backgroundColor: AppColors.lightSurface,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(16)),
     ),
   );
 
-  static const DialogTheme _darkDialogTheme = DialogTheme(
+  static const DialogThemeData _darkDialogTheme = DialogThemeData(
     backgroundColor: AppColors.darkSurface,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(16)),

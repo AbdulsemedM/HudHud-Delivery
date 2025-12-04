@@ -14,7 +14,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.hudhud_delivery"
-        minSdk = 21
+        minSdkVersion = flutter.minSdkVersion
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
