@@ -7,6 +7,53 @@ import '../../bloc/signup_bloc.dart';
 import '../../data/repository/signup_repository.dart';
 import '../../data/data_provider/signup_data_provider.dart';
 
+// Google Sign In Button Widget
+class _GoogleSignInButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 48,
+      child: OutlinedButton(
+        onPressed: () {
+          // TODO: Implement Google Sign In
+        },
+        style: OutlinedButton.styleFrom(
+          side: BorderSide(color: AppColors.primaryColor, width: 1.5),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          backgroundColor: Colors.white,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Google Logo
+            Image.asset(
+              'assets/images/Google_Favicon_2025.svg.png',
+              width: 20,
+              height: 20,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) {
+                return Icon(Icons.g_mobiledata, size: 20, color: Colors.grey[700]);
+              },
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'Continue with Google',
+              style: TextStyle(
+                color: Colors.grey[800],
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class SignupScreen extends StatelessWidget {
   const SignupScreen({super.key});
 
@@ -19,45 +66,108 @@ class SignupScreen extends StatelessWidget {
           ),
         ),
       child: Scaffold(
-        body: Stack(
-          children: [
-            Container(
-              decoration:  BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    AppColors.primaryColor.withOpacity(0.1),
-                    AppColors.secondaryColor.withOpacity(0.1),
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: Column(
+            children: [
+              // Top Navigation Bar
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Back Button
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: IconButton(
+                        icon: Icon(Icons.arrow_back, color: Colors.grey[700]),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ),
+                    // Logo
+                    Image.asset(
+                      'assets/images/logo.png',
+                      width: 100,
+                      fit: BoxFit.contain,
+                    ),
                   ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
                 ),
               ),
-            ),
-            SafeArea(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-
+              // Content
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back_ios,
-                            color: Color(0xFF2C3E50)),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                      // const SizedBox(height: 20),
-                      const SignupTitle(),
+                      // Sign Up Header
+                      SignupTitle(),
                       const SizedBox(height: 20),
+                      // Signup Form
                       createSignupForm(),
-                      const SizedBox(height: 20),
-                      const SignupButton(),
+                      const SizedBox(height: 16),
+                      // Sign Up Button
+                      SignupButton(),
+                      const SizedBox(height: 16),
+                      // Sign In Link
+                      Center(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Already have an account? ",
+                              style: TextStyle(
+                                color: Colors.grey[700],
+                                fontSize: 14,
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () => Navigator.pop(context),
+                              child: Text(
+                                'Sign In',
+                                style: TextStyle(
+                                  color: AppColors.primaryColor,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      // Divider
+                      Row(
+                        children: [
+                          Expanded(child: Divider(color: Colors.grey[300])),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            child: Text(
+                              'or continue with',
+                              style: TextStyle(
+                                color: Colors.grey[700],
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                          Expanded(child: Divider(color: Colors.grey[300])),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      // Google Sign In Button
+                      _GoogleSignInButton(),
+                      const SizedBox(height: 8),
                     ],
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
