@@ -3,8 +3,8 @@ import 'package:google_nav_bar/google_nav_bar.dart';
 import '../../../home/presentation/screen/home_screen.dart';
 import '../../../wallet/presentation/screens/wallet_screen.dart';
 import '../../../settings/presentation/screen/settings_screen.dart';
-import '../screens/courier_screen.dart';
-import '../screens/taxi_screen.dart';
+import '../../../courier/presentation/screens/courier_screen.dart';
+import '../../../taxi/presentation/screens/taxi_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});

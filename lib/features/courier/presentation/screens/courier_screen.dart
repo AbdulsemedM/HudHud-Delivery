@@ -5,8 +5,8 @@ import 'package:hudhud_delivery/models/user_model.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import '../../../home/presentation/widgets/home_widget.dart';
 import '../../../home/presentation/screen/location_search_screen.dart';
-import '../../../courier/presentation/screens/instant_delivery_screen.dart';
-import '../../../courier/presentation/screens/schedule_delivery_screen.dart';
+import 'instant_delivery_screen.dart';
+import 'schedule_delivery_screen.dart';
 
 class CourierScreen extends StatefulWidget {
   const CourierScreen({super.key});
