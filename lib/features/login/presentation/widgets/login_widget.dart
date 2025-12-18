@@ -93,16 +93,46 @@ class _LoginFormState extends State<LoginForm> {
       return 'Please enter your email or phone number';
     }
 
+    final trimmedValue = value.trim();
+
     // Check if it's an email
     final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-    if (emailRegex.hasMatch(value)) {
+    if (emailRegex.hasMatch(trimmedValue)) {
       return null; // Valid email
     }
 
-    // Check if it's a phone number (basic validation)
-    final phoneRegex = RegExp(r'^[+]?[0-9]{10,15}$');
-    if (phoneRegex.hasMatch(value.replaceAll(RegExp(r'[\s\-\(\)]'), ''))) {
-      return null; // Valid phone
+    // Check if it's a phone number
+    // Remove spaces, dashes, parentheses, and other formatting characters
+    String cleanedPhone = trimmedValue.replaceAll(RegExp(r'[\s\-\(\)\.]'), '');
+    
+    // Check for international format (starts with +)
+    if (cleanedPhone.startsWith('+')) {
+      // International phone: + followed by 10-15 digits
+      if (RegExp(r'^\+[0-9]{10,15}$').hasMatch(cleanedPhone)) {
+        return null; // Valid international phone
+      }
+    } else {
+      // Check for Ethiopian phone format or generic phone
+      // Must only contain digits
+      if (!RegExp(r'^\d+$').hasMatch(cleanedPhone)) {
+        return 'Please enter a valid email or phone number';
+      }
+      
+      // Remove leading 0 if present (Ethiopian format)
+      if (cleanedPhone.startsWith('0') && cleanedPhone.length > 1) {
+        cleanedPhone = cleanedPhone.substring(1);
+      }
+      
+      // Ethiopian phone: starts with 9 or 7, and is 9 digits long
+      if ((cleanedPhone.startsWith('9') || cleanedPhone.startsWith('7')) && 
+          cleanedPhone.length == 9) {
+        return null; // Valid Ethiopian phone
+      }
+      
+      // Generic phone validation: 10-15 digits
+      if (cleanedPhone.length >= 10 && cleanedPhone.length <= 15) {
+        return null; // Valid phone (generic)
+      }
     }
 
     return 'Please enter a valid email or phone number';

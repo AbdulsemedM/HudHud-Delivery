@@ -3,21 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/features/restaurants/presentation/screens/list_of_restaurants_screen.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/app/services/location_service.dart';
-import 'package:hudhud_delivery/app/services/greeting_utils.dart';
 import 'package:hudhud_delivery/models/user_model.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import '../../bloc/home_bloc.dart';
 import '../widgets/home_widget.dart';
 import '../../data/repository/home_repository.dart';
 import '../../data/data_provider/home_data_provider.dart';
-import '../../model/category_model.dart';
-import 'package:hudhud_delivery/core/api/api_service.dart';
-import 'map_location_screen.dart';
 import 'location_search_screen.dart';
-import '../../../categories/presentation/screens/categories_screen.dart';
-import '../../../categories/bloc/categories_bloc.dart';
-import '../../../categories/data/repository/categories_repository.dart';
-import '../../../categories/data/data_provider/categories_data_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -91,27 +84,10 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Color _getCategoryColor(String colorString) {
-    // Parse color from string or provide default colors
-    switch (colorString.toLowerCase()) {
-      case 'orange':
-        return Colors.orange[50]!;
-      case 'purple':
-        return Colors.purple[50]!;
-      case 'blue':
-        return Colors.blue[50]!;
-      case 'green':
-        return Colors.green[50]!;
-      case 'red':
-        return Colors.red[50]!;
-      default:
-        return Colors.grey[100]!;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
@@ -139,122 +115,126 @@ class _HomeScreenState extends State<HomeScreen> {
                   }
                 },
               ),
+              const SizedBox(height: 16),
+              // Order Tracking Card
+              OrderTrackingCard(
+                riderName: _currentUser?.name ?? 'Tafari',
+                message: 'Your courier rider Dickson is getting ready to collect your courier request this may take 5-8mins we will notify you once he collects the package.',
+                onViewMap: () {
+                  // Handle view map
+                },
+              ),
               const SizedBox(height: 24),
+              // What would you like to do section
               const Text(
-                'While You may like to have',
+                'What would you like to do?',
                 style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF2C3E50), // Dark grey
                 ),
               ),
               const SizedBox(height: 16),
-              BlocBuilder<HomeBloc, HomeState>(
-                builder: (context, state) {
-                  if (state is GetCategoriesLoadingState) {
-                    return GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 16,
-                        crossAxisSpacing: 16,
-                        childAspectRatio: 1.5,
-                      ),
-                      itemCount: 6, // Show 6 shimmer placeholders
-                      itemBuilder: (context, index) {
-                        return const ServiceCategoryShimmer();
-                      },
-                    );
-                  } else if (state is GetCategoriesSuccessState) {
-                    return GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 16,
-                        crossAxisSpacing: 16,
-                        childAspectRatio: 1.5,
-                      ),
-                      itemCount: state.categories.length,
-                      itemBuilder: (context, index) {
-                        final category = state.categories[index];
-                        return ServiceCategory(
-                          title: category.name ?? '',
-                          subtitle: category.description ?? '',
-                          imagePath: category.image_path ??
-                              'assets/images/categories.png',
-                          backgroundColor:
-                              _getCategoryColor(category.color ?? ''),
-                          onTap: () {
-                            if (category.name!.toLowerCase().contains('food') ||
-                                category.name!
-                                    .toLowerCase()
-                                    .contains('restaurant')) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const ListOfRestaurantsScreen(),
-                                ),
-                              );
-                            } else {
-                              // Navigate to categories screen for other categories
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => BlocProvider(
-                                     create: (context) => CategoriesBloc(
-                                       CategoriesRepository(
-                                         categoriesDataProvider: CategoriesDataProvider(
-                                           apiService: ApiService.instance,
-                                         ),
-                                       ),
-                                     ),
-                                    child: CategoriesScreen(
-                                      categoryId: category.id ?? 0,
-                                      categoryName: category.name ?? 'Category',
-                                      categoryImage: category.image_path ?? 'assets/images/categories.png',
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }
-                          },
-                        );
-                      },
-                    );
-                  } else if (state is GetCategoriesErrorState) {
-                    return Center(
-                      child: Column(
-                        children: [
-                          Text(
-                            'Error loading categories: ${state.errorMessage}',
-                            style: const TextStyle(color: Colors.red),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 16),
-                          ElevatedButton(
-                            onPressed: () {
-                              context
-                                  .read<HomeBloc>()
-                                  .add(GetCategoriesEvent());
-                            },
-                            child: const Text('Retry'),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                  return const SizedBox.shrink();
+              // Service Cards Grid
+              GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: 2,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+                childAspectRatio: 1.3,
+                children: [
+                  ServiceCard(
+                    title: 'Delivery',
+                    subtitle: 'Order groceries from your favourite vendors.',
+                    icon: Icons.shopping_bag,
+                    color: AppColors.primaryColor,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ListOfRestaurantsScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  ServiceCard(
+                    title: 'Courier',
+                    subtitle: 'Order courier services for pickup and drop off.',
+                    icon: Icons.local_shipping,
+                    color: Colors.purple,
+                    onTap: () {
+                      // Navigate to courier screen
+                    },
+                  ),
+                  ServiceCard(
+                    title: 'Taxi',
+                    subtitle: 'Request taxi at affordable rates from anywhere.',
+                    icon: Icons.local_taxi,
+                    color: Colors.yellow[700]!,
+                    onTap: () {
+                      // Navigate to taxi screen
+                    },
+                  ),
+                  ServiceCard(
+                    title: 'Services',
+                    subtitle: 'Request handy men for casual services at home.',
+                    icon: Icons.handyman,
+                    color: Colors.green,
+                    onTap: () {
+                      // Navigate to services screen
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              // Deals Section
+              DealsSection(
+                onClaim: () {
+                  // Handle claim deal
                 },
               ),
               const SizedBox(height: 24),
-              SeeAllServicesCard(
-                onTap: () {
-                  // Handle see all services
-                },
+              // History Section
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'History',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      // Handle view all
+                    },
+                    child: const Text(
+                      'View all',
+                      style: TextStyle(
+                        color: Colors.orange,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              // History Items
+              HistoryItem(
+                orderId: 'ORDB1234',
+                recipient: 'Paul Pogba',
+                location: 'Maryland bustop, Anthony Ikeja',
+                dateTime: '12 January 2020, 2:43pm',
+                status: 'Completed',
+              ),
+              HistoryItem(
+                orderId: 'ORDB1234',
+                recipient: 'Paul Pogba',
+                location: 'Maryland bustop, Anthony Ikeja',
+                dateTime: '12 January 2020, 2:43pm',
+                status: 'Completed',
               ),
             ],
           ),
