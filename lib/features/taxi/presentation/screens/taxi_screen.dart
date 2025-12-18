@@ -252,271 +252,279 @@ class _TaxiScreenState extends State<TaxiScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
+      body: Stack(
         children: [
-          // Map Section (Top 2/3)
-          Expanded(
-            flex: 2,
-            child: Stack(
-              children: [
-                FlutterMap(
-                  mapController: _mapController,
-                  options: MapOptions(
-                    initialCenter: _currentPosition,
-                    initialZoom: 13.0,
-                    minZoom: 3.0,
-                    maxZoom: 18.0,
-                    onTap: _handleMapTap,
+          // Full screen map
+          FlutterMap(
+            mapController: _mapController,
+            options: MapOptions(
+              initialCenter: _currentPosition,
+              initialZoom: 13.0,
+              minZoom: 3.0,
+              maxZoom: 18.0,
+              onTap: _handleMapTap,
+            ),
+            children: [
+              TileLayer(
+                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                userAgentPackageName: 'com.hudhuddelivery.app',
+                maxZoom: 18,
+              ),
+              MarkerLayer(
+                markers: [
+                  // Current location marker
+                  Marker(
+                    point: _currentPosition,
+                    width: 40,
+                    height: 40,
+                    child: const Icon(
+                      Icons.location_on,
+                      color: Colors.blue,
+                      size: 40,
+                    ),
                   ),
-                  children: [
-                    TileLayer(
-                      urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                      userAgentPackageName: 'com.hudhuddelivery.app',
-                      maxZoom: 18,
-                    ),
-                    MarkerLayer(
-                      markers: [
-                        // Current location marker
-                        Marker(
-                          point: _currentPosition,
-                          width: 40,
-                          height: 40,
-                          child: const Icon(
-                            Icons.location_on,
-                            color: Colors.blue,
-                            size: 40,
-                          ),
-                        ),
-                        // Destination marker
-                        if (_destinationPosition != null)
-                          Marker(
-                            point: _destinationPosition!,
-                            width: 40,
-                            height: 40,
-                            child: const Icon(
-                              Icons.location_on,
-                              color: Colors.red,
-                              size: 40,
-                            ),
-                          ),
-                      ],
-                    ),
-                    // Polyline if destination is selected
-                    if (_destinationPosition != null)
-                      PolylineLayer(
-                        polylines: [
-                          Polyline(
-                            points: [_currentPosition, _destinationPosition!],
-                            strokeWidth: 3.0,
-                            color: AppColors.primaryColor,
-                          ),
-                        ],
+                  // Destination marker
+                  if (_destinationPosition != null)
+                    Marker(
+                      point: _destinationPosition!,
+                      width: 40,
+                      height: 40,
+                      child: const Icon(
+                        Icons.location_on,
+                        color: Colors.red,
+                        size: 40,
                       ),
+                    ),
+                ],
+              ),
+              // Polyline if destination is selected
+              if (_destinationPosition != null)
+                PolylineLayer(
+                  polylines: [
+                    Polyline(
+                      points: [_currentPosition, _destinationPosition!],
+                      strokeWidth: 3.0,
+                      color: AppColors.primaryColor,
+                    ),
                   ],
                 ),
-                // Back button
-                Positioned(
-                  top: 40,
-                  left: 16,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
-                          blurRadius: 4,
-                        ),
-                      ],
-                    ),
-                    child: IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ),
-                ),
-                // Current location button
-                Positioned(
-                  right: 16,
-                  bottom: 16,
-                  child: FloatingActionButton(
-                    heroTag: 'current_location',
-                    mini: true,
-                    backgroundColor: Colors.white,
-                    onPressed: _getCurrentLocation,
-                    child: Icon(
-                      Icons.my_location,
-                      color: _isLoadingLocation ? Colors.grey : Colors.blue,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            ],
           ),
-          // Bottom Section (Bottom 1/3)
-          Expanded(
-            flex: 1,
+          // Back button
+          Positioned(
+            top: 40,
+            left: 16,
             child: Container(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
-                ),
-              ),
-              child: Column(
-                children: [
-                  // Logo
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16, bottom: 12),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'HUDHUD',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primaryColor,
-                          ),
-                        ),
-                        Text(
-                          ' delivery',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.normal,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Search Bar and Now Button
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Row(
-                      children: [
-                        // Search Bar
-                        Expanded(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.grey[100],
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: TextField(
-                              controller: _destinationController,
-                              decoration: InputDecoration(
-                                hintText: 'Where to?',
-                                hintStyle: TextStyle(color: Colors.grey[600]),
-                                prefixIcon: Icon(
-                                  Icons.search,
-                                  color: AppColors.primaryColor,
-                                ),
-                                border: InputBorder.none,
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
-                                ),
-                              ),
-                              onTap: () {
-                                // Show location search
-                                showModalBottomSheet(
-                                  context: context,
-                                  isScrollControlled: true,
-                                  backgroundColor: Colors.transparent,
-                                  builder: (context) => Container(
-                                    height: MediaQuery.of(context).size.height * 0.7,
-                                    decoration: const BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.only(
-                                        topLeft: Radius.circular(20),
-                                        topRight: Radius.circular(20),
-                                      ),
-                                    ),
-                                    child: Column(
-                                      children: [
-                                        Padding(
-                                          padding: const EdgeInsets.all(16),
-                                          child: LocationSearchField(
-                                            hintText: 'Where to?',
-                                            onLocationSelected: (place) {
-                                              _onLocationSelected(place);
-                                              Navigator.pop(context);
-                                            },
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        // Now Button
-                        GestureDetector(
-                          onTap: _showTimePicker,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: Colors.grey[300]!,
-                                width: 1,
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.access_time,
-                                  color: AppColors.primaryColor,
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  _selectedTime ?? 'Now',
-                                  style: TextStyle(
-                                    color: AppColors.primaryColor,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                const SizedBox(width: 4),
-                                Icon(
-                                  Icons.keyboard_arrow_down,
-                                  color: AppColors.primaryColor,
-                                  size: 20,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Suggested Locations
-                  Expanded(
-                    child: ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                      itemCount: _suggestedLocations.length,
-                      itemBuilder: (context, index) {
-                        final location = _suggestedLocations[index];
-                        return _SuggestedLocationItem(
-                          title: location.shortAddress,
-                          address: location.displayName,
-                          onTap: () => _selectSuggestedLocation(location),
-                        );
-                      },
-                    ),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 4,
                   ),
                 ],
               ),
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => Navigator.pop(context),
+              ),
             ),
+          ),
+          // Current location button
+          Positioned(
+            right: 16,
+            top: 100,
+            child: FloatingActionButton(
+              heroTag: 'current_location',
+              mini: true,
+              backgroundColor: Colors.white,
+              onPressed: _getCurrentLocation,
+              child: Icon(
+                Icons.my_location,
+                color: _isLoadingLocation ? Colors.grey : Colors.blue,
+              ),
+            ),
+          ),
+          // Bottom Sheet Modal
+          DraggableScrollableSheet(
+            initialChildSize: 0.35,
+            minChildSize: 0.25,
+            maxChildSize: 0.75,
+            builder: (context, scrollController) {
+              return Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    // Drag handle
+                    Container(
+                      margin: const EdgeInsets.only(top: 8),
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    // Logo
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16, bottom: 12),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'HUDHUD',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primaryColor,
+                            ),
+                          ),
+                          Text(
+                            ' delivery',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.normal,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Search Bar and Now Button
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Row(
+                        children: [
+                          // Search Bar
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.grey[100],
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: TextField(
+                                controller: _destinationController,
+                                decoration: InputDecoration(
+                                  hintText: 'Where to?',
+                                  hintStyle: TextStyle(color: Colors.grey[600]),
+                                  prefixIcon: Icon(
+                                    Icons.search,
+                                    color: AppColors.primaryColor,
+                                  ),
+                                  border: InputBorder.none,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 12,
+                                  ),
+                                ),
+                                onTap: () {
+                                  // Show location search
+                                  showModalBottomSheet(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    backgroundColor: Colors.transparent,
+                                    builder: (context) => Container(
+                                      height: MediaQuery.of(context).size.height * 0.7,
+                                      decoration: const BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(20),
+                                          topRight: Radius.circular(20),
+                                        ),
+                                      ),
+                                      child: Column(
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.all(16),
+                                            child: LocationSearchField(
+                                              hintText: 'Where to?',
+                                              onLocationSelected: (place) {
+                                                _onLocationSelected(place);
+                                                Navigator.pop(context);
+                                              },
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          // Now Button
+                          GestureDetector(
+                            onTap: _showTimePicker,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: Colors.grey[300]!,
+                                  width: 1,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.access_time,
+                                    color: AppColors.primaryColor,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    _selectedTime ?? 'Now',
+                                    style: TextStyle(
+                                      color: AppColors.primaryColor,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Icon(
+                                    Icons.keyboard_arrow_down,
+                                    color: AppColors.primaryColor,
+                                    size: 20,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Suggested Locations
+                    Expanded(
+                      child: ListView.builder(
+                        controller: scrollController,
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        itemCount: _suggestedLocations.length,
+                        itemBuilder: (context, index) {
+                          final location = _suggestedLocations[index];
+                          return _SuggestedLocationItem(
+                            title: location.shortAddress,
+                            address: location.displayName,
+                            onTap: () => _selectSuggestedLocation(location),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
         ],
       ),

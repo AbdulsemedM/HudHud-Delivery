@@ -83,178 +83,186 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
     final selectedOption = _tripOptions.firstWhere((opt) => opt.id == _selectedTrip);
     
     return Scaffold(
-      body: Column(
+      body: Stack(
         children: [
-          // Map Section (Top Half)
-          Expanded(
-            flex: 1,
-            child: Stack(
-              children: [
-                FlutterMap(
-                  mapController: _mapController,
-                  options: MapOptions(
-                    initialCenter: widget.pickupLocation,
-                    initialZoom: 13.0,
-                    minZoom: 3.0,
-                    maxZoom: 18.0,
+          // Full screen map
+          FlutterMap(
+            mapController: _mapController,
+            options: MapOptions(
+              initialCenter: widget.pickupLocation,
+              initialZoom: 13.0,
+              minZoom: 3.0,
+              maxZoom: 18.0,
+            ),
+            children: [
+              TileLayer(
+                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                userAgentPackageName: 'com.hudhuddelivery.app',
+                maxZoom: 18,
+              ),
+              PolylineLayer(
+                polylines: [
+                  Polyline(
+                    points: [widget.pickupLocation, widget.destinationLocation],
+                    strokeWidth: 3.0,
+                    color: AppColors.primaryColor,
                   ),
-                  children: [
-                    TileLayer(
-                      urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                      userAgentPackageName: 'com.hudhuddelivery.app',
-                      maxZoom: 18,
-                    ),
-                    PolylineLayer(
-                      polylines: [
-                        Polyline(
-                          points: [widget.pickupLocation, widget.destinationLocation],
-                          strokeWidth: 3.0,
-                          color: AppColors.primaryColor,
-                        ),
-                      ],
-                    ),
-                    MarkerLayer(
-                      markers: [
-                        Marker(
-                          point: widget.pickupLocation,
-                          width: 40,
-                          height: 40,
-                          child: const Icon(
-                            Icons.location_on,
-                            color: Colors.blue,
-                            size: 40,
-                          ),
-                        ),
-                        Marker(
-                          point: widget.destinationLocation,
-                          width: 40,
-                          height: 40,
-                          child: const Icon(
-                            Icons.location_on,
-                            color: Colors.red,
-                            size: 40,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                // Back button
-                Positioned(
-                  top: 40,
-                  left: 16,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
-                          blurRadius: 4,
-                        ),
-                      ],
-                    ),
-                    child: IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      onPressed: () => Navigator.pop(context),
+                ],
+              ),
+              MarkerLayer(
+                markers: [
+                  Marker(
+                    point: widget.pickupLocation,
+                    width: 40,
+                    height: 40,
+                    child: const Icon(
+                      Icons.location_on,
+                      color: Colors.blue,
+                      size: 40,
                     ),
                   ),
-                ),
-              ],
+                  Marker(
+                    point: widget.destinationLocation,
+                    width: 40,
+                    height: 40,
+                    child: const Icon(
+                      Icons.location_on,
+                      color: Colors.red,
+                      size: 40,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          // Back button
+          Positioned(
+            top: 40,
+            left: 16,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 4,
+                  ),
+                ],
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => Navigator.pop(context),
+              ),
             ),
           ),
-          // Trip Selection Panel (Bottom Half)
-          Expanded(
-            flex: 1,
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
+          // Bottom Sheet Modal
+          DraggableScrollableSheet(
+            initialChildSize: 0.5,
+            minChildSize: 0.35,
+            maxChildSize: 0.85,
+            builder: (context, scrollController) {
+              return Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                  ),
                 ),
-              ),
-              child: Column(
-                children: [
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Choose a trip',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF2C3E50),
+                child: Column(
+                  children: [
+                    // Drag handle
+                    Container(
+                      margin: const EdgeInsets.only(top: 8),
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  // Trip Options
-                  Expanded(
-                    child: ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      itemCount: _tripOptions.length,
-                      itemBuilder: (context, index) {
-                        final option = _tripOptions[index];
-                        final isSelected = _selectedTrip == option.id;
-                        
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: _TripOptionCard(
-                            option: option,
-                            isSelected: isSelected,
-                            onTap: () {
-                              setState(() {
-                                _selectedTrip = option.id;
-                              });
-                            },
-                          ),
-                        );
-                      },
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Choose a trip',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF2C3E50),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  // Select Button
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => FindingDriverScreen(
-                                pickupLocation: widget.pickupLocation,
-                                destinationLocation: widget.destinationLocation,
-                                pickupAddress: widget.pickupAddress,
-                                destinationAddress: widget.destinationAddress,
-                                tripType: selectedOption.name,
-                                price: selectedOption.price,
-                                paymentMethod: 'Card',
-                              ),
+                    const SizedBox(height: 16),
+                    // Trip Options
+                    Expanded(
+                      child: ListView.builder(
+                        controller: scrollController,
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        itemCount: _tripOptions.length,
+                        itemBuilder: (context, index) {
+                          final option = _tripOptions[index];
+                          final isSelected = _selectedTrip == option.id;
+                          
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: _TripOptionCard(
+                              option: option,
+                              isSelected: isSelected,
+                              onTap: () {
+                                setState(() {
+                                  _selectedTrip = option.id;
+                                });
+                              },
                             ),
                           );
                         },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Select Button
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => FindingDriverScreen(
+                                  pickupLocation: widget.pickupLocation,
+                                  destinationLocation: widget.destinationLocation,
+                                  pickupAddress: widget.pickupAddress,
+                                  destinationAddress: widget.destinationAddress,
+                                  tripType: selectedOption.name,
+                                  price: selectedOption.price,
+                                  paymentMethod: 'Card',
+                                ),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
-                        ),
-                        child: Text(
-                          'Select ${selectedOption.name}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
+                          child: Text(
+                            'Select ${selectedOption.name}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                ],
-              ),
-            ),
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              );
+            },
           ),
         ],
       ),

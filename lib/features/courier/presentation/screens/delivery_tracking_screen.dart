@@ -87,249 +87,266 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Column(
+      body: Stack(
         children: [
-          // Map Section (Top Half)
-          Expanded(
-            flex: 1,
-            child: Stack(
-              children: [
-                FlutterMap(
-                  mapController: _mapController,
-                  options: MapOptions(
-                    initialCenter: mapCenter,
-                    initialZoom: 13.0,
-                    minZoom: 3.0,
-                    maxZoom: 18.0,
-                  ),
-                  children: [
-                    TileLayer(
-                      urlTemplate:
-                          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                      userAgentPackageName: 'com.hudhuddelivery.app',
-                      maxZoom: 18,
-                    ),
-                    // Polyline between pickup and delivery
-                    if (widget.pickupPosition != null && widget.deliveryPosition != null)
-                      PolylineLayer(
-                        polylines: [
-                          Polyline(
-                            points: [widget.pickupPosition!, widget.deliveryPosition!],
-                            strokeWidth: 4.0,
-                            color: AppColors.primaryColor,
-                          ),
-                        ],
-                      ),
-                    MarkerLayer(
-                      markers: [
-                        // Pickup marker (package icon)
-                        if (widget.pickupPosition != null)
-                          Marker(
-                            point: widget.pickupPosition!,
-                            width: 40,
-                            height: 40,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.brown[300],
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.inventory_2,
-                                color: Colors.white,
-                                size: 24,
-                              ),
-                            ),
-                          ),
-                        // Vehicle marker (motorcycle icon)
-                        if (_vehiclePosition != null)
-                          Marker(
-                            point: _vehiclePosition!,
-                            width: 50,
-                            height: 50,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.grey[800],
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.3),
-                                    blurRadius: 4,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: Icon(
-                                Icons.two_wheeler,
-                                color: Colors.white,
-                                size: 28,
-                              ),
-                            ),
-                          ),
-                        // Delivery marker (green)
-                        if (widget.deliveryPosition != null)
-                          Marker(
-                            point: widget.deliveryPosition!,
-                            width: 40,
-                            height: 40,
-                            child: const Icon(
-                              Icons.location_on,
-                              color: Colors.green,
-                              size: 40,
-                            ),
-                          ),
-                      ],
+          // Full screen map
+          FlutterMap(
+            mapController: _mapController,
+            options: MapOptions(
+              initialCenter: mapCenter,
+              initialZoom: 13.0,
+              minZoom: 3.0,
+              maxZoom: 18.0,
+            ),
+            children: [
+              TileLayer(
+                urlTemplate:
+                    'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                userAgentPackageName: 'com.hudhuddelivery.app',
+                maxZoom: 18,
+              ),
+              // Polyline between pickup and delivery
+              if (widget.pickupPosition != null && widget.deliveryPosition != null)
+                PolylineLayer(
+                  polylines: [
+                    Polyline(
+                      points: [widget.pickupPosition!, widget.deliveryPosition!],
+                      strokeWidth: 4.0,
+                      color: AppColors.primaryColor,
                     ),
                   ],
                 ),
-                // Back button
-                Positioned(
-                  top: 40,
-                  left: 16,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
-                          blurRadius: 4,
+              MarkerLayer(
+                markers: [
+                  // Pickup marker (package icon)
+                  if (widget.pickupPosition != null)
+                    Marker(
+                      point: widget.pickupPosition!,
+                      width: 40,
+                      height: 40,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.brown[300],
+                          shape: BoxShape.circle,
                         ),
-                      ],
+                        child: const Icon(
+                          Icons.inventory_2,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                      ),
                     ),
-                    child: IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      onPressed: () => Navigator.pop(context),
+                  // Vehicle marker (motorcycle icon)
+                  if (_vehiclePosition != null)
+                    Marker(
+                      point: _vehiclePosition!,
+                      width: 50,
+                      height: 50,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey[800],
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.3),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          Icons.two_wheeler,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                      ),
                     ),
+                  // Delivery marker (green)
+                  if (widget.deliveryPosition != null)
+                    Marker(
+                      point: widget.deliveryPosition!,
+                      width: 40,
+                      height: 40,
+                      child: const Icon(
+                        Icons.location_on,
+                        color: Colors.green,
+                        size: 40,
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          ),
+          // Back button
+          Positioned(
+            top: 40,
+            left: 16,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 4,
                   ),
-                ),
-                // Status badge
-                Positioned(
-                  top: 40,
-                  right: 16,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryColor,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
-                          blurRadius: 4,
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        const Text(
-                          'Delivery in progress',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => Navigator.pop(context),
+              ),
             ),
           ),
-          // Details Section (Bottom Half)
-          Expanded(
-            flex: 1,
-            child: SingleChildScrollView(
-              child: Column(
+          // Status badge
+          Positioned(
+            top: 40,
+            right: 16,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppColors.primaryColor,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 4,
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Current Status Banner
                   Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    color: AppColors.primaryColor,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                widget.pickupLocation.length > 30
-                                    ? '${widget.pickupLocation.substring(0, 30)}...'
-                                    : widget.pickupLocation,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              const Text(
-                                'Delivery Pickup • 12 min Estimated',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            shape: BoxShape.circle,
-                          ),
-                          child: IconButton(
-                            icon: const Icon(Icons.send, color: Colors.white),
-                            onPressed: () {
-                              // TODO: Implement send action
-                            },
-                          ),
-                        ),
-                      ],
+                    width: 8,
+                    height: 8,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
                     ),
                   ),
-                  // Content
-                  Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      children: [
-                        // Driver Information
-                        _DriverCard(
-                          driverName: 'Tafari Mwangi',
-                          onCall: () {
-                            // TODO: Implement call
-                          },
-                          onMessage: () {
-                            // TODO: Implement message
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        // Review Order
-                        _ReviewOrderCard(
-                          courierNumber: '#HWDSF776567DS',
-                          from: widget.pickupLocation,
-                          to: widget.deliveryLocation,
-                          createdDate: '04 June 2025',
-                        ),
-                        const SizedBox(height: 16),
-                        // Tracking Order
-                        _TrackingOrderCard(),
-                      ],
+                  const SizedBox(width: 6),
+                  const Text(
+                    'Delivery in progress',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
               ),
             ),
+          ),
+          // Bottom Sheet Modal
+          DraggableScrollableSheet(
+            initialChildSize: 0.5,
+            minChildSize: 0.35,
+            maxChildSize: 0.85,
+            builder: (context, scrollController) {
+              return Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    // Drag handle
+                    Container(
+                      margin: const EdgeInsets.only(top: 8),
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    // Current Status Banner
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      color: AppColors.primaryColor,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  widget.pickupLocation.length > 30
+                                      ? '${widget.pickupLocation.substring(0, 30)}...'
+                                      : widget.pickupLocation,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                const Text(
+                                  'Delivery Pickup • 12 min Estimated',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              shape: BoxShape.circle,
+                            ),
+                            child: IconButton(
+                              icon: const Icon(Icons.send, color: Colors.white),
+                              onPressed: () {
+                                // TODO: Implement send action
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Content
+                    Expanded(
+                      child: SingleChildScrollView(
+                        controller: scrollController,
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          children: [
+                            // Driver Information
+                            _DriverCard(
+                              driverName: 'Tafari Mwangi',
+                              onCall: () {
+                                // TODO: Implement call
+                              },
+                              onMessage: () {
+                                // TODO: Implement message
+                              },
+                            ),
+                            const SizedBox(height: 16),
+                            // Review Order
+                            _ReviewOrderCard(
+                              courierNumber: '#HWDSF776567DS',
+                              from: widget.pickupLocation,
+                              to: widget.deliveryLocation,
+                              createdDate: '04 June 2025',
+                            ),
+                            const SizedBox(height: 16),
+                            // Tracking Order
+                            _TrackingOrderCard(),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
         ],
       ),
