@@ -8,10 +8,10 @@ class OtpInputFields extends StatefulWidget {
   const OtpInputFields({Key? key, this.onCompleted}) : super(key: key);
 
   @override
-  State<OtpInputFields> createState() => _OtpInputFieldsState();
+  State<OtpInputFields> createState() => OtpInputFieldsState();
 }
 
-class _OtpInputFieldsState extends State<OtpInputFields> {
+class OtpInputFieldsState extends State<OtpInputFields> {
   final List<TextEditingController> _controllers =
       List.generate(4, (_) => TextEditingController());
   final List<FocusNode> _focusNodes = List.generate(4, (_) => FocusNode());
@@ -266,7 +266,7 @@ class _OtpResendTimerState extends State<OtpResendTimer> {
 
 class OtpNumericKeyboard extends StatelessWidget {
   final Function(String)? onKeyPressed;
-  final _OtpInputFieldsState? otpInputFieldsState;
+  final OtpInputFieldsState? otpInputFieldsState;
 
   const OtpNumericKeyboard({
     Key? key,

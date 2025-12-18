@@ -392,27 +392,29 @@ class HistoryItem extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Order ID in dark green
               Text(
                 orderId,
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF4CAF50),
+                  color: Color(0xFF2E7D32), // Dark green
                 ),
               ),
+              // Status badge in dark green
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF4CAF50),
-                  borderRadius: BorderRadius.circular(12),
+                  color: const Color(0xFF2E7D32), // Dark green
+                  borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
                   status,
@@ -426,19 +428,43 @@ class HistoryItem extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
+          // Recipient text in grey
           Text(
-            'Recipient: $recipient',
+            'Receipient: $recipient',
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey[700],
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
+          // Motorcycle icon and location with "Drop off"
           Row(
             children: [
-              Icon(Icons.two_wheeler, size: 16, color: Colors.grey[600]),
-              const SizedBox(width: 4),
-              Icon(Icons.location_on, size: 16, color: Colors.grey[600]),
+              // Motorcycle icon (light blue outline)
+              Container(
+                width: 20,
+                height: 20,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(
+                    color: const Color(0xFF64B5F6), // Light blue
+                    width: 1.5,
+                  ),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Icon(
+                  Icons.two_wheeler,
+                  size: 12,
+                  color: const Color(0xFF64B5F6), // Light blue
+                ),
+              ),
+              const SizedBox(width: 8),
+              // Location pin icon in green
+              Icon(
+                Icons.location_on,
+                size: 16,
+                color: const Color(0xFF4CAF50), // Green
+              ),
               const SizedBox(width: 4),
               Text(
                 'Drop off',
@@ -449,20 +475,22 @@ class HistoryItem extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
+          // Location in dark green
           Text(
             location,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 12,
-              color: Colors.grey[600],
+              color: Color(0xFF2E7D32), // Dark green
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
+          // Date and time in grey
           Text(
             dateTime,
             style: TextStyle(
               fontSize: 12,
-              color: Colors.grey[500],
+              color: Colors.grey[600],
             ),
           ),
         ],

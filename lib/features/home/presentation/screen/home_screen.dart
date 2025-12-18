@@ -210,10 +210,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     onPressed: () {
                       // Handle view all
                     },
-                    child: const Text(
+                    child: Text(
                       'View all',
                       style: TextStyle(
-                        color: Colors.orange,
+                        color: AppColors.primaryColor,
                         fontSize: 14,
                       ),
                     ),

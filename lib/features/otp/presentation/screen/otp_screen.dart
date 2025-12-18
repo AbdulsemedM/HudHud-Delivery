@@ -15,8 +15,8 @@ class OtpScreen extends StatefulWidget {
 }
 
 class _OtpScreenState extends State<OtpScreen> {
-  final GlobalKey<_OtpInputFieldsState> _otpInputKey =
-      GlobalKey<_OtpInputFieldsState>();
+  final GlobalKey<OtpInputFieldsState> _otpInputKey =
+      GlobalKey<OtpInputFieldsState>();
 
   @override
   Widget build(BuildContext context) {
@@ -233,5 +233,3 @@ class _PhoneGraphic extends StatelessWidget {
     );
   }
 }
-
-
