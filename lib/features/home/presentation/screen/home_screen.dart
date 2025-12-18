@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hudhud_delivery/features/restaurants/presentation/screens/list_of_restaurants_screen.dart';
+import 'package:hudhud_delivery/features/delivery/presentation/screens/delivery_feed_screen.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/app/services/location_service.dart';
 import 'package:hudhud_delivery/models/user_model.dart';
@@ -153,7 +153,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const ListOfRestaurantsScreen(),
+                          builder: (context) => const DeliveryFeedScreen(),
                         ),
                       );
                     },

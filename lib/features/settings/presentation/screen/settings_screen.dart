@@ -1,22 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:hudhud_delivery/features/settings/presentation/screen/edit_profile_screen.dart';
-import 'package:hudhud_delivery/controllers/theme_controller.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
-import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
 import 'package:hudhud_delivery/models/user_model.dart';
-import '../widgets/setting_widget.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/utils/greeting_utils.dart';
+import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
+import 'personal_details_screen.dart';
+import 'terms_conditions_screen.dart';
+import 'notifications_screen.dart';
+import 'faqs_screen.dart';
+import 'change_password_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
-}  
+}
 
 class _SettingsScreenState extends State<SettingsScreen> {
   UserModel? _user;
   final AuthService _authService = AuthService();
+  bool _smsNotificationsEnabled = true;
 
   @override
   void initState() {
@@ -25,9 +29,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _loadUserData() async {
-    print('Loading user data...');
     final user = await _authService.getStoredUser();
-    print('User data loaded: $user');
     if (mounted) {
       setState(() {
         _user = user;
@@ -37,7 +39,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _handleLogout(BuildContext context) async {
     try {
-      // Show confirmation dialog
       final shouldLogout = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
@@ -57,11 +58,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       );
 
       if (shouldLogout == true) {
-        // Clear all stored data
         final authService = AuthService();
         await authService.clearAllData();
 
-        // Navigate to login screen and clear navigation stack
         if (context.mounted) {
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(builder: (context) => const LoginScreen()),
@@ -70,7 +69,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         }
       }
     } catch (e) {
-      // Show error message
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -84,142 +82,346 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final greeting = GreetingUtils.getTimeBasedGreeting();
+    final userName = _user?.name?.split(' ').first ?? 'Tafari';
+
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SettingsHeader(),
-              const SizedBox(height: 24),
-              const Text(
-                'Settings',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 24),
-              AccountSettingsSection(
-                name: _user?.name ?? 'Loading...',
-                phone: _user?.phone ?? 'Loading...',
-                email: _user?.email ?? 'Loading...',
-                onEditTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const EditProfileScreen(),
+        child: Column(
+          children: [
+            // Profile Section
+            Container(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  // Profile Picture
+                  Stack(
+                    children: [
+                      Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryColor,
+                          shape: BoxShape.circle,
+                        ),
+                        child: ClipOval(
+                          child: Image.asset(
+                            'assets/images/profile.png',
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Icon(
+                                Icons.person,
+                                size: 50,
+                                color: Colors.white,
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: AppColors.primaryColor,
+                              width: 2,
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.camera_alt,
+                            size: 16,
+                            color: AppColors.primaryColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  // Greeting
+                  Text(
+                    '$greeting, $userName',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primaryColor,
                     ),
-                  ).then((_) => _loadUserData()); // Refresh data when returning from edit screen
-                },
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                'General',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 16),
-              SettingsSection(
-                title: '',
-                items: [
-                  SettingsItem(
-                    icon: Icons.payment,
-                    title: 'Payment Methods',
-                    onTap: () {},
                   ),
-                  SettingsItem(
-                    icon: Icons.share,
-                    title: 'Refer friends and family',
-                    onTap: () {},
+                  const SizedBox(height: 4),
+                  // Email
+                  Text(
+                    _user?.email ?? 'tafarimwangi@gmail.com',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
-              Consumer<ThemeController>(
-                builder: (context, themeController, child) {
-                  return ThemeToggleItem(
-                    icon: themeController.themeModeIcon,
-                    title: 'Theme Mode',
-                    subtitle: themeController.themeModeDisplayName,
-                    isDarkMode: themeController.isDarkMode,
-                    onToggle: () async {
-                      await themeController.toggleTheme();
-                    },
-                  );
-                },
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                'Support',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
+            ),
+            // Menu Items
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, -2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    // HUDHUD delivery logo
+                    Padding(
+                      padding: const EdgeInsets.only(top: 20, bottom: 16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'HUDHUD',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primaryColor,
+                            ),
+                          ),
+                          Text(
+                            ' delivery',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.normal,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Menu Items
+                    Expanded(
+                      child: ListView(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        children: [
+                          _MenuItem(
+                            icon: Icons.person,
+                            title: 'Personal Details',
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const PersonalDetailsScreen(),
+                                ),
+                              ).then((_) => _loadUserData());
+                            },
+                          ),
+                          _MenuItem(
+                            icon: Icons.lock,
+                            title: 'Terms & Conditions',
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const TermsConditionsScreen(),
+                                ),
+                              );
+                            },
+                          ),
+                          _MenuItem(
+                            icon: Icons.notifications,
+                            title: 'Notification',
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const NotificationsScreen(),
+                                ),
+                              );
+                            },
+                          ),
+                          _MenuItem(
+                            icon: Icons.favorite_border,
+                            title: 'Wishlist',
+                            onTap: () {
+                              // TODO: Navigate to wishlist
+                            },
+                          ),
+                          _MenuItem(
+                            icon: Icons.help_outline,
+                            title: 'FAQs',
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const FAQsScreen(),
+                                ),
+                              );
+                            },
+                          ),
+                          _MenuItem(
+                            icon: Icons.lock_outline,
+                            title: 'Change Password',
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const ChangePasswordScreen(),
+                                ),
+                              );
+                            },
+                          ),
+                          _MenuItem(
+                            icon: Icons.info_outline,
+                            title: 'Help desk',
+                            onTap: () {
+                              // TODO: Navigate to help desk
+                            },
+                          ),
+                          _MenuItemWithToggle(
+                            icon: Icons.message,
+                            title: 'SMS Notifications',
+                            value: _smsNotificationsEnabled,
+                            onChanged: (value) {
+                              setState(() {
+                                _smsNotificationsEnabled = value;
+                              });
+                            },
+                          ),
+                          _MenuItem(
+                            icon: Icons.logout,
+                            title: 'Log Out',
+                            onTap: () => _handleLogout(context),
+                            isDestructive: true,
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Version
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 20),
+                      child: Text(
+                        'Version 1.0',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[500],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 16),
-              SettingsSection(
-                title: '',
-                items: [
-                  SettingsItem(
-                    icon: Icons.headset_mic_outlined,
-                    title: 'Contact us',
-                    onTap: () {},
-                  ),
-                  SettingsItem(
-                    icon: Icons.info_outline,
-                    title: 'About us',
-                    onTap: () {},
-                  ),
-                  SettingsItem(
-                    icon: Icons.lock_outline,
-                    title: 'Privacy Policy',
-                    onTap: () {},
-                  ),
-                  SettingsItem(
-                    icon: Icons.description_outlined,
-                    title: 'Terms of Services',
-                    onTap: () {},
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                'Setting',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 16),
-              SettingsSection(
-                title: '',
-                items: [
-                  SettingsItem(
-                    icon: Icons.payment,
-                    title: 'Update Password',
-                    onTap: () {},
-                  ),
-                  SettingsItem(
-                    icon: Icons.language,
-                    title: 'Language',
-                    onTap: () {},
-                  ),
-                  SettingsItem(
-                    icon: Icons.logout,
-                    title: 'Logout',
-                    onTap: () async {
-                      await _handleLogout(context);
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
+      ),
+    );
+  }
+}
+
+class _MenuItem extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final VoidCallback onTap;
+  final bool isDestructive;
+
+  const _MenuItem({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+    this.isDestructive = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              size: 24,
+              color: isDestructive ? Colors.red : Colors.grey[700],
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: isDestructive ? Colors.red : const Color(0xFF2C3E50),
+                ),
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios,
+              size: 16,
+              color: Colors.grey[400],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MenuItemWithToggle extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  const _MenuItemWithToggle({
+    required this.icon,
+    required this.title,
+    required this.value,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            size: 24,
+            color: Colors.grey[700],
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF2C3E50),
+              ),
+            ),
+          ),
+          Switch(
+            value: value,
+            onChanged: onChanged,
+            activeColor: Colors.green,
+          ),
+        ],
       ),
     );
   }
