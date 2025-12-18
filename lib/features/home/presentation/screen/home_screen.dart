@@ -99,7 +99,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 location: _currentLocation,
                 isLoadingLocation: _isLoadingLocation,
                 onLocationTap: () async {
-                  final selectedAddress = await Navigator.push<String>(
+                  final result = await Navigator.push<Map<String, dynamic>>(
                     context,
                     MaterialPageRoute(
                       builder: (context) => LocationSearchScreen(
@@ -108,9 +108,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   );
 
-                  if (selectedAddress != null) {
+                  if (result != null && result['address'] != null) {
                     setState(() {
-                      _currentLocation = selectedAddress;
+                      _currentLocation = result['address'] as String;
                     });
                   }
                 },

@@ -249,7 +249,10 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
                           ),
                         ),
                         onPressed: () {
-                          Navigator.pop(context, _selectedPlace!.shortAddress);
+                          Navigator.pop(context, {
+                            'address': _selectedPlace!.shortAddress,
+                            'coordinates': _selectedPlace!.coordinates,
+                          });
                         },
                         child: const Text(
                           'Confirm Location',
