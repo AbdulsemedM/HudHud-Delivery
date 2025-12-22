@@ -211,3 +211,8 @@ class _DetailCard extends StatelessWidget {
   }
 }
 
+
+
+
+
+
