@@ -15,13 +15,27 @@ class OrdersResponseModel extends Equatable {
   });
 
   factory OrdersResponseModel.fromJson(Map<String, dynamic> json) {
+    // API returns: data[], total, current_page, total_pages, per_page (flat)
+    final cp = (json['current_page'] ?? 1) is int ? (json['current_page'] ?? 1) as int : int.tryParse((json['current_page'] ?? 1).toString()) ?? 1;
+    final pp = (json['per_page'] ?? 10) is int ? (json['per_page'] ?? 10) as int : int.tryParse((json['per_page'] ?? 10).toString()) ?? 10;
+    final tot = (json['total'] ?? 0) is int ? (json['total'] ?? 0) as int : int.tryParse((json['total'] ?? 0).toString()) ?? 0;
+    final paginationJson = json['pagination'] as Map<String, dynamic>? ??
+        {
+          'current_page': cp,
+          'total_pages': json['total_pages'] ?? cp,
+          'last_page': json['total_pages'] ?? cp,
+          'per_page': pp,
+          'total': tot,
+          'from': ((cp - 1) * pp + 1).clamp(1, tot),
+          'to': (cp * pp).clamp(0, tot),
+        };
     return OrdersResponseModel(
-      success: json['success'] ?? false,
+      success: true,
       message: json['message'] ?? '',
       data: (json['data'] as List<dynamic>? ?? [])
-          .map((orderJson) => OrderModel.fromJson(orderJson))
+          .map((orderJson) => OrderModel.fromJson(orderJson as Map<String, dynamic>))
           .toList(),
-      pagination: PaginationModel.fromJson(json['pagination'] ?? {}),
+      pagination: PaginationModel.fromJson(paginationJson),
     );
   }
 
@@ -60,15 +74,29 @@ class PaginationModel extends Equatable {
   });
 
   factory PaginationModel.fromJson(Map<String, dynamic> json) {
+    final currentPage = (json['current_page'] ?? 1) is int
+        ? (json['current_page'] ?? 1) as int
+        : int.tryParse((json['current_page'] ?? 1).toString()) ?? 1;
+    final perPage = (json['per_page'] ?? 10) is int
+        ? (json['per_page'] ?? 10) as int
+        : int.tryParse((json['per_page'] ?? 10).toString()) ?? 10;
+    final total = (json['total'] ?? 0) is int
+        ? (json['total'] ?? 0) as int
+        : int.tryParse((json['total'] ?? 0).toString()) ?? 0;
+    final lastPage = (json['last_page'] ?? json['total_pages'] ?? 1) is int
+        ? (json['last_page'] ?? json['total_pages'] ?? 1) as int
+        : int.tryParse((json['last_page'] ?? json['total_pages'] ?? 1).toString()) ?? 1;
+    final from = json['from'] ?? ((currentPage - 1) * perPage + 1).clamp(1, total);
+    final to = json['to'] ?? (currentPage * perPage).clamp(0, total);
     return PaginationModel(
-      currentPage: json['current_page'] ?? 1,
-      lastPage: json['last_page'] ?? 1,
-      perPage: json['per_page'] ?? 10,
-      total: json['total'] ?? 0,
-      from: json['from'] ?? 0,
-      to: json['to'] ?? 0,
-      nextPageUrl: json['next_page_url'],
-      prevPageUrl: json['prev_page_url'],
+      currentPage: currentPage,
+      lastPage: lastPage,
+      perPage: perPage,
+      total: total,
+      from: from is int ? from : int.tryParse(from.toString()) ?? 0,
+      to: to is int ? to : int.tryParse(to.toString()) ?? 0,
+      nextPageUrl: json['next_page_url']?.toString(),
+      prevPageUrl: json['prev_page_url']?.toString(),
     );
   }
 

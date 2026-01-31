@@ -21,7 +21,7 @@ class OrdersDataProvider {
       };
       
       final response = await apiService.get(
-        '${ApiConstants.baseUrl}customer/orders',
+        ApiConstants.orders,
         queryParameters: queryParams,
       );
       

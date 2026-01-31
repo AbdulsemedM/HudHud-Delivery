@@ -51,21 +51,27 @@ class DriverModel extends Equatable {
     required this.updatedAt,
   });
 
+  static int _parseInt(dynamic v) {
+    if (v == null) return 0;
+    if (v is int) return v;
+    return int.tryParse(v.toString()) ?? 0;
+  }
+
   factory DriverModel.fromJson(Map<String, dynamic> json) {
     return DriverModel(
-      id: json['id'],
-      name: json['name'],
-      email: json['email'],
-      phone: json['phone'],
+      id: _parseInt(json['id']),
+      name: json['name']?.toString() ?? '',
+      email: json['email']?.toString() ?? '',
+      phone: json['phone']?.toString() ?? '',
       emailVerifiedAt: json['email_verified_at'] != null 
           ? DateTime.parse(json['email_verified_at']) 
           : null,
       phoneVerifiedAt: json['phone_verified_at'] != null 
           ? DateTime.parse(json['phone_verified_at']) 
           : null,
-      type: json['type'],
-      status: json['status'],
-      avatar: json['avatar'],
+      type: json['type']?.toString() ?? 'driver',
+      status: json['status']?.toString() ?? 'active',
+      avatar: json['avatar']?.toString() ?? json['avatar_url']?.toString() ?? '',
       deviceToken: json['device_token'],
       emailVerificationCode: json['email_verification_code'],
       phoneVerificationCode: json['phone_verification_code'],
@@ -78,14 +84,14 @@ class DriverModel extends Equatable {
           : null,
       gender: json['gender'],
       socialType: json['social_type'],
-      language: json['language'],
-      timezone: json['timezone'],
-      referralCode: json['referral_code'],
+      language: json['language']?.toString() ?? 'en',
+      timezone: json['timezone']?.toString() ?? 'UTC',
+      referralCode: json['referral_code']?.toString() ?? '',
       deletedAt: json['deleted_at'] != null 
           ? DateTime.parse(json['deleted_at']) 
           : null,
-      createdAt: DateTime.parse(json['created_at']),
-      updatedAt: DateTime.parse(json['updated_at']),
+      createdAt: DateTime.tryParse(json['created_at']?.toString() ?? '') ?? DateTime.now(),
+      updatedAt: DateTime.tryParse(json['updated_at']?.toString() ?? '') ?? DateTime.now(),
     );
   }
 

@@ -4,7 +4,7 @@ import 'product_model.dart';
 class OrderItemModel extends Equatable {
   final int id;
   final int orderId;
-  final int productId;
+  final int? productId;
   final String productName;
   final String price;
   final int quantity;
@@ -14,12 +14,12 @@ class OrderItemModel extends Equatable {
   final String total;
   final DateTime createdAt;
   final DateTime updatedAt;
-  final ProductModel product;
+  final ProductModel? product;
 
   const OrderItemModel({
     required this.id,
     required this.orderId,
-    required this.productId,
+    this.productId,
     required this.productName,
     required this.price,
     required this.quantity,
@@ -29,24 +29,32 @@ class OrderItemModel extends Equatable {
     required this.total,
     required this.createdAt,
     required this.updatedAt,
-    required this.product,
+    this.product,
   });
+
+  static int _parseInt(dynamic v) {
+    if (v == null) return 0;
+    if (v is int) return v;
+    return int.tryParse(v.toString()) ?? 0;
+  }
 
   factory OrderItemModel.fromJson(Map<String, dynamic> json) {
     return OrderItemModel(
-      id: json['id'],
-      orderId: json['order_id'],
-      productId: json['product_id'],
-      productName: json['product_name'],
-      price: json['price'],
-      quantity: json['quantity'],
-      subtotal: json['subtotal'],
-      taxAmount: json['tax_amount'],
-      discountAmount: json['discount_amount'],
-      total: json['total'],
-      createdAt: DateTime.parse(json['created_at']),
-      updatedAt: DateTime.parse(json['updated_at']),
-      product: ProductModel.fromJson(json['product']),
+      id: _parseInt(json['id']),
+      orderId: _parseInt(json['order_id']),
+      productId: json['product_id'] != null ? _parseInt(json['product_id']) : null,
+      productName: json['name']?.toString() ?? json['product_name']?.toString() ?? '',
+      price: json['price']?.toString() ?? '0',
+      quantity: _parseInt(json['quantity']),
+      subtotal: json['subtotal']?.toString() ?? '0',
+      taxAmount: json['tax_amount']?.toString() ?? '0',
+      discountAmount: json['discount_amount']?.toString() ?? '0',
+      total: json['total']?.toString() ?? '0',
+      createdAt: DateTime.parse(json['created_at'].toString()),
+      updatedAt: DateTime.parse(json['updated_at'].toString()),
+      product: json['product'] != null
+          ? ProductModel.fromJson(json['product'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -64,7 +72,7 @@ class OrderItemModel extends Equatable {
       'total': total,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
-      'product': product.toJson(),
+      'product': product?.toJson(),
     };
   }
 

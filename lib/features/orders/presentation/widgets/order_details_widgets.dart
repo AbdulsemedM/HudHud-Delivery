@@ -306,26 +306,35 @@ class OrderItemsCard extends StatelessWidget {
   }
 
   Widget _buildOrderItem(BuildContext context, OrderItemModel item) {
+    final imageUrl = item.product?.imagePath ?? '';
+    final name = item.product?.name ?? item.productName;
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: Image.network(
-              item.product.imagePath,
-              width: 50,
-              height: 50,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  width: 50,
-                  height: 50,
-                  color: Colors.grey[300],
-                  child: const Icon(Icons.fastfood, color: Colors.grey),
-                );
-              },
-            ),
+            child: imageUrl.isNotEmpty
+                ? Image.network(
+                    imageUrl,
+                    width: 50,
+                    height: 50,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        width: 50,
+                        height: 50,
+                        color: Colors.grey[300],
+                        child: const Icon(Icons.fastfood, color: Colors.grey),
+                      );
+                    },
+                  )
+                : Container(
+                    width: 50,
+                    height: 50,
+                    color: Colors.grey[300],
+                    child: const Icon(Icons.fastfood, color: Colors.grey),
+                  ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -333,7 +342,7 @@ class OrderItemsCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  item.product.name,
+                  name,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),

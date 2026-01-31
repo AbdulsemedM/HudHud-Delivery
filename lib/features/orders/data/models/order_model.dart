@@ -74,57 +74,63 @@ class OrderModel extends Equatable {
     this.driver,
   });
 
+  static int _parseInt(dynamic v) {
+    if (v == null) return 0;
+    if (v is int) return v;
+    return int.tryParse(v.toString()) ?? 0;
+  }
+
   factory OrderModel.fromJson(Map<String, dynamic> json) {
     return OrderModel(
-      id: json['id'],
-      orderNumber: json['order_number'],
-      userId: json['user_id'],
-      vendorId: json['vendor_id'],
-      driverId: json['driver_id'],
-      paymentId: json['payment_id'],
-      subtotal: json['subtotal'],
-      deliveryFee: json['delivery_fee'],
-      taxAmount: json['tax_amount'],
-      discountAmount: json['discount_amount'],
-      totalAmount: json['total_amount'],
-      paymentMethod: json['payment_method'],
-      status: json['status'],
-      deliveryAddress: json['delivery_address'],
-      deliveryNotes: json['delivery_notes'],
-      preparationTime: json['preparation_time'],
-      isScheduled: json['is_scheduled'],
-      scheduledAt: json['scheduled_at'] != null 
-          ? DateTime.parse(json['scheduled_at']) 
+      id: _parseInt(json['id']),
+      orderNumber: json['order_number']?.toString() ?? '',
+      userId: _parseInt(json['user_id']),
+      vendorId: _parseInt(json['vendor_id']),
+      driverId: json['driver_id'] != null ? _parseInt(json['driver_id']) : null,
+      paymentId: json['payment_id'] != null ? _parseInt(json['payment_id']) : null,
+      subtotal: json['subtotal']?.toString() ?? '0',
+      deliveryFee: json['delivery_fee']?.toString() ?? '0',
+      taxAmount: json['tax_amount']?.toString() ?? '0',
+      discountAmount: json['discount_amount']?.toString() ?? '0',
+      totalAmount: json['total_amount']?.toString() ?? '0',
+      paymentMethod: json['payment_method']?.toString() ?? '',
+      status: json['status']?.toString() ?? 'pending',
+      deliveryAddress: json['delivery_address']?.toString() ?? '',
+      deliveryNotes: json['delivery_notes']?.toString(),
+      preparationTime: json['preparation_time'] != null ? _parseInt(json['preparation_time']) : null,
+      isScheduled: json['is_scheduled'] == true,
+      scheduledAt: json['scheduled_at'] != null
+          ? DateTime.tryParse(json['scheduled_at'].toString())
           : null,
-      acceptedAt: json['accepted_at'] != null 
-          ? DateTime.parse(json['accepted_at']) 
+      acceptedAt: json['accepted_at'] != null
+          ? DateTime.tryParse(json['accepted_at'].toString())
           : null,
-      preparingAt: json['preparing_at'] != null 
-          ? DateTime.parse(json['preparing_at']) 
+      preparingAt: json['preparing_at'] != null
+          ? DateTime.tryParse(json['preparing_at'].toString())
           : null,
-      readyAt: json['ready_at'] != null 
-          ? DateTime.parse(json['ready_at']) 
+      readyAt: json['ready_at'] != null
+          ? DateTime.tryParse(json['ready_at'].toString())
           : null,
-      pickedUpAt: json['picked_up_at'] != null 
-          ? DateTime.parse(json['picked_up_at']) 
+      pickedUpAt: json['picked_up_at'] != null
+          ? DateTime.tryParse(json['picked_up_at'].toString())
           : null,
-      deliveredAt: json['delivered_at'] != null 
-          ? DateTime.parse(json['delivered_at']) 
+      deliveredAt: json['delivered_at'] != null
+          ? DateTime.tryParse(json['delivered_at'].toString())
           : null,
-      cancelledAt: json['cancelled_at'] != null 
-          ? DateTime.parse(json['cancelled_at']) 
+      cancelledAt: json['cancelled_at'] != null
+          ? DateTime.tryParse(json['cancelled_at'].toString())
           : null,
-      cancellationReason: json['cancellation_reason'],
-      cancelledBy: json['cancelled_by'],
-      createdAt: DateTime.parse(json['created_at']),
-      updatedAt: DateTime.parse(json['updated_at']),
-      items: (json['items'] as List)
-          .map((item) => OrderItemModel.fromJson(item))
+      cancellationReason: json['cancellation_reason']?.toString(),
+      cancelledBy: json['cancelled_by']?.toString(),
+      createdAt: DateTime.parse(json['created_at'].toString()),
+      updatedAt: DateTime.parse(json['updated_at'].toString()),
+      items: (json['items'] as List<dynamic>? ?? [])
+          .map((item) => OrderItemModel.fromJson(item as Map<String, dynamic>))
           .toList(),
-      vendor: VendorModel.fromJson(json['vendor']),
-      customer: CustomerModel.fromJson(json['customer']),
-      driver: json['driver'] != null 
-          ? DriverModel.fromJson(json['driver']) 
+      vendor: VendorModel.fromJson(json['vendor'] as Map<String, dynamic>),
+      customer: CustomerModel.fromJson(json['customer'] as Map<String, dynamic>),
+      driver: json['driver'] != null
+          ? DriverModel.fromJson(json['driver'] as Map<String, dynamic>)
           : null,
     );
   }

@@ -26,6 +26,11 @@ class CategoriesProductsModel {
   final List<String>? addons;
   final int? min_selection;
   final int? max_selection;
+  final String? current_price;
+  final String? formatted_price;
+  final String? formatted_original_price;
+  final bool? is_on_discount;
+  final int? discount_percentage;
   CategoriesProductsModel({
     this.id,
     this.vendor_id,
@@ -49,6 +54,11 @@ class CategoriesProductsModel {
     this.addons,
     this.min_selection,
     this.max_selection,
+    this.current_price,
+    this.formatted_price,
+    this.formatted_original_price,
+    this.is_on_discount,
+    this.discount_percentage,
   });
 
   CategoriesProductsModel copyWith({
@@ -74,6 +84,11 @@ class CategoriesProductsModel {
     List<String>? addons,
     int? min_selection,
     int? max_selection,
+    String? current_price,
+    String? formatted_price,
+    String? formatted_original_price,
+    bool? is_on_discount,
+    int? discount_percentage,
   }) {
     return CategoriesProductsModel(
       id: id ?? this.id,
@@ -98,6 +113,11 @@ class CategoriesProductsModel {
       addons: addons ?? this.addons,
       min_selection: min_selection ?? this.min_selection,
       max_selection: max_selection ?? this.max_selection,
+      current_price: current_price ?? this.current_price,
+      formatted_price: formatted_price ?? this.formatted_price,
+      formatted_original_price: formatted_original_price ?? this.formatted_original_price,
+      is_on_discount: is_on_discount ?? this.is_on_discount,
+      discount_percentage: discount_percentage ?? this.discount_percentage,
     );
   }
 
@@ -125,7 +145,24 @@ class CategoriesProductsModel {
       'addons': addons,
       'min_selection': min_selection,
       'max_selection': max_selection,
+      'current_price': current_price,
+      'formatted_price': formatted_price,
+      'formatted_original_price': formatted_original_price,
+      'is_on_discount': is_on_discount,
+      'discount_percentage': discount_percentage,
     };
+  }
+
+  /// Parses gallery_images from API: list of { original, thumb, small, medium, large, webp } -> list of URLs.
+  static List<String>? _parseGalleryImages(dynamic value) {
+    if (value == null || value is! List) return null;
+    final urls = <String>[];
+    for (final item in value) {
+      if (item is! Map<String, dynamic>) continue;
+      final url = item['medium'] ?? item['thumb'] ?? item['original'];
+      if (url != null && url is String) urls.add(url);
+    }
+    return urls.isEmpty ? null : urls;
   }
 
   factory CategoriesProductsModel.fromMap(Map<String, dynamic> map) {
@@ -141,8 +178,8 @@ class CategoriesProductsModel {
       quantity: map['quantity'] != null ? (map['quantity'] is String ? int.tryParse(map['quantity']) : map['quantity'] as int) : null,
       sku: map['sku'] != null ? map['sku'] as String : null,
       barcode: map['barcode'] != null ? map['barcode'] as String : null,
-      image_path: map['image_path'] != null ? map['image_path'] as String : null,
-      gallery_images: map['gallery_images'] != null ? List<String>.from(map['gallery_images']) : null,
+      image_path: (map['image_path'] ?? (map['main_image'] is Map ? (map['main_image'] as Map)['medium'] : null))?.toString(),
+      gallery_images: _parseGalleryImages(map['gallery_images']),
       ingredients: map['ingredients'] != null ? List<String>.from(map['ingredients']) : null,
       allergens: map['allergens'] != null ? List<String>.from(map['allergens']) : null,
       protein: map['nutrition_facts'] != null && map['nutrition_facts']['protein'] != null ? map['nutrition_facts']['protein'].toString() : null,
@@ -152,6 +189,11 @@ class CategoriesProductsModel {
       addons: map['addons'] != null ? List<String>.from(map['addons']) : null,
       min_selection: map['min_selection'] != null ? (map['min_selection'] is String ? int.tryParse(map['min_selection']) : map['min_selection'] as int) : null,
       max_selection: map['max_selection'] != null ? (map['max_selection'] is String ? int.tryParse(map['max_selection']) : map['max_selection'] as int) : null,
+      current_price: map['current_price']?.toString(),
+      formatted_price: map['formatted_price']?.toString(),
+      formatted_original_price: map['formatted_original_price']?.toString(),
+      is_on_discount: map['is_on_discount'] as bool?,
+      discount_percentage: map['discount_percentage'] != null ? (map['discount_percentage'] is String ? int.tryParse(map['discount_percentage']) : map['discount_percentage'] as int) : null,
     );
   }
 
@@ -190,7 +232,12 @@ class CategoriesProductsModel {
       mapEquals(other.options, options) &&
       listEquals(other.addons, addons) &&
       other.min_selection == min_selection &&
-      other.max_selection == max_selection;
+      other.max_selection == max_selection &&
+      other.current_price == current_price &&
+      other.formatted_price == formatted_price &&
+      other.formatted_original_price == formatted_original_price &&
+      other.is_on_discount == is_on_discount &&
+      other.discount_percentage == discount_percentage;
   }
 
   @override
@@ -216,6 +263,11 @@ class CategoriesProductsModel {
       options.hashCode ^
       addons.hashCode ^
       min_selection.hashCode ^
-      max_selection.hashCode;
+      max_selection.hashCode ^
+      current_price.hashCode ^
+      formatted_price.hashCode ^
+      formatted_original_price.hashCode ^
+      is_on_discount.hashCode ^
+      discount_percentage.hashCode;
   }
 }

@@ -32,8 +32,8 @@ class ApiConstants {
   static const String restaurantDetails = '$restaurants/{id}';
   static const String restaurantMenu = '$restaurants/{id}/menu';
 
-  // Order endpoints
-  static const String orders = '/orders';
+  // Order endpoints (GET /api/orders fetches all orders)
+  static const String orders = 'orders';
   static const String orderDetails = '$orders/{id}';
   static const String createOrder = orders;
   static const String cancelOrder = '$orders/{id}/cancel';
