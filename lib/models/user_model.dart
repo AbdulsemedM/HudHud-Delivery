@@ -10,6 +10,9 @@ class UserModel {
   final String? phone;
   final String? type;
   final List<dynamic>? permissions;
+  final DateTime? emailVerifiedAt;
+  final DateTime? phoneVerifiedAt;
+
   UserModel({
     this.id,
     this.name,
@@ -17,7 +20,12 @@ class UserModel {
     this.phone,
     this.type,
     this.permissions,
+    this.emailVerifiedAt,
+    this.phoneVerifiedAt,
   });
+
+  bool get isEmailVerified => emailVerifiedAt != null;
+  bool get isPhoneVerified => phoneVerifiedAt != null;
 
   UserModel copyWith({
     int? id,
@@ -26,6 +34,8 @@ class UserModel {
     String? phone,
     String? type,
     List<dynamic>? permissions,
+    DateTime? emailVerifiedAt,
+    DateTime? phoneVerifiedAt,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -34,6 +44,8 @@ class UserModel {
       phone: phone ?? this.phone,
       type: type ?? this.type,
       permissions: permissions ?? this.permissions,
+      emailVerifiedAt: emailVerifiedAt ?? this.emailVerifiedAt,
+      phoneVerifiedAt: phoneVerifiedAt ?? this.phoneVerifiedAt,
     );
   }
 
@@ -45,6 +57,8 @@ class UserModel {
       'phone': phone,
       'type': type,
       'permissions': permissions,
+      'email_verified_at': emailVerifiedAt?.toIso8601String(),
+      'phone_verified_at': phoneVerifiedAt?.toIso8601String(),
     };
   }
 
@@ -56,6 +70,12 @@ class UserModel {
       phone: map['phone'] != null ? map['phone'] as String : null,
       type: map['type'] != null ? map['type'] as String : null,
       permissions: map['permissions'] != null ? List<String>.from(map['permissions'] as List<dynamic>) : null,
+      emailVerifiedAt: map['email_verified_at'] != null
+          ? DateTime.tryParse(map['email_verified_at'] as String)
+          : null,
+      phoneVerifiedAt: map['phone_verified_at'] != null
+          ? DateTime.tryParse(map['phone_verified_at'] as String)
+          : null,
     );
   }
 
@@ -71,23 +91,26 @@ class UserModel {
   @override
   bool operator ==(covariant UserModel other) {
     if (identical(this, other)) return true;
-  
-    return 
-      other.id == id &&
-      other.name == name &&
-      other.email == email &&
-      other.phone == phone &&
-      other.type == type &&
-      listEquals(other.permissions, permissions);
+
+    return other.id == id &&
+        other.name == name &&
+        other.email == email &&
+        other.phone == phone &&
+        other.type == type &&
+        listEquals(other.permissions, permissions) &&
+        other.emailVerifiedAt == emailVerifiedAt &&
+        other.phoneVerifiedAt == phoneVerifiedAt;
   }
 
   @override
   int get hashCode {
     return id.hashCode ^
-      name.hashCode ^
-      email.hashCode ^
-      phone.hashCode ^
-      type.hashCode ^
-      permissions.hashCode;
+        name.hashCode ^
+        email.hashCode ^
+        phone.hashCode ^
+        type.hashCode ^
+        permissions.hashCode ^
+        emailVerifiedAt.hashCode ^
+        phoneVerifiedAt.hashCode;
   }
 }

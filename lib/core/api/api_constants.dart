@@ -9,8 +9,8 @@ class ApiConstants {
 
   // API Endpoints
   static const String auth = '/auth';
-  static const String login = '$auth/login';
-  static const String register = '$auth/register';
+  static const String login = 'login';
+  static const String register = 'register';
   static const String logout = '$auth/logout';
   static const String refreshToken = '$auth/refresh';
   static const String forgotPassword = '$auth/forgot-password';
@@ -18,9 +18,14 @@ class ApiConstants {
 
   // User endpoints
   static const String users = '/users';
-  static const String profile = '$users/profile';
+  static const String profile = 'profile'; // GET /api/profile returns user object at root
   static const String updateProfile = '$users/profile';
   static const String changePassword = '$users/change-password';
+  static const String updatePassword = 'update-password';
+  static const String sendEmailVerification = 'send-email-verification';
+  static const String verifyEmail = 'verify-email';
+  static const String sendPhoneVerificationCode = 'send-phone-verification-code';
+  static const String verifyPhone = 'verify-phone';
 
   // Restaurant endpoints
   static const String restaurants = '/restaurants';
@@ -49,6 +54,9 @@ class ApiConstants {
   static const String walletBalance = '$wallet/balance';
   static const String walletTransactions = '$wallet/transactions';
   static const String addMoney = '$wallet/add-money';
+
+  // Categories endpoints (requires auth token)
+  static const String categories = 'categories';
 
   // Settings endpoints
   static const String settings = '/settings';

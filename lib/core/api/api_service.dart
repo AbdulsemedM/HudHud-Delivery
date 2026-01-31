@@ -165,8 +165,7 @@ class ApiService {
       case DioExceptionType.badCertificate:
         return ApiException('Bad certificate. Please contact support.');
       case DioExceptionType.unknown:
-      default:
-        return ApiException('An unexpected error occurred: ${error.message}');
+      return ApiException('An unexpected error occurred: ${error.message}');
     }
   }
 

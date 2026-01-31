@@ -13,7 +13,7 @@ class LoginDataProvider {
         'password': password,
       };
       final response = await apiService.post(
-        '${ApiConstants.baseUrl}login',
+        ApiConstants.login,
         data: body,
       );
       return {

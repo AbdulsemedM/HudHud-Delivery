@@ -68,6 +68,7 @@ class CategoryModel {
   }
 
   factory CategoryModel.fromMap(Map<String, dynamic> map) {
+    final meta = map['meta'] is Map ? map['meta'] as Map<String, dynamic> : null;
     return CategoryModel(
       id: map['id'] != null ? map['id'] as int : null,
       name: map['name'] != null ? map['name'] as String : null,
@@ -77,8 +78,8 @@ class CategoryModel {
       position: map['position'] != null ? map['position'] as int : null,
       is_active: map['is_active'] != null ? map['is_active'] as bool : null,
       is_featured: map['is_featured'] != null ? map['is_featured'] as bool : null,
-      icon: map['icon'] != null ? map['icon'] as String : null,
-      color: map['color'] != null ? map['color'] as String : null,
+      icon: (meta?['icon'] ?? map['icon'])?.toString(),
+      color: (meta?['color'] ?? map['color'])?.toString(),
     );
   }
 

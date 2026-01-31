@@ -198,6 +198,7 @@ class AuthController extends ChangeNotifier {
   Future<bool> changePassword({
     required String currentPassword,
     required String newPassword,
+    required String newPasswordConfirmation,
   }) async {
     try {
       _setLoading(true);
@@ -206,6 +207,7 @@ class AuthController extends ChangeNotifier {
       final result = await _authService.changePassword(
         currentPassword: currentPassword,
         newPassword: newPassword,
+        newPasswordConfirmation: newPasswordConfirmation,
       );
       
       if (result['success'] == true) {

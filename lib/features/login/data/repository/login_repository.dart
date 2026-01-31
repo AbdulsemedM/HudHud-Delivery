@@ -11,7 +11,12 @@ class LoginRepository {
     try {
       final response = await loginDataProvider.login(emailOrPhone, password, fieldType);
       if (response['statusCode'] == 200) {
-        final user = UserModel.fromMap(response['data']['user']);
+        // Extract user object and include permissions from root level if available
+        final userData = Map<String, dynamic>.from(response['data']['user'] as Map<String, dynamic>);
+        if (response['data']['permissions'] != null) {
+          userData['permissions'] = response['data']['permissions'];
+        }
+        final user = UserModel.fromMap(userData);
 
         // Store token and user data using AuthService
         // Extract token from response if available

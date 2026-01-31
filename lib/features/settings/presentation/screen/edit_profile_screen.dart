@@ -13,6 +13,7 @@ class EditProfileScreen extends StatefulWidget {
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
   final AuthService _authService = AuthService();
+  // ignore: unused_field
   UserModel? _user;
   
   String firstName = '';

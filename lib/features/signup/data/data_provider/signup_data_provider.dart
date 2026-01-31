@@ -41,7 +41,7 @@ class SignupDataProvider {
         'type': 'customer',
       };
       final response = await apiService.post(
-        '${ApiConstants.baseUrl}register',
+        ApiConstants.register,
         data: body,
       );
       return {

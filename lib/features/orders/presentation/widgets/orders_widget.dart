@@ -301,64 +301,64 @@ class OrderItemCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 12),
-              if (order.vendor != null) ...[
-                Row(
-                  children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: order.vendor!.logo != null
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.network(
-                                order.vendor!.logo!,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Icon(
-                                    Icons.store,
-                                    color: Colors.grey[400],
-                                  );
-                                },
-                              ),
-                            )
-                          : Icon(
-                              Icons.store,
-                              color: Colors.grey[400],
-                            ),
+              ...[
+              Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            order.vendor!.name,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
+                    child: order.vendor!.logo != null
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.network(
+                              order.vendor!.logo!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Icon(
+                                  Icons.store,
+                                  color: Colors.grey[400],
+                                );
+                              },
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                          )
+                        : Icon(
+                            Icons.store,
+                            color: Colors.grey[400],
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            '${order.items.length} item${order.items.length > 1 ? 's' : ''}',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[600],
-                            ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          order.vendor!.name,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
                           ),
-                        ],
-                      ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${order.items.length} item${order.items.length > 1 ? 's' : ''}',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-              ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+            ],
               Row(
                 children: [
                   Expanded(

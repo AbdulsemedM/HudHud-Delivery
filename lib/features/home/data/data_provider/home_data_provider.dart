@@ -7,7 +7,7 @@ class HomeDataProvider {
   HomeDataProvider({required this.apiService});
   Future<Map<String, dynamic>> getCategories() async {
     try {
-      final response = await apiService.get('${ApiConstants.baseUrl}categories');
+      final response = await apiService.get('${ApiConstants.baseUrl}${ApiConstants.categories}');
       return {
         'statusCode': response.statusCode,
         'data': response.data,

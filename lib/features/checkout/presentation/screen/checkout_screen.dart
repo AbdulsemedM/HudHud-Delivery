@@ -31,7 +31,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   double _deliveryFee = 47.00;
   double _tipAmount = 0.0;
   String _deliveryAddress = 'KCK+MCP, Bole, Addis Ababa, Ethiopia';
-  String _paymentMethod = 'card';
+  // String _paymentMethod = 'card';
   int _vendorId = 7; // Default vendor ID
 
   double get _total {

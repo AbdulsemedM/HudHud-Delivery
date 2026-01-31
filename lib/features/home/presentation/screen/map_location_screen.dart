@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../../app/services/nominatim_service.dart';
-import '../../../../app/services/location_service.dart';
+// import '../../../../app/services/location_service.dart';
 import '../../../../app/services/custom_location_service.dart';
 
 class MapLocationScreen extends StatefulWidget {
@@ -20,10 +20,12 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
   final FocusNode _searchFocusNode = FocusNode();
   
   LatLng _currentPosition = const LatLng(33.6844, 73.0479); // Default to Islamabad
+  // ignore: unused_field
   List<PlaceResult> _searchResults = [];
   List<Marker> _markers = [];
   bool _isSearching = false;
   bool _isLoadingCurrentLocation = false;
+  // ignore: unused_field
   PlaceResult? _selectedPlace;
   
   @override

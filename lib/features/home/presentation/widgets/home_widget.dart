@@ -2,6 +2,124 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:lottie/lottie.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../models/user_model.dart';
+
+/// Card showing email and phone verification status with optional Verify buttons.
+class VerificationStatusCard extends StatelessWidget {
+  final UserModel user;
+  final VoidCallback onVerifyEmail;
+  final VoidCallback onVerifyPhone;
+
+  const VerificationStatusCard({
+    super.key,
+    required this.user,
+    required this.onVerifyEmail,
+    required this.onVerifyPhone,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final emailVerified = user.isEmailVerified;
+    final phoneVerified = user.isPhoneVerified;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Verification status',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[700],
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Icon(
+                emailVerified ? Icons.check_circle : Icons.cancel,
+                size: 18,
+                color: emailVerified ? Colors.green : Colors.orange,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                'Email: ${emailVerified ? 'Verified' : 'Not verified'}',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.grey[800],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              Icon(
+                phoneVerified ? Icons.check_circle : Icons.cancel,
+                size: 18,
+                color: phoneVerified ? Colors.green : Colors.orange,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                'Phone: ${phoneVerified ? 'Verified' : 'Not verified'}',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.grey[800],
+                ),
+              ),
+            ],
+          ),
+          if (!emailVerified || !phoneVerified) ...[
+            const SizedBox(height: 12),
+            if (!emailVerified)
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: onVerifyEmail,
+                  icon: const Icon(Icons.mark_email_read_outlined, size: 18),
+                  label: const Text('Verify Email'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.primaryColor,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                  ),
+                ),
+              ),
+            if (!emailVerified && !phoneVerified) const SizedBox(height: 8),
+            if (!phoneVerified)
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: onVerifyPhone,
+                  icon: const Icon(Icons.phone_android_outlined, size: 18),
+                  label: const Text('Verify Phone'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.primaryColor,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                  ),
+                ),
+              ),
+          ],
+        ],
+      ),
+    );
+  }
+}
 
 class UserProfileHeader extends StatelessWidget {
   final String name;

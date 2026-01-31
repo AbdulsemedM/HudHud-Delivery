@@ -141,8 +141,7 @@ class CustomSnackbar extends StatelessWidget {
           'icon': Colors.white,
         };
       case SnackbarType.custom:
-      default:
-        return {
+      return {
           'background': AppColors.primaryColor,
           'text': Colors.white,
           'icon': Colors.white,
@@ -161,8 +160,7 @@ class CustomSnackbar extends StatelessWidget {
       case SnackbarType.info:
         return Icons.info;
       case SnackbarType.custom:
-      default:
-        return Icons.notifications;
+      return Icons.notifications;
     }
   }
 

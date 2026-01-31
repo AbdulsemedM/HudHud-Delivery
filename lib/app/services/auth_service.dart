@@ -103,7 +103,12 @@ class AuthService {
         }
         
         // Parse and store user data
-        final user = UserModel.fromMap(data);
+        // Extract user object and include permissions from root level if available
+        final userData = Map<String, dynamic>.from(data['user'] as Map<String, dynamic>);
+        if (data['permissions'] != null) {
+          userData['permissions'] = data['permissions'];
+        }
+        final user = UserModel.fromMap(userData);
         await _storeUserSession(
           user: user,
           token: data['token'],
@@ -286,15 +291,17 @@ class AuthService {
       
       if (response.statusCode == 200 && response.data != null) {
         final data = response.data as Map<String, dynamic>;
-        if (data['user'] != null) {
-          final user = UserModel.fromMap(data);
-          
-          // Update cached user and store
-          _currentUser = user;
-          await _storeUser(user);
-          
-          return user;
-        }
+        // GET /api/profile returns user object at root (id, name, email, phone, email_verified_at, etc.)
+        final userMap = data['user'] != null
+            ? data['user'] as Map<String, dynamic>
+            : data;
+        final user = UserModel.fromMap(userMap);
+        
+        // Update cached user and store
+        _currentUser = user;
+        await _storeUser(user);
+        
+        return user;
       }
       
       return null;
@@ -398,28 +405,39 @@ class AuthService {
     }
   }
   
-  // Change password
+  // Change password (settings) - POST /api/update-password
   Future<Map<String, dynamic>> changePassword({
     required String currentPassword,
     required String newPassword,
+    required String newPasswordConfirmation,
   }) async {
     try {
-      final response = await _apiService.put(
-        ApiConstants.changePassword,
+      if (!isLoggedIn) {
+        return {'success': false, 'message': 'User not authenticated'};
+      }
+      if (!hasValidToken) {
+        final refreshed = await refreshToken();
+        if (!refreshed) {
+          await _clearSession();
+          return {'success': false, 'message': 'Session expired. Please login again.'};
+        }
+      }
+      final response = await _apiService.post(
+        ApiConstants.updatePassword,
         data: {
           'current_password': currentPassword,
           'new_password': newPassword,
+          'new_password_confirmation': newPasswordConfirmation,
         },
       );
-      
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 && response.data != null) {
         final data = response.data as Map<String, dynamic>;
+        final status = data['status'] == true;
         return {
-          'success': true,
-          'message': data['message'] ?? 'Password changed successfully',
+          'success': status,
+          'message': data['message'] ?? (status ? 'Password updated successfully' : 'Failed to update password'),
         };
       }
-      
       return {
         'success': false,
         'message': 'Failed to change password',
@@ -470,6 +488,152 @@ class AuthService {
     }
   }
   
+  // Send email verification code
+  Future<Map<String, dynamic>> sendEmailVerification() async {
+    try {
+      if (!isLoggedIn) {
+        return {'success': false, 'message': 'User not authenticated'};
+      }
+      if (!hasValidToken) {
+        final refreshed = await refreshToken();
+        if (!refreshed) {
+          await _clearSession();
+          return {'success': false, 'message': 'Session expired. Please login again.'};
+        }
+      }
+      final response = await _apiService.post(ApiConstants.sendEmailVerification);
+      if (response.statusCode == 200 && response.data != null) {
+        final data = response.data as Map<String, dynamic>;
+        return {
+          'success': true,
+          'message': data['message'] ?? 'Verification code sent successfully!',
+        };
+      }
+      return {'success': false, 'message': 'Failed to send verification code'};
+    } on ApiException catch (e) {
+      return {'success': false, 'message': e.message};
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'An unexpected error occurred while sending verification code',
+      };
+    }
+  }
+
+  // Verify email with code
+  Future<Map<String, dynamic>> verifyEmail({
+    required String email,
+    required String code,
+  }) async {
+    try {
+      if (!isLoggedIn) {
+        return {'success': false, 'message': 'User not authenticated'};
+      }
+      if (!hasValidToken) {
+        final refreshed = await refreshToken();
+        if (!refreshed) {
+          await _clearSession();
+          return {'success': false, 'message': 'Session expired. Please login again.'};
+        }
+      }
+      final response = await _apiService.post(
+        ApiConstants.verifyEmail,
+        data: {'email': email, 'code': code},
+      );
+      if (response.statusCode == 200 && response.data != null) {
+        final data = response.data as Map<String, dynamic>;
+        // Refresh user profile to get updated email_verified_at
+        await getUserProfile(forceRefresh: true);
+        return {
+          'success': true,
+          'message': data['message'] ?? 'Email verified successfully!',
+        };
+      }
+      return {'success': false, 'message': 'Failed to verify email'};
+    } on ApiException catch (e) {
+      return {'success': false, 'message': e.message};
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'An unexpected error occurred while verifying email',
+      };
+    }
+  }
+
+  // Send phone verification code
+  Future<Map<String, dynamic>> sendPhoneVerificationCode(String phone) async {
+    try {
+      if (!isLoggedIn) {
+        return {'success': false, 'message': 'User not authenticated'};
+      }
+      if (!hasValidToken) {
+        final refreshed = await refreshToken();
+        if (!refreshed) {
+          await _clearSession();
+          return {'success': false, 'message': 'Session expired. Please login again.'};
+        }
+      }
+      final response = await _apiService.post(
+        ApiConstants.sendPhoneVerificationCode,
+        data: {'phone': phone},
+      );
+      if (response.statusCode == 200 && response.data != null) {
+        final data = response.data as Map<String, dynamic>;
+        return {
+          'success': true,
+          'message': data['message'] ?? 'Verification code sent successfully!',
+        };
+      }
+      return {'success': false, 'message': 'Failed to send verification code'};
+    } on ApiException catch (e) {
+      return {'success': false, 'message': e.message};
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'An unexpected error occurred while sending verification code',
+      };
+    }
+  }
+
+  // Verify phone with code
+  Future<Map<String, dynamic>> verifyPhone({
+    required String phone,
+    required String code,
+  }) async {
+    try {
+      if (!isLoggedIn) {
+        return {'success': false, 'message': 'User not authenticated'};
+      }
+      if (!hasValidToken) {
+        final refreshed = await refreshToken();
+        if (!refreshed) {
+          await _clearSession();
+          return {'success': false, 'message': 'Session expired. Please login again.'};
+        }
+      }
+      final response = await _apiService.post(
+        ApiConstants.verifyPhone,
+        data: {'phone': phone, 'code': code},
+      );
+      if (response.statusCode == 200 && response.data != null) {
+        final data = response.data as Map<String, dynamic>;
+        await getUserProfile(forceRefresh: true);
+        return {
+          'success': true,
+          'message': data['message'] ?? 'Phone number verified successfully',
+        };
+      }
+      return {'success': false, 'message': 'Failed to verify phone'};
+    } on ApiException catch (e) {
+      return {'success': false, 'message': e.message};
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'An unexpected error occurred while verifying phone',
+      };
+    }
+  }
+
   // Reset password
   Future<Map<String, dynamic>> resetPassword({
     required String token,

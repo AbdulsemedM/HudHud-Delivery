@@ -6,6 +6,7 @@ import 'package:hudhud_delivery/app/services/location_service.dart';
 import 'package:hudhud_delivery/models/user_model.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/utils/snackbar_util.dart';
 import '../../bloc/home_bloc.dart';
 import '../widgets/home_widget.dart';
 import '../../data/repository/home_repository.dart';
@@ -84,6 +85,42 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _openVerifyEmailFlow() async {
+    final user = _currentUser;
+    if (user?.email == null || user!.email!.isEmpty) return;
+
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => _VerifyEmailDialog(
+        email: user.email!,
+        authService: _authService,
+      ),
+    );
+    if (result == true && mounted) {
+      await _loadUserData();
+      if (mounted) SnackbarUtil.showSuccess(context, 'Email verified successfully!');
+    }
+  }
+
+  Future<void> _openVerifyPhoneFlow() async {
+    final user = _currentUser;
+    if (user?.phone == null || user!.phone!.isEmpty) return;
+
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => _VerifyPhoneDialog(
+        phone: user.phone!,
+        authService: _authService,
+      ),
+    );
+    if (result == true && mounted) {
+      await _loadUserData();
+      if (mounted) SnackbarUtil.showSuccess(context, 'Phone number verified successfully!');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -115,6 +152,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   }
                 },
               ),
+              if (_currentUser != null) ...[
+                const SizedBox(height: 12),
+                VerificationStatusCard(
+                  user: _currentUser!,
+                  onVerifyEmail: _openVerifyEmailFlow,
+                  onVerifyPhone: _openVerifyPhoneFlow,
+                ),
+              ],
               const SizedBox(height: 16),
               // Order Tracking Card
               OrderTrackingCard(
@@ -240,6 +285,268 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _VerifyEmailDialog extends StatefulWidget {
+  final String email;
+  final AuthService authService;
+
+  const _VerifyEmailDialog({
+    required this.email,
+    required this.authService,
+  });
+
+  @override
+  State<_VerifyEmailDialog> createState() => _VerifyEmailDialogState();
+}
+
+class _VerifyEmailDialogState extends State<_VerifyEmailDialog> {
+  final _codeController = TextEditingController();
+  bool _isSending = false;
+  bool _isVerifying = false;
+  String? _errorMessage;
+
+  @override
+  void dispose() {
+    _codeController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _sendCode() async {
+    setState(() {
+      _isSending = true;
+      _errorMessage = null;
+    });
+    final result = await widget.authService.sendEmailVerification();
+    if (!mounted) return;
+    setState(() => _isSending = false);
+    if (result['success'] == true) {
+      SnackbarUtil.showSuccess(context, result['message'] ?? 'Code sent to your email.');
+    } else {
+      setState(() => _errorMessage = result['message']);
+    }
+  }
+
+  Future<void> _verify() async {
+    final code = _codeController.text.trim();
+    if (code.isEmpty) {
+      setState(() => _errorMessage = 'Enter the verification code');
+      return;
+    }
+    setState(() {
+      _isVerifying = true;
+      _errorMessage = null;
+    });
+    final result = await widget.authService.verifyEmail(
+      email: widget.email,
+      code: code,
+    );
+    if (!mounted) return;
+    setState(() => _isVerifying = false);
+    if (result['success'] == true) {
+      Navigator.of(context).pop(true);
+    } else {
+      setState(() => _errorMessage = result['message']);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Verify Email'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'We sent a verification code to ${widget.email}. Enter it below.',
+              style: TextStyle(color: Colors.grey[700], fontSize: 14),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _codeController,
+              keyboardType: TextInputType.number,
+              maxLength: 6,
+              decoration: const InputDecoration(
+                labelText: 'Verification code',
+                hintText: 'e.g. 111248',
+                border: OutlineInputBorder(),
+                counterText: '',
+              ),
+              onChanged: (_) => setState(() => _errorMessage = null),
+            ),
+            if (_errorMessage != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                _errorMessage!,
+                style: const TextStyle(color: Colors.red, fontSize: 12),
+              ),
+            ],
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: _isSending ? null : _sendCode,
+              icon: _isSending
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.email_outlined, size: 18),
+              label: Text(_isSending ? 'Sending...' : 'Resend code'),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: _isVerifying ? null : _verify,
+          child: _isVerifying
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Text('Verify'),
+        ),
+      ],
+    );
+  }
+}
+
+class _VerifyPhoneDialog extends StatefulWidget {
+  final String phone;
+  final AuthService authService;
+
+  const _VerifyPhoneDialog({
+    required this.phone,
+    required this.authService,
+  });
+
+  @override
+  State<_VerifyPhoneDialog> createState() => _VerifyPhoneDialogState();
+}
+
+class _VerifyPhoneDialogState extends State<_VerifyPhoneDialog> {
+  final _codeController = TextEditingController();
+  bool _isSending = false;
+  bool _isVerifying = false;
+  String? _errorMessage;
+
+  @override
+  void dispose() {
+    _codeController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _sendCode() async {
+    setState(() {
+      _isSending = true;
+      _errorMessage = null;
+    });
+    final result = await widget.authService.sendPhoneVerificationCode(widget.phone);
+    if (!mounted) return;
+    setState(() => _isSending = false);
+    if (result['success'] == true) {
+      SnackbarUtil.showSuccess(context, result['message'] ?? 'Code sent to your phone.');
+    } else {
+      setState(() => _errorMessage = result['message']);
+    }
+  }
+
+  Future<void> _verify() async {
+    final code = _codeController.text.trim();
+    if (code.isEmpty) {
+      setState(() => _errorMessage = 'Enter the verification code');
+      return;
+    }
+    setState(() {
+      _isVerifying = true;
+      _errorMessage = null;
+    });
+    final result = await widget.authService.verifyPhone(
+      phone: widget.phone,
+      code: code,
+    );
+    if (!mounted) return;
+    setState(() => _isVerifying = false);
+    if (result['success'] == true) {
+      Navigator.of(context).pop(true);
+    } else {
+      setState(() => _errorMessage = result['message']);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Verify Phone'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'We sent a verification code to ${widget.phone}. Enter it below.',
+              style: TextStyle(color: Colors.grey[700], fontSize: 14),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _codeController,
+              keyboardType: TextInputType.number,
+              maxLength: 6,
+              decoration: const InputDecoration(
+                labelText: 'Verification code',
+                hintText: 'e.g. 056869',
+                border: OutlineInputBorder(),
+                counterText: '',
+              ),
+              onChanged: (_) => setState(() => _errorMessage = null),
+            ),
+            if (_errorMessage != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                _errorMessage!,
+                style: const TextStyle(color: Colors.red, fontSize: 12),
+              ),
+            ],
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: _isSending ? null : _sendCode,
+              icon: _isSending
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.sms_outlined, size: 18),
+              label: Text(_isSending ? 'Sending...' : 'Resend code'),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: _isVerifying ? null : _verify,
+          child: _isVerifying
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Text('Verify'),
+        ),
+      ],
     );
   }
 }

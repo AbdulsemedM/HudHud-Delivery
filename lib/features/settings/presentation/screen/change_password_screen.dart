@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
@@ -17,6 +18,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   bool _obscureOldPassword = true;
   bool _obscureNewPassword = true;
   bool _obscureConfirmPassword = true;
+  bool _isChangingPassword = false;
+
+  final AuthService _authService = AuthService();
 
   @override
   void dispose() {
@@ -24,6 +28,59 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _submitChangePassword(BuildContext context) async {
+    final currentPassword = _oldPasswordController.text.trim();
+    final newPassword = _newPasswordController.text.trim();
+    final confirmPassword = _confirmPasswordController.text.trim();
+
+    if (currentPassword.isEmpty ||
+        newPassword.isEmpty ||
+        confirmPassword.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please fill all fields'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    if (newPassword != confirmPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Passwords do not match'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isChangingPassword = true);
+    final result = await _authService.changePassword(
+      currentPassword: currentPassword,
+      newPassword: newPassword,
+      newPasswordConfirmation: confirmPassword,
+    );
+    if (!mounted) return;
+    setState(() => _isChangingPassword = false);
+
+    if (result['success'] == true) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result['message'] ?? 'Password updated successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result['message'] ?? 'Failed to change password'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void _showChangePasswordModal(BuildContext context) {
@@ -119,54 +176,32 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       width: double.infinity,
                       height: 50,
                       child: ElevatedButton(
-                        onPressed: () {
-                          // Validate passwords
-                          if (_oldPasswordController.text.isEmpty ||
-                              _newPasswordController.text.isEmpty ||
-                              _confirmPasswordController.text.isEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Please fill all fields'),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
-                            return;
-                          }
-
-                          if (_newPasswordController.text !=
-                              _confirmPasswordController.text) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Passwords do not match'),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
-                            return;
-                          }
-
-                          // TODO: Implement password change logic
-                          Navigator.pop(context);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Password changed successfully'),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
-                        },
+                        onPressed: _isChangingPassword
+                            ? null
+                            : () => _submitChangePassword(context),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primaryColor,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: const Text(
-                          'Continue',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                        child: _isChangingPassword
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                ),
+                              )
+                            : const Text(
+                                'Continue',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                       ),
                     ),
                     const SizedBox(height: 20),
