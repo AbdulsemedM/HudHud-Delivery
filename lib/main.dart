@@ -38,8 +38,11 @@ void main() async {
   fcmService.onNotificationTap = (message, {localPayload}) {
     // Handle notification tap: navigate to order/screen using message?.data or localPayload
   };
-  fcmService.onTokenRefresh = (token) {
-    // Send token to your backend when it refreshes (e.g. after login)
+  fcmService.onTokenRefresh = (token) async {
+    final authService = AuthService();
+    if (await authService.isAuthenticated()) {
+      await authService.sendFcmTokenToBackend();
+    }
   };
 
   // Initialize API service
@@ -56,8 +59,10 @@ void main() async {
   final authService = AuthService();
 
   // Initialize orders repository
-  final ordersDataProvider = OrdersDataProvider(apiService: ApiService.instance);
-  final ordersRepository = OrdersRepositoryImpl(dataProvider: ordersDataProvider);
+  final ordersDataProvider =
+      OrdersDataProvider(apiService: ApiService.instance);
+  final ordersRepository =
+      OrdersRepositoryImpl(dataProvider: ordersDataProvider);
 
   runApp(MyApp(
     themeController: themeController,
@@ -588,7 +593,8 @@ class _SampleHomePageState extends State<SampleHomePage> {
                               Text('Name: ${authController.currentUser!.name}'),
                               Text(
                                   'Email: ${authController.currentUser!.email}'),
-                              Text('Role: ${authController.currentUser!.permissions}'),
+                              Text(
+                                  'Role: ${authController.currentUser!.permissions}'),
                             ],
                           ),
                         ),

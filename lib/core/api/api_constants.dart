@@ -16,15 +16,20 @@ class ApiConstants {
   static const String forgotPassword = '$auth/forgot-password';
   static const String resetPassword = '$auth/reset-password';
 
+  // FCM endpoints
+  static const String fcmToken = 'fcm/token';
+
   // User endpoints
   static const String users = '/users';
-  static const String profile = 'profile'; // GET /api/profile returns user object at root
+  static const String profile =
+      'profile'; // GET /api/profile returns user object at root
   static const String updateProfile = '$users/profile';
   static const String changePassword = '$users/change-password';
   static const String updatePassword = 'update-password';
   static const String sendEmailVerification = 'send-email-verification';
   static const String verifyEmail = 'verify-email';
-  static const String sendPhoneVerificationCode = 'send-phone-verification-code';
+  static const String sendPhoneVerificationCode =
+      'send-phone-verification-code';
   static const String verifyPhone = 'verify-phone';
 
   // Restaurant endpoints
