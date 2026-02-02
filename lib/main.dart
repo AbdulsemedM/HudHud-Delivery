@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hudhud_delivery/features/splash/presentation/screen/splash_screen.dart';
@@ -16,6 +17,7 @@ import 'controllers/auth_controller.dart';
 // Services
 import 'app/services/auth_service.dart';
 import 'app/services/custom_location_service.dart';
+import 'app/services/fcm_service.dart';
 
 // Orders feature
 import 'features/orders/data/providers/orders_data_provider.dart';
@@ -27,6 +29,18 @@ import 'app/widgets/secondary_button.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Register FCM background handler (must be top-level)
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
+  // Initialize FCM
+  final fcmService = await FcmService.initialize();
+  fcmService.onNotificationTap = (message, {localPayload}) {
+    // Handle notification tap: navigate to order/screen using message?.data or localPayload
+  };
+  fcmService.onTokenRefresh = (token) {
+    // Send token to your backend when it refreshes (e.g. after login)
+  };
 
   // Initialize API service
   // DioClient.initialize(); // Will be implemented when needed

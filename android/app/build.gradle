@@ -5,6 +5,7 @@ plugins {
     id "org.jetbrains.kotlin.android"
     // The Flutter Gradle Plugin must be applied after Android/Kotlin plugins
     id "dev.flutter.flutter-gradle-plugin"
+    id "com.google.gms.google-services"
 }
 
 android {
