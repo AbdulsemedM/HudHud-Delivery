@@ -31,6 +31,10 @@ migrate_working_dir/
 .pub/
 /build/
 
+# Firebase / Google service config (keep local, do not commit)
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+
 # Environment variables
 .env
 .env.local
