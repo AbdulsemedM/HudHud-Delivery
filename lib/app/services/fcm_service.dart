@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../../firebase_options.dart';
 
@@ -46,7 +47,16 @@ class FcmService {
     await _setForegroundPresentationOptions();
     _subscribeToTokenRefresh();
     _subscribeToMessageHandlers();
-    _fcmToken = await _messaging.getToken();
+    try {
+      _fcmToken = await _messaging.getToken();
+    } catch (e, st) {
+      // FCM often fails on emulators (Firebase Installations Service unavailable).
+      // App continues without push; token will work on real devices with Google Play.
+      if (kDebugMode) {
+        debugPrint('FCM getToken failed (emulator?): $e');
+        debugPrint('$st');
+      }
+    }
   }
 
   Future<void> _setupLocalNotifications() async {
@@ -157,8 +167,14 @@ class FcmService {
   }
 
   /// Get current FCM token (e.g. to send to your backend after login).
+  /// Returns null if FCM is unavailable (e.g. on emulator without Google Play).
   Future<String?> getToken() async {
-    _fcmToken ??= await _messaging.getToken();
+    if (_fcmToken != null) return _fcmToken;
+    try {
+      _fcmToken = await _messaging.getToken();
+    } catch (e) {
+      if (kDebugMode) debugPrint('FCM getToken failed: $e');
+    }
     return _fcmToken;
   }
 
