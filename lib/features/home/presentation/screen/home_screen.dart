@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hudhud_delivery/features/delivery/presentation/screens/delivery_feed_screen.dart';
+import 'package:hudhud_delivery/features/delivery/presentation/screens/all_categories_screen.dart';
+import 'package:hudhud_delivery/features/service_types/presentation/screens/services_screen.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/app/services/location_service.dart';
 import 'package:hudhud_delivery/models/user_model.dart';
@@ -99,7 +100,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
     if (result == true && mounted) {
       await _loadUserData();
-      if (mounted) SnackbarUtil.showSuccess(context, 'Email verified successfully!');
+      if (mounted)
+        SnackbarUtil.showSuccess(context, 'Email verified successfully!');
     }
   }
 
@@ -117,7 +119,9 @@ class _HomeScreenState extends State<HomeScreen> {
     );
     if (result == true && mounted) {
       await _loadUserData();
-      if (mounted) SnackbarUtil.showSuccess(context, 'Phone number verified successfully!');
+      if (mounted)
+        SnackbarUtil.showSuccess(
+            context, 'Phone number verified successfully!');
     }
   }
 
@@ -164,7 +168,8 @@ class _HomeScreenState extends State<HomeScreen> {
               // Order Tracking Card
               OrderTrackingCard(
                 riderName: _currentUser?.name ?? 'Tafari',
-                message: 'Your courier rider Dickson is getting ready to collect your courier request this may take 5-8mins we will notify you once he collects the package.',
+                message:
+                    'Your courier rider Dickson is getting ready to collect your courier request this may take 5-8mins we will notify you once he collects the package.',
                 onViewMap: () {
                   // Handle view map
                 },
@@ -198,7 +203,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const DeliveryFeedScreen(),
+                          builder: (context) => const AllCategoriesScreen(),
                         ),
                       );
                     },
@@ -227,7 +232,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     icon: Icons.handyman,
                     color: Colors.green,
                     onTap: () {
-                      // Navigate to services screen
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ServicesScreen(),
+                        ),
+                      );
                     },
                   ),
                 ],
@@ -323,7 +333,8 @@ class _VerifyEmailDialogState extends State<_VerifyEmailDialog> {
     if (!mounted) return;
     setState(() => _isSending = false);
     if (result['success'] == true) {
-      SnackbarUtil.showSuccess(context, result['message'] ?? 'Code sent to your email.');
+      SnackbarUtil.showSuccess(
+          context, result['message'] ?? 'Code sent to your email.');
     } else {
       setState(() => _errorMessage = result['message']);
     }
@@ -450,11 +461,13 @@ class _VerifyPhoneDialogState extends State<_VerifyPhoneDialog> {
       _isSending = true;
       _errorMessage = null;
     });
-    final result = await widget.authService.sendPhoneVerificationCode(widget.phone);
+    final result =
+        await widget.authService.sendPhoneVerificationCode(widget.phone);
     if (!mounted) return;
     setState(() => _isSending = false);
     if (result['success'] == true) {
-      SnackbarUtil.showSuccess(context, result['message'] ?? 'Code sent to your phone.');
+      SnackbarUtil.showSuccess(
+          context, result['message'] ?? 'Code sent to your phone.');
     } else {
       setState(() => _errorMessage = result['message']);
     }

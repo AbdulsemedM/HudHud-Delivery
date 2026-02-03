@@ -63,6 +63,9 @@ class ApiConstants {
   // Categories endpoints (requires auth token)
   static const String categories = 'categories';
 
+  // Service types endpoints
+  static const String serviceTypes = 'service-types';
+
   // Settings endpoints
   static const String settings = '/settings';
   static const String notifications = '$settings/notifications';

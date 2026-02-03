@@ -6,7 +6,7 @@ import 'package:hudhud_delivery/features/categories/bloc/categories_bloc.dart';
 import 'package:hudhud_delivery/features/categories/data/data_provider/categories_data_provider.dart';
 import 'package:hudhud_delivery/features/categories/data/repository/categories_repository.dart';
 import 'package:hudhud_delivery/features/categories/model/category_tree_model.dart';
-import 'category_stores_screen.dart';
+import 'package:hudhud_delivery/features/categories/presentation/screens/categories_screen.dart';
 
 class AllCategoriesScreen extends StatelessWidget {
   const AllCategoriesScreen({super.key});
@@ -78,8 +78,7 @@ class _AllCategoriesBody extends StatelessWidget {
           if (state is FetchCategoriesTreeSuccess) {
             final roots = state.categoriesTree;
             if (roots.isEmpty) {
-              return const Center(
-                  child: Text('No categories available.'));
+              return const Center(child: Text('No categories available.'));
             }
             return GridView.builder(
               padding: const EdgeInsets.all(16),
@@ -106,35 +105,19 @@ class _AllCategoriesBody extends StatelessWidget {
   }
 
   void _onCategoryTap(BuildContext context, CategoryTreeModel category) {
-    final icon = _iconFromMeta(category.meta);
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => CategoryStoresScreen(
-          categoryName: category.name,
-          categoryIcon: icon,
+        builder: (context) => BlocProvider.value(
+          value: context.read<CategoriesBloc>(),
+          child: CategoriesScreen(
+            categoryId: category.id,
+            categoryName: category.name,
+            categoryImage: category.displayImageUrl ?? '',
+          ),
         ),
       ),
     );
-  }
-
-  static IconData _iconFromMeta(Map<String, dynamic>? meta) {
-    if (meta == null) return Icons.category;
-    final name = (meta['icon'] as String?)?.toLowerCase();
-    const map = {
-      'tv': Icons.tv,
-      'mobile': Icons.smartphone,
-      'laptop': Icons.laptop,
-      'tshirt': Icons.checkroom,
-      'male': Icons.male,
-      'female': Icons.female,
-      'home': Icons.home,
-      'basketball-ball': Icons.sports_basketball,
-      'spa': Icons.spa,
-      'book': Icons.menu_book,
-      'gamepad': Icons.sports_esports,
-    };
-    return map[name ?? ''] ?? Icons.category;
   }
 }
 
