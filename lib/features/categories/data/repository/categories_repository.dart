@@ -17,7 +17,7 @@ class CategoriesRepository {
         if (data == null) return [];
         final list = data is List ? data : (data is Map ? data['data'] : null);
         if (list is! List) return [];
-        return (list as List)
+        return (list)
             .map((e) =>
                 CategoryTreeModel.fromJson(Map<String, dynamic>.from(e as Map)))
             .toList();

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/models/user_model.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
@@ -246,8 +247,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) =>
-                                      const NotificationsScreen(),
+                                  builder: (context) => BlocProvider(
+                                    create: (_) => createNotificationsBloc(),
+                                    child: const NotificationsScreen(),
+                                  ),
                                 ),
                               );
                             },
