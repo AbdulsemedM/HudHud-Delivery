@@ -119,6 +119,12 @@ class PaymentMethodCard extends StatelessWidget {
         return Icons.account_balance;
       case 'ebirr':
         return Icons.wallet;
+      case 'edahab':
+        return Icons.phone_android_rounded;
+      case 'sahay':
+        return Icons.payment;
+      case 'waafi':
+        return Icons.account_balance_wallet_rounded;
       case 'amole':
         return Icons.mobile_friendly;
       default:
@@ -144,6 +150,12 @@ class PaymentMethodCard extends StatelessWidget {
         return const Color(0xFF2196F3);
       case 'ebirr':
         return const Color(0xFFFF9800);
+      case 'edahab':
+        return const Color(0xFF1E88E5);
+      case 'sahay':
+        return const Color(0xFF4CAF50);
+      case 'waafi':
+        return const Color(0xFF00A86B);
       case 'amole':
         return const Color(0xFF9C27B0);
       default:
@@ -154,17 +166,11 @@ class PaymentMethodCard extends StatelessWidget {
 
 class PaymentSummaryCard extends StatelessWidget {
   final double subtotal;
-  final double discount;
-  final double serviceCharge;
-  final double deliveryFee;
   final double total;
 
   const PaymentSummaryCard({
     super.key,
     required this.subtotal,
-    required this.discount,
-    required this.serviceCharge,
-    required this.deliveryFee,
     required this.total,
   });
 
@@ -190,9 +196,6 @@ class PaymentSummaryCard extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             _buildSummaryRow('Subtotal', subtotal),
-            _buildSummaryRow('Discount', -discount, isDiscount: true),
-            _buildSummaryRow('Service Charge', serviceCharge),
-            _buildSummaryRow('Delivery Fee', deliveryFee),
             const Divider(height: 24),
             _buildSummaryRow(
               'Total Amount',

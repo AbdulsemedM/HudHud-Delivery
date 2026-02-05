@@ -50,7 +50,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
       final position = await LocationService.getCurrentPosition();
       if (position != null) {
         final latLng = LatLng(position.latitude, position.longitude);
-        
+
         // Get address from coordinates
         final address = await GeocodingService.getAddressFromLatLng(
           position.latitude,
@@ -64,7 +64,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
             _pickupLocation = address;
             _isLoadingLocation = false;
           });
-          
+
           // Move map to current location
           _mapController.move(_currentPosition, 15.0);
         }
@@ -99,13 +99,13 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
     if (result != null && mounted) {
       final address = result['address'] as String?;
       final coordinates = result['coordinates'] as LatLng?;
-      
+
       if (address != null && coordinates != null) {
         setState(() {
           _pickupLocation = address;
           _pickupPosition = coordinates;
         });
-        
+
         // Adjust map view to show both locations if both are set
         if (_pickupPosition != null && _deliveryPosition != null) {
           _fitBounds();
@@ -129,13 +129,13 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
     if (result != null && mounted) {
       final address = result['address'] as String?;
       final coordinates = result['coordinates'] as LatLng?;
-      
+
       if (address != null && coordinates != null) {
         setState(() {
           _deliveryLocation = address;
           _deliveryPosition = coordinates;
         });
-        
+
         // Adjust map view to show both locations if both are set
         if (_pickupPosition != null && _deliveryPosition != null) {
           _fitBounds();
@@ -164,7 +164,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
             _deliveryPosition = point;
           }
         });
-        
+
         // Adjust map view to show both locations if both are set
         if (_pickupPosition != null && _deliveryPosition != null) {
           _fitBounds();
@@ -228,6 +228,31 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
     }
   }
 
+  DateTime? _parseScheduledDateTime() {
+    final dateStr = _dateController.text;
+    final timeStr = _timeController.text;
+    if (dateStr.isEmpty || timeStr.isEmpty) return null;
+
+    final dateParts = dateStr.split('/');
+    if (dateParts.length != 3) return null;
+    final day = int.tryParse(dateParts[0]);
+    final month = int.tryParse(dateParts[1]);
+    final year = int.tryParse(dateParts[2]);
+    if (day == null || month == null || year == null) return null;
+
+    final timeParts = timeStr.split(':');
+    if (timeParts.length != 2) return null;
+    final hour = int.tryParse(timeParts[0]);
+    final minute = int.tryParse(timeParts[1]);
+    if (hour == null || minute == null) return null;
+
+    try {
+      return DateTime(year, month, day, hour, minute);
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<void> _selectDate() async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -237,7 +262,8 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
     );
     if (picked != null) {
       setState(() {
-        _dateController.text = '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}';
+        _dateController.text =
+            '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}';
       });
     }
   }
@@ -388,7 +414,11 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                             // Pickup Location (user can select)
                             _LocationField(
                               label: 'Pickup Location',
-                              value: _isLoadingLocation ? 'Getting location...' : (_pickupLocation.isEmpty ? 'Tap to select pickup location' : _pickupLocation),
+                              value: _isLoadingLocation
+                                  ? 'Getting location...'
+                                  : (_pickupLocation.isEmpty
+                                      ? 'Tap to select pickup location'
+                                      : _pickupLocation),
                               icon: Icons.location_on,
                               iconColor: Colors.red,
                               isReadOnly: false,
@@ -398,7 +428,9 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                             // Delivery Location (user can select)
                             _LocationField(
                               label: 'Delivery Location',
-                              value: _deliveryLocation.isEmpty ? 'Tap to select delivery location' : _deliveryLocation,
+                              value: _deliveryLocation.isEmpty
+                                  ? 'Tap to select delivery location'
+                                  : _deliveryLocation,
                               icon: Icons.location_on,
                               iconColor: Colors.green,
                               isReadOnly: false,
@@ -411,7 +443,8 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                                 // Date Field
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       const Text(
                                         'Date',
@@ -428,8 +461,10 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                                           padding: const EdgeInsets.all(16),
                                           decoration: BoxDecoration(
                                             color: Colors.grey[50],
-                                            borderRadius: BorderRadius.circular(12),
-                                            border: Border.all(color: Colors.grey[200]!),
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            border: Border.all(
+                                                color: Colors.grey[200]!),
                                           ),
                                           child: Row(
                                             children: [
@@ -440,14 +475,17 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                                                       : _dateController.text,
                                                   style: TextStyle(
                                                     fontSize: 14,
-                                                    color: _dateController.text.isEmpty
+                                                    color: _dateController
+                                                            .text.isEmpty
                                                         ? Colors.grey[400]
-                                                        : const Color(0xFF2C3E50),
+                                                        : const Color(
+                                                            0xFF2C3E50),
                                                   ),
                                                 ),
                                               ),
                                               Icon(Icons.calendar_today,
-                                                  size: 20, color: Colors.grey[400]),
+                                                  size: 20,
+                                                  color: Colors.grey[400]),
                                             ],
                                           ),
                                         ),
@@ -459,7 +497,8 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                                 // Time Field
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       const Text(
                                         'Time',
@@ -476,11 +515,14 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                                             child: GestureDetector(
                                               onTap: _selectTime,
                                               child: Container(
-                                                padding: const EdgeInsets.all(16),
+                                                padding:
+                                                    const EdgeInsets.all(16),
                                                 decoration: BoxDecoration(
                                                   color: Colors.grey[50],
-                                                  borderRadius: BorderRadius.circular(12),
-                                                  border: Border.all(color: Colors.grey[200]!),
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                  border: Border.all(
+                                                      color: Colors.grey[200]!),
                                                 ),
                                                 child: Text(
                                                   _timeController.text.isEmpty
@@ -488,9 +530,11 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                                                       : _timeController.text,
                                                   style: TextStyle(
                                                     fontSize: 14,
-                                                    color: _timeController.text.isEmpty
+                                                    color: _timeController
+                                                            .text.isEmpty
                                                         ? Colors.grey[400]
-                                                        : const Color(0xFF2C3E50),
+                                                        : const Color(
+                                                            0xFF2C3E50),
                                                   ),
                                                 ),
                                               ),
@@ -502,14 +546,17 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                                                 horizontal: 12, vertical: 16),
                                             decoration: BoxDecoration(
                                               color: Colors.grey[50],
-                                              borderRadius: BorderRadius.circular(12),
-                                              border: Border.all(color: Colors.grey[200]!),
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              border: Border.all(
+                                                  color: Colors.grey[200]!),
                                             ),
                                             child: DropdownButton<String>(
                                               value: _timePeriod,
                                               underline: const SizedBox(),
                                               items: ['am', 'pm']
-                                                  .map((period) => DropdownMenuItem(
+                                                  .map((period) =>
+                                                      DropdownMenuItem(
                                                         value: period,
                                                         child: Text(period),
                                                       ))
@@ -545,7 +592,8 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                                   child: _VehicleTypeOption(
                                     icon: Icons.two_wheeler,
                                     label: 'Motorcycle',
-                                    isSelected: _selectedVehicle == 'motorcycle',
+                                    isSelected:
+                                        _selectedVehicle == 'motorcycle',
                                     onTap: () {
                                       setState(() {
                                         _selectedVehicle = 'motorcycle';
@@ -588,25 +636,55 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                               height: 50,
                               child: ElevatedButton(
                                 onPressed: () {
-                                  if (_pickupLocation.isEmpty || _deliveryLocation.isEmpty) {
+                                  if (_pickupLocation.isEmpty ||
+                                      _deliveryLocation.isEmpty) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
-                                        content: Text('Please select both pickup and delivery locations'),
+                                        content: Text(
+                                            'Please select both pickup and delivery locations'),
                                         backgroundColor: Colors.red,
                                       ),
                                     );
                                     return;
                                   }
-                                  
+                                  if (_dateController.text.isEmpty ||
+                                      _timeController.text.isEmpty) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                            'Please select date and time for delivery'),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                    return;
+                                  }
+
+                                  final scheduledDateTime =
+                                      _parseScheduledDateTime();
+                                  if (scheduledDateTime == null) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content:
+                                            Text('Invalid date or time format'),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                    return;
+                                  }
+
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => PackageDetailsScreen(
+                                      builder: (context) =>
+                                          PackageDetailsScreen(
                                         pickupLocation: _pickupLocation,
                                         deliveryLocation: _deliveryLocation,
                                         pickupPosition: _pickupPosition,
                                         deliveryPosition: _deliveryPosition,
                                         selectedVehicle: _selectedVehicle,
+                                        isInstantDelivery: false,
+                                        scheduledPickup: scheduledDateTime,
+                                        scheduledDelivery: scheduledDateTime,
                                       ),
                                     ),
                                   );
@@ -698,8 +776,7 @@ class _LocationField extends StatelessWidget {
                 ],
               ),
             ),
-            if (!isReadOnly)
-              Icon(Icons.chevron_right, color: Colors.grey[400]),
+            if (!isReadOnly) Icon(Icons.chevron_right, color: Colors.grey[400]),
           ],
         ),
       ),
@@ -732,9 +809,7 @@ class _VehicleTypeOption extends StatelessWidget {
               : Colors.grey[50],
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected
-                ? AppColors.primaryColor
-                : Colors.grey[200]!,
+            color: isSelected ? AppColors.primaryColor : Colors.grey[200]!,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -743,9 +818,7 @@ class _VehicleTypeOption extends StatelessWidget {
             Icon(
               icon,
               size: 32,
-              color: isSelected
-                  ? AppColors.primaryColor
-                  : Colors.grey[400],
+              color: isSelected ? AppColors.primaryColor : Colors.grey[400],
             ),
             const SizedBox(height: 8),
             Text(
@@ -753,9 +826,7 @@ class _VehicleTypeOption extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                color: isSelected
-                    ? AppColors.primaryColor
-                    : Colors.grey[600],
+                color: isSelected ? AppColors.primaryColor : Colors.grey[600],
               ),
             ),
           ],
@@ -764,5 +835,3 @@ class _VehicleTypeOption extends StatelessWidget {
     );
   }
 }
-
-

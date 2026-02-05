@@ -51,6 +51,30 @@ class CheckoutDataProvider {
     }
   }
 
+  /// POST /api/customer/orders/{id}/cancel
+  Future<Map<String, dynamic>> cancelOrder(int orderId) async {
+    try {
+      final url = ApiConstants.baseUrl +
+          ApiConstants.customerOrderCancel
+              .replaceAll('{id}', orderId.toString());
+      final response = await apiService.post(url);
+
+      return {
+        'statusCode': response.statusCode,
+        'data': response.data,
+        'errorMessage': null,
+      };
+    } on ApiException catch (apiException) {
+      return {
+        'statusCode': apiException.statusCode,
+        'data': null,
+        'errorMessage': apiException.message,
+      };
+    } on Exception catch (e) {
+      return {'statusCode': 500, 'data': null, 'errorMessage': e.toString()};
+    }
+  }
+
   Future<Map<String, dynamic>> getOrderHistory() async {
     try {
       final response = await apiService.get(

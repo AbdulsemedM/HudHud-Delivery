@@ -15,7 +15,7 @@ class FetchOrdersEvent extends OrdersEvent {
 
   const FetchOrdersEvent({
     this.page = 1,
-    this.perPage = 10,
+    this.perPage = 15,
     this.status,
   });
 
@@ -57,4 +57,15 @@ class FilterOrdersByStatusEvent extends OrdersEvent {
 
   @override
   List<Object?> get props => [status];
+}
+
+class RateOrderEvent extends OrdersEvent {
+  final int orderId;
+  final int rating;
+  final String? review;
+
+  const RateOrderEvent(this.orderId, {required this.rating, this.review});
+
+  @override
+  List<Object?> get props => [orderId, rating, review];
 }

@@ -182,11 +182,6 @@ class _PaymentScreenState extends State<PaymentScreen>
                           // Payment Summary
                           PaymentSummaryCard(
                             subtotal: widget.orderDetails['subtotal'] ?? 0.0,
-                            discount: widget.orderDetails['discount'] ?? 0.0,
-                            serviceCharge:
-                                widget.orderDetails['service_charge'] ?? 0.0,
-                            deliveryFee:
-                                widget.orderDetails['delivery_fee'] ?? 0.0,
                             total: widget.totalAmount,
                           ),
                           const SizedBox(height: 24),

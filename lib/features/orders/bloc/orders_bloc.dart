@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import '../data/repositories/orders_repository.dart';
 import '../data/models/order_model.dart';
+import '../data/models/order_tracking_model.dart';
 
 part 'orders_event.dart';
 part 'orders_state.dart';
@@ -16,6 +17,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
     on<LoadMoreOrdersEvent>(_onLoadMoreOrders);
     on<FetchOrderDetailsEvent>(_onFetchOrderDetails);
     on<CancelOrderEvent>(_onCancelOrder);
+    on<RateOrderEvent>(_onRateOrder);
     on<FilterOrdersByStatusEvent>(_onFilterOrdersByStatus);
   }
 
@@ -74,7 +76,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
         
         emit(currentState.copyWith(
           orders: [...currentState.orders, ...newOrdersResponse.data],
-          hasReachedMax: newOrdersResponse.data.length < 10,
+          hasReachedMax: newOrdersResponse.data.length < 15,
           currentPage: currentState.currentPage + 1,
         ));
       } catch (e) {
@@ -88,10 +90,16 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
     Emitter<OrdersState> emit,
   ) async {
     emit(OrderDetailsLoading());
-    
+
     try {
       final order = await ordersRepository.getOrderById(event.orderId);
-      emit(OrderDetailsLoaded(order));
+      OrderTrackingModel? tracking;
+      try {
+        tracking = await ordersRepository.getOrderTracking(event.orderId);
+      } catch (_) {
+        // Tracking is optional; show order details even if tracking fails
+      }
+      emit(OrderDetailsLoaded(order, tracking: tracking));
     } catch (e) {
       emit(OrdersError(e.toString()));
     }
@@ -115,6 +123,28 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
         add(const RefreshOrdersEvent());
       } else {
         emit(const OrdersError('Failed to cancel order'));
+      }
+    } catch (e) {
+      emit(OrdersError(e.toString()));
+    }
+  }
+
+  Future<void> _onRateOrder(
+    RateOrderEvent event,
+    Emitter<OrdersState> emit,
+  ) async {
+    try {
+      final success = await ordersRepository.rateOrder(
+        event.orderId,
+        rating: event.rating,
+        review: event.review,
+      );
+
+      if (success) {
+        emit(OrderRated(event.orderId, 'Order rated successfully'));
+        add(FetchOrderDetailsEvent(event.orderId));
+      } else {
+        emit(const OrdersError('Failed to rate order'));
       }
     } catch (e) {
       emit(OrdersError(e.toString()));

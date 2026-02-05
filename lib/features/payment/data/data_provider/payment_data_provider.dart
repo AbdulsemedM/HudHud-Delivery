@@ -6,103 +6,52 @@ class PaymentDataProvider {
 
   PaymentDataProvider({required this.apiService});
 
-  /// GET /api/payments - fetches payment transactions and extracts unique payment types.
+  /// GET /api/payment-methods - fetches available payment methods.
   Future<List<Map<String, dynamic>>> getPaymentMethods() async {
-    try {
-      final response = await apiService.get(
-        '${ApiConstants.baseUrl}${ApiConstants.payments.replaceFirst('/', '')}',
-      );
-      final data = response.data;
+    final response = await apiService.get(
+      '${ApiConstants.baseUrl}${ApiConstants.paymentMethods}',
+    );
+    final data = response.data;
 
-      if (data == null || data is! Map<String, dynamic>) {
-        return _defaultPaymentMethods();
-      }
+    if (data == null || data is! Map<String, dynamic>) {
+      return [];
+    }
 
-      final list = data['data'];
-      if (list == null || list is! List) {
-        return _defaultPaymentMethods();
-      }
+    final list = data['data'];
+    if (list == null || list is! List) {
+      return [];
+    }
 
-      final Set<String> methods = {};
-      for (final item in list) {
-        if (item is Map<String, dynamic>) {
-          final method = item['method'] as String?;
-          if (method != null && method.isNotEmpty) {
-            methods.add(method);
-          }
+    final List<Map<String, dynamic>> methods = [];
+    for (final item in list) {
+      if (item is Map<String, dynamic>) {
+        final isActive = item['is_active'] == true;
+        final code = item['code']?.toString();
+        final name = item['name']?.toString() ?? code ?? 'Unknown';
+        final description = item['description']?.toString() ?? 'Pay with $name';
+        final sortOrder =
+            int.tryParse(item['sort_order']?.toString() ?? '0') ?? 0;
+
+        if (code != null && code.isNotEmpty) {
+          methods.add({
+            'id': code,
+            'name': name,
+            'description': description,
+            'icon': item['icon'],
+            'enabled': isActive,
+            '_sortOrder': sortOrder,
+          });
         }
       }
-
-      if (methods.isEmpty) {
-        return _defaultPaymentMethods();
-      }
-
-      return methods.map((method) => _paymentMethodFromType(method)).toList();
-    } on ApiException {
-      return _defaultPaymentMethods();
-    } catch (e) {
-      throw Exception('Failed to get payment methods: $e');
     }
-  }
 
-  List<Map<String, dynamic>> _defaultPaymentMethods() {
-    return [
-      _paymentMethodFromType('wallet'),
-      _paymentMethodFromType('card'),
-      _paymentMethodFromType('cash_on_delivery'),
-    ];
-  }
-
-  Map<String, dynamic> _paymentMethodFromType(String method) {
-    switch (method) {
-      case 'wallet':
-        return {
-          'id': 'wallet',
-          'name': 'Wallet',
-          'description': 'Pay with your wallet balance',
-          'icon': null,
-          'enabled': true,
-        };
-      case 'card':
-        return {
-          'id': 'card',
-          'name': 'Card',
-          'description': 'Pay with debit or credit card',
-          'icon': null,
-          'enabled': true,
-        };
-      case 'cash_on_delivery':
-        return {
-          'id': 'cash_on_delivery',
-          'name': 'Cash on Delivery',
-          'description': 'Pay when your order arrives',
-          'icon': null,
-          'enabled': true,
-        };
-      case 'mpesa':
-        return {
-          'id': 'mpesa',
-          'name': 'M-Pesa',
-          'description': 'Pay with M-Pesa mobile money',
-          'icon': null,
-          'enabled': true,
-        };
-      default:
-        return {
-          'id': method,
-          'name': _formatMethodName(method),
-          'description': 'Pay with ${_formatMethodName(method)}',
-          'icon': null,
-          'enabled': true,
-        };
+    methods.sort(
+        (a, b) => (a['_sortOrder'] as int).compareTo(b['_sortOrder'] as int));
+    for (final m in methods) {
+      m.remove('_sortOrder');
     }
-  }
 
-  String _formatMethodName(String method) {
-    return method
-        .split('_')
-        .map((e) => e.isEmpty ? '' : '${e[0].toUpperCase()}${e.substring(1)}')
-        .join(' ');
+    return methods;
   }
 
   Future<Map<String, dynamic>> processPayment({

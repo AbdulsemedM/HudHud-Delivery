@@ -173,18 +173,18 @@ class UserProfileHeader extends StatelessWidget {
                               height: 12,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                AppColors.primaryColor,
-                              ),
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  AppColors.primaryColor,
+                                ),
                               ),
                             )
                           : Text(
                               location,
-                            style: TextStyle(
-                              color: AppColors.primaryColor,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
+                              style: TextStyle(
+                                color: AppColors.primaryColor,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                             ),
@@ -303,14 +303,15 @@ class OrderTrackingCard extends StatelessWidget {
             alignment: Alignment.bottomRight,
             child: ElevatedButton(
               onPressed: onViewMap,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: AppColors.primaryColor,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: AppColors.primaryColor,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
-            ),
               child: const Text('View Map'),
             ),
           ),
@@ -401,84 +402,188 @@ class ServiceCard extends StatelessWidget {
   }
 }
 
-// Deals Section
-class DealsSection extends StatelessWidget {
+// Deals Modal - shown as advertising when order history is empty
+class DealsModal extends StatelessWidget {
   final VoidCallback onClaim;
+  final VoidCallback onDismiss;
 
-  const DealsSection({
+  const DealsModal({
     super.key,
     required this.onClaim,
+    required this.onDismiss,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFF5A00), // #FF5A00
-        borderRadius: BorderRadius.circular(12),
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 400),
+          decoration: const BoxDecoration(
+            color: Color(0xFFFF5A00), // #FF5A00
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Close button
+              Align(
+                alignment: Alignment.topRight,
+                child: IconButton(
+                  icon: const Icon(Icons.close, color: Colors.white, size: 24),
+                  onPressed: onDismiss,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Left section - Visual
+                    SizedBox(
+                      width: 100,
+                      height: 100,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.asset(
+                          'assets/images/ChatGPT Image Jun 6, 2025, 09_19_43 PM 1.png',
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    // Right section - Text and button
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text(
+                            'Deals on deals',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          const Text(
+                            'Get upto 50% off on your first Courier delivery fee!',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          ElevatedButton(
+                            onPressed: onClaim,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: AppColors.primaryColor,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 10),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: const Text(
+                              'Claim',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Order History Empty State - professional empty state when no orders
+class OrderHistoryEmptyState extends StatelessWidget {
+  final VoidCallback? onBrowseTap;
+
+  const OrderHistoryEmptyState({super.key, this.onBrowseTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Left section - Visual (woman on bicycle with delivery bag)
-          SizedBox(
-            width: 100,
-            height: 100,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.asset(
-                'assets/images/ChatGPT Image Jun 6, 2025, 09_19_43 PM 1.png',
-                fit: BoxFit.cover,
-              ),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: AppColors.lightTextDisabled.withOpacity(0.2),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.receipt_long_outlined,
+              size: 48,
+              color: AppColors.lightTextDisabled,
             ),
           ),
-          const SizedBox(width: 16),
-          // Right section - Text and button
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'Deals on deals',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
+          const SizedBox(height: 20),
+          Text(
+            'No orders yet',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: AppColors.lightTextPrimary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Your order history will appear here once you place an order',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              color: AppColors.lightTextSecondary,
+            ),
+          ),
+          if (onBrowseTap != null) ...[
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: onBrowseTap,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryColor,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                const SizedBox(height: 4),
-                const Text(
-                  'Get upto 50% off on your first Courier delivery fee!',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          // Claim button
-          ElevatedButton(
-            onPressed: onClaim,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: AppColors.primaryColor,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                child: const Text('Browse Delivery'),
               ),
             ),
-            child: const Text(
-              'Claim',
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
+          ],
         ],
       ),
     );
@@ -492,6 +597,7 @@ class HistoryItem extends StatelessWidget {
   final String location;
   final String dateTime;
   final String status;
+  final VoidCallback? onTap;
 
   const HistoryItem({
     super.key,
@@ -500,11 +606,12 @@ class HistoryItem extends StatelessWidget {
     required this.location,
     required this.dateTime,
     required this.status,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final child = Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -529,7 +636,8 @@ class HistoryItem extends StatelessWidget {
               ),
               // Status badge in dark green
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: const Color(0xFF2E7D32), // Dark green
                   borderRadius: BorderRadius.circular(6),
@@ -614,6 +722,10 @@ class HistoryItem extends StatelessWidget {
         ],
       ),
     );
+    if (onTap != null) {
+      return GestureDetector(onTap: onTap, child: child);
+    }
+    return child;
   }
 }
 

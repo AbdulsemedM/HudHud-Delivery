@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
+import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 
 class DeliveryTrackingScreen extends StatefulWidget {
+  final int? deliveryId;
   final String pickupLocation;
   final String deliveryLocation;
   final LatLng? pickupPosition;
@@ -19,6 +23,7 @@ class DeliveryTrackingScreen extends StatefulWidget {
 
   const DeliveryTrackingScreen({
     super.key,
+    this.deliveryId,
     required this.pickupLocation,
     required this.deliveryLocation,
     this.pickupPosition,
@@ -41,25 +46,47 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
   late MapController _mapController;
   LatLng? _vehiclePosition;
 
+  Map<String, dynamic>? _trackData;
+  bool _isLoadingTrack = true;
+  String? _trackError;
+
+  late final CourierRepository _courierRepository;
+
   @override
   void initState() {
     super.initState();
     _mapController = MapController();
-    
+    _courierRepository = CourierRepository(
+      courierDataProvider: CourierDataProvider(
+        apiService: ApiService.instance,
+      ),
+    );
+
     // Calculate vehicle position (somewhere along the route)
     if (widget.pickupPosition != null && widget.deliveryPosition != null) {
       _vehiclePosition = LatLng(
-        widget.pickupPosition!.latitude + 
-        (widget.deliveryPosition!.latitude - widget.pickupPosition!.latitude) * 0.3,
-        widget.pickupPosition!.longitude + 
-        (widget.deliveryPosition!.longitude - widget.pickupPosition!.longitude) * 0.3,
+        widget.pickupPosition!.latitude +
+            (widget.deliveryPosition!.latitude -
+                    widget.pickupPosition!.latitude) *
+                0.3,
+        widget.pickupPosition!.longitude +
+            (widget.deliveryPosition!.longitude -
+                    widget.pickupPosition!.longitude) *
+                0.3,
       );
     }
-    
+
+    if (widget.deliveryId != null) {
+      _fetchTrackData();
+    } else {
+      _isLoadingTrack = false;
+    }
+
     // Fit map to show route
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.pickupPosition != null && widget.deliveryPosition != null) {
-        final bounds = LatLngBounds(widget.pickupPosition!, widget.deliveryPosition!);
+        final bounds = LatLngBounds(
+            widget.pickupPosition!, widget.deliveryPosition!);
         _mapController.fitCamera(
           CameraFit.bounds(
             bounds: bounds,
@@ -68,6 +95,55 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
         );
       }
     });
+  }
+
+  Future<void> _fetchTrackData() async {
+    if (widget.deliveryId == null) return;
+    try {
+      final result =
+          await _courierRepository.getDeliveryTrack(widget.deliveryId!);
+      if (mounted) {
+        setState(() {
+          _isLoadingTrack = false;
+          if (result['success'] == true) {
+            _trackData = result['data'] as Map<String, dynamic>?;
+            _trackError = null;
+          } else {
+            _trackData = null;
+            _trackError = result['message'] as String?;
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingTrack = false;
+          _trackData = null;
+          _trackError = 'Failed to load tracking';
+        });
+      }
+    }
+  }
+
+  String _formatTimestamp(dynamic value) {
+    if (value == null) return '—';
+    final str = value.toString();
+    try {
+      final dt = DateTime.tryParse(str);
+      if (dt != null) {
+        return '${dt.day} ${_monthName(dt.month)} ${dt.year}, '
+            '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+      }
+    } catch (_) {}
+    return str;
+  }
+
+  String _monthName(int month) {
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return months[month - 1];
   }
 
   @override
@@ -226,9 +302,11 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                     ),
                   ),
                   const SizedBox(width: 6),
-                  const Text(
-                    'Delivery in progress',
-                    style: TextStyle(
+                  Text(
+                    _trackData?['current_status']?.toString() ??
+                        _trackData?['status']?.toString() ??
+                        'Delivery in progress',
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
@@ -276,9 +354,15 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  widget.pickupLocation.length > 30
-                                      ? '${widget.pickupLocation.substring(0, 30)}...'
-                                      : widget.pickupLocation,
+                                  (_trackData?['pickup_location']
+                                              ?.toString() ??
+                                          widget.pickupLocation)
+                                      .length >
+                                      30
+                                      ? '${(_trackData?['pickup_location']?.toString() ?? widget.pickupLocation).substring(0, 30)}...'
+                                      : (_trackData?['pickup_location']
+                                              ?.toString() ??
+                                          widget.pickupLocation),
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
@@ -286,9 +370,12 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                                   ),
                                 ),
                                 const SizedBox(height: 4),
-                                const Text(
-                                  'Delivery Pickup • 12 min Estimated',
-                                  style: TextStyle(
+                                Text(
+                                  _trackData?['current_status']?.toString() ??
+                                      _trackData?['estimated_delivery_time']
+                                          ?.toString() ??
+                                      'Delivery in progress',
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 12,
                                   ),
@@ -313,35 +400,84 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                     ),
                     // Content
                     Expanded(
-                      child: SingleChildScrollView(
-                        controller: scrollController,
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          children: [
-                            // Driver Information
-                            _DriverCard(
-                              driverName: 'Tafari Mwangi',
-                              onCall: () {
-                                // TODO: Implement call
-                              },
-                              onMessage: () {
-                                // TODO: Implement message
-                              },
+                      child: _isLoadingTrack
+                          ? const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(24),
+                                child: CircularProgressIndicator(),
+                              ),
+                            )
+                          : _trackError != null
+                              ? Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(24),
+                                    child: Text(
+                                      _trackError!,
+                                      style: TextStyle(
+                                        color: Colors.grey[600],
+                                        fontSize: 14,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                )
+                              : SingleChildScrollView(
+                              controller: scrollController,
+                              padding: const EdgeInsets.all(20),
+                              child: Column(
+                                children: [
+                                  // Driver Information (only when driver assigned)
+                                  if (_trackData?['driver'] != null) ...[
+                                    _DriverCard(
+                                      driverName: _trackData!['driver']
+                                              is Map<String, dynamic>
+                                          ? ((_trackData!['driver']
+                                                      as Map<String, dynamic>)[
+                                                  'name']
+                                              ?.toString() ??
+                                              'Driver')
+                                          : _trackData!['driver'].toString(),
+                                      onCall: () {
+                                        // TODO: Implement call
+                                      },
+                                      onMessage: () {
+                                        // TODO: Implement message
+                                      },
+                                    ),
+                                    const SizedBox(height: 16),
+                                  ],
+                                  // Review Order
+                                  _ReviewOrderCard(
+                                    courierNumber: _trackData?[
+                                                'tracking_number']
+                                            ?.toString() ??
+                                        (widget.deliveryId != null
+                                            ? '#DEL-${widget.deliveryId}'
+                                            : '—'),
+                                    from: _trackData?['pickup_location']
+                                            ?.toString() ??
+                                        widget.pickupLocation,
+                                    to: _trackData?['dropoff_location']
+                                            ?.toString() ??
+                                        widget.deliveryLocation,
+                                    createdDate: _formatTimestamp(
+                                        _trackData?['last_updated']),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  // Tracking Order (timeline from API)
+                                  _TrackingOrderCard(
+                                    timeline: _trackData?['timeline'] != null
+                                        ? List<Map<String, dynamic>>.from(
+                                            (_trackData!['timeline'] as List)
+                                                .map((e) => e
+                                                    is Map<String, dynamic>
+                                                    ? e
+                                                    : <String, dynamic>{}))
+                                        : null,
+                                  ),
+                                ],
+                              ),
                             ),
-                            const SizedBox(height: 16),
-                            // Review Order
-                            _ReviewOrderCard(
-                              courierNumber: '#HWDSF776567DS',
-                              from: widget.pickupLocation,
-                              to: widget.deliveryLocation,
-                              createdDate: '04 June 2025',
-                            ),
-                            const SizedBox(height: 16),
-                            // Tracking Order
-                            _TrackingOrderCard(),
-                          ],
-                        ),
-                      ),
                     ),
                   ],
                 ),
@@ -507,8 +643,30 @@ class _ReviewOrderCard extends StatelessWidget {
 }
 
 class _TrackingOrderCard extends StatelessWidget {
+  final List<Map<String, dynamic>>? timeline;
+
+  const _TrackingOrderCard({this.timeline});
+
+  String _formatTimestamp(dynamic value) {
+    if (value == null) return '—';
+    final str = value.toString();
+    try {
+      final dt = DateTime.tryParse(str);
+      if (dt != null) {
+        const months = [
+          'January', 'February', 'March', 'April', 'May', 'June',
+          'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+        return '${months[dt.month - 1]} ${dt.day}, ${dt.year} '
+            '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+      }
+    } catch (_) {}
+    return str;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final items = timeline ?? [];
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -534,20 +692,32 @@ class _TrackingOrderCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          _TrackingItem(
-            title: 'Moving From GTC Towers Westlands',
-            date: 'June 6, 2025 02:00 AM',
-          ),
-          const SizedBox(height: 16),
-          _TrackingItem(
-            title: 'In Transit to Adams Arcade Junction Mall',
-            date: 'June 6, 2025 2:00 PM',
-          ),
-          const SizedBox(height: 16),
-          _TrackingItem(
-            title: 'Estimated Arrival',
-            date: 'June 6, 2025 2:00 PM',
-          ),
+          if (items.isEmpty)
+            Text(
+              'No tracking updates yet',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+              ),
+            )
+          else
+            ...items.asMap().entries.map((entry) {
+              final i = entry.key;
+              final item = entry.value;
+              final isCurrent = item['status'] == 'current';
+              final isCompleted = item['status'] == 'completed';
+              return Padding(
+                padding: EdgeInsets.only(
+                  bottom: i < items.length - 1 ? 16 : 0,
+                ),
+                child: _TrackingItem(
+                  title: item['event']?.toString() ?? '—',
+                  date: _formatTimestamp(item['timestamp']),
+                  isActive: isCurrent,
+                  isCompleted: isCompleted,
+                ),
+              );
+            }),
         ],
       ),
     );
@@ -557,14 +727,22 @@ class _TrackingOrderCard extends StatelessWidget {
 class _TrackingItem extends StatelessWidget {
   final String title;
   final String date;
+  final bool isActive;
+  final bool isCompleted;
 
   const _TrackingItem({
     required this.title,
     required this.date,
+    this.isActive = false,
+    this.isCompleted = true,
   });
 
   @override
   Widget build(BuildContext context) {
+    Color dotColor = Colors.grey[400]!;
+    if (isActive) dotColor = AppColors.primaryColor;
+    if (isCompleted) dotColor = Colors.green;
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -572,7 +750,7 @@ class _TrackingItem extends StatelessWidget {
           width: 12,
           height: 12,
           decoration: BoxDecoration(
-            color: AppColors.primaryColor,
+            color: dotColor,
             shape: BoxShape.circle,
           ),
         ),
@@ -583,10 +761,10 @@ class _TrackingItem extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF2C3E50),
+                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                  color: const Color(0xFF2C3E50),
                 ),
               ),
               const SizedBox(height: 4),

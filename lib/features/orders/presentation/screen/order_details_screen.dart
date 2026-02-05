@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../bloc/orders_bloc.dart';
 import '../../data/models/order_model.dart';
+import '../../data/models/order_tracking_model.dart';
 import '../widgets/order_details_widgets.dart';
 
 class OrderDetailsScreen extends StatefulWidget {
@@ -43,6 +44,14 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
             );
             Navigator.of(context).pop();
           }
+          if (state is OrderRated) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.green,
+              ),
+            );
+          }
         },
         builder: (context, state) {
           if (state is OrderDetailsLoading) {
@@ -54,7 +63,8 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
           }
 
           if (state is OrderDetailsLoaded) {
-            return _buildOrderDetails(context, state.order);
+            return _buildOrderDetails(
+                context, state.order, state.tracking);
           }
 
           if (state is OrdersError) {
@@ -69,7 +79,8 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     );
   }
 
-  Widget _buildOrderDetails(BuildContext context, OrderModel order) {
+  Widget _buildOrderDetails(
+      BuildContext context, OrderModel order, OrderTrackingModel? tracking) {
     return CustomScrollView(
       slivers: [
         // Custom App Bar
@@ -122,6 +133,12 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 OrderStatusCard(order: order),
                 const SizedBox(height: 16),
 
+                // Order Tracking (when available)
+                if (tracking != null) ...[
+                  OrderTrackingCard(tracking: tracking),
+                  const SizedBox(height: 16),
+                ],
+
                 // Order Timeline
                 OrderTimelineCard(order: order),
                 const SizedBox(height: 16),
@@ -144,6 +161,17 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
 
                 // Order Summary
                 OrderSummaryCard(order: order),
+                if (order.isDelivered) ...[
+                  const SizedBox(height: 16),
+                  RateOrderCard(
+                    order: order,
+                    onRate: (rating, review) {
+                      context.read<OrdersBloc>().add(
+                            RateOrderEvent(order.id, rating: rating, review: review),
+                          );
+                    },
+                  ),
+                ],
                 const SizedBox(height: 100), // Bottom padding
               ],
             ),

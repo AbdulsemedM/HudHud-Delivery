@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/features/payment/data/data_provider/payment_data_provider.dart';
+import 'package:hudhud_delivery/features/payment/data/repository/payment_repository.dart';
 import 'package:latlong2/latlong.dart';
 import 'confirm_details_screen.dart';
 
@@ -9,6 +12,9 @@ class PackageDetailsScreen extends StatefulWidget {
   final LatLng? pickupPosition;
   final LatLng? deliveryPosition;
   final String selectedVehicle;
+  final bool isInstantDelivery;
+  final DateTime? scheduledPickup;
+  final DateTime? scheduledDelivery;
 
   const PackageDetailsScreen({
     super.key,
@@ -17,6 +23,9 @@ class PackageDetailsScreen extends StatefulWidget {
     this.pickupPosition,
     this.deliveryPosition,
     required this.selectedVehicle,
+    required this.isInstantDelivery,
+    this.scheduledPickup,
+    this.scheduledDelivery,
   });
 
   @override
@@ -25,13 +34,23 @@ class PackageDetailsScreen extends StatefulWidget {
 
 class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
   final TextEditingController _itemTypeController = TextEditingController();
-  final TextEditingController _quantityController = TextEditingController(text: '5');
-  final TextEditingController _recipientNameController = TextEditingController(text: 'Donald Duck');
-  final TextEditingController _recipientPhoneController = TextEditingController(text: '08123456789');
-  
+  final TextEditingController _quantityController = TextEditingController();
+  final TextEditingController _packageWeightController =
+      TextEditingController();
+  final TextEditingController _packageDescriptionController =
+      TextEditingController();
+  final TextEditingController _recipientNameController =
+      TextEditingController();
+  final TextEditingController _recipientPhoneController =
+      TextEditingController();
+
   String _whoPays = 'me'; // 'me' or 'recipient'
-  String _paymentType = 'Mobile Money';
+  String? _paymentType; // API id (e.g. 'wallet', 'card')
   String? _packageImagePath;
+
+  List<Map<String, dynamic>> _paymentMethods = [];
+  bool _isLoadingPaymentMethods = true;
+  String? _paymentMethodsError;
 
   final List<String> _itemTypes = [
     'Electronics/Gadgets',
@@ -42,17 +61,56 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
     'Other'
   ];
 
-  final List<String> _paymentTypes = [
-    'Mobile Money',
-    'Cash',
-    'Card',
-    'Bank Transfer'
-  ];
+  late final PaymentRepository _paymentRepository;
+
+  @override
+  void initState() {
+    super.initState();
+    _paymentRepository = PaymentRepository(
+      paymentDataProvider: PaymentDataProvider(
+        apiService: ApiService.instance,
+      ),
+    );
+    _fetchPaymentMethods();
+  }
+
+  Future<void> _fetchPaymentMethods() async {
+    try {
+      final methods = await _paymentRepository.getPaymentMethods();
+      if (mounted) {
+        setState(() {
+          _paymentMethods = methods;
+          _isLoadingPaymentMethods = false;
+          _paymentMethodsError = null;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _paymentMethods = [];
+          _isLoadingPaymentMethods = false;
+          _paymentMethodsError = 'Failed to load payment methods';
+        });
+      }
+    }
+  }
+
+  String? _getSelectedPaymentName() {
+    if (_paymentType == null) return null;
+    for (final method in _paymentMethods) {
+      if (method['id'] == _paymentType) {
+        return method['name'] as String?;
+      }
+    }
+    return _paymentType;
+  }
 
   @override
   void dispose() {
     _itemTypeController.dispose();
     _quantityController.dispose();
+    _packageWeightController.dispose();
+    _packageDescriptionController.dispose();
     _recipientNameController.dispose();
     _recipientPhoneController.dispose();
     super.dispose();
@@ -79,6 +137,57 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
       return;
     }
 
+    if (_quantityController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter quantity'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final weight = double.tryParse(_packageWeightController.text);
+    if (weight == null || weight <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a valid package weight (kg)'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (_paymentType == null || _paymentType!.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select payment type'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (_recipientNameController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter recipient name'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (_recipientPhoneController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter recipient phone number'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -90,8 +199,13 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
           selectedVehicle: widget.selectedVehicle,
           itemType: _itemTypeController.text,
           quantity: _quantityController.text,
+          packageWeight: weight,
+          packageDescription: _packageDescriptionController.text.trim(),
+          isInstantDelivery: widget.isInstantDelivery,
+          scheduledPickup: widget.scheduledPickup,
+          scheduledDelivery: widget.scheduledDelivery,
           whoPays: _whoPays,
-          paymentType: _paymentType,
+          paymentType: _paymentType!,
           recipientName: _recipientNameController.text,
           recipientPhone: _recipientPhoneController.text,
           packageImagePath: _packageImagePath,
@@ -186,7 +300,8 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                                 ),
                               ),
                             ),
-                            Icon(Icons.keyboard_arrow_down, color: Colors.grey[400]),
+                            Icon(Icons.keyboard_arrow_down,
+                                color: Colors.grey[400]),
                           ],
                         ),
                       ),
@@ -198,6 +313,61 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         labelText: 'Quantity',
+                        labelStyle: const TextStyle(
+                          fontSize: 14,
+                          color: Color(0xFF2C3E50),
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey[50],
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey[200]!),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey[200]!),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: AppColors.primaryColor),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Package Weight (kg)
+                    TextFormField(
+                      controller: _packageWeightController,
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
+                      decoration: InputDecoration(
+                        labelText: 'Package Weight (kg)',
+                        labelStyle: const TextStyle(
+                          fontSize: 14,
+                          color: Color(0xFF2C3E50),
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey[50],
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey[200]!),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey[200]!),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: AppColors.primaryColor),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Package Description (optional)
+                    TextFormField(
+                      controller: _packageDescriptionController,
+                      maxLines: 2,
+                      decoration: InputDecoration(
+                        labelText: 'Package Description (optional)',
                         labelStyle: const TextStyle(
                           fontSize: 14,
                           color: Color(0xFF2C3E50),
@@ -268,28 +438,33 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                     ),
                     const SizedBox(height: 12),
                     GestureDetector(
-                      onTap: () {
-                        showModalBottomSheet(
-                          context: context,
-                          builder: (context) => Container(
-                            padding: const EdgeInsets.all(20),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: _paymentTypes.map((type) {
-                                return ListTile(
-                                  title: Text(type),
-                                  onTap: () {
-                                    setState(() {
-                                      _paymentType = type;
-                                    });
-                                    Navigator.pop(context);
-                                  },
-                                );
-                              }).toList(),
-                            ),
-                          ),
-                        );
-                      },
+                      onTap: _isLoadingPaymentMethods
+                          ? null
+                          : () {
+                              showModalBottomSheet(
+                                context: context,
+                                builder: (context) => Container(
+                                  padding: const EdgeInsets.all(20),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: _paymentMethods.map((method) {
+                                      final id = method['id'] as String?;
+                                      final name =
+                                          method['name'] as String? ?? id ?? '';
+                                      return ListTile(
+                                        title: Text(name),
+                                        onTap: () {
+                                          setState(() {
+                                            _paymentType = id;
+                                          });
+                                          Navigator.pop(context);
+                                        },
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
+                              );
+                            },
                       child: Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
@@ -300,15 +475,28 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                         child: Row(
                           children: [
                             Expanded(
-                              child: Text(
-                                _paymentType,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  color: Color(0xFF2C3E50),
-                                ),
-                              ),
+                              child: _isLoadingPaymentMethods
+                                  ? Text(
+                                      'Loading payment methods...',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey[400],
+                                      ),
+                                    )
+                                  : Text(
+                                      _paymentMethodsError ??
+                                          _getSelectedPaymentName() ??
+                                          'Select payment type',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: _paymentType == null
+                                            ? Colors.grey[400]
+                                            : const Color(0xFF2C3E50),
+                                      ),
+                                    ),
                             ),
-                            Icon(Icons.keyboard_arrow_down, color: Colors.grey[400]),
+                            Icon(Icons.keyboard_arrow_down,
+                                color: Colors.grey[400]),
                           ],
                         ),
                       ),
@@ -494,7 +682,8 @@ class _RadioOption extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected ? AppColors.primaryColor : Colors.grey[400]!,
+                  color:
+                      isSelected ? AppColors.primaryColor : Colors.grey[400]!,
                   width: 2,
                 ),
                 color: isSelected ? AppColors.primaryColor : Colors.transparent,
@@ -526,4 +715,3 @@ class _RadioOption extends StatelessWidget {
     );
   }
 }
-

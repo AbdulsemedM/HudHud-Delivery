@@ -45,6 +45,31 @@ class CheckoutRepository {
     }
   }
 
+  Future<Map<String, dynamic>> cancelOrder(int orderId) async {
+    try {
+      final response = await checkoutDataProvider.cancelOrder(orderId);
+
+      if (response['statusCode'] == 200 || response['statusCode'] == 201) {
+        final data = response['data'] as Map<String, dynamic>?;
+        return {
+          'success': true,
+          'message':
+              data?['message']?.toString() ?? 'Order cancelled successfully',
+        };
+      } else {
+        return {
+          'success': false,
+          'message': "You can't cancel this order",
+        };
+      }
+    } catch (e) {
+      return {
+        'success': false,
+        'message': "You can't cancel this order",
+      };
+    }
+  }
+
   Future<List<dynamic>> getOrderHistory() async {
     try {
       final response = await checkoutDataProvider.getOrderHistory();

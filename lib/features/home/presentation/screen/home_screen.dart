@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:hudhud_delivery/features/delivery/presentation/screens/all_categories_screen.dart';
+import 'package:hudhud_delivery/features/orders/data/models/order_model.dart';
+import 'package:hudhud_delivery/features/orders/bloc/orders_bloc.dart';
+import 'package:hudhud_delivery/features/orders/data/repositories/orders_repository.dart';
+import 'package:hudhud_delivery/features/orders/presentation/screen/order_details_screen.dart';
+import 'package:hudhud_delivery/features/orders/presentation/screen/orders_screen.dart';
 import 'package:hudhud_delivery/features/service_types/presentation/screens/services_screen.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/app/services/location_service.dart';
@@ -47,11 +53,66 @@ class _HomeScreenState extends State<HomeScreen> {
   String _currentLocation = 'Getting location...';
   bool _isLoadingLocation = true;
 
+  List<OrderModel> _availableOrders = [];
+  bool _ordersLoading = true;
+  String? _ordersError;
+
   @override
   void initState() {
     super.initState();
     _loadUserData();
     _requestLocationAndUpdate();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadAvailableOrders());
+  }
+
+  Future<void> _loadAvailableOrders() async {
+    final repo = context.read<OrdersRepository>();
+    setState(() {
+      _ordersLoading = true;
+      _ordersError = null;
+    });
+    try {
+      final orders = await repo.fetchAvailableOrders();
+      if (mounted) {
+        setState(() {
+          _availableOrders = orders;
+          _ordersLoading = false;
+          _ordersError = null;
+        });
+        _showDealsModalIfEmpty();
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _availableOrders = [];
+          _ordersLoading = false;
+          _ordersError = e.toString();
+        });
+      }
+    }
+  }
+
+  void _showDealsModalIfEmpty() {
+    if (!_ordersLoading && _availableOrders.isEmpty && mounted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _showDealsModal(context);
+      });
+    }
+  }
+
+  void _showDealsModal(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => DealsModal(
+        onClaim: () {
+          Navigator.of(context).pop();
+          // Handle claim deal
+        },
+        onDismiss: () => Navigator.of(context).pop(),
+      ),
+    );
   }
 
   Future<void> _loadUserData() async {
@@ -261,14 +322,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
               const SizedBox(height: 24),
-              // Deals Section
-              DealsSection(
-                onClaim: () {
-                  // Handle claim deal
-                },
-              ),
-              const SizedBox(height: 24),
-              // History Section
+              // History Section (Available Orders)
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -281,7 +335,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   TextButton(
                     onPressed: () {
-                      // Handle view all
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const OrdersScreen(),
+                        ),
+                      );
                     },
                     child: Text(
                       'View all',
@@ -294,21 +353,62 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
               const SizedBox(height: 12),
-              // History Items
-              HistoryItem(
-                orderId: 'ORDB1234',
-                recipient: 'Paul Pogba',
-                location: 'Maryland bustop, Anthony Ikeja',
-                dateTime: '12 January 2020, 2:43pm',
-                status: 'Completed',
-              ),
-              HistoryItem(
-                orderId: 'ORDB1234',
-                recipient: 'Paul Pogba',
-                location: 'Maryland bustop, Anthony Ikeja',
-                dateTime: '12 January 2020, 2:43pm',
-                status: 'Completed',
-              ),
+              // History Items from API
+              if (_ordersLoading)
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(24.0),
+                    child: CircularProgressIndicator(),
+                  ),
+                )
+              else if (_ordersError != null)
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    'Failed to load orders: $_ordersError',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                )
+              else if (_availableOrders.isEmpty)
+                OrderHistoryEmptyState(
+                  onBrowseTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AllCategoriesScreen(),
+                      ),
+                    );
+                  },
+                )
+              else
+                ..._availableOrders.map((order) {
+                  final dateStr =
+                      DateFormat('d MMMM yyyy, h:mma').format(order.createdAt);
+                  return HistoryItem(
+                    orderId: order.orderNumber,
+                    recipient: order.customer?.name ?? order.vendor.name,
+                    location: order.deliveryAddress,
+                    dateTime: dateStr,
+                    status: order.statusDisplayName,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => BlocProvider(
+                            create: (context) => OrdersBloc(
+                              ordersRepository:
+                                  context.read<OrdersRepository>(),
+                            ),
+                            child: OrderDetailsScreen(orderId: order.id),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                }),
             ],
           ),
         ),

@@ -25,11 +25,13 @@ class CheckoutProductCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: isDarkMode ? AppColors.darkSurfaceVariant : Colors.white,
         borderRadius: BorderRadius.circular(8),
-        border: isDarkMode ? Border.all(color: AppColors.darkBorder, width: 1) : null,
+        border: isDarkMode
+            ? Border.all(color: AppColors.darkBorder, width: 1)
+            : null,
         boxShadow: [
           BoxShadow(
-            color: isDarkMode 
-                ? Colors.black.withOpacity(0.4) 
+            color: isDarkMode
+                ? Colors.black.withOpacity(0.4)
                 : Colors.grey.withOpacity(0.1),
             spreadRadius: isDarkMode ? 0 : 1,
             blurRadius: isDarkMode ? 6 : 4,
@@ -42,7 +44,9 @@ class CheckoutProductCard extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: Image.network(
-              productImage.startsWith('http') ? productImage : 'https://via.placeholder.com/60',
+              productImage.startsWith('http')
+                  ? productImage
+                  : 'https://via.placeholder.com/60',
               width: 60,
               height: 60,
               fit: BoxFit.cover,
@@ -66,7 +70,9 @@ class CheckoutProductCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: isDarkMode ? AppColors.darkOnSurface : AppColors.lightTextPrimary,
+                    color: isDarkMode
+                        ? AppColors.darkOnSurface
+                        : AppColors.lightTextPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -74,7 +80,9 @@ class CheckoutProductCard extends StatelessWidget {
                   '${quantity}X ${price.toStringAsFixed(1)}',
                   style: TextStyle(
                     fontSize: 14,
-                    color: isDarkMode ? AppColors.darkOnSurface.withOpacity(0.7) : AppColors.lightTextSecondary,
+                    color: isDarkMode
+                        ? AppColors.darkOnSurface.withOpacity(0.7)
+                        : AppColors.lightTextSecondary,
                   ),
                 ),
               ],
@@ -113,8 +121,8 @@ class _PromoCodeSectionState extends State<PromoCodeSection> {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Theme.of(context).brightness == Brightness.dark 
-                  ? AppColors.darkOnSurface 
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppColors.darkOnSurface
                   : AppColors.lightTextPrimary,
             ),
           ),
@@ -174,15 +182,17 @@ class _PromoCodeSectionState extends State<PromoCodeSection> {
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).brightness == Brightness.dark 
-                      ? AppColors.primaryLightColor 
-                      : AppColors.primaryColor,
+                  backgroundColor:
+                      Theme.of(context).brightness == Brightness.dark
+                          ? AppColors.primaryLightColor
+                          : AppColors.primaryColor,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 20,
                     vertical: 12,
                   ),
-                  elevation: Theme.of(context).brightness == Brightness.dark ? 4 : 2,
+                  elevation:
+                      Theme.of(context).brightness == Brightness.dark ? 4 : 2,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -230,8 +240,8 @@ class DeliveryAddressSection extends StatelessWidget {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Theme.of(context).brightness == Brightness.dark 
-                  ? AppColors.darkOnSurface 
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppColors.darkOnSurface
                   : AppColors.lightTextPrimary,
             ),
           ),
@@ -239,12 +249,12 @@ class DeliveryAddressSection extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Theme.of(context).brightness == Brightness.dark 
-                  ? AppColors.darkSurface 
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppColors.darkSurface
                   : Colors.white,
               border: Border.all(
-                color: Theme.of(context).brightness == Brightness.dark 
-                    ? Colors.grey.withOpacity(0.5) 
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.grey.withOpacity(0.5)
                     : Colors.grey.withOpacity(0.3),
               ),
               borderRadius: BorderRadius.circular(8),
@@ -266,8 +276,8 @@ class DeliveryAddressSection extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: Theme.of(context).brightness == Brightness.dark 
-                              ? AppColors.darkOnSurface 
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? AppColors.darkOnSurface
                               : AppColors.lightTextPrimary,
                         ),
                       ),
@@ -276,8 +286,8 @@ class DeliveryAddressSection extends StatelessWidget {
                         currentAddress,
                         style: TextStyle(
                           fontSize: 14,
-                          color: Theme.of(context).brightness == Brightness.dark 
-                              ? AppColors.darkOnSurface.withOpacity(0.7) 
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? AppColors.darkOnSurface.withOpacity(0.7)
                               : AppColors.lightTextSecondary,
                         ),
                       ),
@@ -288,8 +298,8 @@ class DeliveryAddressSection extends StatelessWidget {
                   onPressed: onChangeAddress,
                   icon: Icon(
                     Icons.edit,
-                    color: Theme.of(context).brightness == Brightness.dark 
-                        ? AppColors.darkOnSurface.withOpacity(0.7) 
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? AppColors.darkOnSurface.withOpacity(0.7)
                         : AppColors.lightTextSecondary,
                   ),
                 ),
@@ -323,27 +333,27 @@ class NotesSection extends StatelessWidget {
             decoration: InputDecoration(
               hintText: 'Additional note',
               hintStyle: TextStyle(
-                color: Theme.of(context).brightness == Brightness.dark 
-                    ? AppColors.darkOnSurface.withOpacity(0.5) 
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.darkOnSurface.withOpacity(0.5)
                     : AppColors.lightTextSecondary.withOpacity(0.7),
               ),
               filled: Theme.of(context).brightness == Brightness.dark,
-              fillColor: Theme.of(context).brightness == Brightness.dark 
-                  ? AppColors.darkSurface 
+              fillColor: Theme.of(context).brightness == Brightness.dark
+                  ? AppColors.darkSurface
                   : null,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(
-                  color: Theme.of(context).brightness == Brightness.dark 
-                      ? Colors.grey.withOpacity(0.5) 
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.grey.withOpacity(0.5)
                       : Colors.grey.withOpacity(0.3),
                 ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(
-                  color: Theme.of(context).brightness == Brightness.dark 
-                      ? Colors.grey.withOpacity(0.5) 
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.grey.withOpacity(0.5)
                       : Colors.grey.withOpacity(0.3),
                 ),
               ),
@@ -391,7 +401,7 @@ class _TipSectionState extends State<TipSection> {
   @override
   Widget build(BuildContext context) {
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 16),
       child: Column(
@@ -402,11 +412,13 @@ class _TipSectionState extends State<TipSection> {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: isDarkMode ? AppColors.darkOnSurface : AppColors.lightTextPrimary,
+              color: isDarkMode
+                  ? AppColors.darkOnSurface
+                  : AppColors.lightTextPrimary,
             ),
           ),
           const SizedBox(height: 8),
-          
+
           // Suggested tip amounts
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -421,34 +433,44 @@ class _TipSectionState extends State<TipSection> {
                   widget.onTipChanged(tip);
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                   decoration: BoxDecoration(
-                    color: isSelected 
-                        ? (isDarkMode ? AppColors.primaryLightColor : AppColors.primaryColor)
+                    color: isSelected
+                        ? (isDarkMode
+                            ? AppColors.primaryLightColor
+                            : AppColors.primaryColor)
                         : (isDarkMode ? AppColors.darkSurface : Colors.white),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: isSelected 
-                          ? (isDarkMode ? AppColors.primaryLightColor : AppColors.primaryColor)
-                          : (isDarkMode ? AppColors.darkBorder : Colors.grey.withOpacity(0.3)),
+                      color: isSelected
+                          ? (isDarkMode
+                              ? AppColors.primaryLightColor
+                              : AppColors.primaryColor)
+                          : (isDarkMode
+                              ? AppColors.darkBorder
+                              : Colors.grey.withOpacity(0.3)),
                     ),
                   ),
                   child: Text(
                     '${tip.toStringAsFixed(0)} Birr',
                     style: TextStyle(
-                      color: isSelected 
+                      color: isSelected
                           ? Colors.white
-                          : (isDarkMode ? AppColors.darkOnSurface : AppColors.lightTextPrimary),
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          : (isDarkMode
+                              ? AppColors.darkOnSurface
+                              : AppColors.lightTextPrimary),
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.normal,
                     ),
                   ),
                 ),
               );
             }).toList(),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Custom tip amount
           TextField(
             controller: _tipController,
@@ -469,7 +491,8 @@ class _TipSectionState extends State<TipSection> {
               suffixIcon: TextButton(
                 onPressed: () {
                   if (_tipController.text.isNotEmpty) {
-                    final double customTip = double.tryParse(_tipController.text) ?? 0.0;
+                    final double customTip =
+                        double.tryParse(_tipController.text) ?? 0.0;
                     setState(() {
                       _selectedTip = customTip;
                     });
@@ -479,7 +502,9 @@ class _TipSectionState extends State<TipSection> {
                 child: Text(
                   'Apply',
                   style: TextStyle(
-                    color: isDarkMode ? AppColors.primaryLightColor : AppColors.primaryColor,
+                    color: isDarkMode
+                        ? AppColors.primaryLightColor
+                        : AppColors.primaryColor,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -537,20 +562,12 @@ class _TipSectionState extends State<TipSection> {
 
 class OrderSummarySection extends StatelessWidget {
   final double subtotal;
-  final double discount;
-  final double extras;
-  final double serviceCharge;
-  final double deliveryFee;
   final double total;
   final double tipAmount;
 
   const OrderSummarySection({
     super.key,
     required this.subtotal,
-    required this.discount,
-    required this.extras,
-    required this.serviceCharge,
-    required this.deliveryFee,
     required this.total,
     this.tipAmount = 0.0,
   });
@@ -562,11 +579,8 @@ class OrderSummarySection extends StatelessWidget {
       child: Column(
         children: [
           _buildSummaryRow('Subtotal', subtotal, false),
-          _buildSummaryRow('Discount', -discount, false, isDiscount: true),
-          _buildSummaryRow('Extras', extras, false, showPlus: true),
-          _buildSummaryRow('Service Charge', serviceCharge, false, showPlus: true),
-          _buildSummaryRow('Delivery Fee', deliveryFee, false, showPlus: true),
-          if (tipAmount > 0) _buildSummaryRow('Tip', tipAmount, false, showPlus: true),
+          if (tipAmount > 0)
+            _buildSummaryRow('Tip', tipAmount, false, showPlus: true),
           const Divider(thickness: 1),
           _buildSummaryRow('Total Amount', total, true),
         ],
@@ -592,12 +606,12 @@ class OrderSummarySection extends StatelessWidget {
               style: TextStyle(
                 fontSize: isTotal ? 18 : 14,
                 fontWeight: isTotal ? FontWeight.bold : FontWeight.w500,
-                color: isTotal 
-                    ? (Theme.of(context).brightness == Brightness.dark 
-                        ? AppColors.primaryLightColor 
-                        : AppColors.primaryColor) 
-                    : (Theme.of(context).brightness == Brightness.dark 
-                        ? AppColors.darkOnSurface 
+                color: isTotal
+                    ? (Theme.of(context).brightness == Brightness.dark
+                        ? AppColors.primaryLightColor
+                        : AppColors.primaryColor)
+                    : (Theme.of(context).brightness == Brightness.dark
+                        ? AppColors.darkOnSurface
                         : AppColors.lightTextPrimary),
               ),
             ),
@@ -606,12 +620,12 @@ class OrderSummarySection extends StatelessWidget {
               style: TextStyle(
                 fontSize: isTotal ? 18 : 14,
                 fontWeight: isTotal ? FontWeight.bold : FontWeight.w500,
-                color: isTotal 
-                    ? (Theme.of(context).brightness == Brightness.dark 
-                        ? AppColors.primaryLightColor 
-                        : AppColors.primaryColor) 
-                    : (Theme.of(context).brightness == Brightness.dark 
-                        ? AppColors.darkOnSurface 
+                color: isTotal
+                    ? (Theme.of(context).brightness == Brightness.dark
+                        ? AppColors.primaryLightColor
+                        : AppColors.primaryColor)
+                    : (Theme.of(context).brightness == Brightness.dark
+                        ? AppColors.darkOnSurface
                         : AppColors.lightTextPrimary),
               ),
             ),
@@ -640,8 +654,8 @@ class ConfirmOrderButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: Theme.of(context).brightness == Brightness.dark 
-              ? AppColors.primaryLightColor 
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.primaryLightColor
               : AppColors.primaryColor,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 16),

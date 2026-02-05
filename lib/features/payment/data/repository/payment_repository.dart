@@ -12,20 +12,8 @@ class PaymentRepository {
     Map<String, dynamic>? paymentDetails,
   }) async {
     try {
-      // Validate payment method (allow API-returned methods: wallet, card, cash_on_delivery, mpesa, etc.)
-      final validMethods = [
-        'wallet',
-        'card',
-        'cash_on_delivery',
-        'mpesa',
-        'telebirr',
-        'chapa',
-        'cbe',
-        'ebirr',
-        'amole',
-      ];
-      if (!validMethods.contains(paymentMethod)) {
-        throw Exception('Invalid payment method: $paymentMethod');
+      if (paymentMethod.isEmpty) {
+        throw Exception('Payment method is required');
       }
 
       // Validate amount

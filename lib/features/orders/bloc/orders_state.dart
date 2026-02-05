@@ -63,11 +63,12 @@ final class OrderDetailsLoading extends OrdersState {}
 
 final class OrderDetailsLoaded extends OrdersState {
   final OrderModel order;
+  final OrderTrackingModel? tracking;
 
-  const OrderDetailsLoaded(this.order);
+  const OrderDetailsLoaded(this.order, {this.tracking});
 
   @override
-  List<Object?> get props => [order];
+  List<Object?> get props => [order, tracking];
 }
 
 final class OrderCancelling extends OrdersState {
@@ -84,6 +85,16 @@ final class OrderCancelled extends OrdersState {
   final String message;
 
   const OrderCancelled(this.orderId, this.message);
+
+  @override
+  List<Object?> get props => [orderId, message];
+}
+
+final class OrderRated extends OrdersState {
+  final int orderId;
+  final String message;
+
+  const OrderRated(this.orderId, this.message);
 
   @override
   List<Object?> get props => [orderId, message];

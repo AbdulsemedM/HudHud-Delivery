@@ -13,21 +13,42 @@ class ServicesScreen extends StatelessWidget {
   static IconData _iconForServiceCode(String code) {
     switch (code.toLowerCase()) {
       case 'grocery':
-        return Icons.shopping_basket;
+        return Icons.shopping_basket_rounded;
       case 'handyman':
-        return Icons.handyman;
+        return Icons.handyman_rounded;
       case 'messenger':
-        return Icons.local_shipping;
+        return Icons.local_shipping_rounded;
       case 'restaurant':
-        return Icons.restaurant;
+        return Icons.restaurant_rounded;
       case 'ride_hailing':
-        return Icons.local_taxi;
+        return Icons.local_taxi_rounded;
       case 'supermarket':
-        return Icons.store;
+        return Icons.store_rounded;
       case 'food_delivery':
-        return Icons.delivery_dining;
+        return Icons.delivery_dining_rounded;
       default:
-        return Icons.miscellaneous_services;
+        return Icons.miscellaneous_services_rounded;
+    }
+  }
+
+  static Color _colorForServiceCode(String code) {
+    switch (code.toLowerCase()) {
+      case 'grocery':
+        return const Color(0xFF4CAF50);
+      case 'handyman':
+        return const Color(0xFF795548);
+      case 'messenger':
+        return const Color(0xFF2196F3);
+      case 'restaurant':
+        return const Color(0xFFE91E63);
+      case 'ride_hailing':
+        return const Color(0xFFFFC107);
+      case 'supermarket':
+        return const Color(0xFF009688);
+      case 'food_delivery':
+        return const Color(0xFFFF5722);
+      default:
+        return AppColors.primaryColor;
     }
   }
 
@@ -50,64 +71,51 @@ class _ServicesScreenBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.lightBackground,
       appBar: AppBar(
-        title: const Text('Services'),
+        title: const Text(
+          'Our Services',
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
+            color: AppColors.lightTextPrimary,
+          ),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
+        scrolledUnderElevation: 2,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+          color: AppColors.lightTextPrimary,
           onPressed: () => Navigator.pop(context),
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(
+            color: AppColors.lightBorder.withOpacity(0.5),
+            height: 1,
+          ),
         ),
       ),
       body: BlocBuilder<ServiceTypesBloc, ServiceTypesState>(
         builder: (context, state) {
           if (state is ServiceTypesLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const _LoadingState();
           }
           if (state is ServiceTypesFailure) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      state.errorMessage,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () => context
-                          .read<ServiceTypesBloc>()
-                          .add(FetchServiceTypesEvent()),
-                      child: const Text('Retry'),
-                    ),
-                  ],
-                ),
-              ),
+            return _ErrorState(
+              message: state.errorMessage,
+              onRetry: () => context
+                  .read<ServiceTypesBloc>()
+                  .add(FetchServiceTypesEvent()),
             );
           }
           if (state is ServiceTypesSuccess) {
             final serviceTypes = state.serviceTypes;
             if (serviceTypes.isEmpty) {
-              return const Center(child: Text('No services available.'));
+              return const _EmptyState();
             }
-            return GridView.builder(
-              padding: const EdgeInsets.all(16),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 0.9,
-              ),
-              itemCount: serviceTypes.length,
-              itemBuilder: (context, index) {
-                final service = serviceTypes[index];
-                return _ServiceTypeGridItem(service: service);
-              },
-            );
+            return _ServicesGrid(serviceTypes: serviceTypes);
           }
           return const SizedBox.shrink();
         },
@@ -116,88 +124,378 @@ class _ServicesScreenBody extends StatelessWidget {
   }
 }
 
-class _ServiceTypeGridItem extends StatelessWidget {
+class _LoadingState extends StatelessWidget {
+  const _LoadingState();
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomScrollView(
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.all(16),
+          sliver: SliverGrid(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 0.9,
+            ),
+            delegate: SliverChildBuilderDelegate(
+              (context, index) => _ServiceSkeleton(),
+              childCount: 6,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ServiceSkeleton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: Colors.grey[200],
+              borderRadius: BorderRadius.circular(14),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            height: 14,
+            decoration: BoxDecoration(
+              color: Colors.grey[200],
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 24),
+            height: 10,
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ErrorState extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+
+  const _ErrorState({required this.message, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: AppColors.errorColor.withOpacity(0.08),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.error_outline_rounded,
+                size: 48,
+                color: AppColors.errorColor,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Something went wrong',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: AppColors.lightTextPrimary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: AppColors.lightTextSecondary,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 24),
+            FilledButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh_rounded, size: 18),
+              label: const Text('Try again'),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primaryColor,
+                foregroundColor: Colors.white,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyState extends StatelessWidget {
+  const _EmptyState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: AppColors.lightTextDisabled.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.miscellaneous_services_outlined,
+                size: 56,
+                color: AppColors.lightTextDisabled,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'No services yet',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: AppColors.lightTextPrimary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Check back later for new services',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: AppColors.lightTextSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ServicesGrid extends StatelessWidget {
+  final List<ServiceTypeModel> serviceTypes;
+
+  const _ServicesGrid({required this.serviceTypes});
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomScrollView(
+      slivers: [
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'What can we help you with?',
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: AppColors.lightTextSecondary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${serviceTypes.length} services available',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: AppColors.lightTextSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          sliver: SliverGrid(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 0.88,
+            ),
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final service = serviceTypes[index];
+                return _ServiceCard(service: service);
+              },
+              childCount: serviceTypes.length,
+            ),
+          ),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 24)),
+      ],
+    );
+  }
+}
+
+class _ServiceCard extends StatelessWidget {
   final ServiceTypeModel service;
 
-  const _ServiceTypeGridItem({required this.service});
+  const _ServiceCard({required this.service});
 
   @override
   Widget build(BuildContext context) {
     final icon = ServicesScreen._iconForServiceCode(service.code);
+    final color = ServicesScreen._colorForServiceCode(service.code);
     final iconUrl = service.iconUrl;
 
-    return GestureDetector(
-      onTap: () {
-        // TODO: Navigate to service-specific flow
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.grey[50],
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: Colors.grey[200]!,
-            width: 1,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          // TODO: Navigate to service-specific flow
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (iconUrl != null && iconUrl.isNotEmpty)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  iconUrl,
-                  height: 40,
-                  width: 40,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Icon(
-                    icon,
-                    size: 32,
-                    color: AppColors.primaryColor,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                flex: 3,
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Center(
+                    child: iconUrl != null && iconUrl.isNotEmpty
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(14),
+                            child: Image.network(
+                              iconUrl,
+                              width: double.infinity,
+                              height: double.infinity,
+                              fit: BoxFit.contain,
+                              errorBuilder: (_, __, ___) => _IconPlaceholder(
+                                icon: icon,
+                                color: color,
+                              ),
+                            ),
+                          )
+                        : _IconPlaceholder(icon: icon, color: color),
                   ),
                 ),
-              )
-            else
-              Icon(
-                icon,
-                size: 32,
-                color: AppColors.primaryColor,
               ),
-            const SizedBox(height: 8),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Text(
-                service.name,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF2C3E50),
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            if (service.description != null &&
-                service.description!.isNotEmpty) ...[
-              const SizedBox(height: 4),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Text(
-                  service.description!,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: Colors.grey[600],
+              Expanded(
+                flex: 2,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        service.name,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.lightTextPrimary,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (service.description != null &&
+                          service.description!.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          service.description!,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.lightTextSecondary,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ],
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
-          ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+class _IconPlaceholder extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+
+  const _IconPlaceholder({required this.icon, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 64,
+      height: 64,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            color.withOpacity(0.2),
+            color.withOpacity(0.08),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Icon(icon, size: 32, color: color),
     );
   }
 }

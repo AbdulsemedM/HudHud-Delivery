@@ -40,12 +40,16 @@ class ApiConstants {
   // Order endpoints (GET /api/orders fetches all orders)
   static const String orders = 'orders';
   static const String orderDetails = '$orders/{id}';
+  static const String orderTrack = '$orders/{id}/track';
   static const String createOrder = orders;
   static const String cancelOrder = '$orders/{id}/cancel';
   static const String orderHistory = '$orders/history';
 
   // Customer order creation - POST /api/customer/orders
   static const String customerOrders = 'customer/orders';
+  static const String customerOrdersAvailable = 'customer/orders/available';
+  static const String customerOrderRate = 'customer/orders/{id}/rate';
+  static const String customerOrderCancel = 'customer/orders/{id}/cancel';
 
   // Delivery endpoints
   static const String delivery = '/delivery';
@@ -54,7 +58,7 @@ class ApiConstants {
 
   // Payment endpoints
   static const String payments = '/payments';
-  static const String paymentMethods = '$payments/methods';
+  static const String paymentMethods = 'payment-methods';
   static const String processPayment = '$payments/process';
 
   // Wallet endpoints
@@ -72,6 +76,14 @@ class ApiConstants {
 
   // Service types endpoints
   static const String serviceTypes = 'service-types';
+
+  // Courier delivery endpoints
+  static const String deliveryEstimate = 'services/delivery/estimate';
+  static const String deliveryRequest = 'services/delivery/request';
+  static const String deliveryTrack = 'services/delivery/track/{id}';
+  static const String userDeliveries = 'user/deliveries';
+  static const String userDeliveryDetails = 'user/deliveries/{id}';
+  static const String userDeliveriesActive = 'user/deliveries/active';
 
   // Settings endpoints
   static const String settings = '/settings';

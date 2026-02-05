@@ -27,10 +27,6 @@ class CheckoutScreen extends StatefulWidget {
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
   final TextEditingController _notesController = TextEditingController();
-  double _discount = 100.0;
-  double _extras = 0.0;
-  double _serviceCharge = 16.90;
-  double _deliveryFee = 47.00;
   double _tipAmount = 0.0;
   String _deliveryAddress = 'Loading address...';
 
@@ -76,12 +72,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   double get _total {
-    return widget.subtotal -
-        _discount +
-        _extras +
-        _serviceCharge +
-        _deliveryFee +
-        _tipAmount;
+    return widget.subtotal + _tipAmount;
   }
 
   void _onPromoCodeApplied(String promoCode) {
@@ -161,14 +152,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       'vendor_id': _vendorId,
       'items': orderItems,
       'tax_amount': 0.0,
-      'discount_amount': _discount,
+      'discount_amount': 0.0,
       'delivery_address': _deliveryAddress,
       'notes': _notesController.text.trim().isEmpty
           ? null
           : _notesController.text.trim(),
       'subtotal': widget.subtotal,
-      'service_charge': _serviceCharge,
-      'delivery_fee': _deliveryFee,
       'tip_amount': _tipAmount,
     };
 
@@ -296,10 +285,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 // Order Summary Section
                 OrderSummarySection(
                   subtotal: widget.subtotal,
-                  discount: _discount,
-                  extras: _extras,
-                  serviceCharge: _serviceCharge,
-                  deliveryFee: _deliveryFee,
                   tipAmount: _tipAmount,
                   total: _total,
                 ),

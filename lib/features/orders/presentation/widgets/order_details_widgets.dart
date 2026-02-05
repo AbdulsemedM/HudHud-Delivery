@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../data/models/order_model.dart';
 import '../../data/models/order_item_model.dart';
+import '../../data/models/order_tracking_model.dart';
 import '../../data/models/vendor_model.dart';
 
 // Order Status Card
@@ -64,6 +65,184 @@ class OrderStatusCard extends StatelessWidget {
                   ),
                 ],
               ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Order Tracking Card - shows live tracking when order is opened
+class OrderTrackingCard extends StatelessWidget {
+  final OrderTrackingModel tracking;
+
+  const OrderTrackingCard({Key? key, required this.tracking}) : super(key: key);
+
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return Colors.orange;
+      case 'accepted':
+      case 'confirmed':
+        return Colors.blue;
+      case 'preparing':
+        return Colors.purple;
+      case 'ready_for_pickup':
+        return Colors.teal;
+      case 'picked_up':
+      case 'out_for_delivery':
+        return Colors.indigo;
+      case 'delivered':
+        return Colors.green;
+      case 'cancelled':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final statusColor = _getStatusColor(tracking.orderStatus);
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.location_on, color: statusColor, size: 24),
+                const SizedBox(width: 8),
+                Text(
+                  'Track Order',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: statusColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: statusColor.withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  Text(
+                    'Status: ',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[700],
+                    ),
+                  ),
+                  Text(
+                    tracking.orderStatus.replaceAll('_', ' ').toUpperCase(),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: statusColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (tracking.currentLocation != null &&
+                tracking.currentLocation!.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.place, size: 18, color: Colors.grey[600]),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      tracking.currentLocation!,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+            if (tracking.estimatedTime != null &&
+                tracking.estimatedTime!.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Icon(Icons.access_time, size: 18, color: Colors.grey[600]),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Est. arrival: ${tracking.estimatedTime}',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[700],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+            if (tracking.trackingHistory.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              Text(
+                'Tracking History',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              const SizedBox(height: 8),
+              ...tracking.trackingHistory.map((item) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(Icons.check_circle,
+                            size: 16, color: Colors.green[400]),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (item.status != null)
+                                Text(
+                                  item.status!.replaceAll('_', ' '),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              if (item.location != null) ...[
+                                const SizedBox(height: 2),
+                                Text(
+                                  item.location!,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ],
+                              if (item.timestamp != null) ...[
+                                const SizedBox(height: 2),
+                                Text(
+                                  item.timestamp.toString(),
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.grey[500],
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  )),
             ],
           ],
         ),
@@ -615,6 +794,121 @@ class OrderSummaryCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// Rate Order Card - shown when order is delivered
+class RateOrderCard extends StatefulWidget {
+  final OrderModel order;
+  final void Function(int rating, String? review) onRate;
+
+  const RateOrderCard({
+    Key? key,
+    required this.order,
+    required this.onRate,
+  }) : super(key: key);
+
+  @override
+  State<RateOrderCard> createState() => _RateOrderCardState();
+}
+
+class _RateOrderCardState extends State<RateOrderCard> {
+  int _rating = 0;
+  final _reviewController = TextEditingController();
+  bool _isSubmitting = false;
+
+  @override
+  void dispose() {
+    _reviewController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Rate your order',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(5, (index) {
+                final starValue = index + 1;
+                return IconButton(
+                  icon: Icon(
+                    _rating >= starValue ? Icons.star : Icons.star_border,
+                    color: Colors.amber,
+                    size: 36,
+                  ),
+                  onPressed: _isSubmitting
+                      ? null
+                      : () {
+                          setState(() {
+                            _rating = starValue;
+                          });
+                        },
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                );
+              }),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _reviewController,
+              decoration: const InputDecoration(
+                hintText: 'Add a review (optional)',
+                border: OutlineInputBorder(),
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              ),
+              maxLines: 3,
+              enabled: !_isSubmitting,
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _isSubmitting || _rating == 0
+                    ? null
+                    : () async {
+                        setState(() => _isSubmitting = true);
+                        widget.onRate(
+                          _rating,
+                          _reviewController.text.trim().isEmpty
+                              ? null
+                              : _reviewController.text.trim(),
+                        );
+                      },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+                child: _isSubmitting
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text('Submit Rating'),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

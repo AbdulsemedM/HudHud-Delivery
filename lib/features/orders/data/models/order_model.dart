@@ -36,7 +36,7 @@ class OrderModel extends Equatable {
   final DateTime updatedAt;
   final List<OrderItemModel> items;
   final VendorModel vendor;
-  final CustomerModel customer;
+  final CustomerModel? customer;
   final DriverModel? driver;
 
   const OrderModel({
@@ -70,7 +70,7 @@ class OrderModel extends Equatable {
     required this.updatedAt,
     required this.items,
     required this.vendor,
-    required this.customer,
+    this.customer,
     this.driver,
   });
 
@@ -128,7 +128,9 @@ class OrderModel extends Equatable {
           .map((item) => OrderItemModel.fromJson(item as Map<String, dynamic>))
           .toList(),
       vendor: VendorModel.fromJson(json['vendor'] as Map<String, dynamic>),
-      customer: CustomerModel.fromJson(json['customer'] as Map<String, dynamic>),
+      customer: json['customer'] != null
+          ? CustomerModel.fromJson(json['customer'] as Map<String, dynamic>)
+          : null,
       driver: json['driver'] != null
           ? DriverModel.fromJson(json['driver'] as Map<String, dynamic>)
           : null,
@@ -167,7 +169,7 @@ class OrderModel extends Equatable {
       'updated_at': updatedAt.toIso8601String(),
       'items': items.map((item) => item.toJson()).toList(),
       'vendor': vendor.toJson(),
-      'customer': customer.toJson(),
+      'customer': customer?.toJson(),
       'driver': driver?.toJson(),
     };
   }

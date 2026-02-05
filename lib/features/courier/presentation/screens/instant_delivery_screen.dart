@@ -373,6 +373,9 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                                         pickupPosition: _pickupPosition,
                                         deliveryPosition: _deliveryPosition,
                                         selectedVehicle: _selectedVehicle,
+                                        isInstantDelivery: true,
+                                        scheduledPickup: null,
+                                        scheduledDelivery: null,
                                       ),
                                     ),
                                   );
