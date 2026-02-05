@@ -12,8 +12,18 @@ class PaymentRepository {
     Map<String, dynamic>? paymentDetails,
   }) async {
     try {
-      // Validate payment method
-      final validMethods = ['telebirr', 'chapa', 'cbe', 'ebirr', 'amole'];
+      // Validate payment method (allow API-returned methods: wallet, card, cash_on_delivery, mpesa, etc.)
+      final validMethods = [
+        'wallet',
+        'card',
+        'cash_on_delivery',
+        'mpesa',
+        'telebirr',
+        'chapa',
+        'cbe',
+        'ebirr',
+        'amole',
+      ];
       if (!validMethods.contains(paymentMethod)) {
         throw Exception('Invalid payment method: $paymentMethod');
       }
@@ -40,7 +50,7 @@ class PaymentRepository {
   Future<List<Map<String, dynamic>>> getPaymentMethods() async {
     try {
       final methods = await paymentDataProvider.getPaymentMethods();
-      
+
       // Filter enabled payment methods
       return methods.where((method) => method['enabled'] == true).toList();
     } catch (e) {
@@ -70,7 +80,7 @@ class PaymentRepository {
   }) async {
     // Simulate network delay
     await Future.delayed(const Duration(seconds: 2));
-    
+
     // Mock successful payment
     return {
       'transaction_id': 'TXN_${DateTime.now().millisecondsSinceEpoch}',

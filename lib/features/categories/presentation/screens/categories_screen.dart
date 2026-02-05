@@ -11,7 +11,7 @@ class CategoriesScreen extends StatefulWidget {
   final int categoryId;
   final String categoryName;
   final String categoryImage;
-  
+
   const CategoriesScreen({
     super.key,
     required this.categoryId,
@@ -39,11 +39,9 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 
   void _fetchProducts() {
     context.read<CategoriesBloc>().add(
-      FetchCategoriesProductsEvent(widget.categoryId.toString()),
-    );
+          FetchCategoriesProductsEvent(widget.categoryId.toString()),
+        );
   }
-
-
 
   void _onFiltersChanged(List<String> selectedFilters) {
     setState(() {
@@ -54,28 +52,29 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 
   void _generateAvailableFilters() {
     Set<String> filters = {};
-    
+
     for (var product in _products) {
       // Check for discount/sale
-      if (product.discount_price != null && product.discount_price!.isNotEmpty) {
+      if (product.discount_price != null &&
+          product.discount_price!.isNotEmpty) {
         filters.add('On Sale');
       }
-      
+
       // Check for ingredients
       if (product.ingredients != null && product.ingredients!.isNotEmpty) {
         filters.add('With Ingredients');
       }
-      
+
       // Check for allergens
       if (product.allergens != null && product.allergens!.isNotEmpty) {
         filters.add('Contains Allergens');
       }
-      
+
       // Check for customization (addons)
       if (product.addons != null && product.addons!.isNotEmpty) {
         filters.add('Customizable');
       }
-      
+
       // Check preparation time categories
       if (product.preparation_time != null) {
         int prepTime = int.tryParse(product.preparation_time.toString()) ?? 0;
@@ -87,13 +86,13 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           filters.add('Slow (>30 min)');
         }
       }
-      
+
       // Check for nutrition info
       if (product.calories != null || product.protein != null) {
         filters.add('Nutrition Info');
       }
     }
-    
+
     _availableFilters = filters.toList();
   }
 
@@ -108,21 +107,27 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           return _selectedFilters.every((filter) {
             switch (filter) {
               case 'On Sale':
-                return product.discount_price != null && product.discount_price!.isNotEmpty;
+                return product.discount_price != null &&
+                    product.discount_price!.isNotEmpty;
               case 'With Ingredients':
-                return product.ingredients != null && product.ingredients!.isNotEmpty;
+                return product.ingredients != null &&
+                    product.ingredients!.isNotEmpty;
               case 'Contains Allergens':
-                return product.allergens != null && product.allergens!.isNotEmpty;
+                return product.allergens != null &&
+                    product.allergens!.isNotEmpty;
               case 'Customizable':
                 return product.addons != null && product.addons!.isNotEmpty;
               case 'Quick (≤15 min)':
-                int prepTime = int.tryParse(product.preparation_time.toString()) ?? 0;
+                int prepTime =
+                    int.tryParse(product.preparation_time.toString()) ?? 0;
                 return prepTime > 0 && prepTime <= 15;
               case 'Medium (16-30 min)':
-                int prepTime = int.tryParse(product.preparation_time.toString()) ?? 0;
+                int prepTime =
+                    int.tryParse(product.preparation_time.toString()) ?? 0;
                 return prepTime > 15 && prepTime <= 30;
               case 'Slow (>30 min)':
-                int prepTime = int.tryParse(product.preparation_time.toString()) ?? 0;
+                int prepTime =
+                    int.tryParse(product.preparation_time.toString()) ?? 0;
                 return prepTime > 30;
               case 'Nutrition Info':
                 return product.calories != null || product.protein != null;
@@ -186,9 +191,9 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         orElse: () => CategoriesProductsModel(),
       );
       if (product.id != null) {
-        final price = product.discount_price?.isNotEmpty == true 
-          ? double.tryParse(product.discount_price!) ?? 0
-          : double.tryParse(product.price ?? '0') ?? 0;
+        final price = product.discount_price?.isNotEmpty == true
+            ? double.tryParse(product.discount_price!) ?? 0
+            : double.tryParse(product.price ?? '0') ?? 0;
         total += price * quantity;
       }
     });
@@ -240,15 +245,15 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                           ),
                         )
                       else if (state is FetchCategoriesProductsFailure)
-                          Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(32.0),
-                              child: Column(
-                                children: [
-                                  Text(
-                                    'Error: ${state.errorMessage}',
-                                    style: const TextStyle(color: Colors.red),
-                                  ),
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(32.0),
+                            child: Column(
+                              children: [
+                                Text(
+                                  'Error: ${state.errorMessage}',
+                                  style: const TextStyle(color: Colors.red),
+                                ),
                                 const SizedBox(height: 16),
                                 ElevatedButton(
                                   onPressed: _fetchProducts,
@@ -271,18 +276,22 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 
                             return ProductItem(
                               name: product.name ?? 'Unknown Product',
-                              description: product.description ?? 'No description available',
+                              description: product.description ??
+                                  'No description available',
                               imageUrl: product.image_path ?? '',
                               price: product.price ?? '0',
-                              discountPrice: product.discount_price?.isNotEmpty == true 
-                                ? product.discount_price 
-                                : null,
+                              discountPrice:
+                                  product.discount_price?.isNotEmpty == true
+                                      ? product.discount_price
+                                      : null,
                               isAdded: isAdded,
                               quantity: quantity,
                               onAddPressed: () => _addToCart(productId),
                               onRemovePressed: () => _removeFromCart(productId),
-                              onIncrementPressed: () => _incrementQuantity(productId),
-                              onDecrementPressed: () => _decrementQuantity(productId),
+                              onIncrementPressed: () =>
+                                  _incrementQuantity(productId),
+                              onDecrementPressed: () =>
+                                  _decrementQuantity(productId),
                               onTap: () => _showProductDetails(product),
                             );
                           },
@@ -298,7 +307,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                     right: 0,
                     bottom: 0,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 16),
                       decoration: BoxDecoration(
                         color: const Color(0xFF4A148C),
                         boxShadow: [
@@ -343,26 +353,34 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                               TextButton(
                                 onPressed: () {
                                   // Navigate to checkout screen with cart items
-                                  final List<Map<String, dynamic>> cartItems = _cartItems.entries.map((entry) {
+                                  final List<Map<String, dynamic>> cartItems =
+                                      _cartItems.entries.map((entry) {
                                     final productId = entry.key;
                                     final quantity = entry.value;
-                                    final product = _filteredProducts.firstWhere(
+                                    final product =
+                                        _filteredProducts.firstWhere(
                                       (p) => p.id.toString() == productId,
                                       orElse: () => _products.firstWhere(
                                         (p) => p.id.toString() == productId,
-                                        orElse: () => throw Exception('Product not found'),
+                                        orElse: () => throw Exception(
+                                            'Product not found'),
                                       ),
                                     );
-                                    
+
                                     return {
                                       'id': product.id,
+                                      'productId': product.id,
+                                      'product_id': product.id,
+                                      'vendor_id': product.vendor_id,
                                       'name': product.name,
                                       'image': product.image_path,
-                                      'price': double.tryParse(product.price ?? '0') ?? 0.0,
+                                      'price': double.tryParse(
+                                              product.price ?? '0') ??
+                                          0.0,
                                       'quantity': quantity,
                                     };
                                   }).toList();
-                                  
+
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(

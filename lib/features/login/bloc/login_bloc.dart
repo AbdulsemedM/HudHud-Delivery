@@ -11,17 +11,16 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   LoginBloc(this.loginRepository) : super(LoginInitial()) {
     on<LoginFormSubmitted>((event, emit) async {
       emit(LoginLoading());
-      // Bypass API call for now - directly emit success
-      await Future.delayed(const Duration(milliseconds: 500)); // Small delay for UX
-      emit(LoginSuccess());
-      
-      // Original API call code (commented out for now)
-      // try {
-      //   await loginRepository.login(event.emailOrPhone, event.password, event.fieldType);
-      //   emit(LoginSuccess());
-      // } catch (e) {
-      //   emit(LoginFailure(e.toString()));
-      // }
+      try {
+        await loginRepository.login(
+          event.emailOrPhone,
+          event.password,
+          event.fieldType,
+        );
+        emit(LoginSuccess());
+      } catch (e) {
+        emit(LoginFailure(e.toString()));
+      }
     });
   }
 }

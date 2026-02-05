@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../app/services/location_service.dart';
+import '../../../../app/services/saved_location_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/api/api_service.dart';
 import '../../bloc/checkout_bloc.dart';
@@ -30,12 +32,56 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   double _serviceCharge = 16.90;
   double _deliveryFee = 47.00;
   double _tipAmount = 0.0;
-  String _deliveryAddress = 'KCK+MCP, Bole, Addis Ababa, Ethiopia';
-  // String _paymentMethod = 'card';
-  int _vendorId = 7; // Default vendor ID
+  String _deliveryAddress = 'Loading address...';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDeliveryAddress();
+  }
+
+  Future<void> _loadDeliveryAddress() async {
+    // 1. Try saved address
+    final saved = await SavedLocationService.getSavedAddress();
+    if (saved != null && saved.isNotEmpty) {
+      if (mounted) {
+        setState(() => _deliveryAddress = saved);
+      }
+      return;
+    }
+    // 2. Fallback to current GPS location
+    try {
+      final current = await LocationService.getCurrentLocationAddress();
+      if (mounted) {
+        setState(() {
+          _deliveryAddress =
+              current.isNotEmpty ? current : 'Select delivery address';
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _deliveryAddress = 'Select delivery address');
+      }
+    }
+  }
+
+  /// Vendor ID from first cart item's product (all items in a category are typically from same vendor)
+  int get _vendorId {
+    final first = widget.cartItems.isNotEmpty ? widget.cartItems.first : null;
+    if (first == null) return 7;
+    final vid = first['vendor_id'];
+    if (vid is int) return vid;
+    if (vid != null) return int.tryParse(vid.toString()) ?? 7;
+    return 7;
+  }
 
   double get _total {
-    return widget.subtotal - _discount + _extras + _serviceCharge + _deliveryFee + _tipAmount;
+    return widget.subtotal -
+        _discount +
+        _extras +
+        _serviceCharge +
+        _deliveryFee +
+        _tipAmount;
   }
 
   void _onPromoCodeApplied(String promoCode) {
@@ -61,42 +107,69 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
     // Update address if user selected a new one
     if (newAddress != null && newAddress.isNotEmpty) {
-      setState(() {
-        _deliveryAddress = newAddress;
-      });
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Address updated to: $newAddress'),
-          backgroundColor: AppColors.primaryColor,
-        ),
-      );
+      await SavedLocationService.saveAddress(newAddress);
+      if (mounted) {
+        setState(() {
+          _deliveryAddress = newAddress;
+        });
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Address updated to: $newAddress'),
+            backgroundColor: AppColors.primaryColor,
+          ),
+        );
+      }
     }
   }
 
   void _onConfirmOrder() {
-    // Prepare order items for API
-    final List<Map<String, dynamic>> orderItems = widget.cartItems.map((item) {
-      return {
-        'product_id': item['productId'] ?? item['id'],
-        'quantity': item['quantity'] ?? 1,
-      };
-    }).toList();
+    // Prepare order items for API: [{product_id: int, quantity: int}]
+    final List<Map<String, dynamic>> orderItems = widget.cartItems
+        .map((item) {
+          final productId =
+              item['productId'] ?? item['product_id'] ?? item['id'];
+          final quantity = item['quantity'] ?? 1;
+          final pid = productId is int
+              ? productId
+              : int.tryParse(productId.toString()) ?? 0;
+          final qty = quantity is int
+              ? quantity
+              : int.tryParse(quantity.toString()) ?? 1;
+          return {'product_id': pid, 'quantity': qty};
+        })
+        .where((e) => (e['product_id'] as int) > 0)
+        .toList();
 
-    // Generate temporary order ID
+    if (orderItems.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please add valid products to your cart'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Generate temporary order ID (replaced by server order ID after creation)
     final String orderId = 'ORDER_${DateTime.now().millisecondsSinceEpoch}';
 
-    // Prepare order details for payment
+    // Prepare order details for POST /api/customer/orders
     final Map<String, dynamic> orderDetails = {
       'vendor_id': _vendorId,
       'items': orderItems,
+      'tax_amount': 0.0,
+      'discount_amount': _discount,
+      'delivery_address': _deliveryAddress,
+      'notes': _notesController.text.trim().isEmpty
+          ? null
+          : _notesController.text.trim(),
       'subtotal': widget.subtotal,
-      'discount': _discount,
       'service_charge': _serviceCharge,
       'delivery_fee': _deliveryFee,
       'tip_amount': _tipAmount,
-      'delivery_address': _deliveryAddress,
-      'notes': _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
     };
 
     // Navigate to payment screen
@@ -179,8 +252,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Theme.of(context).brightness == Brightness.dark 
-                        ? AppColors.darkOnSurface 
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? AppColors.darkOnSurface
                         : AppColors.lightTextPrimary,
                   ),
                 ),
@@ -209,7 +282,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 NotesSection(
                   notesController: _notesController,
                 ),
-                
+
                 // Tip Section
                 TipSection(
                   currentTip: _tipAmount,

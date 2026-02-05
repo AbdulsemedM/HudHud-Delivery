@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import '../../checkout/data/repository/checkout_repository.dart';
 import '../data/repository/payment_repository.dart';
 
 // Events
@@ -81,8 +82,12 @@ class PaymentMethodsLoaded extends PaymentState {
 // Bloc
 class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
   final PaymentRepository paymentRepository;
+  final CheckoutRepository checkoutRepository;
 
-  PaymentBloc({required this.paymentRepository}) : super(const PaymentInitial()) {
+  PaymentBloc({
+    required this.paymentRepository,
+    required this.checkoutRepository,
+  }) : super(const PaymentInitial()) {
     on<ProcessPaymentEvent>(_onProcessPayment);
     on<GetPaymentMethodsEvent>(_onGetPaymentMethods);
   }
@@ -93,16 +98,47 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
   ) async {
     emit(const PaymentLoading());
     try {
+      final orderDetails =
+          event.paymentDetails?['order_details'] as Map<String, dynamic>?;
+      if (orderDetails == null) {
+        emit(PaymentFailure(error: 'Order details missing'));
+        return;
+      }
+
+      // 1. Create order via POST /api/customer/orders
+      final orderResult = await checkoutRepository.createOrder(
+        vendorId: orderDetails['vendor_id'] as int,
+        items: List<Map<String, dynamic>>.from(orderDetails['items'] as List),
+        taxAmount: (orderDetails['tax_amount'] ?? 0.0) as double,
+        discountAmount: (orderDetails['discount_amount'] ??
+            orderDetails['discount'] ??
+            0.0) as double,
+        deliveryAddress: orderDetails['delivery_address'] as String,
+        paymentMethod: event.paymentMethod,
+        serviceType: orderDetails['service_type'] as String? ?? 'delivery',
+        notes: orderDetails['notes'] as String?,
+      );
+
+      if (orderResult['success'] != true) {
+        emit(PaymentFailure(
+            error: orderResult['message'] ?? 'Failed to create order'));
+        return;
+      }
+
+      final createdOrderId =
+          orderResult['data']?['id']?.toString() ?? event.orderId;
+
+      // 2. Process payment
       final result = await paymentRepository.processPayment(
         paymentMethod: event.paymentMethod,
         amount: event.amount,
-        orderId: event.orderId,
+        orderId: createdOrderId,
         paymentDetails: event.paymentDetails,
       );
-      
+
       emit(PaymentSuccess(
-        transactionId: result['transaction_id'] ?? '',
-        message: result['message'] ?? 'Payment processed successfully',
+        transactionId: result['transaction_id'] ?? createdOrderId,
+        message: result['message'] ?? 'Order placed successfully',
       ));
     } catch (e) {
       emit(PaymentFailure(error: e.toString()));

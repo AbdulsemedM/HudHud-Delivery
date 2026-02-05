@@ -11,6 +11,7 @@ class CheckoutRepository {
     required double discountAmount,
     required String deliveryAddress,
     required String paymentMethod,
+    String serviceType = 'delivery',
     String? notes,
   }) async {
     try {
@@ -21,9 +22,10 @@ class CheckoutRepository {
         discountAmount: discountAmount,
         deliveryAddress: deliveryAddress,
         paymentMethod: paymentMethod,
+        serviceType: serviceType,
         notes: notes,
       );
-      
+
       if (response['statusCode'] == 200 || response['statusCode'] == 201) {
         return {
           'success': true,
@@ -31,34 +33,28 @@ class CheckoutRepository {
           'message': 'Order created successfully'
         };
       } else {
-        String errorMessage = response['errorMessage'] ?? 'Error creating order';
+        String errorMessage =
+            response['errorMessage'] ?? 'Error creating order';
         errorMessage = _cleanErrorMessage(errorMessage);
-        return {
-          'success': false,
-          'data': null,
-          'message': errorMessage
-        };
+        return {'success': false, 'data': null, 'message': errorMessage};
       }
     } catch (e) {
       String errorMessage = e.toString();
       errorMessage = _cleanErrorMessage(errorMessage);
-      return {
-        'success': false,
-        'data': null,
-        'message': errorMessage
-      };
+      return {'success': false, 'data': null, 'message': errorMessage};
     }
   }
 
   Future<List<dynamic>> getOrderHistory() async {
     try {
       final response = await checkoutDataProvider.getOrderHistory();
-      
+
       if (response['statusCode'] == 200) {
         final List<dynamic> orders = response['data']['data'] ?? [];
         return orders;
       } else {
-        String errorMessage = response['errorMessage'] ?? 'Error fetching order history';
+        String errorMessage =
+            response['errorMessage'] ?? 'Error fetching order history';
         errorMessage = _cleanErrorMessage(errorMessage);
         throw Exception(errorMessage);
       }

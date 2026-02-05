@@ -44,6 +44,9 @@ class ApiConstants {
   static const String cancelOrder = '$orders/{id}/cancel';
   static const String orderHistory = '$orders/history';
 
+  // Customer order creation - POST /api/customer/orders
+  static const String customerOrders = 'customer/orders';
+
   // Delivery endpoints
   static const String delivery = '/delivery';
   static const String trackOrder = '$delivery/track/{orderId}';

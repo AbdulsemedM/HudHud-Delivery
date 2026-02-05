@@ -215,6 +215,9 @@ class AuthService {
     int? expiresIn, // seconds from now
   }) async {
     try {
+      // Clear any stale session before storing new tokens
+      await clearAllData();
+
       // Update in-memory cache
       _currentUser = user;
       _currentToken = token;
@@ -569,6 +572,10 @@ class AuthService {
       if (!isLoggedIn) {
         return {'success': false, 'message': 'User not authenticated'};
       }
+      final email = _currentUser?.email;
+      if (email == null || email.isEmpty) {
+        return {'success': false, 'message': 'No email address on account'};
+      }
       if (!hasValidToken) {
         final refreshed = await refreshToken();
         if (!refreshed) {
@@ -579,8 +586,10 @@ class AuthService {
           };
         }
       }
-      final response =
-          await _apiService.post(ApiConstants.sendEmailVerification);
+      final response = await _apiService.post(
+        ApiConstants.sendEmailVerification,
+        data: {'email': email},
+      );
       if (response.statusCode == 200 && response.data != null) {
         final data = response.data as Map<String, dynamic>;
         return {

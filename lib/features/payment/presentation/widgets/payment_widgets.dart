@@ -103,6 +103,14 @@ class PaymentMethodCard extends StatelessWidget {
 
   IconData _getPaymentMethodIcon(String paymentId) {
     switch (paymentId) {
+      case 'wallet':
+        return Icons.account_balance_wallet_rounded;
+      case 'card':
+        return Icons.credit_card_rounded;
+      case 'cash_on_delivery':
+        return Icons.money_rounded;
+      case 'mpesa':
+        return Icons.phone_android_rounded;
       case 'telebirr':
         return Icons.phone_android;
       case 'chapa':
@@ -120,6 +128,14 @@ class PaymentMethodCard extends StatelessWidget {
 
   Color _getPaymentMethodColor(String paymentId) {
     switch (paymentId) {
+      case 'wallet':
+        return const Color(0xFF2196F3);
+      case 'card':
+        return const Color(0xFF4CAF50);
+      case 'cash_on_delivery':
+        return const Color(0xFFFF9800);
+      case 'mpesa':
+        return const Color(0xFF00A86B);
       case 'telebirr':
         return const Color(0xFF1E88E5);
       case 'chapa':

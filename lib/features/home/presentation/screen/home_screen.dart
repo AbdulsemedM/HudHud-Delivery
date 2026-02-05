@@ -4,6 +4,7 @@ import 'package:hudhud_delivery/features/delivery/presentation/screens/all_categ
 import 'package:hudhud_delivery/features/service_types/presentation/screens/services_screen.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/app/services/location_service.dart';
+import 'package:hudhud_delivery/app/services/saved_location_service.dart';
 import 'package:hudhud_delivery/models/user_model.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
@@ -54,7 +55,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadUserData() async {
-    final user = await _authService.getStoredUser();
+    // Fetch fresh profile from API to get updated verification status; fallback to stored user
+    final user = await _authService.getUserProfile() ??
+        await _authService.getStoredUser();
     if (mounted) {
       setState(() {
         _currentUser = user;
@@ -68,7 +71,18 @@ class _HomeScreenState extends State<HomeScreen> {
         _isLoadingLocation = true;
       });
 
-      // Get street address instead of coordinates
+      // Prefer saved address, then current GPS
+      final saved = await SavedLocationService.getSavedAddress();
+      if (saved != null && saved.isNotEmpty) {
+        if (mounted) {
+          setState(() {
+            _currentLocation = saved;
+            _isLoadingLocation = false;
+          });
+        }
+        return;
+      }
+
       final location = await LocationService.getCurrentLocationAddress();
       if (mounted) {
         setState(() {
@@ -150,9 +164,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   );
 
                   if (result != null && result['address'] != null) {
-                    setState(() {
-                      _currentLocation = result['address'] as String;
-                    });
+                    final address = result['address'] as String;
+                    await SavedLocationService.saveAddress(address);
+                    if (mounted) {
+                      setState(() {
+                        _currentLocation = address;
+                      });
+                    }
                   }
                 },
               ),
@@ -317,6 +335,12 @@ class _VerifyEmailDialogState extends State<_VerifyEmailDialog> {
   bool _isSending = false;
   bool _isVerifying = false;
   String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _sendCode());
+  }
 
   @override
   void dispose() {
