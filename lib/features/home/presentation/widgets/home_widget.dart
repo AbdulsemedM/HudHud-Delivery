@@ -214,9 +214,6 @@ class UserProfileHeader extends StatelessWidget {
                   ? NetworkImage(getDisplayAvatarUrl(user)!)
                   : const AssetImage('assets/images/profile.png')
                       as ImageProvider,
-              child: getDisplayAvatarUrl(user) == null
-                  ? const Icon(Icons.person, color: Colors.white, size: 24)
-                  : null,
             ),
             const SizedBox(width: 12),
             IconButton(
