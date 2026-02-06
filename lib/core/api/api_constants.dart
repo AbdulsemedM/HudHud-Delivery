@@ -62,10 +62,13 @@ class ApiConstants {
   static const String processPayment = '$payments/process';
 
   // Wallet endpoints
-  static const String wallet = '/wallet';
+  static const String wallets = 'wallets';
+  static const String walletDetails = '$wallets/{id}';
+  static const String wallet = 'wallet';
   static const String walletBalance = '$wallet/balance';
   static const String walletTransactions = '$wallet/transactions';
-  static const String addMoney = '$wallet/add-money';
+  static const String walletAddFunds = '$wallet/add-funds';
+  static const String walletWithdraw = '$wallet/withdraw';
 
   // Categories endpoints (requires auth token)
   static const String categories = 'categories';

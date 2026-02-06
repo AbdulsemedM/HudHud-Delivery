@@ -119,12 +119,12 @@ class WalletActions extends StatelessWidget {
 
 class TransactionsList extends StatelessWidget {
   final List<TransactionItem> transactions;
-  final VoidCallback onSeeAll;
+  final VoidCallback? onSeeAll;
 
   const TransactionsList({
     super.key,
     required this.transactions,
-    required this.onSeeAll,
+    this.onSeeAll,
   });
 
   @override
@@ -141,28 +141,40 @@ class TransactionsList extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            TextButton(
-              onPressed: onSeeAll,
-              child: const Text(
-                'See All',
-                style: TextStyle(
-                  color: Colors.orange,
-                  fontWeight: FontWeight.w600,
+            if (onSeeAll != null)
+              TextButton(
+                onPressed: onSeeAll,
+                child: const Text(
+                  'See All',
+                  style: TextStyle(
+                    color: Colors.orange,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
-            ),
           ],
         ),
         const SizedBox(height: 8),
-        ListView.separated(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: transactions.length,
-          separatorBuilder: (context, index) => const SizedBox(height: 16),
-          itemBuilder: (context, index) {
-            return TransactionListItem(transaction: transactions[index]);
-          },
-        ),
+        transactions.isEmpty
+            ? Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                child: Text(
+                  'No transactions yet',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              )
+            : ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: transactions.length,
+                separatorBuilder: (context, index) => const SizedBox(height: 16),
+                itemBuilder: (context, index) {
+                  return TransactionListItem(transaction: transactions[index]);
+                },
+              ),
       ],
     );
   }
@@ -199,7 +211,7 @@ class TransactionListItem extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'PKR${transaction.amount}',
+                transaction.formattedAmount,
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -237,10 +249,19 @@ class TransactionItem {
   final String date;
   final String amount;
   final String type;
+  final String? currency;
 
   const TransactionItem({
     required this.date,
     required this.amount,
     required this.type,
+    this.currency,
   });
+
+  String get formattedAmount {
+    if (currency != null && currency!.isNotEmpty) {
+      return '$currency $amount';
+    }
+    return amount;
+  }
 }
