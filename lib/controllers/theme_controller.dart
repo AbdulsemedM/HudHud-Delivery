@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../core/theme/app_colors.dart';
+
 class ThemeController extends ChangeNotifier {
   static const String _themeKey = 'theme_mode';
   
@@ -96,7 +98,9 @@ class ThemeController extends ChangeNotifier {
         : SystemUiOverlayStyle.dark;
     
     SystemChrome.setSystemUIOverlayStyle(overlayStyle.copyWith(
-      statusBarColor: Colors.transparent,
+      statusBarColor: AppColors.primaryColor,
+      statusBarIconBrightness: Brightness.light,
+      statusBarBrightness: Brightness.dark,
       systemNavigationBarColor: brightness == Brightness.dark
           ? const Color(0xFF121212)
           : const Color(0xFFFAFAFA),

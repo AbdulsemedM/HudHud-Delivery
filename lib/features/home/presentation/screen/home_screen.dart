@@ -22,14 +22,24 @@ import '../../data/data_provider/home_data_provider.dart';
 import 'location_search_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({
+    super.key,
+    this.onSwitchToTab,
+  });
+
+  final void Function(int index)? onSwitchToTab;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class HomeScreenWrapper extends StatelessWidget {
-  const HomeScreenWrapper({super.key});
+  const HomeScreenWrapper({
+    super.key,
+    this.onSwitchToTab,
+  });
+
+  final void Function(int index)? onSwitchToTab;
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +51,7 @@ class HomeScreenWrapper extends StatelessWidget {
           ),
         ),
       )..add(GetCategoriesEvent()),
-      child: const HomeScreen(),
+      child: HomeScreen(onSwitchToTab: onSwitchToTab),
     );
   }
 }
@@ -246,7 +256,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 16),
               // Order Tracking Card
               OrderTrackingCard(
-                riderName: _currentUser?.name ?? 'Tafari',
+                riderName: _currentUser?.name ?? 'User',
                 message:
                     'Your courier rider Dickson is getting ready to collect your courier request this may take 5-8mins we will notify you once he collects the package.',
                 onViewMap: () {
@@ -293,7 +303,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     icon: Icons.local_shipping,
                     color: Colors.purple,
                     onTap: () {
-                      // Navigate to courier screen
+                      widget.onSwitchToTab?.call(1);
                     },
                   ),
                   ServiceCard(
@@ -302,7 +312,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     icon: Icons.local_taxi,
                     color: Colors.yellow[700]!,
                     onTap: () {
-                      // Navigate to taxi screen
+                      widget.onSwitchToTab?.call(3);
                     },
                   ),
                   ServiceCard(
@@ -573,6 +583,12 @@ class _VerifyPhoneDialogState extends State<_VerifyPhoneDialog> {
   bool _isSending = false;
   bool _isVerifying = false;
   String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _sendCode());
+  }
 
   @override
   void dispose() {

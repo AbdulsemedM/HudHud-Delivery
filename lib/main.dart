@@ -1,12 +1,14 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
 import 'package:hudhud_delivery/features/splash/presentation/screen/splash_screen.dart';
 import 'package:provider/provider.dart';
 
 // Core imports
 import 'core/theme/app_theme.dart';
 import 'core/api/api_service.dart';
+import 'core/api/dio_client.dart';
 import 'core/utils/snackbar_util.dart';
 import 'core/utils/button_util.dart';
 
@@ -58,6 +60,15 @@ void main() async {
   // Initialize auth service
   final authService = AuthService();
 
+  // Register 401 redirect to login
+  final navigatorKey = GlobalKey<NavigatorState>();
+  DioClient.instance.setOnUnauthorized(() {
+    navigatorKey.currentState?.pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      (route) => false,
+    );
+  });
+
   // Initialize orders repository
   final ordersDataProvider =
       OrdersDataProvider(apiService: ApiService.instance);
@@ -68,6 +79,7 @@ void main() async {
     themeController: themeController,
     authService: authService,
     ordersRepository: ordersRepository,
+    navigatorKey: navigatorKey,
   ));
 }
 
@@ -75,12 +87,14 @@ class MyApp extends StatelessWidget {
   final ThemeController themeController;
   final AuthService authService;
   final OrdersRepository ordersRepository;
+  final GlobalKey<NavigatorState> navigatorKey;
 
   const MyApp({
     Key? key,
     required this.themeController,
     required this.authService,
     required this.ordersRepository,
+    required this.navigatorKey,
   }) : super(key: key);
 
   @override
@@ -96,6 +110,7 @@ class MyApp extends StatelessWidget {
       child: Consumer<ThemeController>(
         builder: (context, themeController, child) {
           return MaterialApp(
+            navigatorKey: navigatorKey,
             title: 'HudHud Delivery',
             debugShowCheckedModeBanner: false,
             theme: AppTheme.lightTheme,

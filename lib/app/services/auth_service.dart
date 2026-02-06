@@ -244,6 +244,53 @@ class AuthService {
     }
   }
 
+  /// Store only the token (and refresh token, expiry) without user data.
+  /// Used after login so the profile API can be called with the new token.
+  Future<void> storeTokenOnly({
+    required String token,
+    String? refreshToken,
+    int? expiresIn,
+  }) async {
+    await clearAllData();
+    _currentToken = token;
+    _tokenExpiry =
+        DateTime.now().add(Duration(seconds: expiresIn ?? 86400));
+    await Future.wait([
+      _storeToken(token),
+      _storage.write(
+          key: _tokenExpiryKey, value: _tokenExpiry!.toIso8601String()),
+      _storage.write(
+          key: _lastLoginKey, value: DateTime.now().toIso8601String()),
+      if (refreshToken != null) _storeRefreshToken(refreshToken),
+    ]);
+  }
+
+  /// Fetch profile from GET /api/profile, merge permissions, and store the user.
+  /// Call after storeTokenOnly so the request is authenticated.
+  /// On 401: clears session and rethrows. On other errors: rethrows.
+  Future<UserModel?> fetchProfileAndStore({List<dynamic>? permissions}) async {
+    try {
+      final response = await _apiService.get(ApiConstants.profile);
+      if (response.statusCode != 200 || response.data == null) return null;
+
+      final data = response.data as Map<String, dynamic>;
+      // API returns { success: true, data: { ...user } } or { user: { ... } }
+      final userMap = (data['data'] ?? data['user'] ?? data) as Map<String, dynamic>;
+      if (permissions != null) userMap['permissions'] = permissions;
+
+      final user = UserModel.fromMap(userMap);
+      _currentUser = user;
+      await _storeUser(user);
+      _sendFcmTokenToBackend();
+      return user;
+    } on ApiException catch (e) {
+      if (e.statusCode == 401) {
+        await _clearSession();
+      }
+      rethrow;
+    }
+  }
+
   // Register new user
   Future<Map<String, dynamic>> register({
     required String name,
@@ -359,9 +406,13 @@ class AuthService {
 
       if (response.statusCode == 200 && response.data != null) {
         final data = response.data as Map<String, dynamic>;
-        // GET /api/profile returns user object at root (id, name, email, phone, email_verified_at, etc.)
+        // API returns { success: true, data: { ...user } } or { user: { ... } }
         final userMap =
-            data['user'] != null ? data['user'] as Map<String, dynamic> : data;
+            (data['data'] ?? data['user'] ?? data) as Map<String, dynamic>;
+        // Preserve permissions from login if profile API doesn't return them
+        if (userMap['permissions'] == null && _currentUser?.permissions != null) {
+          userMap['permissions'] = _currentUser!.permissions;
+        }
         final user = UserModel.fromMap(userMap);
 
         // Update cached user and store

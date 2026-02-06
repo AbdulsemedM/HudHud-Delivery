@@ -11,24 +11,41 @@ class LoginRepository {
     try {
       final response = await loginDataProvider.login(emailOrPhone, password, fieldType);
       if (response['statusCode'] == 200) {
-        // Extract user object and include permissions from root level if available
-        final userData = Map<String, dynamic>.from(response['data']['user'] as Map<String, dynamic>);
-        if (response['data']['permissions'] != null) {
-          userData['permissions'] = response['data']['permissions'];
+        final data = response['data'] as Map<String, dynamic>?;
+        if (data == null || data['token'] == null || data['user'] == null) {
+          throw 'Invalid server response: missing required data';
         }
-        final user = UserModel.fromMap(userData);
 
-        // Store token and user data using AuthService
-        // Extract token from response if available
-        if (response['data']['token'] != null) {
-          await authService.storeUserSession(
-            user: user,
-            token: response['data']['token'],
-            refreshToken: response['data']['refresh_token'],
-            expiresIn: response['data']['expires_in'],
+        final token = data['token'] as String;
+        final permissions = data['permissions'] as List<dynamic>?;
+        final loginUser = UserModel.fromMap(
+          Map<String, dynamic>.from(data['user'] as Map<String, dynamic>)
+            ..['permissions'] = permissions ?? [],
+        );
+
+        // Store token first so profile API can be called with it
+        await authService.storeTokenOnly(
+          token: token,
+          refreshToken: data['refresh_token']?.toString(),
+          expiresIn: data['expires_in'] is int ? data['expires_in'] as int : null,
+        );
+
+        // Fetch full profile from /api/profile and store (with permissions from login)
+        try {
+          final profileUser = await authService.fetchProfileAndStore(
+            permissions: permissions,
           );
+          return profileUser ?? loginUser;
+        } catch (_) {
+          // Profile fetch failed (network, 500, etc.); fall back to login user
+          await authService.storeUserSession(
+            user: loginUser,
+            token: token,
+            refreshToken: data['refresh_token']?.toString(),
+            expiresIn: data['expires_in'] is int ? data['expires_in'] as int : null,
+          );
+          return loginUser;
         }
-        return user;
       } else {
         // Get clean error message from data provider
         String errorMessage = response['errorMessage'] ?? 'Login failed';

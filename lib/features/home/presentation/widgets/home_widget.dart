@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:lottie/lottie.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/avatar_util.dart';
 import '../../../../models/user_model.dart';
 
 /// Card showing email and phone verification status with optional Verify buttons.
@@ -126,6 +127,7 @@ class UserProfileHeader extends StatelessWidget {
   final String location;
   final bool isLoadingLocation;
   final VoidCallback onLocationTap;
+  final UserModel? user;
 
   const UserProfileHeader({
     super.key,
@@ -133,6 +135,7 @@ class UserProfileHeader extends StatelessWidget {
     required this.location,
     this.isLoadingLocation = false,
     required this.onLocationTap,
+    this.user,
   });
 
   @override

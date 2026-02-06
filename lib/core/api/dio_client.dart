@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'api_constants.dart';
 import 'interceptors/logger_interceptor.dart';
 import '../../app/services/auth_service.dart';
@@ -7,10 +8,15 @@ import '../../app/services/auth_service.dart';
 class DioClient {
   static DioClient? _instance;
   late Dio _dio;
+  void Function()? _onUnauthorized;
 
-  DioClient._internal() {
+  DioClient._internal() : _onUnauthorized = null {
     _dio = Dio();
     _setupDio();
+  }
+
+  void setOnUnauthorized(void Function()? callback) {
+    _onUnauthorized = callback;
   }
 
   static DioClient get instance {
@@ -86,11 +92,15 @@ class DioClient {
         if (kDebugMode) {
           print('Token refresh failed, session cleared');
         }
+        WidgetsBinding.instance.addPostFrameCallback((_) => _onUnauthorized?.call());
       }
     } catch (e) {
       if (kDebugMode) {
         print('Error handling unauthorized access: $e');
       }
+      final authService = AuthService();
+      await authService.clearAllData();
+      WidgetsBinding.instance.addPostFrameCallback((_) => _onUnauthorized?.call());
     }
   }
 

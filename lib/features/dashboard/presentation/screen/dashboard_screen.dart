@@ -16,13 +16,21 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   int _selectedIndex = 0;
 
-  final List<Widget> _screens = [
-    const HomeScreenWrapper(),
-    const CourierScreen(),
-    const WalletScreen(),
-    const TaxiScreen(),
-    const SettingsScreen(),
-  ];
+  late final List<Widget> _screens;
+
+  @override
+  void initState() {
+    super.initState();
+    _screens = [
+      HomeScreenWrapper(
+        onSwitchToTab: (index) => setState(() => _selectedIndex = index),
+      ),
+      const CourierScreen(),
+      const WalletScreen(),
+      const TaxiScreen(),
+      const SettingsScreen(),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {

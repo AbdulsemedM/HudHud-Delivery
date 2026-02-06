@@ -4,6 +4,7 @@ import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/models/user_model.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/utils/greeting_utils.dart';
+import 'package:hudhud_delivery/core/utils/avatar_util.dart';
 import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
 import 'personal_details_screen.dart';
 import 'terms_conditions_screen.dart';
@@ -30,7 +31,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _loadUserData() async {
-    final user = await _authService.getStoredUser();
+    final user = await _authService.getUserProfile(forceRefresh: true) ??
+        await _authService.getStoredUser();
     if (mounted) {
       setState(() {
         _user = user;
@@ -84,7 +86,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final greeting = GreetingUtils.getTimeBasedGreeting();
-    final userName = _user?.name?.split(' ').first ?? 'Tafari';
+    final userName = _user?.name?.split(' ').first ?? 'User';
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -107,17 +109,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           shape: BoxShape.circle,
                         ),
                         child: ClipOval(
-                          child: Image.asset(
-                            'assets/images/profile.png',
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return const Icon(
-                                Icons.person,
-                                size: 50,
-                                color: Colors.white,
-                              );
-                            },
-                          ),
+                          child: getDisplayAvatarUrl(_user) != null
+                              ? Image.network(
+                                  getDisplayAvatarUrl(_user)!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return const Icon(
+                                      Icons.person,
+                                      size: 50,
+                                      color: Colors.white,
+                                    );
+                                  },
+                                )
+                              : Image.asset(
+                                  'assets/images/profile.png',
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return const Icon(
+                                      Icons.person,
+                                      size: 50,
+                                      color: Colors.white,
+                                    );
+                                  },
+                                ),
                         ),
                       ),
                       Positioned(
@@ -156,7 +170,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const SizedBox(height: 4),
                   // Email
                   Text(
-                    _user?.email ?? 'tafarimwangi@gmail.com',
+                    _user?.email ?? '—',
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.grey[600],

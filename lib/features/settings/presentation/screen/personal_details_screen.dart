@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/utils/avatar_util.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/models/user_model.dart';
 
@@ -12,6 +14,8 @@ class PersonalDetailsScreen extends StatefulWidget {
 
 class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
   UserModel? _user;
+  bool _isLoading = true;
+  String? _errorMessage;
   final AuthService _authService = AuthService();
 
   @override
@@ -21,12 +25,24 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
   }
 
   Future<void> _loadUserData() async {
-    final user = await _authService.getStoredUser();
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    final user = await _authService.getUserProfile(forceRefresh: true) ??
+        await _authService.getStoredUser();
     if (mounted) {
       setState(() {
         _user = user;
+        _isLoading = false;
+        _errorMessage = user == null ? 'Failed to load profile' : null;
       });
     }
+  }
+
+  String _formatDateOfBirth(DateTime? date) {
+    if (date == null) return 'Not set';
+    return DateFormat('d MMM yyyy').format(date);
   }
 
   @override
@@ -42,34 +58,47 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
-            // Profile Picture
-            Stack(
-              children: [
-                Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryColor,
-                    shape: BoxShape.circle,
-                  ),
-                  child: ClipOval(
-                    child: Image.asset(
-                      'assets/images/profile.png',
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Icon(
-                          Icons.person,
-                          size: 50,
-                          color: Colors.white,
-                        );
-                      },
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              child: Column(
+                children: [
+                  if (_errorMessage != null) ...[
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text(
+                        _errorMessage!,
+                        style: const TextStyle(color: Colors.red),
+                      ),
                     ),
-                  ),
-                ),
+                  ],
+                  const SizedBox(height: 20),
+                  // Profile Picture
+                  Stack(
+                    children: [
+                      Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryColor,
+                          shape: BoxShape.circle,
+                        ),
+                        child: ClipOval(
+                          child: getDisplayAvatarUrl(_user) != null
+                              ? Image.network(
+                                  getDisplayAvatarUrl(_user)!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      _buildDefaultAvatar(),
+                                )
+                              : Image.asset(
+                                  'assets/images/profile.png',
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      _buildDefaultAvatar(),
+                                ),
+                        ),
+                      ),
                 Positioned(
                   bottom: 0,
                   right: 0,
@@ -93,60 +122,77 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            // Name
-            Text(
-              _user?.name ?? 'Tafari Mwangi',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: AppColors.primaryColor,
-              ),
-            ),
-            const SizedBox(height: 4),
-            // Email
-            Text(
-              _user?.email ?? 'tafarimwangi@gmail.com',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
-              ),
-            ),
-            const SizedBox(height: 32),
-            // Details Cards
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                children: [
-                  _DetailCard(
-                    icon: Icons.person,
-                    label: 'Full Name',
-                    value: _user?.name ?? 'Tafari Mwangi',
-                  ),
                   const SizedBox(height: 16),
-                  _DetailCard(
-                    icon: Icons.phone,
-                    label: 'Phone number',
-                    value: _user?.phone ?? '+1 650-289-9054',
+                  // Name
+                  Text(
+                    _user?.name ?? '—',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primaryColor,
+                    ),
                   ),
-                  const SizedBox(height: 16),
-                  _DetailCard(
-                    icon: Icons.email,
-                    label: 'Email address',
-                    value: _user?.email ?? 'tafarimwangi@gmail.com',
+                  const SizedBox(height: 4),
+                  // Email
+                  Text(
+                    _user?.email ?? '—',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
                   ),
-                  const SizedBox(height: 16),
-                  _DetailCard(
-                    icon: Icons.calendar_today,
-                    label: 'Date of birth',
-                    value: '24 Jul 1998',
+                  const SizedBox(height: 32),
+                  // Details Cards
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      children: [
+                        _DetailCard(
+                          icon: Icons.person,
+                          label: 'Full Name',
+                          value: _user?.name ?? '—',
+                        ),
+                        const SizedBox(height: 16),
+                        _DetailCard(
+                          icon: Icons.phone,
+                          label: 'Phone number',
+                          value: _user?.phone ?? '—',
+                        ),
+                        const SizedBox(height: 16),
+                        _DetailCard(
+                          icon: Icons.email,
+                          label: 'Email address',
+                          value: _user?.email ?? '—',
+                        ),
+                        const SizedBox(height: 16),
+                        _DetailCard(
+                          icon: Icons.calendar_today,
+                          label: 'Date of birth',
+                          value: _formatDateOfBirth(_user?.dateOfBirth),
+                        ),
+                        if (_user?.referralCode != null &&
+                            _user!.referralCode!.isNotEmpty) ...[
+                          const SizedBox(height: 16),
+                          _DetailCard(
+                            icon: Icons.card_giftcard,
+                            label: 'Referral code',
+                            value: _user!.referralCode!,
+                          ),
+                        ],
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
-          ],
-        ),
-      ),
+    );
+  }
+
+  Widget _buildDefaultAvatar() {
+    return const Icon(
+      Icons.person,
+      size: 50,
+      color: Colors.white,
     );
   }
 }

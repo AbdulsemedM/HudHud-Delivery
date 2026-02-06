@@ -12,6 +12,10 @@ class UserModel {
   final List<dynamic>? permissions;
   final DateTime? emailVerifiedAt;
   final DateTime? phoneVerifiedAt;
+  final DateTime? dateOfBirth;
+  final String? avatar;
+  final String? avatarUrl;
+  final String? referralCode;
 
   UserModel({
     this.id,
@@ -22,10 +26,18 @@ class UserModel {
     this.permissions,
     this.emailVerifiedAt,
     this.phoneVerifiedAt,
+    this.dateOfBirth,
+    this.avatar,
+    this.avatarUrl,
+    this.referralCode,
   });
 
   bool get isEmailVerified => emailVerifiedAt != null;
   bool get isPhoneVerified => phoneVerifiedAt != null;
+
+  /// Check if user has a specific permission (from login response)
+  bool hasPermission(String permission) =>
+      permissions?.contains(permission) ?? false;
 
   UserModel copyWith({
     int? id,
@@ -36,6 +48,10 @@ class UserModel {
     List<dynamic>? permissions,
     DateTime? emailVerifiedAt,
     DateTime? phoneVerifiedAt,
+    DateTime? dateOfBirth,
+    String? avatar,
+    String? avatarUrl,
+    String? referralCode,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -46,6 +62,10 @@ class UserModel {
       permissions: permissions ?? this.permissions,
       emailVerifiedAt: emailVerifiedAt ?? this.emailVerifiedAt,
       phoneVerifiedAt: phoneVerifiedAt ?? this.phoneVerifiedAt,
+      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
+      avatar: avatar ?? this.avatar,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+      referralCode: referralCode ?? this.referralCode,
     );
   }
 
@@ -59,6 +79,10 @@ class UserModel {
       'permissions': permissions,
       'email_verified_at': emailVerifiedAt?.toIso8601String(),
       'phone_verified_at': phoneVerifiedAt?.toIso8601String(),
+      'date_of_birth': dateOfBirth?.toIso8601String(),
+      'avatar': avatar,
+      'avatar_url': avatarUrl,
+      'referral_code': referralCode,
     };
   }
 
@@ -76,6 +100,12 @@ class UserModel {
       phoneVerifiedAt: map['phone_verified_at'] != null
           ? DateTime.tryParse(map['phone_verified_at'] as String)
           : null,
+      dateOfBirth: map['date_of_birth'] != null
+          ? DateTime.tryParse(map['date_of_birth'] as String)
+          : null,
+      avatar: map['avatar'] != null ? map['avatar'] as String : null,
+      avatarUrl: map['avatar_url'] != null ? map['avatar_url'] as String : null,
+      referralCode: map['referral_code'] != null ? map['referral_code'] as String : null,
     );
   }
 
@@ -99,7 +129,11 @@ class UserModel {
         other.type == type &&
         listEquals(other.permissions, permissions) &&
         other.emailVerifiedAt == emailVerifiedAt &&
-        other.phoneVerifiedAt == phoneVerifiedAt;
+        other.phoneVerifiedAt == phoneVerifiedAt &&
+        other.dateOfBirth == dateOfBirth &&
+        other.avatar == avatar &&
+        other.avatarUrl == avatarUrl &&
+        other.referralCode == referralCode;
   }
 
   @override
@@ -111,6 +145,10 @@ class UserModel {
         type.hashCode ^
         permissions.hashCode ^
         emailVerifiedAt.hashCode ^
-        phoneVerifiedAt.hashCode;
+        phoneVerifiedAt.hashCode ^
+        dateOfBirth.hashCode ^
+        avatar.hashCode ^
+        avatarUrl.hashCode ^
+        referralCode.hashCode;
   }
 }
