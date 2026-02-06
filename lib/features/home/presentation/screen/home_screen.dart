@@ -224,6 +224,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 name: _currentUser?.name ?? 'User',
                 location: _currentLocation,
                 isLoadingLocation: _isLoadingLocation,
+                user: _currentUser,
                 onLocationTap: () async {
                   final result = await Navigator.push<Map<String, dynamic>>(
                     context,

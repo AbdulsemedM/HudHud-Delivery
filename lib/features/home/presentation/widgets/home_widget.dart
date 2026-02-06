@@ -207,9 +207,16 @@ class UserProfileHeader extends StatelessWidget {
         // Profile picture and notification
         Row(
           children: [
-            const CircleAvatar(
+            CircleAvatar(
               radius: 20,
-              backgroundImage: AssetImage('assets/images/profile.png'),
+              backgroundColor: AppColors.primaryColor,
+              backgroundImage: getDisplayAvatarUrl(user) != null
+                  ? NetworkImage(getDisplayAvatarUrl(user)!)
+                  : const AssetImage('assets/images/profile.png')
+                      as ImageProvider,
+              child: getDisplayAvatarUrl(user) == null
+                  ? const Icon(Icons.person, color: Colors.white, size: 24)
+                  : null,
             ),
             const SizedBox(width: 12),
             IconButton(
