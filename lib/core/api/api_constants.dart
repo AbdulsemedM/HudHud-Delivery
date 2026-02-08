@@ -94,6 +94,20 @@ class ApiConstants {
   static const String userDeliveryDetails = 'user/deliveries/{id}';
   static const String userDeliveriesActive = 'user/deliveries/active';
 
+  // Handyman / Service requests
+  static const String customerServiceRequests = 'customer/services/requests';
+  static const String customerServiceRequestQuotes =
+      'customer/services/requests/{id}/quotes';
+  static const String customerServiceRequestQuoteAccept =
+      'customer/services/requests/{id}/quotes/{quoteId}/accept';
+  static const String customerServiceRequestQuoteReject =
+      'customer/services/requests/{id}/quotes/{quoteId}/reject';
+  static const String customerServiceRequestCancel =
+      'customer/services/requests/{id}/cancel';
+  static const String customerHandymen = 'customer/services/handymen/{id}';
+  static const String customerServiceRequestRate =
+      'customer/service-requests/{id}/rate';
+
   // Settings endpoints
   static const String settings = '/settings';
   static const String notifications = '$settings/notifications';
