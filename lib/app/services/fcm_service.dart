@@ -31,8 +31,15 @@ class FcmService {
 
   /// Initialize Firebase and FCM. Call once from main().
   static Future<FcmService> initialize() async {
-    await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform);
+    try {
+      if (Firebase.apps.isEmpty) {
+        await Firebase.initializeApp(
+            options: DefaultFirebaseOptions.currentPlatform);
+      }
+    } on FirebaseException catch (e) {
+      if (!e.code.contains('duplicate-app')) rethrow;
+      // Native iOS auto-initializes from GoogleService-Info.plist; ignore.
+    }
     await _instance._init();
     return _instance;
   }
@@ -198,6 +205,12 @@ class FcmService {
 /// Top-level handler for background messages. Must be a top-level function.
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  try {
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    }
+  } on FirebaseException catch (e) {
+    if (!e.code.contains('duplicate-app')) rethrow;
+  }
   // Optional: handle data-only messages or update local state
 }

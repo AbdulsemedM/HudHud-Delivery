@@ -72,7 +72,6 @@ flutter:
   assets:
     - assets/images/
     - assets/animations/
-    - assets/fonts/
 
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a
