@@ -1,4 +1,4 @@
-package com.example.hudhud_delivery
+package com.commercepal.hudhud.delivery
 
 import android.Manifest
 import android.content.Context

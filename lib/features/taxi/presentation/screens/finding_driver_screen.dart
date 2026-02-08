@@ -12,6 +12,7 @@ class FindingDriverScreen extends StatefulWidget {
   final String tripType;
   final int price;
   final String paymentMethod;
+  final int? rideId;
 
   const FindingDriverScreen({
     super.key,
@@ -22,6 +23,7 @@ class FindingDriverScreen extends StatefulWidget {
     required this.tripType,
     required this.price,
     required this.paymentMethod,
+    this.rideId,
   });
 
   @override

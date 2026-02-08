@@ -6,6 +6,9 @@ import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/app/services/location_service.dart';
 import 'package:hudhud_delivery/core/widgets/location_search_field.dart';
 import 'package:hudhud_delivery/app/services/nominatim_service.dart';
+import 'package:hudhud_delivery/features/taxi/data/ride_data_provider.dart';
+import 'finding_driver_screen.dart';
+import 'driver_on_the_way_screen.dart';
 import 'trip_selection_screen.dart';
 
 class TaxiScreen extends StatefulWidget {
@@ -15,20 +18,41 @@ class TaxiScreen extends StatefulWidget {
   State<TaxiScreen> createState() => _TaxiScreenState();
 }
 
+class _AvailableDriver {
+  final int id;
+  final LatLng position;
+  final String? vehicleType;
+  final String? name;
+
+  _AvailableDriver({
+    required this.id,
+    required this.position,
+    this.vehicleType,
+    this.name,
+  });
+}
+
 class _TaxiScreenState extends State<TaxiScreen> {
   final MapController _mapController = MapController();
   final TextEditingController _destinationController = TextEditingController();
+  final RideDataProvider _rideDataProvider = RideDataProvider();
   LatLng _currentPosition = const LatLng(37.7749, -122.4194); // Default to San Francisco
   LatLng? _destinationPosition;
   bool _isLoadingLocation = true;
   List<PlaceResult> _suggestedLocations = [];
   String? _selectedTime = 'Now';
+  List<_AvailableDriver> _availableDrivers = [];
+  int? _totalAvailable;
+  int? _estimatedWaitTime;
+  Map<String, dynamic>? _activeRide;
+  bool _isCheckingActiveRide = true;
 
   @override
   void initState() {
     super.initState();
     _getCurrentLocation();
     _loadSuggestedLocations();
+    _checkActiveRide();
   }
 
   @override
@@ -54,6 +78,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
           });
 
           _mapController.move(_currentPosition, 13.0);
+          _fetchAvailableVehicles();
         }
       } else {
         if (mounted) {
@@ -68,6 +93,142 @@ class _TaxiScreenState extends State<TaxiScreen> {
           _isLoadingLocation = false;
         });
       }
+    }
+  }
+
+  Future<void> _checkActiveRide() async {
+    final result = await _rideDataProvider.getActiveRide();
+
+    if (!mounted) return;
+
+    setState(() {
+      _isCheckingActiveRide = false;
+      if (result['statusCode'] == 200 && result['data'] != null) {
+        _activeRide = result['data'] as Map<String, dynamic>;
+      } else {
+        _activeRide = null;
+      }
+    });
+
+    if (_activeRide != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _centerMapOnActiveRide());
+    }
+  }
+
+  void _centerMapOnActiveRide() {
+    final pickupLat = double.tryParse(_activeRide!['pickup_latitude']?.toString() ?? '');
+    final pickupLng = double.tryParse(_activeRide!['pickup_longitude']?.toString() ?? '');
+    final dropoffLat = double.tryParse(_activeRide!['dropoff_latitude']?.toString() ?? '');
+    final dropoffLng = double.tryParse(_activeRide!['dropoff_longitude']?.toString() ?? '');
+
+    if (pickupLat != null && pickupLng != null && dropoffLat != null && dropoffLng != null) {
+      final pickup = LatLng(pickupLat, pickupLng);
+      final dropoff = LatLng(dropoffLat, dropoffLng);
+      _mapController.fitCamera(
+        CameraFit.bounds(
+          bounds: LatLngBounds(pickup, dropoff),
+          padding: const EdgeInsets.all(80),
+        ),
+      );
+    }
+  }
+
+  void _onTrackActiveRide() {
+    if (_activeRide == null) return;
+
+    final pickupLat = double.tryParse(_activeRide!['pickup_latitude']?.toString() ?? '');
+    final pickupLng = double.tryParse(_activeRide!['pickup_longitude']?.toString() ?? '');
+    final dropoffLat = double.tryParse(_activeRide!['dropoff_latitude']?.toString() ?? '');
+    final dropoffLng = double.tryParse(_activeRide!['dropoff_longitude']?.toString() ?? '');
+    final pickupLocation = _activeRide!['pickup_location'] as String? ?? 'Pickup';
+    final dropoffLocation = _activeRide!['dropoff_location'] as String? ?? 'Destination';
+    final status = _activeRide!['status'] as String? ?? 'searching';
+    final vehicleType = _activeRide!['vehicle_type'] as String? ?? 'car';
+    final rideType = _activeRide!['ride_type'] as String? ?? 'standard';
+    final estimatedFare = (double.tryParse(_activeRide!['estimated_fare']?.toString() ?? '') ?? 0).round();
+    final paymentMethod = _activeRide!['payment_method'] as String? ?? 'wallet';
+
+    if (pickupLat == null || pickupLng == null || dropoffLat == null || dropoffLng == null) return;
+
+    final pickup = LatLng(pickupLat, pickupLng);
+    final dropoff = LatLng(dropoffLat, dropoffLng);
+    final tripName = '${vehicleType[0].toUpperCase()}${vehicleType.substring(1)} (${rideType})';
+
+    final hasDriver = _activeRide!['driver_id'] != null;
+    if (status == 'searching' || !hasDriver) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => FindingDriverScreen(
+            pickupLocation: pickup,
+            destinationLocation: dropoff,
+            pickupAddress: pickupLocation,
+            destinationAddress: dropoffLocation,
+            tripType: tripName,
+            price: estimatedFare,
+            paymentMethod: paymentMethod,
+            rideId: _activeRide!['id'] as int?,
+          ),
+        ),
+      ).then((_) => _checkActiveRide());
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DriverOnTheWayScreen(
+            pickupLocation: pickup,
+            destinationLocation: dropoff,
+            pickupAddress: pickupLocation,
+            destinationAddress: dropoffLocation,
+            tripType: tripName,
+            price: estimatedFare,
+            paymentMethod: paymentMethod,
+          ),
+        ),
+      ).then((_) => _checkActiveRide());
+    }
+  }
+
+  Future<void> _fetchAvailableVehicles() async {
+    final result = await _rideDataProvider.getAvailableVehicles(
+      latitude: _currentPosition.latitude,
+      longitude: _currentPosition.longitude,
+      vehicleType: 'car',
+    );
+
+    if (!mounted) return;
+
+    if (result['data'] != null) {
+      final data = result['data'] as Map<String, dynamic>;
+      final drivers = <_AvailableDriver>[];
+      final availableDriversList = data['availableDrivers'] as List<dynamic>? ?? [];
+
+      for (final driver in availableDriversList) {
+        final driverMap = driver as Map<String, dynamic>;
+        final profile = driverMap['driver_profile'] as Map<String, dynamic>?;
+        if (profile == null) continue;
+
+        final latStr = profile['latitude']?.toString();
+        final lngStr = profile['longitude']?.toString();
+        if (latStr == null || lngStr == null) continue;
+
+        final lat = double.tryParse(latStr);
+        final lng = double.tryParse(lngStr);
+        if (lat == null || lng == null) continue;
+
+        drivers.add(_AvailableDriver(
+          id: driverMap['id'] as int? ?? 0,
+          position: LatLng(lat, lng),
+          vehicleType: profile['vehicle_type'] as String?,
+          name: driverMap['name'] as String?,
+        ));
+      }
+
+      setState(() {
+        _availableDrivers = drivers;
+        _totalAvailable = data['total_available'] as int?;
+        _estimatedWaitTime = data['estimated_wait_time'] as int?;
+      });
     }
   }
 
@@ -249,8 +410,198 @@ class _TaxiScreenState extends State<TaxiScreen> {
     );
   }
 
+  LatLng? get _activePickup {
+    if (_activeRide == null) return null;
+    final lat = double.tryParse(_activeRide!['pickup_latitude']?.toString() ?? '');
+    final lng = double.tryParse(_activeRide!['pickup_longitude']?.toString() ?? '');
+    return (lat != null && lng != null) ? LatLng(lat, lng) : null;
+  }
+
+  LatLng? get _activeDropoff {
+    if (_activeRide == null) return null;
+    final lat = double.tryParse(_activeRide!['dropoff_latitude']?.toString() ?? '');
+    final lng = double.tryParse(_activeRide!['dropoff_longitude']?.toString() ?? '');
+    return (lat != null && lng != null) ? LatLng(lat, lng) : null;
+  }
+
+  String get _activeRideStatusLabel {
+    final status = _activeRide?['status'] as String? ?? '';
+    switch (status) {
+      case 'searching':
+        return 'Finding a driver...';
+      case 'accepted':
+        return 'Driver on the way';
+      case 'driver_arrived':
+        return 'Driver has arrived';
+      case 'started':
+        return 'Trip in progress';
+      default:
+        return status.isNotEmpty ? status.replaceAll('_', ' ') : 'Active ride';
+    }
+  }
+
+  Widget _buildActiveRideSheet() {
+    final pickupLocation = _activeRide!['pickup_location'] as String? ?? 'Pickup';
+    final dropoffLocation = _activeRide!['dropoff_location'] as String? ?? 'Destination';
+    final estimatedFare = _activeRide!['estimated_fare']?.toString();
+
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+      ),
+      child: Column(
+        children: [
+          Container(
+            margin: const EdgeInsets.only(top: 8),
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.local_taxi, color: AppColors.primaryColor, size: 24),
+              const SizedBox(width: 8),
+              Text(
+                'Active Ride',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primaryColor,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: AppColors.primaryColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              _activeRideStatusLabel,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: AppColors.primaryColor,
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildLocationRow(Icons.trip_origin, pickupLocation, Colors.blue),
+                const SizedBox(height: 12),
+                _buildLocationRow(Icons.location_on, dropoffLocation, Colors.red),
+                if (estimatedFare != null && estimatedFare != 'null') ...[
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Est. fare',
+                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                      ),
+                      Text(
+                        '\$${double.tryParse(estimatedFare)?.toStringAsFixed(2) ?? estimatedFare}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: _onTrackActiveRide,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'Track Ride',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextButton(
+            onPressed: _isCheckingActiveRide
+                ? null
+                : () {
+                    setState(() => _isCheckingActiveRide = true);
+                    _checkActiveRide();
+                  },
+            child: _isCheckingActiveRide
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : Text(
+                    'Refresh status',
+                    style: TextStyle(color: AppColors.primaryColor, fontSize: 14),
+                  ),
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLocationRow(IconData icon, String text, Color color) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, color: color, size: 22),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final hasActiveRide = _activeRide != null;
+    final activePickup = _activePickup;
+    final activeDropoff = _activeDropoff;
+
     return Scaffold(
       body: Stack(
         children: [
@@ -262,7 +613,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
               initialZoom: 13.0,
               minZoom: 3.0,
               maxZoom: 18.0,
-              onTap: _handleMapTap,
+              onTap: hasActiveRide ? null : _handleMapTap,
             ),
             children: [
               TileLayer(
@@ -272,19 +623,32 @@ class _TaxiScreenState extends State<TaxiScreen> {
               ),
               MarkerLayer(
                 markers: [
-                  // Current location marker
-                  Marker(
-                    point: _currentPosition,
-                    width: 40,
-                    height: 40,
-                    child: const Icon(
-                      Icons.location_on,
-                      color: Colors.blue,
-                      size: 40,
+                  // Current location marker (hide when active ride to reduce clutter)
+                  if (!hasActiveRide)
+                    Marker(
+                      point: _currentPosition,
+                      width: 40,
+                      height: 40,
+                      child: const Icon(
+                        Icons.location_on,
+                        color: Colors.blue,
+                        size: 40,
+                      ),
                     ),
-                  ),
-                  // Destination marker
-                  if (_destinationPosition != null)
+                  // Active ride pickup marker
+                  if (hasActiveRide && activePickup != null)
+                    Marker(
+                      point: activePickup,
+                      width: 40,
+                      height: 40,
+                      child: const Icon(
+                        Icons.location_on,
+                        color: Colors.blue,
+                        size: 40,
+                      ),
+                    ),
+                  // Destination / dropoff marker
+                  if (_destinationPosition != null && !hasActiveRide)
                     Marker(
                       point: _destinationPosition!,
                       width: 40,
@@ -295,10 +659,35 @@ class _TaxiScreenState extends State<TaxiScreen> {
                         size: 40,
                       ),
                     ),
+                  if (hasActiveRide && activeDropoff != null)
+                    Marker(
+                      point: activeDropoff,
+                      width: 40,
+                      height: 40,
+                      child: const Icon(
+                        Icons.location_on,
+                        color: Colors.red,
+                        size: 40,
+                      ),
+                    ),
+                  // Available drivers (cars) on map - hide when active ride
+                  if (!hasActiveRide)
+                    ..._availableDrivers.map(
+                      (driver) => Marker(
+                        point: driver.position,
+                        width: 36,
+                        height: 36,
+                        child: Icon(
+                          Icons.local_taxi,
+                          color: AppColors.primaryColor,
+                          size: 36,
+                        ),
+                      ),
+                    ),
                 ],
               ),
-              // Polyline if destination is selected
-              if (_destinationPosition != null)
+              // Polyline for destination or active ride
+              if (_destinationPosition != null && !hasActiveRide)
                 PolylineLayer(
                   polylines: [
                     Polyline(
@@ -308,8 +697,64 @@ class _TaxiScreenState extends State<TaxiScreen> {
                     ),
                   ],
                 ),
+              if (hasActiveRide && activePickup != null && activeDropoff != null)
+                PolylineLayer(
+                  polylines: [
+                    Polyline(
+                      points: [activePickup, activeDropoff],
+                      strokeWidth: 3.0,
+                      color: AppColors.primaryColor,
+                    ),
+                  ],
+                ),
             ],
           ),
+          // Available cars info chip - hide when active ride
+          if (!hasActiveRide && _totalAvailable != null && _totalAvailable! > 0)
+            Positioned(
+              top: 95,
+              left: 16,
+              right: 16,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.15),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.local_taxi, color: AppColors.primaryColor, size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        '$_totalAvailable car${_totalAvailable! > 1 ? 's' : ''} nearby',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                      if (_estimatedWaitTime != null && _estimatedWaitTime! > 0) ...[
+                        const SizedBox(width: 12),
+                        Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
+                        const SizedBox(width: 4),
+                        Text(
+                          '~$_estimatedWaitTime min',
+                          style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            ),
           // Back button
           Positioned(
             top: 40,
@@ -339,7 +784,10 @@ class _TaxiScreenState extends State<TaxiScreen> {
               heroTag: 'current_location',
               mini: true,
               backgroundColor: Colors.white,
-              onPressed: _getCurrentLocation,
+              onPressed: () async {
+                await _getCurrentLocation();
+                _fetchAvailableVehicles();
+              },
               child: Icon(
                 Icons.my_location,
                 color: _isLoadingLocation ? Colors.grey : Colors.blue,
@@ -348,10 +796,13 @@ class _TaxiScreenState extends State<TaxiScreen> {
           ),
           // Bottom Sheet Modal
           DraggableScrollableSheet(
-            initialChildSize: 0.35,
+            initialChildSize: hasActiveRide ? 0.45 : 0.35,
             minChildSize: 0.25,
             maxChildSize: 0.75,
             builder: (context, scrollController) {
+              if (hasActiveRide) {
+                return _buildActiveRideSheet();
+              }
               return Container(
                 decoration: const BoxDecoration(
                   color: Colors.white,

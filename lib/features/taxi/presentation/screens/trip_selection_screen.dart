@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/features/taxi/data/ride_data_provider.dart';
 import 'finding_driver_screen.dart';
 
 class TripSelectionScreen extends StatefulWidget {
@@ -25,16 +26,24 @@ class TripSelectionScreen extends StatefulWidget {
 class _TripSelectionScreenState extends State<TripSelectionScreen> {
   late MapController _mapController;
   String? _selectedTrip;
+  String _paymentMethod = 'wallet';
+  bool _isLoadingEstimates = true;
+  bool _isRequestingRide = false;
+  String? _estimateError;
+  final RideDataProvider _rideDataProvider = RideDataProvider();
+
+  late List<TripOption> _tripOptions;
 
   @override
   void initState() {
     super.initState();
     _mapController = MapController();
-    _selectedTrip = 'go'; // Default selection
-    
-    // Fit map to show both locations
+    _selectedTrip = 'go';
+    _tripOptions = _getFallbackOptions();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fitBounds();
+      _fetchEstimates();
     });
   }
 
@@ -48,35 +57,200 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
     );
   }
 
-  final List<TripOption> _tripOptions = [
-    TripOption(
-      id: 'go',
-      name: 'Hudhud Go',
-      price: 550,
-      estimatedTime: '4 min away',
-      estimatedArrival: '8:46pm',
-      vehicleImagePath: 'assets/images/car.png',
-      hasFasterBadge: true,
-    ),
-    TripOption(
-      id: 'tuk',
-      name: 'Hudhud Tuk',
-      price: 170,
-      originalPrice: 188,
-      estimatedTime: '4 min away',
-      estimatedArrival: '8:46pm',
-      vehicleImagePath: 'assets/images/tuk.png',
-      isDiscount: true,
-    ),
-    TripOption(
-      id: 'premier',
-      name: 'HudHud Premier',
-      price: 223,
-      estimatedTime: '5 min away',
-      estimatedArrival: '8:46pm',
-      vehicleImagePath: 'assets/images/car.png',
-    ),
-  ];
+  /// Maps trip option id to API vehicle_type and ride_type
+  ({String vehicleType, String rideType}) _getApiParams(String tripId) {
+    switch (tripId) {
+      case 'go':
+        return (vehicleType: 'car', rideType: 'standard');
+      case 'tuk':
+        return (vehicleType: 'auto', rideType: 'standard');
+      case 'premier':
+        return (vehicleType: 'car', rideType: 'premium');
+      default:
+        return (vehicleType: 'car', rideType: 'standard');
+    }
+  }
+
+  Future<void> _fetchEstimates() async {
+    setState(() {
+      _isLoadingEstimates = true;
+      _estimateError = null;
+    });
+
+    final tripConfigs = [
+      ('go', 'Hudhud Go', 'assets/images/car.png', true, false),
+      ('tuk', 'Hudhud Tuk', 'assets/images/tuk.png', false, true),
+      ('premier', 'HudHud Premier', 'assets/images/car.png', false, false),
+    ];
+
+    final options = <TripOption>[];
+    for (final (id, name, imagePath, hasFasterBadge, isDiscount) in tripConfigs) {
+      var params = _getApiParams(id);
+      var result = await _rideDataProvider.getRideEstimate(
+        pickupLatitude: widget.pickupLocation.latitude,
+        pickupLongitude: widget.pickupLocation.longitude,
+        dropoffLatitude: widget.destinationLocation.latitude,
+        dropoffLongitude: widget.destinationLocation.longitude,
+        vehicleType: params.vehicleType,
+        rideType: params.rideType,
+        passengerCount: 1,
+      );
+      if (result['data'] == null && params.vehicleType == 'auto') {
+        params = (vehicleType: 'car', rideType: 'standard');
+        result = await _rideDataProvider.getRideEstimate(
+          pickupLatitude: widget.pickupLocation.latitude,
+          pickupLongitude: widget.pickupLocation.longitude,
+          dropoffLatitude: widget.destinationLocation.latitude,
+          dropoffLongitude: widget.destinationLocation.longitude,
+          vehicleType: params.vehicleType,
+          rideType: params.rideType,
+          passengerCount: 1,
+        );
+      }
+
+      if (mounted && result['data'] != null) {
+        final data = result['data'] as Map<String, dynamic>;
+        final fare = (data['estimated_fare'] as num?)?.toDouble() ?? 0;
+        final duration = (data['estimated_duration'] as int?) ?? 0;
+        final eta = DateTime.now().add(Duration(minutes: duration));
+        final dist = (data['estimated_distance'] as num?)?.toDouble();
+        options.add(TripOption(
+          id: id,
+          name: name,
+          price: fare.round(),
+          originalPrice: isDiscount ? (fare * 1.1).round() : null,
+          estimatedTime: '$duration min',
+          estimatedArrival: '${eta.hour > 12 ? eta.hour - 12 : eta.hour}:${eta.minute.toString().padLeft(2, '0')}${eta.hour >= 12 ? 'pm' : 'am'}',
+          vehicleImagePath: imagePath,
+          hasFasterBadge: hasFasterBadge,
+          isDiscount: isDiscount,
+          estimatedDistance: dist,
+          estimatedDuration: duration,
+          vehicleType: params.vehicleType,
+          rideType: params.rideType,
+        ));
+      } else {
+        options.add(TripOption(
+          id: id,
+          name: name,
+          price: 0,
+          originalPrice: isDiscount ? 0 : null,
+          estimatedTime: '--',
+          estimatedArrival: '--',
+          vehicleImagePath: imagePath,
+          hasFasterBadge: hasFasterBadge,
+          isDiscount: isDiscount,
+          estimatedDistance: null,
+          estimatedDuration: null,
+          vehicleType: params.vehicleType,
+          rideType: params.rideType,
+        ));
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        _tripOptions = options.isEmpty ? _getFallbackOptions() : options;
+        _isLoadingEstimates = false;
+        if (options.every((o) => o.price == 0)) {
+          _estimateError = 'Could not fetch estimates. Using default prices.';
+        }
+      });
+    }
+  }
+
+  List<TripOption> _getFallbackOptions() {
+    return [
+      TripOption(
+        id: 'go',
+        name: 'Hudhud Go',
+        price: 550,
+        estimatedTime: '4 min away',
+        estimatedArrival: '8:46pm',
+        vehicleImagePath: 'assets/images/car.png',
+        hasFasterBadge: true,
+        vehicleType: 'car',
+        rideType: 'standard',
+      ),
+      TripOption(
+        id: 'tuk',
+        name: 'Hudhud Tuk',
+        price: 170,
+        originalPrice: 188,
+        estimatedTime: '4 min away',
+        estimatedArrival: '8:46pm',
+        vehicleImagePath: 'assets/images/tuk.png',
+        isDiscount: true,
+        vehicleType: 'car',
+        rideType: 'standard',
+      ),
+      TripOption(
+        id: 'premier',
+        name: 'HudHud Premier',
+        price: 223,
+        estimatedTime: '5 min away',
+        estimatedArrival: '8:46pm',
+        vehicleImagePath: 'assets/images/car.png',
+        vehicleType: 'car',
+        rideType: 'premium',
+      ),
+    ];
+  }
+
+  Future<void> _onSelectTrip(TripOption selectedOption) async {
+    if (_isRequestingRide) return;
+
+    setState(() => _isRequestingRide = true);
+
+    final result = await _rideDataProvider.requestRide(
+      pickupLocation: widget.pickupAddress,
+      pickupLatitude: widget.pickupLocation.latitude,
+      pickupLongitude: widget.pickupLocation.longitude,
+      dropoffLocation: widget.destinationAddress,
+      dropoffLatitude: widget.destinationLocation.latitude,
+      dropoffLongitude: widget.destinationLocation.longitude,
+      vehicleType: selectedOption.vehicleType,
+      rideType: selectedOption.rideType,
+      passengerCount: 1,
+      estimatedDistance: selectedOption.estimatedDistance ?? 0,
+      estimatedDuration: selectedOption.estimatedDuration ?? 0,
+      estimatedFare: selectedOption.price.toDouble(),
+      paymentMethod: _paymentMethod,
+    );
+
+    if (!mounted) return;
+
+    setState(() => _isRequestingRide = false);
+
+    if (result['statusCode'] != null && result['statusCode'] >= 200 && result['statusCode']! < 300) {
+      final data = result['data'] as Map<String, dynamic>?;
+      final ride = data?['ride'] as Map<String, dynamic>?;
+      final rideId = ride?['id'] as int?;
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => FindingDriverScreen(
+            pickupLocation: widget.pickupLocation,
+            destinationLocation: widget.destinationLocation,
+            pickupAddress: widget.pickupAddress,
+            destinationAddress: widget.destinationAddress,
+            tripType: selectedOption.name,
+            price: selectedOption.price,
+            paymentMethod: _paymentMethod,
+            rideId: rideId,
+          ),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result['errorMessage'] ?? 'Failed to request ride'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -191,10 +365,20 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
                         color: Color(0xFF2C3E50),
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    // Trip Options
+                    if (_estimateError != null) ...[
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Text(
+                          _estimateError!,
+                          style: TextStyle(fontSize: 12, color: Colors.orange[800]),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
                     Expanded(
-                      child: ListView.builder(
+                      child: _isLoadingEstimates
+                          ? const Center(child: CircularProgressIndicator())
+                          : ListView.builder(
                         controller: scrollController,
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         itemCount: _tripOptions.length,
@@ -218,6 +402,29 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
+                    // Payment method selector
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Row(
+                        children: [
+                          Text('Payment: ', style: TextStyle(color: Colors.grey[700], fontSize: 14)),
+                          ...['wallet', 'card', 'cash'].map((method) {
+                            final isSelected = _paymentMethod == method;
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: ChoiceChip(
+                                label: Text(method.toUpperCase()),
+                                selected: isSelected,
+                                onSelected: (selected) {
+                                  if (selected) setState(() => _paymentMethod = method);
+                                },
+                              ),
+                            );
+                          }),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
                     // Select Button
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -225,22 +432,9 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
                         width: double.infinity,
                         height: 50,
                         child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => FindingDriverScreen(
-                                  pickupLocation: widget.pickupLocation,
-                                  destinationLocation: widget.destinationLocation,
-                                  pickupAddress: widget.pickupAddress,
-                                  destinationAddress: widget.destinationAddress,
-                                  tripType: selectedOption.name,
-                                  price: selectedOption.price,
-                                  paymentMethod: 'Card',
-                                ),
-                              ),
-                            );
-                          },
+                          onPressed: _isRequestingRide
+                              ? null
+                              : () => _onSelectTrip(selectedOption),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primaryColor,
                             shape: RoundedRectangleBorder(
@@ -280,6 +474,10 @@ class TripOption {
   final String vehicleImagePath;
   final bool hasFasterBadge;
   final bool isDiscount;
+  final double? estimatedDistance;
+  final int? estimatedDuration;
+  final String vehicleType;
+  final String rideType;
 
   TripOption({
     required this.id,
@@ -291,6 +489,10 @@ class TripOption {
     required this.vehicleImagePath,
     this.hasFasterBadge = false,
     this.isDiscount = false,
+    this.estimatedDistance,
+    this.estimatedDuration,
+    this.vehicleType = 'car',
+    this.rideType = 'standard',
   });
 }
 

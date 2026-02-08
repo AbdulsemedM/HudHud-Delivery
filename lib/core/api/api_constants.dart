@@ -83,6 +83,12 @@ class ApiConstants {
   // Courier delivery endpoints
   static const String deliveryEstimate = 'services/delivery/estimate';
   static const String deliveryRequest = 'services/delivery/request';
+
+  // Ride/Taxi endpoints
+  static const String rideEstimate = 'services/ride/estimate';
+  static const String rideRequest = 'services/ride/request';
+  static const String rideAvailableVehicles = 'services/ride/available-vehicles';
+  static const String userRidesActive = 'user/rides/active';
   static const String deliveryTrack = 'services/delivery/track/{id}';
   static const String userDeliveries = 'user/deliveries';
   static const String userDeliveryDetails = 'user/deliveries/{id}';
