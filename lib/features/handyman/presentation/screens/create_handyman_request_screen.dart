@@ -226,28 +226,29 @@ class _CreateHandymanRequestScreenState
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'New Service Request',
           style: TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 18,
-            color: AppColors.lightTextPrimary,
+            color: theme.colorScheme.onSurface,
           ),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: theme.colorScheme.surface,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-          color: AppColors.lightTextPrimary,
+          color: theme.colorScheme.onSurface,
           onPressed: () => Navigator.pop(context),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(
-            color: AppColors.lightBorder.withOpacity(0.5),
+            color: theme.dividerColor.withOpacity(0.5),
             height: 1,
           ),
         ),
@@ -311,8 +312,8 @@ class _CreateHandymanRequestScreenState
                         : 'Select date and time',
                     style: TextStyle(
                       color: _scheduledAt != null
-                          ? AppColors.lightTextPrimary
-                          : Colors.grey[600],
+                          ? theme.colorScheme.onSurface
+                          : theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ),
@@ -368,20 +369,20 @@ class _CreateHandymanRequestScreenState
                 child: ElevatedButton(
                   onPressed: _isSubmitting ? null : _submit,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryColor,
-                    foregroundColor: Colors.white,
+                    backgroundColor: theme.colorScheme.primary,
+                    foregroundColor: theme.colorScheme.onPrimary,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                   child: _isSubmitting
-                      ? const SizedBox(
+                      ? SizedBox(
                           height: 24,
                           width: 24,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.onPrimary),
                           ),
                         )
                       : const Text('Create Request'),

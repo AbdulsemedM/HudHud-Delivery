@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
@@ -54,7 +54,7 @@ class ConfirmDetailsScreen extends StatefulWidget {
 
 class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
   late final CourierRepository _courierRepository;
-  late final MapController _mapController;
+  gmaps.GoogleMapController? _mapController;
 
   bool _isLoadingEstimate = true;
   bool _isLoadingRequest = false;
@@ -67,13 +67,40 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    _mapController = MapController();
     _courierRepository = CourierRepository(
       courierDataProvider: CourierDataProvider(
         apiService: ApiService.instance,
       ),
     );
     _fetchEstimate();
+  }
+
+  static gmaps.LatLng _toG(LatLng p) => gmaps.LatLng(p.latitude, p.longitude);
+
+  void _fitBounds() {
+    if (widget.pickupPosition != null && widget.deliveryPosition != null) {
+      final bounds = gmaps.LatLngBounds(
+        southwest: gmaps.LatLng(
+          widget.pickupPosition!.latitude < widget.deliveryPosition!.latitude
+              ? widget.pickupPosition!.latitude
+              : widget.deliveryPosition!.latitude,
+          widget.pickupPosition!.longitude < widget.deliveryPosition!.longitude
+              ? widget.pickupPosition!.longitude
+              : widget.deliveryPosition!.longitude,
+        ),
+        northeast: gmaps.LatLng(
+          widget.pickupPosition!.latitude > widget.deliveryPosition!.latitude
+              ? widget.pickupPosition!.latitude
+              : widget.deliveryPosition!.latitude,
+          widget.pickupPosition!.longitude > widget.deliveryPosition!.longitude
+              ? widget.pickupPosition!.longitude
+              : widget.deliveryPosition!.longitude,
+        ),
+      );
+      _mapController?.moveCamera(
+        gmaps.CameraUpdate.newLatLngBounds(bounds, 50),
+      );
+    }
   }
 
   String _mapPackageType(String itemType) {
@@ -242,19 +269,6 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
       mapCenter = widget.deliveryPosition!;
     }
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (widget.pickupPosition != null && widget.deliveryPosition != null) {
-        final bounds =
-            LatLngBounds(widget.pickupPosition!, widget.deliveryPosition!);
-        _mapController.fitCamera(
-          CameraFit.bounds(
-            bounds: bounds,
-            padding: const EdgeInsets.all(50),
-          ),
-        );
-      }
-    });
-
     String estimatedFeeText = 'ETB 150';
     if (_isLoadingEstimate) {
       estimatedFeeText = 'Loading...';
@@ -269,61 +283,47 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          FlutterMap(
-            mapController: _mapController,
-            options: MapOptions(
-              initialCenter: mapCenter,
-              initialZoom: 13.0,
-              minZoom: 3.0,
-              maxZoom: 18.0,
+          gmaps.GoogleMap(
+            initialCameraPosition: gmaps.CameraPosition(
+              target: _toG(mapCenter),
+              zoom: 13.0,
             ),
-            children: [
-              TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.hudhuddelivery.app',
-                maxZoom: 18,
-              ),
-              if (widget.pickupPosition != null &&
-                  widget.deliveryPosition != null)
-                PolylineLayer(
-                  polylines: [
-                    Polyline(
-                      points: [
-                        widget.pickupPosition!,
-                        widget.deliveryPosition!
-                      ],
-                      strokeWidth: 3.0,
-                      color: AppColors.primaryColor,
-                    ),
-                  ],
+            markers: {
+              if (widget.pickupPosition != null)
+                gmaps.Marker(
+                  markerId: const gmaps.MarkerId('pickup'),
+                  position: _toG(widget.pickupPosition!),
+                  icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+                    gmaps.BitmapDescriptor.hueRed,
+                  ),
                 ),
-              MarkerLayer(
-                markers: [
-                  if (widget.pickupPosition != null)
-                    Marker(
-                      point: widget.pickupPosition!,
-                      width: 40,
-                      height: 40,
-                      child: const Icon(
-                        Icons.location_on,
-                        color: Colors.red,
-                        size: 40,
-                      ),
+              if (widget.deliveryPosition != null)
+                gmaps.Marker(
+                  markerId: const gmaps.MarkerId('delivery'),
+                  position: _toG(widget.deliveryPosition!),
+                  icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+                    gmaps.BitmapDescriptor.hueGreen,
+                  ),
+                ),
+            },
+            polylines: widget.pickupPosition != null &&
+                    widget.deliveryPosition != null
+                ? {
+                    gmaps.Polyline(
+                      polylineId: const gmaps.PolylineId('route'),
+                      points: [
+                        _toG(widget.pickupPosition!),
+                        _toG(widget.deliveryPosition!),
+                      ],
+                      color: AppColors.primaryColor,
+                      width: 3,
                     ),
-                  if (widget.deliveryPosition != null)
-                    Marker(
-                      point: widget.deliveryPosition!,
-                      width: 40,
-                      height: 40,
-                      child: const Icon(
-                        Icons.location_on,
-                        color: Colors.green,
-                        size: 40,
-                      ),
-                    ),
-                ],
-              ),
-            ],
+                  }
+                : {},
+            onMapCreated: (controller) {
+              _mapController = controller;
+              _fitBounds();
+            },
           ),
           Positioned(
             top: 40,

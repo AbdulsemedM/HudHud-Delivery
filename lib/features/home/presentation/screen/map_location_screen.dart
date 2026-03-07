@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
 import '../../../../app/services/nominatim_service.dart';
-// import '../../../../app/services/location_service.dart';
 import '../../../../app/services/custom_location_service.dart';
 
 class MapLocationScreen extends StatefulWidget {
   final String? currentLocation;
-  
+
   const MapLocationScreen({Key? key, this.currentLocation}) : super(key: key);
 
   @override
@@ -15,47 +14,53 @@ class MapLocationScreen extends StatefulWidget {
 }
 
 class _MapLocationScreenState extends State<MapLocationScreen> {
-  final MapController _mapController = MapController();
+  gmaps.GoogleMapController? _mapController;
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
-  
+
   LatLng _currentPosition = const LatLng(33.6844, 73.0479); // Default to Islamabad
   // ignore: unused_field
   List<PlaceResult> _searchResults = [];
-  List<Marker> _markers = [];
+  Set<gmaps.Marker> _markers = {};
   bool _isSearching = false;
   bool _isLoadingCurrentLocation = false;
   // ignore: unused_field
   PlaceResult? _selectedPlace;
-  
+
+  static gmaps.LatLng _toG(LatLng p) => gmaps.LatLng(p.latitude, p.longitude);
+
   @override
   void initState() {
     super.initState();
     _getCurrentLocation();
   }
-  
+
   @override
   void dispose() {
     _searchController.dispose();
     _searchFocusNode.dispose();
+    _mapController?.dispose();
     super.dispose();
   }
-  
+
   Future<void> _getCurrentLocation() async {
     setState(() {
       _isLoadingCurrentLocation = true;
     });
-    
+
     try {
-      final LocationData? position = await CustomLocationService.getCurrentPosition();
+      final LocationData? position =
+          await CustomLocationService.getCurrentPosition();
       if (position != null && mounted) {
         final newPosition = LatLng(position.latitude, position.longitude);
         setState(() {
           _currentPosition = newPosition;
-          _markers = [_createCurrentLocationMarker(newPosition)];
+          _markers = {_createCurrentLocationMarker(newPosition)};
         });
-        
-        _mapController.move(newPosition, 15.0);
+
+        _mapController?.moveCamera(
+          gmaps.CameraUpdate.newLatLngZoom(_toG(newPosition), 15.0),
+        );
       }
     } catch (e) {
       print('Error getting current location: $e');
@@ -67,92 +72,56 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
       }
     }
   }
-  
-  Marker _createCurrentLocationMarker(LatLng position) {
-    return Marker(
-      point: position,
-      width: 40,
-      height: 40,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.blue,
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white, width: 3),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.3),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: const Icon(
-          Icons.my_location,
-          color: Colors.white,
-          size: 20,
-        ),
-      ),
+
+  gmaps.Marker _createCurrentLocationMarker(LatLng position) {
+    return gmaps.Marker(
+      markerId: const gmaps.MarkerId('current'),
+      position: _toG(position),
+      icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(gmaps.BitmapDescriptor.hueAzure),
+      infoWindow: const gmaps.InfoWindow(title: 'Current location'),
     );
   }
-  
-  Marker _createSearchMarker(LatLng position, PlaceResult place) {
-    return Marker(
-      point: position,
-      width: 40,
-      height: 40,
-      child: GestureDetector(
-        onTap: () => _selectPlace(place),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.red,
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.white, width: 2),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.3),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: const Icon(
-            Icons.location_on,
-            color: Colors.white,
-            size: 24,
-          ),
-        ),
-      ),
+
+  gmaps.Marker _createSearchMarker(LatLng position, PlaceResult place) {
+    return gmaps.Marker(
+      markerId: gmaps.MarkerId(place.shortAddress),
+      position: _toG(position),
+      icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(gmaps.BitmapDescriptor.hueRed),
+      infoWindow: gmaps.InfoWindow(title: place.shortAddress),
+      onTap: () => _selectPlace(place),
     );
   }
-  
+
   Future<void> _searchPlaces(String query) async {
     if (query.trim().isEmpty) {
       setState(() {
         _searchResults = [];
-        _markers = [_createCurrentLocationMarker(_currentPosition)];
+        _markers = {_createCurrentLocationMarker(_currentPosition)};
       });
       return;
     }
-    
+
     setState(() {
       _isSearching = true;
     });
-    
+
     try {
       final results = await NominatimService.searchPlaces(query);
       if (mounted) {
         setState(() {
           _searchResults = results;
-          _markers = [
+          _markers = {
             _createCurrentLocationMarker(_currentPosition),
             ...results.map((place) => _createSearchMarker(place.coordinates, place)),
-          ];
+          };
         });
-        
+
         if (results.isNotEmpty) {
-          // Fit map to show all markers
-          final bounds = _calculateBounds([_currentPosition, ...results.map((r) => r.coordinates)]);
-          _mapController.fitCamera(CameraFit.bounds(bounds: bounds, padding: const EdgeInsets.all(50)));
+          final bounds = _calculateBounds(
+              [_currentPosition, ...results.map((r) => r.coordinates)]);
+        _mapController?.moveCamera(
+          gmaps.CameraUpdate.newLatLngBounds(bounds, 50),
+        );
         }
       }
     } catch (e) {
@@ -165,37 +134,38 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
       }
     }
   }
-  
-  LatLngBounds _calculateBounds(List<LatLng> points) {
+
+  gmaps.LatLngBounds _calculateBounds(List<LatLng> points) {
     double minLat = points.first.latitude;
     double maxLat = points.first.latitude;
     double minLng = points.first.longitude;
     double maxLng = points.first.longitude;
-    
+
     for (final point in points) {
       minLat = minLat < point.latitude ? minLat : point.latitude;
       maxLat = maxLat > point.latitude ? maxLat : point.latitude;
       minLng = minLng < point.longitude ? minLng : point.longitude;
       maxLng = maxLng > point.longitude ? maxLng : point.longitude;
     }
-    
-    return LatLngBounds(
-      LatLng(minLat, minLng),
-      LatLng(maxLat, maxLng),
+
+    return gmaps.LatLngBounds(
+      southwest: gmaps.LatLng(minLat, minLng),
+      northeast: gmaps.LatLng(maxLat, maxLng),
     );
   }
-  
+
   void _selectPlace(PlaceResult place) {
     setState(() {
       _selectedPlace = place;
     });
-    
-    _mapController.move(place.coordinates, 16.0);
-    
-    // Show bottom sheet with place details
+
+    _mapController?.moveCamera(
+      gmaps.CameraUpdate.newLatLngZoom(_toG(place.coordinates), 16.0),
+    );
+
     _showPlaceDetails(place);
   }
-  
+
   void _showPlaceDetails(PlaceResult place) {
     showModalBottomSheet(
       context: context,
@@ -211,7 +181,6 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Handle bar
             Center(
               child: Container(
                 width: 40,
@@ -223,8 +192,6 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            
-            // Place details
             Row(
               children: [
                 Container(
@@ -266,10 +233,7 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
                 ),
               ],
             ),
-            
             const SizedBox(height: 24),
-            
-            // Action buttons
             Row(
               children: [
                 Expanded(
@@ -301,20 +265,18 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
                 ),
               ],
             ),
-            
-            // Safe area padding
             SizedBox(height: MediaQuery.of(context).padding.bottom),
           ],
         ),
       ),
     );
   }
-  
+
   void _confirmLocation(PlaceResult place) {
-    Navigator.pop(context); // Close bottom sheet
-    Navigator.pop(context, place.shortAddress); // Return to home screen with selected address
+    Navigator.pop(context);
+    Navigator.pop(context, place.shortAddress);
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -347,7 +309,6 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
       ),
       body: Column(
         children: [
-          // Search bar
           Container(
             padding: const EdgeInsets.all(16),
             color: Colors.white,
@@ -388,7 +349,6 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
                 fillColor: Colors.grey[50],
               ),
               onChanged: (value) {
-                // Debounce search
                 Future.delayed(const Duration(milliseconds: 500), () {
                   if (_searchController.text == value) {
                     _searchPlaces(value);
@@ -398,31 +358,22 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
               onSubmitted: _searchPlaces,
             ),
           ),
-          
-          // Map
           Expanded(
-            child: FlutterMap(
-              mapController: _mapController,
-              options: MapOptions(
-                initialCenter: _currentPosition,
-                initialZoom: 13.0,
-                minZoom: 3.0,
-                maxZoom: 18.0,
-                onTap: (tapPosition, point) {
-                  // Hide keyboard when tapping on map
-                  _searchFocusNode.unfocus();
-                },
+            child: gmaps.GoogleMap(
+              initialCameraPosition: gmaps.CameraPosition(
+                target: _toG(_currentPosition),
+                zoom: 13.0,
               ),
-              children: [
-                TileLayer(
-                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                  userAgentPackageName: 'com.hudhuddelivery.app',
-                  maxZoom: 18,
-                ),
-                MarkerLayer(
-                  markers: _markers,
-                ),
-              ],
+              markers: _markers,
+              myLocationEnabled: true,
+              myLocationButtonEnabled: false,
+              zoomControlsEnabled: false,
+              onMapCreated: (controller) {
+                _mapController = controller;
+              },
+              onTap: (_) {
+                _searchFocusNode.unfocus();
+              },
             ),
           ),
         ],

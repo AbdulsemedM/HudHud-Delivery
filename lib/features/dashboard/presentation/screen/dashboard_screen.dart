@@ -34,15 +34,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       body: _screens[_selectedIndex],
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.colorScheme.surface,
           boxShadow: [
             BoxShadow(
               blurRadius: 20,
-              color: Colors.black.withOpacity(.1),
+              color: theme.colorScheme.shadow.withOpacity(.1),
             )
           ],
         ),
@@ -50,15 +52,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8),
             child: GNav(
-              rippleColor: Colors.grey[300]!,
-              hoverColor: Colors.grey[100]!,
+              rippleColor: theme.colorScheme.surfaceContainerHighest,
+              hoverColor: theme.colorScheme.surfaceContainer,
               gap: 4,
-              activeColor: Colors.orange,
+              activeColor: theme.colorScheme.primary,
               iconSize: 22,
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
               duration: const Duration(milliseconds: 400),
-              tabBackgroundColor: Colors.orange.withOpacity(0.1),
-              color: Colors.grey[600]!,
+              tabBackgroundColor: theme.colorScheme.primary.withOpacity(0.15),
+              color: theme.colorScheme.onSurfaceVariant,
               textStyle: const TextStyle(fontSize: 11),
               tabs: const [
                 GButton(

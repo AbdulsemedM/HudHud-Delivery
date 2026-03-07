@@ -80,28 +80,29 @@ class _HandymanScreenState extends State<HandymanScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Handyman Services',
           style: TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 18,
-            color: AppColors.lightTextPrimary,
+            color: theme.colorScheme.onSurface,
           ),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: theme.colorScheme.surface,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-          color: AppColors.lightTextPrimary,
+          color: theme.colorScheme.onSurface,
           onPressed: () => Navigator.pop(context),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(
-            color: AppColors.lightBorder.withOpacity(0.5),
+            color: theme.dividerColor.withOpacity(0.5),
             height: 1,
           ),
         ),
@@ -114,12 +115,12 @@ class _HandymanScreenState extends State<HandymanScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'What would you like to do?',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF2C3E50),
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 16),
@@ -165,7 +166,7 @@ class _HandymanScreenState extends State<HandymanScreen> {
                       Text(
                         _error!,
                         style: TextStyle(
-                          color: Colors.grey[600],
+                          color: theme.colorScheme.onSurfaceVariant,
                           fontSize: 14,
                         ),
                         textAlign: TextAlign.center,
@@ -190,11 +191,11 @@ class _HandymanScreenState extends State<HandymanScreen> {
                     vertical: 40,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: theme.colorScheme.surface,
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey.withOpacity(0.08),
+                        color: theme.colorScheme.shadow.withOpacity(0.08),
                         spreadRadius: 1,
                         blurRadius: 8,
                         offset: const Offset(0, 2),
@@ -207,7 +208,7 @@ class _HandymanScreenState extends State<HandymanScreen> {
                       Icon(
                         Icons.handyman_rounded,
                         size: 48,
-                        color: Colors.grey[400],
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                       const SizedBox(height: 16),
                       Text(
@@ -215,7 +216,7 @@ class _HandymanScreenState extends State<HandymanScreen> {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: Colors.grey[700],
+                          color: theme.colorScheme.onSurface,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -223,7 +224,7 @@ class _HandymanScreenState extends State<HandymanScreen> {
                         'Create a request to get quotes from handymen',
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.grey[500],
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -261,10 +262,12 @@ class _CreateRequestCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF795548).withOpacity(0.12),
+        color: primaryColor.withOpacity(0.12),
         borderRadius: BorderRadius.circular(12),
       ),
       child: GestureDetector(
@@ -274,12 +277,12 @@ class _CreateRequestCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: const Color(0xFF795548).withOpacity(0.25),
+                color: primaryColor.withOpacity(0.25),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.add_circle_outline_rounded,
-                color: Color(0xFF795548),
+                color: primaryColor,
                 size: 32,
               ),
             ),
@@ -293,7 +296,7 @@ class _CreateRequestCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: const Color(0xFF5D4037),
+                      color: theme.colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -301,7 +304,7 @@ class _CreateRequestCard extends StatelessWidget {
                     'Describe your repair or maintenance need and get quotes from handymen.',
                     style: TextStyle(
                       fontSize: 13,
-                      color: Colors.grey[700],
+                      color: theme.colorScheme.onSurfaceVariant,
                       height: 1.4,
                     ),
                   ),
@@ -330,17 +333,18 @@ class _RequestCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.08),
+              color: theme.colorScheme.shadow.withOpacity(0.08),
               spreadRadius: 1,
               blurRadius: 8,
               offset: const Offset(0, 2),
@@ -357,10 +361,10 @@ class _RequestCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     request.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF2E7D32),
+                      color: AppColors.successColor,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -374,8 +378,8 @@ class _RequestCard extends StatelessWidget {
                   ),
                   child: Text(
                     request.status.replaceAll('_', ' ').toUpperCase(),
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: theme.colorScheme.onPrimary,
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
                     ),
@@ -386,19 +390,19 @@ class _RequestCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               request.description,
-              style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+              style: TextStyle(fontSize: 14, color: theme.colorScheme.onSurfaceVariant),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 8),
             Row(
               children: [
-                Icon(Icons.location_on, size: 16, color: Colors.grey[600]),
+                Icon(Icons.location_on, size: 16, color: theme.colorScheme.onSurfaceVariant),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
                     request.location,
-                    style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+                    style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -414,7 +418,7 @@ class _RequestCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.primaryColor,
+                    color: theme.colorScheme.primary,
                   ),
                 ),
                 if (request.quotesCount > 0)
@@ -422,7 +426,7 @@ class _RequestCard extends StatelessWidget {
                     '${request.quotesCount} quote(s)',
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.grey[600],
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
               ],

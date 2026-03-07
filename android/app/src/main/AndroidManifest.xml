@@ -7,7 +7,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     
     <application
-        android:label="hudhud_delivery"
+        android:label="HudHud Delivery"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -36,6 +36,10 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <!-- Google Maps API Key -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyCQVS4wY4ans26sgi214mE6Ic81ER_hOfU" />
         <!-- FCM default notification channel (optional; can be overridden in Flutter) -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"

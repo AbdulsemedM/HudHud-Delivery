@@ -71,29 +71,30 @@ class _ServicesScreenBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppColors.lightBackground,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Our Services',
           style: TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 18,
-            color: AppColors.lightTextPrimary,
+            color: theme.colorScheme.onSurface,
           ),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: theme.colorScheme.surface,
         elevation: 0,
         scrolledUnderElevation: 2,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-          color: AppColors.lightTextPrimary,
+          color: theme.colorScheme.onSurface,
           onPressed: () => Navigator.pop(context),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(
-            color: AppColors.lightBorder.withOpacity(0.5),
+            color: theme.dividerColor.withOpacity(0.5),
             height: 1,
           ),
         ),
@@ -155,13 +156,14 @@ class _LoadingState extends StatelessWidget {
 class _ServiceSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: theme.colorScheme.shadow.withOpacity(0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -174,7 +176,7 @@ class _ServiceSkeleton extends StatelessWidget {
             width: 56,
             height: 56,
             decoration: BoxDecoration(
-              color: Colors.grey[200],
+              color: theme.colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(14),
             ),
           ),
@@ -183,7 +185,7 @@ class _ServiceSkeleton extends StatelessWidget {
             margin: const EdgeInsets.symmetric(horizontal: 16),
             height: 14,
             decoration: BoxDecoration(
-              color: Colors.grey[200],
+              color: theme.colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(4),
             ),
           ),
@@ -192,7 +194,7 @@ class _ServiceSkeleton extends StatelessWidget {
             margin: const EdgeInsets.symmetric(horizontal: 24),
             height: 10,
             decoration: BoxDecoration(
-              color: Colors.grey[100],
+              color: theme.colorScheme.surfaceContainer,
               borderRadius: BorderRadius.circular(4),
             ),
           ),

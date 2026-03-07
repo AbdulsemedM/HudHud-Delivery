@@ -7,7 +7,7 @@ import '../core/theme/app_colors.dart';
 class ThemeController extends ChangeNotifier {
   static const String _themeKey = 'theme_mode';
   
-  ThemeMode _themeMode = ThemeMode.system;
+  ThemeMode _themeMode = ThemeMode.light;
   late SharedPreferences _prefs;
   
   ThemeMode get themeMode => _themeMode;
@@ -37,10 +37,11 @@ class ThemeController extends ChangeNotifier {
   // Load theme mode from shared preferences
   Future<void> _loadThemeMode() async {
     final themeIndex = _prefs.getInt(_themeKey);
-    if (themeIndex != null) {
+    if (themeIndex != null && themeIndex < ThemeMode.values.length) {
       _themeMode = ThemeMode.values[themeIndex];
       notifyListeners();
     }
+    // Default is light mode when no preference is saved
   }
   
   // Save theme mode to shared preferences

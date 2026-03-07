@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 
@@ -28,35 +28,49 @@ class DriverOnTheWayScreen extends StatefulWidget {
 }
 
 class _DriverOnTheWayScreenState extends State<DriverOnTheWayScreen> {
-  late MapController _mapController;
+  gmaps.GoogleMapController? _mapController;
   LatLng? _driverPosition;
+
+  static gmaps.LatLng _toG(LatLng p) => gmaps.LatLng(p.latitude, p.longitude);
 
   @override
   void initState() {
     super.initState();
-    _mapController = MapController();
-    
+
     // Calculate driver position (somewhere along the route)
     _driverPosition = LatLng(
-      widget.pickupLocation.latitude + 
-      (widget.destinationLocation.latitude - widget.pickupLocation.latitude) * 0.3,
-      widget.pickupLocation.longitude + 
-      (widget.destinationLocation.longitude - widget.pickupLocation.longitude) * 0.3,
+      widget.pickupLocation.latitude +
+          (widget.destinationLocation.latitude -
+                  widget.pickupLocation.latitude) *
+              0.3,
+      widget.pickupLocation.longitude +
+          (widget.destinationLocation.longitude -
+                  widget.pickupLocation.longitude) *
+              0.3,
     );
-    
-    // Fit map to show route
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _fitBounds();
-    });
   }
 
   void _fitBounds() {
-    final bounds = LatLngBounds(widget.pickupLocation, widget.destinationLocation);
-    _mapController.fitCamera(
-      CameraFit.bounds(
-        bounds: bounds,
-        padding: const EdgeInsets.all(50),
+    final bounds = gmaps.LatLngBounds(
+      southwest: gmaps.LatLng(
+        widget.pickupLocation.latitude < widget.destinationLocation.latitude
+            ? widget.pickupLocation.latitude
+            : widget.destinationLocation.latitude,
+        widget.pickupLocation.longitude < widget.destinationLocation.longitude
+            ? widget.pickupLocation.longitude
+            : widget.destinationLocation.longitude,
       ),
+      northeast: gmaps.LatLng(
+        widget.pickupLocation.latitude > widget.destinationLocation.latitude
+            ? widget.pickupLocation.latitude
+            : widget.destinationLocation.latitude,
+        widget.pickupLocation.longitude > widget.destinationLocation.longitude
+            ? widget.pickupLocation.longitude
+            : widget.destinationLocation.longitude,
+      ),
+    );
+    _mapController?.moveCamera(
+      gmaps.CameraUpdate.newLatLngBounds(bounds, 50),
     );
   }
 
@@ -65,87 +79,50 @@ class _DriverOnTheWayScreenState extends State<DriverOnTheWayScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Full screen map
-          FlutterMap(
-            mapController: _mapController,
-            options: MapOptions(
-              initialCenter: widget.pickupLocation,
-              initialZoom: 13.0,
-              minZoom: 3.0,
-              maxZoom: 18.0,
+          gmaps.GoogleMap(
+            initialCameraPosition: gmaps.CameraPosition(
+              target: _toG(widget.pickupLocation),
+              zoom: 13.0,
             ),
-            children: [
-              TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.hudhuddelivery.app',
-                maxZoom: 18,
+            markers: {
+              gmaps.Marker(
+                markerId: const gmaps.MarkerId('pickup'),
+                position: _toG(widget.pickupLocation),
+                icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+                  gmaps.BitmapDescriptor.hueGreen,
+                ),
               ),
-              PolylineLayer(
-                polylines: [
-                  Polyline(
-                    points: [widget.pickupLocation, widget.destinationLocation],
-                    strokeWidth: 3.0,
-                    color: AppColors.primaryColor,
+              if (_driverPosition != null)
+                gmaps.Marker(
+                  markerId: const gmaps.MarkerId('driver'),
+                  position: _toG(_driverPosition!),
+                  icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+                    gmaps.BitmapDescriptor.hueYellow,
                   ),
+                ),
+              gmaps.Marker(
+                markerId: const gmaps.MarkerId('destination'),
+                position: _toG(widget.destinationLocation),
+                icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+                  gmaps.BitmapDescriptor.hueRed,
+                ),
+              ),
+            },
+            polylines: {
+              gmaps.Polyline(
+                polylineId: const gmaps.PolylineId('route'),
+                points: [
+                  _toG(widget.pickupLocation),
+                  _toG(widget.destinationLocation),
                 ],
+                color: AppColors.primaryColor,
+                width: 3,
               ),
-              MarkerLayer(
-                markers: [
-                  // Pickup marker (green circle)
-                  Marker(
-                    point: widget.pickupLocation,
-                    width: 30,
-                    height: 30,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.green,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white,
-                          width: 3,
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Driver position (yellow taxi icon)
-                  if (_driverPosition != null)
-                    Marker(
-                      point: _driverPosition!,
-                      width: 40,
-                      height: 40,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.yellow[600],
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.3),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.local_taxi,
-                          color: Colors.white,
-                          size: 24,
-                        ),
-                      ),
-                    ),
-                  // Destination marker (red pin)
-                  Marker(
-                    point: widget.destinationLocation,
-                    width: 40,
-                    height: 40,
-                    child: const Icon(
-                      Icons.location_on,
-                      color: Colors.red,
-                      size: 40,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+            },
+            onMapCreated: (controller) {
+              _mapController = controller;
+              _fitBounds();
+            },
           ),
           // Back button
           Positioned(

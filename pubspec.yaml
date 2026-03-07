@@ -37,7 +37,7 @@ dependencies:
   geocoding: ^3.0.0
 
   # Map and HTTP
-  flutter_map: ^7.0.2
+  google_maps_flutter: ^2.5.0
   latlong2: ^0.9.1
   http: ^1.1.0
 

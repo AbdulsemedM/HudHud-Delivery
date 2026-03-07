@@ -56,28 +56,29 @@ class _HandymanDetailsScreenState extends State<HandymanDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Handyman Profile',
           style: TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 18,
-            color: AppColors.lightTextPrimary,
+            color: theme.colorScheme.onSurface,
           ),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: theme.colorScheme.surface,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-          color: AppColors.lightTextPrimary,
+          color: theme.colorScheme.onSurface,
           onPressed: () => Navigator.pop(context),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(
-            color: AppColors.lightBorder.withOpacity(0.5),
+            color: theme.dividerColor.withOpacity(0.5),
             height: 1,
           ),
         ),
@@ -100,7 +101,7 @@ class _HandymanDetailsScreenState extends State<HandymanDetailsScreen> {
                           _error!,
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: Colors.grey[600],
+                            color: theme.colorScheme.onSurfaceVariant,
                             fontSize: 14,
                           ),
                         ),
@@ -117,7 +118,7 @@ class _HandymanDetailsScreenState extends State<HandymanDetailsScreen> {
                   ),
                 )
               : _handyman == null
-                  ? const Center(child: Text('Handyman not found'))
+                  ? Center(child: Text('Handyman not found', style: TextStyle(color: theme.colorScheme.onSurface)))
                   : SingleChildScrollView(
                       padding: const EdgeInsets.all(16),
                       child: Column(
@@ -138,20 +139,20 @@ class _HandymanDetailsScreenState extends State<HandymanDetailsScreen> {
                           Center(
                             child: Text(
                               _handyman!.name,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF2C3E50),
+                                color: theme.colorScheme.onSurface,
                               ),
                             ),
                           ),
                           if (_handyman!.handymanProfile != null) ...[
                             const SizedBox(height: 24),
-                            _buildProfileSection(),
+                            _buildProfileSection(theme),
                           ],
                           if (_stats != null) ...[
                             const SizedBox(height: 24),
-                            _buildStatsSection(),
+                            _buildStatsSection(theme),
                           ],
                         ],
                       ),
@@ -159,17 +160,17 @@ class _HandymanDetailsScreenState extends State<HandymanDetailsScreen> {
     );
   }
 
-  Widget _buildProfileSection() {
+  Widget _buildProfileSection(ThemeData theme) {
     final profile = _handyman!.handymanProfile!;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.08),
+            color: theme.colorScheme.shadow.withOpacity(0.08),
             spreadRadius: 1,
             blurRadius: 8,
             offset: const Offset(0, 2),
@@ -180,12 +181,12 @@ class _HandymanDetailsScreenState extends State<HandymanDetailsScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (profile.bio != null && profile.bio!.isNotEmpty) ...[
-            const Text(
+            Text(
               'About',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Colors.grey,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 8),
@@ -193,19 +194,19 @@ class _HandymanDetailsScreenState extends State<HandymanDetailsScreen> {
               profile.bio!,
               style: TextStyle(
                 fontSize: 15,
-                color: Colors.grey[800],
+                color: theme.colorScheme.onSurface,
                 height: 1.5,
               ),
             ),
             const SizedBox(height: 20),
           ],
           if (profile.skills.isNotEmpty) ...[
-            const Text(
+            Text(
               'Skills',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Colors.grey,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 8),
@@ -223,18 +224,21 @@ class _HandymanDetailsScreenState extends State<HandymanDetailsScreen> {
           ],
           if (profile.hourlyRate != null) ...[
             _DetailRow(
+              theme: theme,
               label: 'Hourly Rate',
               value: '\$${profile.hourlyRate}',
             ),
           ],
           if (profile.experienceYears != null) ...[
             _DetailRow(
+              theme: theme,
               label: 'Experience',
               value: '${profile.experienceYears} years',
             ),
           ],
           if (profile.address != null && profile.address!.isNotEmpty) ...[
             _DetailRow(
+              theme: theme,
               label: 'Address',
               value: profile.address!,
             ),
@@ -244,17 +248,17 @@ class _HandymanDetailsScreenState extends State<HandymanDetailsScreen> {
     );
   }
 
-  Widget _buildStatsSection() {
+  Widget _buildStatsSection(ThemeData theme) {
     final stats = _stats!;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.08),
+            color: theme.colorScheme.shadow.withOpacity(0.08),
             spreadRadius: 1,
             blurRadius: 8,
             offset: const Offset(0, 2),
@@ -264,12 +268,12 @@ class _HandymanDetailsScreenState extends State<HandymanDetailsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Stats',
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Colors.grey,
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 12),
@@ -277,14 +281,17 @@ class _HandymanDetailsScreenState extends State<HandymanDetailsScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _StatItem(
+                theme: theme,
                 label: 'Services',
                 value: stats['total_services']?.toString() ?? '0',
               ),
               _StatItem(
+                theme: theme,
                 label: 'Rating',
                 value: stats['average_rating']?.toString() ?? '—',
               ),
               _StatItem(
+                theme: theme,
                 label: 'Response',
                 value: '${stats['response_rate'] ?? 0}%',
               ),
@@ -297,10 +304,11 @@ class _HandymanDetailsScreenState extends State<HandymanDetailsScreen> {
 }
 
 class _DetailRow extends StatelessWidget {
+  final ThemeData theme;
   final String label;
   final String value;
 
-  const _DetailRow({required this.label, required this.value});
+  const _DetailRow({required this.theme, required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -313,15 +321,16 @@ class _DetailRow extends StatelessWidget {
             label,
             style: TextStyle(
               fontSize: 12,
-              color: Colors.grey[600],
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 2),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w500,
+              color: theme.colorScheme.onSurface,
             ),
           ),
         ],
@@ -331,10 +340,11 @@ class _DetailRow extends StatelessWidget {
 }
 
 class _StatItem extends StatelessWidget {
+  final ThemeData theme;
   final String label;
   final String value;
 
-  const _StatItem({required this.label, required this.value});
+  const _StatItem({required this.theme, required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -342,10 +352,10 @@ class _StatItem extends StatelessWidget {
       children: [
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF795548),
+            color: theme.colorScheme.primary,
           ),
         ),
         const SizedBox(height: 4),
@@ -353,7 +363,7 @@ class _StatItem extends StatelessWidget {
           label,
           style: TextStyle(
             fontSize: 12,
-            color: Colors.grey[600],
+            color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
       ],

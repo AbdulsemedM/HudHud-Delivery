@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/app/services/location_service.dart';
@@ -33,7 +33,7 @@ class _AvailableDriver {
 }
 
 class _TaxiScreenState extends State<TaxiScreen> {
-  final MapController _mapController = MapController();
+  gmaps.GoogleMapController? _mapController;
   final TextEditingController _destinationController = TextEditingController();
   final RideDataProvider _rideDataProvider = RideDataProvider();
   LatLng _currentPosition = const LatLng(37.7749, -122.4194); // Default to San Francisco
@@ -46,6 +46,8 @@ class _TaxiScreenState extends State<TaxiScreen> {
   int? _estimatedWaitTime;
   Map<String, dynamic>? _activeRide;
   bool _isCheckingActiveRide = true;
+
+  static gmaps.LatLng _toG(LatLng p) => gmaps.LatLng(p.latitude, p.longitude);
 
   @override
   void initState() {
@@ -77,7 +79,9 @@ class _TaxiScreenState extends State<TaxiScreen> {
             _isLoadingLocation = false;
           });
 
-          _mapController.move(_currentPosition, 13.0);
+          _mapController?.moveCamera(
+            gmaps.CameraUpdate.newLatLngZoom(_toG(latLng), 13.0),
+          );
           _fetchAvailableVehicles();
         }
       } else {
@@ -124,11 +128,18 @@ class _TaxiScreenState extends State<TaxiScreen> {
     if (pickupLat != null && pickupLng != null && dropoffLat != null && dropoffLng != null) {
       final pickup = LatLng(pickupLat, pickupLng);
       final dropoff = LatLng(dropoffLat, dropoffLng);
-      _mapController.fitCamera(
-        CameraFit.bounds(
-          bounds: LatLngBounds(pickup, dropoff),
-          padding: const EdgeInsets.all(80),
+      final bounds = gmaps.LatLngBounds(
+        southwest: gmaps.LatLng(
+          pickup.latitude < dropoff.latitude ? pickup.latitude : dropoff.latitude,
+          pickup.longitude < dropoff.longitude ? pickup.longitude : dropoff.longitude,
         ),
+        northeast: gmaps.LatLng(
+          pickup.latitude > dropoff.latitude ? pickup.latitude : dropoff.latitude,
+          pickup.longitude > dropoff.longitude ? pickup.longitude : dropoff.longitude,
+        ),
+      );
+      _mapController?.moveCamera(
+        gmaps.CameraUpdate.newLatLngBounds(bounds, 80),
       );
     }
   }
@@ -291,9 +302,10 @@ class _TaxiScreenState extends State<TaxiScreen> {
     _onLocationSelected(place);
   }
 
-  Future<void> _handleMapTap(TapPosition tapPosition, LatLng point) async {
+  Future<void> _handleMapTap(gmaps.LatLng point) async {
+    final latLng = LatLng(point.latitude, point.longitude);
     // Don't set destination if user tapped on their current location
-    final distance = _calculateDistance(_currentPosition, point);
+    final distance = _calculateDistance(_currentPosition, latLng);
     if (distance < 0.001) {
       // Less than 100 meters, probably the same location
       return;
@@ -314,13 +326,15 @@ class _TaxiScreenState extends State<TaxiScreen> {
       if (mounted && places.isNotEmpty) {
         final place = places.first;
         setState(() {
-          _destinationPosition = point;
+          _destinationPosition = latLng;
           _destinationController.text = place.shortAddress;
           _isLoadingLocation = false;
         });
 
         // Move map to show the destination
-        _mapController.move(point, 15.0);
+        _mapController?.moveCamera(
+          gmaps.CameraUpdate.newLatLngZoom(point, 15.0),
+        );
 
         // Navigate to trip selection screen
         Navigator.push(
@@ -328,7 +342,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
           MaterialPageRoute(
             builder: (context) => TripSelectionScreen(
               pickupLocation: _currentPosition,
-              destinationLocation: point,
+              destinationLocation: latLng,
               pickupAddress: 'Current Location',
               destinationAddress: place.shortAddress,
             ),
@@ -596,6 +610,102 @@ class _TaxiScreenState extends State<TaxiScreen> {
     );
   }
 
+  Set<gmaps.Marker> _buildTaxiMarkers(
+    bool hasActiveRide,
+    LatLng? activePickup,
+    LatLng? activeDropoff,
+  ) {
+    final Set<gmaps.Marker> markers = {};
+    if (!hasActiveRide) {
+      markers.add(
+        gmaps.Marker(
+          markerId: const gmaps.MarkerId('current'),
+          position: _toG(_currentPosition),
+          icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+            gmaps.BitmapDescriptor.hueAzure,
+          ),
+        ),
+      );
+    }
+    if (hasActiveRide && activePickup != null) {
+      markers.add(
+        gmaps.Marker(
+          markerId: const gmaps.MarkerId('pickup'),
+          position: _toG(activePickup),
+          icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+            gmaps.BitmapDescriptor.hueAzure,
+          ),
+        ),
+      );
+    }
+    if (_destinationPosition != null && !hasActiveRide) {
+      markers.add(
+        gmaps.Marker(
+          markerId: const gmaps.MarkerId('destination'),
+          position: _toG(_destinationPosition!),
+          icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+            gmaps.BitmapDescriptor.hueRed,
+          ),
+        ),
+      );
+    }
+    if (hasActiveRide && activeDropoff != null) {
+      markers.add(
+        gmaps.Marker(
+          markerId: const gmaps.MarkerId('dropoff'),
+          position: _toG(activeDropoff),
+          icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+            gmaps.BitmapDescriptor.hueRed,
+          ),
+        ),
+      );
+    }
+    if (!hasActiveRide) {
+      for (var i = 0; i < _availableDrivers.length; i++) {
+        final driver = _availableDrivers[i];
+        markers.add(
+          gmaps.Marker(
+            markerId: gmaps.MarkerId('driver_$i'),
+            position: _toG(driver.position),
+            icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+              gmaps.BitmapDescriptor.hueOrange,
+            ),
+          ),
+        );
+      }
+    }
+    return markers;
+  }
+
+  Set<gmaps.Polyline> _buildTaxiPolylines(
+    bool hasActiveRide,
+    LatLng? activePickup,
+    LatLng? activeDropoff,
+  ) {
+    final Set<gmaps.Polyline> polylines = {};
+    if (_destinationPosition != null && !hasActiveRide) {
+      polylines.add(
+        gmaps.Polyline(
+          polylineId: const gmaps.PolylineId('route'),
+          points: [_toG(_currentPosition), _toG(_destinationPosition!)],
+          color: AppColors.primaryColor,
+          width: 3,
+        ),
+      );
+    }
+    if (hasActiveRide && activePickup != null && activeDropoff != null) {
+      polylines.add(
+        gmaps.Polyline(
+          polylineId: const gmaps.PolylineId('active_route'),
+          points: [_toG(activePickup), _toG(activeDropoff)],
+          color: AppColors.primaryColor,
+          width: 3,
+        ),
+      );
+    }
+    return polylines;
+  }
+
   @override
   Widget build(BuildContext context) {
     final hasActiveRide = _activeRide != null;
@@ -605,109 +715,17 @@ class _TaxiScreenState extends State<TaxiScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Full screen map
-          FlutterMap(
-            mapController: _mapController,
-            options: MapOptions(
-              initialCenter: _currentPosition,
-              initialZoom: 13.0,
-              minZoom: 3.0,
-              maxZoom: 18.0,
-              onTap: hasActiveRide ? null : _handleMapTap,
+          gmaps.GoogleMap(
+            initialCameraPosition: gmaps.CameraPosition(
+              target: _toG(_currentPosition),
+              zoom: 13.0,
             ),
-            children: [
-              TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.hudhuddelivery.app',
-                maxZoom: 18,
-              ),
-              MarkerLayer(
-                markers: [
-                  // Current location marker (hide when active ride to reduce clutter)
-                  if (!hasActiveRide)
-                    Marker(
-                      point: _currentPosition,
-                      width: 40,
-                      height: 40,
-                      child: const Icon(
-                        Icons.location_on,
-                        color: Colors.blue,
-                        size: 40,
-                      ),
-                    ),
-                  // Active ride pickup marker
-                  if (hasActiveRide && activePickup != null)
-                    Marker(
-                      point: activePickup,
-                      width: 40,
-                      height: 40,
-                      child: const Icon(
-                        Icons.location_on,
-                        color: Colors.blue,
-                        size: 40,
-                      ),
-                    ),
-                  // Destination / dropoff marker
-                  if (_destinationPosition != null && !hasActiveRide)
-                    Marker(
-                      point: _destinationPosition!,
-                      width: 40,
-                      height: 40,
-                      child: const Icon(
-                        Icons.location_on,
-                        color: Colors.red,
-                        size: 40,
-                      ),
-                    ),
-                  if (hasActiveRide && activeDropoff != null)
-                    Marker(
-                      point: activeDropoff,
-                      width: 40,
-                      height: 40,
-                      child: const Icon(
-                        Icons.location_on,
-                        color: Colors.red,
-                        size: 40,
-                      ),
-                    ),
-                  // Available drivers (cars) on map - hide when active ride
-                  if (!hasActiveRide)
-                    ..._availableDrivers.map(
-                      (driver) => Marker(
-                        point: driver.position,
-                        width: 36,
-                        height: 36,
-                        child: Icon(
-                          Icons.local_taxi,
-                          color: AppColors.primaryColor,
-                          size: 36,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-              // Polyline for destination or active ride
-              if (_destinationPosition != null && !hasActiveRide)
-                PolylineLayer(
-                  polylines: [
-                    Polyline(
-                      points: [_currentPosition, _destinationPosition!],
-                      strokeWidth: 3.0,
-                      color: AppColors.primaryColor,
-                    ),
-                  ],
-                ),
-              if (hasActiveRide && activePickup != null && activeDropoff != null)
-                PolylineLayer(
-                  polylines: [
-                    Polyline(
-                      points: [activePickup, activeDropoff],
-                      strokeWidth: 3.0,
-                      color: AppColors.primaryColor,
-                    ),
-                  ],
-                ),
-            ],
+            markers: _buildTaxiMarkers(hasActiveRide, activePickup, activeDropoff),
+            polylines: _buildTaxiPolylines(hasActiveRide, activePickup, activeDropoff),
+            onMapCreated: (controller) {
+              _mapController = controller;
+            },
+            onTap: hasActiveRide ? null : _handleMapTap,
           ),
           // Available cars info chip - hide when active ride
           if (!hasActiveRide && _totalAvailable != null && _totalAvailable! > 0)

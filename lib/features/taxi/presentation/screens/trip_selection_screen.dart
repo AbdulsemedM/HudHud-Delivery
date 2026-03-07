@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/taxi/data/ride_data_provider.dart';
@@ -24,7 +24,7 @@ class TripSelectionScreen extends StatefulWidget {
 }
 
 class _TripSelectionScreenState extends State<TripSelectionScreen> {
-  late MapController _mapController;
+  gmaps.GoogleMapController? _mapController;
   String? _selectedTrip;
   String _paymentMethod = 'wallet';
   bool _isLoadingEstimates = true;
@@ -34,26 +34,40 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
 
   late List<TripOption> _tripOptions;
 
+  static gmaps.LatLng _toG(LatLng p) => gmaps.LatLng(p.latitude, p.longitude);
+
   @override
   void initState() {
     super.initState();
-    _mapController = MapController();
     _selectedTrip = 'go';
     _tripOptions = _getFallbackOptions();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _fitBounds();
       _fetchEstimates();
     });
   }
 
   void _fitBounds() {
-    final bounds = LatLngBounds(widget.pickupLocation, widget.destinationLocation);
-    _mapController.fitCamera(
-      CameraFit.bounds(
-        bounds: bounds,
-        padding: const EdgeInsets.all(50),
+    final bounds = gmaps.LatLngBounds(
+      southwest: gmaps.LatLng(
+        widget.pickupLocation.latitude < widget.destinationLocation.latitude
+            ? widget.pickupLocation.latitude
+            : widget.destinationLocation.latitude,
+        widget.pickupLocation.longitude < widget.destinationLocation.longitude
+            ? widget.pickupLocation.longitude
+            : widget.destinationLocation.longitude,
       ),
+      northeast: gmaps.LatLng(
+        widget.pickupLocation.latitude > widget.destinationLocation.latitude
+            ? widget.pickupLocation.latitude
+            : widget.destinationLocation.latitude,
+        widget.pickupLocation.longitude > widget.destinationLocation.longitude
+            ? widget.pickupLocation.longitude
+            : widget.destinationLocation.longitude,
+      ),
+    );
+    _mapController?.moveCamera(
+      gmaps.CameraUpdate.newLatLngBounds(bounds, 50),
     );
   }
 
@@ -259,55 +273,42 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Full screen map
-          FlutterMap(
-            mapController: _mapController,
-            options: MapOptions(
-              initialCenter: widget.pickupLocation,
-              initialZoom: 13.0,
-              minZoom: 3.0,
-              maxZoom: 18.0,
+          gmaps.GoogleMap(
+            initialCameraPosition: gmaps.CameraPosition(
+              target: _toG(widget.pickupLocation),
+              zoom: 13.0,
             ),
-            children: [
-              TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.hudhuddelivery.app',
-                maxZoom: 18,
+            markers: {
+              gmaps.Marker(
+                markerId: const gmaps.MarkerId('pickup'),
+                position: _toG(widget.pickupLocation),
+                icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+                  gmaps.BitmapDescriptor.hueAzure,
+                ),
               ),
-              PolylineLayer(
-                polylines: [
-                  Polyline(
-                    points: [widget.pickupLocation, widget.destinationLocation],
-                    strokeWidth: 3.0,
-                    color: AppColors.primaryColor,
-                  ),
+              gmaps.Marker(
+                markerId: const gmaps.MarkerId('destination'),
+                position: _toG(widget.destinationLocation),
+                icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+                  gmaps.BitmapDescriptor.hueRed,
+                ),
+              ),
+            },
+            polylines: {
+              gmaps.Polyline(
+                polylineId: const gmaps.PolylineId('route'),
+                points: [
+                  _toG(widget.pickupLocation),
+                  _toG(widget.destinationLocation),
                 ],
+                color: AppColors.primaryColor,
+                width: 3,
               ),
-              MarkerLayer(
-                markers: [
-                  Marker(
-                    point: widget.pickupLocation,
-                    width: 40,
-                    height: 40,
-                    child: const Icon(
-                      Icons.location_on,
-                      color: Colors.blue,
-                      size: 40,
-                    ),
-                  ),
-                  Marker(
-                    point: widget.destinationLocation,
-                    width: 40,
-                    height: 40,
-                    child: const Icon(
-                      Icons.location_on,
-                      color: Colors.red,
-                      size: 40,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+            },
+            onMapCreated: (controller) {
+              _mapController = controller;
+              _fitBounds();
+            },
           ),
           // Back button
           Positioned(

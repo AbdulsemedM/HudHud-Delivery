@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/app/services/location_service.dart';
@@ -15,7 +15,7 @@ class InstantDeliveryScreen extends StatefulWidget {
 }
 
 class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
-  final MapController _mapController = MapController();
+  gmaps.GoogleMapController? _mapController;
   String _pickupLocation = 'Getting location...';
   String _deliveryLocation = '';
   String _selectedVehicle = 'motorcycle'; // motorcycle, car, van
@@ -23,6 +23,8 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
   LatLng? _pickupPosition;
   LatLng? _deliveryPosition;
   bool _isLoadingLocation = true;
+
+  static gmaps.LatLng _toG(LatLng p) => gmaps.LatLng(p.latitude, p.longitude);
 
   @override
   void initState() {
@@ -56,7 +58,9 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
           });
 
           // Move map to current location
-          _mapController.move(_currentPosition, 15.0);
+          _mapController?.moveCamera(
+            gmaps.CameraUpdate.newLatLngZoom(_toG(latLng), 15.0),
+          );
         }
       } else {
         if (mounted) {
@@ -100,7 +104,9 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
         if (_pickupPosition != null && _deliveryPosition != null) {
           _fitBounds();
         } else {
-          _mapController.move(coordinates, 15.0);
+          _mapController?.moveCamera(
+            gmaps.CameraUpdate.newLatLngZoom(_toG(coordinates), 15.0),
+          );
         }
       }
     }
@@ -130,7 +136,9 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
         if (_pickupPosition != null && _deliveryPosition != null) {
           _fitBounds();
         } else {
-          _mapController.move(coordinates, 15.0);
+          _mapController?.moveCamera(
+            gmaps.CameraUpdate.newLatLngZoom(_toG(coordinates), 15.0),
+          );
         }
       }
     }
@@ -141,66 +149,46 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Full screen map
-          FlutterMap(
-            mapController: _mapController,
-            options: MapOptions(
-              initialCenter: _currentPosition,
-              initialZoom: 15.0,
-              minZoom: 3.0,
-              maxZoom: 18.0,
-              onTap: (tapPosition, point) {
-                // Allow user to tap on map to select location
-                // Show dialog to choose pickup or delivery
-                _showLocationSelectionDialog(point);
-              },
+          gmaps.GoogleMap(
+            initialCameraPosition: gmaps.CameraPosition(
+              target: _toG(_currentPosition),
+              zoom: 15.0,
             ),
-            children: [
-              TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.hudhuddelivery.app',
-                maxZoom: 18,
-              ),
-              // Polyline between pickup and delivery
-              if (_pickupPosition != null && _deliveryPosition != null)
-                PolylineLayer(
-                  polylines: [
-                    Polyline(
-                      points: [_pickupPosition!, _deliveryPosition!],
-                      strokeWidth: 3.0,
-                      color: AppColors.primaryColor,
-                    ),
-                  ],
+            markers: {
+              if (_pickupPosition != null)
+                gmaps.Marker(
+                  markerId: const gmaps.MarkerId('pickup'),
+                  position: _toG(_pickupPosition!),
+                  icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+                    gmaps.BitmapDescriptor.hueRed,
+                  ),
                 ),
-              MarkerLayer(
-                markers: [
-                  // Pickup marker (red)
-                  if (_pickupPosition != null)
-                    Marker(
-                      point: _pickupPosition!,
-                      width: 40,
-                      height: 40,
-                      child: Icon(
-                        Icons.location_on,
-                        color: Colors.red,
-                        size: 40,
-                      ),
+              if (_deliveryPosition != null)
+                gmaps.Marker(
+                  markerId: const gmaps.MarkerId('delivery'),
+                  position: _toG(_deliveryPosition!),
+                  icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+                    gmaps.BitmapDescriptor.hueGreen,
+                  ),
+                ),
+            },
+            polylines: _pickupPosition != null && _deliveryPosition != null
+                ? {
+                    gmaps.Polyline(
+                      polylineId: const gmaps.PolylineId('route'),
+                      points: [_toG(_pickupPosition!), _toG(_deliveryPosition!)],
+                      color: AppColors.primaryColor,
+                      width: 3,
                     ),
-                  // Delivery marker (green) - only if selected
-                  if (_deliveryPosition != null)
-                    Marker(
-                      point: _deliveryPosition!,
-                      width: 40,
-                      height: 40,
-                      child: Icon(
-                        Icons.location_on,
-                        color: Colors.green,
-                        size: 40,
-                      ),
-                    ),
-                ],
-              ),
-            ],
+                  }
+                : {},
+            onMapCreated: (controller) {
+              _mapController = controller;
+            },
+            onTap: (point) {
+              _showLocationSelectionDialog(
+                  LatLng(point.latitude, point.longitude));
+            },
           ),
           // Back button
           Positioned(
@@ -434,7 +422,9 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
         if (_pickupPosition != null && _deliveryPosition != null) {
           _fitBounds();
         } else {
-          _mapController.move(point, 15.0);
+          _mapController?.moveCamera(
+            gmaps.CameraUpdate.newLatLngZoom(_toG(point), 15.0),
+          );
         }
       }
     } catch (e) {
@@ -482,13 +472,26 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
 
   void _fitBounds() {
     if (_pickupPosition != null && _deliveryPosition != null) {
-      // Calculate bounds to fit both markers
-      final bounds = LatLngBounds(_pickupPosition!, _deliveryPosition!);
-      _mapController.fitCamera(
-        CameraFit.bounds(
-          bounds: bounds,
-          padding: const EdgeInsets.all(50),
+      final bounds = gmaps.LatLngBounds(
+        southwest: gmaps.LatLng(
+          _pickupPosition!.latitude < _deliveryPosition!.latitude
+              ? _pickupPosition!.latitude
+              : _deliveryPosition!.latitude,
+          _pickupPosition!.longitude < _deliveryPosition!.longitude
+              ? _pickupPosition!.longitude
+              : _deliveryPosition!.longitude,
         ),
+        northeast: gmaps.LatLng(
+          _pickupPosition!.latitude > _deliveryPosition!.latitude
+              ? _pickupPosition!.latitude
+              : _deliveryPosition!.latitude,
+          _pickupPosition!.longitude > _deliveryPosition!.longitude
+              ? _pickupPosition!.longitude
+              : _deliveryPosition!.longitude,
+        ),
+      );
+      _mapController?.moveCamera(
+        gmaps.CameraUpdate.newLatLngBounds(bounds, 50),
       );
     }
   }

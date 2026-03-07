@@ -151,28 +151,29 @@ class _ServiceQuotesScreenState extends State<ServiceQuotesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Quotes',
           style: TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 18,
-            color: AppColors.lightTextPrimary,
+            color: theme.colorScheme.onSurface,
           ),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: theme.colorScheme.surface,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-          color: AppColors.lightTextPrimary,
+          color: theme.colorScheme.onSurface,
           onPressed: () => Navigator.pop(context),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(
-            color: AppColors.lightBorder.withOpacity(0.5),
+            color: theme.dividerColor.withOpacity(0.5),
             height: 1,
           ),
         ),
@@ -197,7 +198,7 @@ class _ServiceQuotesScreenState extends State<ServiceQuotesScreen> {
                             _error!,
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: Colors.grey[600],
+                              color: theme.colorScheme.onSurfaceVariant,
                               fontSize: 14,
                             ),
                           ),
@@ -223,7 +224,7 @@ class _ServiceQuotesScreenState extends State<ServiceQuotesScreen> {
                               Icon(
                                 Icons.receipt_long_outlined,
                                 size: 64,
-                                color: Colors.grey[400],
+                                color: theme.colorScheme.onSurfaceVariant,
                               ),
                               const SizedBox(height: 16),
                               Text(
@@ -231,7 +232,7 @@ class _ServiceQuotesScreenState extends State<ServiceQuotesScreen> {
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
-                                  color: Colors.grey[700],
+                                  color: theme.colorScheme.onSurface,
                                 ),
                               ),
                               const SizedBox(height: 8),
@@ -239,7 +240,7 @@ class _ServiceQuotesScreenState extends State<ServiceQuotesScreen> {
                                 'Handymen will send quotes soon',
                                 style: TextStyle(
                                   fontSize: 14,
-                                  color: Colors.grey[500],
+                                  color: theme.colorScheme.onSurfaceVariant,
                                 ),
                                 textAlign: TextAlign.center,
                               ),
@@ -290,15 +291,16 @@ class _QuoteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.08),
+            color: theme.colorScheme.shadow.withOpacity(0.08),
             spreadRadius: 1,
             blurRadius: 8,
             offset: const Offset(0, 2),
@@ -314,21 +316,21 @@ class _QuoteCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   quote.handymanName,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF2E7D32),
+                    color: theme.colorScheme.primary,
                   ),
                 ),
               ),
-              Text(
-                quote.formattedAmount ?? quote.amount,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primaryColor,
-                ),
+            Text(
+              quote.formattedAmount ?? quote.amount,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.primary,
               ),
+            ),
             ],
           ),
           if (quote.description != null && quote.description!.isNotEmpty) ...[
@@ -337,7 +339,7 @@ class _QuoteCard extends StatelessWidget {
               quote.description!,
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey[700],
+                color: theme.colorScheme.onSurfaceVariant,
                 height: 1.4,
               ),
             ),
@@ -351,7 +353,7 @@ class _QuoteCard extends StatelessWidget {
                   'View Profile',
                   style: TextStyle(
                     fontSize: 14,
-                    color: AppColors.primaryColor,
+                    color: theme.colorScheme.primary,
                   ),
                 ),
               ),
@@ -369,8 +371,8 @@ class _QuoteCard extends StatelessWidget {
                 ElevatedButton(
                   onPressed: onAccept,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.successColor,
-                    foregroundColor: Colors.white,
+                    backgroundColor: theme.colorScheme.primary,
+                    foregroundColor: theme.colorScheme.onPrimary,
                   ),
                   child: const Text('Accept'),
                 ),

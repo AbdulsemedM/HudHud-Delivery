@@ -136,29 +136,30 @@ class _ServiceRequestDetailsScreenState extends State<ServiceRequestDetailsScree
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           _request.title,
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 18,
-            color: AppColors.lightTextPrimary,
+            color: theme.colorScheme.onSurface,
           ),
           overflow: TextOverflow.ellipsis,
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: theme.colorScheme.surface,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-          color: AppColors.lightTextPrimary,
+          color: theme.colorScheme.onSurface,
           onPressed: () => Navigator.pop(context),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(
-            color: AppColors.lightBorder.withOpacity(0.5),
+            color: theme.dividerColor.withOpacity(0.5),
             height: 1,
           ),
         ),
@@ -176,8 +177,10 @@ class _ServiceRequestDetailsScreenState extends State<ServiceRequestDetailsScree
               ),
               child: Text(
                 _request.status.replaceAll('_', ' ').toUpperCase(),
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: theme.brightness == Brightness.dark
+                      ? theme.colorScheme.onSurface
+                      : theme.colorScheme.surface,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
@@ -188,7 +191,7 @@ class _ServiceRequestDetailsScreenState extends State<ServiceRequestDetailsScree
               _request.description,
               style: TextStyle(
                 fontSize: 15,
-                color: Colors.grey[800],
+                color: theme.colorScheme.onSurface,
                 height: 1.5,
               ),
             ),
@@ -223,13 +226,13 @@ class _ServiceRequestDetailsScreenState extends State<ServiceRequestDetailsScree
                 const SizedBox(height: 8),
                 Text(
                   'Tools: ${_request.requirements!.tools.join(", ")}',
-                  style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                  style: TextStyle(fontSize: 14, color: theme.colorScheme.onSurfaceVariant),
                 ),
               ],
               if (_request.requirements!.estimatedHours != null)
                 Text(
                   'Est. hours: ${_request.requirements!.estimatedHours}',
-                  style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                  style: TextStyle(fontSize: 14, color: theme.colorScheme.onSurfaceVariant),
                 ),
             ],
             const SizedBox(height: 24),
@@ -242,8 +245,8 @@ class _ServiceRequestDetailsScreenState extends State<ServiceRequestDetailsScree
                     icon: const Icon(Icons.receipt_long),
                     label: Text('View ${_request.quotesCount} Quote(s)'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryColor,
-                      foregroundColor: Colors.white,
+                      backgroundColor: theme.colorScheme.primary,
+                      foregroundColor: theme.colorScheme.onPrimary,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -277,8 +280,8 @@ class _ServiceRequestDetailsScreenState extends State<ServiceRequestDetailsScree
                   icon: const Icon(Icons.star),
                   label: const Text('Rate Service'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryColor,
-                    foregroundColor: Colors.white,
+                    backgroundColor: theme.colorScheme.primary,
+                    foregroundColor: theme.colorScheme.onPrimary,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -325,12 +328,13 @@ class _DetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 20, color: Colors.grey[600]),
+          Icon(icon, size: 20, color: theme.colorScheme.onSurfaceVariant),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -340,15 +344,16 @@ class _DetailRow extends StatelessWidget {
                   label,
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey[600],
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   value,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
               ],

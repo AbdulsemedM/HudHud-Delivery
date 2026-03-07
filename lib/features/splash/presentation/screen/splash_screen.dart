@@ -56,9 +56,10 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Stack(
         children: [
           // Vector background with opacity
@@ -69,7 +70,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 'assets/images/Vector.png',
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
-                  return Container(color: Colors.grey[100]);
+                  return Container(color: theme.colorScheme.surfaceContainerHighest);
                 },
               ),
             ),
@@ -93,7 +94,7 @@ class _SplashScreenState extends State<SplashScreen> {
                       return Container(
                         width: 200,
                         height: 200,
-                        color: Colors.grey[200],
+                        color: theme.colorScheme.surfaceContainerHighest,
                         child: Icon(Icons.image_not_supported, size: 50),
                       );
                     },

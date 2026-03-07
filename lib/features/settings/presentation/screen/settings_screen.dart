@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
+import 'package:hudhud_delivery/controllers/theme_controller.dart';
 import 'package:hudhud_delivery/models/user_model.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/utils/greeting_utils.dart';
 import 'package:hudhud_delivery/core/utils/avatar_util.dart';
 import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
+import 'appearance_screen.dart';
 import 'personal_details_screen.dart';
 import 'terms_conditions_screen.dart';
 import 'notifications_screen.dart';
@@ -87,9 +90,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     final greeting = GreetingUtils.getTimeBasedGreeting();
     final userName = _user?.name?.split(' ').first ?? 'User';
+    final theme = Theme.of(context);
+    final themeController = Provider.of<ThemeController>(context);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -141,7 +146,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           width: 32,
                           height: 32,
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: theme.colorScheme.surface,
                             shape: BoxShape.circle,
                             border: Border.all(
                               color: AppColors.primaryColor,
@@ -171,9 +176,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   // Email
                   Text(
                     _user?.email ?? '—',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -183,14 +187,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: theme.colorScheme.surface,
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(20),
                     topRight: Radius.circular(20),
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: theme.colorScheme.shadow.withOpacity(0.05),
                       blurRadius: 10,
                       offset: const Offset(0, -2),
                     ),
@@ -214,10 +218,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                           Text(
                             ' delivery',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.normal,
-                              color: Colors.grey[600],
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -228,6 +230,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       child: ListView(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         children: [
+                          _MenuItem(
+                            icon: Icons.palette,
+                            title: 'Appearance',
+                            trailing: Text(
+                              themeController.themeModeDisplayName,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const AppearanceScreen(),
+                                ),
+                              );
+                            },
+                          ),
                           _MenuItem(
                             icon: Icons.person,
                             title: 'Personal Details',
@@ -332,9 +353,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       padding: const EdgeInsets.only(bottom: 20),
                       child: Text(
                         'Version 1.0',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[500],
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ),
@@ -354,16 +374,20 @@ class _MenuItem extends StatelessWidget {
   final String title;
   final VoidCallback onTap;
   final bool isDestructive;
+  final Widget? trailing;
 
   const _MenuItem({
     required this.icon,
     required this.title,
     required this.onTap,
     this.isDestructive = false,
+    this.trailing,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -373,7 +397,9 @@ class _MenuItem extends StatelessWidget {
             Icon(
               icon,
               size: 24,
-              color: isDestructive ? Colors.red : Colors.grey[700],
+              color: isDestructive
+                  ? theme.colorScheme.error
+                  : theme.colorScheme.onSurfaceVariant,
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -382,15 +408,20 @@ class _MenuItem extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
-                  color: isDestructive ? Colors.red : const Color(0xFF2C3E50),
+                  color: isDestructive
+                      ? theme.colorScheme.error
+                      : theme.colorScheme.onSurface,
                 ),
               ),
             ),
-            Icon(
-              Icons.arrow_forward_ios,
-              size: 16,
-              color: Colors.grey[400],
-            ),
+            if (trailing != null)
+              trailing!
+            else
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
+              ),
           ],
         ),
       ),
@@ -413,6 +444,8 @@ class _MenuItemWithToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16),
       child: Row(
@@ -420,23 +453,22 @@ class _MenuItemWithToggle extends StatelessWidget {
           Icon(
             icon,
             size: 24,
-            color: Colors.grey[700],
+            color: theme.colorScheme.onSurfaceVariant,
           ),
           const SizedBox(width: 16),
           Expanded(
             child: Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
-                color: Color(0xFF2C3E50),
+                color: theme.colorScheme.onSurface,
               ),
             ),
           ),
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: Colors.green,
           ),
         ],
       ),

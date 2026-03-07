@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
@@ -43,7 +43,7 @@ class DeliveryTrackingScreen extends StatefulWidget {
 }
 
 class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
-  late MapController _mapController;
+  gmaps.GoogleMapController? _mapController;
   LatLng? _vehiclePosition;
 
   Map<String, dynamic>? _trackData;
@@ -55,7 +55,6 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
   @override
   void initState() {
     super.initState();
-    _mapController = MapController();
     _courierRepository = CourierRepository(
       courierDataProvider: CourierDataProvider(
         apiService: ApiService.instance,
@@ -81,20 +80,34 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
     } else {
       _isLoadingTrack = false;
     }
+  }
 
-    // Fit map to show route
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (widget.pickupPosition != null && widget.deliveryPosition != null) {
-        final bounds = LatLngBounds(
-            widget.pickupPosition!, widget.deliveryPosition!);
-        _mapController.fitCamera(
-          CameraFit.bounds(
-            bounds: bounds,
-            padding: const EdgeInsets.all(50),
-          ),
-        );
-      }
-    });
+  static gmaps.LatLng _toG(LatLng p) => gmaps.LatLng(p.latitude, p.longitude);
+
+  void _fitBounds() {
+    if (widget.pickupPosition != null && widget.deliveryPosition != null) {
+      final bounds = gmaps.LatLngBounds(
+        southwest: gmaps.LatLng(
+          widget.pickupPosition!.latitude < widget.deliveryPosition!.latitude
+              ? widget.pickupPosition!.latitude
+              : widget.deliveryPosition!.latitude,
+          widget.pickupPosition!.longitude < widget.deliveryPosition!.longitude
+              ? widget.pickupPosition!.longitude
+              : widget.deliveryPosition!.longitude,
+        ),
+        northeast: gmaps.LatLng(
+          widget.pickupPosition!.latitude > widget.deliveryPosition!.latitude
+              ? widget.pickupPosition!.latitude
+              : widget.deliveryPosition!.latitude,
+          widget.pickupPosition!.longitude > widget.deliveryPosition!.longitude
+              ? widget.pickupPosition!.longitude
+              : widget.deliveryPosition!.longitude,
+        ),
+      );
+      _mapController?.moveCamera(
+        gmaps.CameraUpdate.newLatLngBounds(bounds, 50),
+      );
+    }
   }
 
   Future<void> _fetchTrackData() async {
@@ -161,97 +174,68 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
       mapCenter = widget.deliveryPosition!;
     }
 
+    final Set<gmaps.Marker> markers = {};
+    if (widget.pickupPosition != null) {
+      markers.add(
+        gmaps.Marker(
+          markerId: const gmaps.MarkerId('pickup'),
+          position: _toG(widget.pickupPosition!),
+          icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+            gmaps.BitmapDescriptor.hueOrange,
+          ),
+        ),
+      );
+    }
+    if (_vehiclePosition != null) {
+      markers.add(
+        gmaps.Marker(
+          markerId: const gmaps.MarkerId('vehicle'),
+          position: _toG(_vehiclePosition!),
+          icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+            gmaps.BitmapDescriptor.hueViolet,
+          ),
+        ),
+      );
+    }
+    if (widget.deliveryPosition != null) {
+      markers.add(
+        gmaps.Marker(
+          markerId: const gmaps.MarkerId('delivery'),
+          position: _toG(widget.deliveryPosition!),
+          icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+            gmaps.BitmapDescriptor.hueGreen,
+          ),
+        ),
+      );
+    }
+
+    Set<gmaps.Polyline> polylines = {};
+    if (widget.pickupPosition != null && widget.deliveryPosition != null) {
+      polylines.add(
+        gmaps.Polyline(
+          polylineId: const gmaps.PolylineId('route'),
+          points: [_toG(widget.pickupPosition!), _toG(widget.deliveryPosition!)],
+          color: AppColors.primaryColor,
+          width: 4,
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // Full screen map
-          FlutterMap(
-            mapController: _mapController,
-            options: MapOptions(
-              initialCenter: mapCenter,
-              initialZoom: 13.0,
-              minZoom: 3.0,
-              maxZoom: 18.0,
+          gmaps.GoogleMap(
+            initialCameraPosition: gmaps.CameraPosition(
+              target: _toG(mapCenter),
+              zoom: 13.0,
             ),
-            children: [
-              TileLayer(
-                urlTemplate:
-                    'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.hudhuddelivery.app',
-                maxZoom: 18,
-              ),
-              // Polyline between pickup and delivery
-              if (widget.pickupPosition != null && widget.deliveryPosition != null)
-                PolylineLayer(
-                  polylines: [
-                    Polyline(
-                      points: [widget.pickupPosition!, widget.deliveryPosition!],
-                      strokeWidth: 4.0,
-                      color: AppColors.primaryColor,
-                    ),
-                  ],
-                ),
-              MarkerLayer(
-                markers: [
-                  // Pickup marker (package icon)
-                  if (widget.pickupPosition != null)
-                    Marker(
-                      point: widget.pickupPosition!,
-                      width: 40,
-                      height: 40,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.brown[300],
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.inventory_2,
-                          color: Colors.white,
-                          size: 24,
-                        ),
-                      ),
-                    ),
-                  // Vehicle marker (motorcycle icon)
-                  if (_vehiclePosition != null)
-                    Marker(
-                      point: _vehiclePosition!,
-                      width: 50,
-                      height: 50,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.grey[800],
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.3),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          Icons.two_wheeler,
-                          color: Colors.white,
-                          size: 28,
-                        ),
-                      ),
-                    ),
-                  // Delivery marker (green)
-                  if (widget.deliveryPosition != null)
-                    Marker(
-                      point: widget.deliveryPosition!,
-                      width: 40,
-                      height: 40,
-                      child: const Icon(
-                        Icons.location_on,
-                        color: Colors.green,
-                        size: 40,
-                      ),
-                    ),
-                ],
-              ),
-            ],
+            markers: markers,
+            polylines: polylines,
+            onMapCreated: (controller) {
+              _mapController = controller;
+              _fitBounds();
+            },
           ),
           // Back button
           Positioned(

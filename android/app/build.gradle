@@ -15,16 +15,16 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.commercepal.hudhud.delivery"
-    compileSdk = 35
-    ndkVersion = "26.1.10909125"
+    namespace = "com.hudhud.userapp"
+    compileSdk = 36
+    ndkVersion = "27.0.12077973"
 
     defaultConfig {
-        applicationId = "com.commercepal.hudhud.delivery"
+        applicationId = "com.hudhud.userapp"
         minSdkVersion = flutter.minSdkVersion
         targetSdk = 35
         versionCode = 1
-        versionName = "1.0"
+        versionName = "0.0.1"
     }
 
     compileOptions {
