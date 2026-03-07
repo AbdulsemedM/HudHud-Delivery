@@ -36,10 +36,10 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-        <!-- Google Maps API Key -->
+        <!-- Google Maps API Key (set GOOGLE_MAPS_API_KEY in android/local.properties) -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyCQVS4wY4ans26sgi214mE6Ic81ER_hOfU" />
+            android:value="${googleMapsApiKey}" />
         <!-- FCM default notification channel (optional; can be overridden in Flutter) -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"

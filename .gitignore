@@ -37,6 +37,9 @@ migrate_working_dir/
 android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
 
+# Local config with API keys (Flutter may create local.properties with sdk.dir; add keys there and do not commit)
+android/local.properties
+
 # Environment variables
 .env
 .env.local

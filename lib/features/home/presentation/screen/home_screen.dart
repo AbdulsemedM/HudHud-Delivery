@@ -7,7 +7,7 @@ import 'package:hudhud_delivery/features/orders/bloc/orders_bloc.dart';
 import 'package:hudhud_delivery/features/orders/data/repositories/orders_repository.dart';
 import 'package:hudhud_delivery/features/orders/presentation/screen/order_details_screen.dart';
 import 'package:hudhud_delivery/features/orders/presentation/screen/orders_screen.dart';
-import 'package:hudhud_delivery/features/service_types/presentation/screens/services_screen.dart';
+import 'package:hudhud_delivery/features/handyman/presentation/screens/handyman_screen.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/app/services/location_service.dart';
 import 'package:hudhud_delivery/app/services/saved_location_service.dart';
@@ -285,7 +285,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 childAspectRatio: 1.3,
                 children: [
                   ServiceCard(
-                    title: 'Delivery',
+                    title: 'Food',
                     subtitle: 'Order groceries from your favourite vendors.',
                     icon: Icons.shopping_bag,
                     color: AppColors.primaryColor,
@@ -317,7 +317,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                   ),
                   ServiceCard(
-                    title: 'Services',
+                    title: 'Handyman',
                     subtitle: 'Request handy men for casual services at home.',
                     icon: Icons.handyman,
                     color: Colors.green,
@@ -325,7 +325,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const ServicesScreen(),
+                          builder: (context) => const HandymanScreen(),
                         ),
                       );
                     },

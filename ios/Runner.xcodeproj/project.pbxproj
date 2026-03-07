@@ -202,6 +202,7 @@
 				97C146EC1CF9000F007C117D /* Resources */,
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
+				A1B2C3D4E5F6789012345678 /* Inject Google Maps API Key */,
 				99BD726B4B5A49E9347A99D0 /* [CP] Embed Pods Frameworks */,
 				EBFBF57023F011A5EB6DE045 /* [CP] Copy Pods Resources */,
 			);
@@ -391,6 +392,21 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		A1B2C3D4E5F6789012345678 /* Inject Google Maps API Key */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Inject Google Maps API Key";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ -n \"$GOOGLE_MAPS_API_KEY\" ]; then\n  PLIST=\"${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}\"\n  if [ -f \"$PLIST\" ]; then\n    /usr/libexec/PlistBuddy -c \"Set :GoogleMapsAPIKey $GOOGLE_MAPS_API_KEY\" \"$PLIST\" 2>/dev/null || /usr/libexec/PlistBuddy -c \"Add :GoogleMapsAPIKey string $GOOGLE_MAPS_API_KEY\" \"$PLIST\"\n  fi\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */

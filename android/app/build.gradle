@@ -14,6 +14,12 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
 
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localProperties.load(new FileInputStream(localPropertiesFile))
+}
+
 android {
     namespace = "com.hudhud.userapp"
     compileSdk = 36
@@ -25,6 +31,7 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "0.0.1"
+        manifestPlaceholders = [googleMapsApiKey: localProperties.getProperty('GOOGLE_MAPS_API_KEY', '')]
     }
 
     compileOptions {
