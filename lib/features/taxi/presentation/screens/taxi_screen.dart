@@ -5,7 +5,9 @@ import 'package:latlong2/latlong.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/app/services/location_service.dart';
 import 'package:hudhud_delivery/core/widgets/location_search_field.dart';
-import 'package:hudhud_delivery/app/services/nominatim_service.dart';
+import 'package:hudhud_delivery/app/services/google_places_service.dart';
+import 'package:hudhud_delivery/app/services/google_directions_service.dart';
+import 'package:hudhud_delivery/app/models/place_result.dart';
 import 'package:hudhud_delivery/features/taxi/data/ride_data_provider.dart';
 import 'finding_driver_screen.dart';
 import 'driver_on_the_way_screen.dart';
@@ -36,7 +38,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
   gmaps.GoogleMapController? _mapController;
   final TextEditingController _destinationController = TextEditingController();
   final RideDataProvider _rideDataProvider = RideDataProvider();
-  LatLng _currentPosition = const LatLng(37.7749, -122.4194); // Default to San Francisco
+  LatLng _currentPosition = const LatLng(9.0222, 38.7468); // Default to Addis Ababa (same as location search)
   LatLng? _destinationPosition;
   bool _isLoadingLocation = true;
   List<PlaceResult> _suggestedLocations = [];
@@ -46,6 +48,9 @@ class _TaxiScreenState extends State<TaxiScreen> {
   int? _estimatedWaitTime;
   Map<String, dynamic>? _activeRide;
   bool _isCheckingActiveRide = true;
+  List<LatLng>? _routePolylinePoints;
+  double? _routeDistanceKm;
+  bool _isLoadingRoute = false;
 
   static gmaps.LatLng _toG(LatLng p) => gmaps.LatLng(p.latitude, p.longitude);
 
@@ -247,7 +252,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
     // Load some suggested locations (you can customize these)
     try {
       // Example: Search for popular locations
-      final results = await NominatimService.searchPlaces('Select Citywalk Mall');
+      final results = await GooglePlacesService.searchPlaces('Select Citywalk Mall');
       if (mounted && results.isNotEmpty) {
         setState(() {
           _suggestedLocations = results.take(2).toList();
@@ -280,22 +285,47 @@ class _TaxiScreenState extends State<TaxiScreen> {
     setState(() {
       _destinationPosition = place.coordinates;
       _destinationController.text = place.shortAddress;
+      _routePolylinePoints = null;
+      _routeDistanceKm = null;
+      _isLoadingRoute = true;
     });
+    _fetchRouteAndNavigate(place.shortAddress);
+  }
 
-    // Navigate to trip selection screen
-    if (_destinationPosition != null) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => TripSelectionScreen(
-            pickupLocation: _currentPosition,
-            destinationLocation: _destinationPosition!,
-            pickupAddress: 'Current Location', // You can get this from geocoding
-            destinationAddress: place.shortAddress,
-          ),
+  Future<void> _fetchRouteAndNavigate(String destinationAddress) async {
+    await _fetchRouteDirections();
+    if (!mounted || _destinationPosition == null) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TripSelectionScreen(
+          pickupLocation: _currentPosition,
+          destinationLocation: _destinationPosition!,
+          pickupAddress: 'Current Location',
+          destinationAddress: destinationAddress,
+          initialRouteDistanceKm: _routeDistanceKm,
+          initialRoutePolylinePoints: _routePolylinePoints,
         ),
-      );
-    }
+      ),
+    );
+  }
+
+  Future<void> _fetchRouteDirections() async {
+    if (_destinationPosition == null) return;
+    final result = await GoogleDirectionsService.getDirections(
+      originLat: _currentPosition.latitude,
+      originLng: _currentPosition.longitude,
+      destLat: _destinationPosition!.latitude,
+      destLng: _destinationPosition!.longitude,
+    );
+    if (!mounted) return;
+    setState(() {
+      _isLoadingRoute = false;
+      if (result != null) {
+        _routePolylinePoints = result.polylinePoints;
+        _routeDistanceKm = result.distanceKm;
+      }
+    });
   }
 
   void _selectSuggestedLocation(PlaceResult place) {
@@ -318,7 +348,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
 
     try {
       // Reverse geocode the tapped location
-      final places = await NominatimService.reverseGeocode(
+      final places = await GooglePlacesService.reverseGeocode(
         point.latitude,
         point.longitude,
       );
@@ -329,6 +359,9 @@ class _TaxiScreenState extends State<TaxiScreen> {
           _destinationPosition = latLng;
           _destinationController.text = place.shortAddress;
           _isLoadingLocation = false;
+          _routePolylinePoints = null;
+          _routeDistanceKm = null;
+          _isLoadingRoute = true;
         });
 
         // Move map to show the destination
@@ -336,18 +369,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
           gmaps.CameraUpdate.newLatLngZoom(point, 15.0),
         );
 
-        // Navigate to trip selection screen
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => TripSelectionScreen(
-              pickupLocation: _currentPosition,
-              destinationLocation: latLng,
-              pickupAddress: 'Current Location',
-              destinationAddress: place.shortAddress,
-            ),
-          ),
-        );
+        await _fetchRouteAndNavigate(place.shortAddress);
       } else {
         if (mounted) {
           setState(() {
@@ -684,10 +706,13 @@ class _TaxiScreenState extends State<TaxiScreen> {
   ) {
     final Set<gmaps.Polyline> polylines = {};
     if (_destinationPosition != null && !hasActiveRide) {
+      final points = _routePolylinePoints != null && _routePolylinePoints!.length >= 2
+          ? _routePolylinePoints!.map(_toG).toList()
+          : [_toG(_currentPosition), _toG(_destinationPosition!)];
       polylines.add(
         gmaps.Polyline(
           polylineId: const gmaps.PolylineId('route'),
-          points: [_toG(_currentPosition), _toG(_destinationPosition!)],
+          points: points,
           color: AppColors.primaryColor,
           width: 3,
         ),
@@ -722,6 +747,9 @@ class _TaxiScreenState extends State<TaxiScreen> {
             ),
             markers: _buildTaxiMarkers(hasActiveRide, activePickup, activeDropoff),
             polylines: _buildTaxiPolylines(hasActiveRide, activePickup, activeDropoff),
+            myLocationEnabled: true,
+            myLocationButtonEnabled: false,
+            mapType: gmaps.MapType.normal,
             onMapCreated: (controller) {
               _mapController = controller;
             },
@@ -866,6 +894,39 @@ class _TaxiScreenState extends State<TaxiScreen> {
                         ],
                       ),
                     ),
+                    // Distance in KM when destination is set
+                    if (!hasActiveRide &&
+                        _destinationPosition != null &&
+                        (_routeDistanceKm != null || _isLoadingRoute))
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Row(
+                          children: [
+                            Icon(Icons.straighten,
+                                size: 18, color: AppColors.primaryColor),
+                            const SizedBox(width: 8),
+                            if (_isLoadingRoute)
+                              const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            else if (_routeDistanceKm != null)
+                              Text(
+                                '${_routeDistanceKm!.toStringAsFixed(2)} KM',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primaryColor,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    if (!hasActiveRide &&
+                        _destinationPosition != null &&
+                        (_routeDistanceKm != null || _isLoadingRoute))
+                      const SizedBox(height: 12),
                     // Search Bar and Now Button
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),

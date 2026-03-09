@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
+import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
@@ -63,6 +64,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
   int? _estimatedDuration;
   String _estimatedCurrency = 'ETB';
   String? _estimateError;
+  List<LatLng>? _routePolylinePoints;
 
   @override
   void initState() {
@@ -73,6 +75,23 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
       ),
     );
     _fetchEstimate();
+    if (widget.pickupPosition != null && widget.deliveryPosition != null) {
+      _fetchRouteDirections();
+    }
+  }
+
+  Future<void> _fetchRouteDirections() async {
+    if (widget.pickupPosition == null || widget.deliveryPosition == null) return;
+    final result = await GoogleDirectionsService.getDirections(
+      originLat: widget.pickupPosition!.latitude,
+      originLng: widget.pickupPosition!.longitude,
+      destLat: widget.deliveryPosition!.latitude,
+      destLng: widget.deliveryPosition!.longitude,
+    );
+    if (!mounted) return;
+    setState(() {
+      _routePolylinePoints = result?.polylinePoints;
+    });
   }
 
   static gmaps.LatLng _toG(LatLng p) => gmaps.LatLng(p.latitude, p.longitude);
@@ -311,10 +330,12 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                 ? {
                     gmaps.Polyline(
                       polylineId: const gmaps.PolylineId('route'),
-                      points: [
-                        _toG(widget.pickupPosition!),
-                        _toG(widget.deliveryPosition!),
-                      ],
+                      points: _routePolylinePoints != null && _routePolylinePoints!.length >= 2
+                          ? _routePolylinePoints!.map(_toG).toList()
+                          : [
+                              _toG(widget.pickupPosition!),
+                              _toG(widget.deliveryPosition!),
+                            ],
                       color: AppColors.primaryColor,
                       width: 3,
                     ),

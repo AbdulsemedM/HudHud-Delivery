@@ -14,6 +14,7 @@ import android.os.Bundle
 
 class MainActivity: FlutterActivity() {
     private val CHANNEL = "custom_location"
+    private val CONFIG_CHANNEL = "hudhud_delivery/config"
     private lateinit var locationManager: LocationManager
     private var currentLocation: Location? = null
 
@@ -35,6 +36,15 @@ class MainActivity: FlutterActivity() {
                 else -> {
                     result.notImplemented()
                 }
+            }
+        }
+
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CONFIG_CHANNEL).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "getGoogleMapsApiKey" -> {
+                    result.success(BuildConfig.GOOGLE_MAPS_API_KEY ?: "")
+                }
+                else -> result.notImplemented()
             }
         }
     }

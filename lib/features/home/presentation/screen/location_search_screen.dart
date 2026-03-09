@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:hudhud_delivery/app/services/custom_location_service.dart';
-import 'package:hudhud_delivery/app/services/nominatim_service.dart';
+import 'package:hudhud_delivery/app/services/google_places_service.dart';
+import 'package:hudhud_delivery/app/models/place_result.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -94,7 +95,7 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
     });
 
     try {
-      final places = await NominatimService.reverseGeocode(
+      final places = await GooglePlacesService.reverseGeocode(
         point.latitude,
         point.longitude,
       );

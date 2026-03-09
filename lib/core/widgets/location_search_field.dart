@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:hudhud_delivery/app/services/nominatim_service.dart';
+import 'package:hudhud_delivery/app/services/google_places_service.dart';
+import 'package:hudhud_delivery/app/models/place_result.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 
 class LocationSearchField extends StatefulWidget {
@@ -28,7 +29,6 @@ class _LocationSearchFieldState extends State<LocationSearchField> {
   List<PlaceResult> _suggestions = [];
   bool _isLoading = false;
   bool _showSuggestions = false;
-  bool _usingFallbackData = false;
   
   @override
   void initState() {
@@ -79,29 +79,27 @@ class _LocationSearchFieldState extends State<LocationSearchField> {
   
   Future<void> _searchPlaces(String query) async {
     if (query.trim().length < 2) return;
-    
+
     setState(() {
       _isLoading = true;
       _showSuggestions = true;
     });
-    
+
     try {
-      final results = await NominatimService.searchPlaces(query);
+      final results = await GooglePlacesService.searchPlaces(query);
       if (mounted) {
         setState(() {
           _suggestions = results;
           _isLoading = false;
-          _usingFallbackData = results.isNotEmpty && results.first.displayName.contains('Ethiopia');
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
+          _suggestions = [];
           _isLoading = false;
-          _usingFallbackData = true;
         });
       }
-      print('Error searching places: $e');
     }
   }
   
@@ -147,14 +145,6 @@ class _LocationSearchFieldState extends State<LocationSearchField> {
             }
           },
         ),
-        if (_usingFallbackData && _showSuggestions)
-          Padding(
-            padding: const EdgeInsets.only(top: 4.0, left: 8.0),
-            child: Text(
-              'Using offline location data',
-              style: TextStyle(color: Colors.orange[700], fontSize: 12),
-            ),
-          ),
         if (_showSuggestions) _buildSuggestionsDropdown(),
       ],
     );

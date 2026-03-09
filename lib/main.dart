@@ -1,4 +1,5 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
@@ -32,26 +33,36 @@ import 'app/widgets/secondary_button.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Register FCM background handler (must be top-level)
-  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-
-  // Initialize FCM
-  final fcmService = await FcmService.initialize();
-  fcmService.onNotificationTap = (message, {localPayload}) {
-    // Handle notification tap: navigate to order/screen using message?.data or localPayload
-  };
-  fcmService.onTokenRefresh = (token) async {
-    final authService = AuthService();
-    if (await authService.isAuthenticated()) {
-      await authService.sendFcmTokenToBackend();
+  // Initialize FCM (non-blocking: app starts even if Firebase/FCM fails)
+  FcmService? fcmService;
+  try {
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+    fcmService = await FcmService.initialize();
+    fcmService.onNotificationTap = (message, {localPayload}) {
+      // Handle notification tap: navigate to order/screen using message?.data or localPayload
+    };
+    fcmService.onTokenRefresh = (token) async {
+      final authService = AuthService();
+      if (await authService.isAuthenticated()) {
+        await authService.sendFcmTokenToBackend();
+      }
+    };
+  } catch (e, st) {
+    if (kDebugMode) {
+      debugPrint('FCM/Firebase init failed (app will run without push): $e');
+      debugPrint('$st');
     }
-  };
+  }
 
   // Initialize API service
   // DioClient.initialize(); // Will be implemented when needed
 
-  // Initialize location permissions at startup
-  await CustomLocationService.initializeLocationPermissions();
+  // Initialize location permissions at startup (non-blocking)
+  try {
+    await CustomLocationService.initializeLocationPermissions();
+  } catch (e) {
+    if (kDebugMode) debugPrint('Location permission init failed: $e');
+  }
 
   // Initialize theme controller
   final themeController = ThemeController();

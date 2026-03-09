@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import 'package:hudhud_delivery/features/taxi/data/ride_data_provider.dart';
 import 'finding_driver_screen.dart';
 
@@ -10,6 +11,8 @@ class TripSelectionScreen extends StatefulWidget {
   final LatLng destinationLocation;
   final String pickupAddress;
   final String destinationAddress;
+  final double? initialRouteDistanceKm;
+  final List<LatLng>? initialRoutePolylinePoints;
 
   const TripSelectionScreen({
     super.key,
@@ -17,6 +20,8 @@ class TripSelectionScreen extends StatefulWidget {
     required this.destinationLocation,
     required this.pickupAddress,
     required this.destinationAddress,
+    this.initialRouteDistanceKm,
+    this.initialRoutePolylinePoints,
   });
 
   @override
@@ -31,6 +36,9 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
   bool _isRequestingRide = false;
   String? _estimateError;
   final RideDataProvider _rideDataProvider = RideDataProvider();
+  List<LatLng>? _routePolylinePoints;
+  double? _routeDistanceKm;
+  bool _isLoadingRoute = false;
 
   late List<TripOption> _tripOptions;
 
@@ -41,9 +49,32 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
     super.initState();
     _selectedTrip = 'go';
     _tripOptions = _getFallbackOptions();
-
+    if (widget.initialRoutePolylinePoints != null && widget.initialRouteDistanceKm != null) {
+      _routePolylinePoints = widget.initialRoutePolylinePoints;
+      _routeDistanceKm = widget.initialRouteDistanceKm;
+    } else {
+      _fetchRouteDirections();
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchEstimates();
+    });
+  }
+
+  Future<void> _fetchRouteDirections() async {
+    setState(() => _isLoadingRoute = true);
+    final result = await GoogleDirectionsService.getDirections(
+      originLat: widget.pickupLocation.latitude,
+      originLng: widget.pickupLocation.longitude,
+      destLat: widget.destinationLocation.latitude,
+      destLng: widget.destinationLocation.longitude,
+    );
+    if (!mounted) return;
+    setState(() {
+      _isLoadingRoute = false;
+      if (result != null) {
+        _routePolylinePoints = result.polylinePoints;
+        _routeDistanceKm = result.distanceKm;
+      }
     });
   }
 
@@ -297,14 +328,18 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
             polylines: {
               gmaps.Polyline(
                 polylineId: const gmaps.PolylineId('route'),
-                points: [
-                  _toG(widget.pickupLocation),
-                  _toG(widget.destinationLocation),
-                ],
+                points: _routePolylinePoints != null && _routePolylinePoints!.length >= 2
+                    ? _routePolylinePoints!.map(_toG).toList()
+                    : [
+                        _toG(widget.pickupLocation),
+                        _toG(widget.destinationLocation),
+                      ],
                 color: AppColors.primaryColor,
                 width: 3,
               ),
             },
+            myLocationEnabled: true,
+            mapType: gmaps.MapType.normal,
             onMapCreated: (controller) {
               _mapController = controller;
               _fitBounds();
@@ -358,6 +393,54 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
+                    // Distance in KM
+                    if (_routeDistanceKm != null || _isLoadingRoute)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Row(
+                          children: [
+                            Icon(Icons.straighten,
+                                size: 18, color: AppColors.primaryColor),
+                            const SizedBox(width: 8),
+                            if (_isLoadingRoute)
+                              const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            else if (_routeDistanceKm != null)
+                              Text(
+                                '${_routeDistanceKm!.toStringAsFixed(2)} KM',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primaryColor,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    if (_routeDistanceKm != null || _isLoadingRoute)
+                      const SizedBox(height: 12),
+                    // Hint when road route failed (straight line = Directions API not enabled)
+                    if (!_isLoadingRoute && _routePolylinePoints == null) ...[
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Row(
+                          children: [
+                            Icon(Icons.info_outline, size: 16, color: Colors.orange[800]),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Road route unavailable. Enable "Directions API" in Google Cloud Console for your API key (see MAPS_SETUP.md).',
+                                style: TextStyle(fontSize: 11, color: Colors.orange[800]),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
                     const Text(
                       'Choose a trip',
                       style: TextStyle(

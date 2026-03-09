@@ -20,10 +20,35 @@ if (localPropertiesFile.exists()) {
     localProperties.load(new FileInputStream(localPropertiesFile))
 }
 
+// Read GOOGLE_MAPS_API_KEY from project root .env first, then android/local.properties
+def googleMapsApiKey = ''
+def projectRoot = rootProject.rootDir.parentFile
+def envFile = projectRoot != null ? new File(projectRoot, '.env') : null
+if (envFile != null && envFile.exists()) {
+    envFile.withReader('UTF-8') { reader ->
+        reader.eachLine { line ->
+            def m = line =~ /^\s*GOOGLE_MAPS_API_KEY\s*=\s*(.+)\s*$/
+            if (m) {
+                googleMapsApiKey = m.group(1).trim().replaceAll(/^["']|["']$/, '')
+            }
+        }
+    }
+}
+if (!googleMapsApiKey) {
+    googleMapsApiKey = localProperties.getProperty('GOOGLE_MAPS_API_KEY', '').trim()
+}
+if (!googleMapsApiKey) {
+    println 'WARNING: GOOGLE_MAPS_API_KEY not set. Add it to project root .env or android/local.properties. Google Maps will show a blank screen.'
+}
+
 android {
     namespace = "com.hudhud.userapp"
     compileSdk = 36
     ndkVersion = "27.0.12077973"
+
+    buildFeatures {
+        buildConfig = true
+    }
 
     defaultConfig {
         applicationId = "com.hudhud.userapp"
@@ -31,7 +56,10 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "0.0.1"
-        manifestPlaceholders = [googleMapsApiKey: localProperties.getProperty('GOOGLE_MAPS_API_KEY', '')]
+        manifestPlaceholders = [
+            googleMapsApiKey: googleMapsApiKey
+        ]
+        buildConfigField "String", "GOOGLE_MAPS_API_KEY", "\"${googleMapsApiKey.replace('"', '\\"')}\""
     }
 
     compileOptions {

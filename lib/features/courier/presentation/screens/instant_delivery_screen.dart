@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/app/services/location_service.dart';
 import 'package:hudhud_delivery/app/services/geocoding_service.dart';
+import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import '../../../home/presentation/screen/location_search_screen.dart';
 import 'package_details_screen.dart';
 
@@ -23,8 +24,23 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
   LatLng? _pickupPosition;
   LatLng? _deliveryPosition;
   bool _isLoadingLocation = true;
+  List<LatLng>? _routePolylinePoints;
 
   static gmaps.LatLng _toG(LatLng p) => gmaps.LatLng(p.latitude, p.longitude);
+
+  Future<void> _fetchRouteDirections() async {
+    if (_pickupPosition == null || _deliveryPosition == null) return;
+    final result = await GoogleDirectionsService.getDirections(
+      originLat: _pickupPosition!.latitude,
+      originLng: _pickupPosition!.longitude,
+      destLat: _deliveryPosition!.latitude,
+      destLng: _deliveryPosition!.longitude,
+    );
+    if (!mounted) return;
+    setState(() {
+      _routePolylinePoints = result?.polylinePoints;
+    });
+  }
 
   @override
   void initState() {
@@ -98,10 +114,12 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
         setState(() {
           _pickupLocation = address;
           _pickupPosition = coordinates;
+          _routePolylinePoints = null;
         });
 
         // Adjust map view to show both locations if both are set
         if (_pickupPosition != null && _deliveryPosition != null) {
+          _fetchRouteDirections();
           _fitBounds();
         } else {
           _mapController?.moveCamera(
@@ -130,10 +148,12 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
         setState(() {
           _deliveryLocation = address;
           _deliveryPosition = coordinates;
+          _routePolylinePoints = null;
         });
 
         // Adjust map view to show both locations if both are set
         if (_pickupPosition != null && _deliveryPosition != null) {
+          _fetchRouteDirections();
           _fitBounds();
         } else {
           _mapController?.moveCamera(
@@ -176,7 +196,9 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                 ? {
                     gmaps.Polyline(
                       polylineId: const gmaps.PolylineId('route'),
-                      points: [_toG(_pickupPosition!), _toG(_deliveryPosition!)],
+                      points: _routePolylinePoints != null && _routePolylinePoints!.length >= 2
+                          ? _routePolylinePoints!.map(_toG).toList()
+                          : [_toG(_pickupPosition!), _toG(_deliveryPosition!)],
                       color: AppColors.primaryColor,
                       width: 3,
                     ),
@@ -416,10 +438,12 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
             _deliveryLocation = address;
             _deliveryPosition = point;
           }
+          _routePolylinePoints = null;
         });
 
         // Adjust map view to show both locations if both are set
         if (_pickupPosition != null && _deliveryPosition != null) {
+          _fetchRouteDirections();
           _fitBounds();
         } else {
           _mapController?.moveCamera(

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hudhud_delivery/app/services/nominatim_service.dart';
+import 'package:hudhud_delivery/app/models/place_result.dart';
 import 'package:hudhud_delivery/core/widgets/location_search_field.dart';
 
 class LocationSearchDemoScreen extends StatefulWidget {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 
 class DriverOnTheWayScreen extends StatefulWidget {
   final LatLng pickupLocation;
@@ -30,6 +31,9 @@ class DriverOnTheWayScreen extends StatefulWidget {
 class _DriverOnTheWayScreenState extends State<DriverOnTheWayScreen> {
   gmaps.GoogleMapController? _mapController;
   LatLng? _driverPosition;
+  List<LatLng>? _routePolylinePoints;
+  double? _routeDistanceKm;
+  bool _isLoadingRoute = true;
 
   static gmaps.LatLng _toG(LatLng p) => gmaps.LatLng(p.latitude, p.longitude);
 
@@ -48,6 +52,24 @@ class _DriverOnTheWayScreenState extends State<DriverOnTheWayScreen> {
                   widget.pickupLocation.longitude) *
               0.3,
     );
+    _fetchRouteDirections();
+  }
+
+  Future<void> _fetchRouteDirections() async {
+    final result = await GoogleDirectionsService.getDirections(
+      originLat: widget.pickupLocation.latitude,
+      originLng: widget.pickupLocation.longitude,
+      destLat: widget.destinationLocation.latitude,
+      destLng: widget.destinationLocation.longitude,
+    );
+    if (!mounted) return;
+    setState(() {
+      _isLoadingRoute = false;
+      if (result != null) {
+        _routePolylinePoints = result.polylinePoints;
+        _routeDistanceKm = result.distanceKm;
+      }
+    });
   }
 
   void _fitBounds() {
@@ -111,14 +133,18 @@ class _DriverOnTheWayScreenState extends State<DriverOnTheWayScreen> {
             polylines: {
               gmaps.Polyline(
                 polylineId: const gmaps.PolylineId('route'),
-                points: [
-                  _toG(widget.pickupLocation),
-                  _toG(widget.destinationLocation),
-                ],
+                points: _routePolylinePoints != null && _routePolylinePoints!.length >= 2
+                    ? _routePolylinePoints!.map(_toG).toList()
+                    : [
+                        _toG(widget.pickupLocation),
+                        _toG(widget.destinationLocation),
+                      ],
                 color: AppColors.primaryColor,
                 width: 3,
               ),
             },
+            myLocationEnabled: true,
+            mapType: gmaps.MapType.normal,
             onMapCreated: (controller) {
               _mapController = controller;
               _fitBounds();
@@ -301,6 +327,31 @@ class _DriverOnTheWayScreenState extends State<DriverOnTheWayScreen> {
                               address: widget.destinationAddress,
                               isFirst: false,
                             ),
+                            if (_routeDistanceKm != null || _isLoadingRoute) ...[
+                              const SizedBox(height: 16),
+                              Row(
+                                children: [
+                                  Icon(Icons.straighten,
+                                      size: 18, color: AppColors.primaryColor),
+                                  const SizedBox(width: 8),
+                                  if (_isLoadingRoute)
+                                    const SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(strokeWidth: 2),
+                                    )
+                                  else if (_routeDistanceKm != null)
+                                    Text(
+                                      '${_routeDistanceKm!.toStringAsFixed(2)} KM',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.primaryColor,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ],
                             const SizedBox(height: 24),
                             // Payment Information
                             Row(

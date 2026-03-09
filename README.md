@@ -2,6 +2,10 @@
 
 A new Flutter project.
 
+## Google Maps
+
+The app uses Google Maps for location and delivery features. **You must add a Google Maps API key** or the map will not load. See **[MAPS_SETUP.md](MAPS_SETUP.md)** for step-by-step setup (Android and iOS). For key security and rotation, see [SECURITY.md](SECURITY.md).
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.

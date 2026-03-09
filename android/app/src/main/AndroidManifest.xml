@@ -1,4 +1,5 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <!-- Location permissions -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -8,7 +9,6 @@
     
     <application
         android:label="HudHud Delivery"
-        android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
@@ -36,10 +36,15 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <!-- Disable Impeller on Android to avoid blank/white Google Map (known issue with google_maps_flutter) -->
+        <meta-data
+            android:name="io.flutter.embedding.android.EnableImpeller"
+            android:value="false" />
         <!-- Google Maps API Key (set GOOGLE_MAPS_API_KEY in android/local.properties) -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="${googleMapsApiKey}" />
+            android:value="${googleMapsApiKey}"
+            tools:replace="android:value" />
         <!-- FCM default notification channel (optional; can be overridden in Flutter) -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"

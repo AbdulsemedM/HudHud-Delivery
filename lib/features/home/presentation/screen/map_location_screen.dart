@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
-import '../../../../app/services/nominatim_service.dart';
-import '../../../../app/services/custom_location_service.dart';
+import 'package:hudhud_delivery/app/services/google_places_service.dart';
+import 'package:hudhud_delivery/app/models/place_result.dart';
+import 'package:hudhud_delivery/app/services/custom_location_service.dart';
 
 class MapLocationScreen extends StatefulWidget {
   final String? currentLocation;
@@ -106,7 +107,7 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
     });
 
     try {
-      final results = await NominatimService.searchPlaces(query);
+      final results = await GooglePlacesService.searchPlaces(query);
       if (mounted) {
         setState(() {
           _searchResults = results;
