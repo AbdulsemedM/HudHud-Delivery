@@ -76,6 +76,7 @@ class ApiConstants {
 
   // Vendors endpoints
   static const String vendors = 'vendors';
+  /// Path param is vendor's user_id (from /api/vendors list).
   static const String vendorProducts = 'vendor/products/by-vendor/{id}';
 
   // Notifications endpoints (GET /api/notifications, GET /api/notifications/{id})

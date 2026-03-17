@@ -87,8 +87,7 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
     super.dispose();
   }
 
-  String get _currency =>
-      _selectedWallet?.currency ?? widget.defaultCurrency;
+  String get _currency => 'ETB';
 
   @override
   Widget build(BuildContext context) {

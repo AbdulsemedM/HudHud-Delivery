@@ -119,7 +119,7 @@ class _WalletContent extends StatelessWidget {
       0,
       (sum, w) => sum + w.balanceAmount,
     );
-    final primaryCurrency = wallets.isNotEmpty ? wallets.first.currency : 'ETB';
+    const primaryCurrency = 'ETB';
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -261,7 +261,7 @@ class _WalletCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${wallet.type} • ${wallet.currency}',
+                    '${wallet.type} • ETB',
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey[600],
@@ -271,7 +271,7 @@ class _WalletCard extends StatelessWidget {
               ),
             ),
             Text(
-              '${wallet.currency} ${wallet.balance}',
+              'ETB ${wallet.balance}',
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,

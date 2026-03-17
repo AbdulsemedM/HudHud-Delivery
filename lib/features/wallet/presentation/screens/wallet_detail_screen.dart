@@ -111,7 +111,7 @@ class _WalletDetailContent extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '${wallet.currency} ${wallet.balance}',
+                  'ETB ${wallet.balance}',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 32,
@@ -144,10 +144,10 @@ class _WalletDetailContent extends StatelessWidget {
                 const SizedBox(height: 16),
                 _DetailRow(label: 'Name', value: wallet.name),
                 _DetailRow(label: 'Type', value: wallet.type),
-                _DetailRow(label: 'Currency', value: wallet.currency),
+                const _DetailRow(label: 'Currency', value: 'ETB'),
                 _DetailRow(
                     label: 'Balance',
-                    value: '${wallet.currency} ${wallet.balance}'),
+                    value: 'ETB ${wallet.balance}'),
                 if (wallet.createdAt != null)
                   _DetailRow(label: 'Created', value: wallet.createdAt!),
               ],

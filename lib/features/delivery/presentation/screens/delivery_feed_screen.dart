@@ -198,7 +198,8 @@ class _DeliveryFeedScreenState extends State<DeliveryFeedScreen> {
                         ],
                       ),
                     ),
-                    // Popular Orders Section (mock data)
+                    // Popular Orders Section (mock data). order.vendorId is vendor user_id
+                    // for the products API (mock uses 7, 8, 9 from /api/vendors).
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Column(
@@ -276,7 +277,7 @@ class _DeliveryFeedScreenState extends State<DeliveryFeedScreen> {
                                             storeImage: v.avatar.isNotEmpty
                                                 ? v.avatar
                                                 : null,
-                                            vendorId: v.id,
+                                            vendorId: v.productApiId,
                                             vendor: v,
                                           ),
                                         ),

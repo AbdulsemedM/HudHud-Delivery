@@ -35,15 +35,17 @@ class VendorsRepository {
         .toList();
   }
 
-  /// GET /api/vendor/products/by-vendor/{id}
-  Future<List<CategoriesProductsModel>> getVendorProducts(int vendorId) async {
-    final response = await vendorsDataProvider.getVendorProducts(vendorId);
+  /// GET /api/vendor/products/by-vendor/{user_id}
+  /// [vendorUserId] is the vendor's user_id from the vendors list (e.g. 7, 8, 9).
+  Future<List<CategoriesProductsModel>> getVendorProducts(int vendorUserId) async {
+    final response = await vendorsDataProvider.getVendorProducts(vendorUserId);
     if (response['statusCode'] != 200) {
       throw Exception(_clean(response['errorMessage']?.toString() ?? 'Error fetching vendor products'));
     }
     final data = response['data'];
     if (data == null) return [];
     List<dynamic> list;
+    // Products endpoint may return a raw array of product objects.
     if (data is List) {
       list = data;
     } else if (data is Map<String, dynamic>) {

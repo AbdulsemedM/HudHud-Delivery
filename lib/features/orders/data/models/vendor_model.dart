@@ -2,6 +2,8 @@ import 'package:equatable/equatable.dart';
 
 class VendorModel extends Equatable {
   final int id;
+  /// User ID of the vendor (use this for product APIs like by-vendor/{user_id}).
+  final int? userId;
   final String name;
   final String email;
   final String phone;
@@ -37,6 +39,7 @@ class VendorModel extends Equatable {
 
   const VendorModel({
     required this.id,
+    this.userId,
     required this.name,
     required this.email,
     required this.phone,
@@ -72,9 +75,23 @@ class VendorModel extends Equatable {
     return int.tryParse(v.toString()) ?? 0;
   }
 
+  /// Parses user_id from vendor list item (top-level user_id/userId or nested user.id).
+  /// Accepts any Map for nested user so parsed JSON from Dio works reliably.
+  static int? _parseUserId(Map<String, dynamic> json) {
+    if (json['user_id'] != null) return _parseInt(json['user_id']);
+    if (json['userId'] != null) return _parseInt(json['userId']);
+    final user = json['user'];
+    if (user is Map) {
+      final id = user['id'];
+      if (id != null) return _parseInt(id);
+    }
+    return null;
+  }
+
   factory VendorModel.fromJson(Map<String, dynamic> json) {
     return VendorModel(
       id: _parseInt(json['id']),
+      userId: json['user_id'] != null ? _parseInt(json['user_id']) : null,
       name: json['name']?.toString() ?? '',
       email: json['email']?.toString() ?? '',
       phone: json['phone']?.toString() ?? '',
@@ -135,6 +152,7 @@ class VendorModel extends Equatable {
     final updatedAt = DateTime.tryParse(json['updated_at']?.toString() ?? '') ?? DateTime.now();
     return VendorModel(
       id: _parseInt(json['id']),
+      userId: _parseUserId(json),
       name: json['shop_name']?.toString() ?? json['name']?.toString() ?? '',
       email: json['contact_email']?.toString() ?? '',
       phone: json['contact_phone']?.toString() ?? '',
@@ -211,9 +229,13 @@ class VendorModel extends Equatable {
   bool get isEmailVerified => emailVerifiedAt != null;
   bool get isPhoneVerified => phoneVerifiedAt != null;
 
+  /// ID to use for vendor product APIs (prefer user_id when available).
+  int get productApiId => userId ?? id;
+
   @override
   List<Object?> get props => [
         id,
+        userId,
         name,
         email,
         phone,
