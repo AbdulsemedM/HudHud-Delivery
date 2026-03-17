@@ -166,10 +166,19 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    const initialSheetSize = 0.5;
+    final mapHeight = screenHeight * (1 - initialSheetSize);
+
     return Scaffold(
       body: Stack(
         children: [
-          gmaps.GoogleMap(
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: mapHeight,
+            child: gmaps.GoogleMap(
             initialCameraPosition: gmaps.CameraPosition(
               target: _toG(_currentPosition),
               zoom: 15.0,
@@ -211,6 +220,7 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
               _showLocationSelectionDialog(
                   LatLng(point.latitude, point.longitude));
             },
+            ),
           ),
           // Back button
           Positioned(

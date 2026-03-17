@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:hudhud_delivery/core/api/api_constants.dart';
+import 'package:hudhud_delivery/core/utils/phone_util.dart';
 
 import '../../../../core/api/api_service.dart';
 
@@ -34,7 +35,7 @@ class SignupDataProvider {
       final body = {
         'name': name,
         'email': email,
-        'phone': phone,
+        'phone': normalizePhoneToBackend(phone),
         'password': password,
         'password_confirmation': password_confirmation,
         'device_token': await getDeviceId(),

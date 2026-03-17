@@ -5,6 +5,7 @@ import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/utils/phone_util.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'finding_courier_screen.dart';
@@ -225,9 +226,9 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
       'insurance_required': false,
       'special_instructions': '',
       'sender_name': user?.name ?? '',
-      'sender_phone': user?.phone ?? '',
+      'sender_phone': normalizePhoneToBackend(user?.phone ?? ''),
       'receiver_name': widget.recipientName,
-      'receiver_phone': widget.recipientPhone,
+      'receiver_phone': normalizePhoneToBackend(widget.recipientPhone),
     };
 
     setState(() => _isLoadingRequest = true);

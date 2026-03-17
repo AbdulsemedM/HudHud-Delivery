@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../core/api/api_service.dart';
 import '../../core/api/api_constants.dart';
+import '../../core/utils/phone_util.dart';
 import '../../models/user_model.dart';
 import 'fcm_service.dart';
 
@@ -306,7 +307,7 @@ class AuthService {
           'name': name,
           'email': email,
           'password': password,
-          'phone': phone,
+          'phone': normalizePhoneToBackend(phone),
           if (address != null) 'address': address,
         },
       );
@@ -467,7 +468,7 @@ class AuthService {
       if (email != null && email.trim().isNotEmpty)
         updateData['email'] = email.trim();
       if (phone != null && phone.trim().isNotEmpty)
-        updateData['phone'] = phone.trim();
+        updateData['phone'] = normalizePhoneToBackend(phone);
       if (address != null && address.trim().isNotEmpty)
         updateData['address'] = address.trim();
 
@@ -721,7 +722,7 @@ class AuthService {
       }
       final response = await _apiService.post(
         ApiConstants.sendPhoneVerificationCode,
-        data: {'phone': phone},
+        data: {'phone': normalizePhoneToBackend(phone)},
       );
       if (response.statusCode == 200 && response.data != null) {
         final data = response.data as Map<String, dynamic>;
@@ -763,7 +764,7 @@ class AuthService {
       }
       final response = await _apiService.post(
         ApiConstants.verifyPhone,
-        data: {'phone': phone, 'code': code},
+        data: {'phone': normalizePhoneToBackend(phone), 'code': code},
       );
       if (response.statusCode == 200 && response.data != null) {
         final data = response.data as Map<String, dynamic>;

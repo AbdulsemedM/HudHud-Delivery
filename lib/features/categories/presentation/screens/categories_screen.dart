@@ -1,22 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../../../core/theme/app_colors.dart';
 import '../../bloc/categories_bloc.dart';
+import '../../model/category_tree_model.dart';
 import '../../model/categories_products_model.dart';
 import '../widgets/categories_widget.dart';
-// import '../widgets/product_item.dart';
-// import 'product_details_screen.dart';
 import '../../../checkout/presentation/screen/checkout_screen.dart';
+import '../../../delivery/presentation/screens/product_detail_screen.dart';
 
 class CategoriesScreen extends StatefulWidget {
   final int categoryId;
   final String categoryName;
   final String categoryImage;
+  /// When provided, the header shows description and product count from the category.
+  final CategoryTreeModel? category;
 
   const CategoriesScreen({
     super.key,
     required this.categoryId,
     required this.categoryName,
     required this.categoryImage,
+    this.category,
   });
 
   @override
@@ -169,9 +174,15 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   }
 
   void _showProductDetails(CategoriesProductsModel product) {
-    print('Showing product details for: ${product.name}');
-    print('Product ID: ${product.id}');
-    print('Product description: ${product.description}');
+    if (product.id != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ProductDetailScreen(productId: product.id!),
+        ),
+      );
+      return;
+    }
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -221,17 +232,14 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      CategoryHeader(
-                        imageUrl: widget.categoryImage,
-                        categoryLogo: 'assets/images/cook_nature.jpg',
-                        onBackPressed: () => Navigator.pop(context),
-                      ),
-                      CategoryInfo(
+                      CategoryDetailHeader(
                         name: widget.categoryName,
-                        totalProducts: _products.length,
-                        onFavoritePressed: () {},
+                        imageUrl: widget.categoryImage,
+                        productsCount: widget.category?.productsCount ?? _products.length,
+                        description: widget.category?.description,
+                        onBack: () => Navigator.pop(context),
                       ),
-
+                      const SizedBox(height: 8),
                       ProductFilters(
                         filters: _availableFilters,
                         selectedFilters: _selectedFilters,
@@ -263,10 +271,28 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                             ),
                           ),
                         )
-                      else
+                      else ...[
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+                          child: Row(
+                            children: [
+                              Icon(Icons.grid_view_rounded, size: 20, color: Colors.grey[700]),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Products',
+                                style: TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.grey[800],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                         ListView.builder(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
                           itemCount: _filteredProducts.length,
                           itemBuilder: (context, index) {
                             final product = _filteredProducts[index];
@@ -296,6 +322,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                             );
                           },
                         ),
+                      ],
                       // Add extra padding at bottom for cart bar
                       if (_totalItems > 0) const SizedBox(height: 80),
                     ],
@@ -310,7 +337,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 24, vertical: 16),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF4A148C),
+                        color: AppColors.primaryColor,
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.1),
@@ -398,10 +425,10 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                                     vertical: 8,
                                   ),
                                 ),
-                                child: const Text(
+                                child: Text(
                                   'Go to cart',
                                   style: TextStyle(
-                                    color: Color(0xFF4A148C),
+                                    color: AppColors.primaryColor,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),

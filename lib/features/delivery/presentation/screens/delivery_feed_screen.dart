@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/features/delivery/data/mock_popular_orders.dart';
+import 'package:hudhud_delivery/features/delivery/presentation/screens/all_categories_screen.dart';
+import 'package:hudhud_delivery/features/delivery/presentation/screens/store_detail_screen.dart';
+import 'package:hudhud_delivery/features/orders/data/models/vendor_model.dart';
+import 'package:hudhud_delivery/features/vendors/data/data_provider/vendors_data_provider.dart';
+import 'package:hudhud_delivery/features/vendors/data/repository/vendors_repository.dart';
 import 'category_stores_screen.dart';
 
 class DeliveryFeedScreen extends StatefulWidget {
@@ -12,30 +19,39 @@ class DeliveryFeedScreen extends StatefulWidget {
 class _DeliveryFeedScreenState extends State<DeliveryFeedScreen> {
   String _selectedLocation = 'London Hall';
   String _selectedTime = 'Now';
-  bool _showAllCategories = false;
 
-  final List<Map<String, dynamic>> _allCategories = const [
-    {'title': 'Convenience', 'icon': Icons.shopping_bag},
-    {'title': 'Alcohol', 'icon': Icons.local_drink},
-    {'title': 'Pet Supplies', 'icon': Icons.pets},
-    {'title': 'Flowers', 'icon': Icons.local_florist},
-    {'title': 'Grocery', 'icon': Icons.shopping_basket},
-    {'title': 'American', 'icon': Icons.fastfood},
-    {'title': 'Speciality', 'icon': Icons.restaurant_menu},
-    {'title': 'Takeout', 'icon': Icons.inventory_2},
-    {'title': 'Asian', 'icon': Icons.ramen_dining},
-    {'title': 'Ice Cream', 'icon': Icons.icecream},
-    {'title': 'Halal', 'icon': Icons.set_meal},
-    {'title': 'Retails', 'icon': Icons.store},
-    {'title': 'Carribean', 'icon': Icons.dinner_dining},
-    {'title': 'Indian', 'icon': Icons.rice_bowl},
-    {'title': 'French', 'icon': Icons.restaurant},
-    {'title': 'Fast Foods', 'icon': Icons.lunch_dining},
-    {'title': 'Burger', 'icon': Icons.fastfood},
-    {'title': 'Ride', 'icon': Icons.directions_car},
-    {'title': 'Chinese', 'icon': Icons.ramen_dining},
-    {'title': 'Dessert', 'icon': Icons.cake},
-  ];
+  List<VendorModel> _vendors = [];
+  bool _vendorsLoading = true;
+  String? _vendorsError;
+  late final VendorsRepository _vendorsRepository;
+
+  @override
+  void initState() {
+    super.initState();
+    _vendorsRepository = VendorsRepository(
+      vendorsDataProvider: VendorsDataProvider(apiService: ApiService.instance),
+    );
+    _loadVendors();
+  }
+
+  Future<void> _loadVendors() async {
+    setState(() {
+      _vendorsLoading = true;
+      _vendorsError = null;
+    });
+    try {
+      final list = await _vendorsRepository.getVendors(page: 1);
+      setState(() {
+        _vendors = list;
+        _vendorsLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _vendorsError = e.toString();
+        _vendorsLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -167,9 +183,13 @@ class _DeliveryFeedScreenState extends State<DeliveryFeedScreen> {
                                   icon: Icons.more_horiz,
                                   isLarge: false,
                                   onTap: () {
-                                    setState(() {
-                                      _showAllCategories = !_showAllCategories;
-                                    });
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const AllCategoriesScreen(),
+                                      ),
+                                    );
                                   },
                                 ),
                               ),
@@ -178,61 +198,7 @@ class _DeliveryFeedScreenState extends State<DeliveryFeedScreen> {
                         ],
                       ),
                     ),
-                    // All Categories Section (when expanded)
-                    if (_showAllCategories) ...[
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'All categories',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF2C3E50),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            GridView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 4,
-                                crossAxisSpacing: 12,
-                                mainAxisSpacing: 12,
-                                childAspectRatio: 0.85,
-                              ),
-                              itemCount: _allCategories.length,
-                              itemBuilder: (context, index) {
-                                final category = _allCategories[index];
-                                return _CategoryGridItem(
-                                  title: category['title'] as String,
-                                  icon: category['icon'] as IconData,
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            CategoryStoresScreen(
-                                          categoryName:
-                                              category['title'] as String,
-                                          categoryIcon:
-                                              category['icon'] as IconData,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                );
-                              },
-                            ),
-                            const SizedBox(height: 24),
-                          ],
-                        ),
-                      ),
-                    ],
-                    // Popular Orders Section
+                    // Popular Orders Section (mock data)
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Column(
@@ -247,35 +213,81 @@ class _DeliveryFeedScreenState extends State<DeliveryFeedScreen> {
                             ),
                           ),
                           const SizedBox(height: 16),
-                          // Restaurant Listings
-                          _RestaurantCard(
-                            name: 'Adenine Kitchen',
-                            rating: 4.4,
-                            deliveryFee: 120,
-                            deliveryTime: '10-25 min',
-                            promoText: '5 orders until ETB 800 reward',
-                            imageUrl:
-                                'assets/images/categories.jpg', // Placeholder
-                            onTap: () {
-                              // TODO: Navigate to restaurant details
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          _RestaurantCard(
-                            name: 'Cardinal Chips',
-                            rating: 4.3,
-                            deliveryFee: 120,
-                            deliveryTime: '10-25 min',
-                            imageUrl:
-                                'assets/images/categories.jpg', // Placeholder
-                            onTap: () {
-                              // TODO: Navigate to restaurant details
-                            },
-                          ),
-                          const SizedBox(height: 16),
+                          ...mockPopularOrders.map((order) => Padding(
+                                padding: const EdgeInsets.only(bottom: 16),
+                                child: _RestaurantCard(
+                                  name: order.name,
+                                  rating: order.rating,
+                                  deliveryFee: order.deliveryFee,
+                                  deliveryTime: order.deliveryTime,
+                                  promoText: order.promoText,
+                                  imageUrl: order.imageUrl,
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            StoreDetailScreen(
+                                          storeName: order.name,
+                                          storeImage: order.imageUrl,
+                                          vendorId: order.vendorId,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              )),
+                          const SizedBox(height: 24),
                         ],
                       ),
                     ),
+                    // Popular Stores Section
+                    if (!_vendorsLoading && _vendorsError == null && _vendors.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Popular Stores',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF2C3E50),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            ..._vendors.take(8).map((v) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 16),
+                                  child: _StoreListItem(
+                                    name: v.name,
+                                    openingTime: 'Opens at 08:00',
+                                    promoText: null,
+                                    imageUrl: v.avatar.isNotEmpty
+                                        ? v.avatar
+                                        : 'assets/images/categories.jpg',
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              StoreDetailScreen(
+                                            storeName: v.name,
+                                            storeImage: v.avatar.isNotEmpty
+                                                ? v.avatar
+                                                : null,
+                                            vendorId: v.id,
+                                            vendor: v,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                )),
+                            const SizedBox(height: 24),
+                          ],
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -443,57 +455,6 @@ class _CategoryCard extends StatelessWidget {
   }
 }
 
-class _CategoryGridItem extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const _CategoryGridItem({
-    required this.title,
-    required this.icon,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.grey[50],
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: Colors.grey[200]!,
-            width: 1,
-          ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 32,
-              color: AppColors.primaryColor,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: Color(0xFF2C3E50),
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _RestaurantCard extends StatelessWidget {
   final String name;
   final double rating;
@@ -540,23 +501,41 @@ class _RestaurantCard extends StatelessWidget {
                     topLeft: Radius.circular(12),
                     topRight: Radius.circular(12),
                   ),
-                  child: Image.asset(
-                    imageUrl,
-                    height: 180,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        height: 180,
-                        color: Colors.grey[200],
-                        child: const Icon(
-                          Icons.restaurant,
-                          size: 50,
-                          color: Colors.grey,
+                  child: imageUrl.startsWith('http')
+                      ? Image.network(
+                          imageUrl,
+                          height: 180,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              height: 180,
+                              color: Colors.grey[200],
+                              child: const Icon(
+                                Icons.restaurant,
+                                size: 50,
+                                color: Colors.grey,
+                              ),
+                            );
+                          },
+                        )
+                      : Image.asset(
+                          imageUrl,
+                          height: 180,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              height: 180,
+                              color: Colors.grey[200],
+                              child: const Icon(
+                                Icons.restaurant,
+                                size: 50,
+                                color: Colors.grey,
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    },
-                  ),
                 ),
                 if (promoText != null)
                   Positioned(
@@ -639,6 +618,124 @@ class _RestaurantCard extends StatelessWidget {
                   ),
                 ],
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StoreListItem extends StatelessWidget {
+  final String name;
+  final String openingTime;
+  final String? promoText;
+  final String imageUrl;
+  final VoidCallback onTap;
+
+  const _StoreListItem({
+    required this.name,
+    required this.openingTime,
+    this.promoText,
+    required this.imageUrl,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Colors.grey[200]!,
+            width: 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 70,
+              height: 70,
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                shape: BoxShape.circle,
+              ),
+              child: ClipOval(
+                child: imageUrl.startsWith('http')
+                    ? Image.network(
+                        imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.grey[300],
+                            child: const Icon(
+                              Icons.store,
+                              size: 35,
+                              color: Colors.grey,
+                            ),
+                          );
+                        },
+                      )
+                    : Image.asset(
+                        imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.grey[300],
+                            child: const Icon(
+                              Icons.store,
+                              size: 35,
+                              color: Colors.grey,
+                            ),
+                          );
+                        },
+                      ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF2C3E50),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    openingTime,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  if (promoText != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      promoText!,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.green,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.favorite_border),
+              iconSize: 24,
+              color: Colors.grey,
+              onPressed: () {},
             ),
           ],
         ),

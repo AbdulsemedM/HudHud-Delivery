@@ -25,6 +25,13 @@ class VendorModel extends Equatable {
   final DateTime createdAt;
   final DateTime updatedAt;
 
+  // Optional display fields from vendors list API (shop/vendor profile)
+  final String? description;
+  final String? cuisineType;
+  final String? openingTime;
+  final String? closingTime;
+  final String? bannerPath;
+
   // Getter for logo (using avatar as placeholder)
   String? get logo => avatar.isNotEmpty ? avatar : null;
 
@@ -48,10 +55,15 @@ class VendorModel extends Equatable {
     this.socialType,
     required this.language,
     required this.timezone,
-    required this.referralCode,
+    required     this.referralCode,
     this.deletedAt,
     required this.createdAt,
     required this.updatedAt,
+    this.description,
+    this.cuisineType,
+    this.openingTime,
+    this.closingTime,
+    this.bannerPath,
   });
 
   static int _parseInt(dynamic v) {
@@ -96,6 +108,74 @@ class VendorModel extends Equatable {
       createdAt: DateTime.tryParse(json['created_at']?.toString() ?? '') ?? DateTime.now(),
       updatedAt: DateTime.tryParse(json['updated_at']?.toString() ?? '') ?? DateTime.now(),
     );
+  }
+
+  /// Parses a vendor from the vendors list API (/api/vendors).
+  /// Uses shop_name as name and logo_path / logo_urls as avatar.
+  factory VendorModel.fromVendorListJson(Map<String, dynamic> json) {
+    final logoPath = json['logo_path']?.toString();
+    final logoUrls = json['logo_urls'];
+    String avatar = logoPath ?? '';
+    if (avatar.isEmpty && logoUrls is Map) {
+      final urls = logoUrls as Map<String, dynamic>;
+      avatar = urls['medium']?.toString() ??
+          urls['small']?.toString() ??
+          urls['thumb']?.toString() ??
+          urls['original']?.toString() ??
+          '';
+    }
+    final bannerPath = json['banner_path']?.toString();
+    final bannerUrls = json['banner_urls'];
+    String? banner = bannerPath?.isNotEmpty == true ? bannerPath : null;
+    if (banner == null && bannerUrls is Map) {
+      final urls = bannerUrls as Map<String, dynamic>;
+      banner = urls['medium']?.toString() ?? urls['small']?.toString() ?? urls['thumb']?.toString();
+    }
+    final createdAt = DateTime.tryParse(json['created_at']?.toString() ?? '') ?? DateTime.now();
+    final updatedAt = DateTime.tryParse(json['updated_at']?.toString() ?? '') ?? DateTime.now();
+    return VendorModel(
+      id: _parseInt(json['id']),
+      name: json['shop_name']?.toString() ?? json['name']?.toString() ?? '',
+      email: json['contact_email']?.toString() ?? '',
+      phone: json['contact_phone']?.toString() ?? '',
+      emailVerifiedAt: null,
+      phoneVerifiedAt: null,
+      type: 'vendor',
+      status: json['status']?.toString() ?? 'active',
+      avatar: avatar,
+      deviceToken: null,
+      emailVerificationCode: null,
+      phoneVerificationCode: null,
+      lastLoginAt: null,
+      lastLoginIp: null,
+      dateOfBirth: null,
+      gender: null,
+      socialType: null,
+      language: 'en',
+      timezone: 'UTC',
+      referralCode: '',
+      deletedAt: null,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      description: json['description']?.toString(),
+      cuisineType: json['cuisine_type']?.toString(),
+      openingTime: _formatTime(json['opening_time']?.toString()),
+      closingTime: _formatTime(json['closing_time']?.toString()),
+      bannerPath: banner,
+    );
+  }
+
+  static String? _formatTime(String? time) {
+    if (time == null || time.isEmpty) return null;
+    // "07:00:00" -> "7:00 AM"
+    final parts = time.split(':');
+    if (parts.isEmpty) return time;
+    final h = int.tryParse(parts[0]) ?? 0;
+    final m = parts.length > 1 ? int.tryParse(parts[1]) ?? 0 : 0;
+    if (h == 0 && m == 0 && time == '00:00:00') return 'Midnight';
+    if (h == 12) return '${h}:${m.toString().padLeft(2, '0')} PM';
+    if (h > 12) return '${h - 12}:${m.toString().padLeft(2, '0')} PM';
+    return '${h == 0 ? 12 : h}:${m.toString().padLeft(2, '0')} AM';
   }
 
   Map<String, dynamic> toJson() {
@@ -156,5 +236,10 @@ class VendorModel extends Equatable {
         deletedAt,
         createdAt,
         updatedAt,
+        description,
+        cuisineType,
+        openingTime,
+        closingTime,
+        bannerPath,
       ];
 }

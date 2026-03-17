@@ -255,16 +255,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
               const SizedBox(height: 16),
-              // Order Tracking Card
-              OrderTrackingCard(
-                riderName: _currentUser?.name ?? 'User',
-                message:
-                    'Your courier rider Dickson is getting ready to collect your courier request this may take 5-8mins we will notify you once he collects the package.',
-                onViewMap: () {
-                  // Handle view map
-                },
-              ),
-              const SizedBox(height: 24),
               // What would you like to do section
               const Text(
                 'What would you like to do?',
@@ -287,7 +277,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ServiceCard(
                     title: 'Food',
                     subtitle: 'Order groceries from your favourite vendors.',
-                    icon: Icons.shopping_bag,
+                    icon: Icons.shopping_bag_rounded,
                     color: AppColors.primaryColor,
                     onTap: () {
                       Navigator.push(
@@ -301,8 +291,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ServiceCard(
                     title: 'Courier',
                     subtitle: 'Order courier services for pickup and drop off.',
-                    icon: Icons.local_shipping,
-                    color: Colors.purple,
+                    icon: Icons.local_shipping_rounded,
+                    color: AppColors.primaryColor,
                     onTap: () {
                       widget.onSwitchToTab?.call(1);
                     },
@@ -310,8 +300,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ServiceCard(
                     title: 'Taxi',
                     subtitle: 'Request taxi at affordable rates from anywhere.',
-                    icon: Icons.local_taxi,
-                    color: Colors.yellow[700]!,
+                    icon: Icons.local_taxi_rounded,
+                    color: AppColors.primaryColor,
                     onTap: () {
                       widget.onSwitchToTab?.call(3);
                     },
@@ -319,8 +309,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ServiceCard(
                     title: 'Handyman',
                     subtitle: 'Request handy men for casual services at home.',
-                    icon: Icons.handyman,
-                    color: Colors.green,
+                    icon: Icons.handyman_rounded,
+                    color: AppColors.primaryColor,
                     onTap: () {
                       Navigator.push(
                         context,
@@ -332,6 +322,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ],
               ),
+              const SizedBox(height: 24),
+              const AppFeaturesCard(),
               const SizedBox(height: 24),
               // History Section (Available Orders)
               Row(

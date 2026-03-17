@@ -21,6 +21,15 @@ class CategoriesBloc extends Bloc<CategoriesEvent, CategoriesState> {
         emit(FetchCategoriesTreeFailure(e.toString()));
       }
     });
+    on<FetchCategoriesListEvent>((event, emit) async {
+      emit(FetchCategoriesListLoading());
+      try {
+        final result = await categoriesRepository.getCategories(page: event.page);
+        emit(FetchCategoriesListSuccess(result));
+      } catch (e) {
+        emit(FetchCategoriesListFailure(e.toString()));
+      }
+    });
     on<FetchCategoriesProductsEvent>((event, emit) async {
       emit(FetchCategoriesProductsLoading());
       try {

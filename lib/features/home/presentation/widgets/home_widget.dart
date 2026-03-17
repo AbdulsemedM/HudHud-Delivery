@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:lottie/lottie.dart';
@@ -22,6 +24,10 @@ class VerificationStatusCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final emailVerified = user.isEmailVerified;
     final phoneVerified = user.isPhoneVerified;
+
+    if (emailVerified && phoneVerified) {
+      return const SizedBox.shrink();
+    }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -48,74 +54,38 @@ class VerificationStatusCard extends StatelessWidget {
               color: Colors.grey[700],
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           Row(
             children: [
-              Icon(
-                emailVerified ? Icons.check_circle : Icons.cancel,
-                size: 18,
-                color: emailVerified ? Colors.green : Colors.orange,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                'Email: ${emailVerified ? 'Verified' : 'Not verified'}',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.grey[800],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              Icon(
-                phoneVerified ? Icons.check_circle : Icons.cancel,
-                size: 18,
-                color: phoneVerified ? Colors.green : Colors.orange,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                'Phone: ${phoneVerified ? 'Verified' : 'Not verified'}',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.grey[800],
-                ),
-              ),
-            ],
-          ),
-          if (!emailVerified || !phoneVerified) ...[
-            const SizedBox(height: 12),
-            if (!emailVerified)
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  onPressed: onVerifyEmail,
-                  icon: const Icon(Icons.mark_email_read_outlined, size: 18),
-                  label: const Text('Verify Email'),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.primaryColor,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 10),
+              if (!emailVerified)
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: onVerifyEmail,
+                    icon: const Icon(Icons.mark_email_read_outlined, size: 18),
+                    label: const Text('Verify Email'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.primaryColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                    ),
                   ),
                 ),
-              ),
-            if (!emailVerified && !phoneVerified) const SizedBox(height: 8),
-            if (!phoneVerified)
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  onPressed: onVerifyPhone,
-                  icon: const Icon(Icons.phone_android_outlined, size: 18),
-                  label: const Text('Verify Phone'),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.primaryColor,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 10),
+              if (!emailVerified && !phoneVerified) const SizedBox(width: 12),
+              if (!phoneVerified)
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: onVerifyPhone,
+                    icon: const Icon(Icons.phone_android_outlined, size: 18),
+                    label: const Text('Verify Phone'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.primaryColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                    ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ],
       ),
     );
@@ -230,6 +200,267 @@ class UserProfileHeader extends StatelessWidget {
   }
 }
 
+/// Data for one service in the sliding cards.
+class _ServiceItem {
+  final String title;
+  final String description;
+  final IconData icon;
+  final Color color;
+
+  const _ServiceItem({
+    required this.title,
+    required this.description,
+    required this.icon,
+    required this.color,
+  });
+}
+
+/// Sliding cards that each showcase a different HudHud service, with a one-time section slide-in.
+class AppFeaturesCard extends StatefulWidget {
+  const AppFeaturesCard({super.key});
+
+  @override
+  State<AppFeaturesCard> createState() => _AppFeaturesCardState();
+}
+
+class _AppFeaturesCardState extends State<AppFeaturesCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<Offset> _slideAnimation;
+  late Animation<double> _fadeAnimation;
+  final PageController _pageController = PageController(viewportFraction: 0.88);
+  int _currentPage = 0;
+
+  static final List<_ServiceItem> _services = [
+    _ServiceItem(
+      title: 'Food & groceries',
+      description: 'Order from your favourite vendors.',
+      icon: Icons.shopping_bag_rounded,
+      color: AppColors.primaryColor,
+    ),
+    _ServiceItem(
+      title: 'Courier',
+      description: 'Pickup and drop-off.',
+      icon: Icons.local_shipping_rounded,
+      color: Colors.purple,
+    ),
+    _ServiceItem(
+      title: 'Taxi',
+      description: 'Request a ride anywhere.',
+      icon: Icons.local_taxi_rounded,
+      color: Colors.amber.shade700,
+    ),
+    _ServiceItem(
+      title: 'Handyman',
+      description: 'Home services on demand.',
+      icon: Icons.handyman_rounded,
+      color: Colors.green.shade700,
+    ),
+    _ServiceItem(
+      title: 'Track orders',
+      description: 'Real-time delivery status.',
+      icon: Icons.location_on_rounded,
+      color: AppColors.secondaryColor,
+    ),
+  ];
+
+  Timer? _autoSlideTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 480),
+      vsync: this,
+    );
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0.2, 0),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutCubic,
+    ));
+    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _controller.forward();
+      _startAutoSlide();
+    });
+  }
+
+  void _startAutoSlide() {
+    _autoSlideTimer?.cancel();
+    _autoSlideTimer = Timer.periodic(const Duration(seconds: 3), (_) {
+      if (!mounted) return;
+      final next = (_currentPage + 1) % _services.length;
+      _pageController.animateToPage(
+        next,
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _autoSlideTimer?.cancel();
+    _pageController.dispose();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SlideTransition(
+      position: _slideAnimation,
+      child: FadeTransition(
+        opacity: _fadeAnimation,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 4, bottom: 12),
+              child: Text(
+                'What you can do with HudHud',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.lightTextPrimary,
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 80,
+              child: PageView.builder(
+                controller: _pageController,
+                onPageChanged: (index) {
+                  setState(() => _currentPage = index);
+                },
+                itemCount: _services.length,
+                itemBuilder: (context, index) {
+                  final service = _services[index];
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: _ServiceFeatureCard(
+                      title: service.title,
+                      description: service.description,
+                      icon: service.icon,
+                      color: service.color,
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                _services.length,
+                (index) => AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  margin: const EdgeInsets.symmetric(horizontal: 2),
+                  width: _currentPage == index ? 16 : 6,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(3),
+                    color: _currentPage == index
+                        ? _services[index].color
+                        : Colors.grey[350],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Compact, colorful slide card for the carousel.
+class _ServiceFeatureCard extends StatelessWidget {
+  final String title;
+  final String description;
+  final IconData icon;
+  final Color color;
+
+  const _ServiceFeatureCard({
+    required this.title,
+    required this.description,
+    required this.icon,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            color.withOpacity(0.2),
+            color.withOpacity(0.08),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.4), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.2),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.25),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, size: 22, color: color),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: color,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  description,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey[700],
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          Icon(Icons.chevron_right_rounded, size: 20, color: color.withOpacity(0.8)),
+        ],
+      ),
+    );
+  }
+}
+
 // Order Tracking Card with gradient
 class OrderTrackingCard extends StatelessWidget {
   final String riderName;
@@ -328,7 +559,7 @@ class OrderTrackingCard extends StatelessWidget {
   }
 }
 
-// Service Card for the 2x2 grid
+// Service Card for the 2x2 grid - single accent color, clean and professional
 class ServiceCard extends StatelessWidget {
   final String title;
   final String subtitle;
@@ -347,62 +578,62 @@ class ServiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              spreadRadius: 1,
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Title and Icon in a row
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Title in orange, bold
-                Expanded(
-                  child: Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.orange,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                // Icon on the right
-                Icon(
-                  icon,
-                  color: color,
-                  size: 32,
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            // Description in dark grey - full text
-            Text(
-              subtitle,
-              style: TextStyle(
-                fontSize: 13,
-                color: Colors.grey[700],
-                height: 1.4,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: Colors.grey.shade200, width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
               ),
-            ),
-          ],
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: AppColors.primaryColor, size: 22),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF1a1a1a),
+                  letterSpacing: -0.2,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Flexible(
+                child: Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey[600],
+                    height: 1.3,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -1,5 +1,236 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+
+import '../../../../core/theme/app_colors.dart';
 import '../../model/categories_products_model.dart';
+
+/// Beautiful category detail header: hero image, gradient overlay, frosted back,
+/// category name, product count, and optional description.
+class CategoryDetailHeader extends StatelessWidget {
+  final String name;
+  final String imageUrl;
+  final int? productsCount;
+  final String? description;
+  final VoidCallback onBack;
+
+  const CategoryDetailHeader({
+    super.key,
+    required this.name,
+    required this.imageUrl,
+    this.productsCount,
+    this.description,
+    required this.onBack,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final hasImage = imageUrl.isNotEmpty;
+    return SizedBox(
+      height: 220,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Background: image or gradient
+          if (hasImage && imageUrl.startsWith('http'))
+            Image.network(
+              imageUrl,
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
+              errorBuilder: (_, __, ___) => _gradientFallback(),
+            )
+          else if (hasImage)
+            Image.asset(
+              imageUrl,
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
+              errorBuilder: (_, __, ___) => _gradientFallback(),
+            )
+          else
+            _gradientFallback(),
+          // Gradient overlay for readability
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withOpacity(0.15),
+                    Colors.black.withOpacity(0.4),
+                    Colors.black.withOpacity(0.82),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          // Frosted back button
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 8,
+            left: 8,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                child: Material(
+                  color: Colors.white.withOpacity(0.25),
+                  borderRadius: BorderRadius.circular(24),
+                  child: InkWell(
+                    onTap: onBack,
+                    borderRadius: BorderRadius.circular(24),
+                    child: const Padding(
+                      padding: EdgeInsets.all(10),
+                      child: Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // Bottom content: icon, name, meta
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  // Category icon/avatar
+                  Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2.5),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: ClipOval(
+                      child: hasImage && imageUrl.startsWith('http')
+                          ? Image.network(
+                              imageUrl,
+                              fit: BoxFit.cover,
+                              width: 64,
+                              height: 64,
+                              errorBuilder: (_, __, ___) => _iconPlaceholder(),
+                            )
+                          : hasImage
+                              ? Image.asset(
+                                  imageUrl,
+                                  fit: BoxFit.cover,
+                                  width: 64,
+                                  height: 64,
+                                  errorBuilder: (_, __, ___) => _iconPlaceholder(),
+                                )
+                              : _iconPlaceholder(),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          name,
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            letterSpacing: -0.3,
+                            shadows: [
+                              Shadow(
+                                color: Colors.black26,
+                                offset: Offset(0, 1),
+                                blurRadius: 4,
+                              ),
+                            ],
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if (productsCount != null && productsCount! > 0) ...[
+                          const SizedBox(height: 6),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.inventory_2_outlined,
+                                size: 16,
+                                color: Colors.white.withOpacity(0.95),
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                '$productsCount ${productsCount == 1 ? 'product' : 'products'}',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.white.withOpacity(0.95),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                        if (description != null && description!.isNotEmpty) ...[
+                          const SizedBox(height: 6),
+                          Text(
+                            description!,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.white.withOpacity(0.9),
+                              height: 1.35,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _gradientFallback() => Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.primaryColor.withOpacity(0.92),
+              AppColors.primaryColor,
+              AppColors.primaryDarkColor,
+            ],
+          ),
+        ),
+      );
+
+  Widget _iconPlaceholder() => Container(
+        color: Colors.white.withOpacity(0.3),
+        child: const Icon(
+          Icons.category_rounded,
+          size: 32,
+          color: Colors.white70,
+        ),
+      );
+}
 
 class CategoryHeader extends StatelessWidget {
   final String imageUrl;
@@ -15,22 +246,24 @@ class CategoryHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final logoUrl = categoryLogo.isNotEmpty ? categoryLogo : imageUrl;
     return Stack(
       children: [
-        // Header Image
         Container(
           height: 200,
           width: double.infinity,
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: imageUrl.startsWith('http')
+              image: imageUrl.isNotEmpty && imageUrl.startsWith('http')
                   ? NetworkImage(imageUrl) as ImageProvider
-                  : AssetImage(imageUrl),
+                  : imageUrl.isNotEmpty
+                      ? AssetImage(imageUrl) as ImageProvider
+                      : const AssetImage('assets/images/categories.jpg')
+                          as ImageProvider,
               fit: BoxFit.cover,
             ),
           ),
         ),
-        // Back Button
         Positioned(
           top: 16,
           left: 16,
@@ -52,14 +285,15 @@ class CategoryHeader extends StatelessWidget {
             ),
           ),
         ),
-        // Category Logo
         Positioned(
           bottom: -20,
           left: 16,
           child: CircleAvatar(
             radius: 25,
             backgroundColor: Colors.white,
-            backgroundImage: AssetImage(categoryLogo),
+            backgroundImage: logoUrl.startsWith('http')
+                ? NetworkImage(logoUrl) as ImageProvider
+                : AssetImage(logoUrl) as ImageProvider,
           ),
         ),
       ],
@@ -576,23 +810,30 @@ class ProductFilters extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (filters.isEmpty) return const SizedBox.shrink();
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Filter Products',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
+          Row(
+            children: [
+              Icon(Icons.tune_rounded, size: 20, color: AppColors.primaryColor),
+              const SizedBox(width: 8),
+              Text(
+                'Filter',
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.lightTextPrimary,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: 10,
+            runSpacing: 10,
             children: filters.map((filter) {
               final isSelected = selectedFilters.contains(filter);
               return GestureDetector(
@@ -610,16 +851,16 @@ class ProductFilters extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   decoration: BoxDecoration(
-                    color: isSelected ? Colors.orange : Colors.grey[100],
-                    borderRadius: BorderRadius.circular(25),
+                    color: isSelected ? AppColors.primaryColor : Colors.grey[50],
+                    borderRadius: BorderRadius.circular(24),
                     border: Border.all(
-                      color: isSelected ? Colors.orange : Colors.grey[300]!,
+                      color: isSelected ? AppColors.primaryColor : Colors.grey[300]!,
                       width: 1.5,
                     ),
                     boxShadow: isSelected
                         ? [
                             BoxShadow(
-                              color: Colors.orange.withOpacity(0.3),
+                              color: AppColors.primaryColor.withOpacity(0.3),
                               spreadRadius: 1,
                               blurRadius: 4,
                               offset: const Offset(0, 2),
@@ -908,36 +1149,49 @@ class ProductItem extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Row(
-                          children: [
-                            if (discountPrice != null) ...[
-                              Text(
-                                'ETB$discountPrice',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.orange,
+                        Expanded(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (discountPrice != null) ...[
+                                Flexible(
+                                  child: Text(
+                                    'ETB$discountPrice',
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.orange,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'ETB$price',
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  decoration: TextDecoration.lineThrough,
-                                  color: Colors.grey,
+                                const SizedBox(width: 8),
+                                Flexible(
+                                  child: Text(
+                                    'ETB$price',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      decoration: TextDecoration.lineThrough,
+                                      color: Colors.grey,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
-                              ),
-                            ] else
-                              Text(
-                                'ETB$price',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
+                              ] else
+                                Flexible(
+                                  child: Text(
+                                    'ETB$price',
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
-                              ),
-                          ],
+                            ],
+                          ),
                         ),
+                        const SizedBox(width: 8),
                         if (!isAdded)
                           TextButton(
                             onPressed: onAddPressed,

@@ -408,7 +408,7 @@ class _CourierScreenState extends State<CourierScreen> {
   }
 }
 
-// Instant Delivery Card
+// Instant Delivery Card - matches design: light orange card, black title, faded bolt decoration
 class _InstantDeliveryCard extends StatelessWidget {
   final VoidCallback onTap;
 
@@ -416,73 +416,71 @@ class _InstantDeliveryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.primaryColor.withOpacity(0.1), // Orange-tinted
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: GestureDetector(
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
         onTap: onTap,
-        child: Stack(
-          children: [
-            // Background lightning bolt
-            Positioned(
-              right: 10,
-              top: 10,
-              child: Opacity(
-                opacity: 0.2,
-                child: Icon(
-                  Icons.bolt,
-                  size: 80,
-                  color: AppColors.primaryColor,
-                ),
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFF4ED), // Soft light orange / peach
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
               ),
-            ),
-            Row(
-              children: [
-                // Icon
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryColor.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+            ],
+          ),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              // Faded decorative lightning bolt - upper right, desaturated
+              Positioned(
+                right: 8,
+                top: 4,
+                child: Opacity(
+                  opacity: 0.35,
                   child: Icon(
                     Icons.bolt,
+                    size: 104,
+                    color: AppColors.primaryColor.withOpacity(0.7),
+                  ),
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.bolt,
                     color: AppColors.primaryColor,
-                    size: 32,
+                    size: 36,
                   ),
-                ),
-                const SizedBox(width: 16),
-                // Text content
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Instant Delivery',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primaryColor,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'Courier takes only your package and delivers instantly.',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey[700],
-                          height: 1.4,
-                        ),
-                      ),
-                    ],
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Instant Delivery',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1a1a1a),
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                  const SizedBox(height: 6),
+                  Text(
+                    'Courier takes only your package and delivers instantly.',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey[600],
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -597,7 +595,7 @@ class _ActiveDeliveryCard extends StatelessWidget {
   }
 }
 
-// Schedule Delivery Card
+// Schedule Delivery Card - matches design: white card, black title, faded stopwatch decoration
 class _ScheduleDeliveryCard extends StatelessWidget {
   final VoidCallback onTap;
 
@@ -605,81 +603,71 @@ class _ScheduleDeliveryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: GestureDetector(
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
         onTap: onTap,
-        child: Stack(
-          children: [
-            // Background clock
-            Positioned(
-              right: 10,
-              top: 10,
-              child: Opacity(
-                opacity: 0.2,
-                child: Icon(
-                  Icons.access_time,
-                  size: 80,
-                  color: AppColors.primaryColor,
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              // Faded decorative stopwatch - upper right, light gray
+              Positioned(
+                right: 8,
+                top: 4,
+                child: Opacity(
+                  opacity: 0.25,
+                  child: Icon(
+                    Icons.timer_outlined,
+                    size: 104,
+                    color: Colors.grey.shade400,
+                  ),
                 ),
               ),
-            ),
-            Row(
-              children: [
-                // Icon
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    Icons.access_time,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.timer_outlined,
                     color: AppColors.primaryColor,
-                    size: 32,
+                    size: 36,
                   ),
-                ),
-                const SizedBox(width: 16),
-                // Text content
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Schedule Delivery',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primaryColor,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'Courier comes to pick up on your specified date and time.',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey[700],
-                          height: 1.4,
-                        ),
-                      ),
-                    ],
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Schedule Delivery',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1a1a1a),
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                  const SizedBox(height: 6),
+                  Text(
+                    'Courier comes to pick up on your specified date and time.',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey[600],
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -17,6 +17,18 @@ final class FetchCategoriesTreeFailure extends CategoriesState {
   FetchCategoriesTreeFailure(this.errorMessage);
 }
 
+final class FetchCategoriesListLoading extends CategoriesState {}
+
+final class FetchCategoriesListSuccess extends CategoriesState {
+  final CategoriesListResult result;
+  FetchCategoriesListSuccess(this.result);
+}
+
+final class FetchCategoriesListFailure extends CategoriesState {
+  final String errorMessage;
+  FetchCategoriesListFailure(this.errorMessage);
+}
+
 final class FetchCategoriesProductsLoading extends CategoriesState {}
 
 final class FetchCategoriesProductsSuccess extends CategoriesState {

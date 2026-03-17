@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/categories/bloc/categories_bloc.dart';
@@ -7,6 +8,11 @@ import 'package:hudhud_delivery/features/categories/data/data_provider/categorie
 import 'package:hudhud_delivery/features/categories/data/repository/categories_repository.dart';
 import 'package:hudhud_delivery/features/categories/model/category_tree_model.dart';
 import 'package:hudhud_delivery/features/categories/presentation/screens/categories_screen.dart';
+import 'package:hudhud_delivery/features/delivery/data/mock_popular_orders.dart';
+import 'package:hudhud_delivery/features/delivery/presentation/screens/store_detail_screen.dart';
+import 'package:hudhud_delivery/features/orders/data/models/vendor_model.dart';
+import 'package:hudhud_delivery/features/vendors/data/data_provider/vendors_data_provider.dart';
+import 'package:hudhud_delivery/features/vendors/data/repository/vendors_repository.dart';
 
 class AllCategoriesScreen extends StatelessWidget {
   const AllCategoriesScreen({super.key});
@@ -20,14 +26,54 @@ class AllCategoriesScreen extends StatelessWidget {
     );
     return BlocProvider(
       create: (context) =>
-          CategoriesBloc(repository)..add(FetchCategoriesTreeEvent()),
+          CategoriesBloc(repository)..add(FetchCategoriesListEvent()),
       child: const _AllCategoriesBody(),
     );
   }
 }
 
-class _AllCategoriesBody extends StatelessWidget {
+class _AllCategoriesBody extends StatefulWidget {
   const _AllCategoriesBody();
+
+  @override
+  State<_AllCategoriesBody> createState() => _AllCategoriesBodyState();
+}
+
+class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
+  bool _showAllCategories = false;
+
+  List<VendorModel> _vendors = [];
+  bool _vendorsLoading = true;
+  String? _vendorsError;
+  late final VendorsRepository _vendorsRepository;
+
+  @override
+  void initState() {
+    super.initState();
+    _vendorsRepository = VendorsRepository(
+      vendorsDataProvider: VendorsDataProvider(apiService: ApiService.instance),
+    );
+    _loadVendors();
+  }
+
+  Future<void> _loadVendors() async {
+    setState(() {
+      _vendorsLoading = true;
+      _vendorsError = null;
+    });
+    try {
+      final list = await _vendorsRepository.getVendors(page: 1);
+      setState(() {
+        _vendors = list;
+        _vendorsLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _vendorsError = e.toString();
+        _vendorsLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +81,7 @@ class _AllCategoriesBody extends StatelessWidget {
       backgroundColor: AppColors.lightBackground,
       appBar: AppBar(
         title: const Text(
-          'Browse Categories',
+          'All categories',
           style: TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 18,
@@ -60,29 +106,34 @@ class _AllCategoriesBody extends StatelessWidget {
       ),
       body: BlocBuilder<CategoriesBloc, CategoriesState>(
         buildWhen: (prev, curr) =>
-            curr is FetchCategoriesTreeLoading ||
-            curr is FetchCategoriesTreeSuccess ||
-            curr is FetchCategoriesTreeFailure,
+            curr is FetchCategoriesListLoading ||
+            curr is FetchCategoriesListSuccess ||
+            curr is FetchCategoriesListFailure,
         builder: (context, state) {
-          if (state is FetchCategoriesTreeLoading) {
+          if (state is FetchCategoriesListLoading) {
             return const _LoadingState();
           }
-          if (state is FetchCategoriesTreeFailure) {
+          if (state is FetchCategoriesListFailure) {
             return _ErrorState(
               message: state.errorMessage,
               onRetry: () => context
                   .read<CategoriesBloc>()
-                  .add(FetchCategoriesTreeEvent()),
+                  .add(FetchCategoriesListEvent()),
             );
           }
-          if (state is FetchCategoriesTreeSuccess) {
-            final roots = state.categoriesTree;
-            if (roots.isEmpty) {
+          if (state is FetchCategoriesListSuccess) {
+            final categories = state.result.items;
+            if (categories.isEmpty) {
               return const _EmptyState();
             }
             return _CategoriesGrid(
-              categories: roots,
+              categories: categories,
+              showAll: _showAllCategories,
+              vendors: _vendors,
+              vendorsLoading: _vendorsLoading,
+              vendorsError: _vendorsError,
               onCategoryTap: (category) => _onCategoryTap(context, category),
+              onShowMore: () => setState(() => _showAllCategories = true),
             );
           }
           return const SizedBox.shrink();
@@ -102,6 +153,7 @@ class _AllCategoriesBody extends StatelessWidget {
             categoryId: category.id,
             categoryName: category.name,
             categoryImage: category.displayImageUrl ?? '',
+            category: category,
           ),
         ),
       ),
@@ -114,24 +166,186 @@ class _LoadingState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(
-      slivers: [
-        SliverPadding(
-          padding: const EdgeInsets.all(16),
-          sliver: SliverGrid(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 0.9,
-            ),
-            delegate: SliverChildBuilderDelegate(
-              (context, index) => _CategorySkeleton(),
-              childCount: 6,
+    return Shimmer.fromColors(
+      baseColor: Colors.grey[300]!,
+      highlightColor: Colors.grey[100]!,
+      child: CustomScrollView(
+        slivers: [
+          // Categories title
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
+              child: Container(
+                height: 24,
+                width: 160,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
             ),
           ),
-        ),
-      ],
+          // Categories grid
+          SliverPadding(
+            padding: const EdgeInsets.all(16),
+            sliver: SliverGrid(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 4,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 0.85,
+              ),
+              delegate: SliverChildBuilderDelegate(
+                (context, index) => _CategorySkeleton(),
+                childCount: 8,
+              ),
+            ),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 8)),
+          // Vendors section title
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+              child: Container(
+                height: 20,
+                width: 140,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
+            ),
+          ),
+          // Vendors horizontal row
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: 130,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                itemCount: 6,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 72,
+                          height: 72,
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          width: 70,
+                          height: 10,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+          // Popular Orders title
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              child: Container(
+                height: 20,
+                width: 160,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
+            ),
+          ),
+          // Popular Orders card skeletons
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) => Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: _PopularOrderSkeleton(),
+                ),
+                childCount: 3,
+              ),
+            ),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 24)),
+        ],
+      ),
+    );
+  }
+}
+
+class _PopularOrderSkeleton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            height: 160,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  height: 16,
+                  width: 180,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  height: 12,
+                  width: 220,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -142,7 +356,7 @@ class _CategorySkeleton extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.04),
@@ -153,30 +367,31 @@ class _CategorySkeleton extends StatelessWidget {
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 64,
-            height: 64,
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-            height: 12,
-            decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: BorderRadius.circular(4),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
             ),
           ),
           const SizedBox(height: 6),
           Container(
-            margin: const EdgeInsets.symmetric(horizontal: 24),
-            height: 10,
+            margin: const EdgeInsets.symmetric(horizontal: 8),
+            height: 8,
             decoration: BoxDecoration(
-              color: Colors.grey[100],
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 12),
+            height: 6,
+            decoration: BoxDecoration(
+              color: Colors.white,
               borderRadius: BorderRadius.circular(4),
             ),
           ),
@@ -303,52 +518,523 @@ class _EmptyState extends StatelessWidget {
 
 class _CategoriesGrid extends StatelessWidget {
   final List<CategoryTreeModel> categories;
+  final bool showAll;
+  final List<VendorModel> vendors;
+  final bool vendorsLoading;
+  final String? vendorsError;
   final void Function(CategoryTreeModel) onCategoryTap;
+  final VoidCallback onShowMore;
 
   const _CategoriesGrid({
     required this.categories,
+    required this.showAll,
+    required this.vendors,
+    required this.vendorsLoading,
+    required this.vendorsError,
     required this.onCategoryTap,
+    required this.onShowMore,
   });
 
   @override
   Widget build(BuildContext context) {
+    final displayCategories = showAll ? categories : categories.take(3).toList();
+    final hasMore = categories.length > 3 && !showAll;
+
     return CustomScrollView(
       slivers: [
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
             child: Text(
-              '${categories.length} categories',
+              showAll ? 'All categories' : 'Categories',
               style: TextStyle(
-                fontSize: 13,
-                color: AppColors.lightTextSecondary,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppColors.lightTextPrimary,
               ),
             ),
           ),
         ),
         SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           sliver: SliverGrid(
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
+              crossAxisCount: 4,
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
-              childAspectRatio: 0.88,
+              childAspectRatio: 0.85,
             ),
             delegate: SliverChildBuilderDelegate(
               (context, index) {
-                final category = categories[index];
+                if (hasMore && index == 3) {
+                  return _MoreButton(onTap: onShowMore);
+                }
+                final category = displayCategories[index];
                 return _CategoryCard(
                   category: category,
                   onTap: () => onCategoryTap(category),
                 );
               },
-              childCount: categories.length,
+              childCount: hasMore ? 4 : displayCategories.length,
+            ),
+          ),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 8)),
+        // Vendors slider (one row) - "Browse by store"
+        if (vendorsLoading) ...[
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+              child: Text(
+                'Browse by store',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.lightTextPrimary,
+                ),
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: 130,
+              child: _VendorsSliderShimmer(),
+            ),
+          ),
+        ] else if (vendorsError != null || vendors.isEmpty) ...[
+          // Hide or minimal message - skip section for cleaner UI
+        ] else ...[
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+              child: Text(
+                'Browse by store',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.lightTextPrimary,
+                ),
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: 130,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                itemCount: vendors.length,
+                itemBuilder: (context, index) {
+                  final vendor = vendors[index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: _VendorSliderCard(
+                      name: vendor.name,
+                      avatarUrl: vendor.avatar,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => StoreDetailScreen(
+                              storeName: vendor.name,
+                              storeImage: vendor.avatar.isNotEmpty ? vendor.avatar : null,
+                              vendorId: vendor.id,
+                              vendor: vendor,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+        const SliverToBoxAdapter(child: SizedBox(height: 16)),
+        // Popular Orders section (mock data)
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            child: Text(
+              'Popular Orders',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppColors.lightTextPrimary,
+              ),
+            ),
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final order = mockPopularOrders[index];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: _PopularOrderCard(
+                    name: order.name,
+                    rating: order.rating,
+                    deliveryFee: order.deliveryFee,
+                    deliveryTime: order.deliveryTime,
+                    promoText: order.promoText,
+                    imageUrl: order.imageUrl,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => StoreDetailScreen(
+                            storeName: order.name,
+                            storeImage: order.imageUrl,
+                            vendorId: order.vendorId,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
+              childCount: mockPopularOrders.length,
             ),
           ),
         ),
         const SliverToBoxAdapter(child: SizedBox(height: 24)),
       ],
+    );
+  }
+}
+
+class _VendorsSliderShimmer extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey[300]!,
+      highlightColor: Colors.grey[100]!,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        itemCount: 6,
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 72,
+                  height: 72,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  width: 70,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _VendorSliderCard extends StatelessWidget {
+  final String name;
+  final String avatarUrl;
+  final VoidCallback onTap;
+
+  const _VendorSliderCard({
+    required this.name,
+    required this.avatarUrl,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          width: 100,
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.06),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: ClipOval(
+                  child: avatarUrl.isNotEmpty && avatarUrl.startsWith('http')
+                      ? Image.network(
+                          avatarUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => _avatarPlaceholder(),
+                        )
+                      : (avatarUrl.isNotEmpty
+                            ? Image.asset(
+                                avatarUrl,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => _avatarPlaceholder(),
+                              )
+                            : _avatarPlaceholder()),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                name,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.lightTextPrimary,
+                ),
+                maxLines: 2,
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _avatarPlaceholder() {
+    return Container(
+      color: Colors.grey[200],
+      child: const Icon(Icons.store_rounded, size: 36, color: Colors.grey),
+    );
+  }
+}
+
+class _PopularOrderCard extends StatelessWidget {
+  final String name;
+  final double rating;
+  final int deliveryFee;
+  final String deliveryTime;
+  final String? promoText;
+  final String imageUrl;
+  final VoidCallback onTap;
+
+  const _PopularOrderCard({
+    required this.name,
+    required this.rating,
+    required this.deliveryFee,
+    required this.deliveryTime,
+    this.promoText,
+    required this.imageUrl,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(12),
+                      topRight: Radius.circular(12),
+                    ),
+                    child: imageUrl.startsWith('http')
+                        ? Image.network(
+                            imageUrl,
+                            height: 160,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => _imagePlaceholder(),
+                          )
+                        : Image.asset(
+                            imageUrl,
+                            height: 160,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => _imagePlaceholder(),
+                          ),
+                  ),
+                  if (promoText != null)
+                    Positioned(
+                      top: 12,
+                      left: 12,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.green,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          promoText!,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            name,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF2C3E50),
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.favorite_border),
+                          iconSize: 20,
+                          color: Colors.grey,
+                          onPressed: () {},
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.star,
+                          size: 16,
+                          color: Colors.amber[700],
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          rating.toString(),
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xFF2C3E50),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'ETB $deliveryFee Delivery Fee • $deliveryTime',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _imagePlaceholder() {
+    return Container(
+      height: 160,
+      width: double.infinity,
+      color: Colors.grey[200],
+      child: const Icon(
+        Icons.restaurant,
+        size: 48,
+        color: Colors.grey,
+      ),
+    );
+  }
+}
+
+class _MoreButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _MoreButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.primaryColor.withOpacity(0.12),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: AppColors.primaryColor.withOpacity(0.4),
+              width: 1.5,
+            ),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.grid_view_rounded,
+                size: 36,
+                color: AppColors.primaryColor,
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'More',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.primaryColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -371,34 +1057,32 @@ class _CategoryCard extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         child: Container(
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.06),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
               ),
             ],
           ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Expanded(
-                flex: 3,
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.only(top: 12, left: 8, right: 8),
                   child: Center(
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(10),
                       child: imageUrl != null && imageUrl.isNotEmpty
                           ? Image.network(
                               imageUrl,
                               width: double.infinity,
-                              height: double.infinity,
                               fit: BoxFit.cover,
                               errorBuilder: (_, __, ___) => _IconPlaceholder(
                                 icon: icon,
@@ -409,36 +1093,18 @@ class _CategoryCard extends StatelessWidget {
                   ),
                 ),
               ),
-              Expanded(
-                flex: 2,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        category.name,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.lightTextPrimary,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      if (category.productsCount > 0) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          '${category.productsCount} products',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: AppColors.lightTextSecondary,
-                          ),
-                        ),
-                      ],
-                    ],
+              Padding(
+                padding: const EdgeInsets.fromLTRB(6, 6, 6, 12),
+                child: Text(
+                  category.name,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.lightTextPrimary,
                   ),
+                  maxLines: 2,
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
@@ -463,6 +1129,18 @@ class _CategoryCard extends StatelessWidget {
       'spa': Icons.spa_rounded,
       'book': Icons.menu_book_rounded,
       'gamepad': Icons.sports_esports_rounded,
+      'shopping_bag': Icons.shopping_bag_rounded,
+      'local_drink': Icons.local_drink_rounded,
+      'pets': Icons.pets_rounded,
+      'local_florist': Icons.local_florist_rounded,
+      'shopping_basket': Icons.shopping_basket_rounded,
+      'fastfood': Icons.fastfood_rounded,
+      'restaurant_menu': Icons.restaurant_menu_rounded,
+      'ramen_dining': Icons.ramen_dining_rounded,
+      'icecream': Icons.icecream_rounded,
+      'store': Icons.store_rounded,
+      'directions_car': Icons.directions_car_rounded,
+      'cake': Icons.cake_rounded,
     };
     return map[name ?? ''] ?? Icons.category_rounded;
   }

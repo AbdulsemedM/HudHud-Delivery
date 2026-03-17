@@ -72,6 +72,11 @@ class ApiConstants {
 
   // Categories endpoints (requires auth token)
   static const String categories = 'categories';
+  static const String productDetails = 'products/{id}';
+
+  // Vendors endpoints
+  static const String vendors = 'vendors';
+  static const String vendorProducts = 'vendor/products/by-vendor/{id}';
 
   // Notifications endpoints (GET /api/notifications, GET /api/notifications/{id})
   static const String notificationsList = 'notifications';
