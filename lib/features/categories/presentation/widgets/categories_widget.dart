@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../model/categories_products_model.dart';
+import '../../../wishlist/presentation/widgets/wishlist_toggle_button.dart';
 
 /// Beautiful category detail header: hero image, gradient overlay, frosted back,
 /// category name, product count, and optional description.
@@ -1070,6 +1071,7 @@ class ProductCard extends StatelessWidget {
 }
 
 class ProductItem extends StatelessWidget {
+  final CategoriesProductsModel? product;
   final String name;
   final String description;
   final String imageUrl;
@@ -1085,6 +1087,7 @@ class ProductItem extends StatelessWidget {
 
   const ProductItem({
     super.key,
+    this.product,
     required this.name,
     required this.description,
     required this.imageUrl,
@@ -1192,6 +1195,12 @@ class ProductItem extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 8),
+                        if (product != null && product!.id != null)
+                          WishlistToggleButton(
+                            product: product!,
+                            size: 20,
+                          ),
+                        const SizedBox(width: 4),
                         if (!isAdded)
                           TextButton(
                             onPressed: onAddPressed,

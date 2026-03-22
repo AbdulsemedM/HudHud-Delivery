@@ -737,23 +737,33 @@ class _TaxiScreenState extends State<TaxiScreen> {
     final activePickup = _activePickup;
     final activeDropoff = _activeDropoff;
 
+    final screenHeight = MediaQuery.of(context).size.height;
+    final bottomSheetInitialFraction = hasActiveRide ? 0.45 : 0.35;
+    final mapBottom = screenHeight * bottomSheetInitialFraction;
+
     return Scaffold(
       body: Stack(
         children: [
-          gmaps.GoogleMap(
-            initialCameraPosition: gmaps.CameraPosition(
-              target: _toG(_currentPosition),
-              zoom: 13.0,
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: mapBottom,
+            child: gmaps.GoogleMap(
+              initialCameraPosition: gmaps.CameraPosition(
+                target: _toG(_currentPosition),
+                zoom: 13.0,
+              ),
+              markers: _buildTaxiMarkers(hasActiveRide, activePickup, activeDropoff),
+              polylines: _buildTaxiPolylines(hasActiveRide, activePickup, activeDropoff),
+              myLocationEnabled: true,
+              myLocationButtonEnabled: false,
+              mapType: gmaps.MapType.normal,
+              onMapCreated: (controller) {
+                _mapController = controller;
+              },
+              onTap: hasActiveRide ? null : _handleMapTap,
             ),
-            markers: _buildTaxiMarkers(hasActiveRide, activePickup, activeDropoff),
-            polylines: _buildTaxiPolylines(hasActiveRide, activePickup, activeDropoff),
-            myLocationEnabled: true,
-            myLocationButtonEnabled: false,
-            mapType: gmaps.MapType.normal,
-            onMapCreated: (controller) {
-              _mapController = controller;
-            },
-            onTap: hasActiveRide ? null : _handleMapTap,
           ),
           // Available cars info chip - hide when active ride
           if (!hasActiveRide && _totalAvailable != null && _totalAvailable! > 0)

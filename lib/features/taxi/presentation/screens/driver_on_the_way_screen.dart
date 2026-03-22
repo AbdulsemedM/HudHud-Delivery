@@ -98,57 +98,67 @@ class _DriverOnTheWayScreenState extends State<DriverOnTheWayScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    const bottomSheetInitialFraction = 0.45;
+    final mapBottom = screenHeight * bottomSheetInitialFraction;
+
     return Scaffold(
       body: Stack(
         children: [
-          gmaps.GoogleMap(
-            initialCameraPosition: gmaps.CameraPosition(
-              target: _toG(widget.pickupLocation),
-              zoom: 13.0,
-            ),
-            markers: {
-              gmaps.Marker(
-                markerId: const gmaps.MarkerId('pickup'),
-                position: _toG(widget.pickupLocation),
-                icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-                  gmaps.BitmapDescriptor.hueGreen,
-                ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: mapBottom,
+            child: gmaps.GoogleMap(
+              initialCameraPosition: gmaps.CameraPosition(
+                target: _toG(widget.pickupLocation),
+                zoom: 13.0,
               ),
-              if (_driverPosition != null)
+              markers: {
                 gmaps.Marker(
-                  markerId: const gmaps.MarkerId('driver'),
-                  position: _toG(_driverPosition!),
+                  markerId: const gmaps.MarkerId('pickup'),
+                  position: _toG(widget.pickupLocation),
                   icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-                    gmaps.BitmapDescriptor.hueYellow,
+                    gmaps.BitmapDescriptor.hueGreen,
                   ),
                 ),
-              gmaps.Marker(
-                markerId: const gmaps.MarkerId('destination'),
-                position: _toG(widget.destinationLocation),
-                icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-                  gmaps.BitmapDescriptor.hueRed,
+                if (_driverPosition != null)
+                  gmaps.Marker(
+                    markerId: const gmaps.MarkerId('driver'),
+                    position: _toG(_driverPosition!),
+                    icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+                      gmaps.BitmapDescriptor.hueYellow,
+                    ),
+                  ),
+                gmaps.Marker(
+                  markerId: const gmaps.MarkerId('destination'),
+                  position: _toG(widget.destinationLocation),
+                  icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+                    gmaps.BitmapDescriptor.hueRed,
+                  ),
                 ),
-              ),
-            },
-            polylines: {
-              gmaps.Polyline(
-                polylineId: const gmaps.PolylineId('route'),
-                points: _routePolylinePoints != null && _routePolylinePoints!.length >= 2
-                    ? _routePolylinePoints!.map(_toG).toList()
-                    : [
-                        _toG(widget.pickupLocation),
-                        _toG(widget.destinationLocation),
-                      ],
-                color: AppColors.primaryColor,
-                width: 3,
-              ),
-            },
-            myLocationEnabled: true,
-            mapType: gmaps.MapType.normal,
-            onMapCreated: (controller) {
-              _mapController = controller;
-              _fitBounds();
-            },
+              },
+              polylines: {
+                gmaps.Polyline(
+                  polylineId: const gmaps.PolylineId('route'),
+                  points: _routePolylinePoints != null && _routePolylinePoints!.length >= 2
+                      ? _routePolylinePoints!.map(_toG).toList()
+                      : [
+                          _toG(widget.pickupLocation),
+                          _toG(widget.destinationLocation),
+                        ],
+                  color: AppColors.primaryColor,
+                  width: 3,
+                ),
+              },
+              myLocationEnabled: true,
+              mapType: gmaps.MapType.normal,
+              onMapCreated: (controller) {
+                _mapController = controller;
+                _fitBounds();
+              },
+            ),
           ),
           // Back button
           Positioned(

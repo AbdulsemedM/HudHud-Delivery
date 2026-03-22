@@ -934,6 +934,7 @@ class _ProductSectionFromModel extends StatelessWidget {
               final quantity = cartItems[productId] ?? 0;
               final isAdded = quantity > 0;
               return ProductItem(
+                product: product,
                 name: product.name ?? 'Unknown Product',
                 description: product.description ?? 'No description available',
                 imageUrl: product.image_path ?? '',

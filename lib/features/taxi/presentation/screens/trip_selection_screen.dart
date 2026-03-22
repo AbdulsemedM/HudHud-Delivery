@@ -301,49 +301,59 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
   Widget build(BuildContext context) {
     final selectedOption = _tripOptions.firstWhere((opt) => opt.id == _selectedTrip);
     
+    final screenHeight = MediaQuery.of(context).size.height;
+    const bottomSheetInitialFraction = 0.5;
+    final mapBottom = screenHeight * bottomSheetInitialFraction;
+
     return Scaffold(
       body: Stack(
         children: [
-          gmaps.GoogleMap(
-            initialCameraPosition: gmaps.CameraPosition(
-              target: _toG(widget.pickupLocation),
-              zoom: 13.0,
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: mapBottom,
+            child: gmaps.GoogleMap(
+              initialCameraPosition: gmaps.CameraPosition(
+                target: _toG(widget.pickupLocation),
+                zoom: 13.0,
+              ),
+              markers: {
+                gmaps.Marker(
+                  markerId: const gmaps.MarkerId('pickup'),
+                  position: _toG(widget.pickupLocation),
+                  icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+                    gmaps.BitmapDescriptor.hueAzure,
+                  ),
+                ),
+                gmaps.Marker(
+                  markerId: const gmaps.MarkerId('destination'),
+                  position: _toG(widget.destinationLocation),
+                  icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+                    gmaps.BitmapDescriptor.hueRed,
+                  ),
+                ),
+              },
+              polylines: {
+                gmaps.Polyline(
+                  polylineId: const gmaps.PolylineId('route'),
+                  points: _routePolylinePoints != null && _routePolylinePoints!.length >= 2
+                      ? _routePolylinePoints!.map(_toG).toList()
+                      : [
+                          _toG(widget.pickupLocation),
+                          _toG(widget.destinationLocation),
+                        ],
+                  color: AppColors.primaryColor,
+                  width: 3,
+                ),
+              },
+              myLocationEnabled: true,
+              mapType: gmaps.MapType.normal,
+              onMapCreated: (controller) {
+                _mapController = controller;
+                _fitBounds();
+              },
             ),
-            markers: {
-              gmaps.Marker(
-                markerId: const gmaps.MarkerId('pickup'),
-                position: _toG(widget.pickupLocation),
-                icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-                  gmaps.BitmapDescriptor.hueAzure,
-                ),
-              ),
-              gmaps.Marker(
-                markerId: const gmaps.MarkerId('destination'),
-                position: _toG(widget.destinationLocation),
-                icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-                  gmaps.BitmapDescriptor.hueRed,
-                ),
-              ),
-            },
-            polylines: {
-              gmaps.Polyline(
-                polylineId: const gmaps.PolylineId('route'),
-                points: _routePolylinePoints != null && _routePolylinePoints!.length >= 2
-                    ? _routePolylinePoints!.map(_toG).toList()
-                    : [
-                        _toG(widget.pickupLocation),
-                        _toG(widget.destinationLocation),
-                      ],
-                color: AppColors.primaryColor,
-                width: 3,
-              ),
-            },
-            myLocationEnabled: true,
-            mapType: gmaps.MapType.normal,
-            onMapCreated: (controller) {
-              _mapController = controller;
-              _fitBounds();
-            },
           ),
           // Back button
           Positioned(

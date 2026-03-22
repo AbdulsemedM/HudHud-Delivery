@@ -199,8 +199,11 @@ class _CourierScreenState extends State<CourierScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.grey[50],
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
@@ -229,12 +232,12 @@ class _CourierScreenState extends State<CourierScreen> {
               ),
               const SizedBox(height: 24),
               // What would you like to do section
-              const Text(
+              Text(
                 'What would you like to do?',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF2C3E50), // Dark grey
+                  color: scheme.onBackground,
                 ),
               ),
               const SizedBox(height: 16),
@@ -316,7 +319,10 @@ class _CourierScreenState extends State<CourierScreen> {
                   padding: const EdgeInsets.all(24),
                   child: Text(
                     _deliveriesError!,
-                    style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                    style: TextStyle(
+                      color: scheme.onSurfaceVariant,
+                      fontSize: 14,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 )
@@ -330,11 +336,12 @@ class _CourierScreenState extends State<CourierScreen> {
                       vertical: 40,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: scheme.surface,
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.grey.withOpacity(0.08),
+                          color: (isDark ? Colors.black : Colors.grey)
+                              .withOpacity(isDark ? 0.35 : 0.08),
                           spreadRadius: 1,
                           blurRadius: 8,
                           offset: const Offset(0, 2),
@@ -348,7 +355,7 @@ class _CourierScreenState extends State<CourierScreen> {
                         Icon(
                           Icons.history,
                           size: 48,
-                          color: Colors.grey[400],
+                          color: scheme.onSurfaceVariant.withOpacity(0.7),
                         ),
                         const SizedBox(height: 16),
                         Text(
@@ -356,7 +363,7 @@ class _CourierScreenState extends State<CourierScreen> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: Colors.grey[700],
+                            color: scheme.onSurface,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -364,7 +371,7 @@ class _CourierScreenState extends State<CourierScreen> {
                           'Your past deliveries will appear here',
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.grey[500],
+                            color: scheme.onSurfaceVariant,
                           ),
                           textAlign: TextAlign.center,
                         ),
@@ -416,6 +423,11 @@ class _InstantDeliveryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBg = isDark ? scheme.surfaceVariant : const Color(0xFFFFF4ED);
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -424,11 +436,12 @@ class _InstantDeliveryCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: const Color(0xFFFFF4ED), // Soft light orange / peach
+            color: cardBg, // Soft light orange / peach (light), surfaceVariant (dark)
             borderRadius: BorderRadius.circular(14),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.06),
+                color:
+                    (isDark ? Colors.black : Colors.black).withOpacity(isDark ? 0.35 : 0.06),
                 blurRadius: 10,
                 offset: const Offset(0, 2),
               ),
@@ -456,16 +469,16 @@ class _InstantDeliveryCard extends StatelessWidget {
                 children: [
                   Icon(
                     Icons.bolt,
-                    color: AppColors.primaryColor,
+                    color: scheme.primary,
                     size: 36,
                   ),
                   const SizedBox(height: 12),
-                  const Text(
+                  Text(
                     'Instant Delivery',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF1a1a1a),
+                      color: scheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -473,7 +486,7 @@ class _InstantDeliveryCard extends StatelessWidget {
                     'Courier takes only your package and delivers instantly.',
                     style: TextStyle(
                       fontSize: 13,
-                      color: Colors.grey[600],
+                      color: scheme.onSurfaceVariant,
                       height: 1.4,
                     ),
                   ),
@@ -499,6 +512,9 @@ class _ActiveDeliveryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
     final id = delivery['id'];
     final orderId = id != null ? 'DEL-$id' : '—';
     final recipient = delivery['receiver_name']?.toString() ?? '—';
@@ -512,10 +528,10 @@ class _ActiveDeliveryCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.primaryColor.withOpacity(0.08),
+          color: scheme.primaryContainer.withOpacity(0.55),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: AppColors.primaryColor.withOpacity(0.3),
+            color: scheme.primary.withOpacity(0.3),
             width: 1,
           ),
         ),
@@ -527,23 +543,23 @@ class _ActiveDeliveryCard extends StatelessWidget {
               children: [
                 Text(
                   orderId,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF2E7D32),
+                    color: scheme.onPrimaryContainer,
                   ),
                 ),
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryColor,
+                    color: scheme.primary,
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
                     status,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: scheme.onPrimary,
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
@@ -554,17 +570,21 @@ class _ActiveDeliveryCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               'Recipient: $recipient',
-              style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+              style: TextStyle(fontSize: 14, color: scheme.onSurface),
             ),
             const SizedBox(height: 8),
             Row(
               children: [
-                Icon(Icons.location_on, size: 18, color: Colors.grey[600]),
+                Icon(
+                  Icons.location_on,
+                  size: 18,
+                  color: scheme.onSurfaceVariant,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     location,
-                    style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+                    style: TextStyle(fontSize: 13, color: scheme.onSurface),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -580,12 +600,11 @@ class _ActiveDeliveryCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.primaryColor,
+                    color: scheme.primary,
                   ),
                 ),
                 const SizedBox(width: 4),
-                Icon(Icons.arrow_forward,
-                    size: 18, color: AppColors.primaryColor),
+                Icon(Icons.arrow_forward, size: 18, color: scheme.primary),
               ],
             ),
           ],
@@ -603,6 +622,10 @@ class _ScheduleDeliveryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -611,11 +634,11 @@ class _ScheduleDeliveryCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: scheme.surface,
             borderRadius: BorderRadius.circular(14),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.06),
+                color: Colors.black.withOpacity(isDark ? 0.35 : 0.06),
                 blurRadius: 10,
                 offset: const Offset(0, 2),
               ),
@@ -633,7 +656,7 @@ class _ScheduleDeliveryCard extends StatelessWidget {
                   child: Icon(
                     Icons.timer_outlined,
                     size: 104,
-                    color: Colors.grey.shade400,
+                    color: scheme.onSurfaceVariant.withOpacity(0.55),
                   ),
                 ),
               ),
@@ -643,16 +666,16 @@ class _ScheduleDeliveryCard extends StatelessWidget {
                 children: [
                   Icon(
                     Icons.timer_outlined,
-                    color: AppColors.primaryColor,
+                    color: scheme.primary,
                     size: 36,
                   ),
                   const SizedBox(height: 12),
-                  const Text(
+                  Text(
                     'Schedule Delivery',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF1a1a1a),
+                      color: scheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -660,7 +683,7 @@ class _ScheduleDeliveryCard extends StatelessWidget {
                     'Courier comes to pick up on your specified date and time.',
                     style: TextStyle(
                       fontSize: 13,
-                      color: Colors.grey[600],
+                      color: scheme.onSurfaceVariant,
                       height: 1.4,
                     ),
                   ),

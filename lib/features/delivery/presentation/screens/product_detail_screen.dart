@@ -4,6 +4,7 @@ import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/categories/data/data_provider/categories_data_provider.dart';
 import 'package:hudhud_delivery/features/categories/data/repository/categories_repository.dart';
 import 'package:hudhud_delivery/features/categories/model/categories_products_model.dart';
+import 'package:hudhud_delivery/features/wishlist/presentation/widgets/wishlist_toggle_button.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final int productId;
@@ -63,6 +64,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          if (_product != null && _product!.id != null)
+            WishlistToggleButton(
+              product: _product!,
+              size: 22,
+            ),
+        ],
         title: Text(
           _product?.name ?? 'Product',
           style: const TextStyle(

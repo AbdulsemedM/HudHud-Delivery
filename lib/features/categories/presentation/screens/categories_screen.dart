@@ -301,6 +301,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                             final isAdded = quantity > 0;
 
                             return ProductItem(
+                              product: product,
                               name: product.name ?? 'Unknown Product',
                               description: product.description ??
                                   'No description available',
