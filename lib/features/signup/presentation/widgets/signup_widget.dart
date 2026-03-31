@@ -79,8 +79,8 @@ class _SignupFormState extends State<SignupForm> {
   String _phoneNumber = '';
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
-  bool _termsAccepted = true; // Default to checked
-  bool _dataProtectionAccepted = true; // Default to checked
+  bool _termsAccepted = false;
+  bool _dataProtectionAccepted = false;
 
   // Ethiopian phone number validation
   String? validateAndFormatPhoneNumber(String input) {
