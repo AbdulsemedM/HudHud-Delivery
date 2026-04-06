@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../payment/presentation/widgets/payment_widgets.dart';
 
 class CheckoutProductCard extends StatelessWidget {
   final String productName;
@@ -579,6 +580,10 @@ class OrderSummarySection extends StatelessWidget {
       child: Column(
         children: [
           _buildSummaryRow('Subtotal', subtotal, false),
+          _buildSummaryRow('Delivery Fee', 0.0, false),
+          _buildSummaryRow('Discount', 0.0, false, isDiscount: true),
+          _buildSummaryRow('Extras', 0.0, false),
+          _buildSummaryRow('Service Charge', 0.0, false),
           if (tipAmount > 0)
             _buildSummaryRow('Tip', tipAmount, false, showPlus: true),
           const Divider(thickness: 1),
@@ -631,6 +636,146 @@ class OrderSummarySection extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Payment method grid shown directly on the checkout screen
+// ---------------------------------------------------------------------------
+
+/// Static list of payment methods so the checkout page doesn't need a BLoC.
+const List<Map<String, dynamic>> _kCheckoutPaymentMethods = [
+  {'id': 'cash_on_delivery', 'name': 'Cash on Delivery', 'enabled': true},
+  {'id': 'telebirr',         'name': 'TeleBirr',          'enabled': true},
+  {'id': 'cbe',              'name': 'CBE Birr',           'enabled': true},
+  {'id': 'chapa',            'name': 'Chapa',              'enabled': true},
+  {'id': 'amole',            'name': 'Amole',              'enabled': true},
+  {'id': 'wallet',           'name': 'Wallet',             'enabled': true},
+  {'id': 'card',             'name': 'Card',               'enabled': true},
+  {'id': 'ebirr',            'name': 'eBirr',              'enabled': true},
+];
+
+class PaymentMethodGridSection extends StatelessWidget {
+  final String? selectedId;
+  final ValueChanged<String> onSelected;
+
+  const PaymentMethodGridSection({
+    super.key,
+    required this.selectedId,
+    required this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Payment Method',
+            style: textTheme.titleMedium?.copyWith(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: isDark ? AppColors.darkOnSurface : AppColors.lightTextPrimary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          GridView.builder(
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 4,
+              mainAxisSpacing: 10,
+              crossAxisSpacing: 10,
+              childAspectRatio: 0.85,
+            ),
+            itemCount: _kCheckoutPaymentMethods.length,
+            itemBuilder: (context, index) {
+              final method = _kCheckoutPaymentMethods[index];
+              final id = method['id'] as String;
+              final name = method['name'] as String;
+              final enabled = method['enabled'] as bool;
+              final isSelected = selectedId == id;
+
+              final color = PaymentMethodCard.colorForId(id);
+              final icon = PaymentMethodCard.iconForId(id);
+
+              return GestureDetector(
+                onTap: enabled ? () => onSelected(id) : null,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? color.withOpacity(isDark ? 0.25 : 0.12)
+                        : (isDark ? AppColors.darkSurface : Colors.white),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isSelected
+                          ? color
+                          : (isDark
+                              ? AppColors.darkBorder
+                              : Colors.grey.withOpacity(0.3)),
+                      width: isSelected ? 2 : 1,
+                    ),
+                    boxShadow: isSelected
+                        ? [
+                            BoxShadow(
+                              color: color.withOpacity(0.25),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            )
+                          ]
+                        : [],
+                  ),
+                  child: Opacity(
+                    opacity: enabled ? 1.0 : 0.4,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: color.withOpacity(0.12),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(icon, color: color, size: 20),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            name,
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.w500,
+                              color: isSelected
+                                  ? color
+                                  : (isDark
+                                      ? AppColors.darkOnSurface
+                                      : AppColors.lightTextPrimary),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }

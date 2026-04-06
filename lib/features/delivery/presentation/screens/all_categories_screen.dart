@@ -77,29 +77,31 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
     return Scaffold(
-      backgroundColor: AppColors.lightBackground,
+      backgroundColor: colorScheme.background,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'All categories',
-          style: TextStyle(
+          style: textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
             fontSize: 18,
-            color: AppColors.lightTextPrimary,
           ),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
         scrolledUnderElevation: 2,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-          color: AppColors.lightTextPrimary,
+          color: colorScheme.onSurface,
           onPressed: () => Navigator.pop(context),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(
-            color: AppColors.lightBorder.withOpacity(0.5),
+            color: colorScheme.outline.withOpacity(0.35),
             height: 1,
           ),
         ),
@@ -166,9 +168,13 @@ class _LoadingState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final shimmerBase = isDark ? const Color(0xFF2B2B2B) : Colors.grey[300]!;
+    final shimmerHighlight = isDark ? const Color(0xFF3A3A3A) : Colors.grey[100]!;
+    final blockColor = isDark ? const Color(0xFF1F1F1F) : Colors.white;
     return Shimmer.fromColors(
-      baseColor: Colors.grey[300]!,
-      highlightColor: Colors.grey[100]!,
+      baseColor: shimmerBase,
+      highlightColor: shimmerHighlight,
       child: CustomScrollView(
         slivers: [
           // Categories title
@@ -179,7 +185,7 @@ class _LoadingState extends StatelessWidget {
                 height: 24,
                 width: 160,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: blockColor,
                   borderRadius: BorderRadius.circular(6),
                 ),
               ),
@@ -210,7 +216,7 @@ class _LoadingState extends StatelessWidget {
                 height: 20,
                 width: 140,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: blockColor,
                   borderRadius: BorderRadius.circular(6),
                 ),
               ),
@@ -233,8 +239,8 @@ class _LoadingState extends StatelessWidget {
                         Container(
                           width: 72,
                           height: 72,
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
+                          decoration: BoxDecoration(
+                            color: blockColor,
                             shape: BoxShape.circle,
                           ),
                         ),
@@ -243,7 +249,7 @@ class _LoadingState extends StatelessWidget {
                           width: 70,
                           height: 10,
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: blockColor,
                             borderRadius: BorderRadius.circular(4),
                           ),
                         ),
@@ -263,7 +269,7 @@ class _LoadingState extends StatelessWidget {
                 height: 20,
                 width: 160,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: blockColor,
                   borderRadius: BorderRadius.circular(6),
                 ),
               ),
@@ -292,9 +298,11 @@ class _LoadingState extends StatelessWidget {
 class _PopularOrderSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardColor = isDark ? const Color(0xFF1F1F1F) : Colors.white;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardColor,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -312,7 +320,7 @@ class _PopularOrderSkeleton extends StatelessWidget {
             height: 160,
             width: double.infinity,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: cardColor,
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(12),
                 topRight: Radius.circular(12),
@@ -328,7 +336,7 @@ class _PopularOrderSkeleton extends StatelessWidget {
                   height: 16,
                   width: 180,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: cardColor,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -337,7 +345,7 @@ class _PopularOrderSkeleton extends StatelessWidget {
                   height: 12,
                   width: 220,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: cardColor,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -353,9 +361,11 @@ class _PopularOrderSkeleton extends StatelessWidget {
 class _CategorySkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardColor = isDark ? const Color(0xFF1F1F1F) : Colors.white;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardColor,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -373,7 +383,7 @@ class _CategorySkeleton extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: cardColor,
               borderRadius: BorderRadius.circular(10),
             ),
           ),
@@ -382,7 +392,7 @@ class _CategorySkeleton extends StatelessWidget {
             margin: const EdgeInsets.symmetric(horizontal: 8),
             height: 8,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: cardColor,
               borderRadius: BorderRadius.circular(4),
             ),
           ),
@@ -391,7 +401,7 @@ class _CategorySkeleton extends StatelessWidget {
             margin: const EdgeInsets.symmetric(horizontal: 12),
             height: 6,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: cardColor,
               borderRadius: BorderRadius.circular(4),
             ),
           ),
@@ -409,6 +419,9 @@ class _ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -430,19 +443,18 @@ class _ErrorState extends StatelessWidget {
             const SizedBox(height: 24),
             Text(
               'Something went wrong',
-              style: TextStyle(
+              style: textTheme.titleMedium?.copyWith(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: AppColors.lightTextPrimary,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: textTheme.bodyMedium?.copyWith(
                 fontSize: 14,
-                color: AppColors.lightTextSecondary,
+                color: colorScheme.onSurface.withOpacity(0.75),
                 height: 1.4,
               ),
             ),
@@ -473,6 +485,9 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -482,31 +497,29 @@ class _EmptyState extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: AppColors.lightTextDisabled.withOpacity(0.2),
+                color: colorScheme.onSurface.withOpacity(0.12),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.category_outlined,
                 size: 56,
-                color: AppColors.lightTextDisabled,
+                color: colorScheme.onSurface.withOpacity(0.55),
               ),
             ),
             const SizedBox(height: 24),
             Text(
               'No categories yet',
-              style: TextStyle(
+              style: textTheme.titleMedium?.copyWith(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: AppColors.lightTextPrimary,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'Check back later for new categories',
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: textTheme.bodyMedium?.copyWith(
                 fontSize: 14,
-                color: AppColors.lightTextSecondary,
               ),
             ),
           ],
@@ -537,6 +550,8 @@ class _CategoriesGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
     final displayCategories = showAll ? categories : categories.take(3).toList();
     final hasMore = categories.length > 3 && !showAll;
 
@@ -547,10 +562,9 @@ class _CategoriesGrid extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
             child: Text(
               showAll ? 'All categories' : 'Categories',
-              style: TextStyle(
+              style: textTheme.titleLarge?.copyWith(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: AppColors.lightTextPrimary,
               ),
             ),
           ),
@@ -587,10 +601,9 @@ class _CategoriesGrid extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
               child: Text(
                 'Browse by store',
-                style: TextStyle(
+                style: textTheme.titleMedium?.copyWith(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.lightTextPrimary,
                 ),
               ),
             ),
@@ -609,10 +622,9 @@ class _CategoriesGrid extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
               child: Text(
                 'Browse by store',
-                style: TextStyle(
+                style: textTheme.titleMedium?.copyWith(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.lightTextPrimary,
                 ),
               ),
             ),
@@ -658,10 +670,9 @@ class _CategoriesGrid extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
             child: Text(
               'Popular Orders',
-              style: TextStyle(
+              style: textTheme.titleLarge?.copyWith(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: AppColors.lightTextPrimary,
               ),
             ),
           ),
@@ -709,9 +720,13 @@ class _CategoriesGrid extends StatelessWidget {
 class _VendorsSliderShimmer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final shimmerBase = isDark ? const Color(0xFF2B2B2B) : Colors.grey[300]!;
+    final shimmerHighlight = isDark ? const Color(0xFF3A3A3A) : Colors.grey[100]!;
+    final blockColor = isDark ? const Color(0xFF1F1F1F) : Colors.white;
     return Shimmer.fromColors(
-      baseColor: Colors.grey[300]!,
-      highlightColor: Colors.grey[100]!,
+      baseColor: shimmerBase,
+      highlightColor: shimmerHighlight,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -725,8 +740,8 @@ class _VendorsSliderShimmer extends StatelessWidget {
                 Container(
                   width: 72,
                   height: 72,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
+                  decoration: BoxDecoration(
+                    color: blockColor,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -735,7 +750,7 @@ class _VendorsSliderShimmer extends StatelessWidget {
                   width: 70,
                   height: 10,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: blockColor,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -761,6 +776,7 @@ class _VendorSliderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -780,7 +796,7 @@ class _VendorSliderCard extends StatelessWidget {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.06),
+                      color: Colors.black.withOpacity(0.1),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -805,10 +821,9 @@ class _VendorSliderCard extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 name,
-                style: const TextStyle(
+                style: textTheme.bodySmall?.copyWith(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.lightTextPrimary,
                 ),
                 maxLines: 2,
                 textAlign: TextAlign.center,
@@ -850,6 +865,8 @@ class _PopularOrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -857,11 +874,11 @@ class _PopularOrderCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colorScheme.surface,
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withOpacity(0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -927,17 +944,16 @@ class _PopularOrderCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             name,
-                            style: const TextStyle(
+                            style: textTheme.titleSmall?.copyWith(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
-                              color: Color(0xFF2C3E50),
                             ),
                           ),
                         ),
                         IconButton(
                           icon: const Icon(Icons.favorite_border),
                           iconSize: 20,
-                          color: Colors.grey,
+                          color: colorScheme.onSurface.withOpacity(0.65),
                           onPressed: () {},
                         ),
                       ],
@@ -953,18 +969,17 @@ class _PopularOrderCard extends StatelessWidget {
                         const SizedBox(width: 4),
                         Text(
                           rating.toString(),
-                          style: const TextStyle(
+                          style: textTheme.bodyMedium?.copyWith(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
-                            color: Color(0xFF2C3E50),
                           ),
                         ),
                         const SizedBox(width: 12),
                         Text(
                           'ETB $deliveryFee Delivery Fee • $deliveryTime',
-                          style: TextStyle(
+                          style: textTheme.bodySmall?.copyWith(
                             fontSize: 12,
-                            color: Colors.grey[600],
+                            color: colorScheme.onSurface.withOpacity(0.72),
                           ),
                         ),
                       ],
@@ -1050,6 +1065,8 @@ class _CategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     final icon = _iconFromMeta(category.meta);
     final imageUrl = category.displayImageUrl;
 
@@ -1060,11 +1077,11 @@ class _CategoryCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colorScheme.surface,
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.04),
+                color: Colors.black.withOpacity(0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -1097,10 +1114,9 @@ class _CategoryCard extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(6, 6, 6, 12),
                 child: Text(
                   category.name,
-                  style: const TextStyle(
+                  style: textTheme.bodySmall?.copyWith(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.lightTextPrimary,
                   ),
                   maxLines: 2,
                   textAlign: TextAlign.center,

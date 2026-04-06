@@ -27,7 +27,9 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>GoogleMapsAPIKey</key>
-	<string></string>
+	<string>$(GOOGLE_MAPS_API_KEY)</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>This app uses your location to show your position on the map and to set pickup and delivery addresses.</string>
 	<key>UIApplicationSceneManifest</key>

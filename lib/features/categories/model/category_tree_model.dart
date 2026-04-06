@@ -1,4 +1,5 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'dart:convert';
 
 /// Model for a category node from /api/categories/tree.
 /// Supports nested [children] for tree structure.
@@ -61,9 +62,7 @@ class CategoryTreeModel {
       isActive: json['is_active'] == true,
       isFeatured: json['is_featured'] == true,
       parentId: _parseInt(json['parent_id']),
-      meta: json['meta'] != null
-          ? Map<String, dynamic>.from(json['meta'] as Map)
-          : null,
+      meta: _parseMeta(json['meta']),
       fullPath: json['full_path'] as String?,
       hasProducts: json['has_products'] == true,
       hasActiveProducts: json['has_active_products'] == true,
@@ -86,6 +85,37 @@ class CategoryTreeModel {
     if (value == null) return null;
     if (value is int) return value;
     if (value is String) return int.tryParse(value);
+    return null;
+  }
+
+  /// API returns meta as either:
+  ///   - null
+  ///   - a Map  {"icon": "Male"}
+  ///   - a List of JSON strings  ["{\"icon\":\"Male\"}"]
+  /// Normalise all forms into a single Map.
+  static Map<String, dynamic>? _parseMeta(dynamic raw) {
+    if (raw == null) return null;
+    if (raw is Map<String, dynamic>) return raw;
+    if (raw is Map) return Map<String, dynamic>.from(raw);
+    if (raw is List) {
+      // Merge all JSON-encoded entries in the list into one map.
+      final merged = <String, dynamic>{};
+      for (final entry in raw) {
+        if (entry is String && entry.trim().isNotEmpty) {
+          try {
+            final decoded = jsonDecode(entry);
+            if (decoded is Map) {
+              merged.addAll(Map<String, dynamic>.from(decoded));
+            }
+          } catch (_) {
+            // ignore malformed entries
+          }
+        } else if (entry is Map) {
+          merged.addAll(Map<String, dynamic>.from(entry));
+        }
+      }
+      return merged.isEmpty ? null : merged;
+    }
     return null;
   }
 }

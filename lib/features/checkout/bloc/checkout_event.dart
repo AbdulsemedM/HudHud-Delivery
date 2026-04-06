@@ -8,6 +8,9 @@ class CreateOrderEvent extends CheckoutEvent {
   final double taxAmount;
   final double discountAmount;
   final String deliveryAddress;
+  final String deliveryLocation;
+  final double deliveryLatitude;
+  final double deliveryLongitude;
   final String paymentMethod;
   final String? notes;
 
@@ -17,6 +20,9 @@ class CreateOrderEvent extends CheckoutEvent {
     required this.taxAmount,
     required this.discountAmount,
     required this.deliveryAddress,
+    required this.deliveryLocation,
+    required this.deliveryLatitude,
+    required this.deliveryLongitude,
     required this.paymentMethod,
     this.notes,
   });

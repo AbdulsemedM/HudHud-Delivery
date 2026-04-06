@@ -19,7 +19,6 @@ import 'controllers/auth_controller.dart';
 
 // Services
 import 'app/services/auth_service.dart';
-import 'app/services/custom_location_service.dart';
 import 'app/services/fcm_service.dart';
 
 // Orders feature
@@ -57,13 +56,6 @@ void main() async {
   // Initialize API service
   // DioClient.initialize(); // Will be implemented when needed
 
-  // Initialize location permissions at startup (non-blocking)
-  try {
-    await CustomLocationService.initializeLocationPermissions();
-  } catch (e) {
-    if (kDebugMode) debugPrint('Location permission init failed: $e');
-  }
-
   // Initialize theme controller
   final themeController = ThemeController();
   await themeController.init();
@@ -94,7 +86,7 @@ void main() async {
   ));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   final ThemeController themeController;
   final AuthService authService;
   final OrdersRepository ordersRepository;
@@ -109,19 +101,24 @@ class MyApp extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider.value(value: themeController),
+        ChangeNotifierProvider.value(value: widget.themeController),
         ChangeNotifierProvider(
           create: (_) => AuthController(),
         ),
-        Provider<OrdersRepository>.value(value: ordersRepository),
+        Provider<OrdersRepository>.value(value: widget.ordersRepository),
       ],
       child: Consumer<ThemeController>(
         builder: (context, themeController, child) {
           return MaterialApp(
-            navigatorKey: navigatorKey,
+            navigatorKey: widget.navigatorKey,
             title: 'HudHud Delivery',
             debugShowCheckedModeBanner: false,
             theme: AppTheme.lightTheme,

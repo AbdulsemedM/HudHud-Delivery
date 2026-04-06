@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../dashboard/presentation/screen/dashboard_screen.dart';
+import '../screen/verify_contact_screen.dart';
 import '../../bloc/signup_bloc.dart';
 
 class SignupTitle extends StatelessWidget {
@@ -657,10 +657,10 @@ class SignupButton extends StatelessWidget {
               backgroundColor: Colors.green,
             ),
           );
-          // Navigate to dashboard
+          // Navigate to combined email + phone verification screen
           Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (context) => const DashboardScreen()),
+            MaterialPageRoute(builder: (context) => const VerifyContactScreen()),
             (route) => false,
           );
         } else if (state is SignupFailure) {

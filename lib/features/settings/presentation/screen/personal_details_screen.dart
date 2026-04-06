@@ -47,14 +47,18 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Personal Details'),
-        backgroundColor: Colors.white,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -126,19 +130,17 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                   // Name
                   Text(
                     _user?.name ?? '—',
-                    style: TextStyle(
+                    style: textTheme.titleLarge?.copyWith(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.primaryColor,
                     ),
                   ),
                   const SizedBox(height: 4),
                   // Email
                   Text(
                     _user?.email ?? '—',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: 32),
@@ -210,13 +212,16 @@ class _DetailCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Colors.grey[200]!,
+          color: colorScheme.outlineVariant,
           width: 1,
         ),
       ),
@@ -224,7 +229,7 @@ class _DetailCard extends StatelessWidget {
         children: [
           Icon(
             icon,
-            color: Colors.grey[700],
+            color: colorScheme.onSurfaceVariant,
             size: 24,
           ),
           const SizedBox(width: 16),
@@ -236,16 +241,16 @@ class _DetailCard extends StatelessWidget {
                   label,
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey[600],
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   value,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
-                    color: Color(0xFF2C3E50),
+                    color: colorScheme.onSurface,
                   ),
                 ),
               ],

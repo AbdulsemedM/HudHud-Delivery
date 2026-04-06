@@ -92,278 +92,306 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final userName = _user?.name?.split(' ').first ?? 'User';
     final theme = Theme.of(context);
     final themeController = Provider.of<ThemeController>(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
-        child: Column(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
           children: [
-            // Profile Section
+            Text(
+              'Profile',
+              style: textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 12),
             Container(
-              padding: const EdgeInsets.all(20),
-              child: Column(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: colorScheme.surface,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: colorScheme.outlineVariant.withOpacity(0.45)),
+              ),
+              child: Row(
                 children: [
-                  // Profile Picture
                   Stack(
                     children: [
                       Container(
-                        width: 100,
-                        height: 100,
+                        width: 74,
+                        height: 74,
                         decoration: BoxDecoration(
-                          color: AppColors.primaryColor,
                           shape: BoxShape.circle,
+                          border: Border.all(
+                            color: AppColors.primaryColor.withOpacity(0.35),
+                            width: 2,
+                          ),
                         ),
                         child: ClipOval(
                           child: getDisplayAvatarUrl(_user) != null
                               ? Image.network(
                                   getDisplayAvatarUrl(_user)!,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return const Icon(
-                                      Icons.person,
-                                      size: 50,
-                                      color: Colors.white,
-                                    );
-                                  },
+                                  errorBuilder: (_, __, ___) => const Icon(
+                                    Icons.person,
+                                    size: 36,
+                                    color: AppColors.primaryColor,
+                                  ),
                                 )
                               : Image.asset(
                                   'assets/images/profile.png',
                                   fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return const Icon(
-                                      Icons.person,
-                                      size: 50,
-                                      color: Colors.white,
-                                    );
-                                  },
+                                  errorBuilder: (_, __, ___) => const Icon(
+                                    Icons.person,
+                                    size: 36,
+                                    color: AppColors.primaryColor,
+                                  ),
                                 ),
                         ),
                       ),
                       Positioned(
-                        bottom: 0,
                         right: 0,
+                        bottom: 0,
                         child: Container(
-                          width: 32,
-                          height: 32,
+                          width: 22,
+                          height: 22,
                           decoration: BoxDecoration(
-                            color: theme.colorScheme.surface,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: AppColors.primaryColor,
-                              width: 2,
-                            ),
+                            color: colorScheme.surface,
+                            borderRadius: BorderRadius.circular(11),
+                            border: Border.all(color: colorScheme.outlineVariant),
                           ),
                           child: Icon(
-                            Icons.camera_alt,
-                            size: 16,
+                            Icons.verified,
                             color: AppColors.primaryColor,
+                            size: 16,
                           ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  // Greeting
-                  Text(
-                    '$greeting, $userName',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.primaryColor,
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '$greeting, $userName',
+                          style: textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _user?.email ?? '—',
+                          style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  // Email
-                  Text(
-                    _user?.email ?? '—',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.chevron_right,
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ],
               ),
             ),
-            // Menu Items
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surface,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: theme.colorScheme.shadow.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, -2),
-                    ),
-                  ],
+            const SizedBox(height: 16),
+            _SectionTitle(title: 'Account'),
+            _SectionCard(
+              children: [
+                _MenuItem(
+                  icon: Icons.person,
+                  title: 'Personal Details',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const PersonalDetailsScreen(),
+                      ),
+                    ).then((_) => _loadUserData());
+                  },
                 ),
-                child: Column(
-                  children: [
-                    // HUDHUD delivery logo
-                    Padding(
-                      padding: const EdgeInsets.only(top: 20, bottom: 16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'HUDHUD',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primaryColor,
-                            ),
-                          ),
-                          Text(
-                            ' delivery',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ),
+                _MenuItem(
+                  icon: Icons.palette,
+                  title: 'Appearance',
+                  trailing: Text(
+                    themeController.themeModeDisplayName,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
                     ),
-                    // Menu Items
-                    Expanded(
-                      child: ListView(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        children: [
-                          _MenuItem(
-                            icon: Icons.palette,
-                            title: 'Appearance',
-                            trailing: Text(
-                              themeController.themeModeDisplayName,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const AppearanceScreen(),
-                                ),
-                              );
-                            },
-                          ),
-                          _MenuItem(
-                            icon: Icons.person,
-                            title: 'Personal Details',
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const PersonalDetailsScreen(),
-                                ),
-                              ).then((_) => _loadUserData());
-                            },
-                          ),
-                          _MenuItem(
-                            icon: Icons.lock,
-                            title: 'Terms & Conditions',
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const TermsConditionsScreen(),
-                                ),
-                              );
-                            },
-                          ),
-                          _MenuItem(
-                            icon: Icons.notifications,
-                            title: 'Notification',
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => BlocProvider(
-                                    create: (_) => createNotificationsBloc(),
-                                    child: const NotificationsScreen(),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                          _MenuItem(
-                            icon: Icons.favorite_border,
-                            title: 'Wishlist',
-                            onTap: () {
-                              // TODO: Navigate to wishlist
-                            },
-                          ),
-                          _MenuItem(
-                            icon: Icons.help_outline,
-                            title: 'FAQs',
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const FAQsScreen(),
-                                ),
-                              );
-                            },
-                          ),
-                          _MenuItem(
-                            icon: Icons.lock_outline,
-                            title: 'Change Password',
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const ChangePasswordScreen(),
-                                ),
-                              );
-                            },
-                          ),
-                          _MenuItem(
-                            icon: Icons.info_outline,
-                            title: 'Help desk',
-                            onTap: () {
-                              // TODO: Navigate to help desk
-                            },
-                          ),
-                          _MenuItemWithToggle(
-                            icon: Icons.message,
-                            title: 'SMS Notifications',
-                            value: _smsNotificationsEnabled,
-                            onChanged: (value) {
-                              setState(() {
-                                _smsNotificationsEnabled = value;
-                              });
-                            },
-                          ),
-                          _MenuItem(
-                            icon: Icons.logout,
-                            title: 'Log Out',
-                            onTap: () => _handleLogout(context),
-                            isDestructive: true,
-                          ),
-                        ],
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AppearanceScreen(),
                       ),
-                    ),
-                    // Version
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 20),
-                      child: Text(
-                        'Version 1.0',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
+                    );
+                  },
+                ),
+                _MenuItem(
+                  icon: Icons.lock_outline,
+                  title: 'Change Password',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ChangePasswordScreen(),
+                      ),
+                    ).then((result) {
+                      if (result is String && result.isNotEmpty && mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(result),
+                            backgroundColor: Colors.green,
+                          ),
+                        );
+                      }
+                    });
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            _SectionTitle(title: 'Preferences'),
+            _SectionCard(
+              children: [
+                _MenuItem(
+                  icon: Icons.notifications_outlined,
+                  title: 'Notifications',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => BlocProvider(
+                          create: (_) => createNotificationsBloc(),
+                          child: const NotificationsScreen(),
                         ),
                       ),
-                    ),
-                  ],
+                    );
+                  },
+                ),
+                _MenuItemWithToggle(
+                  icon: Icons.sms_outlined,
+                  title: 'SMS Notifications',
+                  value: _smsNotificationsEnabled,
+                  onChanged: (value) {
+                    setState(() {
+                      _smsNotificationsEnabled = value;
+                    });
+                  },
+                ),
+                _MenuItem(
+                  icon: Icons.favorite_border,
+                  title: 'Wishlist',
+                  onTap: () {
+                    // TODO: Navigate to wishlist
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            _SectionTitle(title: 'Support'),
+            _SectionCard(
+              children: [
+                _MenuItem(
+                  icon: Icons.lock,
+                  title: 'Terms & Conditions',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const TermsConditionsScreen(),
+                      ),
+                    );
+                  },
+                ),
+                _MenuItem(
+                  icon: Icons.help_outline,
+                  title: 'FAQs',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const FAQsScreen(),
+                      ),
+                    );
+                  },
+                ),
+                _MenuItem(
+                  icon: Icons.support_agent,
+                  title: 'Help Desk',
+                  onTap: () {
+                    // TODO: Navigate to help desk
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            _MenuItem(
+              icon: Icons.logout,
+              title: 'Log Out',
+              onTap: () => _handleLogout(context),
+              isDestructive: true,
+            ),
+            const SizedBox(height: 14),
+            Center(
+              child: Text(
+                'Version 1.0',
+                style: textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  final String title;
+
+  const _SectionTitle({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, bottom: 8),
+      child: Text(
+        title,
+        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+      ),
+    );
+  }
+}
+
+class _SectionCard extends StatelessWidget {
+  final List<Widget> children;
+
+  const _SectionCard({required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.45),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        child: Column(children: children),
       ),
     );
   }
@@ -389,24 +417,25 @@ class _MenuItem extends StatelessWidget {
     final theme = Theme.of(context);
 
     return InkWell(
+      borderRadius: BorderRadius.circular(10),
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 2),
         child: Row(
           children: [
             Icon(
               icon,
-              size: 24,
+              size: 20,
               color: isDestructive
                   ? theme.colorScheme.error
                   : theme.colorScheme.onSurfaceVariant,
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 12),
             Expanded(
               child: Text(
                 title,
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 15,
                   fontWeight: FontWeight.w500,
                   color: isDestructive
                       ? theme.colorScheme.error
@@ -419,7 +448,7 @@ class _MenuItem extends StatelessWidget {
             else
               Icon(
                 Icons.arrow_forward_ios,
-                size: 16,
+                size: 14,
                 color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
               ),
           ],
@@ -446,21 +475,21 @@ class _MenuItemWithToggle extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
       child: Row(
         children: [
           Icon(
             icon,
-            size: 24,
+            size: 20,
             color: theme.colorScheme.onSurfaceVariant,
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 12),
           Expanded(
             child: Text(
               title,
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 15,
                 fontWeight: FontWeight.w500,
                 color: theme.colorScheme.onSurface,
               ),

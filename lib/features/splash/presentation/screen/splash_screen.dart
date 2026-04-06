@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
+import 'package:hudhud_delivery/app/services/startup_location_service.dart';
 import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
 import 'package:hudhud_delivery/features/dashboard/presentation/screen/dashboard_screen.dart';
 import '../widgets/splash_widget.dart';
@@ -20,8 +21,10 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _checkAuthenticationAndNavigate() async {
     try {
-      // Initialize the auth service to load cached data
-      await _authService.initialize();
+      await Future.wait([
+        _authService.initialize(),
+        StartupLocationService.fetchFreshOnAppLaunch(),
+      ]);
 
       // Wait for minimum splash screen duration (3 seconds)
       await Future.delayed(Duration(seconds: 3));

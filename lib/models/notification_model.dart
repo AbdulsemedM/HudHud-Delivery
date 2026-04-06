@@ -18,17 +18,34 @@ class NotificationModel {
   });
 
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
+    final payload = json['data'];
+    final payloadMap = payload is Map
+        ? Map<String, dynamic>.from(payload)
+        : const <String, dynamic>{};
+
+    final titleFromPayload = payloadMap['title']?.toString();
+    final messageFromPayload = payloadMap['message']?.toString();
+
+    final readAt = json['read_at'];
+
     return NotificationModel(
-      id: json['id'] as int,
-      userId: json['user_id'] as int,
-      title: json['title'] as String? ?? '',
-      message: json['message'] as String? ?? '',
-      isRead: (json['is_read'] ?? 0) == 1,
+      id: _asInt(json['id']),
+      userId: _asInt(json['user_id'] ?? json['notifiable_id']),
+      title: json['title']?.toString() ?? titleFromPayload ?? 'Notification',
+      message: json['message']?.toString() ?? messageFromPayload ?? '',
+      isRead: readAt != null || (json['is_read'] ?? 0) == 1,
       createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ??
           DateTime.now(),
       updatedAt: DateTime.tryParse(json['updated_at'] as String? ?? '') ??
           DateTime.now(),
     );
+  }
+
+  static int _asInt(dynamic value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value) ?? 0;
+    return 0;
   }
 
   Map<String, dynamic> toJson() {

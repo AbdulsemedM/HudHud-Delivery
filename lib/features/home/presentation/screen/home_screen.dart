@@ -9,8 +9,11 @@ import 'package:hudhud_delivery/features/orders/presentation/screen/order_detail
 import 'package:hudhud_delivery/features/orders/presentation/screen/orders_screen.dart';
 import 'package:hudhud_delivery/features/handyman/presentation/screens/handyman_screen.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
+import 'package:hudhud_delivery/app/services/custom_location_service.dart';
+import 'package:hudhud_delivery/app/services/geocoding_service.dart';
 import 'package:hudhud_delivery/app/services/location_service.dart';
 import 'package:hudhud_delivery/app/services/saved_location_service.dart';
+import 'package:hudhud_delivery/app/services/startup_location_service.dart';
 import 'package:hudhud_delivery/models/user_model.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
@@ -56,7 +59,7 @@ class HomeScreenWrapper extends StatelessWidget {
   }
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final AuthService _authService = AuthService();
 
   UserModel? _currentUser;
@@ -70,9 +73,23 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadUserData();
-    _requestLocationAndUpdate();
+    _requestLocationAndUpdate(resumeRefresh: false);
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadAvailableOrders());
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _requestLocationAndUpdate(resumeRefresh: true);
+    }
   }
 
   Future<void> _loadAvailableOrders() async {
@@ -136,28 +153,78 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<void> _requestLocationAndUpdate() async {
+  /// Shows live GPS as the home header. Splash runs [StartupLocationService.fetchFreshOnAppLaunch]
+  /// on each app open; [resumeRefresh] forces a new read when returning from background.
+  Future<void> _requestLocationAndUpdate({required bool resumeRefresh}) async {
     try {
       setState(() {
         _isLoadingLocation = true;
       });
 
-      // Prefer saved address, then current GPS
-      final saved = await SavedLocationService.getSavedAddress();
-      if (saved != null && saved.isNotEmpty) {
+      // On resume: check if user just granted permission in Settings, then re-fetch.
+      if (resumeRefresh) {
+        StartupLocationService.isPermanentlyDenied = false;
+        final granted = await CustomLocationService.requestLocationPermission();
+        if (granted) {
+          final fix = await LocationService.getCurrentPosition();
+          if (fix != null) {
+            StartupLocationService.updateCache(fix);
+            await _applyFix(fix);
+            return;
+          }
+        }
+      }
+
+      // Use startup fix from splash, or fall back to a one-shot GPS read.
+      final LocationData? fix =
+          StartupLocationService.cached ?? await LocationService.getCurrentPosition();
+
+      if (fix != null) {
+        StartupLocationService.updateCache(fix);
+        await _applyFix(fix);
+        return;
+      }
+
+      // No GPS fix — check if permanently denied and prompt.
+      if (StartupLocationService.isPermanentlyDenied ||
+          await CustomLocationService.isLocationPermissionPermanentlyDenied()) {
         if (mounted) {
           setState(() {
-            _currentLocation = saved;
+            _currentLocation = 'Location access denied';
+            _isLoadingLocation = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text(
+                'Location access is disabled. Enable it in Settings to see your position.',
+              ),
+              duration: const Duration(seconds: 6),
+              action: SnackBarAction(
+                label: 'Open Settings',
+                onPressed: CustomLocationService.openLocationAppSettings,
+              ),
+            ),
+          );
+        }
+        return;
+      }
+
+      // No GPS for another reason (services off, etc.): fall back to saved address.
+      final saved = await SavedLocationService.getSavedLocationData();
+      final savedAddress = saved?['address'] as String?;
+      if (savedAddress != null && savedAddress.isNotEmpty) {
+        if (mounted) {
+          setState(() {
+            _currentLocation = savedAddress;
             _isLoadingLocation = false;
           });
         }
         return;
       }
 
-      final location = await LocationService.getCurrentLocationAddress();
       if (mounted) {
         setState(() {
-          _currentLocation = location;
+          _currentLocation = 'Unable to get location';
           _isLoadingLocation = false;
         });
       }
@@ -168,6 +235,19 @@ class _HomeScreenState extends State<HomeScreen> {
           _isLoadingLocation = false;
         });
       }
+    }
+  }
+
+  Future<void> _applyFix(LocationData fix) async {
+    final address = await GeocodingService.getAddressFromLatLng(
+      fix.latitude,
+      fix.longitude,
+    );
+    if (mounted) {
+      setState(() {
+        _currentLocation = address;
+        _isLoadingLocation = false;
+      });
     }
   }
 
@@ -212,8 +292,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: colorScheme.background,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
@@ -237,7 +320,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   if (result != null && result['address'] != null) {
                     final address = result['address'] as String;
-                    await SavedLocationService.saveAddress(address);
+                    final latitude = (result['latitude'] as num?)?.toDouble();
+                    final longitude = (result['longitude'] as num?)?.toDouble();
+                    if (latitude != null && longitude != null) {
+                      await SavedLocationService.saveLocationData(
+                        address: address,
+                        latitude: latitude,
+                        longitude: longitude,
+                      );
+                    } else {
+                      await SavedLocationService.saveAddress(address);
+                    }
                     if (mounted) {
                       setState(() {
                         _currentLocation = address;
@@ -256,12 +349,11 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
               const SizedBox(height: 16),
               // What would you like to do section
-              const Text(
+              Text(
                 'What would you like to do?',
-                style: TextStyle(
+                style: theme.textTheme.titleMedium?.copyWith(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF2C3E50), // Dark grey
                 ),
               ),
               const SizedBox(height: 16),
@@ -329,9 +421,9 @@ class _HomeScreenState extends State<HomeScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'History',
-                    style: TextStyle(
+                    style: theme.textTheme.titleMedium?.copyWith(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                     ),
@@ -369,9 +461,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   padding: const EdgeInsets.all(16.0),
                   child: Text(
                     'Failed to load orders: $_ordersError',
-                    style: TextStyle(
+                    style: theme.textTheme.bodyMedium?.copyWith(
                       fontSize: 14,
-                      color: Colors.grey[600],
                     ),
                   ),
                 )

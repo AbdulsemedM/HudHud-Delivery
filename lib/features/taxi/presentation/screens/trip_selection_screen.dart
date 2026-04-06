@@ -3,6 +3,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/app/services/google_directions_service.dart';
+import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
 import 'package:hudhud_delivery/features/taxi/data/ride_data_provider.dart';
 import 'finding_driver_screen.dart';
 
@@ -39,6 +40,7 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
   List<LatLng>? _routePolylinePoints;
   double? _routeDistanceKm;
   bool _isLoadingRoute = false;
+  bool? _hasGoogleMapsApiKey;
 
   late List<TripOption> _tripOptions;
 
@@ -47,6 +49,7 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
   @override
   void initState() {
     super.initState();
+    _loadMapsAvailability();
     _selectedTrip = 'go';
     _tripOptions = _getFallbackOptions();
     if (widget.initialRoutePolylinePoints != null && widget.initialRouteDistanceKm != null) {
@@ -57,6 +60,14 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchEstimates();
+    });
+  }
+
+  Future<void> _loadMapsAvailability() async {
+    final key = await GoogleMapsApiKeyProvider.getKey();
+    if (!mounted) return;
+    setState(() {
+      _hasGoogleMapsApiKey = key.trim().isNotEmpty;
     });
   }
 
@@ -313,47 +324,7 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
             left: 0,
             right: 0,
             bottom: mapBottom,
-            child: gmaps.GoogleMap(
-              initialCameraPosition: gmaps.CameraPosition(
-                target: _toG(widget.pickupLocation),
-                zoom: 13.0,
-              ),
-              markers: {
-                gmaps.Marker(
-                  markerId: const gmaps.MarkerId('pickup'),
-                  position: _toG(widget.pickupLocation),
-                  icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-                    gmaps.BitmapDescriptor.hueAzure,
-                  ),
-                ),
-                gmaps.Marker(
-                  markerId: const gmaps.MarkerId('destination'),
-                  position: _toG(widget.destinationLocation),
-                  icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-                    gmaps.BitmapDescriptor.hueRed,
-                  ),
-                ),
-              },
-              polylines: {
-                gmaps.Polyline(
-                  polylineId: const gmaps.PolylineId('route'),
-                  points: _routePolylinePoints != null && _routePolylinePoints!.length >= 2
-                      ? _routePolylinePoints!.map(_toG).toList()
-                      : [
-                          _toG(widget.pickupLocation),
-                          _toG(widget.destinationLocation),
-                        ],
-                  color: AppColors.primaryColor,
-                  width: 3,
-                ),
-              },
-              myLocationEnabled: true,
-              mapType: gmaps.MapType.normal,
-              onMapCreated: (controller) {
-                _mapController = controller;
-                _fitBounds();
-              },
-            ),
+            child: _buildMapOrFallback(),
           ),
           // Back button
           Positioned(
@@ -554,6 +525,65 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildMapOrFallback() {
+    if (_hasGoogleMapsApiKey == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_hasGoogleMapsApiKey == false) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: Text(
+            'Google Maps is not configured on iOS. Add GOOGLE_MAPS_API_KEY and restart the app.',
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
+    return gmaps.GoogleMap(
+      initialCameraPosition: gmaps.CameraPosition(
+        target: _toG(widget.pickupLocation),
+        zoom: 13.0,
+      ),
+      markers: {
+        gmaps.Marker(
+          markerId: const gmaps.MarkerId('pickup'),
+          position: _toG(widget.pickupLocation),
+          icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+            gmaps.BitmapDescriptor.hueAzure,
+          ),
+        ),
+        gmaps.Marker(
+          markerId: const gmaps.MarkerId('destination'),
+          position: _toG(widget.destinationLocation),
+          icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+            gmaps.BitmapDescriptor.hueRed,
+          ),
+        ),
+      },
+      polylines: {
+        gmaps.Polyline(
+          polylineId: const gmaps.PolylineId('route'),
+          points: _routePolylinePoints != null && _routePolylinePoints!.length >= 2
+              ? _routePolylinePoints!.map(_toG).toList()
+              : [
+                  _toG(widget.pickupLocation),
+                  _toG(widget.destinationLocation),
+                ],
+          color: AppColors.primaryColor,
+          width: 3,
+        ),
+      },
+      myLocationEnabled: true,
+      mapType: gmaps.MapType.normal,
+      onMapCreated: (controller) {
+        _mapController = controller;
+        _fitBounds();
+      },
     );
   }
 }

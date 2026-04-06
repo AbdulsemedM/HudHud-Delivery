@@ -23,13 +23,17 @@ class PaymentMethodCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return Card(
       elevation: isSelected ? 4 : 1,
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: isSelected ? AppColors.primaryColor : Colors.grey.shade300,
+          color: isSelected
+              ? AppColors.primaryColor
+              : colorScheme.outline.withOpacity(0.35),
           width: isSelected ? 2 : 1,
         ),
       ),
@@ -62,18 +66,22 @@ class PaymentMethodCard extends StatelessWidget {
                   children: [
                     Text(
                       name,
-                      style: TextStyle(
+                      style: textTheme.titleSmall?.copyWith(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: enabled ? Colors.black87 : Colors.grey,
+                        color: enabled
+                            ? colorScheme.onSurface
+                            : colorScheme.onSurface.withOpacity(0.5),
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       description,
-                      style: TextStyle(
+                      style: textTheme.bodyMedium?.copyWith(
                         fontSize: 14,
-                        color: enabled ? Colors.grey[600] : Colors.grey[400],
+                        color: enabled
+                            ? colorScheme.onSurface.withOpacity(0.72)
+                            : colorScheme.onSurface.withOpacity(0.45),
                       ),
                     ),
                   ],
@@ -101,8 +109,12 @@ class PaymentMethodCard extends StatelessWidget {
     );
   }
 
-  IconData _getPaymentMethodIcon(String paymentId) {
-    switch (paymentId) {
+  IconData _getPaymentMethodIcon(String paymentId) => iconForId(paymentId);
+  Color _getPaymentMethodColor(String paymentId) => colorForId(paymentId);
+
+  /// Shared icon lookup — also used by [PaymentMethodGridSection].
+  static IconData iconForId(String id) {
+    switch (id) {
       case 'wallet':
         return Icons.account_balance_wallet_rounded;
       case 'card':
@@ -132,8 +144,9 @@ class PaymentMethodCard extends StatelessWidget {
     }
   }
 
-  Color _getPaymentMethodColor(String paymentId) {
-    switch (paymentId) {
+  /// Shared color lookup — also used by [PaymentMethodGridSection].
+  static Color colorForId(String id) {
+    switch (id) {
       case 'wallet':
         return const Color(0xFF2196F3);
       case 'card':
@@ -176,6 +189,7 @@ class PaymentSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     return Card(
       elevation: 2,
       margin: const EdgeInsets.all(16),
@@ -187,17 +201,18 @@ class PaymentSummaryCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Payment Summary',
-              style: TextStyle(
+              style: textTheme.titleMedium?.copyWith(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 16),
-            _buildSummaryRow('Subtotal', subtotal),
+            _buildSummaryRow(context, 'Subtotal', subtotal),
             const Divider(height: 24),
             _buildSummaryRow(
+              context,
               'Total Amount',
               total,
               isTotal: true,
@@ -209,11 +224,14 @@ class PaymentSummaryCard extends StatelessWidget {
   }
 
   Widget _buildSummaryRow(
+    BuildContext context,
     String label,
     double amount, {
     bool isDiscount = false,
     bool isTotal = false,
   }) {
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -221,22 +239,24 @@ class PaymentSummaryCard extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(
+            style: textTheme.bodyMedium?.copyWith(
               fontSize: isTotal ? 16 : 14,
               fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
-              color: isTotal ? Colors.black87 : Colors.grey[700],
+              color: isTotal
+                  ? colorScheme.onSurface
+                  : colorScheme.onSurface.withOpacity(0.72),
             ),
           ),
           Text(
             '${isDiscount ? '-' : ''}${amount.toStringAsFixed(2)} Br',
-            style: TextStyle(
+            style: textTheme.bodyMedium?.copyWith(
               fontSize: isTotal ? 16 : 14,
               fontWeight: isTotal ? FontWeight.bold : FontWeight.w500,
               color: isTotal
                   ? AppColors.primaryColor
                   : isDiscount
-                      ? Colors.green
-                      : Colors.black87,
+                      ? AppColors.successColor
+                      : colorScheme.onSurface,
             ),
           ),
         ],
@@ -255,6 +275,8 @@ class PaymentProcessingDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
     return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
@@ -270,7 +292,7 @@ class PaymentProcessingDialog extends StatelessWidget {
             const SizedBox(height: 24),
             Text(
               'Processing Payment',
-              style: const TextStyle(
+              style: textTheme.titleMedium?.copyWith(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -279,9 +301,9 @@ class PaymentProcessingDialog extends StatelessWidget {
             Text(
               'Please wait while we process your payment via $paymentMethod...',
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: textTheme.bodyMedium?.copyWith(
                 fontSize: 14,
-                color: Colors.grey[600],
+                color: colorScheme.onSurface.withOpacity(0.72),
               ),
             ),
           ],

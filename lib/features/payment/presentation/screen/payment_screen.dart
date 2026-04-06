@@ -13,12 +13,14 @@ class PaymentScreen extends StatefulWidget {
   final String orderId;
   final double totalAmount;
   final Map<String, dynamic> orderDetails;
+  final String? preSelectedPaymentMethod;
 
   const PaymentScreen({
     super.key,
     required this.orderId,
     required this.totalAmount,
     required this.orderDetails,
+    this.preSelectedPaymentMethod,
   });
 
   @override
@@ -28,6 +30,7 @@ class PaymentScreen extends StatefulWidget {
 class _PaymentScreenState extends State<PaymentScreen>
     with TickerProviderStateMixin {
   String? _selectedPaymentMethod;
+  List<String> _activePaymentMethodIds = const [];
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
@@ -35,6 +38,7 @@ class _PaymentScreenState extends State<PaymentScreen>
   @override
   void initState() {
     super.initState();
+    _selectedPaymentMethod = widget.preSelectedPaymentMethod;
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
@@ -72,6 +76,18 @@ class _PaymentScreenState extends State<PaymentScreen>
       );
       return;
     }
+    if (!_activePaymentMethodIds.contains(_selectedPaymentMethod)) {
+      ScaffoldMessenger.of(blocContext).showSnackBar(
+        const SnackBar(
+          content: Text('Selected payment method is no longer available'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      setState(() {
+        _selectedPaymentMethod = null;
+      });
+      return;
+    }
 
     // Show processing dialog
     showDialog(
@@ -97,6 +113,11 @@ class _PaymentScreenState extends State<PaymentScreen>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return BlocProvider(
       create: (_) => PaymentBloc(
         paymentRepository: PaymentRepository(
@@ -112,7 +133,7 @@ class _PaymentScreenState extends State<PaymentScreen>
       )..add(const GetPaymentMethodsEvent()),
       child: Builder(
         builder: (blocContext) => Scaffold(
-          backgroundColor: Colors.grey[50],
+          backgroundColor: colorScheme.background,
           body: BlocListener<PaymentBloc, PaymentState>(
             listener: (context, state) {
               if (state is PaymentSuccess) {
@@ -199,12 +220,11 @@ class _PaymentScreenState extends State<PaymentScreen>
                                       size: 24,
                                     ),
                                     const SizedBox(width: 8),
-                                    const Text(
+                                    Text(
                                       'Choose Payment Method',
-                                      style: TextStyle(
+                                      style: textTheme.titleMedium?.copyWith(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.black87,
                                       ),
                                     ),
                                   ],
@@ -212,9 +232,9 @@ class _PaymentScreenState extends State<PaymentScreen>
                                 const SizedBox(height: 8),
                                 Text(
                                   'Select your preferred Ethiopian payment option',
-                                  style: TextStyle(
+                                  style: textTheme.bodyMedium?.copyWith(
                                     fontSize: 14,
-                                    color: Colors.grey[600],
+                                    color: colorScheme.onSurface.withOpacity(0.72),
                                   ),
                                 ),
                               ],
@@ -233,6 +253,25 @@ class _PaymentScreenState extends State<PaymentScreen>
                                   ),
                                 );
                               } else if (state is PaymentMethodsLoaded) {
+                                final activeIds = state.paymentMethods
+                                    .where((m) => m['enabled'] == true)
+                                    .map((m) => m['id'] as String)
+                                    .toList(growable: false);
+                                if (activeIds.join('|') !=
+                                    _activePaymentMethodIds.join('|')) {
+                                  WidgetsBinding.instance
+                                      .addPostFrameCallback((_) {
+                                    if (!mounted) return;
+                                    setState(() {
+                                      _activePaymentMethodIds = activeIds;
+                                      if (_selectedPaymentMethod != null &&
+                                          !_activePaymentMethodIds.contains(
+                                              _selectedPaymentMethod)) {
+                                        _selectedPaymentMethod = null;
+                                      }
+                                    });
+                                  });
+                                }
                                 return Column(
                                   children: state.paymentMethods.map((method) {
                                     return PaymentMethodCard(
@@ -256,10 +295,12 @@ class _PaymentScreenState extends State<PaymentScreen>
                                   margin: const EdgeInsets.all(16),
                                   padding: const EdgeInsets.all(16),
                                   decoration: BoxDecoration(
-                                    color: Colors.red.shade50,
+                                    color: AppColors.errorColor.withOpacity(
+                                        isDark ? 0.16 : 0.08),
                                     borderRadius: BorderRadius.circular(12),
-                                    border:
-                                        Border.all(color: Colors.red.shade200),
+                                    border: Border.all(
+                                      color: AppColors.errorColor.withOpacity(0.4),
+                                    ),
                                   ),
                                   child: Column(
                                     children: [
@@ -271,19 +312,20 @@ class _PaymentScreenState extends State<PaymentScreen>
                                       const SizedBox(height: 16),
                                       Text(
                                         'Failed to load payment methods',
-                                        style: TextStyle(
+                                        style: textTheme.titleSmall?.copyWith(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w600,
-                                          color: Colors.red.shade700,
+                                          color: AppColors.errorColor,
                                         ),
                                       ),
                                       const SizedBox(height: 8),
                                       Text(
                                         state.error,
                                         textAlign: TextAlign.center,
-                                        style: TextStyle(
+                                        style: textTheme.bodyMedium?.copyWith(
                                           fontSize: 14,
-                                          color: Colors.red.shade600,
+                                          color: AppColors.errorColor
+                                              .withOpacity(0.9),
                                         ),
                                       ),
                                       const SizedBox(height: 16),
@@ -294,7 +336,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                                               );
                                         },
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.red.shade600,
+                                          backgroundColor: AppColors.errorColor,
                                           foregroundColor: Colors.white,
                                         ),
                                         child: const Text('Retry'),
@@ -319,7 +361,7 @@ class _PaymentScreenState extends State<PaymentScreen>
           bottomNavigationBar: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: colorScheme.surface,
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.1),
@@ -330,7 +372,8 @@ class _PaymentScreenState extends State<PaymentScreen>
             ),
             child: SafeArea(
               child: ElevatedButton(
-                onPressed: _selectedPaymentMethod != null
+                onPressed: _selectedPaymentMethod != null &&
+                        _activePaymentMethodIds.contains(_selectedPaymentMethod)
                     ? () => _processPayment(blocContext)
                     : null,
                 style: ElevatedButton.styleFrom(
@@ -368,79 +411,86 @@ class _PaymentScreenState extends State<PaymentScreen>
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  color: Colors.green.shade100,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.check,
-                  color: Colors.green.shade600,
-                  size: 48,
-                ),
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                'Payment Successful!',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Transaction ID: $transactionId',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        Navigator.of(context).pop();
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text('Continue Shopping'),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        Navigator.of(context).pop();
-                        Navigator.of(context).pop();
-                        // Navigate to orders screen
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryColor,
-                        foregroundColor: Colors.white,
-                      ),
-                      child: const Text('View Order'),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+      builder: (context) {
+        final textTheme = Theme.of(context).textTheme;
+        final colorScheme = Theme.of(context).colorScheme;
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
           ),
-        ),
-      ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: AppColors.successColor.withOpacity(
+                      isDark ? 0.2 : 0.14,
+                    ),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.check,
+                    color: AppColors.successColor,
+                    size: 48,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Payment Successful!',
+                  style: textTheme.titleLarge?.copyWith(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Transaction ID: $transactionId',
+                  style: textTheme.bodyMedium?.copyWith(
+                    fontSize: 14,
+                    color: colorScheme.onSurface.withOpacity(0.72),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          Navigator.of(context).pop();
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text('Continue Shopping'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          Navigator.of(context).pop();
+                          Navigator.of(context).pop();
+                          // Navigate to orders screen
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryColor,
+                          foregroundColor: Colors.white,
+                        ),
+                        child: const Text('View Order'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

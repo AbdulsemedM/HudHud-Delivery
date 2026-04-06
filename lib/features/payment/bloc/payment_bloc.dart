@@ -114,6 +114,13 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
             orderDetails['discount'] ??
             0.0) as double,
         deliveryAddress: orderDetails['delivery_address'] as String,
+        deliveryLocation:
+            (orderDetails['delivery_location'] ?? orderDetails['delivery_address'])
+                as String,
+        deliveryLatitude:
+            (orderDetails['delivery_latitude'] as num?)?.toDouble() ?? 0.0,
+        deliveryLongitude:
+            (orderDetails['delivery_longitude'] as num?)?.toDouble() ?? 0.0,
         paymentMethod: event.paymentMethod,
         serviceType: orderDetails['service_type'] as String? ?? 'delivery',
         notes: orderDetails['notes'] as String?,

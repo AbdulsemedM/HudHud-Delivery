@@ -4,6 +4,8 @@ import 'package:latlong2/latlong.dart';
 import 'package:hudhud_delivery/app/services/google_places_service.dart';
 import 'package:hudhud_delivery/app/models/place_result.dart';
 import 'package:hudhud_delivery/app/services/custom_location_service.dart';
+import 'package:hudhud_delivery/app/services/startup_location_service.dart';
+import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
 
 class MapLocationScreen extends StatefulWidget {
   final String? currentLocation;
@@ -19,21 +21,42 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
 
-  LatLng _currentPosition = const LatLng(33.6844, 73.0479); // Default to Islamabad
+  /// Device GPS fix only — no hardcoded city default.
+  LatLng? _userPosition;
+  bool _awaitingFirstLocation = true;
+  String? _locationErrorMessage;
   // ignore: unused_field
   List<PlaceResult> _searchResults = [];
   Set<gmaps.Marker> _markers = {};
   bool _isSearching = false;
   bool _isLoadingCurrentLocation = false;
+  bool? _hasGoogleMapsApiKey;
   // ignore: unused_field
   PlaceResult? _selectedPlace;
 
   static gmaps.LatLng _toG(LatLng p) => gmaps.LatLng(p.latitude, p.longitude);
 
+  bool get _hasUserFix => _userPosition != null;
+
   @override
   void initState() {
     super.initState();
+    final cached = StartupLocationService.cached;
+    if (cached != null) {
+      _userPosition = LatLng(cached.latitude, cached.longitude);
+      _awaitingFirstLocation = false;
+      _markers = _markersForSearch(_searchResults);
+    }
+    _loadMapsAvailability();
     _getCurrentLocation();
+  }
+
+  Future<void> _loadMapsAvailability() async {
+    final key = await GoogleMapsApiKeyProvider.getKey();
+    if (!mounted) return;
+    setState(() {
+      _hasGoogleMapsApiKey = key.trim().isNotEmpty;
+    });
   }
 
   @override
@@ -45,26 +68,51 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
   }
 
   Future<void> _getCurrentLocation() async {
+    final hadStartupFix = _userPosition != null;
     setState(() {
-      _isLoadingCurrentLocation = true;
+      _isLoadingCurrentLocation = !hadStartupFix;
+      _locationErrorMessage = null;
     });
 
     try {
+      await CustomLocationService.requestLocationPermission();
+      if (!mounted) return;
+
       final LocationData? position =
           await CustomLocationService.getCurrentPosition();
-      if (position != null && mounted) {
+      if (!mounted) return;
+      if (position != null) {
         final newPosition = LatLng(position.latitude, position.longitude);
         setState(() {
-          _currentPosition = newPosition;
-          _markers = {_createCurrentLocationMarker(newPosition)};
+          _awaitingFirstLocation = false;
+          _userPosition = newPosition;
+          _locationErrorMessage = null;
+          _markers = _markersForSearch(_searchResults);
         });
 
         _mapController?.moveCamera(
           gmaps.CameraUpdate.newLatLngZoom(_toG(newPosition), 15.0),
         );
+      } else {
+        setState(() {
+          _awaitingFirstLocation = false;
+          _userPosition = null;
+          _markers = _markersForSearch(_searchResults);
+          _locationErrorMessage =
+              'Location unavailable. Enable Location in Settings and allow access for this app, then try again. You can also search for a place below.';
+        });
       }
     } catch (e) {
       print('Error getting current location: $e');
+      if (mounted) {
+        setState(() {
+          _awaitingFirstLocation = false;
+          _userPosition = null;
+          _markers = _markersForSearch(_searchResults);
+          _locationErrorMessage =
+              'Could not read your position. Check Location permission in Settings, then try again.';
+        });
+      }
     } finally {
       if (mounted) {
         setState(() {
@@ -72,6 +120,27 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
         });
       }
     }
+  }
+
+  Set<gmaps.Marker> _markersForSearch(List<PlaceResult> results) {
+    return {
+      if (_userPosition != null)
+        _createCurrentLocationMarker(_userPosition!),
+      ...results.map((place) => _createSearchMarker(place.coordinates, place)),
+    };
+  }
+
+  /// Camera target for [GoogleMap]: real user fix, or first search result — never a hardcoded city.
+  gmaps.LatLng _mapTarget() {
+    if (_userPosition != null) return _toG(_userPosition!);
+    assert(_searchResults.isNotEmpty);
+    return _toG(_searchResults.first.coordinates);
+  }
+
+  double _mapZoom() {
+    if (_userPosition != null) return 15.0;
+    assert(_searchResults.isNotEmpty);
+    return 12.0;
   }
 
   gmaps.Marker _createCurrentLocationMarker(LatLng position) {
@@ -94,10 +163,11 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
   }
 
   Future<void> _searchPlaces(String query) async {
+    if (_hasGoogleMapsApiKey == false) return;
     if (query.trim().isEmpty) {
       setState(() {
         _searchResults = [];
-        _markers = {_createCurrentLocationMarker(_currentPosition)};
+        _markers = _markersForSearch(_searchResults);
       });
       return;
     }
@@ -111,18 +181,18 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
       if (mounted) {
         setState(() {
           _searchResults = results;
-          _markers = {
-            _createCurrentLocationMarker(_currentPosition),
-            ...results.map((place) => _createSearchMarker(place.coordinates, place)),
-          };
+          _markers = _markersForSearch(results);
         });
 
         if (results.isNotEmpty) {
-          final bounds = _calculateBounds(
-              [_currentPosition, ...results.map((r) => r.coordinates)]);
-        _mapController?.moveCamera(
-          gmaps.CameraUpdate.newLatLngBounds(bounds, 50),
-        );
+          final points = <LatLng>[
+            if (_userPosition != null) _userPosition!,
+            ...results.map((r) => r.coordinates),
+          ];
+          final bounds = _calculateBounds(points);
+          _mapController?.moveCamera(
+            gmaps.CameraUpdate.newLatLngBounds(bounds, 50),
+          );
         }
       }
     } catch (e) {
@@ -172,22 +242,25 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      builder: (context) {
+        final colorScheme = Theme.of(context).colorScheme;
+        final textTheme = Theme.of(context).textTheme;
+        return Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             Center(
               child: Container(
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey[300],
+                  color: colorScheme.onSurface.withOpacity(0.22),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -214,7 +287,7 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
                     children: [
                       Text(
                         place.shortAddress,
-                        style: const TextStyle(
+                        style: textTheme.titleMedium?.copyWith(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
@@ -222,9 +295,9 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
                       const SizedBox(height: 4),
                       Text(
                         place.displayName,
-                        style: TextStyle(
+                        style: textTheme.bodyMedium?.copyWith(
                           fontSize: 14,
-                          color: Colors.grey[600],
+                          color: colorScheme.onSurface.withOpacity(0.7),
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -267,24 +340,31 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
               ],
             ),
             SizedBox(height: MediaQuery.of(context).padding.bottom),
-          ],
-        ),
-      ),
+            ],
+          ),
+        );
+      },
     );
   }
 
   void _confirmLocation(PlaceResult place) {
     Navigator.pop(context);
-    Navigator.pop(context, place.shortAddress);
+    Navigator.pop(context, {
+      'address': place.shortAddress,
+      'latitude': place.coordinates.latitude,
+      'longitude': place.coordinates.longitude,
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
+      backgroundColor: colorScheme.background,
       appBar: AppBar(
         title: const Text('Select Location'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -304,7 +384,7 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
             IconButton(
               icon: const Icon(Icons.my_location),
               onPressed: _getCurrentLocation,
-              tooltip: 'Get current location',
+              tooltip: 'Refresh current location',
             ),
         ],
       ),
@@ -312,13 +392,16 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
         children: [
           Container(
             padding: const EdgeInsets.all(16),
-            color: Colors.white,
+            color: colorScheme.surface,
             child: TextField(
               controller: _searchController,
               focusNode: _searchFocusNode,
               decoration: InputDecoration(
                 hintText: 'Search for places...',
-                prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                prefixIcon: Icon(
+                  Icons.search,
+                  color: colorScheme.onSurface.withOpacity(0.65),
+                ),
                 suffixIcon: _isSearching
                     ? const SizedBox(
                         width: 20,
@@ -330,7 +413,10 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
                       )
                     : _searchController.text.isNotEmpty
                         ? IconButton(
-                            icon: const Icon(Icons.clear, color: Colors.grey),
+                            icon: Icon(
+                              Icons.clear,
+                              color: colorScheme.onSurface.withOpacity(0.65),
+                            ),
                             onPressed: () {
                               _searchController.clear();
                               _searchPlaces('');
@@ -340,14 +426,16 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
                         : null,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey[300]!),
+                  borderSide: BorderSide(
+                    color: colorScheme.outline.withOpacity(0.35),
+                  ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: const BorderSide(color: Colors.orange),
                 ),
                 filled: true,
-                fillColor: Colors.grey[50],
+                fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.4),
               ),
               onChanged: (value) {
                 Future.delayed(const Duration(milliseconds: 500), () {
@@ -360,25 +448,109 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
             ),
           ),
           Expanded(
-            child: gmaps.GoogleMap(
-              initialCameraPosition: gmaps.CameraPosition(
-                target: _toG(_currentPosition),
-                zoom: 13.0,
-              ),
-              markers: _markers,
-              myLocationEnabled: true,
-              myLocationButtonEnabled: false,
-              zoomControlsEnabled: false,
-              onMapCreated: (controller) {
-                _mapController = controller;
-              },
-              onTap: (_) {
-                _searchFocusNode.unfocus();
-              },
-            ),
+            child: _buildMapBody(colorScheme),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildMapBody(ColorScheme colorScheme) {
+    if (_hasGoogleMapsApiKey == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_hasGoogleMapsApiKey == false) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(
+            'Google Maps is not configured on iOS yet. Add a Google Maps API key in iOS settings to use map selection.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: colorScheme.onSurface.withOpacity(0.75)),
+          ),
+        ),
+      );
+    }
+
+    if (_awaitingFirstLocation) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              Text(
+                'Getting your location…',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: colorScheme.onSurface.withOpacity(0.85)),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final canShowMap = _hasUserFix || _searchResults.isNotEmpty;
+    if (!canShowMap) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.location_off_outlined,
+                size: 48,
+                color: colorScheme.onSurface.withOpacity(0.45),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                _locationErrorMessage ??
+                    'Turn on Location and allow access to show where you are on the map.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: colorScheme.onSurface.withOpacity(0.85)),
+              ),
+              const SizedBox(height: 20),
+              FilledButton.icon(
+                onPressed: _getCurrentLocation,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Try again'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final target = _mapTarget();
+    final zoom = _mapZoom();
+
+    return gmaps.GoogleMap(
+      key: ValueKey<String>(
+        '${_userPosition?.latitude},${_userPosition?.longitude},${_searchResults.length}',
+      ),
+      initialCameraPosition: gmaps.CameraPosition(
+        target: target,
+        zoom: zoom,
+      ),
+      markers: _markers,
+      myLocationEnabled: _hasUserFix,
+      myLocationButtonEnabled: false,
+      zoomControlsEnabled: false,
+      onMapCreated: (controller) {
+        _mapController = controller;
+        if (_userPosition != null) {
+          controller.moveCamera(
+            gmaps.CameraUpdate.newLatLngZoom(_toG(_userPosition!), 15.0),
+          );
+        }
+      },
+      onTap: (_) {
+        _searchFocusNode.unfocus();
+      },
     );
   }
 }

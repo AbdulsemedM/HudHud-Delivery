@@ -7,13 +7,17 @@ class CheckoutDataProvider {
 
   /// POST /api/customer/orders
   /// Payload: vendor_id, items [{product_id, quantity}], tax_amount, discount_amount,
-  /// delivery_address, payment_method, service_type, notes
+  /// delivery_address, delivery_location, delivery_latitude, delivery_longitude,
+  /// payment_method, service_type, notes
   Future<Map<String, dynamic>> createOrder({
     required int vendorId,
     required List<Map<String, dynamic>> items,
     required double taxAmount,
     required double discountAmount,
     required String deliveryAddress,
+    required String deliveryLocation,
+    required double deliveryLatitude,
+    required double deliveryLongitude,
     required String paymentMethod,
     String serviceType = 'delivery',
     String? notes,
@@ -25,6 +29,9 @@ class CheckoutDataProvider {
         'tax_amount': taxAmount,
         'discount_amount': discountAmount,
         'delivery_address': deliveryAddress,
+        'delivery_location': deliveryLocation,
+        'delivery_latitude': deliveryLatitude,
+        'delivery_longitude': deliveryLongitude,
         'payment_method': paymentMethod,
         'service_type': serviceType,
         if (notes != null && notes.isNotEmpty) 'notes': notes,
@@ -41,14 +48,41 @@ class CheckoutDataProvider {
         'errorMessage': null
       };
     } on ApiException catch (apiException) {
+      final message = _extractApiErrorMessage(apiException);
       return {
         'statusCode': apiException.statusCode,
         'data': null,
-        'errorMessage': apiException.message
+        'errorMessage': message,
       };
     } on Exception catch (e) {
       return {'statusCode': 500, 'data': null, 'errorMessage': e.toString()};
     }
+  }
+
+  String _extractApiErrorMessage(ApiException apiException) {
+    final rawData = apiException.data;
+    if (rawData is Map<String, dynamic>) {
+      final errors = rawData['errors'];
+      if (errors is Map<String, dynamic> && errors.isNotEmpty) {
+        final messages = <String>[];
+        errors.forEach((field, value) {
+          if (value is List && value.isNotEmpty) {
+            messages.add('$field: ${value.first}');
+          } else if (value != null) {
+            messages.add('$field: $value');
+          }
+        });
+        if (messages.isNotEmpty) {
+          return messages.join(' | ');
+        }
+      }
+
+      final message = rawData['message'];
+      if (message is String && message.isNotEmpty) {
+        return message;
+      }
+    }
+    return apiException.message;
   }
 
   /// POST /api/customer/orders/{id}/cancel

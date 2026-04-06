@@ -427,7 +427,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                                   ),
                                 ),
                                 child: Text(
-                                  'Go to cart',
+                                  'Go to Checkout',
                                   style: TextStyle(
                                     color: AppColors.primaryColor,
                                     fontWeight: FontWeight.bold,

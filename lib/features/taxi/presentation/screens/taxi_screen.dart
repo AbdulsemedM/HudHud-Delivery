@@ -7,6 +7,7 @@ import 'package:hudhud_delivery/app/services/location_service.dart';
 import 'package:hudhud_delivery/core/widgets/location_search_field.dart';
 import 'package:hudhud_delivery/app/services/google_places_service.dart';
 import 'package:hudhud_delivery/app/services/google_directions_service.dart';
+import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
 import 'package:hudhud_delivery/app/models/place_result.dart';
 import 'package:hudhud_delivery/features/taxi/data/ride_data_provider.dart';
 import 'finding_driver_screen.dart';
@@ -51,15 +52,25 @@ class _TaxiScreenState extends State<TaxiScreen> {
   List<LatLng>? _routePolylinePoints;
   double? _routeDistanceKm;
   bool _isLoadingRoute = false;
+  bool? _hasGoogleMapsApiKey;
 
   static gmaps.LatLng _toG(LatLng p) => gmaps.LatLng(p.latitude, p.longitude);
 
   @override
   void initState() {
     super.initState();
+    _loadMapsAvailability();
     _getCurrentLocation();
     _loadSuggestedLocations();
     _checkActiveRide();
+  }
+
+  Future<void> _loadMapsAvailability() async {
+    final key = await GoogleMapsApiKeyProvider.getKey();
+    if (!mounted) return;
+    setState(() {
+      _hasGoogleMapsApiKey = key.trim().isNotEmpty;
+    });
   }
 
   @override
@@ -749,21 +760,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
             left: 0,
             right: 0,
             bottom: mapBottom,
-            child: gmaps.GoogleMap(
-              initialCameraPosition: gmaps.CameraPosition(
-                target: _toG(_currentPosition),
-                zoom: 13.0,
-              ),
-              markers: _buildTaxiMarkers(hasActiveRide, activePickup, activeDropoff),
-              polylines: _buildTaxiPolylines(hasActiveRide, activePickup, activeDropoff),
-              myLocationEnabled: true,
-              myLocationButtonEnabled: false,
-              mapType: gmaps.MapType.normal,
-              onMapCreated: (controller) {
-                _mapController = controller;
-              },
-              onTap: hasActiveRide ? null : _handleMapTap,
-            ),
+            child: _buildMapOrFallback(hasActiveRide, activePickup, activeDropoff),
           ),
           // Available cars info chip - hide when active ride
           if (!hasActiveRide && _totalAvailable != null && _totalAvailable! > 0)
@@ -811,27 +808,6 @@ class _TaxiScreenState extends State<TaxiScreen> {
                 ),
               ),
             ),
-          // Back button
-          Positioned(
-            top: 40,
-            left: 16,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 4,
-                  ),
-                ],
-              ),
-              child: IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ),
-          ),
           // Current location button
           Positioned(
             right: 16,
@@ -1068,6 +1044,44 @@ class _TaxiScreenState extends State<TaxiScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildMapOrFallback(
+    bool hasActiveRide,
+    LatLng? activePickup,
+    LatLng? activeDropoff,
+  ) {
+    if (_hasGoogleMapsApiKey == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_hasGoogleMapsApiKey == false) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: Text(
+            'Google Maps is not configured on iOS. Add GOOGLE_MAPS_API_KEY and restart the app.',
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
+    return gmaps.GoogleMap(
+      initialCameraPosition: gmaps.CameraPosition(
+        target: _toG(_currentPosition),
+        zoom: 13.0,
+      ),
+      markers: _buildTaxiMarkers(hasActiveRide, activePickup, activeDropoff),
+      polylines: _buildTaxiPolylines(hasActiveRide, activePickup, activeDropoff),
+      myLocationEnabled: true,
+      myLocationButtonEnabled: false,
+      mapType: gmaps.MapType.normal,
+      onMapCreated: (controller) {
+        _mapController = controller;
+      },
+      onTap: hasActiveRide ? null : _handleMapTap,
     );
   }
 }

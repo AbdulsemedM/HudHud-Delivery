@@ -44,6 +44,7 @@ android/local.properties
 .env
 .env.local
 .env.*.local
+ios/Flutter/LocalSecrets.xcconfig
 
 # Symbolication related
 app.*.symbols

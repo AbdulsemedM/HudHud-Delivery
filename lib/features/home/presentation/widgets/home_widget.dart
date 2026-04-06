@@ -22,6 +22,8 @@ class VerificationStatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     final emailVerified = user.isEmailVerified;
     final phoneVerified = user.isPhoneVerified;
 
@@ -32,11 +34,11 @@ class VerificationStatusCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.black.withOpacity(0.08),
             spreadRadius: 1,
             blurRadius: 4,
             offset: const Offset(0, 2),
@@ -48,11 +50,7 @@ class VerificationStatusCard extends StatelessWidget {
         children: [
           Text(
             'Verification status',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey[700],
-            ),
+            style: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 12),
           Row(
@@ -110,6 +108,8 @@ class UserProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return Row(
       children: [
         // Location section
@@ -127,9 +127,9 @@ class UserProfileHeader extends StatelessWidget {
                   const SizedBox(width: 4),
                   Text(
                     'Your Location',
-                    style: TextStyle(
+                    style: textTheme.bodySmall?.copyWith(
                       fontSize: 12,
-                      color: Colors.grey[600],
+                      color: colorScheme.onSurface.withOpacity(0.7),
                     ),
                   ),
                 ],
@@ -187,9 +187,9 @@ class UserProfileHeader extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             IconButton(
-              icon: const Icon(
+              icon: Icon(
                 Icons.notifications_outlined,
-                color: Colors.black,
+                color: colorScheme.onSurface,
               ),
               onPressed: () {},
             ),
@@ -312,6 +312,8 @@ class _AppFeaturesCardState extends State<AppFeaturesCard>
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return SlideTransition(
       position: _slideAnimation,
       child: FadeTransition(
@@ -323,10 +325,9 @@ class _AppFeaturesCardState extends State<AppFeaturesCard>
               padding: const EdgeInsets.only(left: 4, bottom: 12),
               child: Text(
                 'What you can do with HudHud',
-                style: TextStyle(
+                style: textTheme.titleMedium?.copyWith(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.lightTextPrimary,
                 ),
               ),
             ),
@@ -366,7 +367,7 @@ class _AppFeaturesCardState extends State<AppFeaturesCard>
                     borderRadius: BorderRadius.circular(3),
                     color: _currentPage == index
                         ? _services[index].color
-                        : Colors.grey[350],
+                        : colorScheme.onSurface.withOpacity(0.25),
                   ),
                 ),
               ),
@@ -394,6 +395,7 @@ class _ServiceFeatureCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
@@ -446,7 +448,7 @@ class _ServiceFeatureCard extends StatelessWidget {
                   description,
                   style: TextStyle(
                     fontSize: 11,
-                    color: Colors.grey[700],
+                    color: colorScheme.onSurface.withOpacity(0.75),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -578,6 +580,8 @@ class ServiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -586,12 +590,12 @@ class ServiceCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colorScheme.surface,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: Colors.grey.shade200, width: 1),
+            border: Border.all(color: colorScheme.outline.withOpacity(0.28), width: 1),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.04),
+                color: Colors.black.withOpacity(0.08),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -612,10 +616,9 @@ class ServiceCard extends StatelessWidget {
               const SizedBox(height: 10),
               Text(
                 title,
-                style: const TextStyle(
+                style: textTheme.titleSmall?.copyWith(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF1a1a1a),
                   letterSpacing: -0.2,
                 ),
               ),
@@ -623,9 +626,9 @@ class ServiceCard extends StatelessWidget {
               Flexible(
                 child: Text(
                   subtitle,
-                  style: TextStyle(
+                  style: textTheme.bodySmall?.copyWith(
                     fontSize: 11,
-                    color: Colors.grey[600],
+                    color: colorScheme.onSurface.withOpacity(0.7),
                     height: 1.3,
                   ),
                   maxLines: 2,
@@ -756,15 +759,17 @@ class OrderHistoryEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.black.withOpacity(0.08),
             spreadRadius: 1,
             blurRadius: 4,
             offset: const Offset(0, 2),
@@ -777,31 +782,29 @@ class OrderHistoryEmptyState extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: AppColors.lightTextDisabled.withOpacity(0.2),
+              color: colorScheme.onSurface.withOpacity(0.12),
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.receipt_long_outlined,
               size: 48,
-              color: AppColors.lightTextDisabled,
+              color: colorScheme.onSurface.withOpacity(0.55),
             ),
           ),
           const SizedBox(height: 20),
           Text(
             'No orders yet',
-            style: TextStyle(
+            style: textTheme.titleMedium?.copyWith(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: AppColors.lightTextPrimary,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             'Your order history will appear here once you place an order',
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: textTheme.bodyMedium?.copyWith(
               fontSize: 14,
-              color: AppColors.lightTextSecondary,
             ),
           ),
           if (onBrowseTap != null) ...[
@@ -849,11 +852,13 @@ class HistoryItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     final child = Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -895,9 +900,8 @@ class HistoryItem extends StatelessWidget {
           // Recipient text in grey
           Text(
             'Receipient: $recipient',
-            style: TextStyle(
+            style: textTheme.bodyMedium?.copyWith(
               fontSize: 14,
-              color: Colors.grey[700],
             ),
           ),
           const SizedBox(height: 12),
@@ -932,9 +936,8 @@ class HistoryItem extends StatelessWidget {
               const SizedBox(width: 4),
               Text(
                 'Drop off',
-                style: TextStyle(
+                style: textTheme.bodySmall?.copyWith(
                   fontSize: 12,
-                  color: Colors.grey[600],
                 ),
               ),
             ],
@@ -952,9 +955,8 @@ class HistoryItem extends StatelessWidget {
           // Date and time in grey
           Text(
             dateTime,
-            style: TextStyle(
+            style: textTheme.bodySmall?.copyWith(
               fontSize: 12,
-              color: Colors.grey[600],
             ),
           ),
         ],

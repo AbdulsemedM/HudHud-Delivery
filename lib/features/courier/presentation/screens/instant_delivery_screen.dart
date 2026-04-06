@@ -5,6 +5,7 @@ import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/app/services/location_service.dart';
 import 'package:hudhud_delivery/app/services/geocoding_service.dart';
 import 'package:hudhud_delivery/app/services/google_directions_service.dart';
+import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
 import '../../../home/presentation/screen/location_search_screen.dart';
 import 'package_details_screen.dart';
 
@@ -25,6 +26,7 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
   LatLng? _deliveryPosition;
   bool _isLoadingLocation = true;
   List<LatLng>? _routePolylinePoints;
+  bool? _hasGoogleMapsApiKey;
 
   static gmaps.LatLng _toG(LatLng p) => gmaps.LatLng(p.latitude, p.longitude);
 
@@ -45,7 +47,16 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
   @override
   void initState() {
     super.initState();
+    _loadMapsAvailability();
     _getCurrentLocation();
+  }
+
+  Future<void> _loadMapsAvailability() async {
+    final key = await GoogleMapsApiKeyProvider.getKey();
+    if (!mounted) return;
+    setState(() {
+      _hasGoogleMapsApiKey = key.trim().isNotEmpty;
+    });
   }
 
   Future<void> _getCurrentLocation() async {
@@ -178,49 +189,7 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
             left: 0,
             right: 0,
             height: mapHeight,
-            child: gmaps.GoogleMap(
-            initialCameraPosition: gmaps.CameraPosition(
-              target: _toG(_currentPosition),
-              zoom: 15.0,
-            ),
-            markers: {
-              if (_pickupPosition != null)
-                gmaps.Marker(
-                  markerId: const gmaps.MarkerId('pickup'),
-                  position: _toG(_pickupPosition!),
-                  icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-                    gmaps.BitmapDescriptor.hueRed,
-                  ),
-                ),
-              if (_deliveryPosition != null)
-                gmaps.Marker(
-                  markerId: const gmaps.MarkerId('delivery'),
-                  position: _toG(_deliveryPosition!),
-                  icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-                    gmaps.BitmapDescriptor.hueGreen,
-                  ),
-                ),
-            },
-            polylines: _pickupPosition != null && _deliveryPosition != null
-                ? {
-                    gmaps.Polyline(
-                      polylineId: const gmaps.PolylineId('route'),
-                      points: _routePolylinePoints != null && _routePolylinePoints!.length >= 2
-                          ? _routePolylinePoints!.map(_toG).toList()
-                          : [_toG(_pickupPosition!), _toG(_deliveryPosition!)],
-                      color: AppColors.primaryColor,
-                      width: 3,
-                    ),
-                  }
-                : {},
-            onMapCreated: (controller) {
-              _mapController = controller;
-            },
-            onTap: (point) {
-              _showLocationSelectionDialog(
-                  LatLng(point.latitude, point.longitude));
-            },
-            ),
+            child: _buildMapOrFallback(),
           ),
           // Back button
           Positioned(
@@ -528,6 +497,66 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
         gmaps.CameraUpdate.newLatLngBounds(bounds, 50),
       );
     }
+  }
+
+  Widget _buildMapOrFallback() {
+    if (_hasGoogleMapsApiKey == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_hasGoogleMapsApiKey == false) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: Text(
+            'Google Maps is not configured on iOS. Add GOOGLE_MAPS_API_KEY and restart the app.',
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
+    return gmaps.GoogleMap(
+      initialCameraPosition: gmaps.CameraPosition(
+        target: _toG(_currentPosition),
+        zoom: 15.0,
+      ),
+      markers: {
+        if (_pickupPosition != null)
+          gmaps.Marker(
+            markerId: const gmaps.MarkerId('pickup'),
+            position: _toG(_pickupPosition!),
+            icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+              gmaps.BitmapDescriptor.hueRed,
+            ),
+          ),
+        if (_deliveryPosition != null)
+          gmaps.Marker(
+            markerId: const gmaps.MarkerId('delivery'),
+            position: _toG(_deliveryPosition!),
+            icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+              gmaps.BitmapDescriptor.hueGreen,
+            ),
+          ),
+      },
+      polylines: _pickupPosition != null && _deliveryPosition != null
+          ? {
+              gmaps.Polyline(
+                polylineId: const gmaps.PolylineId('route'),
+                points: _routePolylinePoints != null && _routePolylinePoints!.length >= 2
+                    ? _routePolylinePoints!.map(_toG).toList()
+                    : [_toG(_pickupPosition!), _toG(_deliveryPosition!)],
+                color: AppColors.primaryColor,
+                width: 3,
+              ),
+            }
+          : {},
+      onMapCreated: (controller) {
+        _mapController = controller;
+      },
+      onTap: (point) {
+        _showLocationSelectionDialog(LatLng(point.latitude, point.longitude));
+      },
+    );
   }
 }
 

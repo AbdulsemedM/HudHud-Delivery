@@ -226,7 +226,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                             ),
                           ),
                           child: const Text(
-                            'Go to cart',
+                            'Go to Checkout',
                             style: TextStyle(
                               color: Color(0xFF4A148C),
                               fontWeight: FontWeight.bold,

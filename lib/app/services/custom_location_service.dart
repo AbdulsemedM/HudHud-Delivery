@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -30,51 +31,74 @@ class CustomLocationService {
       final bool result = await _channel.invokeMethod('isLocationServiceEnabled');
       return result;
     } catch (e) {
-      print('Error checking location service: $e');
+      debugPrint('Error checking location service: $e');
       return false;
     }
   }
+
+  static Permission get _locationPermission =>
+      Permission.locationWhenInUse;
 
   /// Check if location permission is granted
   static Future<bool> hasLocationPermission() async {
     try {
-      final PermissionStatus status = await Permission.location.status;
-      return status == PermissionStatus.granted;
+      final PermissionStatus status = await _locationPermission.status;
+      return status.isGranted;
     } catch (e) {
-      print('Error checking location permission: $e');
+      debugPrint('Error checking location permission: $e');
       return false;
     }
   }
 
-  /// Request location permission
+  /// Request location permission (when-in-use on iOS/Android).
   static Future<bool> requestLocationPermission() async {
     try {
-      final PermissionStatus status = await Permission.location.request();
-      return status == PermissionStatus.granted;
+      final PermissionStatus status = await _locationPermission.request();
+      if (status.isGranted) {
+        return true;
+      }
+      if (kDebugMode) {
+        if (status.isPermanentlyDenied) {
+          debugPrint(
+            'Location permission permanently denied. Open Settings > HudHud Delivery > Location to enable.',
+          );
+        } else {
+          debugPrint('Location permission denied ($status)');
+        }
+      }
+      return false;
     } catch (e) {
-      print('Error requesting location permission: $e');
+      debugPrint('Error requesting location permission: $e');
       return false;
     }
   }
 
-  /// Get current location coordinates
+  /// Opens the app’s Settings page so the user can enable Location after "Don\'t Allow".
+  static Future<bool> openLocationAppSettings() => openAppSettings();
+
+  /// Returns true when permission is permanently denied (user must go to Settings).
+  static Future<bool> isLocationPermissionPermanentlyDenied() async {
+    try {
+      return (await _locationPermission.status).isPermanentlyDenied;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Get current location coordinates.
+  /// Permission must already be granted; call [requestLocationPermission] first if unsure.
   static Future<LocationData?> getCurrentPosition() async {
     try {
       // Check if location services are enabled
-      bool serviceEnabled = await isLocationServiceEnabled();
+      final bool serviceEnabled = await isLocationServiceEnabled();
       if (!serviceEnabled) {
-        print('Location services are disabled');
+        debugPrint('Location services are disabled');
         return null;
       }
 
-      // Check location permissions
-      bool hasPermission = await hasLocationPermission();
-      if (!hasPermission) {
-        bool granted = await requestLocationPermission();
-        if (!granted) {
-          print('Location permission denied');
-          return null;
-        }
+      // Verify permission without requesting again (avoid duplicate prompts).
+      if (!await hasLocationPermission()) {
+        return null;
       }
 
       // Get current position using platform channel
@@ -87,7 +111,7 @@ class CustomLocationService {
         timestamp: DateTime.now(),
       );
     } catch (e) {
-      print('Error getting current position: $e');
+      debugPrint('Error getting current position: $e');
       return null;
     }
   }
@@ -101,7 +125,7 @@ class CustomLocationService {
       }
       return _defaultLocation;
     } catch (e) {
-      print('Error getting location: $e');
+      debugPrint('Error getting location: $e');
       return _defaultLocation;
     }
   }
@@ -109,30 +133,30 @@ class CustomLocationService {
   /// Initialize location permissions at app startup
   static Future<void> initializeLocationPermissions() async {
     try {
-      print('Initializing location permissions...');
+      debugPrint('Initializing location permissions...');
       
       // Check if location services are enabled
       bool serviceEnabled = await isLocationServiceEnabled();
       if (!serviceEnabled) {
-        print('Location services are disabled');
+        debugPrint('Location services are disabled');
         return;
       }
 
       // Request location permission if not already granted
       bool hasPermission = await hasLocationPermission();
       if (!hasPermission) {
-        print('Requesting location permission...');
+        debugPrint('Requesting location permission...');
         bool granted = await requestLocationPermission();
         if (granted) {
-          print('Location permission granted');
+          debugPrint('Location permission granted');
         } else {
-          print('Location permission denied');
+          debugPrint('Location permission denied');
         }
       } else {
-        print('Location permission already granted');
+        debugPrint('Location permission already granted');
       }
     } catch (e) {
-      print('Error initializing location permissions: $e');
+      debugPrint('Error initializing location permissions: $e');
     }
   }
 }

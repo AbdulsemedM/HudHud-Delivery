@@ -9,7 +9,6 @@ import '../../data/data_provider/checkout_data_provider.dart';
 import '../../data/repository/checkout_repository.dart';
 import '../widgets/checkout_widgets.dart';
 import '../../../home/presentation/screen/map_location_screen.dart';
-import '../../../payment/presentation/screen/payment_screen.dart';
 
 class CheckoutScreen extends StatefulWidget {
   final List<Map<String, dynamic>> cartItems;
@@ -29,6 +28,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   final TextEditingController _notesController = TextEditingController();
   double _tipAmount = 0.0;
   String _deliveryAddress = 'Loading address...';
+  double? _deliveryLatitude;
+  double? _deliveryLongitude;
+  String? _selectedPaymentMethod;
 
   @override
   void initState() {
@@ -38,25 +40,37 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   Future<void> _loadDeliveryAddress() async {
     // 1. Try saved address
-    final saved = await SavedLocationService.getSavedAddress();
-    if (saved != null && saved.isNotEmpty) {
+    final saved = await SavedLocationService.getSavedLocationData();
+    final savedAddress = saved?['address'] as String?;
+    if (savedAddress != null && savedAddress.isNotEmpty) {
       if (mounted) {
-        setState(() => _deliveryAddress = saved);
+        setState(() {
+          _deliveryAddress = savedAddress;
+          _deliveryLatitude = (saved?['latitude'] as num?)?.toDouble();
+          _deliveryLongitude = (saved?['longitude'] as num?)?.toDouble();
+        });
       }
       return;
     }
     // 2. Fallback to current GPS location
     try {
+      final position = await LocationService.getCurrentPosition();
       final current = await LocationService.getCurrentLocationAddress();
       if (mounted) {
         setState(() {
           _deliveryAddress =
               current.isNotEmpty ? current : 'Select delivery address';
+          _deliveryLatitude = position?.latitude;
+          _deliveryLongitude = position?.longitude;
         });
       }
     } catch (_) {
       if (mounted) {
-        setState(() => _deliveryAddress = 'Select delivery address');
+        setState(() {
+          _deliveryAddress = 'Select delivery address';
+          _deliveryLatitude = null;
+          _deliveryLongitude = null;
+        });
       }
     }
   }
@@ -87,7 +101,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   void _onChangeAddress() async {
     // Navigate to map location screen
-    final String? newAddress = await Navigator.push<String>(
+    final Map<String, dynamic>? result = await Navigator.push<Map<String, dynamic>>(
       context,
       MaterialPageRoute(
         builder: (context) => MapLocationScreen(
@@ -97,11 +111,24 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
 
     // Update address if user selected a new one
+    final newAddress = result?['address'] as String?;
+    final latitude = (result?['latitude'] as num?)?.toDouble();
+    final longitude = (result?['longitude'] as num?)?.toDouble();
     if (newAddress != null && newAddress.isNotEmpty) {
-      await SavedLocationService.saveAddress(newAddress);
+      if (latitude != null && longitude != null) {
+        await SavedLocationService.saveLocationData(
+          address: newAddress,
+          latitude: latitude,
+          longitude: longitude,
+        );
+      } else {
+        await SavedLocationService.saveAddress(newAddress);
+      }
       if (mounted) {
         setState(() {
           _deliveryAddress = newAddress;
+          _deliveryLatitude = latitude;
+          _deliveryLongitude = longitude;
         });
       }
 
@@ -116,8 +143,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
   }
 
-  void _onConfirmOrder() {
-    // Prepare order items for API: [{product_id: int, quantity: int}]
+  void _onConfirmOrder(BuildContext blocContext) {
     final List<Map<String, dynamic>> orderItems = widget.cartItems
         .map((item) {
           final productId =
@@ -144,31 +170,102 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       return;
     }
 
-    // Generate temporary order ID (replaced by server order ID after creation)
-    final String orderId = 'ORDER_${DateTime.now().millisecondsSinceEpoch}';
+    if (_deliveryLatitude == null || _deliveryLongitude == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please choose a delivery location from the map'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
 
-    // Prepare order details for POST /api/customer/orders
-    final Map<String, dynamic> orderDetails = {
-      'vendor_id': _vendorId,
-      'items': orderItems,
-      'tax_amount': 0.0,
-      'discount_amount': 0.0,
-      'delivery_address': _deliveryAddress,
-      'notes': _notesController.text.trim().isEmpty
-          ? null
-          : _notesController.text.trim(),
-      'subtotal': widget.subtotal,
-      'tip_amount': _tipAmount,
-    };
+    if (_selectedPaymentMethod == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a payment method'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
 
-    // Navigate to payment screen
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PaymentScreen(
-          orderId: orderId,
-          totalAmount: _total,
-          orderDetails: orderDetails,
+    blocContext.read<CheckoutBloc>().add(
+          CreateOrderEvent(
+            vendorId: _vendorId,
+            items: orderItems,
+            taxAmount: 0.0,
+            discountAmount: 0.0,
+            deliveryAddress: _deliveryAddress,
+            deliveryLocation: _deliveryAddress,
+            deliveryLatitude: _deliveryLatitude!,
+            deliveryLongitude: _deliveryLongitude!,
+            paymentMethod: _selectedPaymentMethod!,
+            notes: _notesController.text.trim().isEmpty
+                ? null
+                : _notesController.text.trim(),
+          ),
+        );
+  }
+
+  void _showOrderSuccessDialog(BuildContext ctx, Map<String, dynamic> orderData) {
+    final orderId = orderData['id']?.toString() ?? '—';
+    showDialog(
+      context: ctx,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        contentPadding: const EdgeInsets.all(24),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: AppColors.primaryColor.withOpacity(0.12),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.check_circle,
+                color: AppColors.primaryColor,
+                size: 44,
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Order Placed!',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Order #$orderId has been placed successfully.',
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryColor,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.of(ctx).pop(); // close dialog
+                  Navigator.of(ctx).pop(); // leave checkout
+                },
+                child: const Text(
+                  'Done',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -184,7 +281,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ),
         ),
       ),
-      child: Scaffold(
+      child: Builder(
+        builder: (blocContext) => Scaffold(
         backgroundColor: Theme.of(context).brightness == Brightness.dark
             ? AppColors.darkBackground
             : Colors.grey[50],
@@ -213,14 +311,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         body: BlocListener<CheckoutBloc, CheckoutState>(
           listener: (context, state) {
             if (state is OrderCreatedSuccess) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: Colors.green,
-                ),
-              );
-              // Navigate back or to order confirmation screen
-              Navigator.of(context).pop();
+              _showOrderSuccessDialog(context, state.orderData);
             } else if (state is CheckoutError) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -256,11 +347,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   );
                 }).toList(),
 
-                // Promo Code Section
-                PromoCodeSection(
-                  onPromoCodeApplied: _onPromoCodeApplied,
-                ),
-
                 // Delivery Address Section
                 DeliveryAddressSection(
                   currentAddress: _deliveryAddress,
@@ -282,6 +368,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   },
                 ),
 
+                // Promo Code Section
+                PromoCodeSection(
+                  onPromoCodeApplied: _onPromoCodeApplied,
+                ),
+
+                // Payment Method Grid
+                PaymentMethodGridSection(
+                  selectedId: _selectedPaymentMethod,
+                  onSelected: (id) => setState(() => _selectedPaymentMethod = id),
+                ),
+
                 // Order Summary Section
                 OrderSummarySection(
                   subtotal: widget.subtotal,
@@ -293,7 +390,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 BlocBuilder<CheckoutBloc, CheckoutState>(
                   builder: (context, state) {
                     return ConfirmOrderButton(
-                      onPressed: _onConfirmOrder,
+                      onPressed: () => _onConfirmOrder(blocContext),
                       isLoading: state is CheckoutLoading,
                     );
                   },
@@ -302,6 +399,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
           ),
         ),
+      ),
       ),
     );
   }

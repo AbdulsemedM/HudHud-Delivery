@@ -26,6 +26,9 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
         taxAmount: event.taxAmount,
         discountAmount: event.discountAmount,
         deliveryAddress: event.deliveryAddress,
+        deliveryLocation: event.deliveryLocation,
+        deliveryLatitude: event.deliveryLatitude,
+        deliveryLongitude: event.deliveryLongitude,
         paymentMethod: event.paymentMethod,
         notes: event.notes,
       );
