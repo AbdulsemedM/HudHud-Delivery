@@ -1,0 +1,859 @@
+{
+  "@@locale": "ar",
+  "appTitle": "تسليم هدهد",
+  "actionCancel": "يلغي",
+  "actionOk": "نعم",
+  "actionRetry": "أعد المحاولة",
+  "actionVerify": "يؤكد",
+  "actionSave": "يحفظ",
+  "actionDelete": "يمسح",
+  "actionClose": "يغلق",
+  "actionBack": "خلف",
+  "actionNext": "التالي",
+  "actionSkip": "يتخطى",
+  "actionDone": "منتهي",
+  "actionResend": "إعادة إرسال الرمز",
+  "actionUndo": "تراجع",
+  "actionOpenSettings": "افتح الإعدادات",
+  "actionViewAll": "عرض الكل",
+  "actionTrackDelivery": "تتبع التسليم",
+  "actionTryAgain": "حاول ثانية",
+  "actionAddToCart": "أضف إلى السلة",
+  "actionSeeAll": "رؤية الكل",
+  "actionSending": "إرسال...",
+  "actionSignIn": "تسجيل الدخول",
+  "actionLogOut": "تسجيل الخروج",
+  "navHome": "بيت",
+  "navCourier": "ساعي",
+  "navWallet": "محفظة",
+  "navTaxi": "تاكسي",
+  "navProfile": "حساب تعريفي",
+  "settingsProfile": "حساب تعريفي",
+  "settingsAccount": "حساب",
+  "settingsPreferences": "التفضيلات",
+  "settingsSupport": "يدعم",
+  "settingsPersonalDetails": "التفاصيل الشخصية",
+  "settingsAppearance": "مظهر",
+  "appearanceChooseTheme": "اختر الموضوع المفضل لديك",
+  "settingsChangePassword": "تغيير كلمة المرور",
+  "settingsNotifications": "إشعارات",
+  "settingsSmsNotifications": "إشعارات الرسائل القصيرة",
+  "settingsWishlist": "قائمة الرغبات",
+  "wishlistEmptyTitle": "No saved items yet",
+  "wishlistEmptySubtitle": "Save products you love — tap the heart on a product to add it here.",
+  "wishlistAddedSnack": "Added to wishlist",
+  "wishlistRemovedSnack": "Removed from wishlist",
+  "wishlistSignInTitle": "Sign in to use your wishlist",
+  "wishlistSignInSubtitle": "Your saved items are stored on this device when you are logged in.",
+  "wishlistLoadError": "Could not load wishlist",
+  "wishlistTooltipAdd": "Add to wishlist",
+  "wishlistTooltipRemove": "Remove from wishlist",
+  "settingsTermsConditions": "الشروط والأحكام",
+  "settingsFaqs": "الأسئلة الشائعة",
+  "settingsHelpDesk": "مكتب المساعدة",
+  "settingsLogOut": "تسجيل الخروج",
+  "settingsVersion": "الإصدار 1.0",
+  "settingsLanguage": "لغة",
+  "logoutTitle": "تسجيل الخروج",
+  "logoutMessage": "هل أنت متأكد أنك تريد تسجيل الخروج؟",
+  "logoutError": "خطأ أثناء تسجيل الخروج: {error}",
+  "@logoutError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "themeLight": "ضوء",
+  "themeDark": "مظلم",
+  "themeSystem": "نظام",
+  "themeSubtitleLight": "استخدم دائمًا المظهر الفاتح",
+  "themeSubtitleDark": "استخدم المظهر الداكن دائمًا",
+  "themeSubtitleSystem": "اتبع موضوع الجهاز",
+  "languageTitle": "لغة",
+  "languageEnglish": "إنجليزي",
+  "languageAmharic": "አማርኛ (الأمهرية)",
+  "languageOromo": "عفان أورومو",
+  "languageSomali": "الصومالية",
+  "languageArabic": "العربية (العربية)",
+  "greetingGoodMorning": "صباح الخير",
+  "greetingGoodAfternoon": "مساء الخير",
+  "greetingGoodEvening": "مساء الخير",
+  "greetingGoodNight": "طاب مساؤك",
+  "userDefault": "مستخدم",
+  "emDash": null,
+  "locationGetting": "جارٍ الحصول على الموقع...",
+  "locationAccessDenied": "تم رفض الوصول إلى الموقع",
+  "locationDisabledSnackbar": "تم تعطيل الوصول إلى الموقع. قم بتمكينه في الإعدادات لمعرفة موقعك.",
+  "locationUnable": "غير قادر على الحصول على الموقع",
+  "yourLocation": "موقعك",
+  "selectLocationTitle": "حدد الموقع",
+  "refreshLocationTooltip": "تحديث الموقع الحالي",
+  "searchPlacesHint": "البحث عن الأماكن...",
+  "searchLocationHint": "ابحث عن مكان...",
+  "locationSearchScreenTitle": "البحث عن موقع",
+  "locationSelectedHeading": "الموقع المحدد",
+  "locationCoordinatesFormat": "الإحداثيات: {lat}، {lng}",
+  "@locationCoordinatesFormat": {
+    "placeholders": {
+      "lat": {
+        "type": "String"
+      },
+      "lng": {
+        "type": "String"
+      }
+    }
+  },
+  "locationConfirmButton": "تأكيد الموقع",
+  "locationSearchNoResults": "لم يتم العثور على مواقع",
+  "locationCurrentPositionFailed": "تعذر الحصول على الموقع الحالي",
+  "currentLocationMap": "الموقع الحالي",
+  "verificationStatus": "حالة التحقق",
+  "verifyEmail": "التحقق من البريد الإلكتروني",
+  "verifyPhone": "التحقق من الهاتف",
+  "verifyEmailDialogTitle": "التحقق من البريد الإلكتروني",
+  "verifyPhoneDialogTitle": "التحقق من الهاتف",
+  "verificationCodeLabel": "رمز التحقق",
+  "verificationCodeHintExample": "على سبيل المثال 111248",
+  "verificationCodeHintSms": "على سبيل المثال 056869",
+  "verifyEmailBody": "أرسلنا رمز التحقق إلى {email}. أدخله أدناه.",
+  "@verifyEmailBody": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "verifyPhoneBody": "أرسلنا رمز التحقق إلى {phone}. أدخله أدناه.",
+  "@verifyPhoneBody": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "enterVerificationCodeError": "أدخل رمز التحقق",
+  "codeSentEmailDefault": "تم إرسال الرمز إلى بريدك الإلكتروني.",
+  "codeSentPhoneDefault": "تم إرسال الرمز إلى هاتفك.",
+  "emailVerifiedSuccess": "تم التحقق من البريد الإلكتروني بنجاح!",
+  "phoneVerifiedSuccess": "تم التحقق من رقم الهاتف بنجاح!",
+  "failedToLoadOrders": "فشل تحميل الطلبات: {error}",
+  "@failedToLoadOrders": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "homeWhatToDo": "ماذا تريد أن تفعل؟",
+  "homeFood": "طعام",
+  "homeFoodSubtitle": "اطلب البقالة من البائعين المفضلين لديك.",
+  "homeCourierSubtitle": "اطلب خدمات البريد السريع للاستلام والتوصيل.",
+  "homeTaxi": "تاكسي",
+  "homeTaxiSubtitle": "طلب سيارة أجرة بأسعار معقولة من أي مكان.",
+  "homeHandyman": "عامل ماهر",
+  "homeHandymanSubtitle": "اطلب رجالًا مفيدين للخدمات غير الرسمية في المنزل.",
+  "history": "تاريخ",
+  "featuresSectionTitle": "ما يمكنك فعله مع HudHud",
+  "featureFoodGroceries": "المواد الغذائية والبقالة",
+  "featureFoodGroceriesDesc": "اطلب من البائعين المفضلين لديك.",
+  "featureCourierTitle": "ساعي",
+  "featureCourierDesc": "الالتقاط والتوصيل.",
+  "featureTaxiTitle": "تاكسي",
+  "featureTaxiDesc": "طلب ركوب في أي مكان.",
+  "featureHandymanTitle": "عامل ماهر",
+  "featureHandymanDesc": "خدمات منزلية حسب الطلب.",
+  "featureTrackOrders": "تتبع الطلبات",
+  "featureTrackOrdersDesc": "حالة التسليم في الوقت الحقيقي.",
+  "courierWhatToDo": "ماذا تريد أن تفعل؟",
+  "courierActiveDelivery": "التسليم النشط",
+  "courierNoHistory": "لا يوجد تاريخ التسليم",
+  "courierHistoryEmptySubtitle": "سوف تظهر عمليات التسليم الماضية الخاصة بك هنا",
+  "courierInstantTitle": "التسليم الفوري",
+  "courierInstantSubtitle": "تأخذ شركة البريد الطرود الخاصة بك فقط وتسلمها على الفور.",
+  "courierScheduleTitle": "جدول التسليم",
+  "courierScheduleSubtitle": "يأتي البريد السريع للاستلام في التاريخ والوقت المحددين.",
+  "failedToLoadHistory": "فشل تحميل السجل",
+  "recipientLabel": "المستلم: {name}",
+  "@recipientLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "inProgress": "في تَقَدم",
+  "loginTitle": "تسجيل الدخول",
+  "loginSubtitle": "يرجى إدخال بيانات الاعتماد الخاصة بك للوصول إلى حسابك وجميع الخدمات المتاحة",
+  "loginContinueAsGuest": "المتابعة كضيف",
+  "labelEmailOrPhone": "عنوان البريد الإلكتروني أو رقم الهاتف",
+  "hintEmailPhone": "على سبيل المثال. JohnDoe@gmail.com",
+  "labelPassword": "كلمة المرور",
+  "hintPassword": "أدخل كلمة المرور",
+  "validationEmailOrPhoneRequired": "الرجاء إدخال البريد الإلكتروني الخاص بك أو رقم الهاتف",
+  "validationEmailOrPhoneInvalid": "الرجاء إدخال بريد إلكتروني أو رقم هاتف صالح",
+  "validationPasswordRequired": "الرجاء إدخال كلمة المرور الخاصة بك",
+  "validationPasswordMin": "يجب أن تتكون كلمة المرور من 8 أحرف على الأقل",
+  "validationEmailRequired": "الرجاء إدخال البريد الإلكتروني الخاص بك",
+  "validationEmailInvalid": "يرجى إدخال عنوان بريد إلكتروني صالح",
+  "mainDemoTitle": "عرض تسليم HudHud",
+  "toggleThemeTooltip": "تبديل الموضوع",
+  "themeSwitched": "تم تحويل الموضوع إلى {mode}",
+  "@themeSwitched": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "themeModeSet": "تم ضبط وضع السمة على {mode}",
+  "@themeModeSet": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "welcomeTitle": "مرحبا بكم في هدهد التسليم!",
+  "welcomeBody": "هذا عرض توضيحي يعرض البنية النظيفة باستخدام الأزرار المخصصة وأشرطة الوجبات الخفيفة وتبديل السمات.",
+  "currentThemeLabel": "الموضوع الحالي: {mode}",
+  "@currentThemeLabel": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "counterDemo": "مكافحة التجريبي",
+  "counterDecreased": "انخفض العداد إلى {count}",
+  "@counterDecreased": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "counterIncreased": "تمت زيادة العداد إلى {count}",
+  "@counterIncreased": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "buttonShowcase": "معرض الأزرار",
+  "primaryButton": "الزر الأساسي",
+  "primaryButtonPressed": "تم الضغط على الزر الأساسي!",
+  "largePrimaryButton": "زر أساسي كبير",
+  "largePrimaryPressed": "زر أساسي كبير مع الضغط على الرمز!",
+  "smallButton": "صغير",
+  "smallButtonPressed": "تم الضغط على زر صغير!",
+  "iconButtonPressed": "تم الضغط على زر الأيقونة!",
+  "secondaryButton": "الزر الثانوي",
+  "secondaryPressed": "تم الضغط على الزر الثانوي!",
+  "largeSecondaryButton": "زر ثانوي كبير",
+  "largeSecondaryPressed": "تم الضغط على زر ثانوي كبير!",
+  "smallSecondary": "الثانوية الصغيرة",
+  "smallSecondaryPressed": "تم الضغط على زر ثانوي صغير!",
+  "ghostButton": "زر الشبح",
+  "ghostPressed": "تم الضغط على زر الشبح!",
+  "snackbarShowcase": "معرض الوجبات الخفيفة",
+  "snackbarSuccess": "هذه رسالة نجاح!",
+  "snackbarSuccessLabel": "نجاح",
+  "snackbarError": "هذه رسالة خطأ!",
+  "snackbarErrorLabel": "خطأ",
+  "snackbarWarning": "هذه رسالة تحذيرية!",
+  "snackbarWarningLabel": "تحذير",
+  "snackbarInfo": "هذه رسالة معلومات!",
+  "snackbarInfoLabel": "معلومات",
+  "undoActionPressed": "تم الضغط على التراجع عن الإجراء",
+  "loadingData": "جارٍ تحميل البيانات...",
+  "showLoadingButton": "إظهار التحميل",
+  "dataLoadedSuccess": "تم تحميل البيانات بنجاح!",
+  "hideSnackbar": "إخفاء شريط الوجبات الخفيفة",
+  "apiDemo": "عرض واجهة برمجة التطبيقات",
+  "sampleLogin": "نموذج تسجيل الدخول",
+  "loginSuccessWelcome": "تم تسجيل الدخول بنجاح! مرحباً {name}",
+  "@loginSuccessWelcome": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "loginFailed": "فشل تسجيل الدخول: {error}",
+  "@loginFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "getUserProfile": "الحصول على ملف تعريف المستخدم",
+  "profileRefreshed": "تم تحديث الملف الشخصي بنجاح!",
+  "profileRefreshFailed": "فشل تحديث الملف الشخصي: {error}",
+  "@profileRefreshFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "currentUser": "المستخدم الحالي:",
+  "nameLabel": "اسم:",
+  "emailLabel": "بريد إلكتروني:",
+  "roleLabel": "دور:",
+  "logoutSuccess": "تم تسجيل الخروج بنجاح!",
+  "errorPrefix": "خطأ: {message}",
+  "@errorPrefix": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "utilityButtonsDemo": "عرض توضيحي لأزرار المساعدة",
+  "utilityPrimary": "فائدة الزر الأساسي",
+  "utilityPrimaryPressed": "تم الضغط على الزر الأساسي للأداة المساعدة!",
+  "utilitySecondary": "فائدة الزر الثانوي",
+  "utilitySecondaryPressed": "تم الضغط على الزر الثانوي للأداة المساعدة!",
+  "textButton": "زر النص",
+  "textButtonPressed": "تم الضغط على زر النص!",
+  "sharePressed": "تم الضغط على زر المشاركة!",
+  "gradientButton": "زر التدرج",
+  "gradientPressed": "تم الضغط على زر التدرج!",
+  "counterReset": "إعادة ضبط العداد!",
+  "decrease": "ينقص",
+  "increase": "يزيد",
+  "orderStatusPending": "قيد الانتظار",
+  "orderStatusConfirmed": "مؤكد",
+  "orderStatusPreparing": "تحضير",
+  "orderStatusReadyForPickup": "جاهز للاستلام",
+  "orderStatusOutForDelivery": "خارج للتسليم",
+  "orderStatusDelivered": "تم التوصيل",
+  "orderStatusCancelled": "تم الإلغاء",
+  "orderStatusTextPending": "الطلب معلق",
+  "orderStatusTextAccepted": "تم قبول الطلب",
+  "orderStatusTextPreparing": "تحضير الطلب",
+  "orderStatusTextReadyPickup": "جاهز للاستلام",
+  "orderStatusTextPickedUp": "تم استلام الطلب",
+  "orderStatusTextDelivered": "تم تسليم الطلب",
+  "orderStatusTextCancelled": "تم إلغاء الطلب",
+  "paymentCashOnDelivery": "الدفع عند التسليم",
+  "paymentPaidOnline": "المدفوعة عبر الإنترنت",
+  "estimatedDeliveryPlaceholder": "30-45 دقيقة",
+  "searchRestaurantsHint": "البحث عن المطاعم بالاسم",
+  "enterPromoCode": "أدخل الرمز الترويجي",
+  "additionalNote": "ملاحظة إضافية",
+  "enterCustomTip": "أدخل مبلغ الإكرامية المخصص",
+  "hintFirstName": "على سبيل المثال. جون",
+  "hintLastName": "على سبيل المثال. ظبية",
+  "hintEmailExample": "على سبيل المثال. JohnDoe@gmail.com",
+  "hintPhoneExample": "على سبيل المثال. 0712345678",
+  "hintEnterPassword": "أدخل كلمة المرور",
+  "pickupLocation": "موقع الالتقاط",
+  "dropOff": "غلبه النعاس",
+  "amount": "كمية",
+  "enterAmount": "أدخل المبلغ",
+  "wallet": "محفظة",
+  "paymentMethod": "طريقة الدفع",
+  "transactionId": "معرف المعاملة",
+  "transactionIdHint": "من بوابة الدفع",
+  "cardLast4": "البطاقة مكونة من 4 أرقام",
+  "cardLast4Hint": "4242",
+  "cardBrand": "العلامة التجارية للبطاقة",
+  "cardBrandHint": "تأشيرة، ماستركارد",
+  "addFundsTitle": "إضافة أموال",
+  "selectPaymentMethod": "حدد طريقة الدفع",
+  "searchCountry": "بحث عن البلد",
+  "categoryGrocery": "خضروات",
+  "categoryAmerican": "أمريكي",
+  "categoryConvenience": "راحة",
+  "categoryAlcohol": "الكحول",
+  "categoryPetSupplies": "مستلزمات الحيوانات الأليفة",
+  "categoryMore": "أكثر",
+  "pickupLocationLabel": "موقع الالتقاط",
+  "deliveryLocationLabel": "موقع التسليم",
+  "vehicleMotorcycle": "دراجة نارية",
+  "vehicleCar": "سيارة",
+  "vehicleVan": "فان",
+  "fromWallet": "من المحفظة",
+  "enterWithdrawAmount": "أدخل المبلغ المراد سحبه",
+  "withdrawalMethod": "طريقة السحب",
+  "requestTitle": "عنوان",
+  "requestTitleHint": "على سبيل المثال إصلاح تسرب الصنبور",
+  "requestDescription": "وصف",
+  "requestDescriptionHint": "وصف الإصلاح أو الصيانة اللازمة",
+  "requestLocation": "موقع",
+  "requestLocationHint": "انقر لتحديد الموقع",
+  "scheduledDateTime": "التاريخ والوقت المقرر",
+  "estimatedCostOptional": "التكلفة المقدرة (اختياري)",
+  "estimatedCostHint": "على سبيل المثال 100",
+  "toolsNeeded": "الأدوات المطلوبة (مفصولة بفواصل)",
+  "toolsNeededHint": "على سبيل المثال مجموعة وجع، شريط سباك",
+  "estimatedHoursOptional": "الساعات المقدرة (اختياري)",
+  "estimatedHoursHint": "على سبيل المثال 2",
+  "commentOptional": "تعليق (اختياري)",
+  "commentExperienceHint": "شارك تجربتك...",
+  "commentHandymanHint": "على سبيل المثال محترف للغاية ومهذب",
+  "whatSending": "ما تقوم بإرساله",
+  "recipient": "متلقي",
+  "recipientContactNumber": "رقم التواصل مع المستلم",
+  "payment": "قسط",
+  "commentsIfAny": "تعليقاتكم إن وجدت....",
+  "walletNotFound": "لم يتم العثور على المحفظة",
+  "quantity": "كمية",
+  "packageWeightKg": "وزن العبوة (كجم)",
+  "packageDescriptionOptional": "وصف الحزمة (اختياري)",
+  "me": "أنا",
+  "recipientNames": "أسماء المستلمين",
+  "imagePickerTodo": "سيتم تنفيذ منتقي الصور",
+  "pleaseSelectItemType": "الرجاء تحديد نوع العنصر",
+  "pleaseEnterQuantity": "الرجاء إدخال الكمية",
+  "pleaseEnterValidWeight": "الرجاء إدخال وزن الطرد الصحيح (كجم)",
+  "pleaseSelectPaymentType": "الرجاء تحديد نوع الدفع",
+  "pleaseEnterRecipientName": "الرجاء إدخال اسم المستلم",
+  "pleaseEnterRecipientPhone": "الرجاء إدخال رقم هاتف المستلم",
+  "walletDetailName": "اسم",
+  "walletDetailType": "يكتب",
+  "walletDetailScreenTitle": "تفاصيل المحفظة",
+  "walletInformation": "معلومات المحفظة",
+  "walletDetailCurrencyLabel": "العملة",
+  "walletMyBalanceLabel": "رصيدي",
+  "walletMyWalletsSection": "محافظي",
+  "walletRecentTransactions": "المعاملات الأخيرة",
+  "walletSeeAll": "عرض الكل",
+  "walletNoTransactionsYet": "لا معاملات بعد",
+  "walletAddMoney": "إضافة أموال",
+  "walletSendMoney": "إرسال أموال",
+  "withdrawFundsTitle": "سحب الأموال",
+  "walletNoWalletsForWithdraw": "لا توجد محافظ متاحة للسحب",
+  "walletNoPaymentMethods": "لا توجد طرق دفع متاحة",
+  "validationEnterValidAmount": "أدخل مبلغًا صالحًا",
+  "validationAmountExceedsWalletBalance": "المبلغ يتجاوز رصيد المحفظة",
+  "withdrawAction": "سحب",
+  "selectWalletPrompt": "اختر محفظة",
+  "selectWithdrawalMethodPrompt": "اختر طريقة السحب",
+  "walletDefaultTransactionLabel": "معاملة",
+  "walletTypeCurrency": "{type} • {currency}",
+  "@walletTypeCurrency": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "currencyEtb": "إي تي بي",
+  "balance": "توازن",
+  "created": "مخلوق",
+  "productNotFound": "لم يتم العثور على المنتج",
+  "featured": "مميز",
+  "categories": "فئات",
+  "orders": "طلبات",
+  "fruitsVegetables": "الفواكه والخضروات",
+  "beverages": "المشروبات",
+  "noProductsYet": "لا توجد منتجات حتى الآن",
+  "noProducts": "لا توجد منتجات",
+  "searchStoresHint": "البحث عن المتاجر والمنتجات...",
+  "failedToAddFunds": "فشلت إضافة الأموال",
+  "failedToWithdrawFunds": "فشل في سحب الأموال",
+  "currentPassword": "كلمة المرور الحالية",
+  "newPassword": "كلمة المرور الجديدة",
+  "confirmNewPassword": "تأكيد كلمة المرور الجديدة",
+  "firstName": "الاسم الأول",
+  "lastName": "اسم العائلة",
+  "email": "بريد إلكتروني",
+  "fullName": "الاسم الكامل",
+  "phoneNumber": "رقم التليفون",
+  "emailAddress": "عنوان البريد الإلكتروني",
+  "dateOfBirth": "تاريخ الميلاد",
+  "referralCode": "رمز الإحالة",
+  "searchQuestions": "سؤال البحث",
+  "whereTo": "إلى أين؟",
+  "taxiCurrentLocation": "الموقع الحالي",
+  "taxiCouldNotGetLocationDetails": "تعذر الحصول على تفاصيل الموقع",
+  "taxiTimeNow": "الآن",
+  "taxiScheduleForLater": "جدولة لوقت لاحق",
+  "taxiActiveRide": "رحلة نشطة",
+  "taxiEstFare": "الأجرة التقديرية",
+  "taxiTrackRide": "تتبع الرحلة",
+  "taxiRefreshStatus": "تحديث الحالة",
+  "taxiCarsNearby": "{count, plural, =1{سيارة واحدة قريبة} other{{count} سيارات قريبة}}",
+  "@taxiCarsNearby": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "taxiMinutesWait": "~{minutes} د",
+  "@taxiMinutesWait": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "taxiBrandHudHud": "HUDHUD",
+  "taxiBrandDelivery": " توصيل",
+  "taxiDistanceKm": "{distance} كم",
+  "@taxiDistanceKm": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "taxiGoogleMapsNotConfigured": "لم يتم إعداد خرائط Google. أضف GOOGLE_MAPS_API_KEY وأعد تشغيل التطبيق.",
+  "taxiStatusFindingDriver": "جارٍ البحث عن سائق…",
+  "taxiStatusDriverOnTheWay": "السائق في الطريق",
+  "taxiStatusDriverArrived": "وصل السائق",
+  "taxiStatusTripInProgress": "الرحلة قيد التنفيذ",
+  "taxiStatusActiveRide": "رحلة نشطة",
+  "taxiPickup": "نقطة الاستلام",
+  "taxiDestination": "الوجهة",
+  "taxiFareAmount": "ETB {amount}",
+  "@taxiFareAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "taxiErrorWithDetails": "خطأ: {details}",
+  "@taxiErrorWithDetails": {
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "profileUpdatedSuccess": "تم تحديث الملف الشخصي بنجاح",
+  "profileUpdateFailed": "فشل تحديث الملف الشخصي: {error}",
+  "@profileUpdateFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "profileLoadFailed": "فشل تحميل الملف الشخصي: {error}",
+  "@profileLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "servicesTryAgain": "حاول ثانية",
+  "unexpectedCheckoutError": "حدث خطأ غير متوقع: {error}",
+  "@unexpectedCheckoutError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "failedOrderHistory": "فشل تحميل سجل الطلب: {error}",
+  "@failedOrderHistory": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "timelineOrderPlaced": "تم تقديم الطلب",
+  "timelineOrderConfirmed": "تم تأكيد الطلب",
+  "timelinePreparing": "تحضير",
+  "timelineReadyPickup": "جاهز للاستلام",
+  "timelineOutDelivery": "خارج للتسليم",
+  "timelineDelivered": "تم التوصيل",
+  "addReviewOptional": "إضافة مراجعة (اختياري)",
+  "pleaseSpecify": "يرجى التحديد...",
+  "courierNumber": "رقم البريد السريع",
+  "from": "من",
+  "to": "ل",
+  "deliveryDetailsStatus": "حالة",
+  "deliveryDetailsPickup": "يلتقط",
+  "deliveryDetailsDropoff": "الإنزال",
+  "labelLocation": "موقع",
+  "labelInstructions": "تعليمات",
+  "labelReceiver": "المتلقي",
+  "labelPhone": "هاتف",
+  "labelPackage": "طَرد",
+  "labelType": "يكتب",
+  "labelDescription": "وصف",
+  "labelWeight": "وزن",
+  "labelSpecialInstructions": "تعليمات خاصة",
+  "paymentAndCost": "الدفع والتكلفة",
+  "labelPaymentMethod": "طريقة الدفع",
+  "labelEstimatedCost": "التكلفة المقدرة",
+  "labelPaymentStatus": "حالة الدفع",
+  "timeline": "الجدول الزمني",
+  "labelScheduledPickup": "الاستلام المقرر",
+  "labelScheduledDelivery": "التسليم المقرر",
+  "labelDelivered": "تم التوصيل",
+  "noEmailAvailable": "لا يوجد بريد إلكتروني متاح",
+  "noPhoneAvailable": "لا يوجد رقم هاتف متاح",
+  "emailVerificationTitle": "التحقق من البريد الإلكتروني",
+  "phoneVerificationTitle": "التحقق من الهاتف",
+  "enterEmailCode": "أدخل رمز البريد الإلكتروني",
+  "enterSmsCode": "أدخل رمز الرسائل القصيرة",
+  "noEmailAvailableShort": "لا يوجد بريد إلكتروني متاح",
+  "addMoney": "أضف المال",
+  "sendMoney": "إرسال الأموال",
+  "exitAppTitle": "Exit App",
+  "exitAppMessage": "Are you sure you want to exit the app?",
+  "actionExit": "Exit",
+  "loginNoAccountPrompt": "Don't have an account? ",
+  "loginOrContinueWith": "or continue with",
+  "continueWithGoogle": "Continue with Google",
+  "actionSignUp": "Sign Up",
+  "paymentScreenTitle": "Payment",
+  "paymentChooseMethodHeading": "Choose Payment Method",
+  "paymentEthiopianOptionsSubtitle": "Select your preferred Ethiopian payment option",
+  "paymentLoadMethodsError": "Failed to load payment methods",
+  "paymentSelectMethodFirst": "Please select a payment method",
+  "paymentMethodUnavailable": "Selected payment method is no longer available",
+  "paymentFailedWithError": "Payment failed: {error}",
+  "@paymentFailedWithError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentPayAmountBr": "Pay {amount} Br",
+  "@paymentPayAmountBr": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentSuccessTitle": "Payment Successful!",
+  "paymentTransactionIdLabel": "Transaction ID: {id}",
+  "@paymentTransactionIdLabel": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "continueShopping": "Continue Shopping",
+  "viewOrder": "View Order",
+  "handymanServicesTitle": "Handyman Services",
+  "handymanWhatToDo": "What would you like to do?",
+  "handymanMyRequests": "My Requests",
+  "handymanNoRequestsYet": "No service requests yet",
+  "handymanNoRequestsSubtitle": "Create a request to get quotes from handymen",
+  "handymanCreateNewRequest": "Create New Request",
+  "handymanCreateRequestSubtitle": "Describe your repair or maintenance need and get quotes from handymen.",
+  "instantDeliveryTitle": "Instant Delivery",
+  "tapToSelectPickup": "Tap to select pickup location",
+  "tapToSelectDelivery": "Tap to select delivery location",
+  "vehicleType": "Vehicle Type",
+  "selectPickupAndDelivery": "Please select both pickup and delivery locations",
+  "actionContinue": "Continue",
+  "errorGettingAddress": "Error getting address: {error}",
+  "@errorGettingAddress": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "googleMapsIosMissingKey": "Google Maps is not configured on iOS. Add GOOGLE_MAPS_API_KEY and restart the app.",
+  "dealsModalTitle": "Deals on deals",
+  "dealsModalSubtitle": "Get upto 50% off on your first Courier delivery fee!",
+  "dealsModalClaim": "Claim",
+  "dealsModalClose": "Maybe later",
+  "orderHistoryEmptyTitle": "No orders yet",
+  "orderHistoryEmptySubtitle": "Browse categories to place your first order.",
+  "orderHistoryEmptyHint": "Your order history will appear here once you place an order",
+  "browseDelivery": "Browse Delivery",
+  "browseCategories": "Browse categories",
+  "handymanQuoteCount": "{count} quote(s)",
+  "@handymanQuoteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "orderDetailsLoadingMessage": "Loading order details...",
+  "orderDetailsLoadErrorTitle": "Error loading order details",
+  "orderAppBarTitle": "Order #{orderNumber}",
+  "@orderAppBarTitle": {
+    "placeholders": {
+      "orderNumber": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentSummaryTitle": "Payment Summary",
+  "paymentSubtotalLabel": "Subtotal",
+  "paymentTotalAmountLabel": "Total Amount",
+  "paymentProcessingTitle": "Processing Payment",
+  "paymentProcessingMessage": "Please wait while we process your payment via {method}...",
+  "@paymentProcessingMessage": {
+    "placeholders": {
+      "method": {
+        "type": "String"
+      }
+    }
+  },
+  "courierRecipientLine": "Recipient: {name}",
+  "@courierRecipientLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "courierTrackDeliveryCta": "Track delivery",
+  "courierDeliveryStatusInProgress": "In progress",
+  "labelDate": "Date",
+  "hintDateFormat": "DD/MM/YYYY",
+  "labelTime": "Time",
+  "hintTimeFormat": "HH:MM",
+  "meridiemAm": "am",
+  "meridiemPm": "pm",
+  "scheduleSelectDateTime": "يرجى اختيار التاريخ والوقت للتسليم",
+  "scheduleInvalidDateTime": "تنسيق التاريخ أو الوقت غير صالح",
+  "servicesScreenTitle": "Our Services",
+  "servicesWhatCanWeHelp": "What can we help you with?",
+  "servicesAvailableCount": "{count} services available",
+  "@servicesAvailableCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "servicesErrorTitle": "Something went wrong",
+  "servicesEmptyTitle": "No services yet",
+  "servicesEmptySubtitle": "Check back later for new services",
+  "handymanNewRequestTitle": "New Service Request",
+  "validationHandymanSelectLocation": "Please select a location",
+  "validationHandymanSelectDateTime": "Please select date and time",
+  "validationHandymanSelectSkill": "Please select at least one skill",
+  "handymanRequestCreatedToast": "Request created",
+  "handymanRequestCreateFailed": "Failed to create request",
+  "labelTitle": "Title",
+  "hintTitleHandymanExample": "e.g. Fix leaking faucet",
+  "validationTitleRequired": "Title is required",
+  "validationDescriptionRequired": "Description is required",
+  "hintDescribeRepair": "Describe the repair or maintenance needed",
+  "handymanTapToSelectLocation": "Tap to select location",
+  "labelScheduledDateTime": "Scheduled Date & Time",
+  "selectDateAndTime": "Select date and time",
+  "labelEstimatedCostOptional": "Estimated Cost (optional)",
+  "hintCostExample": "e.g. 100",
+  "handymanSkillsNeeded": "Skills needed",
+  "handymanSkillPlumbing": "Plumbing",
+  "handymanSkillElectrical": "Electrical",
+  "handymanSkillCarpentry": "Carpentry",
+  "handymanSkillPainting": "Painting",
+  "handymanSkillGeneral": "General",
+  "labelToolsCommaSeparated": "Tools needed (comma-separated)",
+  "hintToolsHandymanExample": "e.g. wrench set, plumber's tape",
+  "labelEstimatedHoursOptional": "Estimated hours (optional)",
+  "hintHoursExample": "e.g. 2",
+  "handymanCreateRequestCta": "Create Request",
+  "handymanDialogCancelRequestTitle": "Cancel Request",
+  "handymanDialogCancelRequestMessage": "Are you sure you want to cancel this service request?",
+  "actionNo": "No",
+  "actionYesCancel": "Yes, Cancel",
+  "handymanRequestCancelled": "Request cancelled",
+  "handymanCancelFailed": "Failed to cancel",
+  "handymanLabelScheduled": "Scheduled",
+  "handymanSectionRequirements": "Requirements",
+  "handymanToolsLine": "Tools: {tools}",
+  "@handymanToolsLine": {
+    "placeholders": {
+      "tools": {
+        "type": "String"
+      }
+    }
+  },
+  "handymanEstHoursLine": "Est. hours: {hours}",
+  "@handymanEstHoursLine": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "handymanViewQuotesCta": "View {count} quote(s)",
+  "@handymanViewQuotesCta": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "handymanCancelRequest": "Cancel Request",
+  "handymanRateServiceTitle": "Rate Service",
+  "handymanProviderFallback": "Provider",
+  "handymanQuotesTitle": "Quotes",
+  "handymanAcceptQuoteTitle": "Accept Quote",
+  "handymanAcceptQuoteMessage": "Accept {amount} from {name}?",
+  "@handymanAcceptQuoteMessage": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "actionAccept": "Accept",
+  "actionReject": "Reject",
+  "handymanQuoteAccepted": "Quote accepted",
+  "handymanAcceptQuoteFailed": "Failed to accept",
+  "handymanRejectQuoteTitle": "Reject Quote",
+  "handymanRejectQuoteMessage": "Reject quote from {name}?",
+  "@handymanRejectQuoteMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "handymanQuoteRejected": "Quote rejected",
+  "handymanRejectQuoteFailed": "Failed to reject",
+  "handymanNoQuotesYet": "No quotes yet",
+  "handymanNoQuotesSubtitle": "Handymen will send quotes soon",
+  "handymanViewProfile": "View Profile",
+  "handymanHowWasService": "How was the service?",
+  "handymanRateTheHandyman": "Rate the handyman",
+  "handymanCommentAboutOptional": "Comment about handyman (optional)",
+  "handymanRatingPublic": "Make my rating public",
+  "handymanSubmitRating": "Submit Rating",
+  "ratingThankYou": "Thank you for your rating!",
+  "ratingSubmitFailed": "Failed to submit rating",
+  "handymanNotFound": "Handyman not found",
+  "handymanProfileTitle": "Handyman Profile",
+  "handymanAbout": "About",
+  "handymanSkillsHeading": "Skills",
+  "handymanHourlyRateLabel": "Hourly Rate",
+  "handymanExperienceLabel": "Experience",
+  "handymanExperienceYears": "{years} years",
+  "@handymanExperienceYears": {
+    "placeholders": {
+      "years": {
+        "type": "String"
+      }
+    }
+  },
+  "labelAddress": "Address",
+  "handymanStatsHeading": "Stats",
+  "handymanStatServices": "Services",
+  "handymanStatRating": "Rating",
+  "handymanStatResponse": "Response"
+}

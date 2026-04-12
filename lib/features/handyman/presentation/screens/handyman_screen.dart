@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/handyman/data/data_provider/handyman_data_provider.dart';
@@ -80,12 +81,13 @@ class _HandymanScreenState extends State<HandymanScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
-          'Handyman Services',
+          l10n.handymanServicesTitle,
           style: TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 18,
@@ -116,7 +118,7 @@ class _HandymanScreenState extends State<HandymanScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'What would you like to do?',
+                l10n.handymanWhatToDo,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -141,9 +143,9 @@ class _HandymanScreenState extends State<HandymanScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'My Requests',
-                    style: TextStyle(
+                  Text(
+                    l10n.handymanMyRequests,
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                     ),
@@ -175,7 +177,7 @@ class _HandymanScreenState extends State<HandymanScreen> {
                       TextButton(
                         onPressed: _fetchRequests,
                         child: Text(
-                          'Retry',
+                          l10n.actionRetry,
                           style: TextStyle(color: AppColors.primaryColor),
                         ),
                       ),
@@ -212,7 +214,7 @@ class _HandymanScreenState extends State<HandymanScreen> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'No service requests yet',
+                        l10n.handymanNoRequestsYet,
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -221,7 +223,7 @@ class _HandymanScreenState extends State<HandymanScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Create a request to get quotes from handymen',
+                        l10n.handymanNoRequestsSubtitle,
                         style: TextStyle(
                           fontSize: 14,
                           color: theme.colorScheme.onSurfaceVariant,
@@ -262,6 +264,7 @@ class _CreateRequestCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final primaryColor = theme.colorScheme.primary;
     return Container(
@@ -292,7 +295,7 @@ class _CreateRequestCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Create New Request',
+                    l10n.handymanCreateNewRequest,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -301,7 +304,7 @@ class _CreateRequestCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Describe your repair or maintenance need and get quotes from handymen.',
+                    l10n.handymanCreateRequestSubtitle,
                     style: TextStyle(
                       fontSize: 13,
                       color: theme.colorScheme.onSurfaceVariant,
@@ -333,6 +336,7 @@ class _RequestCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     return GestureDetector(
       onTap: onTap,
@@ -423,7 +427,7 @@ class _RequestCard extends StatelessWidget {
                 ),
                 if (request.quotesCount > 0)
                   Text(
-                    '${request.quotesCount} quote(s)',
+                    l10n.handymanQuoteCount(request.quotesCount),
                     style: TextStyle(
                       fontSize: 12,
                       color: theme.colorScheme.onSurfaceVariant,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/api/api_service.dart';
 import '../../../checkout/data/data_provider/checkout_data_provider.dart';
@@ -67,10 +68,11 @@ class _PaymentScreenState extends State<PaymentScreen>
   }
 
   void _processPayment(BuildContext blocContext) {
+    final l10n = blocContext.l10n;
     if (_selectedPaymentMethod == null) {
       ScaffoldMessenger.of(blocContext).showSnackBar(
-        const SnackBar(
-          content: Text('Please select a payment method'),
+        SnackBar(
+          content: Text(l10n.paymentSelectMethodFirst),
           backgroundColor: Colors.red,
         ),
       );
@@ -78,8 +80,8 @@ class _PaymentScreenState extends State<PaymentScreen>
     }
     if (!_activePaymentMethodIds.contains(_selectedPaymentMethod)) {
       ScaffoldMessenger.of(blocContext).showSnackBar(
-        const SnackBar(
-          content: Text('Selected payment method is no longer available'),
+        SnackBar(
+          content: Text(l10n.paymentMethodUnavailable),
           backgroundColor: Colors.red,
         ),
       );
@@ -132,7 +134,9 @@ class _PaymentScreenState extends State<PaymentScreen>
         ),
       )..add(const GetPaymentMethodsEvent()),
       child: Builder(
-        builder: (blocContext) => Scaffold(
+        builder: (blocContext) {
+          final l10n = blocContext.l10n;
+          return Scaffold(
           backgroundColor: colorScheme.background,
           body: BlocListener<PaymentBloc, PaymentState>(
             listener: (context, state) {
@@ -143,7 +147,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                 Navigator.of(context).pop(); // Close processing dialog
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Payment failed: ${state.error}'),
+                    content: Text(context.l10n.paymentFailedWithError(state.error)),
                     backgroundColor: Colors.red,
                   ),
                 );
@@ -159,9 +163,9 @@ class _PaymentScreenState extends State<PaymentScreen>
                   elevation: 0,
                   backgroundColor: AppColors.primaryColor,
                   flexibleSpace: FlexibleSpaceBar(
-                    title: const Text(
-                      'Payment',
-                      style: TextStyle(
+                    title: Text(
+                      l10n.paymentScreenTitle,
+                      style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
@@ -221,7 +225,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                                     ),
                                     const SizedBox(width: 8),
                                     Text(
-                                      'Choose Payment Method',
+                                      l10n.paymentChooseMethodHeading,
                                       style: textTheme.titleMedium?.copyWith(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
@@ -231,7 +235,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  'Select your preferred Ethiopian payment option',
+                                  l10n.paymentEthiopianOptionsSubtitle,
                                   style: textTheme.bodyMedium?.copyWith(
                                     fontSize: 14,
                                     color: colorScheme.onSurface.withOpacity(0.72),
@@ -311,7 +315,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                                       ),
                                       const SizedBox(height: 16),
                                       Text(
-                                        'Failed to load payment methods',
+                                        l10n.paymentLoadMethodsError,
                                         style: textTheme.titleSmall?.copyWith(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w600,
@@ -339,7 +343,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                                           backgroundColor: AppColors.errorColor,
                                           foregroundColor: Colors.white,
                                         ),
-                                        child: const Text('Retry'),
+                                        child: Text(l10n.actionRetry),
                                       ),
                                     ],
                                   ),
@@ -391,7 +395,9 @@ class _PaymentScreenState extends State<PaymentScreen>
                     const Icon(Icons.lock, size: 20),
                     const SizedBox(width: 8),
                     Text(
-                      'Pay ${widget.totalAmount.toStringAsFixed(2)} Br',
+                      l10n.paymentPayAmountBr(
+                        widget.totalAmount.toStringAsFixed(2),
+                      ),
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -402,7 +408,8 @@ class _PaymentScreenState extends State<PaymentScreen>
               ),
             ),
           ),
-        ),
+        );
+        },
       ),
     );
   }
@@ -412,6 +419,7 @@ class _PaymentScreenState extends State<PaymentScreen>
       context: context,
       barrierDismissible: false,
       builder: (context) {
+        final l10n = context.l10n;
         final textTheme = Theme.of(context).textTheme;
         final colorScheme = Theme.of(context).colorScheme;
         final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -441,7 +449,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'Payment Successful!',
+                  l10n.paymentSuccessTitle,
                   style: textTheme.titleLarge?.copyWith(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -449,7 +457,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Transaction ID: $transactionId',
+                  l10n.paymentTransactionIdLabel(transactionId),
                   style: textTheme.bodyMedium?.copyWith(
                     fontSize: 14,
                     color: colorScheme.onSurface.withOpacity(0.72),
@@ -465,7 +473,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                           Navigator.of(context).pop();
                           Navigator.of(context).pop();
                         },
-                        child: const Text('Continue Shopping'),
+                        child: Text(l10n.continueShopping),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -481,7 +489,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                           backgroundColor: AppColors.primaryColor,
                           foregroundColor: Colors.white,
                         ),
-                        child: const Text('View Order'),
+                        child: Text(l10n.viewOrder),
                       ),
                     ),
                   ],

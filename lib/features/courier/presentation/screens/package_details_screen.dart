@@ -216,19 +216,22 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final outline = colorScheme.outlineVariant;
+    final fieldFill = colorScheme.surfaceContainerHighest;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'What are you sending',
           style: TextStyle(
-            color: Colors.black,
+            color: colorScheme.onSurface,
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
@@ -245,12 +248,12 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // What are you sending section
-                    const Text(
+                    Text(
                       'What are you sending',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF2C3E50),
+                        color: colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -281,9 +284,9 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.grey[50],
+                          color: fieldFill,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.grey[200]!),
+                          border: Border.all(color: outline),
                         ),
                         child: Row(
                           children: [
@@ -295,13 +298,13 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: _itemTypeController.text.isEmpty
-                                      ? Colors.grey[400]
-                                      : const Color(0xFF2C3E50),
+                                      ? colorScheme.outline
+                                      : colorScheme.onSurface,
                                 ),
                               ),
                             ),
                             Icon(Icons.keyboard_arrow_down,
-                                color: Colors.grey[400]),
+                                color: colorScheme.outline),
                           ],
                         ),
                       ),
@@ -313,19 +316,19 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         labelText: 'Quantity',
-                        labelStyle: const TextStyle(
+                        labelStyle: TextStyle(
                           fontSize: 14,
-                          color: Color(0xFF2C3E50),
+                          color: colorScheme.onSurface,
                         ),
                         filled: true,
-                        fillColor: Colors.grey[50],
+                        fillColor: fieldFill,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey[200]!),
+                          borderSide: BorderSide(color: outline),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey[200]!),
+                          borderSide: BorderSide(color: outline),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -341,19 +344,19 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                           const TextInputType.numberWithOptions(decimal: true),
                       decoration: InputDecoration(
                         labelText: 'Package Weight (kg)',
-                        labelStyle: const TextStyle(
+                        labelStyle: TextStyle(
                           fontSize: 14,
-                          color: Color(0xFF2C3E50),
+                          color: colorScheme.onSurface,
                         ),
                         filled: true,
-                        fillColor: Colors.grey[50],
+                        fillColor: fieldFill,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey[200]!),
+                          borderSide: BorderSide(color: outline),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey[200]!),
+                          borderSide: BorderSide(color: outline),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -368,19 +371,19 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                       maxLines: 2,
                       decoration: InputDecoration(
                         labelText: 'Package Description (optional)',
-                        labelStyle: const TextStyle(
+                        labelStyle: TextStyle(
                           fontSize: 14,
-                          color: Color(0xFF2C3E50),
+                          color: colorScheme.onSurface,
                         ),
                         filled: true,
-                        fillColor: Colors.grey[50],
+                        fillColor: fieldFill,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey[200]!),
+                          borderSide: BorderSide(color: outline),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey[200]!),
+                          borderSide: BorderSide(color: outline),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -390,12 +393,12 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                     ),
                     const SizedBox(height: 24),
                     // Select who pays
-                    const Text(
+                    Text(
                       'Select who pays',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF2C3E50),
+                        color: colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -428,12 +431,12 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                     ),
                     const SizedBox(height: 24),
                     // Payment type
-                    const Text(
+                    Text(
                       'Payment type',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF2C3E50),
+                        color: colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -468,9 +471,9 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.grey[50],
+                          color: fieldFill,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.grey[200]!),
+                          border: Border.all(color: outline),
                         ),
                         child: Row(
                           children: [
@@ -480,7 +483,7 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                                       'Loading payment methods...',
                                       style: TextStyle(
                                         fontSize: 14,
-                                        color: Colors.grey[400],
+                                        color: colorScheme.outline,
                                       ),
                                     )
                                   : Text(
@@ -490,25 +493,25 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                                       style: TextStyle(
                                         fontSize: 14,
                                         color: _paymentType == null
-                                            ? Colors.grey[400]
-                                            : const Color(0xFF2C3E50),
+                                            ? colorScheme.outline
+                                            : colorScheme.onSurface,
                                       ),
                                     ),
                             ),
                             Icon(Icons.keyboard_arrow_down,
-                                color: Colors.grey[400]),
+                                color: colorScheme.outline),
                           ],
                         ),
                       ),
                     ),
                     const SizedBox(height: 24),
                     // Recipient Information
-                    const Text(
+                    Text(
                       'Recipient Information',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF2C3E50),
+                        color: colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -517,19 +520,19 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                       controller: _recipientNameController,
                       decoration: InputDecoration(
                         labelText: 'Recipient Names',
-                        labelStyle: const TextStyle(
+                        labelStyle: TextStyle(
                           fontSize: 14,
-                          color: Color(0xFF2C3E50),
+                          color: colorScheme.onSurface,
                         ),
                         filled: true,
-                        fillColor: Colors.grey[50],
+                        fillColor: fieldFill,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey[200]!),
+                          borderSide: BorderSide(color: outline),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey[200]!),
+                          borderSide: BorderSide(color: outline),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -544,19 +547,19 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                       keyboardType: TextInputType.phone,
                       decoration: InputDecoration(
                         labelText: 'Recipient contact number',
-                        labelStyle: const TextStyle(
+                        labelStyle: TextStyle(
                           fontSize: 14,
-                          color: Color(0xFF2C3E50),
+                          color: colorScheme.onSurface,
                         ),
                         filled: true,
-                        fillColor: Colors.grey[50],
+                        fillColor: fieldFill,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey[200]!),
+                          borderSide: BorderSide(color: outline),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey[200]!),
+                          borderSide: BorderSide(color: outline),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -572,10 +575,10 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                         width: double.infinity,
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: Colors.grey[50],
+                          color: fieldFill,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: Colors.grey[300]!,
+                            color: outline,
                             style: BorderStyle.solid,
                             width: 2,
                           ),
@@ -585,14 +588,14 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                             Icon(
                               Icons.camera_alt,
                               size: 48,
-                              color: Colors.grey[600],
+                              color: colorScheme.onSurfaceVariant,
                             ),
                             const SizedBox(height: 12),
                             Text(
                               'Take a picture of the package',
                               style: TextStyle(
                                 fontSize: 14,
-                                color: Colors.grey[600],
+                                color: colorScheme.onSurfaceVariant,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -609,10 +612,10 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colorScheme.surface,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: colorScheme.shadow.withOpacity(0.08),
                     blurRadius: 10,
                     offset: const Offset(0, -2),
                   ),
@@ -660,6 +663,9 @@ class _RadioOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final outline = colorScheme.outlineVariant;
+    final fieldFill = colorScheme.surfaceContainerHighest;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -667,10 +673,10 @@ class _RadioOption extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? AppColors.primaryColor.withOpacity(0.1)
-              : Colors.grey[50],
+              : fieldFill,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? AppColors.primaryColor : Colors.grey[200]!,
+            color: isSelected ? AppColors.primaryColor : outline,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -683,7 +689,7 @@ class _RadioOption extends StatelessWidget {
                 shape: BoxShape.circle,
                 border: Border.all(
                   color:
-                      isSelected ? AppColors.primaryColor : Colors.grey[400]!,
+                      isSelected ? AppColors.primaryColor : colorScheme.outline,
                   width: 2,
                 ),
                 color: isSelected ? AppColors.primaryColor : Colors.transparent,
@@ -706,7 +712,7 @@ class _RadioOption extends StatelessWidget {
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 color: isSelected
                     ? AppColors.primaryColor
-                    : const Color(0xFF2C3E50),
+                    : colorScheme.onSurface,
               ),
             ),
           ],

@@ -10,9 +10,13 @@ import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
 import 'package:hudhud_delivery/app/models/place_result.dart';
 import 'package:hudhud_delivery/features/taxi/data/ride_data_provider.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
+import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import 'finding_driver_screen.dart';
 import 'driver_on_the_way_screen.dart';
 import 'trip_selection_screen.dart';
+
+enum _TaxiTimeChoice { now, scheduleLater }
 
 class TaxiScreen extends StatefulWidget {
   const TaxiScreen({super.key});
@@ -43,7 +47,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
   LatLng? _destinationPosition;
   bool _isLoadingLocation = true;
   List<PlaceResult> _suggestedLocations = [];
-  String? _selectedTime = 'Now';
+  _TaxiTimeChoice _timeChoice = _TaxiTimeChoice.now;
   List<_AvailableDriver> _availableDrivers = [];
   int? _totalAvailable;
   int? _estimatedWaitTime;
@@ -163,12 +167,13 @@ class _TaxiScreenState extends State<TaxiScreen> {
   void _onTrackActiveRide() {
     if (_activeRide == null) return;
 
+    final l10n = context.l10n;
     final pickupLat = double.tryParse(_activeRide!['pickup_latitude']?.toString() ?? '');
     final pickupLng = double.tryParse(_activeRide!['pickup_longitude']?.toString() ?? '');
     final dropoffLat = double.tryParse(_activeRide!['dropoff_latitude']?.toString() ?? '');
     final dropoffLng = double.tryParse(_activeRide!['dropoff_longitude']?.toString() ?? '');
-    final pickupLocation = _activeRide!['pickup_location'] as String? ?? 'Pickup';
-    final dropoffLocation = _activeRide!['dropoff_location'] as String? ?? 'Destination';
+    final pickupLocation = _activeRide!['pickup_location'] as String? ?? l10n.taxiPickup;
+    final dropoffLocation = _activeRide!['dropoff_location'] as String? ?? l10n.taxiDestination;
     final status = _activeRide!['status'] as String? ?? 'searching';
     final vehicleType = _activeRide!['vehicle_type'] as String? ?? 'car';
     final rideType = _activeRide!['ride_type'] as String? ?? 'standard';
@@ -179,7 +184,8 @@ class _TaxiScreenState extends State<TaxiScreen> {
 
     final pickup = LatLng(pickupLat, pickupLng);
     final dropoff = LatLng(dropoffLat, dropoffLng);
-    final tripName = '${vehicleType[0].toUpperCase()}${vehicleType.substring(1)} (${rideType})';
+    final tripName =
+        '${vehicleType[0].toUpperCase()}${vehicleType.substring(1)} ($rideType)';
 
     final hasDriver = _activeRide!['driver_id'] != null;
     if (status == 'searching' || !hasDriver) {
@@ -312,7 +318,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
         builder: (context) => TripSelectionScreen(
           pickupLocation: _currentPosition,
           destinationLocation: _destinationPosition!,
-          pickupAddress: 'Current Location',
+          pickupAddress: context.l10n.taxiCurrentLocation,
           destinationAddress: destinationAddress,
           initialRouteDistanceKm: _routeDistanceKm,
           initialRoutePolylinePoints: _routePolylinePoints,
@@ -387,9 +393,9 @@ class _TaxiScreenState extends State<TaxiScreen> {
             _isLoadingLocation = false;
           });
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Could not get location details'),
-              backgroundColor: Colors.red,
+            SnackBar(
+              content: Text(context.l10n.taxiCouldNotGetLocationDetails),
+              backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );
         }
@@ -401,8 +407,8 @@ class _TaxiScreenState extends State<TaxiScreen> {
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            content: Text(context.l10n.taxiErrorWithDetails(e.toString())),
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }
@@ -426,29 +432,35 @@ class _TaxiScreenState extends State<TaxiScreen> {
   }
 
   void _showTimePicker() {
-    showModalBottomSheet(
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    showModalBottomSheet<void>(
       context: context,
-      builder: (context) => Container(
+      backgroundColor: theme.colorScheme.surface,
+      builder: (sheetContext) => Container(
         padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
               leading: const Icon(Icons.access_time, color: AppColors.primaryColor),
-              title: const Text('Now'),
+              title: Text(l10n.taxiTimeNow),
               onTap: () {
                 setState(() {
-                  _selectedTime = 'Now';
+                  _timeChoice = _TaxiTimeChoice.now;
                 });
-                Navigator.pop(context);
+                Navigator.pop(sheetContext);
               },
             ),
             ListTile(
               leading: const Icon(Icons.schedule, color: AppColors.primaryColor),
-              title: const Text('Schedule for later'),
+              title: Text(l10n.taxiScheduleForLater),
               onTap: () {
+                setState(() {
+                  _timeChoice = _TaxiTimeChoice.scheduleLater;
+                });
                 // TODO: Implement time picker
-                Navigator.pop(context);
+                Navigator.pop(sheetContext);
               },
             ),
           ],
@@ -471,31 +483,36 @@ class _TaxiScreenState extends State<TaxiScreen> {
     return (lat != null && lng != null) ? LatLng(lat, lng) : null;
   }
 
-  String get _activeRideStatusLabel {
+  String _activeRideStatusLabel(AppLocalizations l10n) {
     final status = _activeRide?['status'] as String? ?? '';
     switch (status) {
       case 'searching':
-        return 'Finding a driver...';
+        return l10n.taxiStatusFindingDriver;
       case 'accepted':
-        return 'Driver on the way';
+        return l10n.taxiStatusDriverOnTheWay;
       case 'driver_arrived':
-        return 'Driver has arrived';
+        return l10n.taxiStatusDriverArrived;
       case 'started':
-        return 'Trip in progress';
+        return l10n.taxiStatusTripInProgress;
       default:
-        return status.isNotEmpty ? status.replaceAll('_', ' ') : 'Active ride';
+        return status.isNotEmpty
+            ? status.replaceAll('_', ' ')
+            : l10n.taxiStatusActiveRide;
     }
   }
 
-  Widget _buildActiveRideSheet() {
-    final pickupLocation = _activeRide!['pickup_location'] as String? ?? 'Pickup';
-    final dropoffLocation = _activeRide!['dropoff_location'] as String? ?? 'Destination';
+  Widget _buildActiveRideSheet(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final l10n = context.l10n;
+    final pickupLocation = _activeRide!['pickup_location'] as String? ?? l10n.taxiPickup;
+    final dropoffLocation = _activeRide!['dropoff_location'] as String? ?? l10n.taxiDestination;
     final estimatedFare = _activeRide!['estimated_fare']?.toString();
 
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(20),
           topRight: Radius.circular(20),
         ),
@@ -507,7 +524,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.grey[300],
+              color: colorScheme.outlineVariant,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -518,7 +535,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
               Icon(Icons.local_taxi, color: AppColors.primaryColor, size: 24),
               const SizedBox(width: 8),
               Text(
-                'Active Ride',
+                l10n.taxiActiveRide,
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -532,11 +549,11 @@ class _TaxiScreenState extends State<TaxiScreen> {
             margin: const EdgeInsets.symmetric(horizontal: 20),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: AppColors.primaryColor.withOpacity(0.1),
+              color: AppColors.primaryColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              _activeRideStatusLabel,
+              _activeRideStatusLabel(l10n),
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -550,23 +567,40 @@ class _TaxiScreenState extends State<TaxiScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildLocationRow(Icons.trip_origin, pickupLocation, Colors.blue),
+                _buildLocationRow(
+                  context,
+                  Icons.trip_origin,
+                  pickupLocation,
+                  colorScheme.primary,
+                ),
                 const SizedBox(height: 12),
-                _buildLocationRow(Icons.location_on, dropoffLocation, Colors.red),
+                _buildLocationRow(
+                  context,
+                  Icons.location_on,
+                  dropoffLocation,
+                  colorScheme.error,
+                ),
                 if (estimatedFare != null && estimatedFare != 'null') ...[
                   const SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Est. fare',
-                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                        l10n.taxiEstFare,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
                       ),
                       Text(
-                        '\$${double.tryParse(estimatedFare)?.toStringAsFixed(2) ?? estimatedFare}',
-                        style: const TextStyle(
+                        l10n.taxiFareAmount(
+                          double.tryParse(estimatedFare)?.toStringAsFixed(2) ??
+                              estimatedFare,
+                        ),
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
+                          color: colorScheme.onSurface,
                         ),
                       ),
                     ],
@@ -581,18 +615,18 @@ class _TaxiScreenState extends State<TaxiScreen> {
             child: SizedBox(
               width: double.infinity,
               height: 50,
-              child: ElevatedButton(
+              child: FilledButton(
                 onPressed: _onTrackActiveRide,
-                style: ElevatedButton.styleFrom(
+                style: FilledButton.styleFrom(
                   backgroundColor: AppColors.primaryColor,
+                  foregroundColor: colorScheme.onPrimary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text(
-                  'Track Ride',
-                  style: TextStyle(
-                    color: Colors.white,
+                child: Text(
+                  l10n.taxiTrackRide,
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
@@ -609,13 +643,16 @@ class _TaxiScreenState extends State<TaxiScreen> {
                     _checkActiveRide();
                   },
             child: _isCheckingActiveRide
-                ? const SizedBox(
+                ? SizedBox(
                     width: 20,
                     height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.primaryColor,
+                    ),
                   )
                 : Text(
-                    'Refresh status',
+                    l10n.taxiRefreshStatus,
                     style: TextStyle(color: AppColors.primaryColor, fontSize: 14),
                   ),
           ),
@@ -625,16 +662,29 @@ class _TaxiScreenState extends State<TaxiScreen> {
     );
   }
 
-  Widget _buildLocationRow(IconData icon, String text, Color color) {
+  Widget _buildLocationRow(
+    BuildContext context,
+    IconData icon,
+    String text,
+    Color iconColor,
+  ) {
+    final theme = Theme.of(context);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, color: color, size: 22),
+        Icon(icon, color: iconColor, size: 22),
         const SizedBox(width: 12),
         Expanded(
           child: Text(
             text,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ) ??
+                TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: theme.colorScheme.onSurface,
+                ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
@@ -744,6 +794,9 @@ class _TaxiScreenState extends State<TaxiScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final l10n = context.l10n;
     final hasActiveRide = _activeRide != null;
     final activePickup = _activePickup;
     final activeDropoff = _activeDropoff;
@@ -760,7 +813,12 @@ class _TaxiScreenState extends State<TaxiScreen> {
             left: 0,
             right: 0,
             bottom: mapBottom,
-            child: _buildMapOrFallback(hasActiveRide, activePickup, activeDropoff),
+            child: _buildMapOrFallback(
+              context,
+              hasActiveRide,
+              activePickup,
+              activeDropoff,
+            ),
           ),
           // Available cars info chip - hide when active ride
           if (!hasActiveRide && _totalAvailable != null && _totalAvailable! > 0)
@@ -772,11 +830,11 @@ class _TaxiScreenState extends State<TaxiScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: colorScheme.surfaceContainerHigh,
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.15),
+                        color: colorScheme.shadow.withValues(alpha: 0.12),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -788,19 +846,31 @@ class _TaxiScreenState extends State<TaxiScreen> {
                       Icon(Icons.local_taxi, color: AppColors.primaryColor, size: 20),
                       const SizedBox(width: 8),
                       Text(
-                        '$_totalAvailable car${_totalAvailable! > 1 ? 's' : ''} nearby',
-                        style: const TextStyle(
+                        l10n.taxiCarsNearby(_totalAvailable!),
+                        style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                           fontSize: 14,
+                          color: colorScheme.onSurface,
                         ),
                       ),
                       if (_estimatedWaitTime != null && _estimatedWaitTime! > 0) ...[
                         const SizedBox(width: 12),
-                        Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
+                        Icon(
+                          Icons.access_time,
+                          size: 16,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
                         const SizedBox(width: 4),
                         Text(
-                          '~$_estimatedWaitTime min',
-                          style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+                          l10n.taxiMinutesWait(_estimatedWaitTime!),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                                fontSize: 13,
+                                color: colorScheme.onSurfaceVariant,
+                              ) ??
+                              TextStyle(
+                                fontSize: 13,
+                                color: colorScheme.onSurfaceVariant,
+                              ),
                         ),
                       ],
                     ],
@@ -815,14 +885,16 @@ class _TaxiScreenState extends State<TaxiScreen> {
             child: FloatingActionButton(
               heroTag: 'current_location',
               mini: true,
-              backgroundColor: Colors.white,
+              backgroundColor: colorScheme.surfaceContainerHigh,
               onPressed: () async {
                 await _getCurrentLocation();
                 _fetchAvailableVehicles();
               },
               child: Icon(
                 Icons.my_location,
-                color: _isLoadingLocation ? Colors.grey : Colors.blue,
+                color: _isLoadingLocation
+                    ? colorScheme.onSurfaceVariant
+                    : colorScheme.primary,
               ),
             ),
           ),
@@ -833,12 +905,12 @@ class _TaxiScreenState extends State<TaxiScreen> {
             maxChildSize: 0.75,
             builder: (context, scrollController) {
               if (hasActiveRide) {
-                return _buildActiveRideSheet();
+                return _buildActiveRideSheet(context);
               }
               return Container(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(20),
                     topRight: Radius.circular(20),
                   ),
@@ -851,7 +923,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: Colors.grey[300],
+                        color: colorScheme.outlineVariant,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -862,7 +934,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            'HUDHUD',
+                            l10n.taxiBrandHudHud,
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -870,11 +942,11 @@ class _TaxiScreenState extends State<TaxiScreen> {
                             ),
                           ),
                           Text(
-                            ' delivery',
+                            l10n.taxiBrandDelivery,
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.normal,
-                              color: Colors.grey[600],
+                              color: colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -899,7 +971,9 @@ class _TaxiScreenState extends State<TaxiScreen> {
                               )
                             else if (_routeDistanceKm != null)
                               Text(
-                                '${_routeDistanceKm!.toStringAsFixed(2)} KM',
+                                l10n.taxiDistanceKm(
+                                  _routeDistanceKm!.toStringAsFixed(2),
+                                ),
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
@@ -922,14 +996,17 @@ class _TaxiScreenState extends State<TaxiScreen> {
                           Expanded(
                             child: Container(
                               decoration: BoxDecoration(
-                                color: Colors.grey[100],
+                                color: colorScheme.surfaceContainerHighest,
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: TextField(
                                 controller: _destinationController,
+                                style: TextStyle(color: colorScheme.onSurface),
                                 decoration: InputDecoration(
-                                  hintText: 'Where to?',
-                                  hintStyle: TextStyle(color: Colors.grey[600]),
+                                  hintText: l10n.whereTo,
+                                  hintStyle: TextStyle(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
                                   prefixIcon: Icon(
                                     Icons.search,
                                     color: AppColors.primaryColor,
@@ -942,15 +1019,19 @@ class _TaxiScreenState extends State<TaxiScreen> {
                                 ),
                                 onTap: () {
                                   // Show location search
-                                  showModalBottomSheet(
+                                  showModalBottomSheet<void>(
                                     context: context,
                                     isScrollControlled: true,
                                     backgroundColor: Colors.transparent,
-                                    builder: (context) => Container(
-                                      height: MediaQuery.of(context).size.height * 0.7,
-                                      decoration: const BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.only(
+                                    builder: (sheetContext) => Container(
+                                      height:
+                                          MediaQuery.of(sheetContext).size.height *
+                                              0.7,
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(sheetContext)
+                                            .colorScheme
+                                            .surface,
+                                        borderRadius: const BorderRadius.only(
                                           topLeft: Radius.circular(20),
                                           topRight: Radius.circular(20),
                                         ),
@@ -960,10 +1041,10 @@ class _TaxiScreenState extends State<TaxiScreen> {
                                           Padding(
                                             padding: const EdgeInsets.all(16),
                                             child: LocationSearchField(
-                                              hintText: 'Where to?',
+                                              hintText: l10n.whereTo,
                                               onLocationSelected: (place) {
                                                 _onLocationSelected(place);
-                                                Navigator.pop(context);
+                                                Navigator.pop(sheetContext);
                                               },
                                             ),
                                           ),
@@ -985,10 +1066,10 @@ class _TaxiScreenState extends State<TaxiScreen> {
                                 vertical: 12,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: colorScheme.surfaceContainerHigh,
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: Colors.grey[300]!,
+                                  color: colorScheme.outlineVariant,
                                   width: 1,
                                 ),
                               ),
@@ -1002,7 +1083,9 @@ class _TaxiScreenState extends State<TaxiScreen> {
                                   ),
                                   const SizedBox(width: 6),
                                   Text(
-                                    _selectedTime ?? 'Now',
+                                    _timeChoice == _TaxiTimeChoice.now
+                                        ? l10n.taxiTimeNow
+                                        : l10n.taxiScheduleForLater,
                                     style: TextStyle(
                                       color: AppColors.primaryColor,
                                       fontWeight: FontWeight.w600,
@@ -1048,6 +1131,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
   }
 
   Widget _buildMapOrFallback(
+    BuildContext context,
     bool hasActiveRide,
     LatLng? activePickup,
     LatLng? activeDropoff,
@@ -1057,12 +1141,16 @@ class _TaxiScreenState extends State<TaxiScreen> {
     }
 
     if (_hasGoogleMapsApiKey == false) {
-      return const Center(
+      final theme = Theme.of(context);
+      return Center(
         child: Padding(
-          padding: EdgeInsets.all(24),
+          padding: const EdgeInsets.all(24),
           child: Text(
-            'Google Maps is not configured on iOS. Add GOOGLE_MAPS_API_KEY and restart the app.',
+            context.l10n.taxiGoogleMapsNotConfigured,
             textAlign: TextAlign.center,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurface,
+            ),
           ),
         ),
       );
@@ -1099,6 +1187,8 @@ class _SuggestedLocationItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -1118,18 +1208,23 @@ class _SuggestedLocationItem extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF2C3E50),
-                    ),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: colorScheme.onSurface,
+                        ) ??
+                        TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: colorScheme.onSurface,
+                        ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     address,
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.grey[600],
+                      color: colorScheme.onSurfaceVariant,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,

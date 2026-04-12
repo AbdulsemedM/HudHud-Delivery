@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/features/orders/presentation/widgets/orders_widget.dart';
 
 class WalletHeader extends StatelessWidget {
@@ -6,6 +7,7 @@ class WalletHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final onSurface = Theme.of(context).colorScheme.onSurface;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -16,9 +18,9 @@ class WalletHeader extends StatelessWidget {
           ),
         ),
         IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.notifications_outlined,
-            color: Colors.black,
+            color: onSurface,
           ),
           onPressed: () {},
         ),
@@ -37,6 +39,7 @@ class BalanceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
@@ -54,9 +57,9 @@ class BalanceCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'MY BALANCE',
-            style: TextStyle(
+          Text(
+            l10n.walletMyBalanceLabel.toUpperCase(),
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 14,
               fontWeight: FontWeight.w500,
@@ -89,15 +92,17 @@ class WalletActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colorScheme = Theme.of(context).colorScheme;
     return Row(
       children: [
         Expanded(
           child: TextButton.icon(
             onPressed: onAddMoney,
             icon: const Icon(Icons.add_circle_outline),
-            label: const Text('Add Money'),
+            label: Text(l10n.walletAddMoney),
             style: TextButton.styleFrom(
-              foregroundColor: Colors.purple,
+              foregroundColor: colorScheme.primary,
             ),
           ),
         ),
@@ -106,9 +111,9 @@ class WalletActions extends StatelessWidget {
           child: TextButton.icon(
             onPressed: onSendMoney,
             icon: const Icon(Icons.send_outlined),
-            label: const Text('Send Money'),
+            label: Text(l10n.walletSendMoney),
             style: TextButton.styleFrom(
-              foregroundColor: Colors.black87,
+              foregroundColor: colorScheme.onSurface,
             ),
           ),
         ),
@@ -129,14 +134,16 @@ class TransactionsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'Recent Transactions',
-              style: TextStyle(
+            Text(
+              l10n.walletRecentTransactions,
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),
@@ -144,10 +151,10 @@ class TransactionsList extends StatelessWidget {
             if (onSeeAll != null)
               TextButton(
                 onPressed: onSeeAll,
-                child: const Text(
-                  'See All',
+                child: Text(
+                  l10n.walletSeeAll,
                   style: TextStyle(
-                    color: Colors.orange,
+                    color: colorScheme.primary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -159,10 +166,10 @@ class TransactionsList extends StatelessWidget {
             ? Padding(
                 padding: const EdgeInsets.symmetric(vertical: 24),
                 child: Text(
-                  'No transactions yet',
+                  l10n.walletNoTransactionsYet,
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.grey[600],
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
               )
@@ -190,10 +197,11 @@ class TransactionListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -202,7 +210,7 @@ class TransactionListItem extends StatelessWidget {
           Text(
             transaction.date,
             style: TextStyle(
-              color: Colors.grey[600],
+              color: colorScheme.onSurfaceVariant,
               fontSize: 12,
             ),
           ),
@@ -212,9 +220,10 @@ class TransactionListItem extends StatelessWidget {
             children: [
               Text(
                 transaction.formattedAmount,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
+                  color: colorScheme.onSurface,
                 ),
               ),
               Container(
@@ -223,17 +232,18 @@ class TransactionListItem extends StatelessWidget {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: colorScheme.surface,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: Colors.grey[200]!,
+                    color: colorScheme.outlineVariant,
                   ),
                 ),
                 child: Text(
                   transaction.type,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
+                    color: colorScheme.onSurface,
                   ),
                 ),
               ),

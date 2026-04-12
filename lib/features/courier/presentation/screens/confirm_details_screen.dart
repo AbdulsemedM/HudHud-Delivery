@@ -310,8 +310,9 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
           '$_estimatedCurrency ${_estimatedCost!.toStringAsFixed(2)}';
     }
 
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
           _buildMapOrFallback(mapCenter),
@@ -320,17 +321,17 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
             left: 16,
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colorScheme.surface,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: colorScheme.shadow.withOpacity(0.2),
                     blurRadius: 4,
                   ),
                 ],
               ),
               child: IconButton(
-                icon: const Icon(Icons.arrow_back),
+                icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
                 onPressed: () => Navigator.pop(context),
               ),
             ),
@@ -341,11 +342,11 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
             child: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colorScheme.surface,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: colorScheme.shadow.withOpacity(0.2),
                     blurRadius: 4,
                   ),
                 ],
@@ -363,9 +364,9 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
             maxChildSize: 0.85,
             builder: (context, scrollController) {
               return Container(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(20),
                     topRight: Radius.circular(20),
                   ),
@@ -377,7 +378,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: Colors.grey[300],
+                        color: colorScheme.outlineVariant,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),

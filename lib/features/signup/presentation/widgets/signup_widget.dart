@@ -9,6 +9,9 @@ class SignupTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -17,7 +20,7 @@ class SignupTitle extends StatelessWidget {
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF2C3E50),
+            color: isDark ? cs.onSurface : const Color(0xFF2C3E50),
             letterSpacing: 0.5,
           ),
         ),
@@ -26,7 +29,7 @@ class SignupTitle extends StatelessWidget {
           'Create your account and proceed to access all the Businesses offered to you',
           style: TextStyle(
             fontSize: 13,
-            color: Colors.grey[600],
+            color: isDark ? cs.onSurfaceVariant : Colors.grey[600],
             height: 1.4,
           ),
         ),
@@ -135,8 +138,87 @@ class _SignupFormState extends State<SignupForm> {
     super.dispose();
   }
 
+  TextStyle _signupLabelStyle(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    return TextStyle(
+      fontSize: 13,
+      color: isDark ? theme.colorScheme.onSurfaceVariant : Colors.grey[700],
+      fontWeight: FontWeight.w500,
+    );
+  }
+
+  TextStyle _signupFieldTextStyle(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    return TextStyle(
+      color: isDark ? theme.colorScheme.onSurface : Colors.grey[800],
+      fontSize: 14,
+    );
+  }
+
+  InputDecoration _signupFieldDecoration(
+    BuildContext context, {
+    required String hintText,
+    Widget? suffixIcon,
+  }) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final fieldFill =
+        isDark ? cs.surfaceContainerHighest : Colors.grey[50]!;
+    final borderColor =
+        isDark ? cs.outline.withValues(alpha: 0.45) : Colors.grey[200]!;
+    final hintColor = isDark
+        ? cs.onSurfaceVariant.withValues(alpha: 0.75)
+        : Colors.grey[400]!;
+
+    return InputDecoration(
+      hintText: hintText,
+      hintStyle: TextStyle(
+        color: hintColor,
+        fontSize: 14,
+      ),
+      suffixIcon: suffixIcon,
+      filled: true,
+      fillColor: fieldFill,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: borderColor),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: AppColors.primaryColor, width: 2),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.red, width: 2),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.red, width: 2),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final iconMuted =
+        isDark ? cs.onSurfaceVariant : Colors.grey[600]!;
+    final checkboxBodyStyle = TextStyle(
+      fontSize: 13,
+      color: isDark ? cs.onSurfaceVariant : Colors.grey[700],
+      height: 1.4,
+    );
+
     return Form(
       key: _formKey,
       child: Column(
@@ -152,45 +234,16 @@ class _SignupFormState extends State<SignupForm> {
                   children: [
                     Text(
                       'First name',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey[700],
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: _signupLabelStyle(context),
                     ),
                     const SizedBox(height: 6),
                     TextFormField(
                       controller: _firstNameController,
-                      decoration: InputDecoration(
+                      decoration: _signupFieldDecoration(
+                        context,
                         hintText: 'Eg. John',
-                        hintStyle: TextStyle(
-                          color: Colors.grey[400],
-                          fontSize: 14,
-                        ),
-                        filled: true,
-                        fillColor: Colors.grey[50],
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey[200]!),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: AppColors.primaryColor, width: 2),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.red, width: 2),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                       ),
-                      style: TextStyle(
-                        color: Colors.grey[800],
-                        fontSize: 14,
-                      ),
+                      style: _signupFieldTextStyle(context),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
                           return 'First name is required';
@@ -209,45 +262,16 @@ class _SignupFormState extends State<SignupForm> {
                   children: [
                     Text(
                       'Last name',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey[700],
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: _signupLabelStyle(context),
                     ),
                     const SizedBox(height: 6),
                     TextFormField(
                       controller: _lastNameController,
-                      decoration: InputDecoration(
+                      decoration: _signupFieldDecoration(
+                        context,
                         hintText: 'Eg. Doe',
-                        hintStyle: TextStyle(
-                          color: Colors.grey[400],
-                          fontSize: 14,
-                        ),
-                        filled: true,
-                        fillColor: Colors.grey[50],
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey[200]!),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: AppColors.primaryColor, width: 2),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.red, width: 2),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                       ),
-                      style: TextStyle(
-                        color: Colors.grey[800],
-                        fontSize: 14,
-                      ),
+                      style: _signupFieldTextStyle(context),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
                           return 'Last name is required';
@@ -265,46 +289,17 @@ class _SignupFormState extends State<SignupForm> {
           // Email Field
           Text(
             'Email address',
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.grey[700],
-              fontWeight: FontWeight.w500,
-            ),
+            style: _signupLabelStyle(context),
           ),
           const SizedBox(height: 6),
           TextFormField(
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
-            decoration: InputDecoration(
+            decoration: _signupFieldDecoration(
+              context,
               hintText: 'Eg. JohnDoe@gmail.com',
-              hintStyle: TextStyle(
-                color: Colors.grey[400],
-                fontSize: 14,
-              ),
-              filled: true,
-              fillColor: Colors.grey[50],
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.grey[200]!),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: AppColors.primaryColor, width: 2),
-              ),
-              errorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.red, width: 2),
-              ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             ),
-            style: TextStyle(
-              color: Colors.grey[800],
-              fontSize: 14,
-            ),
+            style: _signupFieldTextStyle(context),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
                 return 'Email is required';
@@ -320,46 +315,17 @@ class _SignupFormState extends State<SignupForm> {
           // Phone Number Field
           Text(
             'Phone number',
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.grey[700],
-              fontWeight: FontWeight.w500,
-            ),
+            style: _signupLabelStyle(context),
           ),
           const SizedBox(height: 6),
           TextFormField(
             controller: _phoneController,
             keyboardType: TextInputType.phone,
-            decoration: InputDecoration(
+            decoration: _signupFieldDecoration(
+              context,
               hintText: 'Eg. 0712345678',
-              hintStyle: TextStyle(
-                color: Colors.grey[400],
-                fontSize: 14,
-              ),
-              filled: true,
-              fillColor: Colors.grey[50],
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.grey[200]!),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: AppColors.primaryColor, width: 2),
-              ),
-              errorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.red, width: 2),
-              ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             ),
-            style: TextStyle(
-              color: Colors.grey[800],
-              fontSize: 14,
-            ),
+            style: _signupFieldTextStyle(context),
             onChanged: (value) {
               _phoneNumber = value;
             },
@@ -375,26 +341,19 @@ class _SignupFormState extends State<SignupForm> {
           // Password Field
           Text(
             'Password',
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.grey[700],
-              fontWeight: FontWeight.w500,
-            ),
+            style: _signupLabelStyle(context),
           ),
           const SizedBox(height: 6),
           TextFormField(
             controller: _passwordController,
             obscureText: !_isPasswordVisible,
-            decoration: InputDecoration(
+            decoration: _signupFieldDecoration(
+              context,
               hintText: 'Enter password',
-              hintStyle: TextStyle(
-                color: Colors.grey[400],
-                fontSize: 14,
-              ),
               suffixIcon: IconButton(
                 icon: Icon(
                   _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                  color: Colors.grey[600],
+                  color: iconMuted,
                 ),
                 onPressed: () {
                   setState(() {
@@ -402,30 +361,8 @@ class _SignupFormState extends State<SignupForm> {
                   });
                 },
               ),
-              filled: true,
-              fillColor: Colors.grey[50],
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.grey[200]!),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: AppColors.primaryColor, width: 2),
-              ),
-              errorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.red, width: 2),
-              ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             ),
-            style: TextStyle(
-              color: Colors.grey[800],
-              fontSize: 14,
-            ),
+            style: _signupFieldTextStyle(context),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
                 return 'Password is required';
@@ -441,26 +378,19 @@ class _SignupFormState extends State<SignupForm> {
           // Confirm Password Field
           Text(
             'Confirm Password',
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.grey[700],
-              fontWeight: FontWeight.w500,
-            ),
+            style: _signupLabelStyle(context),
           ),
           const SizedBox(height: 6),
           TextFormField(
             controller: _confirmPasswordController,
             obscureText: !_isConfirmPasswordVisible,
-            decoration: InputDecoration(
+            decoration: _signupFieldDecoration(
+              context,
               hintText: 'Enter password',
-              hintStyle: TextStyle(
-                color: Colors.grey[400],
-                fontSize: 14,
-              ),
               suffixIcon: IconButton(
                 icon: Icon(
                   _isConfirmPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                  color: Colors.grey[600],
+                  color: iconMuted,
                 ),
                 onPressed: () {
                   setState(() {
@@ -468,30 +398,8 @@ class _SignupFormState extends State<SignupForm> {
                   });
                 },
               ),
-              filled: true,
-              fillColor: Colors.grey[50],
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.grey[200]!),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: AppColors.primaryColor, width: 2),
-              ),
-              errorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.red, width: 2),
-              ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             ),
-            style: TextStyle(
-              color: Colors.grey[800],
-              fontSize: 14,
-            ),
+            style: _signupFieldTextStyle(context),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
                 return 'Please confirm your password';
@@ -525,11 +433,7 @@ class _SignupFormState extends State<SignupForm> {
                   padding: const EdgeInsets.only(top: 12),
                   child: RichText(
                     text: TextSpan(
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey[700],
-                        height: 1.4,
-                      ),
+                      style: checkboxBodyStyle,
                       children: [
                         TextSpan(text: "I have read and accepted "),
                         TextSpan(
@@ -569,11 +473,7 @@ class _SignupFormState extends State<SignupForm> {
                   padding: const EdgeInsets.only(top: 12),
                   child: RichText(
                     text: TextSpan(
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey[700],
-                        height: 1.4,
-                      ),
+                      style: checkboxBodyStyle,
                       children: [
                         TextSpan(text: "I consent to the collection and processing of my personal data in accordance with the applicable "),
                         TextSpan(

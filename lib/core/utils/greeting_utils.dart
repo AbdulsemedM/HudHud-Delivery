@@ -1,21 +1,23 @@
+import 'package:hudhud_delivery/l10n/app_localizations.dart';
+
 class GreetingUtils {
-  static String getTimeBasedGreeting() {
+  static String getTimeBasedGreeting(AppLocalizations l10n) {
     final hour = DateTime.now().hour;
-    
+
     if (hour >= 5 && hour < 12) {
-      return 'Good Morning';
+      return l10n.greetingGoodMorning;
     } else if (hour >= 12 && hour < 17) {
-      return 'Good Afternoon';
+      return l10n.greetingGoodAfternoon;
     } else if (hour >= 17 && hour < 21) {
-      return 'Good Evening';
+      return l10n.greetingGoodEvening;
     } else {
-      return 'Good Night';
+      return l10n.greetingGoodNight;
     }
   }
-  
-  static String getGreetingWithName(String? name) {
-    final greeting = getTimeBasedGreeting();
-    final displayName = name ?? 'User';
-    return '$greeting $displayName';
+
+  static String getGreetingWithName(AppLocalizations l10n, String? name) {
+    final greeting = getTimeBasedGreeting(l10n);
+    final displayName = name ?? l10n.userDefault;
+    return '$greeting, $displayName';
   }
 }

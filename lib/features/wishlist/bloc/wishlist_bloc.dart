@@ -1,5 +1,5 @@
-import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/features/categories/model/categories_products_model.dart';
 import 'package:hudhud_delivery/features/wishlist/data/wishlist_repository.dart';
 
@@ -89,6 +89,8 @@ class WishlistBloc extends Bloc<WishlistEvent, WishlistState> {
     Emitter<WishlistState> emit,
   ) async {
     final current = state;
+    final previousItems =
+        current is WishlistLoaded ? List<CategoriesProductsModel>.from(current.items) : null;
     if (current is WishlistLoaded) {
       emit(current.copyWith(
         items: current.items.where((p) => p.id != event.productId).toList(growable: false),
@@ -97,7 +99,16 @@ class WishlistBloc extends Bloc<WishlistEvent, WishlistState> {
     try {
       await _repository.remove(userId: event.userId, productId: event.productId);
     } catch (e) {
-      emit(WishlistError(e.toString()));
+      if (previousItems != null) {
+        try {
+          final synced = await _repository.getWishlist(userId: event.userId);
+          emit(WishlistLoaded(items: synced));
+        } catch (_) {
+          emit(WishlistLoaded(items: previousItems));
+        }
+      } else {
+        emit(WishlistError(e.toString()));
+      }
     }
   }
 }

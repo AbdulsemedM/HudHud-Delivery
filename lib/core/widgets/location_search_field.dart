@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/app/services/google_places_service.dart';
 import 'package:hudhud_delivery/app/models/place_result.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/l10n/app_localizations.dart';
 
 class LocationSearchField extends StatefulWidget {
-  final String hintText;
+  final String? hintText;
   final TextEditingController? controller;
   final Function(PlaceResult) onLocationSelected;
   final String? initialLocation;
@@ -12,7 +14,7 @@ class LocationSearchField extends StatefulWidget {
 
   const LocationSearchField({
     Key? key,
-    this.hintText = 'Search for location...',
+    this.hintText,
     this.controller,
     required this.onLocationSelected,
     this.initialLocation,
@@ -29,32 +31,30 @@ class _LocationSearchFieldState extends State<LocationSearchField> {
   List<PlaceResult> _suggestions = [];
   bool _isLoading = false;
   bool _showSuggestions = false;
-  
+
   @override
   void initState() {
     super.initState();
     _controller = widget.controller ?? TextEditingController();
-    
+
     if (widget.initialLocation != null) {
       _controller.text = widget.initialLocation!;
     }
-    
+
     _controller.addListener(_onSearchChanged);
     _focusNode.addListener(() {
-      // Show suggestions when field is focused and has text
       if (_focusNode.hasFocus && _controller.text.isNotEmpty) {
         setState(() {
           _showSuggestions = true;
         });
       } else {
-        // Hide suggestions when focus is lost
         setState(() {
           _showSuggestions = false;
         });
       }
     });
   }
-  
+
   @override
   void dispose() {
     if (widget.controller == null) {
@@ -64,7 +64,7 @@ class _LocationSearchFieldState extends State<LocationSearchField> {
     _focusNode.dispose();
     super.dispose();
   }
-  
+
   void _onSearchChanged() {
     if (_controller.text.isEmpty) {
       setState(() {
@@ -73,10 +73,10 @@ class _LocationSearchFieldState extends State<LocationSearchField> {
       });
       return;
     }
-    
+
     _searchPlaces(_controller.text);
   }
-  
+
   Future<void> _searchPlaces(String query) async {
     if (query.trim().length < 2) return;
 
@@ -102,7 +102,7 @@ class _LocationSearchFieldState extends State<LocationSearchField> {
       }
     }
   }
-  
+
   void _selectLocation(PlaceResult place) {
     _controller.text = place.shortAddress;
     widget.onLocationSelected(place);
@@ -111,9 +111,13 @@ class _LocationSearchFieldState extends State<LocationSearchField> {
     });
     _focusNode.unfocus();
   }
-  
+
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colorScheme = Theme.of(context).colorScheme;
+    final hint = widget.hintText ?? l10n.searchLocationHint;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -121,21 +125,28 @@ class _LocationSearchFieldState extends State<LocationSearchField> {
           controller: _controller,
           focusNode: _focusNode,
           autofocus: widget.autofocus,
+          style: TextStyle(color: colorScheme.onSurface),
           decoration: InputDecoration(
-            hintText: widget.hintText,
-            prefixIcon: const Icon(Icons.search, color: Colors.grey),
-            suffixIcon: _buildSuffixIcon(),
+            hintText: hint,
+            hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
+            prefixIcon: Icon(Icons.search, color: colorScheme.onSurfaceVariant),
+            suffixIcon: _buildSuffixIcon(colorScheme),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey[300]!),
+              borderSide: BorderSide(color: colorScheme.outlineVariant),
             ),
-            focusedBorder: OutlineInputBorder(
+            enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.primaryColor),
+              borderSide: BorderSide(color: colorScheme.outlineVariant),
+            ),
+            focusedBorder: const OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(12)),
+              borderSide: BorderSide(color: AppColors.primaryColor, width: 2),
             ),
             filled: true,
-            fillColor: Colors.grey[50],
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            fillColor: colorScheme.surfaceContainerHighest,
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
           onTap: () {
             if (_controller.text.isNotEmpty) {
@@ -145,24 +156,28 @@ class _LocationSearchFieldState extends State<LocationSearchField> {
             }
           },
         ),
-        if (_showSuggestions) _buildSuggestionsDropdown(),
+        if (_showSuggestions)
+          _buildSuggestionsDropdown(colorScheme, l10n),
       ],
     );
   }
-  
-  Widget? _buildSuffixIcon() {
+
+  Widget? _buildSuffixIcon(ColorScheme colorScheme) {
     if (_isLoading) {
-      return const SizedBox(
+      return SizedBox(
         width: 20,
         height: 20,
         child: Padding(
-          padding: EdgeInsets.all(12.0),
-          child: CircularProgressIndicator(strokeWidth: 2),
+          padding: const EdgeInsets.all(12.0),
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            color: colorScheme.primary,
+          ),
         ),
       );
     } else if (_controller.text.isNotEmpty) {
       return IconButton(
-        icon: const Icon(Icons.clear, color: Colors.grey),
+        icon: Icon(Icons.clear, color: colorScheme.onSurfaceVariant),
         onPressed: () {
           _controller.clear();
           setState(() {
@@ -174,55 +189,69 @@ class _LocationSearchFieldState extends State<LocationSearchField> {
     }
     return null;
   }
-  
-  Widget _buildSuggestionsDropdown() {
-    return Container(
-      constraints: const BoxConstraints(maxHeight: 250),
-      margin: const EdgeInsets.only(top: 4),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
+
+  Widget _buildSuggestionsDropdown(
+    ColorScheme colorScheme,
+    AppLocalizations l10n,
+  ) {
+    return Material(
+      elevation: 2,
+      color: colorScheme.surface,
+      borderRadius: BorderRadius.circular(12),
+      shadowColor: colorScheme.shadow.withValues(alpha: 0.18),
+      child: Container(
+        constraints: const BoxConstraints(maxHeight: 250),
+        margin: const EdgeInsets.only(top: 4),
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: colorScheme.outlineVariant),
+        ),
+        child: _suggestions.isEmpty
+            ? _isLoading
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: CircularProgressIndicator(
+                        color: colorScheme.primary,
+                      ),
+                    ),
+                  )
+                : ListTile(
+                    title: Text(
+                      l10n.locationSearchNoResults,
+                      style: TextStyle(color: colorScheme.onSurfaceVariant),
+                    ),
+                  )
+            : ListView.builder(
+                shrinkWrap: true,
+                padding: EdgeInsets.zero,
+                itemCount: _suggestions.length,
+                itemBuilder: (context, index) {
+                  final place = _suggestions[index];
+                  return ListTile(
+                    leading: Icon(
+                      Icons.location_on,
+                      color: colorScheme.primary,
+                    ),
+                    title: Text(
+                      place.shortAddress,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
+                    subtitle: Text(
+                      place.displayName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: colorScheme.onSurfaceVariant),
+                    ),
+                    onTap: () => _selectLocation(place),
+                  );
+                },
+              ),
       ),
-      child: _suggestions.isEmpty
-          ? _isLoading
-              ? const Center(child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: CircularProgressIndicator(),
-                ))
-              : ListTile(
-                  title: Text(
-                    'No locations found',
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-                )
-          : ListView.builder(
-              shrinkWrap: true,
-              padding: EdgeInsets.zero,
-              itemCount: _suggestions.length,
-              itemBuilder: (context, index) {
-                final place = _suggestions[index];
-                return ListTile(
-                  leading: const Icon(Icons.location_on, color: Colors.red),
-                  title: Text(
-                    place.shortAddress,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: Text(
-                    place.displayName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  onTap: () => _selectLocation(place),
-                );
-              },
-            ),
     );
   }
 }

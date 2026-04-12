@@ -1,0 +1,859 @@
+{
+  "@@locale": "om",
+  "appTitle": "HudHud Geejjibaa",
+  "actionCancel": "Haquu",
+  "actionOk": "TOLE",
+  "actionRetry": "Irra deebi'ii yaali",
+  "actionVerify": "Dhugoomsuu",
+  "actionSave": "Qusachuu",
+  "actionDelete": "Haquu",
+  "actionClose": "Cufuu",
+  "actionBack": "Dugda",
+  "actionNext": "Kan itti aanu",
+  "actionSkip": "Irra darbuu",
+  "actionDone": "Raawwatame",
+  "actionResend": "Koodii Irra Deebiin Ergaa",
+  "actionUndo": "UNDO",
+  "actionOpenSettings": "Sajoo Bani",
+  "actionViewAll": "Hundaa ilaali",
+  "actionTrackDelivery": "Geejjibaa hordofaa",
+  "actionTryAgain": "Ammas yaalaa",
+  "actionAddToCart": "Gara gaariitti dabali",
+  "actionSeeAll": "hunda ilaali",
+  "actionSending": "Ergaa...",
+  "actionSignIn": "Sign In",
+  "actionLogOut": "Ba'i",
+  "navHome": "Mana",
+  "navCourier": "Ergamaa",
+  "navWallet": "Boorsaa xiqqoo",
+  "navTaxi": "Taaksii",
+  "navProfile": "Ibsama",
+  "settingsProfile": "Ibsama",
+  "settingsAccount": "Herrega",
+  "settingsPreferences": "Filannoo",
+  "settingsSupport": "Deeggarsa",
+  "settingsPersonalDetails": "Odeeffannoo Dhuunfaa",
+  "settingsAppearance": "Mul'ina",
+  "appearanceChooseTheme": "Mata duree barbaadde filadhu",
+  "settingsChangePassword": "Jecha Darbii Jijjiiri",
+  "settingsNotifications": "Beeksisa",
+  "settingsSmsNotifications": "Beeksisa Ergaa gabaabaa",
+  "settingsWishlist": "Tarree hawwii",
+  "wishlistEmptyTitle": "No saved items yet",
+  "wishlistEmptySubtitle": "Save products you love — tap the heart on a product to add it here.",
+  "wishlistAddedSnack": "Added to wishlist",
+  "wishlistRemovedSnack": "Removed from wishlist",
+  "wishlistSignInTitle": "Sign in to use your wishlist",
+  "wishlistSignInSubtitle": "Your saved items are stored on this device when you are logged in.",
+  "wishlistLoadError": "Could not load wishlist",
+  "wishlistTooltipAdd": "Add to wishlist",
+  "wishlistTooltipRemove": "Remove from wishlist",
+  "settingsTermsConditions": "Haalawwanii fi Dambiiwwan",
+  "settingsFaqs": "Gaaffii fi deebii",
+  "settingsHelpDesk": "Deeskii Gargaarsaa",
+  "settingsLogOut": "Log Out",
+  "settingsVersion": "Vershinii 1.0",
+  "settingsLanguage": "Afaan",
+  "logoutTitle": "Ba'i",
+  "logoutMessage": "Logout gochuu akka barbaaddu mirkaneeffatteettaa?",
+  "logoutError": "Dogoggora yeroo ba'uu: {error} .",
+  "@logoutError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "themeLight": "Ifa",
+  "themeDark": "Duukkana",
+  "themeSystem": "Sirna",
+  "themeSubtitleLight": "Yeroo hunda mata duree ifa ta'e fayyadamaa",
+  "themeSubtitleDark": "Yeroo hunda mata duree dukkanaa'aa fayyadami",
+  "themeSubtitleSystem": "Mata duree meeshaa hordofaa",
+  "languageTitle": "Afaan",
+  "languageEnglish": "Afaan Ingilizii",
+  "languageAmharic": "ማርኛ (Afaan Amaaraa) .",
+  "languageOromo": "Afaan Oromoo",
+  "languageSomali": "Afaan Somaalee",
+  "languageArabic": "العربية (Afaan Arabaa) .",
+  "greetingGoodMorning": "Akkam bulte",
+  "greetingGoodAfternoon": "Akkam ooltan",
+  "greetingGoodEvening": "Akkam ooltan",
+  "greetingGoodNight": "Halkan gaarii",
+  "userDefault": "Fayyadamaa",
+  "emDash": "— .",
+  "locationGetting": "Bakka argachuu...",
+  "locationAccessDenied": "Bakka argachuun dhorkame",
+  "locationDisabledSnackbar": "Bakka argachuun ni cufama. Bakka kee ilaaluuf Sajoo keessatti dandeessisi.",
+  "locationUnable": "Bakka argachuu hin dandeenye",
+  "yourLocation": "Bakka Keessan",
+  "selectLocationTitle": "Bakka filadhu",
+  "refreshLocationTooltip": "Bakka amma jiru haaromsi",
+  "searchPlacesHint": "Bakka barbaadi...",
+  "searchLocationHint": "Bakka barbaadi...",
+  "locationSearchScreenTitle": "Bakka barbaadi",
+  "locationSelectedHeading": "Bakka filatame",
+  "locationCoordinatesFormat": "Gosa: {lat}, {lng}",
+  "@locationCoordinatesFormat": {
+    "placeholders": {
+      "lat": {
+        "type": "String"
+      },
+      "lng": {
+        "type": "String"
+      }
+    }
+  },
+  "locationConfirmButton": "Bakka mirkaneessi",
+  "locationSearchNoResults": "Bakka hin argamne",
+  "locationCurrentPositionFailed": "Bakka ammaa argachuu hin dandeenye",
+  "currentLocationMap": "Bakka amma jiru",
+  "verificationStatus": "Haala mirkaneessuu",
+  "verifyEmail": "Imeelii Mirkaneessi",
+  "verifyPhone": "Bilbila Mirkaneessaa",
+  "verifyEmailDialogTitle": "Imeelii Mirkaneessi",
+  "verifyPhoneDialogTitle": "Bilbila Mirkaneessaa",
+  "verificationCodeLabel": "Koodii mirkaneessuu",
+  "verificationCodeHintExample": "fkn. 111248 irratti kan argamu",
+  "verificationCodeHintSms": "fkn. 056869 irratti bilbila",
+  "verifyEmailBody": "Koodii mirkaneessuu gara {email} ergine. Armaan gaditti galchaa.",
+  "@verifyEmailBody": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "verifyPhoneBody": "Koodii mirkaneessuu gara {phone} ergine. Armaan gaditti galchaa.",
+  "@verifyPhoneBody": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "enterVerificationCodeError": "Koodii mirkaneessuu galchi",
+  "codeSentEmailDefault": "Koodii gara email keessaniitti ergame.",
+  "codeSentPhoneDefault": "Koodii bilbila keessanitti ergame.",
+  "emailVerifiedSuccess": "Email milkaa'inaan mirkanaa'eera!",
+  "phoneVerifiedSuccess": "Lakkoofsi bilbilaa milkaa'inaan mirkanaa'eera!",
+  "failedToLoadOrders": "Ajajoota fe'uu hin dandeenye: {error} .",
+  "@failedToLoadOrders": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "homeWhatToDo": "Maal gochuu barbaadda?",
+  "homeFood": "Nyaata",
+  "homeFoodSubtitle": "Gurgurtoota jaallattan irraa mi'a gurgurtaa ajajuu.",
+  "homeCourierSubtitle": "Tajaajila ergaa fudhachuu fi buusuuf ajajuu.",
+  "homeTaxi": "Taaksii",
+  "homeTaxiSubtitle": "Bakka kamirraayyuu taaksii gatii madaalawaadhaan gaafadhu.",
+  "homeHandyman": "Nama harkaa",
+  "homeHandymanSubtitle": "Tajaajila yeroo hunda mana keessatti argachuuf dhiirota harka qaban gaafadhu.",
+  "history": "Seenaa",
+  "featuresSectionTitle": "HudHud waliin maal gochuu dandeessu",
+  "featureFoodGroceries": "Nyaata & gurgurtaa nyaataa",
+  "featureFoodGroceriesDesc": "Daldaltoota jaallattan irraa ajajaa.",
+  "featureCourierTitle": "Ergamaa",
+  "featureCourierDesc": "Fudhachuu fi gadi dhiisuu.",
+  "featureTaxiTitle": "Taaksii",
+  "featureTaxiDesc": "Bakka barbaaddanitti konkolaataa yaabbachuu gaafadhaa.",
+  "featureHandymanTitle": "Nama harkaa",
+  "featureHandymanDesc": "Tajaajila manaa gaaffii irratti.",
+  "featureTrackOrders": "Ajaja hordofuu",
+  "featureTrackOrdersDesc": "Haala geejjibaa yeroo qabatamaa.",
+  "courierWhatToDo": "Maal gochuu barbaadda?",
+  "courierActiveDelivery": "Geejjibaa Socho'aa",
+  "courierNoHistory": "Seenaa geejjibaa hin qabu",
+  "courierHistoryEmptySubtitle": "Geejjibni keessan kan darbe asitti ni mul'ata",
+  "courierInstantTitle": "Geejjibaa Battalaa",
+  "courierInstantSubtitle": "Courier paakeejii keessan qofa fudhatee battalumatti geessa.",
+  "courierScheduleTitle": "Sagantaa Geejjibaa",
+  "courierScheduleSubtitle": "Guyyaa fi sa'aatii ati murteessite irratti ergamaan dhufa.",
+  "failedToLoadHistory": "Seenaa fe'uu hin dandeenye",
+  "recipientLabel": "Fudhataa: {name}",
+  "@recipientLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "inProgress": "Adeemsa irra jira",
+  "loginTitle": "Sign In",
+  "loginSubtitle": "Maaloo akkaawuntii keessanii fi tajaajiloota jiran hunda argachuuf ragaa keessan galchaa",
+  "loginContinueAsGuest": "Akka keessummaa itti fufi",
+  "labelEmailOrPhone": "Teessoo imeelii ykn Lakkoofsa bilbilaa",
+  "hintEmailPhone": "Fkn. JohnDoe@gmail.com irraa argattu",
+  "labelPassword": "Jecha iccitii",
+  "hintPassword": "Jecha icciitii galchi",
+  "validationEmailOrPhoneRequired": "Mee email ykn lakkoofsa bilbilaa keessan galchaa",
+  "validationEmailOrPhoneInvalid": "Mee email ykn lakkoofsa bilbilaa sirrii ta'e galchaa",
+  "validationPasswordRequired": "Mee password keessan galchaa",
+  "validationPasswordMin": "Jechi icciitii yoo xiqqaate arfiilee 8 ta'uu qaba",
+  "validationEmailRequired": "Mee email keessan galchaa",
+  "validationEmailInvalid": "Mee teessoo imeelii sirrii ta'e galchi",
+  "mainDemoTitle": "HudHud Demo Geejjibaa",
+  "toggleThemeTooltip": "Mata duree Jijjiiri",
+  "themeSwitched": "Mata dureen gara {mode} tti jijjiirame.",
+  "@themeSwitched": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "themeModeSet": "Haalata mata duree gara {mode} tti saagame.",
+  "@themeModeSet": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "welcomeTitle": "Baga gara HudHud Delivery dhuftan!",
+  "welcomeBody": "Kun demoo arkiteekcharii qulqulluu kan agarsiisu buttons amala, snackbars, fi theme switching waliin.",
+  "currentThemeLabel": "Mata duree yeroo ammaa: {mode}",
+  "@currentThemeLabel": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "counterDemo": "Demoo Lakkaawwii",
+  "counterDecreased": "Lakkaawwiin gara {count} tti gadi bu'e.",
+  "@counterDecreased": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "counterIncreased": "Lakkaawwiin gara {count} tti ol guddate.",
+  "@counterIncreased": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "buttonShowcase": "Agarsiisa Button",
+  "primaryButton": "Button Duraa",
+  "primaryButtonPressed": "Qabduu jalqabaa dhiibame!",
+  "largePrimaryButton": "Button Sadarkaa Duraa Guddaa",
+  "largePrimaryPressed": "Button jalqabaa guddaa kan mallattoo dhiibame!",
+  "smallButton": "Xiqqoo",
+  "smallButtonPressed": "Button xiqqaan dhiibame!",
+  "iconButtonPressed": "Icon button dhiibame!",
+  "secondaryButton": "Button Sadarkaa Lammaffaa",
+  "secondaryPressed": "Button sadarkaa lammaffaa dhiibame!",
+  "largeSecondaryButton": "Button Sadarkaa Lammaffaa Guddaa",
+  "largeSecondaryPressed": "Button guddaa lammaffaa dhiibame!",
+  "smallSecondary": "Sadarkaa Lammaffaa Xiqqaa",
+  "smallSecondaryPressed": "Button lammaffaa xiqqaa dhiibame!",
+  "ghostButton": "Button Hafuuraa",
+  "ghostPressed": "Button hafuuraa dhiibame!",
+  "snackbarShowcase": "Agarsiisa Snackbar",
+  "snackbarSuccess": "Kun ergaa milkaa'inaati!",
+  "snackbarSuccessLabel": "Milkaa'ina",
+  "snackbarError": "Kun ergaa dogongoraati!",
+  "snackbarErrorLabel": "Dogoggora",
+  "snackbarWarning": "Kun ergaa akeekkachiisaati!",
+  "snackbarWarningLabel": "Akeekkachiisa",
+  "snackbarInfo": "Kun ergaa info ti!",
+  "snackbarInfoLabel": "Info",
+  "undoActionPressed": "Tarkaanfiin duubatti deebisuu dhiibame",
+  "loadingData": "Daataa fe'amaa jira...",
+  "showLoadingButton": "Fe'amuu Agarsiisi",
+  "dataLoadedSuccess": "Daataan milkaa'inaan fe'ame!",
+  "hideSnackbar": "Snackbar dhoksi",
+  "apiDemo": "API Demo",
+  "sampleLogin": "Fakkeenya Galmee",
+  "loginSuccessWelcome": "Login milkaa'aa! Baga nagaan dhuftan {name}",
+  "@loginSuccessWelcome": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "loginFailed": "Galmeen hin milkoofne: {error} .",
+  "@loginFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "getUserProfile": "Profaayilii Fayyadamtootaa argadhu",
+  "profileRefreshed": "Profile milkaa'inaan haaromfame!",
+  "profileRefreshFailed": "Profaayila haaromsuu hin dandeenye: {error} .",
+  "@profileRefreshFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "currentUser": "Fayyadamaa Ammaa:",
+  "nameLabel": "Maqaa:",
+  "emailLabel": "Imeelii:",
+  "roleLabel": "Ga'ee:",
+  "logoutSuccess": "Milkaa'inaan ba'eera!",
+  "errorPrefix": "Dogoggora: {message} .",
+  "@errorPrefix": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "utilityButtonsDemo": "Faayidaa Qabduu Demo",
+  "utilityPrimary": "Faayidaa Qabduu Duraa",
+  "utilityPrimaryPressed": "Utility primary button dhiibame!",
+  "utilitySecondary": "Faayidaa Qabduu Lammaffaa",
+  "utilitySecondaryPressed": "Utility secondary button dhiibame!",
+  "textButton": "Qabduu Barruu",
+  "textButtonPressed": "Qabduu barreeffamaa dhiibame!",
+  "sharePressed": "Share button dhiibame!",
+  "gradientButton": "Qabduu Gradient",
+  "gradientPressed": "Qabduun Gradient dhiibame!",
+  "counterReset": "Lakkaawwii deebisanii dhaabuu!",
+  "decrease": "Hir'isuu",
+  "increase": "Dabaluu",
+  "orderStatusPending": "Eeggataa kan jiru",
+  "orderStatusConfirmed": "Mirkanaa'eera",
+  "orderStatusPreparing": "Qophaa'uu",
+  "orderStatusReadyForPickup": "Pickup'f qophaa'eera",
+  "orderStatusOutForDelivery": "Geejjibaaf Bahee",
+  "orderStatusDelivered": "Qaqqabsiise",
+  "orderStatusCancelled": "Haqameera",
+  "orderStatusTextPending": "Ajajni Eegamaa Jira",
+  "orderStatusTextAccepted": "Ajajni Fudhatama",
+  "orderStatusTextPreparing": "Ajaja Qopheessuu",
+  "orderStatusTextReadyPickup": "Pickup'f qophaa'eera",
+  "orderStatusTextPickedUp": "Ajajni Fudhatame",
+  "orderStatusTextDelivered": "Ajajni Geejjibame",
+  "orderStatusTextCancelled": "Ajajni Haqame",
+  "paymentCashOnDelivery": "Maallaqa Geejjibaa irratti",
+  "paymentPaidOnline": "Kaffaltii Toora Interneetii",
+  "estimatedDeliveryPlaceholder": "Daqiiqaa 30-45",
+  "searchRestaurantsHint": "Manneen nyaataa maqaa isaaniitiin barbaadi",
+  "enterPromoCode": "Koodii Piroomoo galchaa",
+  "additionalNote": "Hubachiisa dabalataa",
+  "enterCustomTip": "Hanga gorsa amala galchi",
+  "hintFirstName": "Fkn. Yohaannis",
+  "hintLastName": "Fkn. Doe",
+  "hintEmailExample": "Fkn. JohnDoe@gmail.com irraa argattu",
+  "hintPhoneExample": "Fkn. 0712345678 irratti bilbila",
+  "hintEnterPassword": "Jecha icciitii galchi",
+  "pickupLocation": "Bakka fudhannaa",
+  "dropOff": "Gadi dhiisaa",
+  "amount": "Hamma",
+  "enterAmount": "Hanga galchi",
+  "wallet": "Boorsaa xiqqoo",
+  "paymentMethod": "Mala Kaffaltii",
+  "transactionId": "ID daldalaa",
+  "transactionIdHint": "Karra kaffaltii irraa",
+  "cardLast4": "Kaardii dijiitii 4 dhumaa",
+  "cardLast4Hint": "4242 irratti kan argamu",
+  "cardBrand": "Maqaa kaardii",
+  "cardBrandHint": "viizaa, masterkaardii",
+  "addFundsTitle": "Maallaqa Dabaluu",
+  "selectPaymentMethod": "Mala kaffaltii filadhu",
+  "searchCountry": "Biyya barbaadi",
+  "categoryGrocery": "Dukkaana nyaataa",
+  "categoryAmerican": "Ameerikaa",
+  "categoryConvenience": "Mijannaa",
+  "categoryAlcohol": "Dhugaatii nama macheessu",
+  "categoryPetSupplies": "Meeshaalee Manaa",
+  "categoryMore": "Caalaa",
+  "pickupLocationLabel": "Bakka Fudhachuu",
+  "deliveryLocationLabel": "Bakka Geejjibaa",
+  "vehicleMotorcycle": "Mootar Saayikilii",
+  "vehicleCar": "Konkolaataa",
+  "vehicleVan": "Vaan",
+  "fromWallet": "Wallet irraa",
+  "enterWithdrawAmount": "Maallaqa baasuuf galchi",
+  "withdrawalMethod": "Mala Bahuu",
+  "requestTitle": "Mata-duree",
+  "requestTitleHint": "fkn. Faucet dhangala'aa jiru sirreessuu",
+  "requestDescription": "Ibsa",
+  "requestDescriptionHint": "Suphaa ykn suphaa barbaachisu ibsi",
+  "requestLocation": "Bakka",
+  "requestLocationHint": "Bakka filachuuf tuqi",
+  "scheduledDateTime": "Guyyaa fi Sa'aatii Beellamame",
+  "estimatedCostOptional": "Tilmaama Baasii (dirqama) .",
+  "estimatedCostHint": "fkn. 100 irratti",
+  "toolsNeeded": "Meeshaalee barbaachisan (komaandiin adda baafaman) .",
+  "toolsNeededHint": "fkn. furtuu seet, teeppii pilaambaa",
+  "estimatedHoursOptional": "Sa'aatii tilmaamame (dirqama) .",
+  "estimatedHoursHint": "fkn. 2. 2.",
+  "commentOptional": "Yaada (dirqama)",
+  "commentExperienceHint": "Muuxannoo keessan nuuf qoodaa...",
+  "commentHandymanHint": "fkn. Baayyee ogeessaa fi kabaja kan qabu",
+  "whatSending": "Waan ergitan",
+  "recipient": "Fudhataa",
+  "recipientContactNumber": "Lakkoofsa quunnamtii fudhataa",
+  "payment": "Kaffaltii",
+  "commentsIfAny": "Yaada Keessan yoo jiraate....",
+  "walletNotFound": "Wallet hin argamne",
+  "quantity": "Baay'ina",
+  "packageWeightKg": "Ulfaatina Paakeejii (kg) .",
+  "packageDescriptionOptional": "Ibsa Paakeejii (dirqama) .",
+  "me": "Ana",
+  "recipientNames": "Maqaa Fudhattootaa",
+  "imagePickerTodo": "Image picker hojiirra ni oola",
+  "pleaseSelectItemType": "Maaloo gosa wantaa filadhu",
+  "pleaseEnterQuantity": "Mee baay'ina galchaa",
+  "pleaseEnterValidWeight": "Maaloo ulfaatina paakeejii sirrii (kg) galchi .",
+  "pleaseSelectPaymentType": "Mee gosa kaffaltii filadhaa",
+  "pleaseEnterRecipientName": "Mee maqaa fudhataa galchi",
+  "pleaseEnterRecipientPhone": "Lakkoofsa bilbilaa fudhataa galchaa",
+  "walletDetailName": "Maqaa",
+  "walletDetailType": "Akaakuu",
+  "walletDetailScreenTitle": "Ibsa Bosonaa",
+  "walletInformation": "Odeeffannoo Bosonaa",
+  "walletDetailCurrencyLabel": "Maallaqa",
+  "walletMyBalanceLabel": "Madaalli koo",
+  "walletMyWalletsSection": "Bosonawwan koo",
+  "walletRecentTransactions": "Daldala dhiyoo",
+  "walletSeeAll": "Hunda agarsiisi",
+  "walletNoTransactionsYet": "Daldalli hin jiru",
+  "walletAddMoney": "Maallaqa dabaluu",
+  "walletSendMoney": "Maallaqa erguu",
+  "withdrawFundsTitle": "Maallaqa baasuu",
+  "walletNoWalletsForWithdraw": "Bosonni baafachuuf hin jiru",
+  "walletNoPaymentMethods": "Karaan kaffaltii hin jiru",
+  "validationEnterValidAmount": "Hamma sirrii galchi",
+  "validationAmountExceedsWalletBalance": "Hanni madaala bosonaa ol ta'e",
+  "withdrawAction": "Baasi",
+  "selectWalletPrompt": "Bosona filadhu",
+  "selectWithdrawalMethodPrompt": "Karaan baasuu filadhu",
+  "walletDefaultTransactionLabel": "Daldala",
+  "walletTypeCurrency": "{type} • {currency}",
+  "@walletTypeCurrency": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "currencyEtb": "ETB",
+  "balance": "Madaallii",
+  "created": "Uumame",
+  "productNotFound": "Omishni hin argamne",
+  "featured": "Kan mul'ate",
+  "categories": "Ramaddiiwwan",
+  "orders": "Ajaja",
+  "fruitsVegetables": "Fuduraalee fi Kuduraalee",
+  "beverages": "Dhugaatii",
+  "noProductsYet": "Ammatti oomisha hin jiru",
+  "noProducts": "Oomisha hin qabu",
+  "searchStoresHint": "Manneen daldalaa fi oomishaalee barbaadi...",
+  "failedToAddFunds": "Maallaqa dabaluu hin dandeenye",
+  "failedToWithdrawFunds": "Maallaqa baasuu dadhabe",
+  "currentPassword": "Jecha Darbii Ammaa",
+  "newPassword": "Jecha Darbii Haaraa",
+  "confirmNewPassword": "Jecha Darbii Haaraa Mirkaneessi",
+  "firstName": "Maqaa jalqabaa",
+  "lastName": "Maqaa akaakayyuu",
+  "email": "Imeelii",
+  "fullName": "Maqaa Guutuu",
+  "phoneNumber": "Lakkoofsa bilbilaa",
+  "emailAddress": "Teessoo imeelii",
+  "dateOfBirth": "Guyyaa dhalootaa",
+  "referralCode": "Koodii rifaralaa",
+  "searchQuestions": "Gaaffii barbaacha",
+  "whereTo": "Eessatti?",
+  "taxiCurrentLocation": "Bakka ammaa",
+  "taxiCouldNotGetLocationDetails": "Gosa bakka argachuu hin dandeenye",
+  "taxiTimeNow": "Amma",
+  "taxiScheduleForLater": "Yeroo booda qopheessi",
+  "taxiActiveRide": "Imala hojii irra jiru",
+  "taxiEstFare": "Galii tilmaamaa",
+  "taxiTrackRide": "Imala hordofi",
+  "taxiRefreshStatus": "Haala haaromsi",
+  "taxiCarsNearby": "{count, plural, =1{Konkolaataa 1 dhiyoo} other{Konkolaataawwan {count} dhiyoo}}",
+  "@taxiCarsNearby": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "taxiMinutesWait": "~{minutes} daq",
+  "@taxiMinutesWait": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "taxiBrandHudHud": "HUDHUD",
+  "taxiBrandDelivery": " geejjibaa",
+  "taxiDistanceKm": "{distance} KM",
+  "@taxiDistanceKm": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "taxiGoogleMapsNotConfigured": "Google Maps hin qopheessin. GOOGLE_MAPS_API_KEY galchi app haala irra deebi'ii jalqabi.",
+  "taxiStatusFindingDriver": "Konkolaachisaa barbachaa jira…",
+  "taxiStatusDriverOnTheWay": "Konkolaachisaan karaa irratti",
+  "taxiStatusDriverArrived": "Konkolaachisaan gahe",
+  "taxiStatusTripInProgress": "Imalli itti fufeera",
+  "taxiStatusActiveRide": "Imala hojii irra jiru",
+  "taxiPickup": "Fudhatama",
+  "taxiDestination": "Bakka deemamu",
+  "taxiFareAmount": "ETB {amount}",
+  "@taxiFareAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "taxiErrorWithDetails": "Dogoggora: {details}",
+  "@taxiErrorWithDetails": {
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "profileUpdatedSuccess": "Profile milkaa'inaan haaromfame",
+  "profileUpdateFailed": "Profaayila haaromsuu hin dandeenye: {error} .",
+  "@profileUpdateFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "profileLoadFailed": "Profaayilii fe'uu hin dandeenye: {error} .",
+  "@profileLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "servicesTryAgain": "Ammas yaalaa",
+  "unexpectedCheckoutError": "Dogoggorri hin eegamne uumame: {error} .",
+  "@unexpectedCheckoutError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "failedOrderHistory": "Seenaa ajaja fe'uu hin dandeenye: {error} .",
+  "@failedOrderHistory": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "timelineOrderPlaced": "Tartiiba Kaa'ame",
+  "timelineOrderConfirmed": "Ajajni Mirkanaa'eera",
+  "timelinePreparing": "Qophaa'uu",
+  "timelineReadyPickup": "Pickup'f qophaa'eera",
+  "timelineOutDelivery": "Geejjibaaf Bahee",
+  "timelineDelivered": "Qaqqabsiise",
+  "addReviewOptional": "Gamaaggama itti dabali (dirqama) .",
+  "pleaseSpecify": "Mee ibsaa...",
+  "courierNumber": "Lakkoofsa Ergamaa",
+  "from": "Irraa",
+  "to": "Gara",
+  "deliveryDetailsStatus": "Sadarkaa",
+  "deliveryDetailsPickup": "Kaasuu",
+  "deliveryDetailsDropoff": "Dropoff jedhamuun beekama",
+  "labelLocation": "Bakka",
+  "labelInstructions": "Qajeelfamoota",
+  "labelReceiver": "Fudhataa",
+  "labelPhone": "Bilbila",
+  "labelPackage": "Kuufama",
+  "labelType": "Akaakuu",
+  "labelDescription": "Ibsa",
+  "labelWeight": "Ulfaatina",
+  "labelSpecialInstructions": "Qajeelfama addaa",
+  "paymentAndCost": "Kaffaltii & Baasii",
+  "labelPaymentMethod": "Mala kaffaltii",
+  "labelEstimatedCost": "Tilmaama baasii",
+  "labelPaymentStatus": "Haala kaffaltii",
+  "timeline": "Sarara yeroo",
+  "labelScheduledPickup": "Fudhachuu sagantaa qabame",
+  "labelScheduledDelivery": "Geejjibni sagantaa qabame",
+  "labelDelivered": "Qaqqabsiise",
+  "noEmailAvailable": "Email hin jiru",
+  "noPhoneAvailable": "Lakkoofsi bilbilaa hin jiru",
+  "emailVerificationTitle": "Mirkaneessa Imeelii",
+  "phoneVerificationTitle": "Mirkaneessa Bilbilaa",
+  "enterEmailCode": "Koodii email galchi",
+  "enterSmsCode": "Koodii ergaa gabaabaa galchaa",
+  "noEmailAvailableShort": "Email hin jiru",
+  "addMoney": "Maallaqa Dabalaa",
+  "sendMoney": "Maallaqa Ergaa",
+  "exitAppTitle": "Exit App",
+  "exitAppMessage": "Are you sure you want to exit the app?",
+  "actionExit": "Exit",
+  "loginNoAccountPrompt": "Don't have an account? ",
+  "loginOrContinueWith": "or continue with",
+  "continueWithGoogle": "Continue with Google",
+  "actionSignUp": "Sign Up",
+  "paymentScreenTitle": "Payment",
+  "paymentChooseMethodHeading": "Choose Payment Method",
+  "paymentEthiopianOptionsSubtitle": "Select your preferred Ethiopian payment option",
+  "paymentLoadMethodsError": "Failed to load payment methods",
+  "paymentSelectMethodFirst": "Please select a payment method",
+  "paymentMethodUnavailable": "Selected payment method is no longer available",
+  "paymentFailedWithError": "Payment failed: {error}",
+  "@paymentFailedWithError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentPayAmountBr": "Pay {amount} Br",
+  "@paymentPayAmountBr": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentSuccessTitle": "Payment Successful!",
+  "paymentTransactionIdLabel": "Transaction ID: {id}",
+  "@paymentTransactionIdLabel": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "continueShopping": "Continue Shopping",
+  "viewOrder": "View Order",
+  "handymanServicesTitle": "Handyman Services",
+  "handymanWhatToDo": "What would you like to do?",
+  "handymanMyRequests": "My Requests",
+  "handymanNoRequestsYet": "No service requests yet",
+  "handymanNoRequestsSubtitle": "Create a request to get quotes from handymen",
+  "handymanCreateNewRequest": "Create New Request",
+  "handymanCreateRequestSubtitle": "Describe your repair or maintenance need and get quotes from handymen.",
+  "instantDeliveryTitle": "Instant Delivery",
+  "tapToSelectPickup": "Tap to select pickup location",
+  "tapToSelectDelivery": "Tap to select delivery location",
+  "vehicleType": "Vehicle Type",
+  "selectPickupAndDelivery": "Please select both pickup and delivery locations",
+  "actionContinue": "Continue",
+  "errorGettingAddress": "Error getting address: {error}",
+  "@errorGettingAddress": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "googleMapsIosMissingKey": "Google Maps is not configured on iOS. Add GOOGLE_MAPS_API_KEY and restart the app.",
+  "dealsModalTitle": "Deals on deals",
+  "dealsModalSubtitle": "Get upto 50% off on your first Courier delivery fee!",
+  "dealsModalClaim": "Claim",
+  "dealsModalClose": "Maybe later",
+  "orderHistoryEmptyTitle": "No orders yet",
+  "orderHistoryEmptySubtitle": "Browse categories to place your first order.",
+  "orderHistoryEmptyHint": "Your order history will appear here once you place an order",
+  "browseDelivery": "Browse Delivery",
+  "browseCategories": "Browse categories",
+  "handymanQuoteCount": "{count} quote(s)",
+  "@handymanQuoteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "orderDetailsLoadingMessage": "Loading order details...",
+  "orderDetailsLoadErrorTitle": "Error loading order details",
+  "orderAppBarTitle": "Order #{orderNumber}",
+  "@orderAppBarTitle": {
+    "placeholders": {
+      "orderNumber": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentSummaryTitle": "Payment Summary",
+  "paymentSubtotalLabel": "Subtotal",
+  "paymentTotalAmountLabel": "Total Amount",
+  "paymentProcessingTitle": "Processing Payment",
+  "paymentProcessingMessage": "Please wait while we process your payment via {method}...",
+  "@paymentProcessingMessage": {
+    "placeholders": {
+      "method": {
+        "type": "String"
+      }
+    }
+  },
+  "courierRecipientLine": "Recipient: {name}",
+  "@courierRecipientLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "courierTrackDeliveryCta": "Track delivery",
+  "courierDeliveryStatusInProgress": "In progress",
+  "labelDate": "Date",
+  "hintDateFormat": "DD/MM/YYYY",
+  "labelTime": "Time",
+  "hintTimeFormat": "HH:MM",
+  "meridiemAm": "am",
+  "meridiemPm": "pm",
+  "scheduleSelectDateTime": "Maaloo guyyaa fi sa'aatii ergaa filadhu",
+  "scheduleInvalidDateTime": "Mallattoolee guyyaa ykn sa'aatii dogoggora",
+  "servicesScreenTitle": "Our Services",
+  "servicesWhatCanWeHelp": "What can we help you with?",
+  "servicesAvailableCount": "{count} services available",
+  "@servicesAvailableCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "servicesErrorTitle": "Something went wrong",
+  "servicesEmptyTitle": "No services yet",
+  "servicesEmptySubtitle": "Check back later for new services",
+  "handymanNewRequestTitle": "New Service Request",
+  "validationHandymanSelectLocation": "Please select a location",
+  "validationHandymanSelectDateTime": "Please select date and time",
+  "validationHandymanSelectSkill": "Please select at least one skill",
+  "handymanRequestCreatedToast": "Request created",
+  "handymanRequestCreateFailed": "Failed to create request",
+  "labelTitle": "Title",
+  "hintTitleHandymanExample": "e.g. Fix leaking faucet",
+  "validationTitleRequired": "Title is required",
+  "validationDescriptionRequired": "Description is required",
+  "hintDescribeRepair": "Describe the repair or maintenance needed",
+  "handymanTapToSelectLocation": "Tap to select location",
+  "labelScheduledDateTime": "Scheduled Date & Time",
+  "selectDateAndTime": "Select date and time",
+  "labelEstimatedCostOptional": "Estimated Cost (optional)",
+  "hintCostExample": "e.g. 100",
+  "handymanSkillsNeeded": "Skills needed",
+  "handymanSkillPlumbing": "Plumbing",
+  "handymanSkillElectrical": "Electrical",
+  "handymanSkillCarpentry": "Carpentry",
+  "handymanSkillPainting": "Painting",
+  "handymanSkillGeneral": "General",
+  "labelToolsCommaSeparated": "Tools needed (comma-separated)",
+  "hintToolsHandymanExample": "e.g. wrench set, plumber's tape",
+  "labelEstimatedHoursOptional": "Estimated hours (optional)",
+  "hintHoursExample": "e.g. 2",
+  "handymanCreateRequestCta": "Create Request",
+  "handymanDialogCancelRequestTitle": "Cancel Request",
+  "handymanDialogCancelRequestMessage": "Are you sure you want to cancel this service request?",
+  "actionNo": "No",
+  "actionYesCancel": "Yes, Cancel",
+  "handymanRequestCancelled": "Request cancelled",
+  "handymanCancelFailed": "Failed to cancel",
+  "handymanLabelScheduled": "Scheduled",
+  "handymanSectionRequirements": "Requirements",
+  "handymanToolsLine": "Tools: {tools}",
+  "@handymanToolsLine": {
+    "placeholders": {
+      "tools": {
+        "type": "String"
+      }
+    }
+  },
+  "handymanEstHoursLine": "Est. hours: {hours}",
+  "@handymanEstHoursLine": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "handymanViewQuotesCta": "View {count} quote(s)",
+  "@handymanViewQuotesCta": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "handymanCancelRequest": "Cancel Request",
+  "handymanRateServiceTitle": "Rate Service",
+  "handymanProviderFallback": "Provider",
+  "handymanQuotesTitle": "Quotes",
+  "handymanAcceptQuoteTitle": "Accept Quote",
+  "handymanAcceptQuoteMessage": "Accept {amount} from {name}?",
+  "@handymanAcceptQuoteMessage": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "actionAccept": "Accept",
+  "actionReject": "Reject",
+  "handymanQuoteAccepted": "Quote accepted",
+  "handymanAcceptQuoteFailed": "Failed to accept",
+  "handymanRejectQuoteTitle": "Reject Quote",
+  "handymanRejectQuoteMessage": "Reject quote from {name}?",
+  "@handymanRejectQuoteMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "handymanQuoteRejected": "Quote rejected",
+  "handymanRejectQuoteFailed": "Failed to reject",
+  "handymanNoQuotesYet": "No quotes yet",
+  "handymanNoQuotesSubtitle": "Handymen will send quotes soon",
+  "handymanViewProfile": "View Profile",
+  "handymanHowWasService": "How was the service?",
+  "handymanRateTheHandyman": "Rate the handyman",
+  "handymanCommentAboutOptional": "Comment about handyman (optional)",
+  "handymanRatingPublic": "Make my rating public",
+  "handymanSubmitRating": "Submit Rating",
+  "ratingThankYou": "Thank you for your rating!",
+  "ratingSubmitFailed": "Failed to submit rating",
+  "handymanNotFound": "Handyman not found",
+  "handymanProfileTitle": "Handyman Profile",
+  "handymanAbout": "About",
+  "handymanSkillsHeading": "Skills",
+  "handymanHourlyRateLabel": "Hourly Rate",
+  "handymanExperienceLabel": "Experience",
+  "handymanExperienceYears": "{years} years",
+  "@handymanExperienceYears": {
+    "placeholders": {
+      "years": {
+        "type": "String"
+      }
+    }
+  },
+  "labelAddress": "Address",
+  "handymanStatsHeading": "Stats",
+  "handymanStatServices": "Services",
+  "handymanStatRating": "Rating",
+  "handymanStatResponse": "Response"
+}

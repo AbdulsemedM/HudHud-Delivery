@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import '../../../home/presentation/screen/home_screen.dart';
 import '../../../wallet/presentation/screens/wallet_screen.dart';
 import '../../../settings/presentation/screen/settings_screen.dart';
@@ -35,6 +36,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       body: _screens[_selectedIndex],
@@ -62,26 +64,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
               tabBackgroundColor: theme.colorScheme.primary.withOpacity(0.15),
               color: theme.colorScheme.onSurfaceVariant,
               textStyle: const TextStyle(fontSize: 11),
-              tabs: const [
+              tabs: [
                 GButton(
                   icon: Icons.home,
-                  text: 'Home',
+                  text: l10n.navHome,
                 ),
                 GButton(
                   icon: Icons.local_shipping,
-                  text: 'Courier',
+                  text: l10n.navCourier,
                 ),
                 GButton(
                   icon: Icons.account_balance_wallet,
-                  text: 'Wallet',
+                  text: l10n.navWallet,
                 ),
                 GButton(
                   icon: Icons.local_taxi,
-                  text: 'Taxi',
+                  text: l10n.navTaxi,
                 ),
                 GButton(
                   icon: Icons.person,
-                  text: 'Profile',
+                  text: l10n.navProfile,
                 ),
               ],
               selectedIndex: _selectedIndex,

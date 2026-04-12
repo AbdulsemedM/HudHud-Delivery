@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
@@ -91,10 +92,12 @@ class _WithdrawFundsScreenState extends State<WithdrawFundsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colorScheme = Theme.of(context).colorScheme;
     if (widget.wallets.isEmpty) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Withdraw Funds'),
+          title: Text(l10n.withdrawFundsTitle),
           backgroundColor: AppColors.primaryColor,
           foregroundColor: Colors.white,
         ),
@@ -102,9 +105,12 @@ class _WithdrawFundsScreenState extends State<WithdrawFundsScreen> {
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Text(
-              'No wallets available to withdraw from',
+              l10n.walletNoWalletsForWithdraw,
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey[600], fontSize: 16),
+              style: TextStyle(
+                color: colorScheme.onSurfaceVariant,
+                fontSize: 16,
+              ),
             ),
           ),
         ),
@@ -117,7 +123,7 @@ class _WithdrawFundsScreenState extends State<WithdrawFundsScreen> {
       ),
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Withdraw Funds'),
+          title: Text(l10n.withdrawFundsTitle),
           backgroundColor: AppColors.primaryColor,
           foregroundColor: Colors.white,
         ),
@@ -127,7 +133,7 @@ class _WithdrawFundsScreenState extends State<WithdrawFundsScreen> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.message),
-                  backgroundColor: Colors.green,
+                  backgroundColor: Colors.green.shade700,
                 ),
               );
               Navigator.of(context).pop(true);
@@ -135,7 +141,7 @@ class _WithdrawFundsScreenState extends State<WithdrawFundsScreen> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.message),
-                  backgroundColor: Colors.red,
+                  backgroundColor: Theme.of(context).colorScheme.error,
                 ),
               );
             }
@@ -153,9 +159,9 @@ class _WithdrawFundsScreenState extends State<WithdrawFundsScreen> {
                     const SizedBox(height: 16),
                     DropdownButtonFormField<WalletModel>(
                       value: _selectedWallet,
-                      decoration: const InputDecoration(
-                        labelText: 'From Wallet',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: l10n.fromWallet,
+                        border: const OutlineInputBorder(),
                       ),
                       items: widget.wallets
                           .map((w) => DropdownMenuItem(
@@ -172,21 +178,21 @@ class _WithdrawFundsScreenState extends State<WithdrawFundsScreen> {
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
-                      decoration: const InputDecoration(
-                        labelText: 'Amount',
-                        hintText: 'Enter amount to withdraw',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: l10n.amount,
+                        hintText: l10n.enterWithdrawAmount,
+                        border: const OutlineInputBorder(),
                         prefixText: ' ',
                       ),
                       validator: (v) {
-                        if (v == null || v.isEmpty) return 'Enter amount';
+                        if (v == null || v.isEmpty) return l10n.enterAmount;
                         final amount = double.tryParse(v);
                         if (amount == null || amount <= 0) {
-                          return 'Enter a valid amount';
+                          return l10n.validationEnterValidAmount;
                         }
                         if (_selectedWallet != null &&
                             amount > _selectedWallet!.balanceAmount) {
-                          return 'Amount exceeds wallet balance';
+                          return l10n.validationAmountExceedsWalletBalance;
                         }
                         return null;
                       },
@@ -203,16 +209,16 @@ class _WithdrawFundsScreenState extends State<WithdrawFundsScreen> {
                       Padding(
                         padding: const EdgeInsets.all(16),
                         child: Text(
-                          'No payment methods available',
-                          style: TextStyle(color: Colors.grey[600]),
+                          l10n.walletNoPaymentMethods,
+                          style: TextStyle(color: colorScheme.onSurfaceVariant),
                         ),
                       )
                     else ...[
                       DropdownButtonFormField<String>(
                         value: _selectedMethodId,
-                        decoration: const InputDecoration(
-                          labelText: 'Withdrawal Method',
-                          border: OutlineInputBorder(),
+                        decoration: InputDecoration(
+                          labelText: l10n.withdrawalMethod,
+                          border: const OutlineInputBorder(),
                         ),
                         items: _paymentMethods
                             .map((m) => DropdownMenuItem(
@@ -229,19 +235,19 @@ class _WithdrawFundsScreenState extends State<WithdrawFundsScreen> {
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: _transactionIdController,
-                          decoration: const InputDecoration(
-                            labelText: 'Transaction ID',
-                            hintText: 'From payment gateway',
-                            border: OutlineInputBorder(),
+                          decoration: InputDecoration(
+                            labelText: l10n.transactionId,
+                            hintText: l10n.transactionIdHint,
+                            border: const OutlineInputBorder(),
                           ),
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
                           controller: _cardLastFourController,
-                          decoration: const InputDecoration(
-                            labelText: 'Card last 4 digits',
-                            hintText: '4242',
-                            border: OutlineInputBorder(),
+                          decoration: InputDecoration(
+                            labelText: l10n.cardLast4,
+                            hintText: l10n.cardLast4Hint,
+                            border: const OutlineInputBorder(),
                           ),
                           keyboardType: TextInputType.number,
                           maxLength: 4,
@@ -249,10 +255,10 @@ class _WithdrawFundsScreenState extends State<WithdrawFundsScreen> {
                         const SizedBox(height: 12),
                         TextFormField(
                           controller: _cardBrandController,
-                          decoration: const InputDecoration(
-                            labelText: 'Card brand',
-                            hintText: 'visa, mastercard',
-                            border: OutlineInputBorder(),
+                          decoration: InputDecoration(
+                            labelText: l10n.cardBrand,
+                            hintText: l10n.cardBrandHint,
+                            border: const OutlineInputBorder(),
                           ),
                         ),
                       ],
@@ -262,19 +268,19 @@ class _WithdrawFundsScreenState extends State<WithdrawFundsScreen> {
                       onPressed: isLoading ? null : _submit,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryColor,
-                        foregroundColor: Colors.white,
+                        foregroundColor: colorScheme.onPrimary,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
                       child: isLoading
-                          ? const SizedBox(
+                          ? SizedBox(
                               height: 24,
                               width: 24,
                               child: CircularProgressIndicator(
-                                color: Colors.white,
+                                color: colorScheme.onPrimary,
                                 strokeWidth: 2,
                               ),
                             )
-                          : const Text('Withdraw'),
+                          : Text(l10n.withdrawAction),
                     ),
                   ],
                 ),
@@ -317,20 +323,21 @@ class _WithdrawFundsScreenState extends State<WithdrawFundsScreen> {
 
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
+    final colorScheme = Theme.of(context).colorScheme;
     if (_selectedWallet == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Select a wallet'),
-          backgroundColor: Colors.red,
+        SnackBar(
+          content: Text(context.l10n.selectWalletPrompt),
+          backgroundColor: colorScheme.error,
         ),
       );
       return;
     }
     if (_selectedMethodId == null || _selectedMethodId!.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Select a withdrawal method'),
-          backgroundColor: Colors.red,
+        SnackBar(
+          content: Text(context.l10n.selectWithdrawalMethodPrompt),
+          backgroundColor: colorScheme.error,
         ),
       );
       return;

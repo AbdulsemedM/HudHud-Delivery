@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/handyman/data/data_provider/handyman_data_provider.dart';
 // import 'package:hudhud_delivery/features/handyman/data/models/service_request_model.dart';
 import 'package:hudhud_delivery/features/handyman/data/repository/handyman_repository.dart';
 import 'package:hudhud_delivery/features/home/presentation/screen/location_search_screen.dart';
+import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import 'package:latlong2/latlong.dart';
 import 'service_request_details_screen.dart';
 
@@ -42,6 +44,23 @@ class _CreateHandymanRequestScreenState
     'painting',
     'general',
   ];
+
+  static String _skillDisplay(AppLocalizations l10n, String code) {
+    switch (code) {
+      case 'plumbing':
+        return l10n.handymanSkillPlumbing;
+      case 'electrical':
+        return l10n.handymanSkillElectrical;
+      case 'carpentry':
+        return l10n.handymanSkillCarpentry;
+      case 'painting':
+        return l10n.handymanSkillPainting;
+      case 'general':
+        return l10n.handymanSkillGeneral;
+      default:
+        return code;
+    }
+  }
 
   @override
   void initState() {
@@ -125,12 +144,13 @@ class _CreateHandymanRequestScreenState
   }
 
   Future<void> _submit() async {
+    final l10n = context.l10n;
     if (!_formKey.currentState!.validate()) return;
 
     if (_latitude == null || _longitude == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select a location'),
+        SnackBar(
+          content: Text(l10n.validationHandymanSelectLocation),
           backgroundColor: AppColors.errorColor,
         ),
       );
@@ -139,8 +159,8 @@ class _CreateHandymanRequestScreenState
 
     if (_scheduledAt == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select date and time'),
+        SnackBar(
+          content: Text(l10n.validationHandymanSelectDateTime),
           backgroundColor: AppColors.errorColor,
         ),
       );
@@ -149,8 +169,8 @@ class _CreateHandymanRequestScreenState
 
     if (_selectedSkills.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select at least one skill'),
+        SnackBar(
+          content: Text(l10n.validationHandymanSelectSkill),
           backgroundColor: AppColors.errorColor,
         ),
       );
@@ -198,7 +218,7 @@ class _CreateHandymanRequestScreenState
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(result['message'] as String? ?? 'Request created'),
+          content: Text(result['message'] as String? ?? l10n.handymanRequestCreatedToast),
           backgroundColor: AppColors.successColor,
         ),
       );
@@ -217,7 +237,7 @@ class _CreateHandymanRequestScreenState
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(result['message'] as String? ?? 'Failed to create request'),
+          content: Text(result['message'] as String? ?? l10n.handymanRequestCreateFailed),
           backgroundColor: AppColors.errorColor,
         ),
       );
@@ -226,12 +246,13 @@ class _CreateHandymanRequestScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
-          'New Service Request',
+          l10n.handymanNewRequestTitle,
           style: TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 18,
@@ -262,54 +283,54 @@ class _CreateHandymanRequestScreenState
             children: [
               TextFormField(
                 controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Title',
-                  hintText: 'e.g. Fix leaking faucet',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.labelTitle,
+                  hintText: l10n.hintTitleHandymanExample,
+                  border: const OutlineInputBorder(),
                 ),
                 validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Title is required' : null,
+                    (v == null || v.trim().isEmpty) ? l10n.validationTitleRequired : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Description',
-                  hintText: 'Describe the repair or maintenance needed',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.labelDescription,
+                  hintText: l10n.hintDescribeRepair,
+                  border: const OutlineInputBorder(),
                   alignLabelWithHint: true,
                 ),
                 maxLines: 3,
                 validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Description is required' : null,
+                    (v == null || v.trim().isEmpty) ? l10n.validationDescriptionRequired : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _locationController,
                 readOnly: true,
                 decoration: InputDecoration(
-                  labelText: 'Location',
-                  hintText: 'Tap to select location',
+                  labelText: l10n.labelLocation,
+                  hintText: l10n.handymanTapToSelectLocation,
                   border: const OutlineInputBorder(),
                   suffixIcon: const Icon(Icons.search),
                 ),
                 onTap: _selectLocation,
                 validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Location is required' : null,
+                    (v == null || v.trim().isEmpty) ? l10n.validationHandymanSelectLocation : null,
               ),
               const SizedBox(height: 16),
               InkWell(
                 onTap: _selectDate,
                 child: InputDecorator(
-                  decoration: const InputDecoration(
-                    labelText: 'Scheduled Date & Time',
-                    border: OutlineInputBorder(),
-                    suffixIcon: Icon(Icons.calendar_today),
+                  decoration: InputDecoration(
+                    labelText: l10n.labelScheduledDateTime,
+                    border: const OutlineInputBorder(),
+                    suffixIcon: const Icon(Icons.calendar_today),
                   ),
                   child: Text(
                     _scheduledAt != null
                         ? '${_scheduledAt!.day}/${_scheduledAt!.month}/${_scheduledAt!.year} ${_scheduledAt!.hour.toString().padLeft(2, '0')}:${_scheduledAt!.minute.toString().padLeft(2, '0')}'
-                        : 'Select date and time',
+                        : l10n.selectDateAndTime,
                     style: TextStyle(
                       color: _scheduledAt != null
                           ? theme.colorScheme.onSurface
@@ -321,15 +342,15 @@ class _CreateHandymanRequestScreenState
               const SizedBox(height: 16),
               TextFormField(
                 controller: _estimatedCostController,
-                decoration: const InputDecoration(
-                  labelText: 'Estimated Cost (optional)',
-                  hintText: 'e.g. 100',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.labelEstimatedCostOptional,
+                  hintText: l10n.hintCostExample,
+                  border: const OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 16),
-              const Text('Skills needed', style: TextStyle(fontWeight: FontWeight.w500)),
+              Text(l10n.handymanSkillsNeeded, style: const TextStyle(fontWeight: FontWeight.w500)),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
@@ -337,7 +358,7 @@ class _CreateHandymanRequestScreenState
                 children: _skillOptions.map((skill) {
                   final selected = _selectedSkills.contains(skill);
                   return FilterChip(
-                    label: Text(skill),
+                    label: Text(_skillDisplay(l10n, skill)),
                     selected: selected,
                     onSelected: (_) => _toggleSkill(skill),
                     selectedColor: AppColors.primaryColor.withOpacity(0.3),
@@ -347,19 +368,19 @@ class _CreateHandymanRequestScreenState
               const SizedBox(height: 16),
               TextFormField(
                 controller: _toolsController,
-                decoration: const InputDecoration(
-                  labelText: 'Tools needed (comma-separated)',
-                  hintText: "e.g. wrench set, plumber's tape",
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.labelToolsCommaSeparated,
+                  hintText: l10n.hintToolsHandymanExample,
+                  border: const OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _estimatedHoursController,
-                decoration: const InputDecoration(
-                  labelText: 'Estimated hours (optional)',
-                  hintText: 'e.g. 2',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.labelEstimatedHoursOptional,
+                  hintText: l10n.hintHoursExample,
+                  border: const OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.number,
               ),
@@ -385,7 +406,7 @@ class _CreateHandymanRequestScreenState
                             valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.onPrimary),
                           ),
                         )
-                      : const Text('Create Request'),
+                      : Text(l10n.handymanCreateRequestCta),
                 ),
               ),
             ],

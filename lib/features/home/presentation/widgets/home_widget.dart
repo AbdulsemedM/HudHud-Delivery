@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:lottie/lottie.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/avatar_util.dart';
 import '../../../../models/user_model.dart';
@@ -108,6 +109,7 @@ class UserProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     return Row(
@@ -126,7 +128,7 @@ class UserProfileHeader extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    'Your Location',
+                    l10n.yourLocation,
                     style: textTheme.bodySmall?.copyWith(
                       fontSize: 12,
                       color: colorScheme.onSurface.withOpacity(0.7),
@@ -656,6 +658,7 @@ class DealsModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
@@ -702,17 +705,17 @@ class DealsModal extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Text(
-                            'Deals on deals',
-                            style: TextStyle(
+                          Text(
+                            l10n.dealsModalTitle,
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 14,
                             ),
                           ),
                           const SizedBox(height: 4),
-                          const Text(
-                            'Get upto 50% off on your first Courier delivery fee!',
-                            style: TextStyle(
+                          Text(
+                            l10n.dealsModalSubtitle,
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -730,9 +733,9 @@ class DealsModal extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                             ),
-                            child: const Text(
-                              'Claim',
-                              style: TextStyle(
+                            child: Text(
+                              l10n.dealsModalClaim,
+                              style: const TextStyle(
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -759,6 +762,7 @@ class OrderHistoryEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     return Container(
@@ -793,7 +797,7 @@ class OrderHistoryEmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           Text(
-            'No orders yet',
+            l10n.orderHistoryEmptyTitle,
             style: textTheme.titleMedium?.copyWith(
               fontSize: 18,
               fontWeight: FontWeight.w600,
@@ -801,7 +805,7 @@ class OrderHistoryEmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Your order history will appear here once you place an order',
+            l10n.orderHistoryEmptyHint,
             textAlign: TextAlign.center,
             style: textTheme.bodyMedium?.copyWith(
               fontSize: 14,
@@ -821,7 +825,7 @@ class OrderHistoryEmptyState extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                child: const Text('Browse Delivery'),
+                child: Text(l10n.browseDelivery),
               ),
             ),
           ],

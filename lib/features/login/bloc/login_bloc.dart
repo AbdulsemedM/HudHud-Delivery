@@ -22,5 +22,14 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         emit(LoginFailure(e.toString()));
       }
     });
+    on<GuestLoginRequested>((event, emit) async {
+      emit(LoginLoading());
+      try {
+        await loginRepository.guest();
+        emit(LoginSuccess());
+      } catch (e) {
+        emit(LoginFailure(e.toString()));
+      }
+    });
   }
 }

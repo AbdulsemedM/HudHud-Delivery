@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/app/services/location_service.dart';
 import 'package:hudhud_delivery/app/services/geocoding_service.dart';
@@ -18,10 +19,12 @@ class InstantDeliveryScreen extends StatefulWidget {
 
 class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
   gmaps.GoogleMapController? _mapController;
-  String _pickupLocation = 'Getting location...';
+  String _pickupLocation = '';
   String _deliveryLocation = '';
+  bool _pickupResolveFailed = false;
   String _selectedVehicle = 'motorcycle'; // motorcycle, car, van
-  LatLng _currentPosition = const LatLng(37.7749, -122.4194); // Default
+  /// Default map center (Addis Ababa) — same as taxi / location flows until GPS resolves.
+  LatLng _currentPosition = const LatLng(9.0222, 38.7468);
   LatLng? _pickupPosition;
   LatLng? _deliveryPosition;
   bool _isLoadingLocation = true;
@@ -81,6 +84,7 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
             _currentPosition = latLng;
             _pickupPosition = latLng; // Set initial pickup position
             _pickupLocation = address;
+            _pickupResolveFailed = false;
             _isLoadingLocation = false;
           });
 
@@ -92,7 +96,8 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
       } else {
         if (mounted) {
           setState(() {
-            _pickupLocation = 'Unable to get location';
+            _pickupResolveFailed = true;
+            _pickupLocation = '';
             _isLoadingLocation = false;
           });
         }
@@ -100,7 +105,8 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _pickupLocation = 'Unable to get location';
+          _pickupResolveFailed = true;
+          _pickupLocation = '';
           _isLoadingLocation = false;
         });
       }
@@ -124,6 +130,7 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
       if (address != null && coordinates != null) {
         setState(() {
           _pickupLocation = address;
+          _pickupResolveFailed = false;
           _pickupPosition = coordinates;
           _routePolylinePoints = null;
         });
@@ -177,11 +184,16 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final topPad = MediaQuery.paddingOf(context).top;
     final screenHeight = MediaQuery.of(context).size.height;
     const initialSheetSize = 0.5;
     final mapHeight = screenHeight * (1 - initialSheetSize);
 
     return Scaffold(
+      backgroundColor: colorScheme.surface,
       body: Stack(
         children: [
           Positioned(
@@ -189,26 +201,53 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
             left: 0,
             right: 0,
             height: mapHeight,
-            child: _buildMapOrFallback(),
+            child: _buildMapOrFallback(context),
           ),
           // Back button
           Positioned(
-            top: 40,
+            top: topPad + 8,
             left: 16,
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colorScheme.surfaceContainerHigh,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: colorScheme.shadow.withValues(alpha: 0.15),
                     blurRadius: 4,
                   ),
                 ],
               ),
               child: IconButton(
-                icon: const Icon(Icons.arrow_back),
+                icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
                 onPressed: () => Navigator.of(context).pop(),
+              ),
+            ),
+          ),
+          // Recenter on current GPS — matches taxi / delivery map UX
+          Positioned(
+            top: topPad + 8,
+            right: 16,
+            child: FloatingActionButton(
+              heroTag: 'instant_delivery_my_location',
+              mini: true,
+              backgroundColor: colorScheme.surfaceContainerHigh,
+              onPressed: () async {
+                await _getCurrentLocation();
+                if (_pickupPosition != null && mounted) {
+                  _mapController?.moveCamera(
+                    gmaps.CameraUpdate.newLatLngZoom(
+                      _toG(_pickupPosition!),
+                      15,
+                    ),
+                  );
+                }
+              },
+              child: Icon(
+                Icons.my_location,
+                color: _isLoadingLocation
+                    ? colorScheme.onSurfaceVariant
+                    : colorScheme.primary,
               ),
             ),
           ),
@@ -219,9 +258,9 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
             maxChildSize: 0.85,
             builder: (context, scrollController) {
               return Container(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(20),
                     topRight: Radius.circular(20),
                   ),
@@ -234,7 +273,7 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: Colors.grey[300],
+                        color: colorScheme.outlineVariant,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -245,49 +284,59 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Instant Delivery',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF2C3E50),
-                              ),
+                            Text(
+                              l10n.courierInstantTitle,
+                              style: theme.textTheme.headlineSmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: colorScheme.onSurface,
+                                  ) ??
+                                  TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: colorScheme.onSurface,
+                                  ),
                             ),
                             const SizedBox(height: 24),
                             // Pickup Location (user can select)
                             _LocationField(
-                              label: 'Pickup Location',
+                              label: l10n.pickupLocationLabel,
                               value: _isLoadingLocation
-                                  ? 'Getting location...'
-                                  : (_pickupLocation.isEmpty
-                                      ? 'Tap to select pickup location'
-                                      : _pickupLocation),
+                                  ? l10n.locationGetting
+                                  : (_pickupResolveFailed
+                                      ? l10n.locationUnable
+                                      : (_pickupLocation.isEmpty
+                                          ? l10n.tapToSelectPickup
+                                          : _pickupLocation)),
                               icon: Icons.location_on,
-                              iconColor: Colors.red,
+                              iconColor: colorScheme.error,
                               isReadOnly: false,
                               onTap: _selectPickupLocation,
                             ),
                             const SizedBox(height: 16),
                             // Delivery Location (user can select)
                             _LocationField(
-                              label: 'Delivery Location',
+                              label: l10n.deliveryLocationLabel,
                               value: _deliveryLocation.isEmpty
-                                  ? 'Tap to select delivery location'
+                                  ? l10n.tapToSelectDelivery
                                   : _deliveryLocation,
                               icon: Icons.location_on,
-                              iconColor: Colors.green,
+                              iconColor: colorScheme.primary,
                               isReadOnly: false,
                               onTap: _selectDeliveryLocation,
                             ),
                             const SizedBox(height: 24),
                             // Vehicle Type
-                            const Text(
-                              'Vehicle Type',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFF2C3E50),
-                              ),
+                            Text(
+                              l10n.vehicleType,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: colorScheme.onSurface,
+                                  ) ??
+                                  TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: colorScheme.onSurface,
+                                  ),
                             ),
                             const SizedBox(height: 12),
                             Row(
@@ -295,7 +344,7 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                                 Expanded(
                                   child: _VehicleTypeOption(
                                     icon: Icons.two_wheeler,
-                                    label: 'Motorcycle',
+                                    label: l10n.vehicleMotorcycle,
                                     isSelected:
                                         _selectedVehicle == 'motorcycle',
                                     onTap: () {
@@ -309,7 +358,7 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                                 Expanded(
                                   child: _VehicleTypeOption(
                                     icon: Icons.directions_car,
-                                    label: 'Car',
+                                    label: l10n.vehicleCar,
                                     isSelected: _selectedVehicle == 'car',
                                     onTap: () {
                                       setState(() {
@@ -322,7 +371,7 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                                 Expanded(
                                   child: _VehicleTypeOption(
                                     icon: Icons.airport_shuttle,
-                                    label: 'Van',
+                                    label: l10n.vehicleVan,
                                     isSelected: _selectedVehicle == 'van',
                                     onTap: () {
                                       setState(() {
@@ -343,10 +392,11 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                                   if (_pickupLocation.isEmpty ||
                                       _deliveryLocation.isEmpty) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
+                                      SnackBar(
                                         content: Text(
-                                            'Please select both pickup and delivery locations'),
-                                        backgroundColor: Colors.red,
+                                            l10n.selectPickupAndDelivery),
+                                        backgroundColor:
+                                            colorScheme.error,
                                       ),
                                     );
                                     return;
@@ -371,14 +421,14 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: AppColors.primaryColor,
+                                  foregroundColor: colorScheme.onPrimary,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                 ),
-                                child: const Text(
-                                  'Continue',
-                                  style: TextStyle(
-                                    color: Colors.white,
+                                child: Text(
+                                  l10n.actionContinue,
+                                  style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -435,8 +485,8 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error getting address: $e'),
-            backgroundColor: Colors.red,
+            content: Text(context.l10n.errorGettingAddress(e.toString())),
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }
@@ -444,32 +494,46 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
   }
 
   void _showLocationSelectionDialog(LatLng point) {
-    showDialog(
+    showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Select Location'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.location_on, color: Colors.red),
-              title: const Text('Pickup Location'),
-              onTap: () {
-                Navigator.pop(context);
-                _handleMapTap(point, true);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.location_on, color: Colors.green),
-              title: const Text('Delivery Location'),
-              onTap: () {
-                Navigator.pop(context);
-                _handleMapTap(point, false);
-              },
-            ),
-          ],
-        ),
-      ),
+      builder: (dialogContext) {
+        final l10n = dialogContext.l10n;
+        final cs = Theme.of(dialogContext).colorScheme;
+        return AlertDialog(
+          backgroundColor: cs.surface,
+          title: Text(
+            l10n.selectLocationTitle,
+            style: TextStyle(color: cs.onSurface),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(Icons.location_on, color: cs.error),
+                title: Text(
+                  l10n.pickupLocationLabel,
+                  style: TextStyle(color: cs.onSurface),
+                ),
+                onTap: () {
+                  Navigator.pop(dialogContext);
+                  _handleMapTap(point, true);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.location_on, color: cs.primary),
+                title: Text(
+                  l10n.deliveryLocationLabel,
+                  style: TextStyle(color: cs.onSurface),
+                ),
+                onTap: () {
+                  Navigator.pop(dialogContext);
+                  _handleMapTap(point, false);
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -499,17 +563,21 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
     }
   }
 
-  Widget _buildMapOrFallback() {
+  Widget _buildMapOrFallback(BuildContext context) {
+    final theme = Theme.of(context);
     if (_hasGoogleMapsApiKey == null) {
       return const Center(child: CircularProgressIndicator());
     }
     if (_hasGoogleMapsApiKey == false) {
-      return const Center(
+      return Center(
         child: Padding(
-          padding: EdgeInsets.all(24),
+          padding: const EdgeInsets.all(24),
           child: Text(
-            'Google Maps is not configured on iOS. Add GOOGLE_MAPS_API_KEY and restart the app.',
+            context.l10n.taxiGoogleMapsNotConfigured,
             textAlign: TextAlign.center,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurface,
+            ),
           ),
         ),
       );
@@ -520,13 +588,16 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
         target: _toG(_currentPosition),
         zoom: 15.0,
       ),
+      myLocationEnabled: true,
+      myLocationButtonEnabled: false,
+      mapType: gmaps.MapType.normal,
       markers: {
         if (_pickupPosition != null)
           gmaps.Marker(
             markerId: const gmaps.MarkerId('pickup'),
             position: _toG(_pickupPosition!),
             icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-              gmaps.BitmapDescriptor.hueRed,
+              gmaps.BitmapDescriptor.hueAzure,
             ),
           ),
         if (_deliveryPosition != null)
@@ -534,7 +605,7 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
             markerId: const gmaps.MarkerId('delivery'),
             position: _toG(_deliveryPosition!),
             icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-              gmaps.BitmapDescriptor.hueGreen,
+              gmaps.BitmapDescriptor.hueRed,
             ),
           ),
       },
@@ -552,6 +623,11 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
           : {},
       onMapCreated: (controller) {
         _mapController = controller;
+        if (!_isLoadingLocation) {
+          controller.moveCamera(
+            gmaps.CameraUpdate.newLatLngZoom(_toG(_currentPosition), 15),
+          );
+        }
       },
       onTap: (point) {
         _showLocationSelectionDialog(LatLng(point.latitude, point.longitude));
@@ -579,14 +655,15 @@ class _LocationField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.grey[50],
+          color: colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey[200]!),
+          border: Border.all(color: colorScheme.outlineVariant),
         ),
         child: Row(
           children: [
@@ -600,22 +677,23 @@ class _LocationField extends StatelessWidget {
                     label,
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.grey[600],
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     value,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFF2C3E50),
+                      color: colorScheme.onSurface,
                     ),
                   ),
                 ],
               ),
             ),
-            if (!isReadOnly) Icon(Icons.chevron_right, color: Colors.grey[400]),
+            if (!isReadOnly)
+              Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant),
           ],
         ),
       ),
@@ -638,17 +716,18 @@ class _VehicleTypeOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primaryColor.withOpacity(0.1)
-              : Colors.grey[50],
+              ? AppColors.primaryColor.withValues(alpha: 0.12)
+              : colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? AppColors.primaryColor : Colors.grey[200]!,
+            color: isSelected ? AppColors.primaryColor : colorScheme.outlineVariant,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -657,7 +736,9 @@ class _VehicleTypeOption extends StatelessWidget {
             Icon(
               icon,
               size: 32,
-              color: isSelected ? AppColors.primaryColor : Colors.grey[400],
+              color: isSelected
+                  ? AppColors.primaryColor
+                  : colorScheme.onSurfaceVariant,
             ),
             const SizedBox(height: 8),
             Text(
@@ -665,7 +746,9 @@ class _VehicleTypeOption extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                color: isSelected ? AppColors.primaryColor : Colors.grey[600],
+                color: isSelected
+                    ? AppColors.primaryColor
+                    : colorScheme.onSurfaceVariant,
               ),
             ),
           ],

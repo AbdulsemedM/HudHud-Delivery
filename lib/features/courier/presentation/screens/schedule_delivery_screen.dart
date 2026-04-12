@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/app/services/location_service.dart';
 import 'package:hudhud_delivery/app/services/geocoding_service.dart';
@@ -20,11 +21,13 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
   gmaps.GoogleMapController? _mapController;
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _timeController = TextEditingController();
-  String _pickupLocation = 'Getting location...';
+  String _pickupLocation = '';
   String _deliveryLocation = '';
+  bool _pickupResolveFailed = false;
   String _selectedVehicle = 'motorcycle'; // motorcycle, car, van
   String _timePeriod = 'pm'; // am or pm
-  LatLng _currentPosition = const LatLng(37.7749, -122.4194); // Default
+  /// Default map center (Addis Ababa) — same as taxi / instant until GPS resolves.
+  LatLng _currentPosition = const LatLng(9.0222, 38.7468);
   LatLng? _pickupPosition;
   LatLng? _deliveryPosition;
   bool _isLoadingLocation = true;
@@ -75,12 +78,10 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
     });
 
     try {
-      // Get current position coordinates
       final position = await LocationService.getCurrentPosition();
       if (position != null) {
         final latLng = LatLng(position.latitude, position.longitude);
 
-        // Get address from coordinates
         final address = await GeocodingService.getAddressFromLatLng(
           position.latitude,
           position.longitude,
@@ -89,12 +90,12 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
         if (mounted) {
           setState(() {
             _currentPosition = latLng;
-            _pickupPosition = latLng; // Set initial pickup position
+            _pickupPosition = latLng;
             _pickupLocation = address;
+            _pickupResolveFailed = false;
             _isLoadingLocation = false;
           });
 
-          // Move map to current location
           _mapController?.moveCamera(
             gmaps.CameraUpdate.newLatLngZoom(_toG(latLng), 15.0),
           );
@@ -102,7 +103,8 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
       } else {
         if (mounted) {
           setState(() {
-            _pickupLocation = 'Unable to get location';
+            _pickupResolveFailed = true;
+            _pickupLocation = '';
             _isLoadingLocation = false;
           });
         }
@@ -110,7 +112,8 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _pickupLocation = 'Unable to get location';
+          _pickupResolveFailed = true;
+          _pickupLocation = '';
           _isLoadingLocation = false;
         });
       }
@@ -134,11 +137,11 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
       if (address != null && coordinates != null) {
         setState(() {
           _pickupLocation = address;
+          _pickupResolveFailed = false;
           _pickupPosition = coordinates;
           _routePolylinePoints = null;
         });
 
-        // Adjust map view to show both locations if both are set
         if (_pickupPosition != null && _deliveryPosition != null) {
           _fetchRouteDirections();
           _fitBounds();
@@ -172,7 +175,6 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
           _routePolylinePoints = null;
         });
 
-        // Adjust map view to show both locations if both are set
         if (_pickupPosition != null && _deliveryPosition != null) {
           _fetchRouteDirections();
           _fitBounds();
@@ -187,7 +189,6 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
 
   Future<void> _handleMapTap(LatLng point, bool isPickup) async {
     try {
-      // Get address from tapped location
       final address = await GeocodingService.getAddressFromLatLng(
         point.latitude,
         point.longitude,
@@ -205,7 +206,6 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
           _routePolylinePoints = null;
         });
 
-        // Adjust map view to show both locations if both are set
         if (_pickupPosition != null && _deliveryPosition != null) {
           _fetchRouteDirections();
           _fitBounds();
@@ -216,12 +216,11 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
         }
       }
     } catch (e) {
-      // Handle error
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error getting address: $e'),
-            backgroundColor: Colors.red,
+            content: Text(context.l10n.errorGettingAddress(e.toString())),
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }
@@ -229,32 +228,46 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
   }
 
   void _showLocationSelectionDialog(LatLng point) {
-    showDialog(
+    showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Select Location'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.location_on, color: Colors.red),
-              title: const Text('Pickup Location'),
-              onTap: () {
-                Navigator.pop(context);
-                _handleMapTap(point, true);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.location_on, color: Colors.green),
-              title: const Text('Delivery Location'),
-              onTap: () {
-                Navigator.pop(context);
-                _handleMapTap(point, false);
-              },
-            ),
-          ],
-        ),
-      ),
+      builder: (dialogContext) {
+        final l10n = dialogContext.l10n;
+        final cs = Theme.of(dialogContext).colorScheme;
+        return AlertDialog(
+          backgroundColor: cs.surface,
+          title: Text(
+            l10n.selectLocationTitle,
+            style: TextStyle(color: cs.onSurface),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(Icons.location_on, color: cs.error),
+                title: Text(
+                  l10n.pickupLocationLabel,
+                  style: TextStyle(color: cs.onSurface),
+                ),
+                onTap: () {
+                  Navigator.pop(dialogContext);
+                  _handleMapTap(point, true);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.location_on, color: cs.primary),
+                title: Text(
+                  l10n.deliveryLocationLabel,
+                  style: TextStyle(color: cs.onSurface),
+                ),
+                onTap: () {
+                  Navigator.pop(dialogContext);
+                  _handleMapTap(point, false);
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -340,54 +353,92 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final topPad = MediaQuery.paddingOf(context).top;
+    final screenHeight = MediaQuery.of(context).size.height;
+    const initialSheetSize = 0.55;
+    final mapHeight = screenHeight * (1 - initialSheetSize);
+
     return Scaffold(
+      backgroundColor: colorScheme.surface,
       body: Stack(
         children: [
-          _buildMapOrFallback(),
-          // Back button
           Positioned(
-            top: 40,
+            top: 0,
+            left: 0,
+            right: 0,
+            height: mapHeight,
+            child: _buildMapOrFallback(context),
+          ),
+          Positioned(
+            top: topPad + 8,
             left: 16,
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colorScheme.surfaceContainerHigh,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: colorScheme.shadow.withValues(alpha: 0.15),
                     blurRadius: 4,
                   ),
                 ],
               ),
               child: IconButton(
-                icon: const Icon(Icons.arrow_back),
+                icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
                 onPressed: () => Navigator.of(context).pop(),
               ),
             ),
           ),
-          // Bottom Sheet Modal
+          Positioned(
+            top: topPad + 8,
+            right: 16,
+            child: FloatingActionButton(
+              heroTag: 'schedule_delivery_my_location',
+              mini: true,
+              backgroundColor: colorScheme.surfaceContainerHigh,
+              onPressed: () async {
+                await _getCurrentLocation();
+                if (_pickupPosition != null && mounted) {
+                  _mapController?.moveCamera(
+                    gmaps.CameraUpdate.newLatLngZoom(
+                      _toG(_pickupPosition!),
+                      15,
+                    ),
+                  );
+                }
+              },
+              child: Icon(
+                Icons.my_location,
+                color: _isLoadingLocation
+                    ? colorScheme.onSurfaceVariant
+                    : colorScheme.primary,
+              ),
+            ),
+          ),
           DraggableScrollableSheet(
-            initialChildSize: 0.55,
+            initialChildSize: initialSheetSize,
             minChildSize: 0.35,
             maxChildSize: 0.9,
             builder: (context, scrollController) {
               return Container(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(20),
                     topRight: Radius.circular(20),
                   ),
                 ),
                 child: Column(
                   children: [
-                    // Drag handle
                     Container(
                       margin: const EdgeInsets.only(top: 8),
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: Colors.grey[300],
+                        color: colorScheme.outlineVariant,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -398,56 +449,64 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Schedule Delivery',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF2C3E50),
+                            Text(
+                              l10n.courierScheduleTitle,
+                              style: theme.textTheme.headlineSmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: colorScheme.onSurface,
+                                  ) ??
+                                  TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: colorScheme.onSurface,
+                                  ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              l10n.courierScheduleSubtitle,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
                               ),
                             ),
                             const SizedBox(height: 24),
-                            // Pickup Location (user can select)
                             _LocationField(
-                              label: 'Pickup Location',
+                              label: l10n.pickupLocationLabel,
                               value: _isLoadingLocation
-                                  ? 'Getting location...'
-                                  : (_pickupLocation.isEmpty
-                                      ? 'Tap to select pickup location'
-                                      : _pickupLocation),
+                                  ? l10n.locationGetting
+                                  : (_pickupResolveFailed
+                                      ? l10n.locationUnable
+                                      : (_pickupLocation.isEmpty
+                                          ? l10n.tapToSelectPickup
+                                          : _pickupLocation)),
                               icon: Icons.location_on,
-                              iconColor: Colors.red,
+                              iconColor: colorScheme.error,
                               isReadOnly: false,
                               onTap: _selectPickupLocation,
                             ),
                             const SizedBox(height: 16),
-                            // Delivery Location (user can select)
                             _LocationField(
-                              label: 'Delivery Location',
+                              label: l10n.deliveryLocationLabel,
                               value: _deliveryLocation.isEmpty
-                                  ? 'Tap to select delivery location'
+                                  ? l10n.tapToSelectDelivery
                                   : _deliveryLocation,
                               icon: Icons.location_on,
-                              iconColor: Colors.green,
+                              iconColor: colorScheme.primary,
                               isReadOnly: false,
                               onTap: _selectDeliveryLocation,
                             ),
                             const SizedBox(height: 16),
-                            // Date and Time Row
                             Row(
                               children: [
-                                // Date Field
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      const Text(
-                                        'Date',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w500,
-                                          color: Color(0xFF2C3E50),
+                                      Text(
+                                        l10n.labelDate,
+                                        style: theme.textTheme.labelLarge
+                                            ?.copyWith(
+                                          color: colorScheme.onSurface,
                                         ),
                                       ),
                                       const SizedBox(height: 8),
@@ -456,32 +515,38 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                                         child: Container(
                                           padding: const EdgeInsets.all(16),
                                           decoration: BoxDecoration(
-                                            color: Colors.grey[50],
+                                            color: colorScheme
+                                                .surfaceContainerHighest,
                                             borderRadius:
                                                 BorderRadius.circular(12),
                                             border: Border.all(
-                                                color: Colors.grey[200]!),
+                                              color: colorScheme.outlineVariant,
+                                            ),
                                           ),
                                           child: Row(
                                             children: [
                                               Expanded(
                                                 child: Text(
                                                   _dateController.text.isEmpty
-                                                      ? 'DD/MM/YYYY'
+                                                      ? l10n.hintDateFormat
                                                       : _dateController.text,
                                                   style: TextStyle(
                                                     fontSize: 14,
                                                     color: _dateController
                                                             .text.isEmpty
-                                                        ? Colors.grey[400]
-                                                        : const Color(
-                                                            0xFF2C3E50),
+                                                        ? colorScheme
+                                                            .onSurfaceVariant
+                                                        : colorScheme
+                                                            .onSurface,
                                                   ),
                                                 ),
                                               ),
-                                              Icon(Icons.calendar_today,
-                                                  size: 20,
-                                                  color: Colors.grey[400]),
+                                              Icon(
+                                                Icons.calendar_today,
+                                                size: 20,
+                                                color: colorScheme
+                                                    .onSurfaceVariant,
+                                              ),
                                             ],
                                           ),
                                         ),
@@ -490,18 +555,16 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                                   ),
                                 ),
                                 const SizedBox(width: 12),
-                                // Time Field
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      const Text(
-                                        'Time',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w500,
-                                          color: Color(0xFF2C3E50),
+                                      Text(
+                                        l10n.labelTime,
+                                        style: theme.textTheme.labelLarge
+                                            ?.copyWith(
+                                          color: colorScheme.onSurface,
                                         ),
                                       ),
                                       const SizedBox(height: 8),
@@ -514,23 +577,27 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                                                 padding:
                                                     const EdgeInsets.all(16),
                                                 decoration: BoxDecoration(
-                                                  color: Colors.grey[50],
+                                                  color: colorScheme
+                                                      .surfaceContainerHighest,
                                                   borderRadius:
                                                       BorderRadius.circular(12),
                                                   border: Border.all(
-                                                      color: Colors.grey[200]!),
+                                                    color: colorScheme
+                                                        .outlineVariant,
+                                                  ),
                                                 ),
                                                 child: Text(
                                                   _timeController.text.isEmpty
-                                                      ? 'HH:MM'
+                                                      ? l10n.hintTimeFormat
                                                       : _timeController.text,
                                                   style: TextStyle(
                                                     fontSize: 14,
                                                     color: _timeController
                                                             .text.isEmpty
-                                                        ? Colors.grey[400]
-                                                        : const Color(
-                                                            0xFF2C3E50),
+                                                        ? colorScheme
+                                                            .onSurfaceVariant
+                                                        : colorScheme
+                                                            .onSurface,
                                                   ),
                                                 ),
                                               ),
@@ -539,29 +606,45 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                                           const SizedBox(width: 8),
                                           Container(
                                             padding: const EdgeInsets.symmetric(
-                                                horizontal: 12, vertical: 16),
+                                                horizontal: 8, vertical: 4),
                                             decoration: BoxDecoration(
-                                              color: Colors.grey[50],
+                                              color: colorScheme
+                                                  .surfaceContainerHighest,
                                               borderRadius:
                                                   BorderRadius.circular(12),
                                               border: Border.all(
-                                                  color: Colors.grey[200]!),
+                                                color:
+                                                    colorScheme.outlineVariant,
+                                              ),
                                             ),
-                                            child: DropdownButton<String>(
-                                              value: _timePeriod,
-                                              underline: const SizedBox(),
-                                              items: ['am', 'pm']
-                                                  .map((period) =>
-                                                      DropdownMenuItem(
-                                                        value: period,
-                                                        child: Text(period),
-                                                      ))
-                                                  .toList(),
-                                              onChanged: (value) {
-                                                setState(() {
-                                                  _timePeriod = value!;
-                                                });
-                                              },
+                                            child: DropdownButtonHideUnderline(
+                                              child: DropdownButton<String>(
+                                                value: _timePeriod,
+                                                dropdownColor: colorScheme
+                                                    .surfaceContainerHigh,
+                                                style: TextStyle(
+                                                  color: colorScheme.onSurface,
+                                                  fontSize: 14,
+                                                ),
+                                                items: [
+                                                  DropdownMenuItem(
+                                                    value: 'am',
+                                                    child:
+                                                        Text(l10n.meridiemAm),
+                                                  ),
+                                                  DropdownMenuItem(
+                                                    value: 'pm',
+                                                    child:
+                                                        Text(l10n.meridiemPm),
+                                                  ),
+                                                ],
+                                                onChanged: (value) {
+                                                  if (value == null) return;
+                                                  setState(() {
+                                                    _timePeriod = value;
+                                                  });
+                                                },
+                                              ),
                                             ),
                                           ),
                                         ],
@@ -572,14 +655,17 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                               ],
                             ),
                             const SizedBox(height: 24),
-                            // Vehicle Type
-                            const Text(
-                              'Vehicle Type',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFF2C3E50),
-                              ),
+                            Text(
+                              l10n.vehicleType,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: colorScheme.onSurface,
+                                  ) ??
+                                  TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: colorScheme.onSurface,
+                                  ),
                             ),
                             const SizedBox(height: 12),
                             Row(
@@ -587,7 +673,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                                 Expanded(
                                   child: _VehicleTypeOption(
                                     icon: Icons.two_wheeler,
-                                    label: 'Motorcycle',
+                                    label: l10n.vehicleMotorcycle,
                                     isSelected:
                                         _selectedVehicle == 'motorcycle',
                                     onTap: () {
@@ -601,7 +687,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                                 Expanded(
                                   child: _VehicleTypeOption(
                                     icon: Icons.directions_car,
-                                    label: 'Car',
+                                    label: l10n.vehicleCar,
                                     isSelected: _selectedVehicle == 'car',
                                     onTap: () {
                                       setState(() {
@@ -614,7 +700,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                                 Expanded(
                                   child: _VehicleTypeOption(
                                     icon: Icons.airport_shuttle,
-                                    label: 'Van',
+                                    label: l10n.vehicleVan,
                                     isSelected: _selectedVehicle == 'van',
                                     onTap: () {
                                       setState(() {
@@ -626,7 +712,6 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                               ],
                             ),
                             const SizedBox(height: 32),
-                            // Continue Button
                             SizedBox(
                               width: double.infinity,
                               height: 50,
@@ -635,10 +720,10 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                                   if (_pickupLocation.isEmpty ||
                                       _deliveryLocation.isEmpty) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
+                                      SnackBar(
                                         content: Text(
-                                            'Please select both pickup and delivery locations'),
-                                        backgroundColor: Colors.red,
+                                            l10n.selectPickupAndDelivery),
+                                        backgroundColor: colorScheme.error,
                                       ),
                                     );
                                     return;
@@ -646,10 +731,10 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                                   if (_dateController.text.isEmpty ||
                                       _timeController.text.isEmpty) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
+                                      SnackBar(
                                         content: Text(
-                                            'Please select date and time for delivery'),
-                                        backgroundColor: Colors.red,
+                                            l10n.scheduleSelectDateTime),
+                                        backgroundColor: colorScheme.error,
                                       ),
                                     );
                                     return;
@@ -659,10 +744,10 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                                       _parseScheduledDateTime();
                                   if (scheduledDateTime == null) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
+                                      SnackBar(
                                         content:
-                                            Text('Invalid date or time format'),
-                                        backgroundColor: Colors.red,
+                                            Text(l10n.scheduleInvalidDateTime),
+                                        backgroundColor: colorScheme.error,
                                       ),
                                     );
                                     return;
@@ -687,14 +772,14 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: AppColors.primaryColor,
+                                  foregroundColor: colorScheme.onPrimary,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                 ),
-                                child: const Text(
-                                  'Continue',
-                                  style: TextStyle(
-                                    color: Colors.white,
+                                child: Text(
+                                  l10n.actionContinue,
+                                  style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -716,17 +801,27 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
     );
   }
 
-  Widget _buildMapOrFallback() {
+  Widget _buildMapOrFallback(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final l10n = context.l10n;
     if (_hasGoogleMapsApiKey == null) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(
+        child: CircularProgressIndicator(
+          color: colorScheme.primary,
+        ),
+      );
     }
     if (_hasGoogleMapsApiKey == false) {
-      return const Center(
+      return Center(
         child: Padding(
-          padding: EdgeInsets.all(24),
+          padding: const EdgeInsets.all(24),
           child: Text(
-            'Google Maps is not configured on iOS. Add GOOGLE_MAPS_API_KEY and restart the app.',
+            l10n.taxiGoogleMapsNotConfigured,
             textAlign: TextAlign.center,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurface,
+            ),
           ),
         ),
       );
@@ -737,13 +832,16 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
         target: _toG(_currentPosition),
         zoom: 15.0,
       ),
+      myLocationEnabled: true,
+      myLocationButtonEnabled: false,
+      mapType: gmaps.MapType.normal,
       markers: {
         if (_pickupPosition != null)
           gmaps.Marker(
             markerId: const gmaps.MarkerId('pickup'),
             position: _toG(_pickupPosition!),
             icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-              gmaps.BitmapDescriptor.hueRed,
+              gmaps.BitmapDescriptor.hueAzure,
             ),
           ),
         if (_deliveryPosition != null)
@@ -751,7 +849,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
             markerId: const gmaps.MarkerId('delivery'),
             position: _toG(_deliveryPosition!),
             icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-              gmaps.BitmapDescriptor.hueGreen,
+              gmaps.BitmapDescriptor.hueRed,
             ),
           ),
       },
@@ -759,7 +857,8 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
           ? {
               gmaps.Polyline(
                 polylineId: const gmaps.PolylineId('route'),
-                points: _routePolylinePoints != null && _routePolylinePoints!.length >= 2
+                points: _routePolylinePoints != null &&
+                        _routePolylinePoints!.length >= 2
                     ? _routePolylinePoints!.map(_toG).toList()
                     : [_toG(_pickupPosition!), _toG(_deliveryPosition!)],
                 color: AppColors.primaryColor,
@@ -769,6 +868,11 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
           : {},
       onMapCreated: (controller) {
         _mapController = controller;
+        if (!_isLoadingLocation) {
+          controller.moveCamera(
+            gmaps.CameraUpdate.newLatLngZoom(_toG(_currentPosition), 15),
+          );
+        }
       },
       onTap: (point) {
         _showLocationSelectionDialog(LatLng(point.latitude, point.longitude));
@@ -796,14 +900,15 @@ class _LocationField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.grey[50],
+          color: colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey[200]!),
+          border: Border.all(color: colorScheme.outlineVariant),
         ),
         child: Row(
           children: [
@@ -817,28 +922,28 @@ class _LocationField extends StatelessWidget {
                     label,
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.grey[600],
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     value,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFF2C3E50),
+                      color: colorScheme.onSurface,
                     ),
                   ),
                 ],
               ),
             ),
-            if (!isReadOnly) Icon(Icons.chevron_right, color: Colors.grey[400]),
+            if (!isReadOnly)
+              Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant),
           ],
         ),
       ),
     );
   }
-
 }
 
 class _VehicleTypeOption extends StatelessWidget {
@@ -856,17 +961,19 @@ class _VehicleTypeOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primaryColor.withOpacity(0.1)
-              : Colors.grey[50],
+              ? AppColors.primaryColor.withValues(alpha: 0.12)
+              : colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? AppColors.primaryColor : Colors.grey[200]!,
+            color:
+                isSelected ? AppColors.primaryColor : colorScheme.outlineVariant,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -875,7 +982,9 @@ class _VehicleTypeOption extends StatelessWidget {
             Icon(
               icon,
               size: 32,
-              color: isSelected ? AppColors.primaryColor : Colors.grey[400],
+              color: isSelected
+                  ? AppColors.primaryColor
+                  : colorScheme.onSurfaceVariant,
             ),
             const SizedBox(height: 8),
             Text(
@@ -883,8 +992,11 @@ class _VehicleTypeOption extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                color: isSelected ? AppColors.primaryColor : Colors.grey[600],
+                color: isSelected
+                    ? AppColors.primaryColor
+                    : colorScheme.onSurfaceVariant,
               ),
+              textAlign: TextAlign.center,
             ),
           ],
         ),

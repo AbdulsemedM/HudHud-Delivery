@@ -13,6 +13,9 @@ class ApiConstants {
   static const String register = 'register';
   static const String logout = '$auth/logout';
   static const String refreshToken = '$auth/refresh';
+  /// POST — returns same shape as [login] (token, user, optional refresh_token).
+  /// Coordinate path with backend if it differs.
+  static const String guest = '$auth/guest';
   static const String forgotPassword = '$auth/forgot-password';
   static const String resetPassword = '$auth/reset-password';
 

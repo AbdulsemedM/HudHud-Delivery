@@ -20,8 +20,11 @@ class _OtpScreenState extends State<OtpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -37,11 +40,16 @@ class _OtpScreenState extends State<OtpScreen> {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: Colors.grey[100],
+                      color: isDark
+                          ? colorScheme.surfaceContainerHighest
+                          : Colors.grey[100],
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: IconButton(
-                      icon: Icon(Icons.arrow_back, color: Colors.grey[700]),
+                      icon: Icon(
+                        Icons.arrow_back,
+                        color: colorScheme.onSurface.withOpacity(0.8),
+                      ),
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ),
@@ -62,7 +70,8 @@ class _OtpScreenState extends State<OtpScreen> {
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.normal,
-                          color: Colors.grey[600],
+                          color: theme.textTheme.bodyMedium?.color
+                              ?.withOpacity(0.7),
                         ),
                       ),
                     ],
@@ -86,7 +95,7 @@ class _OtpScreenState extends State<OtpScreen> {
                       style: TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF2C3E50),
+                        color: theme.textTheme.headlineSmall?.color,
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -97,7 +106,8 @@ class _OtpScreenState extends State<OtpScreen> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey[600],
+                        color: theme.textTheme.bodyMedium?.color
+                            ?.withOpacity(0.8),
                         height: 1.4,
                       ),
                     ),

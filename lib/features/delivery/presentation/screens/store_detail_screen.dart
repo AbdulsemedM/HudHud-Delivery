@@ -150,7 +150,7 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -172,10 +172,10 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                     Expanded(
                       child: Text(
                         _displayName,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF2C3E50),
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                     ),

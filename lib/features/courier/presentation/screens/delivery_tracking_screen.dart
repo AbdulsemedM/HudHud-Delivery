@@ -240,8 +240,9 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
       );
     }
 
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
           gmaps.GoogleMap(
@@ -262,17 +263,17 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
             left: 16,
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colorScheme.surface,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: colorScheme.shadow.withOpacity(0.2),
                     blurRadius: 4,
                   ),
                 ],
               ),
               child: IconButton(
-                icon: const Icon(Icons.arrow_back),
+                icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
                 onPressed: () => Navigator.pop(context),
               ),
             ),
@@ -326,9 +327,9 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
             maxChildSize: 0.85,
             builder: (context, scrollController) {
               return Container(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(20),
                     topRight: Radius.circular(20),
                   ),
@@ -341,7 +342,7 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: Colors.grey[300],
+                        color: colorScheme.outlineVariant,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -417,7 +418,7 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                                     child: Text(
                                       _trackError!,
                                       style: TextStyle(
-                                        color: Colors.grey[600],
+                                        color: colorScheme.onSurfaceVariant,
                                         fontSize: 14,
                                       ),
                                       textAlign: TextAlign.center,
@@ -506,14 +507,15 @@ class _DriverCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: colorScheme.shadow.withOpacity(0.06),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -524,11 +526,11 @@ class _DriverCard extends StatelessWidget {
           // Profile Picture
           CircleAvatar(
             radius: 30,
-            backgroundColor: Colors.grey[200],
-            child: const Icon(
+            backgroundColor: colorScheme.surfaceContainerHighest,
+            child: Icon(
               Icons.person,
               size: 30,
-              color: Colors.grey,
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(width: 16),
@@ -539,18 +541,18 @@ class _DriverCard extends StatelessWidget {
               children: [
                 Text(
                   driverName,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF2C3E50),
+                    color: colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 4),
-                const Text(
+                Text(
                   'Driver',
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.grey,
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -561,10 +563,10 @@ class _DriverCard extends StatelessWidget {
             icon: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: colorScheme.surfaceContainerHighest,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.chat_bubble_outline, size: 20),
+              child: Icon(Icons.chat_bubble_outline, size: 20, color: colorScheme.onSurface),
             ),
             onPressed: onMessage,
           ),
@@ -573,10 +575,10 @@ class _DriverCard extends StatelessWidget {
             icon: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: colorScheme.surfaceContainerHighest,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.phone, size: 20),
+              child: Icon(Icons.phone, size: 20, color: colorScheme.onSurface),
             ),
             onPressed: onCall,
           ),
@@ -601,14 +603,15 @@ class _ReviewOrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: colorScheme.shadow.withOpacity(0.06),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -617,12 +620,12 @@ class _ReviewOrderCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Review Order',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF2C3E50),
+              color: colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 16),
@@ -670,14 +673,15 @@ class _TrackingOrderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = timeline ?? [];
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: colorScheme.shadow.withOpacity(0.06),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -686,12 +690,12 @@ class _TrackingOrderCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Tracking Order',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF2C3E50),
+              color: colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 16),

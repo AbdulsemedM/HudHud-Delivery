@@ -10,6 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   # State Management
   provider: ^6.1.1
@@ -29,7 +31,7 @@ dependencies:
   shared_preferences: ^2.2.2
   flutter_bloc: ^8.1.6
   font_awesome_flutter: ^10.6.0
-  intl: ^0.19.0
+  intl: ^0.20.2
   intl_phone_field: ^3.2.0
   google_nav_bar: ^5.0.7
   lottie: ^3.1.3
@@ -70,6 +72,7 @@ flutter_launcher_icons:
   remove_alpha_ios: true
 
 flutter:
+  generate: true
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:

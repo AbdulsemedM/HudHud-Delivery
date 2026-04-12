@@ -16,36 +16,7 @@ class LoginRepository {
           throw 'Invalid server response: missing required data';
         }
 
-        final token = data['token'] as String;
-        final permissions = data['permissions'] as List<dynamic>?;
-        final loginUser = UserModel.fromMap(
-          Map<String, dynamic>.from(data['user'] as Map<String, dynamic>)
-            ..['permissions'] = permissions ?? [],
-        );
-
-        // Store token first so profile API can be called with it
-        await authService.storeTokenOnly(
-          token: token,
-          refreshToken: data['refresh_token']?.toString(),
-          expiresIn: data['expires_in'] is int ? data['expires_in'] as int : null,
-        );
-
-        // Fetch full profile from /api/profile and store (with permissions from login)
-        try {
-          final profileUser = await authService.fetchProfileAndStore(
-            permissions: permissions,
-          );
-          return profileUser ?? loginUser;
-        } catch (_) {
-          // Profile fetch failed (network, 500, etc.); fall back to login user
-          await authService.storeUserSession(
-            user: loginUser,
-            token: token,
-            refreshToken: data['refresh_token']?.toString(),
-            expiresIn: data['expires_in'] is int ? data['expires_in'] as int : null,
-          );
-          return loginUser;
-        }
+        return _completeSessionFromLoginData(data, authService);
       } else {
         // Get clean error message from data provider
         String errorMessage = response['errorMessage'] ?? 'Login failed';
@@ -62,7 +33,65 @@ class LoginRepository {
       throw errorMessage;
     }
   }
-  
+
+  Future<UserModel> guest() async {
+    final authService = AuthService();
+    try {
+      final response = await loginDataProvider.guest();
+      if (response['statusCode'] == 200) {
+        final data = response['data'] as Map<String, dynamic>?;
+        if (data == null || data['token'] == null || data['user'] == null) {
+          throw 'Invalid server response: missing required data';
+        }
+
+        return _completeSessionFromLoginData(data, authService);
+      } else {
+        String errorMessage = response['errorMessage'] ?? 'Guest login failed';
+        errorMessage = _cleanErrorMessage(errorMessage);
+        throw errorMessage;
+      }
+    } catch (e) {
+      if (e is String) {
+        throw e;
+      }
+      String errorMessage = _cleanErrorMessage(e.toString());
+      throw errorMessage;
+    }
+  }
+
+  Future<UserModel> _completeSessionFromLoginData(
+    Map<String, dynamic> data,
+    AuthService authService,
+  ) async {
+    final token = data['token'] as String;
+    final permissions = data['permissions'] as List<dynamic>?;
+    final loginUser = UserModel.fromMap(
+      Map<String, dynamic>.from(data['user'] as Map<String, dynamic>)
+        ..['permissions'] = permissions ?? [],
+    );
+
+    await authService.storeTokenOnly(
+      token: token,
+      refreshToken: data['refresh_token']?.toString(),
+      expiresIn: data['expires_in'] is int ? data['expires_in'] as int : null,
+    );
+
+    try {
+      final profileUser = await authService.fetchProfileAndStore(
+        permissions: permissions,
+      );
+      return profileUser ?? loginUser;
+    } catch (_) {
+      await authService.storeUserSession(
+        user: loginUser,
+        token: token,
+        refreshToken: data['refresh_token']?.toString(),
+        expiresIn: data['expires_in'] is int ? data['expires_in'] as int : null,
+      );
+      return loginUser;
+    }
+  }
+
   String _cleanErrorMessage(String message) {
     // Remove various prefixes that might appear
     if (message.startsWith('Exception: ')) {

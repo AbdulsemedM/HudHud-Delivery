@@ -1,12 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/handyman/data/data_provider/handyman_data_provider.dart';
 import 'package:hudhud_delivery/features/handyman/data/models/service_request_model.dart';
 import 'package:hudhud_delivery/features/handyman/data/repository/handyman_repository.dart';
+import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import 'handyman_details_screen.dart';
 import 'rate_service_screen.dart';
 import 'service_quotes_screen.dart';
+
+String _localizedSkillLabel(AppLocalizations l10n, String code) {
+  switch (code.toLowerCase()) {
+    case 'plumbing':
+      return l10n.handymanSkillPlumbing;
+    case 'electrical':
+      return l10n.handymanSkillElectrical;
+    case 'carpentry':
+      return l10n.handymanSkillCarpentry;
+    case 'painting':
+      return l10n.handymanSkillPainting;
+    case 'general':
+      return l10n.handymanSkillGeneral;
+    default:
+      return code;
+  }
+}
 
 class ServiceRequestDetailsScreen extends StatefulWidget {
   final ServiceRequestModel request;
@@ -59,22 +78,21 @@ class _ServiceRequestDetailsScreenState extends State<ServiceRequestDetailsScree
   }
 
   Future<void> _cancelRequest() async {
+    final l10n = context.l10n;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Cancel Request'),
-        content: const Text(
-          'Are you sure you want to cancel this service request?',
-        ),
+        title: Text(l10n.handymanDialogCancelRequestTitle),
+        content: Text(l10n.handymanDialogCancelRequestMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('No'),
+            child: Text(l10n.actionNo),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: AppColors.errorColor),
-            child: const Text('Yes, Cancel'),
+            child: Text(l10n.actionYesCancel),
           ),
         ],
       ),
@@ -88,7 +106,7 @@ class _ServiceRequestDetailsScreenState extends State<ServiceRequestDetailsScree
     if (result['success'] == true) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(result['message'] as String? ?? 'Request cancelled'),
+          content: Text(result['message'] as String? ?? l10n.handymanRequestCancelled),
           backgroundColor: AppColors.successColor,
         ),
       );
@@ -96,7 +114,7 @@ class _ServiceRequestDetailsScreenState extends State<ServiceRequestDetailsScree
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(result['message'] as String? ?? 'Failed to cancel'),
+          content: Text(result['message'] as String? ?? l10n.handymanCancelFailed),
           backgroundColor: AppColors.errorColor,
         ),
       );
@@ -137,6 +155,7 @@ class _ServiceRequestDetailsScreenState extends State<ServiceRequestDetailsScree
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
@@ -198,40 +217,40 @@ class _ServiceRequestDetailsScreenState extends State<ServiceRequestDetailsScree
             const SizedBox(height: 20),
             _DetailRow(
               icon: Icons.location_on,
-              label: 'Location',
+              label: l10n.labelLocation,
               value: _request.location,
             ),
             _DetailRow(
               icon: Icons.schedule,
-              label: 'Scheduled',
+              label: l10n.handymanLabelScheduled,
               value: _formatDate(_request.scheduledAt),
             ),
             _DetailRow(
               icon: Icons.attach_money,
-              label: 'Estimated Cost',
+              label: l10n.labelEstimatedCost,
               value: _request.formattedEstimatedCost ?? '—',
             ),
             if (_request.requirements != null) ...[
               const SizedBox(height: 8),
-              const Text('Requirements', style: TextStyle(fontWeight: FontWeight.w600)),
+              Text(l10n.handymanSectionRequirements, style: const TextStyle(fontWeight: FontWeight.w600)),
               const SizedBox(height: 4),
               if (_request.requirements!.skills.isNotEmpty)
                 Wrap(
                   spacing: 8,
                   children: _request.requirements!.skills
-                      .map((s) => Chip(label: Text(s)))
+                      .map((s) => Chip(label: Text(_localizedSkillLabel(l10n, s))))
                       .toList(),
                 ),
               if (_request.requirements!.tools.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Text(
-                  'Tools: ${_request.requirements!.tools.join(", ")}',
+                  l10n.handymanToolsLine(_request.requirements!.tools.join(', ')),
                   style: TextStyle(fontSize: 14, color: theme.colorScheme.onSurfaceVariant),
                 ),
               ],
               if (_request.requirements!.estimatedHours != null)
                 Text(
-                  'Est. hours: ${_request.requirements!.estimatedHours}',
+                  l10n.handymanEstHoursLine('${_request.requirements!.estimatedHours}'),
                   style: TextStyle(fontSize: 14, color: theme.colorScheme.onSurfaceVariant),
                 ),
             ],
@@ -243,7 +262,7 @@ class _ServiceRequestDetailsScreenState extends State<ServiceRequestDetailsScree
                   child: ElevatedButton.icon(
                     onPressed: _openQuotes,
                     icon: const Icon(Icons.receipt_long),
-                    label: Text('View ${_request.quotesCount} Quote(s)'),
+                    label: Text(l10n.handymanViewQuotesCta(_request.quotesCount)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: theme.colorScheme.primary,
                       foregroundColor: theme.colorScheme.onPrimary,
@@ -260,7 +279,7 @@ class _ServiceRequestDetailsScreenState extends State<ServiceRequestDetailsScree
                 child: OutlinedButton.icon(
                   onPressed: _cancelRequest,
                   icon: const Icon(Icons.cancel_outlined),
-                  label: const Text('Cancel Request'),
+                  label: Text(l10n.handymanCancelRequest),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.errorColor,
                     side: const BorderSide(color: AppColors.errorColor),
@@ -278,7 +297,7 @@ class _ServiceRequestDetailsScreenState extends State<ServiceRequestDetailsScree
                 child: ElevatedButton.icon(
                   onPressed: _rateService,
                   icon: const Icon(Icons.star),
-                  label: const Text('Rate Service'),
+                  label: Text(l10n.handymanRateServiceTitle),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: theme.colorScheme.primary,
                     foregroundColor: theme.colorScheme.onPrimary,
@@ -300,7 +319,7 @@ class _ServiceRequestDetailsScreenState extends State<ServiceRequestDetailsScree
                   child: Icon(Icons.person),
                 ),
                 title: Text(
-                  _request.provider!['name']?.toString() ?? 'Provider',
+                  _request.provider!['name']?.toString() ?? l10n.handymanProviderFallback,
                 ),
                 trailing: const Icon(Icons.arrow_forward_ios, size: 14),
                 onTap: () => _openHandyman(

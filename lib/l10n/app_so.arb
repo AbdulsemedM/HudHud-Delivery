@@ -1,0 +1,859 @@
+{
+  "@@locale": "so",
+  "appTitle": "Gaadhsiinta HudHud",
+  "actionCancel": "Jooji",
+  "actionOk": "OK",
+  "actionRetry": "Isku day",
+  "actionVerify": "Xaqiiji",
+  "actionSave": "Badbaadin",
+  "actionDelete": "Tirtir",
+  "actionClose": "Xir",
+  "actionBack": "Dib u noqo",
+  "actionNext": "Xiga",
+  "actionSkip": "Ka bood",
+  "actionDone": "La sameeyay",
+  "actionResend": "Dib u soo dir Koodhka",
+  "actionUndo": "UNDO",
+  "actionOpenSettings": "Fur Settings",
+  "actionViewAll": "Eeg dhammaan",
+  "actionTrackDelivery": "Raad gaarsiinta",
+  "actionTryAgain": "Isku day mar kale",
+  "actionAddToCart": "Ku dar gaariga",
+  "actionSeeAll": "dhammaan arag",
+  "actionSending": "Diraya...",
+  "actionSignIn": "Soo gal",
+  "actionLogOut": "Ka bax",
+  "navHome": "Guriga",
+  "navCourier": "Gaadhi-qaade",
+  "navWallet": "Wallet",
+  "navTaxi": "Taksi",
+  "navProfile": "Profile",
+  "settingsProfile": "Profile",
+  "settingsAccount": "Xisaab",
+  "settingsPreferences": "Dookhyada",
+  "settingsSupport": "Taageero",
+  "settingsPersonalDetails": "Faahfaahinta Shaqsiyeed",
+  "settingsAppearance": "Muuqashada",
+  "appearanceChooseTheme": "Dooro mawduuca aad door bidayso",
+  "settingsChangePassword": "Beddel erayga sirta ah",
+  "settingsNotifications": "Ogeysiisyada",
+  "settingsSmsNotifications": "Ogeysiisyada SMS",
+  "settingsWishlist": "Liiska rajada",
+  "wishlistEmptyTitle": "No saved items yet",
+  "wishlistEmptySubtitle": "Save products you love — tap the heart on a product to add it here.",
+  "wishlistAddedSnack": "Added to wishlist",
+  "wishlistRemovedSnack": "Removed from wishlist",
+  "wishlistSignInTitle": "Sign in to use your wishlist",
+  "wishlistSignInSubtitle": "Your saved items are stored on this device when you are logged in.",
+  "wishlistLoadError": "Could not load wishlist",
+  "wishlistTooltipAdd": "Add to wishlist",
+  "wishlistTooltipRemove": "Remove from wishlist",
+  "settingsTermsConditions": "Shuruudaha & Shuruudaha",
+  "settingsFaqs": "FAQs",
+  "settingsHelpDesk": "Miiska Caawinta",
+  "settingsLogOut": "Ka bax",
+  "settingsVersion": "Nooca 1.0",
+  "settingsLanguage": "Luuqad",
+  "logoutTitle": "Ka bax",
+  "logoutMessage": "Ma hubtaa inaad doonayso inaad ka baxdo?",
+  "logoutError": "Khalad intii lagu jiray ka bixida: {error}",
+  "@logoutError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "themeLight": "Iftiin",
+  "themeDark": "Madow",
+  "themeSystem": "Nidaamka",
+  "themeSubtitleLight": "Had iyo jeer isticmaal mawduuc khafiif ah",
+  "themeSubtitleDark": "Had iyo jeer isticmaal mawduuc madow",
+  "themeSubtitleSystem": "Raac dulucda aaladda",
+  "languageTitle": "Luuqad",
+  "languageEnglish": "Ingiriis",
+  "languageAmharic": "af-soomaali",
+  "languageOromo": "Afaan Oromo",
+  "languageSomali": "Soomaali",
+  "languageArabic": "العربية (Carabi)",
+  "greetingGoodMorning": "Subax Wacan",
+  "greetingGoodAfternoon": "Galab Wacan",
+  "greetingGoodEvening": "Fiid Wanaagsan",
+  "greetingGoodNight": "Habeen Wanaagsan",
+  "userDefault": "Isticmaale",
+  "emDash": "-",
+  "locationGetting": "Helitaanka goobta...",
+  "locationAccessDenied": "Gelitaanka goobta waa la diiday",
+  "locationDisabledSnackbar": "Gelitaanka goobta waa la joojiyay Ka yeel Settings si aad u aragto booskaaga.",
+  "locationUnable": "Aan awoodin in la helo goobta",
+  "yourLocation": "Goobtaada",
+  "selectLocationTitle": "Dooro Goobta",
+  "refreshLocationTooltip": "Dib u cusboonaysii goobta hadda",
+  "searchPlacesHint": "Raadi meelaha...",
+  "searchLocationHint": "Ka raadi goob...",
+  "locationSearchScreenTitle": "Raadi goob",
+  "locationSelectedHeading": "Goobta la doortay",
+  "locationCoordinatesFormat": "Xuduudaha: {lat}, {lng}",
+  "@locationCoordinatesFormat": {
+    "placeholders": {
+      "lat": {
+        "type": "String"
+      },
+      "lng": {
+        "type": "String"
+      }
+    }
+  },
+  "locationConfirmButton": "Xaqiiji goobta",
+  "locationSearchNoResults": "Goob lama helin",
+  "locationCurrentPositionFailed": "Lama helin goobta hadda",
+  "currentLocationMap": "Goobta hadda",
+  "verificationStatus": "Heerka xaqiijinta",
+  "verifyEmail": "Xaqiiji iimaylka",
+  "verifyPhone": "Xaqiiji Taleefanka",
+  "verifyEmailDialogTitle": "Xaqiiji iimaylka",
+  "verifyPhoneDialogTitle": "Xaqiiji Taleefanka",
+  "verificationCodeLabel": "Koodhka xaqiijinta",
+  "verificationCodeHintExample": "tusaale. 111248",
+  "verificationCodeHintSms": "tusaale. 056869",
+  "verifyEmailBody": "Waxaan u dirnay summada xaqiijinta {email}. Hoos ka gal",
+  "@verifyEmailBody": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "verifyPhoneBody": "Waxaan u dirnay summada xaqiijinta {phone}. Hoos ka gal",
+  "@verifyPhoneBody": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "enterVerificationCodeError": "Geli lambarka xaqiijinta",
+  "codeSentEmailDefault": "Koodhka ayaa lagu soo diray emailkaaga",
+  "codeSentPhoneDefault": "Koodhka ayaa lagu soo diray taleefankaaga.",
+  "emailVerifiedSuccess": "Iimaylku waa la xaqiijiyay si guul leh!",
+  "phoneVerifiedSuccess": "Lambarka taleefanka ayaa si guul leh loo xaqiijiyay!",
+  "failedToLoadOrders": "Ku guuldareystay in la soo dajiyo dalabaadka: {error}",
+  "@failedToLoadOrders": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "homeWhatToDo": "Maxaad jeclaan lahayd inaad sameyso?",
+  "homeFood": "Cunto",
+  "homeFoodSubtitle": "Ka dalbo raashinka iibiyeyaasha aad jeceshahay.",
+  "homeCourierSubtitle": "Dalbo adeegyada qaadista si loo soo qaado oo lagu dejiyo.",
+  "homeTaxi": "Taksi",
+  "homeTaxiSubtitle": "Codso tagsi qiimo jaban meel kasta.",
+  "homeHandyman": "Handyman",
+  "homeHandymanSubtitle": "Codso ragga waxtarka leh adeegyada caadiga ah ee guriga.",
+  "history": "Taariikhda",
+  "featuresSectionTitle": "Maxaad ku samayn kartaa HudHud",
+  "featureFoodGroceries": "Cuntada & raashinka",
+  "featureFoodGroceriesDesc": "Ka dalbo iibiyeyaasha aad jeceshahay",
+  "featureCourierTitle": "Gaadhi-qaade",
+  "featureCourierDesc": "Soo qaadis iyo dejin.",
+  "featureTaxiTitle": "Taksi",
+  "featureTaxiDesc": "Codso raacid meel kasta",
+  "featureHandymanTitle": "Handyman",
+  "featureHandymanDesc": "Adeegyada guriga ee baahida.",
+  "featureTrackOrders": "Raad raac dalabaadka",
+  "featureTrackOrdersDesc": "Xaaladda gaarsiinta waqtiga-dhabta ah.",
+  "courierWhatToDo": "Maxaad jeclaan lahayd inaad sameyso?",
+  "courierActiveDelivery": "Bixinta Firfircoon",
+  "courierNoHistory": "Taariikhda keenista ma jirto",
+  "courierHistoryEmptySubtitle": "keenistaadii hore waxay ka muuqan doontaa halkan",
+  "courierInstantTitle": "Bixinta degdega ah",
+  "courierInstantSubtitle": "Warbixiyuhu waxa uu qaataa baakaddaada oo keliya oo isla markaaba wax keena.",
+  "courierScheduleTitle": "Jadwalka Gaarsiinta",
+  "courierScheduleSubtitle": "Warqaaduhu wuxuu u imanayaa inuu soo qaado taariikhdaada iyo wakhtigaaga cayiman.",
+  "failedToLoadHistory": "Ku guuldareystay in la soo geliyo taariikhda",
+  "recipientLabel": "qaataha: {name}",
+  "@recipientLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "inProgress": "Oo socda",
+  "loginTitle": "Soo gal",
+  "loginSubtitle": "Fadlan geli waraaqahaaga aqoonsiga si aad u gasho akoonkaaga iyo dhammaan adeegyada jira",
+  "loginContinueAsGuest": "Sii wad marti ahaan",
+  "labelEmailOrPhone": "Cinwaanka iimaylka ama lambarka telefoonka",
+  "hintEmailPhone": "Tusaale. JohnDoe@gmail.com",
+  "labelPassword": "Furaha",
+  "hintPassword": "Geli erayga sirta ah",
+  "validationEmailOrPhoneRequired": "Fadlan geli emailkaaga ama lambarka taleefankaaga",
+  "validationEmailOrPhoneInvalid": "Fadlan geli iimayl ama lambar taleefoon sax ah",
+  "validationPasswordRequired": "Fadlan geli eraygaaga sirta ah",
+  "validationPasswordMin": "Erayga sirta ah waa inuu ahaadaa ugu yaraan 8 xaraf",
+  "validationEmailRequired": "Fadlan gali iimaylkaga",
+  "validationEmailInvalid": "Fadlan geli ciwaan email sax ah",
+  "mainDemoTitle": "HudHud Delivery Demo",
+  "toggleThemeTooltip": "Beddel Mawduuca",
+  "themeSwitched": "Mawduuca waxa loo beddelay {mode}",
+  "@themeSwitched": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "themeModeSet": "Habka mawduuca waxaa loo dejiyay {mode}",
+  "@themeModeSet": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "welcomeTitle": "Ku Soo Dhawoow Gaadhista HudHud!",
+  "welcomeBody": "Kani waa bandhig muujinaya naqshadda nadiifka ah ee leh badhamada gaarka ah, baararka fudud, iyo beddelka mawduuca.",
+  "currentThemeLabel": "Mawduuca hadda: {mode}",
+  "@currentThemeLabel": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "counterDemo": "Counter Demo",
+  "counterDecreased": "Xisaabiyaha ayaa hoos u dhacay {count}",
+  "@counterDecreased": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "counterIncreased": "Miisaanka ayaa kordhay ilaa {count}",
+  "@counterIncreased": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "buttonShowcase": "Bandhiga badhanka",
+  "primaryButton": "Badhanka koowaad",
+  "primaryButtonPressed": "Badhanka koowaad waa la riixay!",
+  "largePrimaryButton": "Badhanka Hoose ee Weyn",
+  "largePrimaryPressed": "Badhan weyn oo hoose oo leh summada la riixay!",
+  "smallButton": "Yar",
+  "smallButtonPressed": "Badhan yar ayaa la riixay!",
+  "iconButtonPressed": "Badhanka astaanta ayaa la riixay!",
+  "secondaryButton": "Badhanka Labaad",
+  "secondaryPressed": "Badhanka labaad waa la riixay!",
+  "largeSecondaryButton": "Badhanka Sare ee Weyn",
+  "largeSecondaryPressed": "Badhan sare oo weyn ayaa la riixay!",
+  "smallSecondary": "Dugsiga Sare",
+  "smallSecondaryPressed": "Badhan yar oo labaad ayaa la riixay!",
+  "ghostButton": "Badhanka Ruuxa",
+  "ghostPressed": "Badhanka rooxaanta waa la riixay!",
+  "snackbarShowcase": "Bandhiga Bar-cuntada",
+  "snackbarSuccess": "Tani waa fariin guuleed!",
+  "snackbarSuccessLabel": "Guul",
+  "snackbarError": "Tani waa fariin qalad ah!",
+  "snackbarErrorLabel": "Khalad",
+  "snackbarWarning": "Tani waa fariin digniin ah!",
+  "snackbarWarningLabel": "Digniin",
+  "snackbarInfo": "Tani waa fariin macluumaad ah!",
+  "snackbarInfoLabel": "Xog",
+  "undoActionPressed": "Ka noqo tallaabada la riixay",
+  "loadingData": "Soodejinaya xogta...",
+  "showLoadingButton": "Muuji loading",
+  "dataLoadedSuccess": "Xogta si guul leh ayaa loo shubay!",
+  "hideSnackbar": "Qari bar-cunista",
+  "apiDemo": "API Demo",
+  "sampleLogin": "Tusaalaha Gelitaanka",
+  "loginSuccessWelcome": "Gal guul Soo dhawoow{name}",
+  "@loginSuccessWelcome": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "loginFailed": "Gelitaanku wuu fashilmay: {error}",
+  "@loginFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "getUserProfile": "Hel Xogta Isticmaalaha",
+  "profileRefreshed": "Xogta si guul leh ayaa loo cusbooneysiiyay!",
+  "profileRefreshFailed": "Ku guuldareystay inuu dib u cusboonaysiiyo astaanta guud: {error}",
+  "@profileRefreshFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "currentUser": "Isticmaalaha hadda:",
+  "nameLabel": "Magaca:",
+  "emailLabel": "Iimayl:",
+  "roleLabel": "Doorka:",
+  "logoutSuccess": "Si guul leh uga soo baxay!",
+  "errorPrefix": "Khalad: {message}",
+  "@errorPrefix": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "utilityButtonsDemo": "Badhamada Utility Demo",
+  "utilityPrimary": "Badhanka Koowaad ee Utility",
+  "utilityPrimaryPressed": "Badhanka aasaasiga ah ee utility waa la riixay!",
+  "utilitySecondary": "Badhanka Sare ee Utility",
+  "utilitySecondaryPressed": "Badhanka sare ee utility waa la riixay!",
+  "textButton": "Badhanka qoraalka",
+  "textButtonPressed": "Badhanka qoraalka waa la riixay!",
+  "sharePressed": "La wadaag badhanka la riixay!",
+  "gradientButton": "Badhanka Gradient",
+  "gradientPressed": "Badhanka gradient waa la riixay!",
+  "counterReset": "Dib u dejintii!",
+  "decrease": "Hoos u dhac",
+  "increase": "Kordhi",
+  "orderStatusPending": "La sugayo",
+  "orderStatusConfirmed": "La xaqiijiyay",
+  "orderStatusPreparing": "Diyaarinta",
+  "orderStatusReadyForPickup": "U diyaar ah qaadista",
+  "orderStatusOutForDelivery": "U Banaan Bixinta",
+  "orderStatusDelivered": "la keenay",
+  "orderStatusCancelled": "La joojiyay",
+  "orderStatusTextPending": "Dalabka la sugayo",
+  "orderStatusTextAccepted": "Amarka waa la aqbalay",
+  "orderStatusTextPreparing": "Dalabka Diyaarinta",
+  "orderStatusTextReadyPickup": "U diyaar ah qaadista",
+  "orderStatusTextPickedUp": "Dalabka waa la qaaday",
+  "orderStatusTextDelivered": "Dalabka la keenay",
+  "orderStatusTextCancelled": "Dalabka waa la joojiyay",
+  "paymentCashOnDelivery": "Lacag bixinta",
+  "paymentPaidOnline": "Kharashka Onlineka ah",
+  "estimatedDeliveryPlaceholder": "30-45 daqiiqo",
+  "searchRestaurantsHint": "Makhaayadaha magac ku raadi",
+  "enterPromoCode": "Geli Koodhka xayaysiiska",
+  "additionalNote": "Qoraal dheeraad ah",
+  "enterCustomTip": "Geli qaddarka caadooyinka gaarka ah",
+  "hintFirstName": "Tusaale. John",
+  "hintLastName": "Tusaale. Doe",
+  "hintEmailExample": "Tusaale. JohnDoe@gmail.com",
+  "hintPhoneExample": "Tusaale. 0712345678",
+  "hintEnterPassword": "Geli erayga sirta ah",
+  "pickupLocation": "Goobta laga soo qaadayo",
+  "dropOff": "Soo deg",
+  "amount": "Qadarka",
+  "enterAmount": "Geli cadadka",
+  "wallet": "Wallet",
+  "paymentMethod": "Habka Lacag-bixinta",
+  "transactionId": "Aqoonsiga wax kala iibsiga",
+  "transactionIdHint": "Laga soo bilaabo albaabka lacag bixinta",
+  "cardLast4": "Kaadhka ugu dambeeya 4 lambar",
+  "cardLast4Hint": "4242",
+  "cardBrand": "Summada kaadhka",
+  "cardBrandHint": "fiisaha, mastercard",
+  "addFundsTitle": "Ku dar Lacag",
+  "selectPaymentMethod": "Dooro habka lacag bixinta",
+  "searchCountry": "Dalka ka raadi",
+  "categoryGrocery": "Raashinka",
+  "categoryAmerican": "Maraykan",
+  "categoryConvenience": "Raaxo",
+  "categoryAlcohol": "Khamriga",
+  "categoryPetSupplies": "Sahayda xayawaanka",
+  "categoryMore": "Wax badan",
+  "pickupLocationLabel": "Goobta laga soo qaadayo",
+  "deliveryLocationLabel": "Goobta lagu geynayo",
+  "vehicleMotorcycle": "Baaskiil",
+  "vehicleCar": "Baabuur",
+  "vehicleVan": "Van",
+  "fromWallet": "Laga soo bilaabo Wallet",
+  "enterWithdrawAmount": "Geli cadadka aad kala baxayso",
+  "withdrawalMethod": "Habka Ka-noqoshada",
+  "requestTitle": "Ciwaanka",
+  "requestTitleHint": "tusaale. Hagaaji tuubada soo daadanaysa",
+  "requestDescription": "Sharaxaada",
+  "requestDescriptionHint": "Sharax dayactirka ama dayactirka loo baahan yahay",
+  "requestLocation": "Goobta",
+  "requestLocationHint": "Taabo si aad u doorato goobta",
+  "scheduledDateTime": "Taariikhda & Waqtiga la qorsheeyay",
+  "estimatedCostOptional": "Qiimaha la qiyaasay (ikhtiyaar)",
+  "estimatedCostHint": "tusaale. 100",
+  "toolsNeeded": "Qalabka loo baahan yahay (comma-kala-saar)",
+  "toolsNeededHint": "tusaale. xirmo furaha, cajalad tuubiste",
+  "estimatedHoursOptional": "Saacadaha la qiyaasay (ikhtiyaari)",
+  "estimatedHoursHint": "tusaale. 2",
+  "commentOptional": "Faallo (ikhtiyaar)",
+  "commentExperienceHint": "La wadaag khibradaada...",
+  "commentHandymanHint": "tusaale. Aad u xirfad iyo edeb leh",
+  "whatSending": "Waxa aad dirayso",
+  "recipient": "Qaataha",
+  "recipientContactNumber": "Lambarka xiriirka qaataha",
+  "payment": "Lacag bixinta",
+  "commentsIfAny": "Commentigaga hadii ay jiraan....",
+  "walletNotFound": "Wallet lama helin",
+  "quantity": "Tirada",
+  "packageWeightKg": "Culayska Xidhmada (kg)",
+  "packageDescriptionOptional": "Sharaxaada Xidhmada (ikhtiyaar)",
+  "me": "Aniga",
+  "recipientNames": "Magacyada qaataha",
+  "imagePickerTodo": "Sawir qaade ayaa la hirgelin doonaa",
+  "pleaseSelectItemType": "Fadlan door nooca shayga",
+  "pleaseEnterQuantity": "Fadlan geli tirada",
+  "pleaseEnterValidWeight": "Fadlan geli xirmo miisaan sax ah (kg)",
+  "pleaseSelectPaymentType": "Fadlan door nooca lacag bixinta",
+  "pleaseEnterRecipientName": "Fadlan geli magaca qaataha",
+  "pleaseEnterRecipientPhone": "Fadlan geli lambarka taleefanka qaataha",
+  "walletDetailName": "Magaca",
+  "walletDetailType": "Nooca",
+  "walletDetailScreenTitle": "Faahfaahinta boorsada",
+  "walletInformation": "Macluumaadka boorsada",
+  "walletDetailCurrencyLabel": "Lacagta",
+  "walletMyBalanceLabel": "Hadhayga",
+  "walletMyWalletsSection": "Boorsadahayga",
+  "walletRecentTransactions": "Macaamil dhawaan",
+  "walletSeeAll": "Arag dhammaan",
+  "walletNoTransactionsYet": "Weli macaamil ma jiro",
+  "walletAddMoney": "Lacag ku dar",
+  "walletSendMoney": "Lacag dir",
+  "withdrawFundsTitle": "Lacag soo saar",
+  "walletNoWalletsForWithdraw": "Boorsado laga soo saari karo ma jiraan",
+  "walletNoPaymentMethods": "Habab lacag bixineed ma jiraan",
+  "validationEnterValidAmount": "Geli lacag sax ah",
+  "validationAmountExceedsWalletBalance": "Lacagtu way ka badan tahay hadhayga boorsada",
+  "withdrawAction": "Soo saar",
+  "selectWalletPrompt": "Dooro boorsad",
+  "selectWithdrawalMethodPrompt": "Dooro habka soo saarista",
+  "walletDefaultTransactionLabel": "Macaamil",
+  "walletTypeCurrency": "{type} • {currency}",
+  "@walletTypeCurrency": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "currencyEtb": "ETB",
+  "balance": "Dheelitiran",
+  "created": "Abuuray",
+  "productNotFound": "Alaabta lama helin",
+  "featured": "Sifaysan",
+  "categories": "Qaybaha",
+  "orders": "Dalabka",
+  "fruitsVegetables": "Miraha & Khudaarta",
+  "beverages": "Cabbitaannada",
+  "noProductsYet": "Weli wax alaab ah ma jiraan",
+  "noProducts": "Wax alaab ah malaha",
+  "searchStoresHint": "Ka raadi dukaamada iyo alaabta...",
+  "failedToAddFunds": "Ku guuldareystay in lagu daro lacagaha",
+  "failedToWithdrawFunds": "Ku guul daraystay in uu la baxo lacagaha",
+  "currentPassword": "Furaha hadda jira",
+  "newPassword": "Furaha cusub",
+  "confirmNewPassword": "Xaqiiji erayga sirta ah ee cusub",
+  "firstName": "Magaca Hore",
+  "lastName": "Magaca Dambe",
+  "email": "iimaylka",
+  "fullName": "Magaca oo buuxa",
+  "phoneNumber": "Lambarka taleefanka",
+  "emailAddress": "Ciwaanka iimaylka",
+  "dateOfBirth": "Taariikhda dhalashada",
+  "referralCode": "Koodhka gudbinta",
+  "searchQuestions": "Raadi su'aal",
+  "whereTo": "Xagee loo socdaa?",
+  "taxiCurrentLocation": "Goobta hadda",
+  "taxiCouldNotGetLocationDetails": "Faahfaahinta goobta lama helin",
+  "taxiTimeNow": "Hadda",
+  "taxiScheduleForLater": "Jadwal waqti dambe",
+  "taxiActiveRide": "Safar firfircoon",
+  "taxiEstFare": "Qiimaha qiyaasta",
+  "taxiTrackRide": "Raadi safarka",
+  "taxiRefreshStatus": "Cusboonaysii xaaladda",
+  "taxiCarsNearby": "{count, plural, =1{1 baabuur dhow} other{{count} baabuurro dhow}}",
+  "@taxiCarsNearby": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "taxiMinutesWait": "~{minutes} dq",
+  "@taxiMinutesWait": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "taxiBrandHudHud": "HUDHUD",
+  "taxiBrandDelivery": " gaarsiin",
+  "taxiDistanceKm": "{distance} KM",
+  "@taxiDistanceKm": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "taxiGoogleMapsNotConfigured": "Khariidadaha Google lama diyaarin. Ku dar GOOGLE_MAPS_API_KEY oo dib u bilow app-ka.",
+  "taxiStatusFindingDriver": "Waa la raadinayaa darawal…",
+  "taxiStatusDriverOnTheWay": "Darawalku wuu waddo ku jiraa",
+  "taxiStatusDriverArrived": "Darawalku wuu yimid",
+  "taxiStatusTripInProgress": "Safarku wuu socdaa",
+  "taxiStatusActiveRide": "Safar firfircoon",
+  "taxiPickup": "Qaadista",
+  "taxiDestination": "Meesha loo socdo",
+  "taxiFareAmount": "ETB {amount}",
+  "@taxiFareAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "taxiErrorWithDetails": "Khalad: {details}",
+  "@taxiErrorWithDetails": {
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "profileUpdatedSuccess": "Xogta si guul leh ayaa loo cusboonaysiiyay",
+  "profileUpdateFailed": "Ku guuldareystay in la cusboonaysiiyo astaanta guud: {error}",
+  "@profileUpdateFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "profileLoadFailed": "Ku guuldareystay in la soo geliyo astaanta guud: {error}",
+  "@profileLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "servicesTryAgain": "Isku day mar kale",
+  "unexpectedCheckoutError": "Khalad lama filaan ah ayaa dhacay: {error}",
+  "@unexpectedCheckoutError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "failedOrderHistory": "Ku guuldareystay in la soo dajiyo dalabka taariikhda: {error}",
+  "@failedOrderHistory": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "timelineOrderPlaced": "Dalabka La Dhigay",
+  "timelineOrderConfirmed": "Dalabka La Xaqiijiyay",
+  "timelinePreparing": "Diyaarinta",
+  "timelineReadyPickup": "U diyaar ah qaadista",
+  "timelineOutDelivery": "U Banaan Bixinta",
+  "timelineDelivered": "la keenay",
+  "addReviewOptional": "Kudar dulmar (ikhtiyaar)",
+  "pleaseSpecify": "Fadlan sheeg...",
+  "courierNumber": "Lambarka wax-qaadista",
+  "from": "Ka",
+  "to": "Ku",
+  "deliveryDetailsStatus": "Xaalada",
+  "deliveryDetailsPickup": "Qaadista",
+  "deliveryDetailsDropoff": "Dhisidda",
+  "labelLocation": "Goobta",
+  "labelInstructions": "Tilmaamaha",
+  "labelReceiver": "qaataha",
+  "labelPhone": "Taleefanka",
+  "labelPackage": "Xidhmada",
+  "labelType": "Nooca",
+  "labelDescription": "Sharaxaada",
+  "labelWeight": "Miisaanka",
+  "labelSpecialInstructions": "Tilmaamaha gaarka ah",
+  "paymentAndCost": "Bixinta & Qiimaha",
+  "labelPaymentMethod": "Habka lacag bixinta",
+  "labelEstimatedCost": "Qiimaha la qiyaasay",
+  "labelPaymentStatus": "Heerka lacag bixinta",
+  "timeline": "Jadwalka waqtiga",
+  "labelScheduledPickup": "Qaadista la qorsheeyay",
+  "labelScheduledDelivery": "gaarsiinta la qorsheeyay",
+  "labelDelivered": "la keenay",
+  "noEmailAvailable": "Iimayl lama hayo",
+  "noPhoneAvailable": "Ma jiro lambar telefoon oo la heli karo",
+  "emailVerificationTitle": "Xaqiijinta iimaylka",
+  "phoneVerificationTitle": "Xaqiijinta Taleefanka",
+  "enterEmailCode": "Geli lambarka iimaylka",
+  "enterSmsCode": "Geli lambarka SMS",
+  "noEmailAvailableShort": "Iimayl lama hayo",
+  "addMoney": "Lacag ku darso",
+  "sendMoney": "Lacag Dir",
+  "exitAppTitle": "Exit App",
+  "exitAppMessage": "Are you sure you want to exit the app?",
+  "actionExit": "Exit",
+  "loginNoAccountPrompt": "Don't have an account? ",
+  "loginOrContinueWith": "or continue with",
+  "continueWithGoogle": "Continue with Google",
+  "actionSignUp": "Sign Up",
+  "paymentScreenTitle": "Payment",
+  "paymentChooseMethodHeading": "Choose Payment Method",
+  "paymentEthiopianOptionsSubtitle": "Select your preferred Ethiopian payment option",
+  "paymentLoadMethodsError": "Failed to load payment methods",
+  "paymentSelectMethodFirst": "Please select a payment method",
+  "paymentMethodUnavailable": "Selected payment method is no longer available",
+  "paymentFailedWithError": "Payment failed: {error}",
+  "@paymentFailedWithError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentPayAmountBr": "Pay {amount} Br",
+  "@paymentPayAmountBr": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentSuccessTitle": "Payment Successful!",
+  "paymentTransactionIdLabel": "Transaction ID: {id}",
+  "@paymentTransactionIdLabel": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "continueShopping": "Continue Shopping",
+  "viewOrder": "View Order",
+  "handymanServicesTitle": "Handyman Services",
+  "handymanWhatToDo": "What would you like to do?",
+  "handymanMyRequests": "My Requests",
+  "handymanNoRequestsYet": "No service requests yet",
+  "handymanNoRequestsSubtitle": "Create a request to get quotes from handymen",
+  "handymanCreateNewRequest": "Create New Request",
+  "handymanCreateRequestSubtitle": "Describe your repair or maintenance need and get quotes from handymen.",
+  "instantDeliveryTitle": "Instant Delivery",
+  "tapToSelectPickup": "Tap to select pickup location",
+  "tapToSelectDelivery": "Tap to select delivery location",
+  "vehicleType": "Vehicle Type",
+  "selectPickupAndDelivery": "Please select both pickup and delivery locations",
+  "actionContinue": "Continue",
+  "errorGettingAddress": "Error getting address: {error}",
+  "@errorGettingAddress": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "googleMapsIosMissingKey": "Google Maps is not configured on iOS. Add GOOGLE_MAPS_API_KEY and restart the app.",
+  "dealsModalTitle": "Deals on deals",
+  "dealsModalSubtitle": "Get upto 50% off on your first Courier delivery fee!",
+  "dealsModalClaim": "Claim",
+  "dealsModalClose": "Maybe later",
+  "orderHistoryEmptyTitle": "No orders yet",
+  "orderHistoryEmptySubtitle": "Browse categories to place your first order.",
+  "orderHistoryEmptyHint": "Your order history will appear here once you place an order",
+  "browseDelivery": "Browse Delivery",
+  "browseCategories": "Browse categories",
+  "handymanQuoteCount": "{count} quote(s)",
+  "@handymanQuoteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "orderDetailsLoadingMessage": "Loading order details...",
+  "orderDetailsLoadErrorTitle": "Error loading order details",
+  "orderAppBarTitle": "Order #{orderNumber}",
+  "@orderAppBarTitle": {
+    "placeholders": {
+      "orderNumber": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentSummaryTitle": "Payment Summary",
+  "paymentSubtotalLabel": "Subtotal",
+  "paymentTotalAmountLabel": "Total Amount",
+  "paymentProcessingTitle": "Processing Payment",
+  "paymentProcessingMessage": "Please wait while we process your payment via {method}...",
+  "@paymentProcessingMessage": {
+    "placeholders": {
+      "method": {
+        "type": "String"
+      }
+    }
+  },
+  "courierRecipientLine": "Recipient: {name}",
+  "@courierRecipientLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "courierTrackDeliveryCta": "Track delivery",
+  "courierDeliveryStatusInProgress": "In progress",
+  "labelDate": "Date",
+  "hintDateFormat": "DD/MM/YYYY",
+  "labelTime": "Time",
+  "hintTimeFormat": "HH:MM",
+  "meridiemAm": "am",
+  "meridiemPm": "pm",
+  "scheduleSelectDateTime": "Fadlan dooro taariikhda iyo waqtiga gaarsiinta",
+  "scheduleInvalidDateTime": "Qaab taariikh ama waqti aan sax ahayn",
+  "servicesScreenTitle": "Our Services",
+  "servicesWhatCanWeHelp": "What can we help you with?",
+  "servicesAvailableCount": "{count} services available",
+  "@servicesAvailableCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "servicesErrorTitle": "Something went wrong",
+  "servicesEmptyTitle": "No services yet",
+  "servicesEmptySubtitle": "Check back later for new services",
+  "handymanNewRequestTitle": "New Service Request",
+  "validationHandymanSelectLocation": "Please select a location",
+  "validationHandymanSelectDateTime": "Please select date and time",
+  "validationHandymanSelectSkill": "Please select at least one skill",
+  "handymanRequestCreatedToast": "Request created",
+  "handymanRequestCreateFailed": "Failed to create request",
+  "labelTitle": "Title",
+  "hintTitleHandymanExample": "e.g. Fix leaking faucet",
+  "validationTitleRequired": "Title is required",
+  "validationDescriptionRequired": "Description is required",
+  "hintDescribeRepair": "Describe the repair or maintenance needed",
+  "handymanTapToSelectLocation": "Tap to select location",
+  "labelScheduledDateTime": "Scheduled Date & Time",
+  "selectDateAndTime": "Select date and time",
+  "labelEstimatedCostOptional": "Estimated Cost (optional)",
+  "hintCostExample": "e.g. 100",
+  "handymanSkillsNeeded": "Skills needed",
+  "handymanSkillPlumbing": "Plumbing",
+  "handymanSkillElectrical": "Electrical",
+  "handymanSkillCarpentry": "Carpentry",
+  "handymanSkillPainting": "Painting",
+  "handymanSkillGeneral": "General",
+  "labelToolsCommaSeparated": "Tools needed (comma-separated)",
+  "hintToolsHandymanExample": "e.g. wrench set, plumber's tape",
+  "labelEstimatedHoursOptional": "Estimated hours (optional)",
+  "hintHoursExample": "e.g. 2",
+  "handymanCreateRequestCta": "Create Request",
+  "handymanDialogCancelRequestTitle": "Cancel Request",
+  "handymanDialogCancelRequestMessage": "Are you sure you want to cancel this service request?",
+  "actionNo": "No",
+  "actionYesCancel": "Yes, Cancel",
+  "handymanRequestCancelled": "Request cancelled",
+  "handymanCancelFailed": "Failed to cancel",
+  "handymanLabelScheduled": "Scheduled",
+  "handymanSectionRequirements": "Requirements",
+  "handymanToolsLine": "Tools: {tools}",
+  "@handymanToolsLine": {
+    "placeholders": {
+      "tools": {
+        "type": "String"
+      }
+    }
+  },
+  "handymanEstHoursLine": "Est. hours: {hours}",
+  "@handymanEstHoursLine": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "handymanViewQuotesCta": "View {count} quote(s)",
+  "@handymanViewQuotesCta": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "handymanCancelRequest": "Cancel Request",
+  "handymanRateServiceTitle": "Rate Service",
+  "handymanProviderFallback": "Provider",
+  "handymanQuotesTitle": "Quotes",
+  "handymanAcceptQuoteTitle": "Accept Quote",
+  "handymanAcceptQuoteMessage": "Accept {amount} from {name}?",
+  "@handymanAcceptQuoteMessage": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "actionAccept": "Accept",
+  "actionReject": "Reject",
+  "handymanQuoteAccepted": "Quote accepted",
+  "handymanAcceptQuoteFailed": "Failed to accept",
+  "handymanRejectQuoteTitle": "Reject Quote",
+  "handymanRejectQuoteMessage": "Reject quote from {name}?",
+  "@handymanRejectQuoteMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "handymanQuoteRejected": "Quote rejected",
+  "handymanRejectQuoteFailed": "Failed to reject",
+  "handymanNoQuotesYet": "No quotes yet",
+  "handymanNoQuotesSubtitle": "Handymen will send quotes soon",
+  "handymanViewProfile": "View Profile",
+  "handymanHowWasService": "How was the service?",
+  "handymanRateTheHandyman": "Rate the handyman",
+  "handymanCommentAboutOptional": "Comment about handyman (optional)",
+  "handymanRatingPublic": "Make my rating public",
+  "handymanSubmitRating": "Submit Rating",
+  "ratingThankYou": "Thank you for your rating!",
+  "ratingSubmitFailed": "Failed to submit rating",
+  "handymanNotFound": "Handyman not found",
+  "handymanProfileTitle": "Handyman Profile",
+  "handymanAbout": "About",
+  "handymanSkillsHeading": "Skills",
+  "handymanHourlyRateLabel": "Hourly Rate",
+  "handymanExperienceLabel": "Experience",
+  "handymanExperienceYears": "{years} years",
+  "@handymanExperienceYears": {
+    "placeholders": {
+      "years": {
+        "type": "String"
+      }
+    }
+  },
+  "labelAddress": "Address",
+  "handymanStatsHeading": "Stats",
+  "handymanStatServices": "Services",
+  "handymanStatRating": "Rating",
+  "handymanStatResponse": "Response"
+}

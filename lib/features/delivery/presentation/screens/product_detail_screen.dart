@@ -55,13 +55,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
@@ -73,10 +74,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         ],
         title: Text(
           _product?.name ?? 'Product',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF2C3E50),
+            color: colorScheme.onSurface,
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
@@ -96,7 +97,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.grey[600],
+                            color: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.color
+                                ?.withOpacity(0.8),
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -123,11 +128,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 fit: BoxFit.cover,
                                 errorBuilder: (_, __, ___) => Container(
                                   height: 280,
-                                  color: Colors.grey[200],
-                                  child: const Icon(
+                                  color: colorScheme.surfaceContainerHighest,
+                                  child: Icon(
                                     Icons.shopping_bag,
                                     size: 80,
-                                    color: Colors.grey,
+                                    color: colorScheme.onSurfaceVariant,
                                   ),
                                 ),
                               ),
@@ -135,11 +140,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           else
                             Container(
                               height: 280,
-                              color: Colors.grey[200],
-                              child: const Icon(
+                              color: colorScheme.surfaceContainerHighest,
+                              child: Icon(
                                 Icons.shopping_bag,
                                 size: 80,
-                                color: Colors.grey,
+                                color: colorScheme.onSurfaceVariant,
                               ),
                             ),
                           Padding(
@@ -149,10 +154,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               children: [
                                 Text(
                                   _product!.name ?? 'Product',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 22,
                                     fontWeight: FontWeight.bold,
-                                    color: Color(0xFF2C3E50),
+                                    color: colorScheme.onSurface,
                                   ),
                                 ),
                                 const SizedBox(height: 12),
@@ -173,7 +178,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                         _product!.formatted_original_price!,
                                         style: TextStyle(
                                           fontSize: 14,
-                                          color: Colors.grey[600],
+                                          color: colorScheme.onSurfaceVariant,
                                           decoration: TextDecoration.lineThrough,
                                         ),
                                       ),
@@ -186,7 +191,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     _product!.description!,
                                     style: TextStyle(
                                       fontSize: 14,
-                                      color: Colors.grey[700],
+                                      color: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.color
+                                          ?.withOpacity(0.9),
                                       height: 1.5,
                                     ),
                                   ),

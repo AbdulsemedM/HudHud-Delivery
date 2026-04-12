@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
+import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/app/services/location_service.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
@@ -25,7 +27,7 @@ class _CourierScreenState extends State<CourierScreen> {
   final AuthService _authService = AuthService();
   late final CourierRepository _courierRepository;
   UserModel? _currentUser;
-  String _currentLocation = 'Getting location...';
+  String _currentLocation = '';
   bool _isLoadingLocation = true;
   List<Map<String, dynamic>> _deliveries = [];
   bool _isLoadingDeliveries = true;
@@ -90,7 +92,7 @@ class _CourierScreenState extends State<CourierScreen> {
         setState(() {
           _deliveries = [];
           _isLoadingDeliveries = false;
-          _deliveriesError = 'Failed to load history';
+          _deliveriesError = context.l10n.failedToLoadHistory;
         });
       }
     }
@@ -190,7 +192,7 @@ class _CourierScreenState extends State<CourierScreen> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _currentLocation = 'Unable to get location';
+          _currentLocation = context.l10n.locationUnable;
           _isLoadingLocation = false;
         });
       }
@@ -199,6 +201,7 @@ class _CourierScreenState extends State<CourierScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
@@ -211,7 +214,7 @@ class _CourierScreenState extends State<CourierScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               UserProfileHeader(
-                name: _currentUser?.name ?? 'User',
+                name: _currentUser?.name ?? l10n.userDefault,
                 location: _currentLocation,
                 isLoadingLocation: _isLoadingLocation,
                 onLocationTap: () async {
@@ -233,7 +236,7 @@ class _CourierScreenState extends State<CourierScreen> {
               const SizedBox(height: 24),
               // What would you like to do section
               Text(
-                'What would you like to do?',
+                l10n.courierWhatToDo,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -243,6 +246,7 @@ class _CourierScreenState extends State<CourierScreen> {
               const SizedBox(height: 16),
               // Instant Delivery Card
               _InstantDeliveryCard(
+                l10n: l10n,
                 onTap: () {
                   Navigator.push(
                     context,
@@ -255,6 +259,7 @@ class _CourierScreenState extends State<CourierScreen> {
               const SizedBox(height: 16),
               // Schedule Delivery Card
               _ScheduleDeliveryCard(
+                l10n: l10n,
                 onTap: () {
                   Navigator.push(
                     context,
@@ -266,15 +271,16 @@ class _CourierScreenState extends State<CourierScreen> {
               ),
               if (!_isLoadingActiveDelivery && _activeDelivery != null) ...[
                 const SizedBox(height: 24),
-                const Text(
-                  'Active Delivery',
-                  style: TextStyle(
+                Text(
+                  l10n.courierActiveDelivery,
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 12),
                 _ActiveDeliveryCard(
+                  l10n: l10n,
                   delivery: _activeDelivery!,
                   onTap: () => _navigateToTracking(_activeDelivery!),
                 ),
@@ -284,9 +290,9 @@ class _CourierScreenState extends State<CourierScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'History',
-                    style: TextStyle(
+                  Text(
+                    l10n.history,
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                     ),
@@ -296,7 +302,7 @@ class _CourierScreenState extends State<CourierScreen> {
                       // Handle view all
                     },
                     child: Text(
-                      'View all',
+                      l10n.actionViewAll,
                       style: TextStyle(
                         color: AppColors.primaryColor,
                         fontSize: 14,
@@ -359,7 +365,7 @@ class _CourierScreenState extends State<CourierScreen> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'No delivery history',
+                          l10n.courierNoHistory,
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -368,7 +374,7 @@ class _CourierScreenState extends State<CourierScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Your past deliveries will appear here',
+                          l10n.courierHistoryEmptySubtitle,
                           style: TextStyle(
                             fontSize: 14,
                             color: scheme.onSurfaceVariant,
@@ -417,9 +423,10 @@ class _CourierScreenState extends State<CourierScreen> {
 
 // Instant Delivery Card - matches design: light orange card, black title, faded bolt decoration
 class _InstantDeliveryCard extends StatelessWidget {
+  final AppLocalizations l10n;
   final VoidCallback onTap;
 
-  const _InstantDeliveryCard({required this.onTap});
+  const _InstantDeliveryCard({required this.l10n, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -474,7 +481,7 @@ class _InstantDeliveryCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Instant Delivery',
+                    l10n.courierInstantTitle,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -483,7 +490,7 @@ class _InstantDeliveryCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Courier takes only your package and delivers instantly.',
+                    l10n.courierInstantSubtitle,
                     style: TextStyle(
                       fontSize: 13,
                       color: scheme.onSurfaceVariant,
@@ -502,10 +509,12 @@ class _InstantDeliveryCard extends StatelessWidget {
 
 // Active Delivery Card
 class _ActiveDeliveryCard extends StatelessWidget {
+  final AppLocalizations l10n;
   final Map<String, dynamic> delivery;
   final VoidCallback onTap;
 
   const _ActiveDeliveryCard({
+    required this.l10n,
     required this.delivery,
     required this.onTap,
   });
@@ -521,7 +530,7 @@ class _ActiveDeliveryCard extends StatelessWidget {
     final location = delivery['dropoff_location']?.toString() ?? '—';
     final status =
         (delivery['current_status'] ?? delivery['status'])?.toString() ??
-            'In progress';
+            l10n.courierDeliveryStatusInProgress;
 
     return GestureDetector(
       onTap: onTap,
@@ -569,7 +578,7 @@ class _ActiveDeliveryCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Recipient: $recipient',
+              l10n.courierRecipientLine(recipient),
               style: TextStyle(fontSize: 14, color: scheme.onSurface),
             ),
             const SizedBox(height: 8),
@@ -596,7 +605,7 @@ class _ActiveDeliveryCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Text(
-                  'Track delivery',
+                  l10n.courierTrackDeliveryCta,
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -616,9 +625,10 @@ class _ActiveDeliveryCard extends StatelessWidget {
 
 // Schedule Delivery Card - matches design: white card, black title, faded stopwatch decoration
 class _ScheduleDeliveryCard extends StatelessWidget {
+  final AppLocalizations l10n;
   final VoidCallback onTap;
 
-  const _ScheduleDeliveryCard({required this.onTap});
+  const _ScheduleDeliveryCard({required this.l10n, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -671,7 +681,7 @@ class _ScheduleDeliveryCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Schedule Delivery',
+                    l10n.courierScheduleTitle,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -680,7 +690,7 @@ class _ScheduleDeliveryCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Courier comes to pick up on your specified date and time.',
+                    l10n.courierScheduleSubtitle,
                     style: TextStyle(
                       fontSize: 13,
                       color: scheme.onSurfaceVariant,

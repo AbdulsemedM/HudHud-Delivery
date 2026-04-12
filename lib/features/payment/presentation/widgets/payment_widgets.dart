@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class PaymentMethodCard extends StatelessWidget {
@@ -189,6 +190,7 @@ class PaymentSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final textTheme = Theme.of(context).textTheme;
     return Card(
       elevation: 2,
@@ -202,18 +204,18 @@ class PaymentSummaryCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Payment Summary',
+              l10n.paymentSummaryTitle,
               style: textTheme.titleMedium?.copyWith(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 16),
-            _buildSummaryRow(context, 'Subtotal', subtotal),
+            _buildSummaryRow(context, l10n.paymentSubtotalLabel, subtotal),
             const Divider(height: 24),
             _buildSummaryRow(
               context,
-              'Total Amount',
+              l10n.paymentTotalAmountLabel,
               total,
               isTotal: true,
             ),
@@ -275,6 +277,7 @@ class PaymentProcessingDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
     return Dialog(
@@ -291,7 +294,7 @@ class PaymentProcessingDialog extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              'Processing Payment',
+              l10n.paymentProcessingTitle,
               style: textTheme.titleMedium?.copyWith(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -299,7 +302,7 @@ class PaymentProcessingDialog extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Please wait while we process your payment via $paymentMethod...',
+              l10n.paymentProcessingMessage(paymentMethod),
               textAlign: TextAlign.center,
               style: textTheme.bodyMedium?.copyWith(
                 fontSize: 14,

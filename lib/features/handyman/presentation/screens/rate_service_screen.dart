@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/handyman/data/data_provider/handyman_data_provider.dart';
 import 'package:hudhud_delivery/features/handyman/data/repository/handyman_repository.dart';
@@ -40,6 +41,7 @@ class _RateServiceScreenState extends State<RateServiceScreen> {
   }
 
   Future<void> _submit() async {
+    final l10n = context.l10n;
     setState(() => _isSubmitting = true);
 
     final result = await _repository.rateServiceRequest(
@@ -61,7 +63,7 @@ class _RateServiceScreenState extends State<RateServiceScreen> {
     if (result['success'] == true) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(result['message'] as String? ?? 'Thank you for your rating!'),
+          content: Text(result['message'] as String? ?? l10n.ratingThankYou),
           backgroundColor: AppColors.successColor,
         ),
       );
@@ -69,7 +71,7 @@ class _RateServiceScreenState extends State<RateServiceScreen> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(result['message'] as String? ?? 'Failed to submit rating'),
+          content: Text(result['message'] as String? ?? l10n.ratingSubmitFailed),
           backgroundColor: AppColors.errorColor,
         ),
       );
@@ -79,11 +81,12 @@ class _RateServiceScreenState extends State<RateServiceScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
-          'Rate Service',
+          l10n.handymanRateServiceTitle,
           style: TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 18,
@@ -110,9 +113,9 @@ class _RateServiceScreenState extends State<RateServiceScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'How was the service?',
-              style: TextStyle(
+            Text(
+              l10n.handymanHowWasService,
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),
@@ -135,18 +138,18 @@ class _RateServiceScreenState extends State<RateServiceScreen> {
             const SizedBox(height: 24),
             TextFormField(
               controller: _commentController,
-              decoration: const InputDecoration(
-                labelText: 'Comment (optional)',
-                hintText: 'Share your experience...',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.commentOptional,
+                hintText: l10n.commentExperienceHint,
+                border: const OutlineInputBorder(),
                 alignLabelWithHint: true,
               ),
               maxLines: 3,
             ),
             const SizedBox(height: 20),
-            const Text(
-              'Rate the handyman',
-              style: TextStyle(
+            Text(
+              l10n.handymanRateTheHandyman,
+              style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
@@ -172,10 +175,10 @@ class _RateServiceScreenState extends State<RateServiceScreen> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _providerCommentController,
-              decoration: const InputDecoration(
-                labelText: 'Comment about handyman (optional)',
-                hintText: 'e.g. Very professional and courteous',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.handymanCommentAboutOptional,
+                hintText: l10n.commentHandymanHint,
+                border: const OutlineInputBorder(),
                 alignLabelWithHint: true,
               ),
               maxLines: 2,
@@ -188,10 +191,10 @@ class _RateServiceScreenState extends State<RateServiceScreen> {
                   onChanged: (v) => setState(() => _isPublic = v ?? true),
                   activeColor: AppColors.primaryColor,
                 ),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'Make my rating public',
-                    style: TextStyle(fontSize: 14),
+                    l10n.handymanRatingPublic,
+                    style: const TextStyle(fontSize: 14),
                   ),
                 ),
               ],
@@ -219,7 +222,7 @@ class _RateServiceScreenState extends State<RateServiceScreen> {
                               AlwaysStoppedAnimation<Color>(theme.colorScheme.onPrimary),
                         ),
                       )
-                    : const Text('Submit Rating'),
+                    : Text(l10n.handymanSubmitRating),
               ),
             ),
           ],

@@ -5,14 +5,15 @@ class TermsConditionsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Terms & Conditions'),
-        backgroundColor: Colors.white,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -69,15 +70,16 @@ class _ClauseSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Clause $clauseNumber',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF2C3E50),
+            color: theme.textTheme.titleMedium?.color,
           ),
         ),
         const SizedBox(height: 12),
@@ -85,7 +87,7 @@ class _ClauseSection extends StatelessWidget {
           content,
           style: TextStyle(
             fontSize: 14,
-            color: Colors.grey[700],
+            color: theme.textTheme.bodyMedium?.color?.withOpacity(0.9),
             height: 1.6,
           ),
         ),

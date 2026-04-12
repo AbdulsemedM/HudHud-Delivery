@@ -90,8 +90,9 @@ class _FindingDriverScreenState extends State<FindingDriverScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -146,7 +147,7 @@ class _FindingDriverScreenState extends State<FindingDriverScreen> {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.grey[600],
+                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.8),
                 ),
               ),
             ),

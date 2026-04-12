@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
+import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/features/wallet/bloc/wallet_bloc.dart';
 import 'package:hudhud_delivery/features/wallet/data/models/wallet_model.dart';
@@ -45,6 +47,7 @@ class _WalletScreenContent extends StatelessWidget {
               );
             }
             if (state is WalletError) {
+              final theme = Theme.of(context);
               return Center(
                 child: Padding(
                   padding: const EdgeInsets.all(24),
@@ -56,14 +59,14 @@ class _WalletScreenContent extends StatelessWidget {
                       Text(
                         state.message,
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey[700]),
+                        style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
                       ),
                       const SizedBox(height: 24),
                       TextButton.icon(
                         onPressed: () =>
                             context.read<WalletBloc>().add(const FetchWalletsEvent()),
                         icon: const Icon(Icons.refresh),
-                        label: const Text('Retry'),
+                        label: Text(context.l10n.actionRetry),
                       ),
                     ],
                   ),
@@ -94,6 +97,7 @@ class _WalletContent extends StatelessWidget {
   });
 
   static List<TransactionItem> _toTransactionItems(
+    AppLocalizations l10n,
     List<WalletTransactionModel>? transactions,
     String defaultCurrency,
   ) {
@@ -107,7 +111,9 @@ class _WalletContent extends StatelessWidget {
       return TransactionItem(
         date: date.toUpperCase(),
         amount: t.amount ?? '0',
-        type: t.type ?? t.description ?? 'Transaction',
+        type: t.type ??
+            t.description ??
+            l10n.walletDefaultTransactionLabel,
         currency: t.currency ?? defaultCurrency,
       );
     }).toList();
@@ -115,6 +121,7 @@ class _WalletContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final totalBalance = wallets.fold<double>(
       0,
       (sum, w) => sum + w.balanceAmount,
@@ -128,7 +135,8 @@ class _WalletContent extends StatelessWidget {
           const WalletHeader(),
           const SizedBox(height: 24),
           BalanceCard(
-            balance: '$primaryCurrency ${totalBalance.toStringAsFixed(2)}',
+            balance:
+                '${l10n.currencyEtb} ${totalBalance.toStringAsFixed(2)}',
           ),
           const SizedBox(height: 24),
           WalletActions(
@@ -165,7 +173,8 @@ class _WalletContent extends StatelessWidget {
           ],
           const SizedBox(height: 24),
           TransactionsList(
-            transactions: _toTransactionItems(transactions, primaryCurrency),
+            transactions:
+                _toTransactionItems(l10n, transactions, primaryCurrency),
             onSeeAll: null,
           ),
         ],
@@ -189,12 +198,13 @@ class _WalletsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'My Wallets',
-          style: TextStyle(
+        Text(
+          l10n.walletMyWalletsSection,
+          style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
@@ -226,15 +236,17 @@ class _WalletCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colorScheme = Theme.of(context).colorScheme;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.grey[50],
+          color: colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey[200]!),
+          border: Border.all(color: colorScheme.outlineVariant),
         ),
         child: Row(
           children: [
@@ -261,17 +273,17 @@ class _WalletCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${wallet.type} • ETB',
+                    l10n.walletTypeCurrency(wallet.type, l10n.currencyEtb),
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.grey[600],
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
               ),
             ),
             Text(
-              'ETB ${wallet.balance}',
+              '${l10n.currencyEtb} ${wallet.balance}',
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,

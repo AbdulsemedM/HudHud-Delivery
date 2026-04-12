@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
@@ -91,13 +92,15 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colorScheme = Theme.of(context).colorScheme;
     return BlocProvider(
       create: (_) => WalletBloc(
         walletRepository: _walletRepository,
       ),
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Add Funds'),
+          title: Text(l10n.addFundsTitle),
           backgroundColor: AppColors.primaryColor,
           foregroundColor: Colors.white,
         ),
@@ -107,7 +110,7 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.message),
-                  backgroundColor: Colors.green,
+                  backgroundColor: Colors.green.shade700,
                 ),
               );
               Navigator.of(context).pop(true);
@@ -115,7 +118,7 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.message),
-                  backgroundColor: Colors.red,
+                  backgroundColor: Theme.of(context).colorScheme.error,
                 ),
               );
             }
@@ -136,17 +139,17 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
-                      decoration: const InputDecoration(
-                        labelText: 'Amount',
-                        hintText: 'Enter amount',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: l10n.amount,
+                        hintText: l10n.enterAmount,
+                        border: const OutlineInputBorder(),
                         prefixText: ' ',
                       ),
                       validator: (v) {
-                        if (v == null || v.isEmpty) return 'Enter amount';
+                        if (v == null || v.isEmpty) return l10n.enterAmount;
                         final amount = double.tryParse(v);
                         if (amount == null || amount <= 0) {
-                          return 'Enter a valid amount';
+                          return l10n.validationEnterValidAmount;
                         }
                         return null;
                       },
@@ -155,9 +158,9 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
                     if (widget.wallets.isNotEmpty) ...[
                       DropdownButtonFormField<WalletModel>(
                         value: _selectedWallet,
-                        decoration: const InputDecoration(
-                          labelText: 'Wallet',
-                          border: OutlineInputBorder(),
+                        decoration: InputDecoration(
+                          labelText: l10n.wallet,
+                          border: const OutlineInputBorder(),
                         ),
                         items: widget.wallets
                             .map((w) => DropdownMenuItem(
@@ -180,16 +183,16 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
                       Padding(
                         padding: const EdgeInsets.all(16),
                         child: Text(
-                          'No payment methods available',
-                          style: TextStyle(color: Colors.grey[600]),
+                          l10n.walletNoPaymentMethods,
+                          style: TextStyle(color: colorScheme.onSurfaceVariant),
                         ),
                       )
                     else ...[
                       DropdownButtonFormField<String>(
                         value: _selectedMethodId,
-                        decoration: const InputDecoration(
-                          labelText: 'Payment Method',
-                          border: OutlineInputBorder(),
+                        decoration: InputDecoration(
+                          labelText: l10n.paymentMethod,
+                          border: const OutlineInputBorder(),
                         ),
                         items: _paymentMethods
                             .map((m) => DropdownMenuItem(
@@ -206,19 +209,19 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: _transactionIdController,
-                          decoration: const InputDecoration(
-                            labelText: 'Transaction ID',
-                            hintText: 'From payment gateway',
-                            border: OutlineInputBorder(),
+                          decoration: InputDecoration(
+                            labelText: l10n.transactionId,
+                            hintText: l10n.transactionIdHint,
+                            border: const OutlineInputBorder(),
                           ),
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
                           controller: _cardLastFourController,
-                          decoration: const InputDecoration(
-                            labelText: 'Card last 4 digits',
-                            hintText: '4242',
-                            border: OutlineInputBorder(),
+                          decoration: InputDecoration(
+                            labelText: l10n.cardLast4,
+                            hintText: l10n.cardLast4Hint,
+                            border: const OutlineInputBorder(),
                           ),
                           keyboardType: TextInputType.number,
                           maxLength: 4,
@@ -226,10 +229,10 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
                         const SizedBox(height: 12),
                         TextFormField(
                           controller: _cardBrandController,
-                          decoration: const InputDecoration(
-                            labelText: 'Card brand',
-                            hintText: 'visa, mastercard',
-                            border: OutlineInputBorder(),
+                          decoration: InputDecoration(
+                            labelText: l10n.cardBrand,
+                            hintText: l10n.cardBrandHint,
+                            border: const OutlineInputBorder(),
                           ),
                         ),
                       ],
@@ -239,19 +242,19 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
                       onPressed: isLoading ? null : _submit,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryColor,
-                        foregroundColor: Colors.white,
+                        foregroundColor: colorScheme.onPrimary,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
                       child: isLoading
-                          ? const SizedBox(
+                          ? SizedBox(
                               height: 24,
                               width: 24,
                               child: CircularProgressIndicator(
-                                color: Colors.white,
+                                color: colorScheme.onPrimary,
                                 strokeWidth: 2,
                               ),
                             )
-                          : const Text('Add Funds'),
+                          : Text(l10n.addFundsTitle),
                     ),
                   ],
                 ),
@@ -295,10 +298,11 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedMethodId == null || _selectedMethodId!.isEmpty) {
+      final colorScheme = Theme.of(context).colorScheme;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Select a payment method'),
-          backgroundColor: Colors.red,
+        SnackBar(
+          content: Text(context.l10n.selectPaymentMethod),
+          backgroundColor: colorScheme.error,
         ),
       );
       return;

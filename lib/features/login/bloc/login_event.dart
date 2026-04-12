@@ -9,3 +9,5 @@ class LoginFormSubmitted extends LoginEvent {
   final String fieldType; // 'email' or 'phone'
   LoginFormSubmitted(this.emailOrPhone, this.password, this.fieldType);
 }
+
+class GuestLoginRequested extends LoginEvent {}

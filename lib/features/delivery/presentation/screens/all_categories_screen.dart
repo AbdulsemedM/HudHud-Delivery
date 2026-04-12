@@ -950,12 +950,6 @@ class _PopularOrderCard extends StatelessWidget {
                             ),
                           ),
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.favorite_border),
-                          iconSize: 20,
-                          color: colorScheme.onSurface.withOpacity(0.65),
-                          onPressed: () {},
-                        ),
                       ],
                     ),
                     const SizedBox(height: 4),

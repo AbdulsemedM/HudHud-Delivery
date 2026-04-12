@@ -14,7 +14,7 @@ class CategoryStoresScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -95,12 +95,12 @@ class CategoryStoresScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Popular Stores',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF2C3E50),
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -204,13 +204,14 @@ class _CategoryHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: colorScheme.shadow.withOpacity(0.06),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -221,21 +222,21 @@ class _CategoryHeader extends StatelessWidget {
           Row(
             children: [
               IconButton(
-                icon: const Icon(Icons.arrow_back),
+                icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
                 onPressed: () => Navigator.pop(context),
               ),
               Expanded(
                 child: Text(
                   categoryName,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF2C3E50),
+                    color: colorScheme.onSurface,
                   ),
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.tune),
+                icon: Icon(Icons.tune, color: colorScheme.onSurface),
                 onPressed: onFilterTap,
               ),
             ],
@@ -250,16 +251,16 @@ class _CategoryHeader extends StatelessWidget {
                   children: [
                     Text(
                       '$time • $location',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
-                        color: Color(0xFF2C3E50),
+                        color: colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(width: 4),
-                    const Icon(
+                    Icon(
                       Icons.keyboard_arrow_down,
                       size: 20,
-                      color: Color(0xFF2C3E50),
+                      color: colorScheme.onSurface,
                     ),
                   ],
                 ),
@@ -289,16 +290,17 @@ class _FeaturedStoreCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         height: 140,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.grey[50],
+          color: colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: Colors.grey[200]!,
+            color: colorScheme.outlineVariant,
             width: 1,
           ),
         ),
@@ -317,10 +319,10 @@ class _FeaturedStoreCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               name,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF2C3E50),
+                color: colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 4),
@@ -328,7 +330,7 @@ class _FeaturedStoreCard extends StatelessWidget {
               openingTime,
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.grey[600],
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
           ],
@@ -355,15 +357,16 @@ class _StoreListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: Colors.grey[200]!,
+            color: colorScheme.outlineVariant,
             width: 1,
           ),
         ),
@@ -374,7 +377,7 @@ class _StoreListItem extends StatelessWidget {
               width: 70,
               height: 70,
               decoration: BoxDecoration(
-                color: Colors.grey[200],
+                color: colorScheme.surfaceContainerHighest,
                 shape: BoxShape.circle,
               ),
               child: ClipOval(
@@ -383,11 +386,11 @@ class _StoreListItem extends StatelessWidget {
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
-                      color: Colors.grey[300],
-                      child: const Icon(
+                      color: colorScheme.surfaceContainerHigh,
+                      child: Icon(
                         Icons.store,
                         size: 35,
-                        color: Colors.grey,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     );
                   },
@@ -402,10 +405,10 @@ class _StoreListItem extends StatelessWidget {
                 children: [
                   Text(
                     name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF2C3E50),
+                      color: colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -413,7 +416,7 @@ class _StoreListItem extends StatelessWidget {
                     openingTime,
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.grey[600],
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
                   if (promoText != null) ...[
@@ -429,15 +432,6 @@ class _StoreListItem extends StatelessWidget {
                   ],
                 ],
               ),
-            ),
-            // Favorite Icon
-            IconButton(
-              icon: const Icon(Icons.favorite_border),
-              iconSize: 24,
-              color: Colors.grey,
-              onPressed: () {
-                // TODO: Toggle favorite
-              },
             ),
           ],
         ),

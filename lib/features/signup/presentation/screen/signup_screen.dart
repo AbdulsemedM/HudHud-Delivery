@@ -11,6 +11,7 @@ import '../../data/data_provider/signup_data_provider.dart';
 class _GoogleSignInButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return SizedBox(
       width: double.infinity,
       height: 48,
@@ -23,7 +24,7 @@ class _GoogleSignInButton extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          backgroundColor: Colors.white,
+          backgroundColor: colorScheme.surface,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -35,14 +36,18 @@ class _GoogleSignInButton extends StatelessWidget {
               height: 20,
               fit: BoxFit.contain,
               errorBuilder: (context, error, stackTrace) {
-                return Icon(Icons.g_mobiledata, size: 20, color: Colors.grey[700]);
+                return Icon(
+                  Icons.g_mobiledata,
+                  size: 20,
+                  color: colorScheme.onSurfaceVariant,
+                );
               },
             ),
             const SizedBox(width: 12),
             Text(
               'Continue with Google',
               style: TextStyle(
-                color: Colors.grey[800],
+                color: Theme.of(context).textTheme.bodyLarge?.color,
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),
@@ -65,30 +70,41 @@ class SignupScreen extends StatelessWidget {
             SignupDataProvider(apiService: ApiService.instance),
           ),
         ),
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        body: SafeArea(
-          child: Column(
-            children: [
-              // Top Navigation Bar
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Back Button
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: IconButton(
-                        icon: Icon(Icons.arrow_back, color: Colors.grey[700]),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ),
+      child: Builder(
+        builder: (context) {
+          final theme = Theme.of(context);
+          final colorScheme = theme.colorScheme;
+          final isDark = theme.brightness == Brightness.dark;
+          return Scaffold(
+            backgroundColor: theme.scaffoldBackgroundColor,
+            body: SafeArea(
+              child: Column(
+                children: [
+                  // Top Navigation Bar
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Back Button
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? colorScheme.surfaceContainerHighest
+                                : Colors.grey[100],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.arrow_back,
+                              color: colorScheme.onSurface.withValues(alpha: 0.8),
+                            ),
+                            onPressed: () => Navigator.pop(context),
+                          ),
+                        ),
                     // Logo
                     Image.asset(
                       'assets/images/logo.png',
@@ -122,7 +138,7 @@ class SignupScreen extends StatelessWidget {
                             Text(
                               "Already have an account? ",
                               style: TextStyle(
-                                color: Colors.grey[700],
+                                color: colorScheme.onSurfaceVariant,
                                 fontSize: 14,
                               ),
                             ),
@@ -144,18 +160,26 @@ class SignupScreen extends StatelessWidget {
                       // Divider
                       Row(
                         children: [
-                          Expanded(child: Divider(color: Colors.grey[300])),
+                          Expanded(
+                            child: Divider(
+                              color: colorScheme.outline.withValues(alpha: 0.45),
+                            ),
+                          ),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 12),
                             child: Text(
                               'or continue with',
                               style: TextStyle(
-                                color: Colors.grey[700],
+                                color: colorScheme.onSurfaceVariant,
                                 fontSize: 14,
                               ),
                             ),
                           ),
-                          Expanded(child: Divider(color: Colors.grey[300])),
+                          Expanded(
+                            child: Divider(
+                              color: colorScheme.outline.withValues(alpha: 0.45),
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 16),
@@ -169,6 +193,8 @@ class SignupScreen extends StatelessWidget {
             ],
           ),
         ),
+      );
+        },
       ),
     );
   }

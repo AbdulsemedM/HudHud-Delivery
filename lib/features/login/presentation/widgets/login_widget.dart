@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hudhud_delivery/features/dashboard/presentation/screen/dashboard_screen.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
+import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import 'package:hudhud_delivery/features/login/bloc/login_bloc.dart';
 
 class LogoWidget extends StatelessWidget {
@@ -36,12 +37,13 @@ class LoginTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Sign In',
+          l10n.loginTitle,
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
@@ -51,7 +53,7 @@ class LoginTitle extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          'Please enter your credentials to access your account and all available services',
+          l10n.loginSubtitle,
           style: TextStyle(
             fontSize: 13,
             color: theme.colorScheme.onSurfaceVariant,
@@ -76,22 +78,10 @@ class _LoginFormState extends State<LoginForm> {
   final _formKey = GlobalKey<FormState>();
   bool _isPasswordVisible = false;
 
-  // Email validation
-  String? validateEmail(String? value) {
+  /// Email or phone validation using [l10n] for error messages.
+  String? _validateEmailOrPhone(String? value, AppLocalizations l10n) {
     if (value == null || value.isEmpty) {
-      return 'Please enter your email';
-    }
-    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-    if (!emailRegex.hasMatch(value)) {
-      return 'Please enter a valid email address';
-    }
-    return null;
-  }
-
-  // Email or Phone validation
-  String? validateEmailOrPhone(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter your email or phone number';
+      return l10n.validationEmailOrPhoneRequired;
     }
 
     final trimmedValue = value.trim();
@@ -102,72 +92,49 @@ class _LoginFormState extends State<LoginForm> {
       return null; // Valid email
     }
 
-    // Check if it's a phone number
     // Remove spaces, dashes, parentheses, and other formatting characters
     String cleanedPhone = trimmedValue.replaceAll(RegExp(r'[\s\-\(\)\.]'), '');
-    
-    // Check for international format (starts with +)
+
     if (cleanedPhone.startsWith('+')) {
-      // International phone: + followed by 10-15 digits
       if (RegExp(r'^\+[0-9]{10,15}$').hasMatch(cleanedPhone)) {
         return null; // Valid international phone
       }
     } else {
-      // Check for Ethiopian phone format or generic phone
-      // Must only contain digits
       if (!RegExp(r'^\d+$').hasMatch(cleanedPhone)) {
-        return 'Please enter a valid email or phone number';
+        return l10n.validationEmailOrPhoneInvalid;
       }
-      
-      // Remove leading 0 if present (Ethiopian format)
+
       if (cleanedPhone.startsWith('0') && cleanedPhone.length > 1) {
         cleanedPhone = cleanedPhone.substring(1);
       }
-      
-      // Ethiopian phone: starts with 9 or 7, and is 9 digits long
-      if ((cleanedPhone.startsWith('9') || cleanedPhone.startsWith('7')) && 
+
+      if ((cleanedPhone.startsWith('9') || cleanedPhone.startsWith('7')) &&
           cleanedPhone.length == 9) {
         return null; // Valid Ethiopian phone
       }
-      
-      // Generic phone validation: 10-15 digits
+
       if (cleanedPhone.length >= 10 && cleanedPhone.length <= 15) {
         return null; // Valid phone (generic)
       }
     }
 
-    return 'Please enter a valid email or phone number';
+    return l10n.validationEmailOrPhoneInvalid;
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<LoginBloc, LoginState>(
-      listener: (context, state) {
-        if (state is LoginSuccess) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const DashboardScreen()),
-          );
-        } else if (state is LoginFailure) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.errorMessage),
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
-          );
-        }
-      },
-      child: Form(
+    return Form(
         key: _formKey,
         child: Builder(
           builder: (context) {
+            final l10n = context.l10n;
             final theme = Theme.of(context);
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Email or Phone Input
                 Text(
-                  'Email address or Phone number',
+                  l10n.labelEmailOrPhone,
                   style: TextStyle(
                     fontSize: 13,
                     color: theme.colorScheme.onSurfaceVariant,
@@ -179,7 +146,7 @@ class _LoginFormState extends State<LoginForm> {
                   controller: _emailPhoneController,
                   keyboardType: TextInputType.text,
                   decoration: InputDecoration(
-                    hintText: 'Eg. JohnDoe@gmail.com',
+                    hintText: l10n.hintEmailPhone,
                     hintStyle: TextStyle(
                       color: theme.colorScheme.onSurfaceVariant,
                       fontSize: 14,
@@ -210,12 +177,13 @@ class _LoginFormState extends State<LoginForm> {
                     color: theme.colorScheme.onSurface,
                     fontSize: 14,
                   ),
-                  validator: validateEmailOrPhone,
+                  validator: (value) =>
+                      _validateEmailOrPhone(value, l10n),
                 ),
                 const SizedBox(height: 16),
                 // Password Input
                 Text(
-                  'Password',
+                  l10n.labelPassword,
                   style: TextStyle(
                     fontSize: 13,
                     color: theme.colorScheme.onSurfaceVariant,
@@ -227,7 +195,7 @@ class _LoginFormState extends State<LoginForm> {
                   controller: _passwordController,
                   obscureText: !_isPasswordVisible,
                   decoration: InputDecoration(
-                    hintText: 'Enter password',
+                    hintText: l10n.hintPassword,
                     hintStyle: TextStyle(
                       color: theme.colorScheme.onSurfaceVariant,
                       fontSize: 14,
@@ -272,14 +240,14 @@ class _LoginFormState extends State<LoginForm> {
                     fontSize: 14,
                   ),
                   validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your password';
-                }
-                if (value.length < 8) {
-                  return 'Password must be at least 8 characters';
-                }
-                return null;
-              },
+                    if (value == null || value.isEmpty) {
+                      return l10n.validationPasswordRequired;
+                    }
+                    if (value.length < 8) {
+                      return l10n.validationPasswordMin;
+                    }
+                    return null;
+                  },
             ),
             const SizedBox(height: 24),
             // Sign In Button
@@ -308,7 +276,7 @@ class _LoginFormState extends State<LoginForm> {
                             ),
                           )
                         : Text(
-                            'Sign In',
+                            l10n.loginTitle,
                             style: TextStyle(
                               color: theme.colorScheme.onPrimary,
                               fontSize: 16,
@@ -323,7 +291,6 @@ class _LoginFormState extends State<LoginForm> {
             );
           },
         ),
-      ),
     );
   }
 

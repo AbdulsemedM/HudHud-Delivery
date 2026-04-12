@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/features/delivery/presentation/screens/all_categories_screen.dart';
 import 'package:hudhud_delivery/features/orders/data/models/order_model.dart';
 import 'package:hudhud_delivery/features/orders/bloc/orders_bloc.dart';
@@ -63,7 +64,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final AuthService _authService = AuthService();
 
   UserModel? _currentUser;
-  String _currentLocation = 'Getting location...';
+  String _currentLocation = '';
   bool _isLoadingLocation = true;
 
   List<OrderModel> _availableOrders = [];
@@ -189,18 +190,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       if (StartupLocationService.isPermanentlyDenied ||
           await CustomLocationService.isLocationPermissionPermanentlyDenied()) {
         if (mounted) {
+          final l10n = context.l10n;
           setState(() {
-            _currentLocation = 'Location access denied';
+            _currentLocation = l10n.locationAccessDenied;
             _isLoadingLocation = false;
           });
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text(
-                'Location access is disabled. Enable it in Settings to see your position.',
-              ),
+              content: Text(l10n.locationDisabledSnackbar),
               duration: const Duration(seconds: 6),
               action: SnackBarAction(
-                label: 'Open Settings',
+                label: l10n.actionOpenSettings,
                 onPressed: CustomLocationService.openLocationAppSettings,
               ),
             ),
@@ -223,15 +223,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       }
 
       if (mounted) {
+        final l10n = context.l10n;
         setState(() {
-          _currentLocation = 'Unable to get location';
+          _currentLocation = l10n.locationUnable;
           _isLoadingLocation = false;
         });
       }
     } catch (e) {
       if (mounted) {
+        final l10n = context.l10n;
         setState(() {
-          _currentLocation = 'Unable to get location';
+          _currentLocation = l10n.locationUnable;
           _isLoadingLocation = false;
         });
       }
@@ -263,10 +265,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         authService: _authService,
       ),
     );
-    if (result == true && mounted) {
+      if (result == true && mounted) {
       await _loadUserData();
-      if (mounted)
-        SnackbarUtil.showSuccess(context, 'Email verified successfully!');
+      if (mounted) {
+        SnackbarUtil.showSuccess(context, context.l10n.emailVerifiedSuccess);
+      }
     }
   }
 
@@ -284,14 +287,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
     if (result == true && mounted) {
       await _loadUserData();
-      if (mounted)
+      if (mounted) {
         SnackbarUtil.showSuccess(
-            context, 'Phone number verified successfully!');
+            context, context.l10n.phoneVerifiedSuccess);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -304,7 +309,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               UserProfileHeader(
-                name: _currentUser?.name ?? 'User',
+                name: _currentUser?.name ?? l10n.userDefault,
                 location: _currentLocation,
                 isLoadingLocation: _isLoadingLocation,
                 user: _currentUser,
@@ -350,7 +355,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               const SizedBox(height: 16),
               // What would you like to do section
               Text(
-                'What would you like to do?',
+                l10n.handymanWhatToDo,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -367,8 +372,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 childAspectRatio: 1.3,
                 children: [
                   ServiceCard(
-                    title: 'Food',
-                    subtitle: 'Order groceries from your favourite vendors.',
+                    title: l10n.featureFoodGroceries,
+                    subtitle: l10n.featureFoodGroceriesDesc,
                     icon: Icons.shopping_bag_rounded,
                     color: AppColors.primaryColor,
                     onTap: () {
@@ -381,8 +386,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     },
                   ),
                   ServiceCard(
-                    title: 'Courier',
-                    subtitle: 'Order courier services for pickup and drop off.',
+                    title: l10n.featureCourierTitle,
+                    subtitle: l10n.featureCourierDesc,
                     icon: Icons.local_shipping_rounded,
                     color: AppColors.primaryColor,
                     onTap: () {
@@ -390,8 +395,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     },
                   ),
                   ServiceCard(
-                    title: 'Taxi',
-                    subtitle: 'Request taxi at affordable rates from anywhere.',
+                    title: l10n.featureTaxiTitle,
+                    subtitle: l10n.featureTaxiDesc,
                     icon: Icons.local_taxi_rounded,
                     color: AppColors.primaryColor,
                     onTap: () {
@@ -399,8 +404,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     },
                   ),
                   ServiceCard(
-                    title: 'Handyman',
-                    subtitle: 'Request handy men for casual services at home.',
+                    title: l10n.featureHandymanTitle,
+                    subtitle: l10n.featureHandymanDesc,
                     icon: Icons.handyman_rounded,
                     color: AppColors.primaryColor,
                     onTap: () {
@@ -422,7 +427,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'History',
+                    l10n.history,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -438,7 +443,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       );
                     },
                     child: Text(
-                      'View all',
+                      l10n.actionViewAll,
                       style: TextStyle(
                         color: AppColors.primaryColor,
                         fontSize: 14,
@@ -460,7 +465,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Text(
-                    'Failed to load orders: $_ordersError',
+                    l10n.failedToLoadOrders(_ordersError!),
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontSize: 14,
                     ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/wallet/bloc/wallet_bloc.dart';
@@ -24,7 +25,7 @@ class WalletDetailScreen extends StatelessWidget {
       )..add(FetchWalletEvent(walletId: walletId)),
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Wallet Details'),
+          title: Text(context.l10n.walletDetailScreenTitle),
           backgroundColor: AppColors.primaryColor,
           foregroundColor: Colors.white,
         ),
@@ -46,7 +47,13 @@ class WalletDetailScreen extends StatelessWidget {
                       Text(
                         state.message,
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey[700]),
+                        style: TextStyle(
+                          color: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.color
+                              ?.withValues(alpha: 0.85),
+                        ),
                       ),
                       const SizedBox(height: 24),
                       TextButton.icon(
@@ -54,7 +61,7 @@ class WalletDetailScreen extends StatelessWidget {
                             .read<WalletBloc>()
                             .add(FetchWalletEvent(walletId: walletId)),
                         icon: const Icon(Icons.refresh),
-                        label: const Text('Retry'),
+                        label: Text(context.l10n.actionRetry),
                       ),
                     ],
                   ),
@@ -79,6 +86,8 @@ class _WalletDetailContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colorScheme = Theme.of(context).colorScheme;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -111,7 +120,7 @@ class _WalletDetailContent extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'ETB ${wallet.balance}',
+                  '${l10n.currencyEtb} ${wallet.balance}',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 32,
@@ -127,29 +136,33 @@ class _WalletDetailContent extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.grey[50],
+              color: colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey[200]!),
+              border: Border.all(color: colorScheme.outlineVariant),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Wallet Information',
-                  style: TextStyle(
+                Text(
+                  l10n.walletInformation,
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 16),
-                _DetailRow(label: 'Name', value: wallet.name),
-                _DetailRow(label: 'Type', value: wallet.type),
-                const _DetailRow(label: 'Currency', value: 'ETB'),
+                _DetailRow(label: l10n.walletDetailName, value: wallet.name),
+                _DetailRow(label: l10n.walletDetailType, value: wallet.type),
                 _DetailRow(
-                    label: 'Balance',
-                    value: 'ETB ${wallet.balance}'),
+                  label: l10n.walletDetailCurrencyLabel,
+                  value: l10n.currencyEtb,
+                ),
+                _DetailRow(
+                  label: l10n.balance,
+                  value: '${l10n.currencyEtb} ${wallet.balance}',
+                ),
                 if (wallet.createdAt != null)
-                  _DetailRow(label: 'Created', value: wallet.createdAt!),
+                  _DetailRow(label: l10n.created, value: wallet.createdAt!),
               ],
             ),
           ),
@@ -167,6 +180,7 @@ class _DetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -176,14 +190,15 @@ class _DetailRow extends StatelessWidget {
             label,
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey[600],
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
+              color: colorScheme.onSurface,
             ),
           ),
         ],

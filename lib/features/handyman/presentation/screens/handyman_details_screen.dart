@@ -1,9 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/handyman/data/data_provider/handyman_data_provider.dart';
 import 'package:hudhud_delivery/features/handyman/data/models/handyman_model.dart';
 import 'package:hudhud_delivery/features/handyman/data/repository/handyman_repository.dart';
+import 'package:hudhud_delivery/l10n/app_localizations.dart';
+
+String _skillChipLabel(AppLocalizations l10n, String code) {
+  switch (code.toLowerCase()) {
+    case 'plumbing':
+      return l10n.handymanSkillPlumbing;
+    case 'electrical':
+      return l10n.handymanSkillElectrical;
+    case 'carpentry':
+      return l10n.handymanSkillCarpentry;
+    case 'painting':
+      return l10n.handymanSkillPainting;
+    case 'general':
+      return l10n.handymanSkillGeneral;
+    default:
+      return code;
+  }
+}
 
 class HandymanDetailsScreen extends StatefulWidget {
   final int handymanId;
@@ -57,11 +76,12 @@ class _HandymanDetailsScreenState extends State<HandymanDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
-          'Handyman Profile',
+          l10n.handymanProfileTitle,
           style: TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 18,
@@ -109,7 +129,7 @@ class _HandymanDetailsScreenState extends State<HandymanDetailsScreen> {
                         TextButton(
                           onPressed: _fetchDetails,
                           child: Text(
-                            'Retry',
+                            l10n.actionRetry,
                             style: TextStyle(color: AppColors.primaryColor),
                           ),
                         ),
@@ -118,7 +138,12 @@ class _HandymanDetailsScreenState extends State<HandymanDetailsScreen> {
                   ),
                 )
               : _handyman == null
-                  ? Center(child: Text('Handyman not found', style: TextStyle(color: theme.colorScheme.onSurface)))
+                  ? Center(
+                      child: Text(
+                        l10n.handymanNotFound,
+                        style: TextStyle(color: theme.colorScheme.onSurface),
+                      ),
+                    )
                   : SingleChildScrollView(
                       padding: const EdgeInsets.all(16),
                       child: Column(
@@ -127,11 +152,11 @@ class _HandymanDetailsScreenState extends State<HandymanDetailsScreen> {
                           Center(
                             child: CircleAvatar(
                               radius: 48,
-                              backgroundColor: const Color(0xFF795548).withOpacity(0.2),
-                              child: const Icon(
+                              backgroundColor: theme.colorScheme.primaryContainer.withOpacity(0.6),
+                              child: Icon(
                                 Icons.person,
                                 size: 48,
-                                color: Color(0xFF795548),
+                                color: theme.colorScheme.onPrimaryContainer,
                               ),
                             ),
                           ),
@@ -148,11 +173,11 @@ class _HandymanDetailsScreenState extends State<HandymanDetailsScreen> {
                           ),
                           if (_handyman!.handymanProfile != null) ...[
                             const SizedBox(height: 24),
-                            _buildProfileSection(theme),
+                            _buildProfileSection(context, theme),
                           ],
                           if (_stats != null) ...[
                             const SizedBox(height: 24),
-                            _buildStatsSection(theme),
+                            _buildStatsSection(context, theme),
                           ],
                         ],
                       ),
@@ -160,7 +185,8 @@ class _HandymanDetailsScreenState extends State<HandymanDetailsScreen> {
     );
   }
 
-  Widget _buildProfileSection(ThemeData theme) {
+  Widget _buildProfileSection(BuildContext context, ThemeData theme) {
+    final l10n = context.l10n;
     final profile = _handyman!.handymanProfile!;
 
     return Container(
@@ -182,7 +208,7 @@ class _HandymanDetailsScreenState extends State<HandymanDetailsScreen> {
         children: [
           if (profile.bio != null && profile.bio!.isNotEmpty) ...[
             Text(
-              'About',
+              l10n.handymanAbout,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -202,7 +228,7 @@ class _HandymanDetailsScreenState extends State<HandymanDetailsScreen> {
           ],
           if (profile.skills.isNotEmpty) ...[
             Text(
-              'Skills',
+              l10n.handymanSkillsHeading,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -215,8 +241,8 @@ class _HandymanDetailsScreenState extends State<HandymanDetailsScreen> {
               runSpacing: 8,
               children: profile.skills
                   .map((s) => Chip(
-                        label: Text(s),
-                        backgroundColor: const Color(0xFF795548).withOpacity(0.1),
+                        label: Text(_skillChipLabel(l10n, s)),
+                        backgroundColor: theme.colorScheme.primaryContainer.withOpacity(0.35),
                       ))
                   .toList(),
             ),
@@ -225,21 +251,21 @@ class _HandymanDetailsScreenState extends State<HandymanDetailsScreen> {
           if (profile.hourlyRate != null) ...[
             _DetailRow(
               theme: theme,
-              label: 'Hourly Rate',
+              label: l10n.handymanHourlyRateLabel,
               value: '\$${profile.hourlyRate}',
             ),
           ],
           if (profile.experienceYears != null) ...[
             _DetailRow(
               theme: theme,
-              label: 'Experience',
-              value: '${profile.experienceYears} years',
+              label: l10n.handymanExperienceLabel,
+              value: l10n.handymanExperienceYears('${profile.experienceYears}'),
             ),
           ],
           if (profile.address != null && profile.address!.isNotEmpty) ...[
             _DetailRow(
               theme: theme,
-              label: 'Address',
+              label: l10n.labelAddress,
               value: profile.address!,
             ),
           ],
@@ -248,7 +274,8 @@ class _HandymanDetailsScreenState extends State<HandymanDetailsScreen> {
     );
   }
 
-  Widget _buildStatsSection(ThemeData theme) {
+  Widget _buildStatsSection(BuildContext context, ThemeData theme) {
+    final l10n = context.l10n;
     final stats = _stats!;
 
     return Container(
@@ -269,7 +296,7 @@ class _HandymanDetailsScreenState extends State<HandymanDetailsScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Stats',
+            l10n.handymanStatsHeading,
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -282,17 +309,17 @@ class _HandymanDetailsScreenState extends State<HandymanDetailsScreen> {
             children: [
               _StatItem(
                 theme: theme,
-                label: 'Services',
+                label: l10n.handymanStatServices,
                 value: stats['total_services']?.toString() ?? '0',
               ),
               _StatItem(
                 theme: theme,
-                label: 'Rating',
+                label: l10n.handymanStatRating,
                 value: stats['average_rating']?.toString() ?? '—',
               ),
               _StatItem(
                 theme: theme,
-                label: 'Response',
+                label: l10n.handymanStatResponse,
                 value: '${stats['response_rate'] ?? 0}%',
               ),
             ],

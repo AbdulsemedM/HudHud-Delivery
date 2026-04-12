@@ -23,14 +23,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Notifications'),
-        backgroundColor: Colors.white,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -54,7 +56,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors.grey[700],
+                        color: theme.textTheme.bodyMedium?.color?.withOpacity(0.85),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -86,7 +88,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       'No notifications yet',
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors.grey[600],
+                        color: theme.textTheme.bodyMedium?.color?.withOpacity(0.75),
                       ),
                     ),
                   ],
@@ -163,6 +165,7 @@ class _NotificationSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16),
       child: Column(
@@ -172,10 +175,10 @@ class _NotificationSection extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF2C3E50),
+                color: theme.textTheme.titleMedium?.color,
               ),
             ),
           ),
@@ -194,6 +197,8 @@ class _NotificationItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final iconColor =
         notification.isRead ? Colors.grey : (Colors.blue[700] ?? Colors.blue);
     final timeAgo = _formatTimeAgo(notification.createdAt);
@@ -201,7 +206,7 @@ class _NotificationItem extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: notification.isRead ? Colors.white : Colors.white,
+        color: colorScheme.surface,
         border: Border(
           left: BorderSide(
             color: notification.isRead
@@ -237,7 +242,7 @@ class _NotificationItem extends StatelessWidget {
                     fontSize: 16,
                     fontWeight:
                         notification.isRead ? FontWeight.w500 : FontWeight.w600,
-                    color: const Color(0xFF2C3E50),
+                    color: theme.textTheme.titleMedium?.color,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -245,7 +250,7 @@ class _NotificationItem extends StatelessWidget {
                   notification.message,
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.grey[600],
+                    color: theme.textTheme.bodyMedium?.color?.withOpacity(0.8),
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -253,7 +258,7 @@ class _NotificationItem extends StatelessWidget {
                   timeAgo,
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey[500],
+                    color: theme.textTheme.bodySmall?.color?.withOpacity(0.75),
                   ),
                 ),
               ],

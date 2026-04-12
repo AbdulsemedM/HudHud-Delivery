@@ -2,9 +2,13 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
 import 'package:hudhud_delivery/features/splash/presentation/screen/splash_screen.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
+
+import 'features/wishlist/bloc/wishlist_bloc.dart';
 
 // Core imports
 import 'core/theme/app_theme.dart';
@@ -15,6 +19,7 @@ import 'core/utils/button_util.dart';
 
 // Controllers
 import 'controllers/theme_controller.dart';
+import 'controllers/locale_controller.dart';
 import 'controllers/auth_controller.dart';
 
 // Services
@@ -60,6 +65,9 @@ void main() async {
   final themeController = ThemeController();
   await themeController.init();
 
+  final localeController = LocaleController();
+  await localeController.init();
+
   // Initialize auth service
   final authService = AuthService();
 
@@ -80,6 +88,7 @@ void main() async {
 
   runApp(MyApp(
     themeController: themeController,
+    localeController: localeController,
     authService: authService,
     ordersRepository: ordersRepository,
     navigatorKey: navigatorKey,
@@ -88,6 +97,7 @@ void main() async {
 
 class MyApp extends StatefulWidget {
   final ThemeController themeController;
+  final LocaleController localeController;
   final AuthService authService;
   final OrdersRepository ordersRepository;
   final GlobalKey<NavigatorState> navigatorKey;
@@ -95,6 +105,7 @@ class MyApp extends StatefulWidget {
   const MyApp({
     Key? key,
     required this.themeController,
+    required this.localeController,
     required this.authService,
     required this.ordersRepository,
     required this.navigatorKey,
@@ -110,28 +121,40 @@ class _MyAppState extends State<MyApp> {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: widget.themeController),
+        ChangeNotifierProvider.value(value: widget.localeController),
         ChangeNotifierProvider(
           create: (_) => AuthController(),
         ),
         Provider<OrdersRepository>.value(value: widget.ordersRepository),
       ],
-      child: Consumer<ThemeController>(
-        builder: (context, themeController, child) {
-          return MaterialApp(
-            navigatorKey: widget.navigatorKey,
-            title: 'HudHud Delivery',
-            debugShowCheckedModeBanner: false,
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
-            themeMode: themeController.themeMode,
-            home: SplashScreen(),
-            builder: (context, child) {
-              // Update system UI overlay style when theme changes
-              themeController.updateSystemUIOverlayStyle();
-              return child!;
-            },
-          );
-        },
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider<WishlistBloc>(
+            create: (_) => WishlistBloc(),
+          ),
+        ],
+        child: Consumer2<ThemeController, LocaleController>(
+          builder: (context, themeController, localeController, child) {
+            return MaterialApp(
+              navigatorKey: widget.navigatorKey,
+              onGenerateTitle: (context) =>
+                  AppLocalizations.of(context)!.appTitle,
+              debugShowCheckedModeBanner: false,
+              theme: AppTheme.lightTheme,
+              darkTheme: AppTheme.darkTheme,
+              themeMode: themeController.themeMode,
+              locale: localeController.locale,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: SplashScreen(),
+              builder: (context, child) {
+                // Update system UI overlay style when theme changes
+                themeController.updateSystemUIOverlayStyle();
+                return child!;
+              },
+            );
+          },
+        ),
       ),
     );
   }

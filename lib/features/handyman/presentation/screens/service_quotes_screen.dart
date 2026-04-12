@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/handyman/data/data_provider/handyman_data_provider.dart';
 import 'package:hudhud_delivery/features/handyman/data/models/service_quote_model.dart';
@@ -54,22 +55,26 @@ class _ServiceQuotesScreenState extends State<ServiceQuotesScreen> {
   }
 
   Future<void> _acceptQuote(ServiceQuoteModel quote) async {
+    final l10n = context.l10n;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Accept Quote'),
+        title: Text(l10n.handymanAcceptQuoteTitle),
         content: Text(
-          'Accept ${quote.formattedAmount ?? quote.amount} from ${quote.handymanName}?',
+          l10n.handymanAcceptQuoteMessage(
+            quote.formattedAmount ?? quote.amount,
+            quote.handymanName,
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.actionCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: AppColors.successColor),
-            child: const Text('Accept'),
+            child: Text(l10n.actionAccept),
           ),
         ],
       ),
@@ -86,7 +91,7 @@ class _ServiceQuotesScreenState extends State<ServiceQuotesScreen> {
     if (result['success'] == true) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(result['message'] as String? ?? 'Quote accepted'),
+          content: Text(result['message'] as String? ?? l10n.handymanQuoteAccepted),
           backgroundColor: AppColors.successColor,
         ),
       );
@@ -94,7 +99,7 @@ class _ServiceQuotesScreenState extends State<ServiceQuotesScreen> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(result['message'] as String? ?? 'Failed to accept'),
+          content: Text(result['message'] as String? ?? l10n.handymanAcceptQuoteFailed),
           backgroundColor: AppColors.errorColor,
         ),
       );
@@ -102,22 +107,23 @@ class _ServiceQuotesScreenState extends State<ServiceQuotesScreen> {
   }
 
   Future<void> _rejectQuote(ServiceQuoteModel quote) async {
+    final l10n = context.l10n;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Reject Quote'),
+        title: Text(l10n.handymanRejectQuoteTitle),
         content: Text(
-          'Reject quote from ${quote.handymanName}?',
+          l10n.handymanRejectQuoteMessage(quote.handymanName),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.actionCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: AppColors.errorColor),
-            child: const Text('Reject'),
+            child: Text(l10n.actionReject),
           ),
         ],
       ),
@@ -134,7 +140,7 @@ class _ServiceQuotesScreenState extends State<ServiceQuotesScreen> {
     if (result['success'] == true) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(result['message'] as String? ?? 'Quote rejected'),
+          content: Text(result['message'] as String? ?? l10n.handymanQuoteRejected),
           backgroundColor: AppColors.successColor,
         ),
       );
@@ -142,7 +148,7 @@ class _ServiceQuotesScreenState extends State<ServiceQuotesScreen> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(result['message'] as String? ?? 'Failed to reject'),
+          content: Text(result['message'] as String? ?? l10n.handymanRejectQuoteFailed),
           backgroundColor: AppColors.errorColor,
         ),
       );
@@ -152,11 +158,12 @@ class _ServiceQuotesScreenState extends State<ServiceQuotesScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
-          'Quotes',
+          l10n.handymanQuotesTitle,
           style: TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 18,
@@ -206,7 +213,7 @@ class _ServiceQuotesScreenState extends State<ServiceQuotesScreen> {
                           TextButton(
                             onPressed: _fetchQuotes,
                             child: Text(
-                              'Retry',
+                              l10n.actionRetry,
                               style: TextStyle(color: AppColors.primaryColor),
                             ),
                           ),
@@ -228,7 +235,7 @@ class _ServiceQuotesScreenState extends State<ServiceQuotesScreen> {
                               ),
                               const SizedBox(height: 16),
                               Text(
-                                'No quotes yet',
+                                l10n.handymanNoQuotesYet,
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
@@ -237,7 +244,7 @@ class _ServiceQuotesScreenState extends State<ServiceQuotesScreen> {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                'Handymen will send quotes soon',
+                                l10n.handymanNoQuotesSubtitle,
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: theme.colorScheme.onSurfaceVariant,
@@ -292,6 +299,7 @@ class _QuoteCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
@@ -350,7 +358,7 @@ class _QuoteCard extends StatelessWidget {
               TextButton(
                 onPressed: onViewProfile,
                 child: Text(
-                  'View Profile',
+                  l10n.handymanViewProfile,
                   style: TextStyle(
                     fontSize: 14,
                     color: theme.colorScheme.primary,
@@ -365,7 +373,7 @@ class _QuoteCard extends StatelessWidget {
                     foregroundColor: AppColors.errorColor,
                     side: const BorderSide(color: AppColors.errorColor),
                   ),
-                  child: const Text('Reject'),
+                  child: Text(l10n.actionReject),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(
@@ -374,7 +382,7 @@ class _QuoteCard extends StatelessWidget {
                     backgroundColor: theme.colorScheme.primary,
                     foregroundColor: theme.colorScheme.onPrimary,
                   ),
-                  child: const Text('Accept'),
+                  child: Text(l10n.actionAccept),
                 ),
               ],
             ],

@@ -7,6 +7,7 @@ import 'package:hudhud_delivery/models/user_model.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/utils/greeting_utils.dart';
 import 'package:hudhud_delivery/core/utils/avatar_util.dart';
+import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
 import 'appearance_screen.dart';
 import 'personal_details_screen.dart';
@@ -14,6 +15,19 @@ import 'terms_conditions_screen.dart';
 import 'notifications_screen.dart';
 import 'faqs_screen.dart';
 import 'change_password_screen.dart';
+import 'language_screen.dart';
+import 'package:hudhud_delivery/features/wishlist/presentation/screen/wishlist_screen.dart';
+
+String _themeModeLabel(AppLocalizations l10n, ThemeController themeController) {
+  switch (themeController.themeMode) {
+    case ThemeMode.light:
+      return l10n.themeLight;
+    case ThemeMode.dark:
+      return l10n.themeDark;
+    case ThemeMode.system:
+      return l10n.themeSystem;
+  }
+}
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -45,19 +59,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _handleLogout(BuildContext context) async {
     try {
+      final l10n = AppLocalizations.of(context)!;
       final shouldLogout = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Logout'),
-          content: const Text('Are you sure you want to logout?'),
+          title: Text(l10n.logoutTitle),
+          content: Text(l10n.logoutMessage),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
+              child: Text(l10n.actionCancel),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Logout'),
+              child: Text(l10n.actionLogOut),
             ),
           ],
         ),
@@ -76,9 +91,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       }
     } catch (e) {
       if (context.mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error during logout: $e'),
+            content: Text(l10n.logoutError(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -88,8 +104,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final greeting = GreetingUtils.getTimeBasedGreeting();
-    final userName = _user?.name?.split(' ').first ?? 'User';
+    final l10n = AppLocalizations.of(context)!;
+    final greeting = GreetingUtils.getTimeBasedGreeting(l10n);
+    final userName = _user?.name?.split(' ').first ?? l10n.userDefault;
     final theme = Theme.of(context);
     final themeController = Provider.of<ThemeController>(context);
     final colorScheme = theme.colorScheme;
@@ -102,7 +119,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
           children: [
             Text(
-              'Profile',
+              l10n.settingsProfile,
               style: textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
@@ -200,12 +217,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            _SectionTitle(title: 'Account'),
+            _SectionTitle(title: l10n.settingsAccount),
             _SectionCard(
               children: [
                 _MenuItem(
                   icon: Icons.person,
-                  title: 'Personal Details',
+                  title: l10n.settingsPersonalDetails,
                   onTap: () {
                     Navigator.push(
                       context,
@@ -217,9 +234,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 _MenuItem(
                   icon: Icons.palette,
-                  title: 'Appearance',
+                  title: l10n.settingsAppearance,
                   trailing: Text(
-                    themeController.themeModeDisplayName,
+                    _themeModeLabel(l10n, themeController),
                     style: textTheme.bodySmall?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),
@@ -235,7 +252,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 _MenuItem(
                   icon: Icons.lock_outline,
-                  title: 'Change Password',
+                  title: l10n.settingsChangePassword,
                   onTap: () {
                     Navigator.push(
                       context,
@@ -257,12 +274,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            _SectionTitle(title: 'Preferences'),
+            _SectionTitle(title: l10n.settingsPreferences),
             _SectionCard(
               children: [
                 _MenuItem(
+                  icon: Icons.language,
+                  title: l10n.settingsLanguage,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LanguageScreen(),
+                      ),
+                    );
+                  },
+                ),
+                _MenuItem(
                   icon: Icons.notifications_outlined,
-                  title: 'Notifications',
+                  title: l10n.settingsNotifications,
                   onTap: () {
                     Navigator.push(
                       context,
@@ -277,7 +306,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 _MenuItemWithToggle(
                   icon: Icons.sms_outlined,
-                  title: 'SMS Notifications',
+                  title: l10n.settingsSmsNotifications,
                   value: _smsNotificationsEnabled,
                   onChanged: (value) {
                     setState(() {
@@ -287,20 +316,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 _MenuItem(
                   icon: Icons.favorite_border,
-                  title: 'Wishlist',
+                  title: l10n.settingsWishlist,
                   onTap: () {
-                    // TODO: Navigate to wishlist
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const WishlistScreen(),
+                      ),
+                    );
                   },
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            _SectionTitle(title: 'Support'),
+            _SectionTitle(title: l10n.settingsSupport),
             _SectionCard(
               children: [
                 _MenuItem(
                   icon: Icons.lock,
-                  title: 'Terms & Conditions',
+                  title: l10n.settingsTermsConditions,
                   onTap: () {
                     Navigator.push(
                       context,
@@ -312,7 +346,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 _MenuItem(
                   icon: Icons.help_outline,
-                  title: 'FAQs',
+                  title: l10n.settingsFaqs,
                   onTap: () {
                     Navigator.push(
                       context,
@@ -324,7 +358,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 _MenuItem(
                   icon: Icons.support_agent,
-                  title: 'Help Desk',
+                  title: l10n.settingsHelpDesk,
                   onTap: () {
                     // TODO: Navigate to help desk
                   },
@@ -334,14 +368,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(height: 12),
             _MenuItem(
               icon: Icons.logout,
-              title: 'Log Out',
+              title: l10n.settingsLogOut,
               onTap: () => _handleLogout(context),
               isDestructive: true,
             ),
             const SizedBox(height: 14),
             Center(
               child: Text(
-                'Version 1.0',
+                l10n.settingsVersion,
                 style: textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),

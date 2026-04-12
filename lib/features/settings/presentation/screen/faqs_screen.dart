@@ -56,14 +56,17 @@ class _FAQsScreenState extends State<FAQsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('FAQs'),
-        backgroundColor: Colors.white,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -75,19 +78,18 @@ class _FAQsScreenState extends State<FAQsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'How can we help you?',
-                  style: TextStyle(
+                  style: theme.textTheme.headlineSmall?.copyWith(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF2C3E50),
                   ),
                 ),
                 const SizedBox(height: 16),
                 // Search Bar
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.grey[100],
+                    color: isDark ? colorScheme.surfaceContainerHighest : Colors.grey[100],
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: TextField(
@@ -98,10 +100,12 @@ class _FAQsScreenState extends State<FAQsScreen> {
                     },
                     decoration: InputDecoration(
                       hintText: 'Search question',
-                      hintStyle: TextStyle(color: Colors.grey[600]),
+                      hintStyle: TextStyle(
+                        color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+                      ),
                       prefixIcon: Icon(
                         Icons.search,
-                        color: Colors.grey[600],
+                        color: theme.iconTheme.color?.withOpacity(0.75),
                       ),
                       border: InputBorder.none,
                       contentPadding: const EdgeInsets.symmetric(
@@ -140,12 +144,12 @@ class _FAQsScreenState extends State<FAQsScreen> {
                             decoration: BoxDecoration(
                               color: isSelected
                                   ? AppColors.primaryColor
-                                  : Colors.white,
+                                  : colorScheme.surface,
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
                                 color: isSelected
                                     ? AppColors.primaryColor
-                                    : Colors.grey[300]!,
+                                    : (isDark ? colorScheme.outline : Colors.grey[300]!),
                                 width: 1.5,
                               ),
                             ),
@@ -182,10 +186,10 @@ class _FAQsScreenState extends State<FAQsScreen> {
                   decoration: BoxDecoration(
                     color: isExpanded
                         ? AppColors.primaryColor.withOpacity(0.1)
-                        : Colors.white,
+                        : colorScheme.surface,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: Colors.grey[200]!,
+                      color: isDark ? colorScheme.outline : Colors.grey[200]!,
                       width: 1,
                     ),
                   ),
@@ -209,7 +213,7 @@ class _FAQsScreenState extends State<FAQsScreen> {
                                     fontWeight: FontWeight.w600,
                                     color: isExpanded
                                         ? AppColors.primaryColor
-                                        : const Color(0xFF2C3E50),
+                                        : theme.textTheme.titleMedium?.color,
                                   ),
                                 ),
                               ),
@@ -219,7 +223,7 @@ class _FAQsScreenState extends State<FAQsScreen> {
                                     : Icons.keyboard_arrow_down,
                                 color: isExpanded
                                     ? AppColors.primaryColor
-                                    : Colors.grey[600],
+                                    : theme.iconTheme.color?.withOpacity(0.75),
                               ),
                             ],
                           ),
@@ -232,7 +236,7 @@ class _FAQsScreenState extends State<FAQsScreen> {
                             question['answer'] as String,
                             style: TextStyle(
                               fontSize: 14,
-                              color: Colors.grey[700],
+                              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.85),
                               height: 1.5,
                             ),
                           ),

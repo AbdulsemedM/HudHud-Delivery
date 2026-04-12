@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import '../../bloc/orders_bloc.dart';
 import '../../data/models/order_model.dart';
 import '../../data/models/order_tracking_model.dart';
@@ -23,8 +24,9 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: BlocConsumer<OrdersBloc, OrdersState>(
         listener: (context, state) {
           if (state is OrdersError) {
@@ -71,8 +73,8 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
             return _buildErrorState(context, state.message);
           }
 
-          return const Center(
-            child: Text('Loading order details...'),
+          return Center(
+            child: Text(context.l10n.orderDetailsLoadingMessage),
           );
         },
       ),
@@ -81,6 +83,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
 
   Widget _buildOrderDetails(
       BuildContext context, OrderModel order, OrderTrackingModel? tracking) {
+    final colorScheme = Theme.of(context).colorScheme;
     return CustomScrollView(
       slivers: [
         // Custom App Bar
@@ -88,17 +91,17 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
           expandedHeight: 120,
           floating: false,
           pinned: true,
-          backgroundColor: Colors.white,
+          backgroundColor: colorScheme.surface,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
             onPressed: () => Navigator.of(context).pop(),
           ),
           flexibleSpace: FlexibleSpaceBar(
             title: Text(
-              'Order #${order.orderNumber}',
-              style: const TextStyle(
-                color: Colors.black,
+              context.l10n.orderAppBarTitle(order.orderNumber),
+              style: TextStyle(
+                color: colorScheme.onSurface,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -182,6 +185,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   }
 
   Widget _buildErrorState(BuildContext context, String message) {
+    final l10n = context.l10n;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -193,7 +197,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            'Error loading order details',
+            l10n.orderDetailsLoadErrorTitle,
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 8),
@@ -211,7 +215,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
               backgroundColor: Colors.orange,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Retry'),
+            child: Text(l10n.actionRetry),
           ),
         ],
       ),
