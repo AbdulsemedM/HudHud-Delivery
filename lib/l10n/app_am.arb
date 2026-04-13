@@ -28,6 +28,7 @@
   "navWallet": "የኪስ ቦርሳ",
   "navTaxi": "ታክሲ",
   "navProfile": "መገለጫ",
+  "navOrderHistory": "የትዕዛዝ ታሪክ",
   "settingsProfile": "መገለጫ",
   "settingsAccount": "መለያ",
   "settingsPreferences": "ምርጫዎች",
@@ -169,6 +170,9 @@
   "codeSentPhoneDefault": "ኮድ ወደ ስልክዎ ተልኳል።",
   "emailVerifiedSuccess": "ኢሜል በተሳካ ሁኔታ ተረጋግጧል!",
   "phoneVerifiedSuccess": "ስልክ ቁጥር በተሳካ ሁኔታ ተረጋግጧል!",
+  "accountVerificationBannerTitle": "Secure your account",
+  "accountVerificationEmailSubtitle": "Confirm your email for receipts and updates.",
+  "accountVerificationPhoneSubtitle": "Verify your phone for security and support.",
   "failedToLoadOrders": "ትዕዛዞችን መጫን አልተሳካም፦ {error}",
   "@failedToLoadOrders": {
     "placeholders": {

@@ -93,6 +93,9 @@ class AppLocalizationsOm extends AppLocalizations {
   String get navProfile => 'Ibsama';
 
   @override
+  String get navOrderHistory => 'Seenaa Ajajaa';
+
+  @override
   String get settingsProfile => 'Ibsama';
 
   @override
@@ -390,6 +393,17 @@ class AppLocalizationsOm extends AppLocalizations {
   @override
   String get phoneVerifiedSuccess =>
       'Lakkoofsi bilbilaa milkaa\'inaan mirkanaa\'eera!';
+
+  @override
+  String get accountVerificationBannerTitle => 'Secure your account';
+
+  @override
+  String get accountVerificationEmailSubtitle =>
+      'Confirm your email for receipts and updates.';
+
+  @override
+  String get accountVerificationPhoneSubtitle =>
+      'Verify your phone for security and support.';
 
   @override
   String failedToLoadOrders(String error) {

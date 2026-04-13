@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:hudhud_delivery/app/services/custom_location_service.dart';
@@ -5,6 +7,7 @@ import 'package:hudhud_delivery/app/services/google_places_service.dart';
 import 'package:hudhud_delivery/app/models/place_result.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/widgets/centered_pin_map.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../../../core/widgets/location_search_field.dart';
@@ -20,11 +23,13 @@ class LocationSearchScreen extends StatefulWidget {
 
 class _LocationSearchScreenState extends State<LocationSearchScreen> {
   gmaps.GoogleMapController? _mapController;
-  Set<gmaps.Marker> _markers = {};
 
   LatLng _currentPosition = const LatLng(9.0222, 38.7468); // Default to Addis Ababa
   bool _isLoadingCurrentLocation = false;
   PlaceResult? _selectedPlace;
+
+  /// Skip one [onCenterLatLngChanged] after programmatic camera moves / tap geocode.
+  bool _skipNextIdleGeocode = false;
 
   static gmaps.LatLng _toG(LatLng p) => gmaps.LatLng(p.latitude, p.longitude);
 
@@ -32,6 +37,43 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
   void initState() {
     super.initState();
     _getCurrentLocation();
+  }
+
+  Future<void> _reverseGeocodeCenter(gmaps.LatLng point) async {
+    final l10n = context.l10n;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    try {
+      final places = await GooglePlacesService.reverseGeocode(
+        point.latitude,
+        point.longitude,
+      );
+
+      if (!mounted) return;
+
+      if (places.isNotEmpty) {
+        setState(() {
+          _selectedPlace = places.first;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.taxiCouldNotGetLocationDetails),
+            backgroundColor: colorScheme.error,
+          ),
+        );
+      }
+    }
+  }
+
+  void _onCenterLatLngChanged(gmaps.LatLng point) {
+    if (_skipNextIdleGeocode) {
+      _skipNextIdleGeocode = false;
+      return;
+    }
+    unawaited(_reverseGeocodeCenter(point));
   }
 
   Future<void> _getCurrentLocation() async {
@@ -47,11 +89,12 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
       if (position != null) {
         setState(() {
           _currentPosition = LatLng(position.latitude, position.longitude);
-          _updateMarker(_currentPosition, isCurrentLocation: true);
-          _mapController?.moveCamera(
-            gmaps.CameraUpdate.newLatLngZoom(_toG(_currentPosition), 15.0),
-          );
         });
+        _skipNextIdleGeocode = true;
+        await _mapController?.moveCamera(
+          gmaps.CameraUpdate.newLatLngZoom(_toG(_currentPosition), 15.0),
+        );
+        await _reverseGeocodeCenter(_toG(_currentPosition));
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -80,60 +123,12 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
     }
   }
 
-  void _updateMarker(LatLng position,
-      {bool isCurrentLocation = false, PlaceResult? place}) {
-    setState(() {
-      _markers = {
-        gmaps.Marker(
-          markerId: const gmaps.MarkerId('pin'),
-          position: _toG(position),
-          icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-            isCurrentLocation
-                ? gmaps.BitmapDescriptor.hueAzure
-                : gmaps.BitmapDescriptor.hueRed,
-          ),
-        ),
-      };
-    });
-  }
-
-  void _handleMapTap(gmaps.LatLng point) async {
-    setState(() {
-      _markers = {
-        gmaps.Marker(
-          markerId: const gmaps.MarkerId('pin'),
-          position: point,
-          icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-            gmaps.BitmapDescriptor.hueRed,
-          ),
-        ),
-      };
-    });
-
-    final l10n = context.l10n;
-    final colorScheme = Theme.of(context).colorScheme;
-
-    try {
-      final places = await GooglePlacesService.reverseGeocode(
-        point.latitude,
-        point.longitude,
-      );
-
-      if (places.isNotEmpty) {
-        setState(() {
-          _selectedPlace = places.first;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.taxiCouldNotGetLocationDetails),
-            backgroundColor: colorScheme.error,
-          ),
-        );
-      }
-    }
+  Future<void> _handleMapTap(gmaps.LatLng point) async {
+    _skipNextIdleGeocode = true;
+    await _mapController?.animateCamera(
+      gmaps.CameraUpdate.newLatLngZoom(point, 15.0),
+    );
+    await _reverseGeocodeCenter(point);
   }
 
   @override
@@ -163,12 +158,14 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
                     place.coordinates.latitude,
                     place.coordinates.longitude,
                   );
-                  _updateMarker(_currentPosition, place: place);
-                  _mapController?.moveCamera(
-                    gmaps.CameraUpdate.newLatLngZoom(
-                        _toG(_currentPosition), 15.0),
-                  );
                 });
+                _skipNextIdleGeocode = true;
+                _mapController?.moveCamera(
+                  gmaps.CameraUpdate.newLatLngZoom(
+                    _toG(_currentPosition),
+                    15.0,
+                  ),
+                );
               },
               initialLocation: widget.currentLocation,
             ),
@@ -176,19 +173,20 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
           Expanded(
             child: Stack(
               children: [
-                gmaps.GoogleMap(
+                CenteredPinMap(
                   initialCameraPosition: gmaps.CameraPosition(
                     target: _toG(_currentPosition),
                     zoom: 13.0,
                   ),
-                  markers: _markers,
-                  myLocationEnabled: true,
-                  myLocationButtonEnabled: false,
-                  mapType: gmaps.MapType.normal,
+                  idleDebounce: const Duration(milliseconds: 400),
                   onMapCreated: (controller) {
                     _mapController = controller;
                   },
+                  onCenterLatLngChanged: _onCenterLatLngChanged,
                   onTap: _handleMapTap,
+                  myLocationEnabled: true,
+                  myLocationButtonEnabled: false,
+                  mapType: gmaps.MapType.normal,
                 ),
                 Positioned(
                   right: 16,

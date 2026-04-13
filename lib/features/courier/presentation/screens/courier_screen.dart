@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
-import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/app/services/location_service.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
-import 'package:hudhud_delivery/models/user_model.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../home/presentation/widgets/home_widget.dart';
 import '../../../home/presentation/screen/location_search_screen.dart';
@@ -24,9 +22,7 @@ class CourierScreen extends StatefulWidget {
 }
 
 class _CourierScreenState extends State<CourierScreen> {
-  final AuthService _authService = AuthService();
   late final CourierRepository _courierRepository;
-  UserModel? _currentUser;
   String _currentLocation = '';
   bool _isLoadingLocation = true;
   List<Map<String, dynamic>> _deliveries = [];
@@ -43,7 +39,6 @@ class _CourierScreenState extends State<CourierScreen> {
         apiService: ApiService.instance,
       ),
     );
-    _loadUserData();
     _requestLocationAndUpdate();
     _fetchDeliveries();
     _fetchActiveDelivery();
@@ -168,15 +163,6 @@ class _CourierScreenState extends State<CourierScreen> {
     );
   }
 
-  Future<void> _loadUserData() async {
-    final user = await _authService.getStoredUser();
-    if (mounted) {
-      setState(() {
-        _currentUser = user;
-      });
-    }
-  }
-
   Future<void> _requestLocationAndUpdate() async {
     try {
       setState(() {
@@ -214,7 +200,6 @@ class _CourierScreenState extends State<CourierScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               UserProfileHeader(
-                name: _currentUser?.name ?? l10n.userDefault,
                 location: _currentLocation,
                 isLoadingLocation: _isLoadingLocation,
                 onLocationTap: () async {

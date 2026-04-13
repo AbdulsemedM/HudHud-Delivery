@@ -7,8 +7,11 @@ import 'package:hudhud_delivery/app/services/location_service.dart';
 import 'package:hudhud_delivery/app/services/geocoding_service.dart';
 import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
+import 'package:hudhud_delivery/core/widgets/centered_pin_map.dart';
 import '../../../home/presentation/screen/location_search_screen.dart';
 import 'package_details_screen.dart';
+
+enum _PinField { pickup, delivery }
 
 class InstantDeliveryScreen extends StatefulWidget {
   const InstantDeliveryScreen({super.key});
@@ -30,6 +33,10 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
   bool _isLoadingLocation = true;
   List<LatLng>? _routePolylinePoints;
   bool? _hasGoogleMapsApiKey;
+
+  _PinField _activePinField = _PinField.pickup;
+
+  bool _skipNextIdleGeocode = false;
 
   static gmaps.LatLng _toG(LatLng p) => gmaps.LatLng(p.latitude, p.longitude);
 
@@ -88,6 +95,8 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
             _isLoadingLocation = false;
           });
 
+          _skipNextIdleGeocode = true;
+          _activePinField = _PinField.pickup;
           // Move map to current location
           _mapController?.moveCamera(
             gmaps.CameraUpdate.newLatLngZoom(_toG(latLng), 15.0),
@@ -138,8 +147,10 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
         // Adjust map view to show both locations if both are set
         if (_pickupPosition != null && _deliveryPosition != null) {
           _fetchRouteDirections();
+          _skipNextIdleGeocode = true;
           _fitBounds();
         } else {
+          _skipNextIdleGeocode = true;
           _mapController?.moveCamera(
             gmaps.CameraUpdate.newLatLngZoom(_toG(coordinates), 15.0),
           );
@@ -172,12 +183,98 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
         // Adjust map view to show both locations if both are set
         if (_pickupPosition != null && _deliveryPosition != null) {
           _fetchRouteDirections();
+          _skipNextIdleGeocode = true;
           _fitBounds();
         } else {
+          _skipNextIdleGeocode = true;
           _mapController?.moveCamera(
             gmaps.CameraUpdate.newLatLngZoom(_toG(coordinates), 15.0),
           );
         }
+      }
+    }
+  }
+
+  Future<void> _applyCenterPinChange(gmaps.LatLng g) async {
+    if (_skipNextIdleGeocode) {
+      _skipNextIdleGeocode = false;
+      return;
+    }
+    final point = LatLng(g.latitude, g.longitude);
+    try {
+      final address = await GeocodingService.getAddressFromLatLng(
+        point.latitude,
+        point.longitude,
+      );
+
+      if (!mounted) return;
+      setState(() {
+        if (_activePinField == _PinField.pickup) {
+          _pickupLocation = address;
+          _pickupPosition = point;
+          _pickupResolveFailed = false;
+        } else {
+          _deliveryLocation = address;
+          _deliveryPosition = point;
+        }
+        _routePolylinePoints = null;
+      });
+
+      if (_pickupPosition != null && _deliveryPosition != null) {
+        _fetchRouteDirections();
+        _skipNextIdleGeocode = true;
+        _fitBounds();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.l10n.errorGettingAddress(e.toString())),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _onMapTap(gmaps.LatLng g) async {
+    _skipNextIdleGeocode = true;
+    await _mapController?.animateCamera(
+      gmaps.CameraUpdate.newLatLngZoom(g, 15.0),
+    );
+    final point = LatLng(g.latitude, g.longitude);
+    try {
+      final address = await GeocodingService.getAddressFromLatLng(
+        point.latitude,
+        point.longitude,
+      );
+
+      if (!mounted) return;
+      setState(() {
+        if (_activePinField == _PinField.pickup) {
+          _pickupLocation = address;
+          _pickupPosition = point;
+          _pickupResolveFailed = false;
+        } else {
+          _deliveryLocation = address;
+          _deliveryPosition = point;
+        }
+        _routePolylinePoints = null;
+      });
+
+      if (_pickupPosition != null && _deliveryPosition != null) {
+        _fetchRouteDirections();
+        _skipNextIdleGeocode = true;
+        _fitBounds();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.l10n.errorGettingAddress(e.toString())),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
       }
     }
   }
@@ -227,14 +324,39 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
           // Recenter on current GPS — matches taxi / delivery map UX
           Positioned(
             top: topPad + 8,
+            left: 72,
+            right: 72,
+            child: Material(
+              color: colorScheme.surfaceContainerHigh.withValues(alpha: 0.92),
+              borderRadius: BorderRadius.circular(20),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                child: Text(
+                  _activePinField == _PinField.pickup
+                      ? l10n.pickupLocationLabel
+                      : l10n.deliveryLocationLabel,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: colorScheme.onSurface,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: topPad + 8,
             right: 16,
             child: FloatingActionButton(
               heroTag: 'instant_delivery_my_location',
               mini: true,
               backgroundColor: colorScheme.surfaceContainerHigh,
               onPressed: () async {
+                setState(() => _activePinField = _PinField.pickup);
                 await _getCurrentLocation();
                 if (_pickupPosition != null && mounted) {
+                  _skipNextIdleGeocode = true;
                   _mapController?.moveCamera(
                     gmaps.CameraUpdate.newLatLngZoom(
                       _toG(_pickupPosition!),
@@ -310,7 +432,10 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                               icon: Icons.location_on,
                               iconColor: colorScheme.error,
                               isReadOnly: false,
-                              onTap: _selectPickupLocation,
+                              onTap: () {
+                                setState(() => _activePinField = _PinField.pickup);
+                                _selectPickupLocation();
+                              },
                             ),
                             const SizedBox(height: 16),
                             // Delivery Location (user can select)
@@ -322,7 +447,11 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                               icon: Icons.location_on,
                               iconColor: colorScheme.primary,
                               isReadOnly: false,
-                              onTap: _selectDeliveryLocation,
+                              onTap: () {
+                                setState(
+                                    () => _activePinField = _PinField.delivery);
+                                _selectDeliveryLocation();
+                              },
                             ),
                             const SizedBox(height: 24),
                             // Vehicle Type
@@ -450,93 +579,6 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
     );
   }
 
-  Future<void> _handleMapTap(LatLng point, bool isPickup) async {
-    try {
-      // Get address from tapped location
-      final address = await GeocodingService.getAddressFromLatLng(
-        point.latitude,
-        point.longitude,
-      );
-
-      if (mounted) {
-        setState(() {
-          if (isPickup) {
-            _pickupLocation = address;
-            _pickupPosition = point;
-          } else {
-            _deliveryLocation = address;
-            _deliveryPosition = point;
-          }
-          _routePolylinePoints = null;
-        });
-
-        // Adjust map view to show both locations if both are set
-        if (_pickupPosition != null && _deliveryPosition != null) {
-          _fetchRouteDirections();
-          _fitBounds();
-        } else {
-          _mapController?.moveCamera(
-            gmaps.CameraUpdate.newLatLngZoom(_toG(point), 15.0),
-          );
-        }
-      }
-    } catch (e) {
-      // Handle error
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(context.l10n.errorGettingAddress(e.toString())),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      }
-    }
-  }
-
-  void _showLocationSelectionDialog(LatLng point) {
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) {
-        final l10n = dialogContext.l10n;
-        final cs = Theme.of(dialogContext).colorScheme;
-        return AlertDialog(
-          backgroundColor: cs.surface,
-          title: Text(
-            l10n.selectLocationTitle,
-            style: TextStyle(color: cs.onSurface),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: Icon(Icons.location_on, color: cs.error),
-                title: Text(
-                  l10n.pickupLocationLabel,
-                  style: TextStyle(color: cs.onSurface),
-                ),
-                onTap: () {
-                  Navigator.pop(dialogContext);
-                  _handleMapTap(point, true);
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.location_on, color: cs.primary),
-                title: Text(
-                  l10n.deliveryLocationLabel,
-                  style: TextStyle(color: cs.onSurface),
-                ),
-                onTap: () {
-                  Navigator.pop(dialogContext);
-                  _handleMapTap(point, false);
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   void _fitBounds() {
     if (_pickupPosition != null && _deliveryPosition != null) {
       final bounds = gmaps.LatLngBounds(
@@ -583,37 +625,22 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
       );
     }
 
-    return gmaps.GoogleMap(
+    return CenteredPinMap(
       initialCameraPosition: gmaps.CameraPosition(
         target: _toG(_currentPosition),
         zoom: 15.0,
       ),
+      idleDebounce: const Duration(milliseconds: 400),
+      onCenterLatLngChanged: _applyCenterPinChange,
       myLocationEnabled: true,
       myLocationButtonEnabled: false,
       mapType: gmaps.MapType.normal,
-      markers: {
-        if (_pickupPosition != null)
-          gmaps.Marker(
-            markerId: const gmaps.MarkerId('pickup'),
-            position: _toG(_pickupPosition!),
-            icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-              gmaps.BitmapDescriptor.hueAzure,
-            ),
-          ),
-        if (_deliveryPosition != null)
-          gmaps.Marker(
-            markerId: const gmaps.MarkerId('delivery'),
-            position: _toG(_deliveryPosition!),
-            icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-              gmaps.BitmapDescriptor.hueRed,
-            ),
-          ),
-      },
       polylines: _pickupPosition != null && _deliveryPosition != null
           ? {
               gmaps.Polyline(
                 polylineId: const gmaps.PolylineId('route'),
-                points: _routePolylinePoints != null && _routePolylinePoints!.length >= 2
+                points: _routePolylinePoints != null &&
+                        _routePolylinePoints!.length >= 2
                     ? _routePolylinePoints!.map(_toG).toList()
                     : [_toG(_pickupPosition!), _toG(_deliveryPosition!)],
                 color: AppColors.primaryColor,
@@ -624,14 +651,13 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
       onMapCreated: (controller) {
         _mapController = controller;
         if (!_isLoadingLocation) {
+          _skipNextIdleGeocode = true;
           controller.moveCamera(
             gmaps.CameraUpdate.newLatLngZoom(_toG(_currentPosition), 15),
           );
         }
       },
-      onTap: (point) {
-        _showLocationSelectionDialog(LatLng(point.latitude, point.longitude));
-      },
+      onTap: _onMapTap,
     );
   }
 }

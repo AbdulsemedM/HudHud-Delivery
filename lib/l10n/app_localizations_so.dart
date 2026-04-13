@@ -93,6 +93,9 @@ class AppLocalizationsSo extends AppLocalizations {
   String get navProfile => 'Profile';
 
   @override
+  String get navOrderHistory => 'Taariikhda dalbashada';
+
+  @override
   String get settingsProfile => 'Profile';
 
   @override
@@ -387,6 +390,17 @@ class AppLocalizationsSo extends AppLocalizations {
   @override
   String get phoneVerifiedSuccess =>
       'Lambarka taleefanka ayaa si guul leh loo xaqiijiyay!';
+
+  @override
+  String get accountVerificationBannerTitle => 'Secure your account';
+
+  @override
+  String get accountVerificationEmailSubtitle =>
+      'Confirm your email for receipts and updates.';
+
+  @override
+  String get accountVerificationPhoneSubtitle =>
+      'Verify your phone for security and support.';
 
   @override
   String failedToLoadOrders(String error) {

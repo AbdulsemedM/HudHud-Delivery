@@ -15,7 +15,10 @@ import 'package:hudhud_delivery/features/vendors/data/data_provider/vendors_data
 import 'package:hudhud_delivery/features/vendors/data/repository/vendors_repository.dart';
 
 class AllCategoriesScreen extends StatelessWidget {
-  const AllCategoriesScreen({super.key});
+  /// When true (e.g. home Food & groceries tab), no [Scaffold] app bar — fills parent only.
+  const AllCategoriesScreen({super.key, this.embedded = false});
+
+  final bool embedded;
 
   @override
   Widget build(BuildContext context) {
@@ -27,13 +30,15 @@ class AllCategoriesScreen extends StatelessWidget {
     return BlocProvider(
       create: (context) =>
           CategoriesBloc(repository)..add(FetchCategoriesListEvent()),
-      child: const _AllCategoriesBody(),
+      child: _AllCategoriesBody(embedded: embedded),
     );
   }
 }
 
 class _AllCategoriesBody extends StatefulWidget {
-  const _AllCategoriesBody();
+  const _AllCategoriesBody({required this.embedded});
+
+  final bool embedded;
 
   @override
   State<_AllCategoriesBody> createState() => _AllCategoriesBodyState();
@@ -80,6 +85,49 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
+
+    final body = BlocBuilder<CategoriesBloc, CategoriesState>(
+      buildWhen: (prev, curr) =>
+          curr is FetchCategoriesListLoading ||
+          curr is FetchCategoriesListSuccess ||
+          curr is FetchCategoriesListFailure,
+      builder: (context, state) {
+        if (state is FetchCategoriesListLoading) {
+          return const _LoadingState();
+        }
+        if (state is FetchCategoriesListFailure) {
+          return _ErrorState(
+            message: state.errorMessage,
+            onRetry: () =>
+                context.read<CategoriesBloc>().add(FetchCategoriesListEvent()),
+          );
+        }
+        if (state is FetchCategoriesListSuccess) {
+          final categories = state.result.items;
+          if (categories.isEmpty) {
+            return const _EmptyState();
+          }
+          return _CategoriesGrid(
+            categories: categories,
+            showAll: _showAllCategories,
+            vendors: _vendors,
+            vendorsLoading: _vendorsLoading,
+            vendorsError: _vendorsError,
+            onCategoryTap: (category) => _onCategoryTap(context, category),
+            onShowMore: () => setState(() => _showAllCategories = true),
+          );
+        }
+        return const SizedBox.shrink();
+      },
+    );
+
+    if (widget.embedded) {
+      return ColoredBox(
+        color: colorScheme.background,
+        child: body,
+      );
+    }
+
     return Scaffold(
       backgroundColor: colorScheme.background,
       appBar: AppBar(
@@ -106,41 +154,7 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
           ),
         ),
       ),
-      body: BlocBuilder<CategoriesBloc, CategoriesState>(
-        buildWhen: (prev, curr) =>
-            curr is FetchCategoriesListLoading ||
-            curr is FetchCategoriesListSuccess ||
-            curr is FetchCategoriesListFailure,
-        builder: (context, state) {
-          if (state is FetchCategoriesListLoading) {
-            return const _LoadingState();
-          }
-          if (state is FetchCategoriesListFailure) {
-            return _ErrorState(
-              message: state.errorMessage,
-              onRetry: () => context
-                  .read<CategoriesBloc>()
-                  .add(FetchCategoriesListEvent()),
-            );
-          }
-          if (state is FetchCategoriesListSuccess) {
-            final categories = state.result.items;
-            if (categories.isEmpty) {
-              return const _EmptyState();
-            }
-            return _CategoriesGrid(
-              categories: categories,
-              showAll: _showAllCategories,
-              vendors: _vendors,
-              vendorsLoading: _vendorsLoading,
-              vendorsError: _vendorsError,
-              onCategoryTap: (category) => _onCategoryTap(context, category),
-              onShowMore: () => setState(() => _showAllCategories = true),
-            );
-          }
-          return const SizedBox.shrink();
-        },
-      ),
+      body: body,
     );
   }
 

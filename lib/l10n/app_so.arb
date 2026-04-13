@@ -28,6 +28,7 @@
   "navWallet": "Wallet",
   "navTaxi": "Taksi",
   "navProfile": "Profile",
+  "navOrderHistory": "Taariikhda dalbashada",
   "settingsProfile": "Profile",
   "settingsAccount": "Xisaab",
   "settingsPreferences": "Dookhyada",
@@ -169,6 +170,9 @@
   "codeSentPhoneDefault": "Koodhka ayaa lagu soo diray taleefankaaga.",
   "emailVerifiedSuccess": "Iimaylku waa la xaqiijiyay si guul leh!",
   "phoneVerifiedSuccess": "Lambarka taleefanka ayaa si guul leh loo xaqiijiyay!",
+  "accountVerificationBannerTitle": "Secure your account",
+  "accountVerificationEmailSubtitle": "Confirm your email for receipts and updates.",
+  "accountVerificationPhoneSubtitle": "Verify your phone for security and support.",
   "failedToLoadOrders": "Ku guuldareystay in la soo dajiyo dalabaadka: {error}",
   "@failedToLoadOrders": {
     "placeholders": {

@@ -28,6 +28,7 @@
   "navWallet": "Boorsaa xiqqoo",
   "navTaxi": "Taaksii",
   "navProfile": "Ibsama",
+  "navOrderHistory": "Seenaa Ajajaa",
   "settingsProfile": "Ibsama",
   "settingsAccount": "Herrega",
   "settingsPreferences": "Filannoo",
@@ -169,6 +170,9 @@
   "codeSentPhoneDefault": "Koodii bilbila keessanitti ergame.",
   "emailVerifiedSuccess": "Email milkaa'inaan mirkanaa'eera!",
   "phoneVerifiedSuccess": "Lakkoofsi bilbilaa milkaa'inaan mirkanaa'eera!",
+  "accountVerificationBannerTitle": "Secure your account",
+  "accountVerificationEmailSubtitle": "Confirm your email for receipts and updates.",
+  "accountVerificationPhoneSubtitle": "Verify your phone for security and support.",
   "failedToLoadOrders": "Ajajoota fe'uu hin dandeenye: {error} .",
   "@failedToLoadOrders": {
     "placeholders": {

@@ -93,6 +93,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get navProfile => 'حساب تعريفي';
 
   @override
+  String get navOrderHistory => 'سجل الطلبات';
+
+  @override
   String get settingsProfile => 'حساب تعريفي';
 
   @override
@@ -385,6 +388,17 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get phoneVerifiedSuccess => 'تم التحقق من رقم الهاتف بنجاح!';
+
+  @override
+  String get accountVerificationBannerTitle => 'Secure your account';
+
+  @override
+  String get accountVerificationEmailSubtitle =>
+      'Confirm your email for receipts and updates.';
+
+  @override
+  String get accountVerificationPhoneSubtitle =>
+      'Verify your phone for security and support.';
 
   @override
   String failedToLoadOrders(String error) {

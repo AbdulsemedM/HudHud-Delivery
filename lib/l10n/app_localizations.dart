@@ -272,6 +272,12 @@ abstract class AppLocalizations {
   /// **'Profile'**
   String get navProfile;
 
+  /// No description provided for @navOrderHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Order History'**
+  String get navOrderHistory;
+
   /// No description provided for @settingsProfile.
   ///
   /// In en, this message translates to:
@@ -829,6 +835,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Phone number verified successfully!'**
   String get phoneVerifiedSuccess;
+
+  /// No description provided for @accountVerificationBannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Secure your account'**
+  String get accountVerificationBannerTitle;
+
+  /// No description provided for @accountVerificationEmailSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm your email for receipts and updates.'**
+  String get accountVerificationEmailSubtitle;
+
+  /// No description provided for @accountVerificationPhoneSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify your phone for security and support.'**
+  String get accountVerificationPhoneSubtitle;
 
   /// No description provided for @failedToLoadOrders.
   ///

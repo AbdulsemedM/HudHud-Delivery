@@ -13,6 +13,7 @@ class ApiConstants {
   static const String register = 'register';
   static const String logout = '$auth/logout';
   static const String refreshToken = '$auth/refresh';
+
   /// POST — returns same shape as [login] (token, user, optional refresh_token).
   /// Coordinate path with backend if it differs.
   static const String guest = '$auth/guest';
@@ -79,6 +80,7 @@ class ApiConstants {
 
   // Vendors endpoints
   static const String vendors = 'vendors';
+
   /// Path param is vendor's user_id (from /api/vendors list).
   static const String vendorProducts = 'vendor/products/by-vendor/{id}';
 
@@ -96,7 +98,8 @@ class ApiConstants {
   // Ride/Taxi endpoints
   static const String rideEstimate = 'services/ride/estimate';
   static const String rideRequest = 'services/ride/request';
-  static const String rideAvailableVehicles = 'services/ride/available-vehicles';
+  static const String rideAvailableVehicles =
+      'services/ride/available-vehicles';
   static const String userRidesActive = 'user/rides/active';
   static const String deliveryTrack = 'services/delivery/track/{id}';
   static const String userDeliveries = 'user/deliveries';

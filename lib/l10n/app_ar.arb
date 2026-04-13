@@ -28,6 +28,7 @@
   "navWallet": "محفظة",
   "navTaxi": "تاكسي",
   "navProfile": "حساب تعريفي",
+  "navOrderHistory": "سجل الطلبات",
   "settingsProfile": "حساب تعريفي",
   "settingsAccount": "حساب",
   "settingsPreferences": "التفضيلات",
@@ -169,6 +170,9 @@
   "codeSentPhoneDefault": "تم إرسال الرمز إلى هاتفك.",
   "emailVerifiedSuccess": "تم التحقق من البريد الإلكتروني بنجاح!",
   "phoneVerifiedSuccess": "تم التحقق من رقم الهاتف بنجاح!",
+  "accountVerificationBannerTitle": "Secure your account",
+  "accountVerificationEmailSubtitle": "Confirm your email for receipts and updates.",
+  "accountVerificationPhoneSubtitle": "Verify your phone for security and support.",
   "failedToLoadOrders": "فشل تحميل الطلبات: {error}",
   "@failedToLoadOrders": {
     "placeholders": {

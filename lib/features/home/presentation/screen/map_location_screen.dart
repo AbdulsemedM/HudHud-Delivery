@@ -6,6 +6,7 @@ import 'package:hudhud_delivery/app/models/place_result.dart';
 import 'package:hudhud_delivery/app/services/custom_location_service.dart';
 import 'package:hudhud_delivery/app/services/startup_location_service.dart';
 import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
+import 'package:hudhud_delivery/core/widgets/centered_pin_map.dart';
 
 class MapLocationScreen extends StatefulWidget {
   final String? currentLocation;
@@ -33,6 +34,12 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
   bool? _hasGoogleMapsApiKey;
   // ignore: unused_field
   PlaceResult? _selectedPlace;
+
+  /// From map camera center (debounced); user can confirm without tapping a search marker.
+  PlaceResult? _centerPickPlace;
+
+  /// After programmatic [moveCamera], skip the next idle geocode from [CenteredPinMap].
+  bool _skipNextIdleGeocode = false;
 
   static gmaps.LatLng _toG(LatLng p) => gmaps.LatLng(p.latitude, p.longitude);
 
@@ -90,6 +97,7 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
           _markers = _markersForSearch(_searchResults);
         });
 
+        _skipNextIdleGeocode = true;
         _mapController?.moveCamera(
           gmaps.CameraUpdate.newLatLngZoom(_toG(newPosition), 15.0),
         );
@@ -124,8 +132,6 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
 
   Set<gmaps.Marker> _markersForSearch(List<PlaceResult> results) {
     return {
-      if (_userPosition != null)
-        _createCurrentLocationMarker(_userPosition!),
       ...results.map((place) => _createSearchMarker(place.coordinates, place)),
     };
   }
@@ -141,15 +147,6 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
     if (_userPosition != null) return 15.0;
     assert(_searchResults.isNotEmpty);
     return 12.0;
-  }
-
-  gmaps.Marker _createCurrentLocationMarker(LatLng position) {
-    return gmaps.Marker(
-      markerId: const gmaps.MarkerId('current'),
-      position: _toG(position),
-      icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(gmaps.BitmapDescriptor.hueAzure),
-      infoWindow: const gmaps.InfoWindow(title: 'Current location'),
-    );
   }
 
   gmaps.Marker _createSearchMarker(LatLng position, PlaceResult place) {
@@ -190,6 +187,7 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
             ...results.map((r) => r.coordinates),
           ];
           final bounds = _calculateBounds(points);
+          _skipNextIdleGeocode = true;
           _mapController?.moveCamera(
             gmaps.CameraUpdate.newLatLngBounds(bounds, 50),
           );
@@ -230,11 +228,50 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
       _selectedPlace = place;
     });
 
+    _skipNextIdleGeocode = true;
     _mapController?.moveCamera(
       gmaps.CameraUpdate.newLatLngZoom(_toG(place.coordinates), 16.0),
     );
 
     _showPlaceDetails(place);
+  }
+
+  Future<void> _onMapCenterChanged(gmaps.LatLng g) async {
+    if (_skipNextIdleGeocode) {
+      _skipNextIdleGeocode = false;
+      return;
+    }
+    try {
+      final places = await GooglePlacesService.reverseGeocode(
+        g.latitude,
+        g.longitude,
+      );
+      if (!mounted || places.isEmpty) return;
+      setState(() {
+        _centerPickPlace = places.first;
+      });
+    } catch (_) {
+      // Non-fatal: user can still pick from search markers.
+    }
+  }
+
+  Future<void> _onMapTap(gmaps.LatLng g) async {
+    _searchFocusNode.unfocus();
+    _skipNextIdleGeocode = true;
+    await _mapController?.animateCamera(
+      gmaps.CameraUpdate.newLatLngZoom(g, 16.0),
+    );
+    try {
+      final places = await GooglePlacesService.reverseGeocode(
+        g.latitude,
+        g.longitude,
+      );
+      if (!mounted || places.isEmpty) return;
+      setState(() {
+        _centerPickPlace = places.first;
+      });
+      _showPlaceDetails(places.first);
+    } catch (_) {}
   }
 
   void _showPlaceDetails(PlaceResult place) {
@@ -528,29 +565,69 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
     final target = _mapTarget();
     final zoom = _mapZoom();
 
-    return gmaps.GoogleMap(
-      key: ValueKey<String>(
-        '${_userPosition?.latitude},${_userPosition?.longitude},${_searchResults.length}',
-      ),
-      initialCameraPosition: gmaps.CameraPosition(
-        target: target,
-        zoom: zoom,
-      ),
-      markers: _markers,
-      myLocationEnabled: _hasUserFix,
-      myLocationButtonEnabled: false,
-      zoomControlsEnabled: false,
-      onMapCreated: (controller) {
-        _mapController = controller;
-        if (_userPosition != null) {
-          controller.moveCamera(
-            gmaps.CameraUpdate.newLatLngZoom(_toG(_userPosition!), 15.0),
-          );
-        }
-      },
-      onTap: (_) {
-        _searchFocusNode.unfocus();
-      },
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        CenteredPinMap(
+          key: ValueKey<String>(
+            '${_userPosition?.latitude},${_userPosition?.longitude},${_searchResults.length}',
+          ),
+          initialCameraPosition: gmaps.CameraPosition(
+            target: target,
+            zoom: zoom,
+          ),
+          markers: _markers,
+          myLocationEnabled: _hasUserFix,
+          myLocationButtonEnabled: false,
+          zoomControlsEnabled: false,
+          idleDebounce: const Duration(milliseconds: 400),
+          onCenterLatLngChanged: _onMapCenterChanged,
+          onMapCreated: (controller) {
+            _mapController = controller;
+            if (_userPosition != null) {
+              _skipNextIdleGeocode = true;
+              controller.moveCamera(
+                gmaps.CameraUpdate.newLatLngZoom(_toG(_userPosition!), 15.0),
+              );
+            }
+          },
+          onTap: _onMapTap,
+        ),
+        if (_centerPickPlace != null)
+          Positioned(
+            left: 16,
+            right: 16,
+            bottom: 16,
+            child: Material(
+              elevation: 6,
+              borderRadius: BorderRadius.circular(12),
+              color: colorScheme.surfaceContainerHigh,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        _centerPickPlace!.shortAddress,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: colorScheme.onSurface,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () =>
+                          _confirmLocation(_centerPickPlace!),
+                      child: const Text('Use pin'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

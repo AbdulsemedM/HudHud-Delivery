@@ -1,11 +1,12 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/controllers/service_accent_controller.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
 import '../../../home/presentation/screen/home_screen.dart';
 import '../../../settings/presentation/screen/settings_screen.dart';
-import '../../../courier/presentation/screens/courier_screen.dart';
-import '../../../taxi/presentation/screens/taxi_screen.dart';
+import '../../../orders/presentation/screen/orders_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -17,19 +18,29 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   int _selectedIndex = 0;
 
+  /// Incremented on first frame and every time the user selects the Home tab.
+  late final ValueNotifier<int> _homeTabActivation;
+
   late final List<Widget> _screens;
 
   @override
   void initState() {
     super.initState();
+    _homeTabActivation = ValueNotifier<int>(0);
     _screens = [
-      HomeScreenWrapper(
-        onSwitchToTab: (index) => setState(() => _selectedIndex = index),
-      ),
-      const CourierScreen(),
-      const TaxiScreen(),
+      HomeScreenWrapper(homeTabActivation: _homeTabActivation),
+      const OrdersScreen(),
       const SettingsScreen(),
     ];
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _homeTabActivation.value = _homeTabActivation.value + 1;
+    });
+  }
+
+  @override
+  void dispose() {
+    _homeTabActivation.dispose();
+    super.dispose();
   }
 
   @override
@@ -126,6 +137,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                     onDestinationSelected: (index) {
                       setState(() => _selectedIndex = index);
+                      context
+                          .read<ServiceAccentController>()
+                          .setDashboardIndex(index);
+                      if (index == 0) {
+                        _homeTabActivation.value =
+                            _homeTabActivation.value + 1;
+                      }
                     },
                     destinations: [
                       NavigationDestination(
@@ -141,25 +159,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                       NavigationDestination(
                         icon: Icon(
-                          Icons.local_shipping_outlined,
+                          Icons.receipt_long_outlined,
                           color: colorScheme.onSurfaceVariant,
                         ),
                         selectedIcon: Icon(
-                          Icons.local_shipping_rounded,
+                          Icons.receipt_long_rounded,
                           color: colorScheme.primary,
                         ),
-                        label: l10n.navCourier,
-                      ),
-                      NavigationDestination(
-                        icon: Icon(
-                          Icons.local_taxi_outlined,
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                        selectedIcon: Icon(
-                          Icons.local_taxi_rounded,
-                          color: colorScheme.primary,
-                        ),
-                        label: l10n.navTaxi,
+                        label: l10n.navOrderHistory,
                       ),
                       NavigationDestination(
                         icon: Icon(

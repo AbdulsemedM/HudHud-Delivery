@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/features/delivery/presentation/screens/all_categories_screen.dart';
-import 'package:hudhud_delivery/features/orders/data/models/order_model.dart';
-import 'package:hudhud_delivery/features/orders/bloc/orders_bloc.dart';
-import 'package:hudhud_delivery/features/orders/data/repositories/orders_repository.dart';
-import 'package:hudhud_delivery/features/orders/presentation/screen/order_details_screen.dart';
-import 'package:hudhud_delivery/features/orders/presentation/screen/orders_screen.dart';
 import 'package:hudhud_delivery/features/handyman/presentation/screens/handyman_screen.dart';
+import 'package:hudhud_delivery/features/courier/presentation/screens/courier_screen.dart';
+import 'package:hudhud_delivery/features/taxi/presentation/screens/taxi_screen.dart';
+import '../widgets/home_service_tab_bar.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/app/services/custom_location_service.dart';
 import 'package:hudhud_delivery/app/services/geocoding_service.dart';
@@ -17,7 +14,7 @@ import 'package:hudhud_delivery/app/services/saved_location_service.dart';
 import 'package:hudhud_delivery/app/services/startup_location_service.dart';
 import 'package:hudhud_delivery/models/user_model.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
-import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/controllers/service_accent_controller.dart';
 import 'package:hudhud_delivery/core/utils/snackbar_util.dart';
 import '../../bloc/home_bloc.dart';
 import '../widgets/home_widget.dart';
@@ -26,24 +23,19 @@ import '../../data/data_provider/home_data_provider.dart';
 import 'location_search_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({
-    super.key,
-    this.onSwitchToTab,
-  });
+  /// Incremented whenever the user selects the Home tab (including first open).
+  final ValueNotifier<int> homeTabActivation;
 
-  final void Function(int index)? onSwitchToTab;
+  const HomeScreen({super.key, required this.homeTabActivation});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class HomeScreenWrapper extends StatelessWidget {
-  const HomeScreenWrapper({
-    super.key,
-    this.onSwitchToTab,
-  });
+  final ValueNotifier<int> homeTabActivation;
 
-  final void Function(int index)? onSwitchToTab;
+  const HomeScreenWrapper({super.key, required this.homeTabActivation});
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +47,7 @@ class HomeScreenWrapper extends StatelessWidget {
           ),
         ),
       )..add(GetCategoriesEvent()),
-      child: HomeScreen(onSwitchToTab: onSwitchToTab),
+      child: HomeScreen(homeTabActivation: homeTabActivation),
     );
   }
 }
@@ -63,25 +55,43 @@ class HomeScreenWrapper extends StatelessWidget {
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final AuthService _authService = AuthService();
 
+  bool _syncedServiceAccent = false;
+
   UserModel? _currentUser;
   String _currentLocation = '';
   bool _isLoadingLocation = true;
 
-  List<OrderModel> _availableOrders = [];
-  bool _ordersLoading = true;
-  String? _ordersError;
+  HomeServiceMode _serviceMode = HomeServiceMode.foodGroceries;
+
+  bool _verificationPromptOpen = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    widget.homeTabActivation.addListener(_onHomeTabActivation);
     _loadUserData();
     _requestLocationAndUpdate(resumeRefresh: false);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadAvailableOrders());
+  }
+
+  void _onHomeTabActivation() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _tryShowVerificationPrompt();
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_syncedServiceAccent) {
+      _syncedServiceAccent = true;
+      context.read<ServiceAccentController>().updateHomeServiceMode(_serviceMode);
+    }
   }
 
   @override
   void dispose() {
+    widget.homeTabActivation.removeListener(_onHomeTabActivation);
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -93,56 +103,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
-  Future<void> _loadAvailableOrders() async {
-    final repo = context.read<OrdersRepository>();
-    setState(() {
-      _ordersLoading = true;
-      _ordersError = null;
-    });
-    try {
-      final orders = await repo.fetchAvailableOrders();
-      if (mounted) {
-        setState(() {
-          _availableOrders = orders;
-          _ordersLoading = false;
-          _ordersError = null;
-        });
-        _showDealsModalIfEmpty();
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _availableOrders = [];
-          _ordersLoading = false;
-          _ordersError = e.toString();
-        });
-      }
-    }
-  }
-
-  void _showDealsModalIfEmpty() {
-    if (!_ordersLoading && _availableOrders.isEmpty && mounted) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        _showDealsModal(context);
-      });
-    }
-  }
-
-  void _showDealsModal(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (context) => DealsModal(
-        onClaim: () {
-          Navigator.of(context).pop();
-          // Handle claim deal
-        },
-        onDismiss: () => Navigator.of(context).pop(),
-      ),
-    );
-  }
-
   Future<void> _loadUserData() async {
     // Fetch fresh profile from API to get updated verification status; fallback to stored user
     final user = await _authService.getUserProfile() ??
@@ -151,6 +111,43 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       setState(() {
         _currentUser = user;
       });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _tryShowVerificationPrompt();
+      });
+    }
+  }
+
+  /// Shows when Home tab is selected and email or phone still needs verification.
+  Future<void> _tryShowVerificationPrompt() async {
+    if (!mounted) return;
+    if (!context.read<ServiceAccentController>().isOnHomeTab) return;
+    final u = _currentUser;
+    if (u == null) return;
+    if (u.isEmailVerified && u.isPhoneVerified) return;
+    if (_verificationPromptOpen) return;
+
+    _verificationPromptOpen = true;
+    try {
+      await showDialog<void>(
+        context: context,
+        barrierDismissible: true,
+        builder: (ctx) => AccountVerificationPromptDialog(
+          user: u,
+          onDismiss: () => Navigator.of(ctx).pop(),
+          onVerifyEmail: () {
+            Navigator.of(ctx).pop();
+            _openVerifyEmailFlow();
+          },
+          onVerifyPhone: () {
+            Navigator.of(ctx).pop();
+            _openVerifyPhoneFlow();
+          },
+        ),
+      );
+    } finally {
+      if (mounted) {
+        _verificationPromptOpen = false;
+      }
     }
   }
 
@@ -273,6 +270,37 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
+  Future<void> _openLocationSearch() async {
+    final result = await Navigator.push<Map<String, dynamic>>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LocationSearchScreen(
+          currentLocation: _currentLocation,
+        ),
+      ),
+    );
+
+    if (result != null && result['address'] != null) {
+      final address = result['address'] as String;
+      final latitude = (result['latitude'] as num?)?.toDouble();
+      final longitude = (result['longitude'] as num?)?.toDouble();
+      if (latitude != null && longitude != null) {
+        await SavedLocationService.saveLocationData(
+          address: address,
+          latitude: latitude,
+          longitude: longitude,
+        );
+      } else {
+        await SavedLocationService.saveAddress(address);
+      }
+      if (mounted) {
+        setState(() {
+          _currentLocation = address;
+        });
+      }
+    }
+  }
+
   Future<void> _openVerifyPhoneFlow() async {
     final user = _currentUser;
     if (user?.phone == null || user!.phone!.isEmpty) return;
@@ -296,220 +324,42 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: colorScheme.background,
+      backgroundColor: colorScheme.surface,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              UserProfileHeader(
-                name: _currentUser?.name ?? l10n.userDefault,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+              child: UserProfileHeader(
                 location: _currentLocation,
                 isLoadingLocation: _isLoadingLocation,
-                user: _currentUser,
-                onLocationTap: () async {
-                  final result = await Navigator.push<Map<String, dynamic>>(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => LocationSearchScreen(
-                        currentLocation: _currentLocation,
-                      ),
-                    ),
-                  );
-
-                  if (result != null && result['address'] != null) {
-                    final address = result['address'] as String;
-                    final latitude = (result['latitude'] as num?)?.toDouble();
-                    final longitude = (result['longitude'] as num?)?.toDouble();
-                    if (latitude != null && longitude != null) {
-                      await SavedLocationService.saveLocationData(
-                        address: address,
-                        latitude: latitude,
-                        longitude: longitude,
-                      );
-                    } else {
-                      await SavedLocationService.saveAddress(address);
-                    }
-                    if (mounted) {
-                      setState(() {
-                        _currentLocation = address;
-                      });
-                    }
-                  }
-                },
+                onLocationTap: _openLocationSearch,
               ),
-              if (_currentUser != null) ...[
-                const SizedBox(height: 12),
-                VerificationStatusCard(
-                  user: _currentUser!,
-                  onVerifyEmail: _openVerifyEmailFlow,
-                  onVerifyPhone: _openVerifyPhoneFlow,
-                ),
-              ],
-              const SizedBox(height: 16),
-              // What would you like to do section
-              Text(
-                l10n.handymanWhatToDo,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 16),
-              // Service Cards Grid
-              GridView.count(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisCount: 2,
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
-                childAspectRatio: 1.3,
+            ),
+            HomeServiceTabBar(
+              selected: _serviceMode,
+              onSelected: (mode) {
+                setState(() => _serviceMode = mode);
+                context.read<ServiceAccentController>().updateHomeServiceMode(mode);
+              },
+            ),
+            Expanded(
+              child: IndexedStack(
+                index: _serviceMode.index,
                 children: [
-                  ServiceCard(
-                    title: l10n.featureFoodGroceries,
-                    subtitle: l10n.featureFoodGroceriesDesc,
-                    icon: Icons.shopping_bag_rounded,
-                    color: AppColors.primaryColor,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const AllCategoriesScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  ServiceCard(
-                    title: l10n.featureCourierTitle,
-                    subtitle: l10n.featureCourierDesc,
-                    icon: Icons.local_shipping_rounded,
-                    color: AppColors.primaryColor,
-                    onTap: () {
-                      widget.onSwitchToTab?.call(1);
-                    },
-                  ),
-                  ServiceCard(
-                    title: l10n.featureTaxiTitle,
-                    subtitle: l10n.featureTaxiDesc,
-                    icon: Icons.local_taxi_rounded,
-                    color: AppColors.primaryColor,
-                    onTap: () {
-                      widget.onSwitchToTab?.call(2);
-                    },
-                  ),
-                  ServiceCard(
-                    title: l10n.featureHandymanTitle,
-                    subtitle: l10n.featureHandymanDesc,
-                    icon: Icons.handyman_rounded,
-                    color: AppColors.primaryColor,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const HandymanScreen(),
-                        ),
-                      );
-                    },
-                  ),
+                  const AllCategoriesScreen(embedded: true),
+                  const CourierScreen(),
+                  const TaxiScreen(),
+                  const HandymanScreen(embedded: true),
                 ],
               ),
-              const SizedBox(height: 24),
-              const AppFeaturesCard(),
-              const SizedBox(height: 24),
-              // History Section (Available Orders)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    l10n.history,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const OrdersScreen(),
-                        ),
-                      );
-                    },
-                    child: Text(
-                      l10n.actionViewAll,
-                      style: TextStyle(
-                        color: AppColors.primaryColor,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              // History Items from API
-              if (_ordersLoading)
-                const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(24.0),
-                    child: CircularProgressIndicator(),
-                  ),
-                )
-              else if (_ordersError != null)
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(
-                    l10n.failedToLoadOrders(_ordersError!),
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontSize: 14,
-                    ),
-                  ),
-                )
-              else if (_availableOrders.isEmpty)
-                OrderHistoryEmptyState(
-                  onBrowseTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const AllCategoriesScreen(),
-                      ),
-                    );
-                  },
-                )
-              else
-                ..._availableOrders.map((order) {
-                  final dateStr =
-                      DateFormat('d MMMM yyyy, h:mma').format(order.createdAt);
-                  return HistoryItem(
-                    orderId: order.orderNumber,
-                    recipient: order.customer?.name ?? order.vendor.name,
-                    location: order.deliveryAddress,
-                    dateTime: dateStr,
-                    status: order.statusDisplayName,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => BlocProvider(
-                            create: (context) => OrdersBloc(
-                              ordersRepository:
-                                  context.read<OrdersRepository>(),
-                            ),
-                            child: OrderDetailsScreen(orderId: order.id),
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                }),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

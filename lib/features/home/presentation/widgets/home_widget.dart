@@ -1,466 +1,146 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:lottie/lottie.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/utils/avatar_util.dart';
 import '../../../../models/user_model.dart';
 
-/// Card showing email and phone verification status with optional Verify buttons.
-class VerificationStatusCard extends StatelessWidget {
+/// Shown when the user lands on the Home tab and email or phone is not verified.
+class AccountVerificationPromptDialog extends StatelessWidget {
   final UserModel user;
+  final VoidCallback onDismiss;
   final VoidCallback onVerifyEmail;
   final VoidCallback onVerifyPhone;
 
-  const VerificationStatusCard({
+  const AccountVerificationPromptDialog({
     super.key,
     required this.user,
+    required this.onDismiss,
     required this.onVerifyEmail,
     required this.onVerifyPhone,
   });
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final emailVerified = user.isEmailVerified;
-    final phoneVerified = user.isPhoneVerified;
-
-    if (emailVerified && phoneVerified) {
-      return const SizedBox.shrink();
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            spreadRadius: 1,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Verification status',
-            style: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              if (!emailVerified)
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed: onVerifyEmail,
-                    icon: const Icon(Icons.mark_email_read_outlined, size: 18),
-                    label: const Text('Verify Email'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.primaryColor,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                    ),
-                  ),
-                ),
-              if (!emailVerified && !phoneVerified) const SizedBox(width: 12),
-              if (!phoneVerified)
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed: onVerifyPhone,
-                    icon: const Icon(Icons.phone_android_outlined, size: 18),
-                    label: const Text('Verify Phone'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.primaryColor,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class UserProfileHeader extends StatelessWidget {
-  final String name;
-  final String location;
-  final bool isLoadingLocation;
-  final VoidCallback onLocationTap;
-  final UserModel? user;
-
-  const UserProfileHeader({
-    super.key,
-    required this.name,
-    required this.location,
-    this.isLoadingLocation = false,
-    required this.onLocationTap,
-    this.user,
-  });
-
-  @override
-  Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    return Row(
-      children: [
-        // Location section
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(
-                    Icons.location_on,
-                    color: AppColors.primaryColor,
-                    size: 18,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    l10n.yourLocation,
-                    style: textTheme.bodySmall?.copyWith(
-                      fontSize: 12,
-                      color: colorScheme.onSurface.withOpacity(0.7),
-                    ),
-                  ),
-                ],
+    final theme = Theme.of(context);
+    final needEmail = !user.isEmailVerified;
+    final needPhone = !user.isPhoneVerified;
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      title: Text(l10n.accountVerificationBannerTitle),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (needEmail) ...[
+              Text(
+                l10n.accountVerificationEmailSubtitle,
+                style: theme.textTheme.bodyMedium,
               ),
-              const SizedBox(height: 4),
-              GestureDetector(
-                onTap: onLocationTap,
-                child: Row(
-                  children: [
-                    Flexible(
-                      child: isLoadingLocation
-                          ? SizedBox(
-                              width: 12,
-                              height: 12,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  AppColors.primaryColor,
-                                ),
-                              ),
-                            )
-                          : Text(
-                              location,
-                              style: TextStyle(
-                                color: AppColors.primaryColor,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            ),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(
-                      Icons.arrow_drop_down,
-                      color: AppColors.primaryColor,
-                      size: 18,
-                    ),
-                  ],
-                ),
+              const SizedBox(height: 12),
+              FilledButton.icon(
+                onPressed: onVerifyEmail,
+                icon: const Icon(Icons.mark_email_read_outlined, size: 20),
+                label: Text(l10n.verifyEmail),
+              ),
+              if (needPhone) const SizedBox(height: 16),
+            ],
+            if (needPhone) ...[
+              Text(
+                l10n.accountVerificationPhoneSubtitle,
+                style: theme.textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 12),
+              FilledButton.icon(
+                onPressed: onVerifyPhone,
+                icon: const Icon(Icons.phone_android_outlined, size: 20),
+                label: Text(l10n.verifyPhone),
               ),
             ],
-          ),
-        ),
-        // Profile picture and notification
-        Row(
-          children: [
-            CircleAvatar(
-              radius: 20,
-              backgroundColor: AppColors.primaryColor,
-              backgroundImage: getDisplayAvatarUrl(user) != null
-                  ? NetworkImage(getDisplayAvatarUrl(user)!)
-                  : const AssetImage('assets/images/profile.png')
-                      as ImageProvider,
-            ),
-            const SizedBox(width: 12),
-            IconButton(
-              icon: Icon(
-                Icons.notifications_outlined,
-                color: colorScheme.onSurface,
-              ),
-              onPressed: () {},
-            ),
           ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: onDismiss,
+          child: Text(l10n.dealsModalClose),
         ),
       ],
     );
   }
 }
 
-/// Data for one service in the sliding cards.
-class _ServiceItem {
-  final String title;
-  final String description;
-  final IconData icon;
-  final Color color;
+class UserProfileHeader extends StatelessWidget {
+  final String location;
+  final bool isLoadingLocation;
+  final VoidCallback onLocationTap;
 
-  const _ServiceItem({
-    required this.title,
-    required this.description,
-    required this.icon,
-    required this.color,
-  });
-}
-
-/// Sliding cards that each showcase a different HudHud service, with a one-time section slide-in.
-class AppFeaturesCard extends StatefulWidget {
-  const AppFeaturesCard({super.key});
-
-  @override
-  State<AppFeaturesCard> createState() => _AppFeaturesCardState();
-}
-
-class _AppFeaturesCardState extends State<AppFeaturesCard>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<Offset> _slideAnimation;
-  late Animation<double> _fadeAnimation;
-  final PageController _pageController = PageController(viewportFraction: 0.88);
-  int _currentPage = 0;
-
-  static final List<_ServiceItem> _services = [
-    _ServiceItem(
-      title: 'Food & groceries',
-      description: 'Order from your favourite vendors.',
-      icon: Icons.shopping_bag_rounded,
-      color: AppColors.primaryColor,
-    ),
-    _ServiceItem(
-      title: 'Courier',
-      description: 'Pickup and drop-off.',
-      icon: Icons.local_shipping_rounded,
-      color: Colors.purple,
-    ),
-    _ServiceItem(
-      title: 'Taxi',
-      description: 'Request a ride anywhere.',
-      icon: Icons.local_taxi_rounded,
-      color: Colors.amber.shade700,
-    ),
-    _ServiceItem(
-      title: 'Handyman',
-      description: 'Home services on demand.',
-      icon: Icons.handyman_rounded,
-      color: Colors.green.shade700,
-    ),
-    _ServiceItem(
-      title: 'Track orders',
-      description: 'Real-time delivery status.',
-      icon: Icons.location_on_rounded,
-      color: AppColors.secondaryColor,
-    ),
-  ];
-
-  Timer? _autoSlideTimer;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 480),
-      vsync: this,
-    );
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0.2, 0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutCubic,
-    ));
-    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
-    );
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _controller.forward();
-      _startAutoSlide();
-    });
-  }
-
-  void _startAutoSlide() {
-    _autoSlideTimer?.cancel();
-    _autoSlideTimer = Timer.periodic(const Duration(seconds: 3), (_) {
-      if (!mounted) return;
-      final next = (_currentPage + 1) % _services.length;
-      _pageController.animateToPage(
-        next,
-        duration: const Duration(milliseconds: 350),
-        curve: Curves.easeInOut,
-      );
-    });
-  }
-
-  @override
-  void dispose() {
-    _autoSlideTimer?.cancel();
-    _pageController.dispose();
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    return SlideTransition(
-      position: _slideAnimation,
-      child: FadeTransition(
-        opacity: _fadeAnimation,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 4, bottom: 12),
-              child: Text(
-                'What you can do with HudHud',
-                style: textTheme.titleMedium?.copyWith(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            SizedBox(
-              height: 80,
-              child: PageView.builder(
-                controller: _pageController,
-                onPageChanged: (index) {
-                  setState(() => _currentPage = index);
-                },
-                itemCount: _services.length,
-                itemBuilder: (context, index) {
-                  final service = _services[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: _ServiceFeatureCard(
-                      title: service.title,
-                      description: service.description,
-                      icon: service.icon,
-                      color: service.color,
-                    ),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                _services.length,
-                (index) => AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  margin: const EdgeInsets.symmetric(horizontal: 2),
-                  width: _currentPage == index ? 16 : 6,
-                  height: 6,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(3),
-                    color: _currentPage == index
-                        ? _services[index].color
-                        : colorScheme.onSurface.withOpacity(0.25),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Compact, colorful slide card for the carousel.
-class _ServiceFeatureCard extends StatelessWidget {
-  final String title;
-  final String description;
-  final IconData icon;
-  final Color color;
-
-  const _ServiceFeatureCard({
-    required this.title,
-    required this.description,
-    required this.icon,
-    required this.color,
+  const UserProfileHeader({
+    super.key,
+    required this.location,
+    this.isLoadingLocation = false,
+    required this.onLocationTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            color.withOpacity(0.2),
-            color.withOpacity(0.08),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.4), width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.2),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.25),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, size: 22, color: color),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
+    final primary = colorScheme.primary;
+    return Row(
+      children: [
+        Expanded(
+          child: GestureDetector(
+            onTap: onLocationTap,
+            behavior: HitTestBehavior.opaque,
+            child: Row(
               children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: color,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                Icon(
+                  Icons.location_on,
+                  color: primary,
+                  size: 20,
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  description,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: colorScheme.onSurface.withOpacity(0.75),
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                const SizedBox(width: 6),
+                Flexible(
+                  child: isLoadingLocation
+                      ? SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(primary),
+                          ),
+                        )
+                      : Text(
+                          location,
+                          style: TextStyle(
+                            color: primary,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                ),
+                const SizedBox(width: 4),
+                Icon(
+                  Icons.arrow_drop_down,
+                  color: primary,
+                  size: 20,
                 ),
               ],
             ),
           ),
-          Icon(Icons.chevron_right_rounded, size: 20, color: color.withOpacity(0.8)),
-        ],
-      ),
+        ),
+        IconButton(
+          icon: Icon(
+            Icons.notifications_outlined,
+            color: colorScheme.onSurface,
+          ),
+          onPressed: () {},
+        ),
+      ],
     );
   }
 }
@@ -635,115 +315,6 @@ class ServiceCard extends StatelessWidget {
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// Deals Modal - shown as advertising when order history is empty
-class DealsModal extends StatelessWidget {
-  final VoidCallback onClaim;
-  final VoidCallback onDismiss;
-
-  const DealsModal({
-    super.key,
-    required this.onClaim,
-    required this.onDismiss,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 400),
-          decoration: const BoxDecoration(
-            color: Color(0xFFFF5A00), // #FF5A00
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Close button
-              Align(
-                alignment: Alignment.topRight,
-                child: IconButton(
-                  icon: const Icon(Icons.close, color: Colors.white, size: 24),
-                  onPressed: onDismiss,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Left section - Visual
-                    SizedBox(
-                      width: 100,
-                      height: 100,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.asset(
-                          'assets/images/ChatGPT Image Jun 6, 2025, 09_19_43 PM 1.png',
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    // Right section - Text and button
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            l10n.dealsModalTitle,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            l10n.dealsModalSubtitle,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          ElevatedButton(
-                            onPressed: onClaim,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: AppColors.primaryColor,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 10),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            child: Text(
-                              l10n.dealsModalClaim,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
                 ),
               ),
             ],

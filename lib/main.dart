@@ -21,6 +21,9 @@ import 'core/utils/button_util.dart';
 import 'controllers/theme_controller.dart';
 import 'controllers/locale_controller.dart';
 import 'controllers/auth_controller.dart';
+import 'controllers/service_accent_controller.dart';
+
+import 'core/theme/service_tab_palette.dart';
 
 // Services
 import 'app/services/auth_service.dart';
@@ -122,6 +125,7 @@ class _MyAppState extends State<MyApp> {
       providers: [
         ChangeNotifierProvider.value(value: widget.themeController),
         ChangeNotifierProvider.value(value: widget.localeController),
+        ChangeNotifierProvider(create: (_) => ServiceAccentController()),
         ChangeNotifierProvider(
           create: (_) => AuthController(),
         ),
@@ -133,15 +137,25 @@ class _MyAppState extends State<MyApp> {
             create: (_) => WishlistBloc(),
           ),
         ],
-        child: Consumer2<ThemeController, LocaleController>(
-          builder: (context, themeController, localeController, child) {
+        child: Consumer3<ThemeController, LocaleController,
+            ServiceAccentController>(
+          builder: (context, themeController, localeController,
+              serviceAccent, child) {
+            final seed =
+                ServiceTabPalette.seedFor(serviceAccent.homeServiceMode);
+            final themeLight = serviceAccent.shouldApplyServiceAccent
+                ? AppTheme.lightThemeWithSeed(seed)
+                : AppTheme.lightTheme;
+            final themeDark = serviceAccent.shouldApplyServiceAccent
+                ? AppTheme.darkThemeWithSeed(seed)
+                : AppTheme.darkTheme;
             return MaterialApp(
               navigatorKey: widget.navigatorKey,
               onGenerateTitle: (context) =>
                   AppLocalizations.of(context)!.appTitle,
               debugShowCheckedModeBanner: false,
-              theme: AppTheme.lightTheme,
-              darkTheme: AppTheme.darkTheme,
+              theme: themeLight,
+              darkTheme: themeDark,
               themeMode: themeController.themeMode,
               locale: localeController.locale,
               localizationsDelegates: AppLocalizations.localizationsDelegates,

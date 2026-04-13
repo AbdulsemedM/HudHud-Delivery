@@ -9,7 +9,10 @@ import 'create_handyman_request_screen.dart';
 import 'service_request_details_screen.dart';
 
 class HandymanScreen extends StatefulWidget {
-  const HandymanScreen({super.key});
+  const HandymanScreen({super.key, this.embedded = false});
+
+  /// When true (embedded in home service tabs), hides [AppBar] and back button.
+  final bool embedded;
 
   @override
   State<HandymanScreen> createState() => _HandymanScreenState();
@@ -85,30 +88,32 @@ class _HandymanScreenState extends State<HandymanScreen> {
     final theme = Theme.of(context);
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: Text(
-          l10n.handymanServicesTitle,
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 18,
-            color: theme.colorScheme.onSurface,
-          ),
-        ),
-        backgroundColor: theme.colorScheme.surface,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-          color: theme.colorScheme.onSurface,
-          onPressed: () => Navigator.pop(context),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(
-            color: theme.dividerColor.withOpacity(0.5),
-            height: 1,
-          ),
-        ),
-      ),
+      appBar: widget.embedded
+          ? null
+          : AppBar(
+              title: Text(
+                l10n.handymanServicesTitle,
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 18,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+              backgroundColor: theme.colorScheme.surface,
+              elevation: 0,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+                color: theme.colorScheme.onSurface,
+                onPressed: () => Navigator.pop(context),
+              ),
+              bottom: PreferredSize(
+                preferredSize: const Size.fromHeight(1),
+                child: Container(
+                  color: theme.dividerColor.withOpacity(0.5),
+                  height: 1,
+                ),
+              ),
+            ),
       body: RefreshIndicator(
         onRefresh: _fetchRequests,
         child: SingleChildScrollView(

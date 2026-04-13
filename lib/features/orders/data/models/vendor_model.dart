@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 
 class VendorModel extends Equatable {
   final int id;
+
   /// User ID of the vendor (use this for product APIs like by-vendor/{user_id}).
   final int? userId;
   final String name;
@@ -58,7 +59,7 @@ class VendorModel extends Equatable {
     this.socialType,
     required this.language,
     required this.timezone,
-    required     this.referralCode,
+    required this.referralCode,
     this.deletedAt,
     required this.createdAt,
     required this.updatedAt,
@@ -95,35 +96,38 @@ class VendorModel extends Equatable {
       name: json['name']?.toString() ?? '',
       email: json['email']?.toString() ?? '',
       phone: json['phone']?.toString() ?? '',
-      emailVerifiedAt: json['email_verified_at'] != null 
-          ? DateTime.parse(json['email_verified_at']) 
+      emailVerifiedAt: json['email_verified_at'] != null
+          ? DateTime.parse(json['email_verified_at'])
           : null,
-      phoneVerifiedAt: json['phone_verified_at'] != null 
-          ? DateTime.parse(json['phone_verified_at']) 
+      phoneVerifiedAt: json['phone_verified_at'] != null
+          ? DateTime.parse(json['phone_verified_at'])
           : null,
       type: json['type']?.toString() ?? 'vendor',
       status: json['status']?.toString() ?? 'active',
-      avatar: json['avatar']?.toString() ?? json['avatar_url']?.toString() ?? '',
+      avatar:
+          json['avatar']?.toString() ?? json['avatar_url']?.toString() ?? '',
       deviceToken: json['device_token'],
       emailVerificationCode: json['email_verification_code'],
       phoneVerificationCode: json['phone_verification_code'],
-      lastLoginAt: json['last_login_at'] != null 
-          ? DateTime.parse(json['last_login_at']) 
+      lastLoginAt: json['last_login_at'] != null
+          ? DateTime.parse(json['last_login_at'])
           : null,
       lastLoginIp: json['last_login_ip'],
-      dateOfBirth: json['date_of_birth'] != null 
-          ? DateTime.parse(json['date_of_birth']) 
+      dateOfBirth: json['date_of_birth'] != null
+          ? DateTime.parse(json['date_of_birth'])
           : null,
       gender: json['gender'],
       socialType: json['social_type'],
       language: json['language']?.toString() ?? 'en',
       timezone: json['timezone']?.toString() ?? 'UTC',
       referralCode: json['referral_code']?.toString() ?? '',
-      deletedAt: json['deleted_at'] != null 
-          ? DateTime.parse(json['deleted_at']) 
+      deletedAt: json['deleted_at'] != null
+          ? DateTime.parse(json['deleted_at'])
           : null,
-      createdAt: DateTime.tryParse(json['created_at']?.toString() ?? '') ?? DateTime.now(),
-      updatedAt: DateTime.tryParse(json['updated_at']?.toString() ?? '') ?? DateTime.now(),
+      createdAt: DateTime.tryParse(json['created_at']?.toString() ?? '') ??
+          DateTime.now(),
+      updatedAt: DateTime.tryParse(json['updated_at']?.toString() ?? '') ??
+          DateTime.now(),
     );
   }
 
@@ -146,10 +150,14 @@ class VendorModel extends Equatable {
     String? banner = bannerPath?.isNotEmpty == true ? bannerPath : null;
     if (banner == null && bannerUrls is Map) {
       final urls = bannerUrls as Map<String, dynamic>;
-      banner = urls['medium']?.toString() ?? urls['small']?.toString() ?? urls['thumb']?.toString();
+      banner = urls['medium']?.toString() ??
+          urls['small']?.toString() ??
+          urls['thumb']?.toString();
     }
-    final createdAt = DateTime.tryParse(json['created_at']?.toString() ?? '') ?? DateTime.now();
-    final updatedAt = DateTime.tryParse(json['updated_at']?.toString() ?? '') ?? DateTime.now();
+    final createdAt = DateTime.tryParse(json['created_at']?.toString() ?? '') ??
+        DateTime.now();
+    final updatedAt = DateTime.tryParse(json['updated_at']?.toString() ?? '') ??
+        DateTime.now();
     return VendorModel(
       id: _parseInt(json['id']),
       userId: _parseUserId(json),

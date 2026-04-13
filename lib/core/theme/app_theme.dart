@@ -417,4 +417,135 @@ class AppTheme {
     iconColor: AppColors.darkTextSecondary,
     textColor: AppColors.darkTextPrimary,
   );
+
+  /// Light theme tinted by service accent (Courier / Taxi / Handyman / Food).
+  static ThemeData lightThemeWithSeed(Color seed) {
+    final cs = ColorScheme.fromSeed(
+      seedColor: seed,
+      brightness: Brightness.light,
+    );
+    return lightTheme.copyWith(
+      colorScheme: cs,
+      primaryColor: cs.primary,
+      appBarTheme: _lightAppBarTheme.copyWith(
+        backgroundColor: cs.primary,
+        foregroundColor: cs.onPrimary,
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: cs.primary,
+          foregroundColor: cs.onPrimary,
+          elevation: 2,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: cs.primary,
+          side: BorderSide(color: cs.primary),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: cs.primary,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        ),
+      ),
+      inputDecorationTheme: _lightInputDecorationTheme.copyWith(
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: cs.primary, width: 2),
+        ),
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: cs.primary,
+        foregroundColor: cs.onPrimary,
+      ),
+      bottomNavigationBarTheme: _lightBottomNavigationBarTheme.copyWith(
+        selectedItemColor: cs.primary,
+      ),
+      tabBarTheme: _lightTabBarTheme.copyWith(
+        labelColor: cs.primary,
+        indicator: UnderlineTabIndicator(
+          borderSide: BorderSide(color: cs.primary, width: 2),
+        ),
+      ),
+      chipTheme: _lightChipTheme.copyWith(
+        selectedColor: cs.primary,
+      ),
+    );
+  }
+
+  /// Dark theme tinted by service accent.
+  static ThemeData darkThemeWithSeed(Color seed) {
+    final cs = ColorScheme.fromSeed(
+      seedColor: seed,
+      brightness: Brightness.dark,
+    );
+    return darkTheme.copyWith(
+      colorScheme: cs,
+      primaryColor: cs.primary,
+      appBarTheme: _darkAppBarTheme.copyWith(
+        backgroundColor: cs.primary,
+        foregroundColor: cs.onPrimary,
+        systemOverlayStyle: SystemUiOverlayStyle.light,
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: cs.primary,
+          foregroundColor: cs.onPrimary,
+          elevation: 2,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: cs.primary,
+          side: BorderSide(color: cs.primary),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: cs.primary,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        ),
+      ),
+      inputDecorationTheme: _darkInputDecorationTheme.copyWith(
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: cs.primary, width: 2),
+        ),
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: cs.primary,
+        foregroundColor: cs.onPrimary,
+      ),
+      bottomNavigationBarTheme: _darkBottomNavigationBarTheme.copyWith(
+        selectedItemColor: cs.primary,
+      ),
+      tabBarTheme: _darkTabBarTheme.copyWith(
+        labelColor: cs.primary,
+        indicator: UnderlineTabIndicator(
+          borderSide: BorderSide(color: cs.primary, width: 2),
+        ),
+      ),
+      chipTheme: _darkChipTheme.copyWith(
+        selectedColor: cs.primary,
+      ),
+    );
+  }
 }

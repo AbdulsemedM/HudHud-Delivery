@@ -2,12 +2,12 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
-import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/app/services/location_service.dart';
 import 'package:hudhud_delivery/core/widgets/location_search_field.dart';
 import 'package:hudhud_delivery/app/services/google_places_service.dart';
 import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
+import 'package:hudhud_delivery/core/widgets/centered_pin_map.dart';
 import 'package:hudhud_delivery/app/models/place_result.dart';
 import 'package:hudhud_delivery/features/taxi/data/ride_data_provider.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
@@ -58,6 +58,9 @@ class _TaxiScreenState extends State<TaxiScreen> {
   bool _isLoadingRoute = false;
   bool? _hasGoogleMapsApiKey;
 
+  /// After programmatic camera moves, ignore one idle callback from [CenteredPinMap].
+  bool _skipNextIdleDestinationUpdate = false;
+
   static gmaps.LatLng _toG(LatLng p) => gmaps.LatLng(p.latitude, p.longitude);
 
   @override
@@ -99,6 +102,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
             _isLoadingLocation = false;
           });
 
+          _skipNextIdleDestinationUpdate = true;
           _mapController?.moveCamera(
             gmaps.CameraUpdate.newLatLngZoom(_toG(latLng), 13.0),
           );
@@ -158,6 +162,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
           pickup.longitude > dropoff.longitude ? pickup.longitude : dropoff.longitude,
         ),
       );
+      _skipNextIdleDestinationUpdate = true;
       _mapController?.moveCamera(
         gmaps.CameraUpdate.newLatLngBounds(bounds, 80),
       );
@@ -299,6 +304,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
   }
 
   void _onLocationSelected(PlaceResult place) {
+    _skipNextIdleDestinationUpdate = true;
     setState(() {
       _destinationPosition = place.coordinates;
       _destinationController.text = place.shortAddress;
@@ -307,6 +313,46 @@ class _TaxiScreenState extends State<TaxiScreen> {
       _isLoadingRoute = true;
     });
     _fetchRouteAndNavigate(place.shortAddress);
+  }
+
+  Future<void> _onDestinationCenterChanged(gmaps.LatLng g) async {
+    if (_skipNextIdleDestinationUpdate) {
+      _skipNextIdleDestinationUpdate = false;
+      return;
+    }
+    final latLng = LatLng(g.latitude, g.longitude);
+    if (_calculateDistance(_currentPosition, latLng) < 100) {
+      return;
+    }
+
+    try {
+      final places = await GooglePlacesService.reverseGeocode(
+        g.latitude,
+        g.longitude,
+      );
+
+      if (!mounted || places.isEmpty) return;
+
+      final place = places.first;
+      setState(() {
+        _destinationPosition = latLng;
+        _destinationController.text = place.shortAddress;
+        _routePolylinePoints = null;
+        _routeDistanceKm = null;
+        _isLoadingRoute = true;
+      });
+
+      await _fetchRouteDirections();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.l10n.taxiErrorWithDetails(e.toString())),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _fetchRouteAndNavigate(String destinationAddress) async {
@@ -351,12 +397,15 @@ class _TaxiScreenState extends State<TaxiScreen> {
 
   Future<void> _handleMapTap(gmaps.LatLng point) async {
     final latLng = LatLng(point.latitude, point.longitude);
-    // Don't set destination if user tapped on their current location
     final distance = _calculateDistance(_currentPosition, latLng);
-    if (distance < 0.001) {
-      // Less than 100 meters, probably the same location
+    if (distance < 100) {
       return;
     }
+
+    _skipNextIdleDestinationUpdate = true;
+    await _mapController?.animateCamera(
+      gmaps.CameraUpdate.newLatLngZoom(point, 15.0),
+    );
 
     // Show loading indicator
     setState(() {
@@ -380,11 +429,6 @@ class _TaxiScreenState extends State<TaxiScreen> {
           _routeDistanceKm = null;
           _isLoadingRoute = true;
         });
-
-        // Move map to show the destination
-        _mapController?.moveCamera(
-          gmaps.CameraUpdate.newLatLngZoom(point, 15.0),
-        );
 
         await _fetchRouteAndNavigate(place.shortAddress);
       } else {
@@ -433,6 +477,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
 
   void _showTimePicker() {
     final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
     final l10n = context.l10n;
     showModalBottomSheet<void>(
       context: context,
@@ -443,7 +488,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.access_time, color: AppColors.primaryColor),
+              leading: Icon(Icons.access_time, color: primary),
               title: Text(l10n.taxiTimeNow),
               onTap: () {
                 setState(() {
@@ -453,7 +498,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.schedule, color: AppColors.primaryColor),
+              leading: Icon(Icons.schedule, color: primary),
               title: Text(l10n.taxiScheduleForLater),
               onTap: () {
                 setState(() {
@@ -532,14 +577,14 @@ class _TaxiScreenState extends State<TaxiScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.local_taxi, color: AppColors.primaryColor, size: 24),
+              Icon(Icons.local_taxi, color: colorScheme.primary, size: 24),
               const SizedBox(width: 8),
               Text(
                 l10n.taxiActiveRide,
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.primaryColor,
+                  color: colorScheme.primary,
                 ),
               ),
             ],
@@ -549,7 +594,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
             margin: const EdgeInsets.symmetric(horizontal: 20),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: AppColors.primaryColor.withValues(alpha: 0.1),
+              color: colorScheme.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
@@ -557,7 +602,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: AppColors.primaryColor,
+                color: colorScheme.primary,
               ),
             ),
           ),
@@ -618,7 +663,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
               child: FilledButton(
                 onPressed: _onTrackActiveRide,
                 style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.primaryColor,
+                  backgroundColor: colorScheme.primary,
                   foregroundColor: colorScheme.onPrimary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -648,12 +693,12 @@ class _TaxiScreenState extends State<TaxiScreen> {
                     height: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: AppColors.primaryColor,
+                      color: colorScheme.primary,
                     ),
                   )
                 : Text(
                     l10n.taxiRefreshStatus,
-                    style: TextStyle(color: AppColors.primaryColor, fontSize: 14),
+                    style: TextStyle(color: colorScheme.primary, fontSize: 14),
                   ),
           ),
           const SizedBox(height: 16),
@@ -699,17 +744,6 @@ class _TaxiScreenState extends State<TaxiScreen> {
     LatLng? activeDropoff,
   ) {
     final Set<gmaps.Marker> markers = {};
-    if (!hasActiveRide) {
-      markers.add(
-        gmaps.Marker(
-          markerId: const gmaps.MarkerId('current'),
-          position: _toG(_currentPosition),
-          icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-            gmaps.BitmapDescriptor.hueAzure,
-          ),
-        ),
-      );
-    }
     if (hasActiveRide && activePickup != null) {
       markers.add(
         gmaps.Marker(
@@ -717,17 +751,6 @@ class _TaxiScreenState extends State<TaxiScreen> {
           position: _toG(activePickup),
           icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
             gmaps.BitmapDescriptor.hueAzure,
-          ),
-        ),
-      );
-    }
-    if (_destinationPosition != null && !hasActiveRide) {
-      markers.add(
-        gmaps.Marker(
-          markerId: const gmaps.MarkerId('destination'),
-          position: _toG(_destinationPosition!),
-          icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-            gmaps.BitmapDescriptor.hueRed,
           ),
         ),
       );
@@ -764,6 +787,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
     bool hasActiveRide,
     LatLng? activePickup,
     LatLng? activeDropoff,
+    Color routeColor,
   ) {
     final Set<gmaps.Polyline> polylines = {};
     if (_destinationPosition != null && !hasActiveRide) {
@@ -774,7 +798,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
         gmaps.Polyline(
           polylineId: const gmaps.PolylineId('route'),
           points: points,
-          color: AppColors.primaryColor,
+          color: routeColor,
           width: 3,
         ),
       );
@@ -784,7 +808,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
         gmaps.Polyline(
           polylineId: const gmaps.PolylineId('active_route'),
           points: [_toG(activePickup), _toG(activeDropoff)],
-          color: AppColors.primaryColor,
+          color: routeColor,
           width: 3,
         ),
       );
@@ -843,7 +867,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.local_taxi, color: AppColors.primaryColor, size: 20),
+                      Icon(Icons.local_taxi, color: colorScheme.primary, size: 20),
                       const SizedBox(width: 8),
                       Text(
                         l10n.taxiCarsNearby(_totalAvailable!),
@@ -938,7 +962,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
-                              color: AppColors.primaryColor,
+                              color: colorScheme.primary,
                             ),
                           ),
                           Text(
@@ -961,7 +985,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
                         child: Row(
                           children: [
                             Icon(Icons.straighten,
-                                size: 18, color: AppColors.primaryColor),
+                                size: 18, color: colorScheme.primary),
                             const SizedBox(width: 8),
                             if (_isLoadingRoute)
                               const SizedBox(
@@ -977,7 +1001,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
-                                  color: AppColors.primaryColor,
+                                  color: colorScheme.primary,
                                 ),
                               ),
                           ],
@@ -1009,7 +1033,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
                                   ),
                                   prefixIcon: Icon(
                                     Icons.search,
-                                    color: AppColors.primaryColor,
+                                    color: colorScheme.primary,
                                   ),
                                   border: InputBorder.none,
                                   contentPadding: const EdgeInsets.symmetric(
@@ -1078,7 +1102,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
                                 children: [
                                   Icon(
                                     Icons.access_time,
-                                    color: AppColors.primaryColor,
+                                    color: colorScheme.primary,
                                     size: 20,
                                   ),
                                   const SizedBox(width: 6),
@@ -1087,14 +1111,14 @@ class _TaxiScreenState extends State<TaxiScreen> {
                                         ? l10n.taxiTimeNow
                                         : l10n.taxiScheduleForLater,
                                     style: TextStyle(
-                                      color: AppColors.primaryColor,
+                                      color: colorScheme.primary,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                   const SizedBox(width: 4),
                                   Icon(
                                     Icons.keyboard_arrow_down,
-                                    color: AppColors.primaryColor,
+                                    color: colorScheme.primary,
                                     size: 20,
                                   ),
                                 ],
@@ -1156,20 +1180,49 @@ class _TaxiScreenState extends State<TaxiScreen> {
       );
     }
 
-    return gmaps.GoogleMap(
+    if (hasActiveRide) {
+      return gmaps.GoogleMap(
+        initialCameraPosition: gmaps.CameraPosition(
+          target: _toG(_currentPosition),
+          zoom: 13.0,
+        ),
+        markers: _buildTaxiMarkers(hasActiveRide, activePickup, activeDropoff),
+        polylines: _buildTaxiPolylines(
+          hasActiveRide,
+          activePickup,
+          activeDropoff,
+          Theme.of(context).colorScheme.primary,
+        ),
+        myLocationEnabled: true,
+        myLocationButtonEnabled: false,
+        mapType: gmaps.MapType.normal,
+        onMapCreated: (controller) {
+          _mapController = controller;
+        },
+      );
+    }
+
+    return CenteredPinMap(
       initialCameraPosition: gmaps.CameraPosition(
         target: _toG(_currentPosition),
         zoom: 13.0,
       ),
+      idleDebounce: const Duration(milliseconds: 400),
+      onCenterLatLngChanged: _onDestinationCenterChanged,
       markers: _buildTaxiMarkers(hasActiveRide, activePickup, activeDropoff),
-      polylines: _buildTaxiPolylines(hasActiveRide, activePickup, activeDropoff),
+      polylines: _buildTaxiPolylines(
+        hasActiveRide,
+        activePickup,
+        activeDropoff,
+        Theme.of(context).colorScheme.primary,
+      ),
       myLocationEnabled: true,
       myLocationButtonEnabled: false,
       mapType: gmaps.MapType.normal,
       onMapCreated: (controller) {
         _mapController = controller;
       },
-      onTap: hasActiveRide ? null : _handleMapTap,
+      onTap: _handleMapTap,
     );
   }
 }
@@ -1198,7 +1251,7 @@ class _SuggestedLocationItem extends StatelessWidget {
           children: [
             Icon(
               Icons.access_time,
-              color: AppColors.primaryColor,
+              color: colorScheme.primary,
               size: 20,
             ),
             const SizedBox(width: 12),

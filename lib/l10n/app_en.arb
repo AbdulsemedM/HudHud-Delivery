@@ -28,6 +28,7 @@
   "navWallet": "Wallet",
   "navTaxi": "Taxi",
   "navProfile": "Profile",
+  "navOrderHistory": "Order History",
   "settingsProfile": "Profile",
   "settingsAccount": "Account",
   "settingsPreferences": "Preferences",
@@ -163,6 +164,9 @@
   "codeSentPhoneDefault": "Code sent to your phone.",
   "emailVerifiedSuccess": "Email verified successfully!",
   "phoneVerifiedSuccess": "Phone number verified successfully!",
+  "accountVerificationBannerTitle": "Secure your account",
+  "accountVerificationEmailSubtitle": "Confirm your email for receipts and updates.",
+  "accountVerificationPhoneSubtitle": "Verify your phone for security and support.",
   "failedToLoadOrders": "Failed to load orders: {error}",
   "@failedToLoadOrders": {
     "placeholders": {

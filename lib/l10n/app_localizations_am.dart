@@ -93,6 +93,9 @@ class AppLocalizationsAm extends AppLocalizations {
   String get navProfile => 'መገለጫ';
 
   @override
+  String get navOrderHistory => 'የትዕዛዝ ታሪክ';
+
+  @override
   String get settingsProfile => 'መገለጫ';
 
   @override
@@ -385,6 +388,17 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get phoneVerifiedSuccess => 'ስልክ ቁጥር በተሳካ ሁኔታ ተረጋግጧል!';
+
+  @override
+  String get accountVerificationBannerTitle => 'Secure your account';
+
+  @override
+  String get accountVerificationEmailSubtitle =>
+      'Confirm your email for receipts and updates.';
+
+  @override
+  String get accountVerificationPhoneSubtitle =>
+      'Verify your phone for security and support.';
 
   @override
   String failedToLoadOrders(String error) {
