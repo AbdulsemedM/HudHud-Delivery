@@ -173,6 +173,55 @@ class AppLocalizationsSo extends AppLocalizations {
   String get settingsLanguage => 'Luuqad';
 
   @override
+  String get profileEdit => 'Wax ka beddel';
+
+  @override
+  String get profileCoupons => 'Kuuboonnada';
+
+  @override
+  String get profileWallet => 'Wallet';
+
+  @override
+  String get profileMenuProfile => 'Profile';
+
+  @override
+  String get profileMenuAddresses => 'Cinwaanada';
+
+  @override
+  String get profileMenuFavorites => 'Kuwa aad jeceshahay';
+
+  @override
+  String get profileMenuAccountSettings => 'Dejinta Akoonka';
+
+  @override
+  String get settingsGeneralPreferences => 'Doorbidayaasha Guud';
+
+  @override
+  String get settingsDeliveryPreferences => 'Doorbidayaasha Gaarsiinta';
+
+  @override
+  String get settingsAppSettings => 'Dejinta App-ka';
+
+  @override
+  String get profileCouponsComingSoon => 'Kuuboonnada wali lama helin.';
+
+  @override
+  String get profileTermsOfUse => 'Shuruudaha Isticmaalka';
+
+  @override
+  String get profilePrivacyPolicy => 'Siyaasadda Asturnaanta';
+
+  @override
+  String profileCopyright(String year) {
+    return '© $year HudHud Delivery. Xuquuqda oo dhan way dhawran yihiin.';
+  }
+
+  @override
+  String profileVersionFormatted(String version, String buildNumber) {
+    return 'Nooca $version (Dhismaha $buildNumber)';
+  }
+
+  @override
   String get logoutTitle => 'Ka bax';
 
   @override

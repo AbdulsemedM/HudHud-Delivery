@@ -54,6 +54,38 @@
   "settingsLogOut": "تسجيل الخروج",
   "settingsVersion": "الإصدار 1.0",
   "settingsLanguage": "لغة",
+  "profileEdit": "تعديل",
+  "profileCoupons": "القسائم",
+  "profileWallet": "المحفظة",
+  "profileMenuProfile": "الملف الشخصي",
+  "profileMenuAddresses": "العناوين",
+  "profileMenuFavorites": "المفضلة",
+  "profileMenuAccountSettings": "إعدادات الحساب",
+  "settingsGeneralPreferences": "التفضيلات العامة",
+  "settingsDeliveryPreferences": "تفضيلات التوصيل",
+  "settingsAppSettings": "إعدادات التطبيق",
+  "profileCouponsComingSoon": "القسائم غير متوفرة بعد.",
+  "profileTermsOfUse": "شروط الاستخدام",
+  "profilePrivacyPolicy": "سياسة الخصوصية",
+  "profileCopyright": "© {year} HudHud Delivery. جميع الحقوق محفوظة.",
+  "@profileCopyright": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "profileVersionFormatted": "الإصدار {version} (البناء {buildNumber})",
+  "@profileVersionFormatted": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "buildNumber": {
+        "type": "String"
+      }
+    }
+  },
   "logoutTitle": "تسجيل الخروج",
   "logoutMessage": "هل أنت متأكد أنك تريد تسجيل الخروج؟",
   "logoutError": "خطأ أثناء تسجيل الخروج: {error}",

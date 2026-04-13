@@ -173,6 +173,55 @@ class AppLocalizationsAm extends AppLocalizations {
   String get settingsLanguage => 'ቋንቋ';
 
   @override
+  String get profileEdit => 'አርም';
+
+  @override
+  String get profileCoupons => 'ኩፖኖች';
+
+  @override
+  String get profileWallet => 'ዋሌት';
+
+  @override
+  String get profileMenuProfile => 'መገለጫ';
+
+  @override
+  String get profileMenuAddresses => 'አድራሻዎች';
+
+  @override
+  String get profileMenuFavorites => 'የሚወዱ';
+
+  @override
+  String get profileMenuAccountSettings => 'የመለያ ቅንብሮች';
+
+  @override
+  String get settingsGeneralPreferences => 'አጠቃላይ ምርጫዎች';
+
+  @override
+  String get settingsDeliveryPreferences => 'የማድረሻ ምርጫዎች';
+
+  @override
+  String get settingsAppSettings => 'የመተግበሪያ ቅንብሮች';
+
+  @override
+  String get profileCouponsComingSoon => 'ኩፖኖች ገና አይገኙም።';
+
+  @override
+  String get profileTermsOfUse => 'የመጠቀሚያ ውሎች';
+
+  @override
+  String get profilePrivacyPolicy => 'የግላዊነት ፖሊሲ';
+
+  @override
+  String profileCopyright(String year) {
+    return '© $year HudHud Delivery. መብቱ በህግ የተጠበቀ ነው።';
+  }
+
+  @override
+  String profileVersionFormatted(String version, String buildNumber) {
+    return 'ስሪት $version (ህንፃ $buildNumber)';
+  }
+
+  @override
   String get logoutTitle => 'ውጣ';
 
   @override

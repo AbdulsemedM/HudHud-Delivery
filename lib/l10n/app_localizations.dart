@@ -428,6 +428,96 @@ abstract class AppLocalizations {
   /// **'Language'**
   String get settingsLanguage;
 
+  /// No description provided for @profileEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get profileEdit;
+
+  /// No description provided for @profileCoupons.
+  ///
+  /// In en, this message translates to:
+  /// **'Coupons'**
+  String get profileCoupons;
+
+  /// No description provided for @profileWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet'**
+  String get profileWallet;
+
+  /// No description provided for @profileMenuProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get profileMenuProfile;
+
+  /// No description provided for @profileMenuAddresses.
+  ///
+  /// In en, this message translates to:
+  /// **'Addresses'**
+  String get profileMenuAddresses;
+
+  /// No description provided for @profileMenuFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get profileMenuFavorites;
+
+  /// No description provided for @profileMenuAccountSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Settings'**
+  String get profileMenuAccountSettings;
+
+  /// No description provided for @settingsGeneralPreferences.
+  ///
+  /// In en, this message translates to:
+  /// **'General Preferences'**
+  String get settingsGeneralPreferences;
+
+  /// No description provided for @settingsDeliveryPreferences.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery Preferences'**
+  String get settingsDeliveryPreferences;
+
+  /// No description provided for @settingsAppSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'App Settings'**
+  String get settingsAppSettings;
+
+  /// No description provided for @profileCouponsComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Coupons are not available yet.'**
+  String get profileCouponsComingSoon;
+
+  /// No description provided for @profileTermsOfUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Use'**
+  String get profileTermsOfUse;
+
+  /// No description provided for @profilePrivacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get profilePrivacyPolicy;
+
+  /// No description provided for @profileCopyright.
+  ///
+  /// In en, this message translates to:
+  /// **'© {year} HudHud Delivery. All Rights Reserved.'**
+  String profileCopyright(String year);
+
+  /// No description provided for @profileVersionFormatted.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version} (Build {buildNumber})'**
+  String profileVersionFormatted(String version, String buildNumber);
+
   /// No description provided for @logoutTitle.
   ///
   /// In en, this message translates to:

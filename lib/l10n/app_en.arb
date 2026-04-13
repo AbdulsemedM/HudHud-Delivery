@@ -54,6 +54,38 @@
   "settingsLogOut": "Log Out",
   "settingsVersion": "Version 1.0",
   "settingsLanguage": "Language",
+  "profileEdit": "Edit",
+  "profileCoupons": "Coupons",
+  "profileWallet": "Wallet",
+  "profileMenuProfile": "Profile",
+  "profileMenuAddresses": "Addresses",
+  "profileMenuFavorites": "Favorites",
+  "profileMenuAccountSettings": "Account Settings",
+  "settingsGeneralPreferences": "General Preferences",
+  "settingsDeliveryPreferences": "Delivery Preferences",
+  "settingsAppSettings": "App Settings",
+  "profileCouponsComingSoon": "Coupons are not available yet.",
+  "profileTermsOfUse": "Terms of Use",
+  "profilePrivacyPolicy": "Privacy Policy",
+  "profileCopyright": "© {year} HudHud Delivery. All Rights Reserved.",
+  "@profileCopyright": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "profileVersionFormatted": "Version {version} (Build {buildNumber})",
+  "@profileVersionFormatted": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "buildNumber": {
+        "type": "String"
+      }
+    }
+  },
   "logoutTitle": "Logout",
   "logoutMessage": "Are you sure you want to logout?",
   "logoutError": "Error during logout: {error}",

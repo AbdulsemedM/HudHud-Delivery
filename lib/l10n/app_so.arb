@@ -54,6 +54,38 @@
   "settingsLogOut": "Ka bax",
   "settingsVersion": "Nooca 1.0",
   "settingsLanguage": "Luuqad",
+  "profileEdit": "Wax ka beddel",
+  "profileCoupons": "Kuuboonnada",
+  "profileWallet": "Wallet",
+  "profileMenuProfile": "Profile",
+  "profileMenuAddresses": "Cinwaanada",
+  "profileMenuFavorites": "Kuwa aad jeceshahay",
+  "profileMenuAccountSettings": "Dejinta Akoonka",
+  "settingsGeneralPreferences": "Doorbidayaasha Guud",
+  "settingsDeliveryPreferences": "Doorbidayaasha Gaarsiinta",
+  "settingsAppSettings": "Dejinta App-ka",
+  "profileCouponsComingSoon": "Kuuboonnada wali lama helin.",
+  "profileTermsOfUse": "Shuruudaha Isticmaalka",
+  "profilePrivacyPolicy": "Siyaasadda Asturnaanta",
+  "profileCopyright": "© {year} HudHud Delivery. Xuquuqda oo dhan way dhawran yihiin.",
+  "@profileCopyright": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "profileVersionFormatted": "Nooca {version} (Dhismaha {buildNumber})",
+  "@profileVersionFormatted": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "buildNumber": {
+        "type": "String"
+      }
+    }
+  },
   "logoutTitle": "Ka bax",
   "logoutMessage": "Ma hubtaa inaad doonayso inaad ka baxdo?",
   "logoutError": "Khalad intii lagu jiray ka bixida: {error}",

@@ -54,6 +54,38 @@
   "settingsLogOut": "ውጣ",
   "settingsVersion": "ስሪት 1.0",
   "settingsLanguage": "ቋንቋ",
+  "profileEdit": "አርም",
+  "profileCoupons": "ኩፖኖች",
+  "profileWallet": "ዋሌት",
+  "profileMenuProfile": "መገለጫ",
+  "profileMenuAddresses": "አድራሻዎች",
+  "profileMenuFavorites": "የሚወዱ",
+  "profileMenuAccountSettings": "የመለያ ቅንብሮች",
+  "settingsGeneralPreferences": "አጠቃላይ ምርጫዎች",
+  "settingsDeliveryPreferences": "የማድረሻ ምርጫዎች",
+  "settingsAppSettings": "የመተግበሪያ ቅንብሮች",
+  "profileCouponsComingSoon": "ኩፖኖች ገና አይገኙም።",
+  "profileTermsOfUse": "የመጠቀሚያ ውሎች",
+  "profilePrivacyPolicy": "የግላዊነት ፖሊሲ",
+  "profileCopyright": "© {year} HudHud Delivery. መብቱ በህግ የተጠበቀ ነው።",
+  "@profileCopyright": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "profileVersionFormatted": "ስሪት {version} (ህንፃ {buildNumber})",
+  "@profileVersionFormatted": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "buildNumber": {
+        "type": "String"
+      }
+    }
+  },
   "logoutTitle": "ውጣ",
   "logoutMessage": "እርግጠኛ ነህ መውጣት ትፈልጋለህ?",
   "logoutError": "በመውጣት ጊዜ ስህተት፦ {error}",

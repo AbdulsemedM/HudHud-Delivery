@@ -173,6 +173,55 @@ class AppLocalizationsOm extends AppLocalizations {
   String get settingsLanguage => 'Afaan';
 
   @override
+  String get profileEdit => 'Gulaali';
+
+  @override
+  String get profileCoupons => 'Kuupoonota';
+
+  @override
+  String get profileWallet => 'Walleetii';
+
+  @override
+  String get profileMenuProfile => 'Profaayilii';
+
+  @override
+  String get profileMenuAddresses => 'Teessoo';
+
+  @override
+  String get profileMenuFavorites => 'Jaallatamoo';
+
+  @override
+  String get profileMenuAccountSettings => 'Qindaa\'ina Herrega';
+
+  @override
+  String get settingsGeneralPreferences => 'Filannoo Waliigalaa';
+
+  @override
+  String get settingsDeliveryPreferences => 'Filannoo Geejjibaa';
+
+  @override
+  String get settingsAppSettings => 'Qindaa\'ina App';
+
+  @override
+  String get profileCouponsComingSoon => 'Kuupoononni ammallee hin jiran.';
+
+  @override
+  String get profileTermsOfUse => 'Seera Itti Fayyadamaa';
+
+  @override
+  String get profilePrivacyPolicy => 'Imaammata Dhuunfaa';
+
+  @override
+  String profileCopyright(String year) {
+    return '© $year HudHud Delivery. Mirgi hundi seeraan kan eegame.';
+  }
+
+  @override
+  String profileVersionFormatted(String version, String buildNumber) {
+    return 'Vershinii $version (Ijaarsa $buildNumber)';
+  }
+
+  @override
   String get logoutTitle => 'Ba\'i';
 
   @override

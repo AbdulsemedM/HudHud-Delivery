@@ -173,6 +173,55 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsLanguage => 'لغة';
 
   @override
+  String get profileEdit => 'تعديل';
+
+  @override
+  String get profileCoupons => 'القسائم';
+
+  @override
+  String get profileWallet => 'المحفظة';
+
+  @override
+  String get profileMenuProfile => 'الملف الشخصي';
+
+  @override
+  String get profileMenuAddresses => 'العناوين';
+
+  @override
+  String get profileMenuFavorites => 'المفضلة';
+
+  @override
+  String get profileMenuAccountSettings => 'إعدادات الحساب';
+
+  @override
+  String get settingsGeneralPreferences => 'التفضيلات العامة';
+
+  @override
+  String get settingsDeliveryPreferences => 'تفضيلات التوصيل';
+
+  @override
+  String get settingsAppSettings => 'إعدادات التطبيق';
+
+  @override
+  String get profileCouponsComingSoon => 'القسائم غير متوفرة بعد.';
+
+  @override
+  String get profileTermsOfUse => 'شروط الاستخدام';
+
+  @override
+  String get profilePrivacyPolicy => 'سياسة الخصوصية';
+
+  @override
+  String profileCopyright(String year) {
+    return '© $year HudHud Delivery. جميع الحقوق محفوظة.';
+  }
+
+  @override
+  String profileVersionFormatted(String version, String buildNumber) {
+    return 'الإصدار $version (البناء $buildNumber)';
+  }
+
+  @override
   String get logoutTitle => 'تسجيل الخروج';
 
   @override

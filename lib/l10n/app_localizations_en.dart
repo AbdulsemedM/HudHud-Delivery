@@ -173,6 +173,55 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsLanguage => 'Language';
 
   @override
+  String get profileEdit => 'Edit';
+
+  @override
+  String get profileCoupons => 'Coupons';
+
+  @override
+  String get profileWallet => 'Wallet';
+
+  @override
+  String get profileMenuProfile => 'Profile';
+
+  @override
+  String get profileMenuAddresses => 'Addresses';
+
+  @override
+  String get profileMenuFavorites => 'Favorites';
+
+  @override
+  String get profileMenuAccountSettings => 'Account Settings';
+
+  @override
+  String get settingsGeneralPreferences => 'General Preferences';
+
+  @override
+  String get settingsDeliveryPreferences => 'Delivery Preferences';
+
+  @override
+  String get settingsAppSettings => 'App Settings';
+
+  @override
+  String get profileCouponsComingSoon => 'Coupons are not available yet.';
+
+  @override
+  String get profileTermsOfUse => 'Terms of Use';
+
+  @override
+  String get profilePrivacyPolicy => 'Privacy Policy';
+
+  @override
+  String profileCopyright(String year) {
+    return '© $year HudHud Delivery. All Rights Reserved.';
+  }
+
+  @override
+  String profileVersionFormatted(String version, String buildNumber) {
+    return 'Version $version (Build $buildNumber)';
+  }
+
+  @override
   String get logoutTitle => 'Logout';
 
   @override

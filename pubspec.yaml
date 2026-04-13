@@ -33,10 +33,10 @@ dependencies:
   font_awesome_flutter: ^10.6.0
   intl: ^0.20.2
   intl_phone_field: ^3.2.0
-  google_nav_bar: ^5.0.7
   lottie: ^3.1.3
   country_picker: ^2.0.27
   device_info_plus: ^10.1.0
+  package_info_plus: ^8.1.2
 
   # Location Services
   permission_handler: ^12.0.1

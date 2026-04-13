@@ -400,7 +400,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     icon: Icons.local_taxi_rounded,
                     color: AppColors.primaryColor,
                     onTap: () {
-                      widget.onSwitchToTab?.call(3);
+                      widget.onSwitchToTab?.call(2);
                     },
                   ),
                   ServiceCard(

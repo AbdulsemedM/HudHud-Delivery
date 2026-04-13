@@ -54,6 +54,38 @@
   "settingsLogOut": "Log Out",
   "settingsVersion": "Vershinii 1.0",
   "settingsLanguage": "Afaan",
+  "profileEdit": "Gulaali",
+  "profileCoupons": "Kuupoonota",
+  "profileWallet": "Walleetii",
+  "profileMenuProfile": "Profaayilii",
+  "profileMenuAddresses": "Teessoo",
+  "profileMenuFavorites": "Jaallatamoo",
+  "profileMenuAccountSettings": "Qindaa'ina Herrega",
+  "settingsGeneralPreferences": "Filannoo Waliigalaa",
+  "settingsDeliveryPreferences": "Filannoo Geejjibaa",
+  "settingsAppSettings": "Qindaa'ina App",
+  "profileCouponsComingSoon": "Kuupoononni ammallee hin jiran.",
+  "profileTermsOfUse": "Seera Itti Fayyadamaa",
+  "profilePrivacyPolicy": "Imaammata Dhuunfaa",
+  "profileCopyright": "© {year} HudHud Delivery. Mirgi hundi seeraan kan eegame.",
+  "@profileCopyright": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "profileVersionFormatted": "Vershinii {version} (Ijaarsa {buildNumber})",
+  "@profileVersionFormatted": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "buildNumber": {
+        "type": "String"
+      }
+    }
+  },
   "logoutTitle": "Ba'i",
   "logoutMessage": "Logout gochuu akka barbaaddu mirkaneeffatteettaa?",
   "logoutError": "Dogoggora yeroo ba'uu: {error} .",
