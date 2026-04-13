@@ -36,6 +36,43 @@ class LoginDataProvider {
     }
   }
 
+  /// POST /api/auth/google-login — customer app uses `user_type: customer`.
+  Future<Map<String, dynamic>> googleLogin({
+    required String idToken,
+    String? deviceToken,
+  }) async {
+    try {
+      final body = <String, dynamic>{
+        'id_token': idToken,
+        'user_type': 'customer',
+      };
+      if (deviceToken != null && deviceToken.isNotEmpty) {
+        body['device_token'] = deviceToken;
+      }
+      final response = await apiService.post(
+        ApiConstants.googleLogin,
+        data: body,
+      );
+      return {
+        'statusCode': response.statusCode,
+        'data': response.data,
+        'errorMessage': null,
+      };
+    } on ApiException catch (apiError) {
+      return {
+        'statusCode': apiError.statusCode,
+        'data': apiError.data,
+        'errorMessage': apiError.message,
+      };
+    } on Exception catch (e) {
+      return {
+        'statusCode': 500,
+        'data': null,
+        'errorMessage': 'Unexpected error: ${e.toString()}',
+      };
+    }
+  }
+
   Future<Map<String, dynamic>> guest() async {
     try {
       final response = await apiService.post(

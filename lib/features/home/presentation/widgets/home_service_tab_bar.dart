@@ -27,6 +27,8 @@ class HomeServiceTabBar extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
+    // Strip tint follows the selected service; each tile uses its own brand (food = app orange).
+    final stripAccent = ServiceTabPalette.seedFor(selected);
 
     final items = <_TabSpec>[
       _TabSpec(
@@ -64,31 +66,49 @@ class HomeServiceTabBar extends StatelessWidget {
           end: Alignment.bottomCenter,
           colors: isDark
               ? [
-                  cs.primary.withValues(alpha: 0.26),
-                  Color.lerp(cs.surface, cs.primary, 0.06)!
+                  stripAccent.withValues(alpha: 0.26),
+                  Color.lerp(cs.surface, stripAccent, 0.06)!
                       .withValues(alpha: 0.96),
                 ]
               : [
-                  cs.primary.withValues(alpha: 0.20),
-                  Color.lerp(cs.surface, cs.primary, 0.04)!
+                  stripAccent.withValues(alpha: 0.20),
+                  Color.lerp(cs.surface, stripAccent, 0.04)!
                       .withValues(alpha: 0.98),
                 ],
         ),
       ),
       child: SizedBox(
         height: 100,
-        child: ListView.separated(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          itemCount: items.length,
-          separatorBuilder: (_, __) => const SizedBox(width: 10),
-          itemBuilder: (context, index) {
-            final spec = items[index];
-            final isSelected = spec.mode == selected;
-            return _ServiceTile(
-              spec: spec,
-              selected: isSelected,
-              onTap: () => onSelected(spec.mode),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final tiles = <Widget>[
+              for (final spec in items)
+                _ServiceTile(
+                  spec: spec,
+                  brand: ServiceTabPalette.seedFor(spec.mode),
+                  selected: spec.mode == selected,
+                  onTap: () => onSelected(spec.mode),
+                ),
+            ];
+            // Space-around when all four tiles fit; scroll on very narrow widths.
+            const minWidthForPackedRow =
+                _ServiceTile.tileWidth * 4 + 8; // ~360pt
+            if (constraints.maxWidth >= minWidthForPackedRow) {
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: tiles,
+              );
+            }
+            return ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              children: [
+                for (var i = 0; i < tiles.length; i++) ...[
+                  if (i > 0) const SizedBox(width: 10),
+                  tiles[i],
+                ],
+              ],
             );
           },
         ),
@@ -114,15 +134,18 @@ class _TabSpec {
 class _ServiceTile extends StatelessWidget {
   const _ServiceTile({
     required this.spec,
+    required this.brand,
     required this.selected,
     required this.onTap,
   });
 
   final _TabSpec spec;
+  /// Per-service accent (food & groceries = [AppColors.primaryColor]).
+  final Color brand;
   final bool selected;
   final VoidCallback onTap;
 
-  static const double _tileWidth = 88;
+  static const double tileWidth = 88;
   static const double _tileHeight = 96;
   static const double _imageBoxHeight = 54;
 
@@ -132,18 +155,18 @@ class _ServiceTile extends StatelessWidget {
     final cs = theme.colorScheme;
 
     final bg = selected
-        ? cs.primary
-        : Color.lerp(cs.surface, cs.primary, theme.brightness == Brightness.dark ? 0.14 : 0.11)!;
+        ? brand
+        : Color.lerp(cs.surface, brand, theme.brightness == Brightness.dark ? 0.14 : 0.11)!;
     final border = selected
-        ? cs.primary
-        : (Color.lerp(cs.outlineVariant, cs.primary, 0.35) ?? cs.outlineVariant)
+        ? brand
+        : (Color.lerp(cs.outlineVariant, brand, 0.35) ?? cs.outlineVariant)
             .withValues(alpha: 0.55);
     final labelColor = selected ? Colors.white : cs.onSurface;
 
     // Use Material + InkWell + Container — not [Ink], which can fail to paint
     // [Image.asset] children correctly in some cases.
     return SizedBox(
-      width: _tileWidth,
+      width: tileWidth,
       height: _tileHeight,
       child: Material(
         color: Colors.transparent,
@@ -153,7 +176,7 @@ class _ServiceTile extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(20),
           child: Container(
-            width: _tileWidth,
+            width: tileWidth,
             decoration: BoxDecoration(
               color: bg,
               borderRadius: BorderRadius.circular(20),
@@ -161,14 +184,14 @@ class _ServiceTile extends StatelessWidget {
               boxShadow: selected
                   ? [
                       BoxShadow(
-                        color: cs.primary.withValues(alpha: 0.35),
+                        color: brand.withValues(alpha: 0.35),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
                     ]
                   : [
                       BoxShadow(
-                        color: cs.primary.withValues(alpha: 0.12),
+                        color: brand.withValues(alpha: 0.12),
                         blurRadius: 10,
                         offset: const Offset(0, 2),
                       ),
@@ -185,7 +208,12 @@ class _ServiceTile extends StatelessWidget {
                   child: Center(
                     child: _IconImageWell(
                       selected: selected,
-                      child: _TabArtwork(spec: spec, selected: selected),
+                      brand: brand,
+                      child: _TabArtwork(
+                        spec: spec,
+                        selected: selected,
+                        brand: brand,
+                      ),
                     ),
                   ),
                 ),
@@ -215,21 +243,21 @@ class _ServiceTile extends StatelessWidget {
 class _IconImageWell extends StatelessWidget {
   const _IconImageWell({
     required this.selected,
+    required this.brand,
     required this.child,
   });
 
   final bool selected;
+  final Color brand;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final Color wellColor = selected
         ? Colors.white.withValues(alpha: isDark ? 0.26 : 0.32)
-        : cs.primary.withValues(alpha: isDark ? 0.26 : 0.20);
+        : brand.withValues(alpha: isDark ? 0.26 : 0.20);
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -237,7 +265,7 @@ class _IconImageWell extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: (selected ? Colors.white : cs.primary)
+            color: (selected ? Colors.white : brand)
                 .withValues(alpha: selected ? 0.14 : 0.12),
             blurRadius: selected ? 8 : 10,
             offset: const Offset(0, 2),
@@ -257,15 +285,16 @@ class _TabArtwork extends StatelessWidget {
   const _TabArtwork({
     required this.spec,
     required this.selected,
+    required this.brand,
   });
 
   final _TabSpec spec;
   final bool selected;
+  final Color brand;
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final iconColor = selected ? Colors.white : cs.primary;
+    final iconColor = selected ? Colors.white : brand;
 
     return Image.asset(
       spec.assetPath,

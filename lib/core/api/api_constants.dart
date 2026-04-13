@@ -17,6 +17,8 @@ class ApiConstants {
   /// POST — returns same shape as [login] (token, user, optional refresh_token).
   /// Coordinate path with backend if it differs.
   static const String guest = '$auth/guest';
+  /// POST body: `id_token`, optional `user_type`, optional `device_token`.
+  static const String googleLogin = '$auth/google-login';
   static const String forgotPassword = '$auth/forgot-password';
   static const String resetPassword = '$auth/reset-password';
 

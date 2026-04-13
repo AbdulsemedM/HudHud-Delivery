@@ -99,16 +99,16 @@ class UserProfileHeader extends StatelessWidget {
                 Icon(
                   Icons.location_on,
                   color: primary,
-                  size: 20,
+                  size: 18,
                 ),
-                const SizedBox(width: 6),
+                const SizedBox(width: 4),
                 Flexible(
                   child: isLoadingLocation
                       ? SizedBox(
-                          width: 14,
-                          height: 14,
+                          width: 12,
+                          height: 12,
                           child: CircularProgressIndicator(
-                            strokeWidth: 2,
+                            strokeWidth: 1.5,
                             valueColor: AlwaysStoppedAnimation<Color>(primary),
                           ),
                         )
@@ -116,24 +116,28 @@ class UserProfileHeader extends StatelessWidget {
                           location,
                           style: TextStyle(
                             color: primary,
-                            fontSize: 14,
+                            fontSize: 13,
                             fontWeight: FontWeight.w600,
                           ),
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
                         ),
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: 2),
                 Icon(
                   Icons.arrow_drop_down,
                   color: primary,
-                  size: 20,
+                  size: 18,
                 ),
               ],
             ),
           ),
         ),
         IconButton(
+          visualDensity: VisualDensity.compact,
+          padding: const EdgeInsets.all(4),
+          constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+          iconSize: 20,
           icon: Icon(
             Icons.notifications_outlined,
             color: colorScheme.onSurface,

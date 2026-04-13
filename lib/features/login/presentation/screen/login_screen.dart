@@ -271,45 +271,59 @@ class _GoogleSignInButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final colorScheme = Theme.of(context).colorScheme;
-    return SizedBox(
-      width: double.infinity,
-      height: 48,
-      child: OutlinedButton(
-        onPressed: () {
-          // TODO: Implement Google Sign In
-        },
-        style: OutlinedButton.styleFrom(
-          side: BorderSide(color: AppColors.primaryColor, width: 1.5),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          backgroundColor: colorScheme.surface,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Google Logo
-            Image.asset(
-              'assets/images/Google_Favicon_2025.svg.png',
-              width: 20,
-              height: 20,
-              fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) {
-                return Icon(Icons.g_mobiledata, size: 20, color: Colors.grey[700]);
-              },
-            ),
-            const SizedBox(width: 12),
-            Text(
-              l10n.continueWithGoogle,
-              style: TextStyle(
-                color: Theme.of(context).textTheme.bodyLarge?.color,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
+    return BlocBuilder<LoginBloc, LoginState>(
+      builder: (context, state) {
+        final loading = state is LoginLoading;
+        return SizedBox(
+          width: double.infinity,
+          height: 48,
+          child: OutlinedButton(
+            onPressed: loading
+                ? null
+                : () => context.read<LoginBloc>().add(GoogleLoginRequested()),
+            style: OutlinedButton.styleFrom(
+              side: BorderSide(color: AppColors.primaryColor, width: 1.5),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
+              backgroundColor: colorScheme.surface,
             ),
-          ],
-        ),
-      ),
+            child: loading
+                ? SizedBox(
+                    height: 22,
+                    width: 22,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.primaryColor,
+                    ),
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        'assets/images/Google_Favicon_2025.svg.png',
+                        width: 20,
+                        height: 20,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Icon(Icons.g_mobiledata,
+                              size: 20, color: Colors.grey[700]);
+                        },
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        l10n.continueWithGoogle,
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
+        );
+      },
     );
   }
 }

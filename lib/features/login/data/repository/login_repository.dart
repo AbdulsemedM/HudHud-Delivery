@@ -1,4 +1,6 @@
 import 'package:hudhud_delivery/app/services/auth_service.dart';
+import 'package:hudhud_delivery/app/services/fcm_service.dart';
+import 'package:hudhud_delivery/app/services/google_auth_helper.dart';
 import 'package:hudhud_delivery/features/login/data/data_provider/login_data_provider.dart';
 import 'package:hudhud_delivery/models/user_model.dart';
 
@@ -32,6 +34,51 @@ class LoginRepository {
       String errorMessage = _cleanErrorMessage(e.toString());
       throw errorMessage;
     }
+  }
+
+  Future<UserModel> googleLogin() async {
+    final authService = AuthService();
+    try {
+      final idToken = await obtainGoogleIdToken();
+      final deviceToken = await FcmService().getToken();
+      final response = await loginDataProvider.googleLogin(
+        idToken: idToken,
+        deviceToken: deviceToken,
+      );
+      final code = response['statusCode'] as int?;
+      if (code == 200 || code == 201) {
+        final raw = response['data'];
+        final data = _normalizeLoginPayload(raw);
+        return _completeSessionFromLoginData(data, authService);
+      }
+      String errorMessage =
+          response['errorMessage'] as String? ?? 'Google login failed';
+      errorMessage = _cleanErrorMessage(errorMessage);
+      throw errorMessage;
+    } on GoogleSignInUserCancelled {
+      rethrow;
+    } catch (e) {
+      if (e is String) rethrow;
+      throw _cleanErrorMessage(e.toString());
+    }
+  }
+
+  /// Accepts either `{ token, user }` or `{ success, data: { token, user } }`.
+  Map<String, dynamic> _normalizeLoginPayload(dynamic raw) {
+    if (raw is! Map) {
+      throw 'Invalid server response: missing required data';
+    }
+    final map = Map<String, dynamic>.from(raw);
+    if (map['token'] != null && map['user'] != null) {
+      return map;
+    }
+    final inner = map['data'];
+    if (inner is Map &&
+        inner['token'] != null &&
+        inner['user'] != null) {
+      return Map<String, dynamic>.from(inner);
+    }
+    throw 'Invalid server response: missing required data';
   }
 
   Future<UserModel> guest() async {

@@ -11,3 +11,5 @@ class LoginFormSubmitted extends LoginEvent {
 }
 
 class GuestLoginRequested extends LoginEvent {}
+
+class GoogleLoginRequested extends LoginEvent {}
