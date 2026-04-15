@@ -19,8 +19,13 @@ class ApiConstants {
   static const String guest = '$auth/guest';
   /// POST body: `id_token`, optional `user_type`, optional `device_token`.
   static const String googleLogin = '$auth/google-login';
-  static const String forgotPassword = '$auth/forgot-password';
   static const String resetPassword = '$auth/reset-password';
+
+  /// Password reset OTP flow (unauthenticated): POST `/api/password/...`
+  static const String passwordResetOtp = 'password/reset-otp';
+  static const String passwordVerifyOtp = 'password/verify-otp';
+  static const String passwordResendOtp = 'password/resend-otp';
+  static const String passwordResetWithToken = 'password/reset-with-token';
 
   // FCM endpoints
   static const String fcmToken = 'fcm/token';

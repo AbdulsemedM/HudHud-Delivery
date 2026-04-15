@@ -891,5 +891,39 @@
   "handymanStatsHeading": "Stats",
   "handymanStatServices": "Services",
   "handymanStatRating": "Rating",
-  "handymanStatResponse": "Response"
+  "handymanStatResponse": "Response",
+  "forgotPasswordLink": "Forgot password?",
+  "forgotPasswordRequestTitle": "Reset password",
+  "forgotPasswordRequestSubtitle": "Enter your email or phone number. We'll send a 6-digit verification code.",
+  "forgotPasswordSendCode": "Send code",
+  "forgotPasswordVerifyTitle": "Enter verification code",
+  "forgotPasswordVerifySubtitle": "We sent a code to {identifier}.",
+  "@forgotPasswordVerifySubtitle": {
+    "placeholders": {
+      "identifier": {
+        "type": "String"
+      }
+    }
+  },
+  "forgotPasswordOtpLabel": "6-digit code",
+  "forgotPasswordTimeRemaining": "Time remaining: {time}",
+  "@forgotPasswordTimeRemaining": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "forgotPasswordCodeExpired": "This code has expired. Tap resend for a new code.",
+  "forgotPasswordResend": "Resend code",
+  "forgotPasswordVerifyButton": "Verify",
+  "forgotPasswordNewTitle": "Create new password",
+  "forgotPasswordNewSubtitle": "Use at least 8 characters.",
+  "forgotPasswordLabelConfirmPassword": "Confirm password",
+  "forgotPasswordHintConfirmPassword": "Re-enter new password",
+  "forgotPasswordSaveButton": "Save password",
+  "forgotPasswordSuccessMessage": "Password updated. You can sign in now.",
+  "validationOtpLength": "Enter the 6-digit code",
+  "validationConfirmPasswordRequired": "Please confirm your password",
+  "validationPasswordsDoNotMatch": "Passwords do not match"
 }

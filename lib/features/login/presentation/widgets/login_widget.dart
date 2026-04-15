@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
-import 'package:hudhud_delivery/l10n/app_localizations.dart';
+import 'package:hudhud_delivery/core/validation/email_or_phone_validator.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/features/forgot_password/presentation/screen/forgot_password_identifier_screen.dart';
 import 'package:hudhud_delivery/features/login/bloc/login_bloc.dart';
 
 class LogoWidget extends StatelessWidget {
@@ -78,49 +80,6 @@ class _LoginFormState extends State<LoginForm> {
   final _formKey = GlobalKey<FormState>();
   bool _isPasswordVisible = false;
 
-  /// Email or phone validation using [l10n] for error messages.
-  String? _validateEmailOrPhone(String? value, AppLocalizations l10n) {
-    if (value == null || value.isEmpty) {
-      return l10n.validationEmailOrPhoneRequired;
-    }
-
-    final trimmedValue = value.trim();
-
-    // Check if it's an email
-    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-    if (emailRegex.hasMatch(trimmedValue)) {
-      return null; // Valid email
-    }
-
-    // Remove spaces, dashes, parentheses, and other formatting characters
-    String cleanedPhone = trimmedValue.replaceAll(RegExp(r'[\s\-\(\)\.]'), '');
-
-    if (cleanedPhone.startsWith('+')) {
-      if (RegExp(r'^\+[0-9]{10,15}$').hasMatch(cleanedPhone)) {
-        return null; // Valid international phone
-      }
-    } else {
-      if (!RegExp(r'^\d+$').hasMatch(cleanedPhone)) {
-        return l10n.validationEmailOrPhoneInvalid;
-      }
-
-      if (cleanedPhone.startsWith('0') && cleanedPhone.length > 1) {
-        cleanedPhone = cleanedPhone.substring(1);
-      }
-
-      if ((cleanedPhone.startsWith('9') || cleanedPhone.startsWith('7')) &&
-          cleanedPhone.length == 9) {
-        return null; // Valid Ethiopian phone
-      }
-
-      if (cleanedPhone.length >= 10 && cleanedPhone.length <= 15) {
-        return null; // Valid phone (generic)
-      }
-    }
-
-    return l10n.validationEmailOrPhoneInvalid;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -177,8 +136,7 @@ class _LoginFormState extends State<LoginForm> {
                     color: theme.colorScheme.onSurface,
                     fontSize: 14,
                   ),
-                  validator: (value) =>
-                      _validateEmailOrPhone(value, l10n),
+                  validator: (value) => validateEmailOrPhone(value, l10n),
                 ),
                 const SizedBox(height: 16),
                 // Password Input
@@ -249,6 +207,32 @@ class _LoginFormState extends State<LoginForm> {
                     return null;
                   },
             ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () {
+                  Navigator.push<void>(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (_) => const ForgotPasswordIdentifierScreen(),
+                    ),
+                  );
+                },
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(
+                  l10n.forgotPasswordLink,
+                  style: const TextStyle(
+                    color: AppColors.primaryColor,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
             const SizedBox(height: 24),
             // Sign In Button
             SizedBox(
@@ -256,29 +240,32 @@ class _LoginFormState extends State<LoginForm> {
               height: 48,
               child: BlocBuilder<LoginBloc, LoginState>(
                 builder: (context, state) {
+                  final signInBackground = theme.brightness == Brightness.dark
+                      ? AppColors.primaryLightColor
+                      : AppColors.primaryColor;
                   return ElevatedButton(
                     onPressed: state is LoginLoading ? null : _submitForm,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: theme.colorScheme.primary,
-                      foregroundColor: theme.colorScheme.onPrimary,
+                      backgroundColor: signInBackground,
+                      foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       elevation: 0,
                     ),
                     child: state is LoginLoading
-                        ? SizedBox(
+                        ? const SizedBox(
                             height: 20,
                             width: 20,
                             child: CircularProgressIndicator(
-                              color: theme.colorScheme.onPrimary,
+                              color: Colors.white,
                               strokeWidth: 2,
                             ),
                           )
                         : Text(
                             l10n.loginTitle,
-                            style: TextStyle(
-                              color: theme.colorScheme.onPrimary,
+                            style: const TextStyle(
+                              color: Colors.white,
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                             ),

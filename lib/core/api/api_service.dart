@@ -173,34 +173,54 @@ class ApiService {
   ApiException _handleResponseError(DioException error) {
     final statusCode = error.response?.statusCode;
     final data = error.response?.data;
-    
+
     String message = 'An error occurred';
-    
-    if (data is Map<String, dynamic> && data.containsKey('message')) {
-      message = data['message'];
+
+    if (data is Map) {
+      final map = Map<String, dynamic>.from(data);
+      if (map.containsKey('message')) {
+        message = map['message']?.toString() ?? message;
+      }
     } else if (data is String) {
       message = data;
     }
-    
+
+    Map<String, dynamic>? payload;
+    if (data is Map) {
+      payload = Map<String, dynamic>.from(data);
+    }
+
     switch (statusCode) {
       case 400:
-        return ApiException('Bad request: $message', statusCode: statusCode);
+        return ApiException('Bad request: $message',
+            statusCode: statusCode, data: payload);
       case 401:
-        return ApiException('Unauthorized: Please login again', statusCode: statusCode);
+        return ApiException('Unauthorized: Please login again',
+            statusCode: statusCode, data: payload);
       case 403:
-        return ApiException('Forbidden: You don\'t have permission', statusCode: statusCode);
+        return ApiException('Forbidden: You don\'t have permission',
+            statusCode: statusCode, data: payload);
       case 404:
-        return ApiException('Not found: $message', statusCode: statusCode);
+        return ApiException('Not found: $message',
+            statusCode: statusCode, data: payload);
       case 422:
-        return ApiException('Validation error: $message', statusCode: statusCode);
+        return ApiException('Validation error: $message',
+            statusCode: statusCode, data: payload);
+      case 429:
+        return ApiException('HTTP $statusCode: $message',
+            statusCode: statusCode, data: payload);
       case 500:
-        return ApiException('Server error: Please try again later', statusCode: statusCode);
+        return ApiException('Server error: Please try again later',
+            statusCode: statusCode, data: payload);
       case 502:
-        return ApiException('Bad gateway: Server is temporarily unavailable', statusCode: statusCode);
+        return ApiException('Bad gateway: Server is temporarily unavailable',
+            statusCode: statusCode, data: payload);
       case 503:
-        return ApiException('Service unavailable: Please try again later', statusCode: statusCode);
+        return ApiException('Service unavailable: Please try again later',
+            statusCode: statusCode, data: payload);
       default:
-        return ApiException('HTTP $statusCode: $message', statusCode: statusCode);
+        return ApiException('HTTP $statusCode: $message',
+            statusCode: statusCode, data: payload);
     }
   }
 }
