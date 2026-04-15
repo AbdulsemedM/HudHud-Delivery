@@ -227,31 +227,6 @@ class AuthController extends ChangeNotifier {
     }
   }
   
-  // Forgot password
-  Future<bool> forgotPassword(String email) async {
-    try {
-      _setLoading(true);
-      _clearError();
-      
-      final result = await _authService.forgotPassword(email);
-      
-      if (result['success'] == true) {
-        return true;
-      } else {
-        _setError(result['message'] ?? 'Failed to send reset email');
-        return false;
-      }
-    } on ApiException catch (e) {
-      _setError(e.message);
-      return false;
-    } catch (e) {
-      _setError('An unexpected error occurred while sending reset email');
-      return false;
-    } finally {
-      _setLoading(false);
-    }
-  }
-  
   // Reset password
   Future<bool> resetPassword({
     required String token,

@@ -3619,6 +3619,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Response'**
   String get handymanStatResponse;
+
+  /// No description provided for @forgotPasswordLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password?'**
+  String get forgotPasswordLink;
+
+  /// No description provided for @forgotPasswordRequestTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset password'**
+  String get forgotPasswordRequestTitle;
+
+  /// No description provided for @forgotPasswordRequestSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email or phone number. We\'ll send a 6-digit verification code.'**
+  String get forgotPasswordRequestSubtitle;
+
+  /// No description provided for @forgotPasswordSendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Send code'**
+  String get forgotPasswordSendCode;
+
+  /// No description provided for @forgotPasswordVerifyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter verification code'**
+  String get forgotPasswordVerifyTitle;
+
+  /// No description provided for @forgotPasswordVerifySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We sent a code to {identifier}.'**
+  String forgotPasswordVerifySubtitle(String identifier);
+
+  /// No description provided for @forgotPasswordOtpLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'6-digit code'**
+  String get forgotPasswordOtpLabel;
+
+  /// No description provided for @forgotPasswordTimeRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Time remaining: {time}'**
+  String forgotPasswordTimeRemaining(String time);
+
+  /// No description provided for @forgotPasswordCodeExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'This code has expired. Tap resend for a new code.'**
+  String get forgotPasswordCodeExpired;
+
+  /// No description provided for @forgotPasswordResend.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend code'**
+  String get forgotPasswordResend;
+
+  /// No description provided for @forgotPasswordVerifyButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify'**
+  String get forgotPasswordVerifyButton;
+
+  /// No description provided for @forgotPasswordNewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create new password'**
+  String get forgotPasswordNewTitle;
+
+  /// No description provided for @forgotPasswordNewSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use at least 8 characters.'**
+  String get forgotPasswordNewSubtitle;
+
+  /// No description provided for @forgotPasswordLabelConfirmPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm password'**
+  String get forgotPasswordLabelConfirmPassword;
+
+  /// No description provided for @forgotPasswordHintConfirmPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enter new password'**
+  String get forgotPasswordHintConfirmPassword;
+
+  /// No description provided for @forgotPasswordSaveButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Save password'**
+  String get forgotPasswordSaveButton;
+
+  /// No description provided for @forgotPasswordSuccessMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Password updated. You can sign in now.'**
+  String get forgotPasswordSuccessMessage;
+
+  /// No description provided for @validationOtpLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6-digit code'**
+  String get validationOtpLength;
+
+  /// No description provided for @validationConfirmPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please confirm your password'**
+  String get validationConfirmPasswordRequired;
+
+  /// No description provided for @validationPasswordsDoNotMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get validationPasswordsDoNotMatch;
 }
 
 class _AppLocalizationsDelegate

@@ -585,39 +585,6 @@ class AuthService {
     }
   }
 
-  // Forgot password
-  Future<Map<String, dynamic>> forgotPassword(String email) async {
-    try {
-      final response = await _apiService.post(
-        ApiConstants.forgotPassword,
-        data: {'email': email},
-      );
-
-      if (response.statusCode == 200) {
-        final data = response.data as Map<String, dynamic>;
-        return {
-          'success': true,
-          'message': data['message'] ?? 'Reset email sent successfully',
-        };
-      }
-
-      return {
-        'success': false,
-        'message': 'Failed to send reset email',
-      };
-    } on ApiException catch (e) {
-      return {
-        'success': false,
-        'message': e.message,
-      };
-    } catch (e) {
-      return {
-        'success': false,
-        'message': 'An unexpected error occurred while sending reset email',
-      };
-    }
-  }
-
   // Send email verification code
   Future<Map<String, dynamic>> sendEmailVerification() async {
     try {

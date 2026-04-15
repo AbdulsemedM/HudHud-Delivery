@@ -1887,4 +1887,72 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get handymanStatResponse => 'Response';
+
+  @override
+  String get forgotPasswordLink => 'Forgot password?';
+
+  @override
+  String get forgotPasswordRequestTitle => 'Reset password';
+
+  @override
+  String get forgotPasswordRequestSubtitle =>
+      'Enter your email or phone number. We\'ll send a 6-digit verification code.';
+
+  @override
+  String get forgotPasswordSendCode => 'Send code';
+
+  @override
+  String get forgotPasswordVerifyTitle => 'Enter verification code';
+
+  @override
+  String forgotPasswordVerifySubtitle(String identifier) {
+    return 'We sent a code to $identifier.';
+  }
+
+  @override
+  String get forgotPasswordOtpLabel => '6-digit code';
+
+  @override
+  String forgotPasswordTimeRemaining(String time) {
+    return 'Time remaining: $time';
+  }
+
+  @override
+  String get forgotPasswordCodeExpired =>
+      'This code has expired. Tap resend for a new code.';
+
+  @override
+  String get forgotPasswordResend => 'Resend code';
+
+  @override
+  String get forgotPasswordVerifyButton => 'Verify';
+
+  @override
+  String get forgotPasswordNewTitle => 'Create new password';
+
+  @override
+  String get forgotPasswordNewSubtitle => 'Use at least 8 characters.';
+
+  @override
+  String get forgotPasswordLabelConfirmPassword => 'Confirm password';
+
+  @override
+  String get forgotPasswordHintConfirmPassword => 'Re-enter new password';
+
+  @override
+  String get forgotPasswordSaveButton => 'Save password';
+
+  @override
+  String get forgotPasswordSuccessMessage =>
+      'Password updated. You can sign in now.';
+
+  @override
+  String get validationOtpLength => 'Enter the 6-digit code';
+
+  @override
+  String get validationConfirmPasswordRequired =>
+      'Please confirm your password';
+
+  @override
+  String get validationPasswordsDoNotMatch => 'Passwords do not match';
 }
