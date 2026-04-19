@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/app/services/fcm_service.dart';
 import 'package:hudhud_delivery/app/services/google_auth_helper.dart';
@@ -40,6 +42,9 @@ class LoginRepository {
     final authService = AuthService();
     try {
       final idToken = await obtainGoogleIdToken();
+      debugPrint(
+        '[GoogleSignIn] id_token received (length ${idToken.length})',
+      );
       final deviceToken = await FcmService().getToken();
       final response = await loginDataProvider.googleLogin(
         idToken: idToken,
@@ -54,10 +59,14 @@ class LoginRepository {
       String errorMessage =
           response['errorMessage'] as String? ?? 'Google login failed';
       errorMessage = _cleanErrorMessage(errorMessage);
+      debugPrint('[GoogleSignIn] backend HTTP $code: $errorMessage');
+      debugPrint('[GoogleSignIn] backend response data: ${response['data']}');
       throw errorMessage;
     } on GoogleSignInUserCancelled {
       rethrow;
-    } catch (e) {
+    } catch (e, st) {
+      debugPrint('[GoogleSignIn] googleLogin failed: $e');
+      debugPrint('$st');
       if (e is String) rethrow;
       throw _cleanErrorMessage(e.toString());
     }

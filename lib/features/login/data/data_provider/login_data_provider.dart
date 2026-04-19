@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import 'package:hudhud_delivery/core/api/api_service.dart';
 
 import '../../../../core/api/api_constants.dart';
@@ -59,12 +61,18 @@ class LoginDataProvider {
         'errorMessage': null,
       };
     } on ApiException catch (apiError) {
+      debugPrint(
+        '[GoogleSignIn] ApiException status=${apiError.statusCode} '
+        'message=${apiError.message} data=${apiError.data}',
+      );
       return {
         'statusCode': apiError.statusCode,
         'data': apiError.data,
         'errorMessage': apiError.message,
       };
-    } on Exception catch (e) {
+    } on Exception catch (e, st) {
+      debugPrint('[GoogleSignIn] googleLogin request failed: $e');
+      debugPrint('$st');
       return {
         'statusCode': 500,
         'data': null,

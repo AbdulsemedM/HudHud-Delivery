@@ -39,7 +39,9 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         emit(LoginSuccess());
       } on GoogleSignInUserCancelled {
         emit(LoginInitial());
-      } catch (e) {
+      } catch (e, st) {
+        debugPrint('[GoogleSignIn] LoginBloc: $e');
+        debugPrint('$st');
         emit(LoginFailure(e.toString()));
       }
     });
