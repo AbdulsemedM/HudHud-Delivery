@@ -8,6 +8,7 @@ import 'package:hudhud_delivery/controllers/theme_controller.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/utils/support_launcher.dart';
 import 'package:hudhud_delivery/core/utils/avatar_util.dart';
 import 'package:hudhud_delivery/features/home/presentation/screen/location_search_screen.dart';
 import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
@@ -410,6 +411,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           builder: (context) => const FAQsScreen(),
                         ),
                       );
+                    },
+                  ),
+                  _tileDivider(colorScheme),
+                  _KlikTile(
+                    icon: Icons.email_outlined,
+                    iconColor: _accentIconRed,
+                    title: l10n.settingsContactEmail,
+                    colorScheme: colorScheme,
+                    textTheme: textTheme,
+                    onTap: () async {
+                      final ok = await launchSupportEmail();
+                      if (context.mounted && !ok) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(l10n.actionTryAgain)),
+                        );
+                      }
                     },
                   ),
                 ],

@@ -24,6 +24,13 @@ dependencies:
   # HTTP Client
   dio: ^5.4.0
 
+  # URLs (support mailto / tel)
+  url_launcher: ^6.3.1
+  # Share sheet / platform share
+  share_plus: ^10.1.4
+  # Network reachability
+  connectivity_plus: ^6.1.1
+
   # Secure Storage
   flutter_secure_storage: ^9.0.0
 

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -164,12 +165,17 @@ class FcmService {
       android: androidDetails,
       iOS: iosDetails,
     );
+    final dataJson = message.data.isEmpty
+        ? '{}'
+        : jsonEncode(
+            {for (final e in message.data.entries) e.key: e.value.toString()},
+          );
     await _localNotifications.show(
       message.hashCode,
       notification.title ?? 'Notification',
       notification.body,
       details,
-      payload: message.messageId,
+      payload: dataJson,
     );
   }
 

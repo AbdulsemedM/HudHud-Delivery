@@ -61,6 +61,12 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
     _loadVendors();
   }
 
+  Future<void> _onPullToRefresh() async {
+    if (!mounted) return;
+    context.read<CategoriesBloc>().add(FetchCategoriesListEvent());
+    await _loadVendors();
+  }
+
   Future<void> _loadVendors() async {
     setState(() {
       _vendorsLoading = true;
@@ -115,6 +121,8 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
             vendorsError: _vendorsError,
             onCategoryTap: (category) => _onCategoryTap(context, category),
             onShowMore: () => setState(() => _showAllCategories = true),
+            usePullToRefresh: true,
+            onPullToRefresh: _onPullToRefresh,
           );
         }
         return const SizedBox.shrink();
@@ -551,6 +559,8 @@ class _CategoriesGrid extends StatelessWidget {
   final String? vendorsError;
   final void Function(CategoryTreeModel) onCategoryTap;
   final VoidCallback onShowMore;
+  final bool usePullToRefresh;
+  final Future<void> Function() onPullToRefresh;
 
   const _CategoriesGrid({
     required this.categories,
@@ -560,6 +570,8 @@ class _CategoriesGrid extends StatelessWidget {
     required this.vendorsError,
     required this.onCategoryTap,
     required this.onShowMore,
+    this.usePullToRefresh = false,
+    required this.onPullToRefresh,
   });
 
   @override
@@ -569,7 +581,10 @@ class _CategoriesGrid extends StatelessWidget {
     final displayCategories = showAll ? categories : categories.take(3).toList();
     final hasMore = categories.length > 3 && !showAll;
 
-    return CustomScrollView(
+    final view = CustomScrollView(
+      physics: usePullToRefresh
+          ? const AlwaysScrollableScrollPhysics()
+          : null,
       slivers: [
         SliverToBoxAdapter(
           child: Padding(
@@ -728,6 +743,13 @@ class _CategoriesGrid extends StatelessWidget {
         const SliverToBoxAdapter(child: SizedBox(height: 24)),
       ],
     );
+    if (usePullToRefresh) {
+      return RefreshIndicator(
+        onRefresh: onPullToRefresh,
+        child: view,
+      );
+    }
+    return view;
   }
 }
 

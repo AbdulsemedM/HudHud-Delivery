@@ -302,6 +302,30 @@ abstract class AppLocalizations {
   /// **'Support'**
   String get settingsSupport;
 
+  /// No description provided for @settingsContactEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email support'**
+  String get settingsContactEmail;
+
+  /// No description provided for @offlineNoConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'No internet connection'**
+  String get offlineNoConnection;
+
+  /// No description provided for @orderIdCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Order ID copied'**
+  String get orderIdCopied;
+
+  /// No description provided for @orderShareSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'HudHud order'**
+  String get orderShareSubject;
+
   /// No description provided for @settingsPersonalDetails.
   ///
   /// In en, this message translates to:

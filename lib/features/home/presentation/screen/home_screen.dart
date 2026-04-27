@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hudhud_delivery/features/settings/presentation/screen/notifications_screen.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/features/delivery/presentation/screens/all_categories_screen.dart';
 import 'package:hudhud_delivery/features/handyman/presentation/screens/handyman_screen.dart';
@@ -270,6 +271,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
+  void _openNotifications() {
+    Navigator.push<void>(
+      context,
+      MaterialPageRoute<void>(
+        builder: (context) => BlocProvider(
+          create: (_) => createNotificationsBloc(),
+          child: const NotificationsScreen(),
+        ),
+      ),
+    );
+  }
+
   Future<void> _openLocationSearch() async {
     final result = await Navigator.push<Map<String, dynamic>>(
       context,
@@ -339,6 +352,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 location: _currentLocation,
                 isLoadingLocation: _isLoadingLocation,
                 onLocationTap: _openLocationSearch,
+                onNotificationsTap: _openNotifications,
               ),
             ),
             HomeServiceTabBar(

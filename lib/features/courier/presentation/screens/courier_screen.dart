@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
+import 'package:hudhud_delivery/features/settings/presentation/screen/notifications_screen.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import 'package:hudhud_delivery/app/services/location_service.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
@@ -216,6 +218,17 @@ class _CourierScreenState extends State<CourierScreen> {
                       _currentLocation = result['address'] as String;
                     });
                   }
+                },
+                onNotificationsTap: () {
+                  Navigator.push<void>(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (context) => BlocProvider(
+                        create: (_) => createNotificationsBloc(),
+                        child: const NotificationsScreen(),
+                      ),
+                    ),
+                  );
                 },
               ),
               const SizedBox(height: 24),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/features/orders/presentation/widgets/orders_widget.dart';
+import 'package:hudhud_delivery/features/settings/presentation/screen/notifications_screen.dart';
 
 class SettingsHeader extends StatelessWidget {
   const SettingsHeader({super.key});
@@ -21,7 +23,17 @@ class SettingsHeader extends StatelessWidget {
             color: Colors.black,
             size: 28,
           ),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute<void>(
+                builder: (context) => BlocProvider(
+                  create: (_) => createNotificationsBloc(),
+                  child: const NotificationsScreen(),
+                ),
+              ),
+            );
+          },
         ),
       ],
     );

@@ -108,6 +108,18 @@ class AppLocalizationsSo extends AppLocalizations {
   String get settingsSupport => 'Taageero';
 
   @override
+  String get settingsContactEmail => 'Email support';
+
+  @override
+  String get offlineNoConnection => 'No internet connection';
+
+  @override
+  String get orderIdCopied => 'Order ID copied';
+
+  @override
+  String get orderShareSubject => 'HudHud order';
+
+  @override
   String get settingsPersonalDetails => 'Faahfaahinta Shaqsiyeed';
 
   @override

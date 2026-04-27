@@ -108,6 +108,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsSupport => 'Support';
 
   @override
+  String get settingsContactEmail => 'Email support';
+
+  @override
+  String get offlineNoConnection => 'No internet connection';
+
+  @override
+  String get orderIdCopied => 'Order ID copied';
+
+  @override
+  String get orderShareSubject => 'HudHud order';
+
+  @override
   String get settingsPersonalDetails => 'Personal Details';
 
   @override

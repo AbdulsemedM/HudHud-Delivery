@@ -26,6 +26,7 @@ import 'controllers/service_accent_controller.dart';
 import 'core/theme/service_tab_palette.dart';
 
 // Services
+import 'app/navigation/fcm_order_navigation.dart';
 import 'app/services/auth_service.dart';
 import 'app/services/fcm_service.dart';
 
@@ -34,11 +35,15 @@ import 'features/orders/data/providers/orders_data_provider.dart';
 import 'features/orders/data/repositories/orders_repository.dart';
 
 // Widgets
+import 'app/widgets/app_connectivity_banner.dart';
 import 'app/widgets/primary_button.dart';
 import 'app/widgets/secondary_button.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Must exist before FCM tap handlers so they can push routes.
+  final navigatorKey = GlobalKey<NavigatorState>();
 
   // Initialize FCM (non-blocking: app starts even if Firebase/FCM fails)
   FcmService? fcmService;
@@ -46,7 +51,11 @@ void main() async {
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
     fcmService = await FcmService.initialize();
     fcmService.onNotificationTap = (message, {localPayload}) {
-      // Handle notification tap: navigate to order/screen using message?.data or localPayload
+      openOrderDetailsFromFcm(
+        navigatorKey,
+        message: message,
+        localPayload: localPayload,
+      );
     };
     fcmService.onTokenRefresh = (token) async {
       final authService = AuthService();
@@ -75,7 +84,6 @@ void main() async {
   final authService = AuthService();
 
   // Register 401 redirect to login
-  final navigatorKey = GlobalKey<NavigatorState>();
   DioClient.instance.setOnUnauthorized(() {
     navigatorKey.currentState?.pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -164,7 +172,9 @@ class _MyAppState extends State<MyApp> {
               builder: (context, child) {
                 // Update system UI overlay style when theme changes
                 themeController.updateSystemUIOverlayStyle();
-                return child!;
+                return AppConnectivityBanner(
+                  child: child ?? const SizedBox.shrink(),
+                );
               },
             );
           },

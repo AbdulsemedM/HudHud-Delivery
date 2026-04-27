@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/app/navigation/fcm_order_navigation.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
+import 'package:hudhud_delivery/app/services/fcm_service.dart';
 import 'package:hudhud_delivery/app/services/startup_location_service.dart';
 import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
 import 'package:hudhud_delivery/features/dashboard/presentation/screen/dashboard_screen.dart';
@@ -25,6 +27,17 @@ class _SplashScreenState extends State<SplashScreen> {
         _authService.initialize(),
         StartupLocationService.fetchFreshOnAppLaunch(),
       ]);
+
+      // Cold start from FCM: resolve order and open after dashboard (or after login).
+      try {
+        final initialMsg = await FcmService().getInitialMessage();
+        final id = parseOrderIdFromFcmPayload(initialMsg, localPayload: null);
+        if (id != null) {
+          PendingFcmOrderNavigation.setPending(id);
+        }
+      } catch (_) {
+        // FCM not initialized (e.g. Firebase unavailable)
+      }
 
       // Wait for minimum splash screen duration (3 seconds)
       await Future.delayed(Duration(seconds: 3));

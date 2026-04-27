@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import '../../bloc/orders_bloc.dart';
 import '../../data/models/order_model.dart';
@@ -117,6 +119,29 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
             ),
           ),
           actions: [
+            IconButton(
+              tooltip: 'Copy order ID',
+              icon: const Icon(Icons.copy_outlined, color: Colors.white),
+              onPressed: () async {
+                await Clipboard.setData(ClipboardData(text: '${order.id}'));
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(context.l10n.orderIdCopied)),
+                  );
+                }
+              },
+            ),
+            IconButton(
+              tooltip: 'Share order',
+              icon: const Icon(Icons.share_outlined, color: Colors.white),
+              onPressed: () {
+                final l10n = context.l10n;
+                Share.share(
+                  'Order #${order.orderNumber} (ID: ${order.id})\n${order.status}',
+                  subject: l10n.orderShareSubject,
+                );
+              },
+            ),
             if (order.canBeCancelled)
               IconButton(
                 icon: const Icon(Icons.cancel_outlined, color: Colors.red),

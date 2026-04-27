@@ -76,12 +76,14 @@ class UserProfileHeader extends StatelessWidget {
   final String location;
   final bool isLoadingLocation;
   final VoidCallback onLocationTap;
+  final VoidCallback onNotificationsTap;
 
   const UserProfileHeader({
     super.key,
     required this.location,
     this.isLoadingLocation = false,
     required this.onLocationTap,
+    required this.onNotificationsTap,
   });
 
   @override
@@ -142,7 +144,7 @@ class UserProfileHeader extends StatelessWidget {
             Icons.notifications_outlined,
             color: colorScheme.onSurface,
           ),
-          onPressed: () {},
+          onPressed: onNotificationsTap,
         ),
       ],
     );

@@ -108,6 +108,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsSupport => 'يدعم';
 
   @override
+  String get settingsContactEmail => 'البريد للدعم';
+
+  @override
+  String get offlineNoConnection => 'لا يوجد اتصال بالإنترنت';
+
+  @override
+  String get orderIdCopied => 'تم نسخ رقم الطلب';
+
+  @override
+  String get orderShareSubject => 'طلب HudHud';
+
+  @override
   String get settingsPersonalDetails => 'التفاصيل الشخصية';
 
   @override
