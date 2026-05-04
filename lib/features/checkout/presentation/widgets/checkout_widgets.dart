@@ -96,7 +96,7 @@ class CheckoutProductCard extends StatelessWidget {
 }
 
 class PromoCodeSection extends StatefulWidget {
-  final Function(String) onPromoCodeApplied;
+  final Future<void> Function(String) onPromoCodeApplied;
 
   const PromoCodeSection({
     super.key,
@@ -109,6 +109,7 @@ class PromoCodeSection extends StatefulWidget {
 
 class _PromoCodeSectionState extends State<PromoCodeSection> {
   final TextEditingController _promoController = TextEditingController();
+  bool _isApplying = false;
 
   @override
   Widget build(BuildContext context) {
@@ -177,11 +178,21 @@ class _PromoCodeSectionState extends State<PromoCodeSection> {
               ),
               const SizedBox(width: 12),
               ElevatedButton(
-                onPressed: () {
-                  if (_promoController.text.isNotEmpty) {
-                    widget.onPromoCodeApplied(_promoController.text);
-                  }
-                },
+                onPressed: _isApplying
+                    ? null
+                    : () async {
+                        if (_promoController.text.isEmpty) {
+                          return;
+                        }
+                        setState(() => _isApplying = true);
+                        try {
+                          await widget.onPromoCodeApplied(_promoController.text);
+                        } finally {
+                          if (mounted) {
+                            setState(() => _isApplying = false);
+                          }
+                        }
+                      },
                 style: ElevatedButton.styleFrom(
                   backgroundColor:
                       Theme.of(context).brightness == Brightness.dark
@@ -198,12 +209,22 @@ class _PromoCodeSectionState extends State<PromoCodeSection> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                child: const Text(
-                  'Apply',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                child: _isApplying
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : const Text(
+                        'Apply',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
               ),
             ],
           ),

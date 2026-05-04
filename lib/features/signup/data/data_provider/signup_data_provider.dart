@@ -30,6 +30,7 @@ class SignupDataProvider {
     String phone,
     String password,
     String password_confirmation,
+    {String? referralCode}
   ) async {
     try {
       final body = {
@@ -41,6 +42,9 @@ class SignupDataProvider {
         'device_token': await getDeviceId(),
         'type': 'customer',
       };
+      if (referralCode != null && referralCode.trim().isNotEmpty) {
+        body['referral_code'] = referralCode.trim();
+      }
       final response = await apiService.post(
         ApiConstants.register,
         data: body,

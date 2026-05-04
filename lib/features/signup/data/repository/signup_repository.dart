@@ -14,6 +14,7 @@ class SignupRepository {
     String phone,
     String password,
     String confirmPassword,
+    {String? referralCode}
   ) async {
     AuthService authService = AuthService();
     try {
@@ -23,6 +24,7 @@ class SignupRepository {
         phone,
         password,
         confirmPassword,
+        referralCode: referralCode,
       );
       if (response['statusCode'] == 201) {
         // Extract user data from nested 'user' object

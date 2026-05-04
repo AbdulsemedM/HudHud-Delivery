@@ -97,6 +97,7 @@ class ApiConstants {
 
   // Service types endpoints
   static const String serviceTypes = 'service-types';
+  static const String validateCoupon = 'coupons/validate';
 
   // Courier delivery endpoints
   static const String deliveryEstimate = 'services/delivery/estimate';

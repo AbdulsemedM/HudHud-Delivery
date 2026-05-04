@@ -9,11 +9,13 @@ final class SignupFormSubmitted extends SignupEvent {
   final String phone;
   final String password;
   final String confirmPassword;
+  final String? referralCode;
   SignupFormSubmitted(
     this.name,
     this.email,
     this.phone,
     this.password,
     this.confirmPassword,
+    this.referralCode,
   );
 }

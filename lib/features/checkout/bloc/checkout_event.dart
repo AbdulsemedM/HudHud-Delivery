@@ -13,6 +13,8 @@ class CreateOrderEvent extends CheckoutEvent {
   final double deliveryLongitude;
   final String paymentMethod;
   final String? notes;
+  final String? couponCode;
+  final String serviceType;
 
   CreateOrderEvent({
     required this.vendorId,
@@ -25,6 +27,8 @@ class CreateOrderEvent extends CheckoutEvent {
     required this.deliveryLongitude,
     required this.paymentMethod,
     this.notes,
+    this.couponCode,
+    this.serviceType = 'restaurant',
   });
 }
 

@@ -21,6 +21,7 @@ class CheckoutDataProvider {
     required String paymentMethod,
     String serviceType = 'delivery',
     String? notes,
+    String? couponCode,
   }) async {
     try {
       final Map<String, dynamic> orderData = {
@@ -35,6 +36,8 @@ class CheckoutDataProvider {
         'payment_method': paymentMethod,
         'service_type': serviceType,
         if (notes != null && notes.isNotEmpty) 'notes': notes,
+        if (couponCode != null && couponCode.trim().isNotEmpty)
+          'coupon_code': couponCode.trim(),
       };
 
       final response = await apiService.post(
@@ -59,9 +62,64 @@ class CheckoutDataProvider {
     }
   }
 
+  Future<Map<String, dynamic>> validateCoupon({
+    required String code,
+    required double orderAmount,
+    required int vendorId,
+    String serviceType = 'restaurant',
+  }) async {
+    try {
+      final response = await apiService.post(
+        '${ApiConstants.baseUrl}${ApiConstants.validateCoupon}',
+        data: {
+          'code': code,
+          'order_amount': orderAmount,
+          'vendor_id': vendorId,
+          'service_type': serviceType,
+        },
+      );
+
+      return {
+        'statusCode': response.statusCode,
+        'data': response.data,
+        'errorMessage': null,
+      };
+    } on ApiException catch (apiException) {
+      return {
+        'statusCode': apiException.statusCode,
+        'data': apiException.data,
+        'errorMessage': _extractApiErrorMessage(apiException),
+      };
+    } on Exception catch (e) {
+      return {
+        'statusCode': 500,
+        'data': null,
+        'errorMessage': e.toString(),
+      };
+    }
+  }
+
   String _extractApiErrorMessage(ApiException apiException) {
     final rawData = apiException.data;
     if (rawData is Map<String, dynamic>) {
+      final messageField = rawData['message'];
+      if (messageField is Map<String, dynamic>) {
+        final couponErrors = messageField['coupon_code'];
+        if (couponErrors is List && couponErrors.isNotEmpty) {
+          return couponErrors.first.toString();
+        }
+
+        for (final entry in messageField.entries) {
+          final value = entry.value;
+          if (value is List && value.isNotEmpty) {
+            return value.first.toString();
+          }
+          if (value != null && value.toString().isNotEmpty) {
+            return value.toString();
+          }
+        }
+      }
+
       final errors = rawData['errors'];
       if (errors is Map<String, dynamic> && errors.isNotEmpty) {
         final messages = <String>[];

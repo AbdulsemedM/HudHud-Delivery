@@ -57,6 +57,7 @@ class SignupFormData {
   final String password;
   final String confirmPassword;
   final String phoneNumber;
+  final String referralCode;
 
   SignupFormData({
     required this.firstName,
@@ -65,6 +66,7 @@ class SignupFormData {
     required this.password,
     required this.confirmPassword,
     required this.phoneNumber,
+    required this.referralCode,
   });
 }
 
@@ -79,6 +81,7 @@ class _SignupFormState extends State<SignupForm> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _phoneController = TextEditingController();
+  final _referralCodeController = TextEditingController();
   String _phoneNumber = '';
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
@@ -116,6 +119,7 @@ class _SignupFormState extends State<SignupForm> {
       password: _passwordController.text.trim(),
       confirmPassword: _confirmPasswordController.text.trim(),
       phoneNumber: _phoneNumber.isNotEmpty ? _phoneNumber : _phoneController.text.trim(),
+      referralCode: _referralCodeController.text.trim(),
     );
   }
 
@@ -135,6 +139,7 @@ class _SignupFormState extends State<SignupForm> {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     _phoneController.dispose();
+    _referralCodeController.dispose();
     super.dispose();
   }
 
@@ -335,6 +340,23 @@ class _SignupFormState extends State<SignupForm> {
               }
               return null;
             },
+          ),
+          const SizedBox(height: 16),
+
+          // Referral Code Field (Optional)
+          Text(
+            'Referral code (optional)',
+            style: _signupLabelStyle(context),
+          ),
+          const SizedBox(height: 6),
+          TextFormField(
+            controller: _referralCodeController,
+            textCapitalization: TextCapitalization.characters,
+            decoration: _signupFieldDecoration(
+              context,
+              hintText: 'Eg. UCZXSD3O',
+            ),
+            style: _signupFieldTextStyle(context),
           ),
           const SizedBox(height: 16),
 
@@ -542,6 +564,7 @@ class SignupButton extends StatelessWidget {
             formData.phoneNumber,
             formData.password,
             formData.password, // confirmPassword same as password
+            formData.referralCode,
           ),
         );
   }

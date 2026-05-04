@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/utils/avatar_util.dart';
@@ -43,6 +44,14 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
   String _formatDateOfBirth(DateTime? date) {
     if (date == null) return 'Not set';
     return DateFormat('d MMM yyyy').format(date);
+  }
+
+  Future<void> _copyReferralCode(String referralCode) async {
+    await Clipboard.setData(ClipboardData(text: referralCode));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Referral code copied')),
+    );
   }
 
   @override
@@ -179,6 +188,12 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                             icon: Icons.card_giftcard,
                             label: 'Referral code',
                             value: _user!.referralCode!,
+                            trailing: IconButton(
+                              icon: const Icon(Icons.copy),
+                              tooltip: 'Copy referral code',
+                              onPressed: () =>
+                                  _copyReferralCode(_user!.referralCode!),
+                            ),
                           ),
                         ],
                       ],
@@ -203,11 +218,13 @@ class _DetailCard extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
+  final Widget? trailing;
 
   const _DetailCard({
     required this.icon,
     required this.label,
     required this.value,
+    this.trailing,
   });
 
   @override
@@ -256,6 +273,7 @@ class _DetailCard extends StatelessWidget {
               ],
             ),
           ),
+          if (trailing != null) trailing!,
         ],
       ),
     );

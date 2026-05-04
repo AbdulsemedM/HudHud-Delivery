@@ -31,6 +31,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   double? _deliveryLatitude;
   double? _deliveryLongitude;
   String? _selectedPaymentMethod;
+  String? _validatedCouponCode;
+  Map<String, dynamic>? _validatedCouponData;
+  static const String _serviceType = 'restaurant';
 
   @override
   void initState() {
@@ -89,12 +92,44 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return widget.subtotal + _tipAmount;
   }
 
-  void _onPromoCodeApplied(String promoCode) {
-    // Handle promo code logic here
+  Future<void> _onPromoCodeApplied(String promoCode) async {
+    final normalizedCode = promoCode.trim().toUpperCase();
+    if (normalizedCode.isEmpty) return;
+
+    final checkoutRepository = context.read<CheckoutBloc>().checkoutRepository;
+    final result = await checkoutRepository.validateCoupon(
+      code: normalizedCode,
+      orderAmount: _total,
+      vendorId: _vendorId,
+      serviceType: _serviceType,
+    );
+
+    if (!mounted) return;
+
+    if (result['success'] == true) {
+      final dataWrapper = result['data'] as Map<String, dynamic>?;
+      final couponData = dataWrapper?['data'] as Map<String, dynamic>?;
+      setState(() {
+        _validatedCouponCode = normalizedCode;
+        _validatedCouponData = couponData;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result['message']?.toString() ?? 'Coupon is valid!'),
+          backgroundColor: AppColors.primaryColor,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _validatedCouponCode = null;
+      _validatedCouponData = null;
+    });
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Promo code "$promoCode" applied'),
-        backgroundColor: AppColors.primaryColor,
+        content: Text(result['message']?.toString() ?? 'Invalid coupon'),
+        backgroundColor: Colors.red,
       ),
     );
   }
@@ -201,6 +236,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             deliveryLatitude: _deliveryLatitude!,
             deliveryLongitude: _deliveryLongitude!,
             paymentMethod: _selectedPaymentMethod!,
+            couponCode: _validatedCouponCode,
+            serviceType: _serviceType,
             notes: _notesController.text.trim().isEmpty
                 ? null
                 : _notesController.text.trim(),
@@ -209,7 +246,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   void _showOrderSuccessDialog(BuildContext ctx, Map<String, dynamic> orderData) {
-    final orderId = orderData['id']?.toString() ?? '—';
+    final orderPayload = orderData['order'] is Map<String, dynamic>
+        ? orderData['order'] as Map<String, dynamic>
+        : orderData;
+    final orderId = orderPayload['id']?.toString() ?? '—';
+    final couponApplied = orderData['coupon_applied'] as Map<String, dynamic>?;
+    final couponCode = couponApplied?['code']?.toString();
+    final couponSaved = couponApplied?['saved']?.toString();
     showDialog(
       context: ctx,
       barrierDismissible: false,
@@ -243,6 +286,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 14, color: Colors.grey),
             ),
+            if (couponCode != null && couponCode.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              Text(
+                couponSaved != null && couponSaved.isNotEmpty
+                    ? 'Coupon $couponCode applied. You saved $couponSaved.'
+                    : 'Coupon $couponCode applied successfully.',
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 13, color: Colors.green),
+              ),
+            ],
             const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
@@ -364,6 +417,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   onTipChanged: (value) {
                     setState(() {
                       _tipAmount = value;
+                      _validatedCouponCode = null;
+                      _validatedCouponData = null;
                     });
                   },
                 ),
@@ -372,6 +427,18 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 PromoCodeSection(
                   onPromoCodeApplied: _onPromoCodeApplied,
                 ),
+                if (_validatedCouponCode != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    _validatedCouponData?['value_display'] != null
+                        ? 'Coupon ${_validatedCouponCode!} applied (${_validatedCouponData!['value_display']}).'
+                        : 'Coupon ${_validatedCouponCode!} applied.',
+                    style: const TextStyle(
+                      color: Colors.green,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
 
                 // Payment Method Grid
                 PaymentMethodGridSection(
