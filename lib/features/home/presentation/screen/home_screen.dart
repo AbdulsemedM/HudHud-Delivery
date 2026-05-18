@@ -76,8 +76,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   void _onHomeTabActivation() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _tryShowVerificationPrompt();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      await _loadUserData();
     });
   }
 

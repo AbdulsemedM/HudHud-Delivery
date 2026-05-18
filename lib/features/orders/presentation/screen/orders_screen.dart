@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hudhud_delivery/app/navigation/fcm_order_navigation.dart';
+import 'package:hudhud_delivery/controllers/auth_controller.dart';
+import 'package:hudhud_delivery/core/utils/avatar_util.dart';
+import 'package:provider/provider.dart';
 import '../../bloc/orders_bloc.dart';
 import '../widgets/orders_widget.dart';
 import '../../data/repositories/orders_repository.dart';
-import 'order_details_screen.dart';
 
 class OrdersScreen extends StatefulWidget {
   const OrdersScreen({super.key});
@@ -109,6 +112,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       children: [
                         OrdersHeader(
                           onFilterTap: _showFilterDialog,
+                          avatarUrl: getDisplayAvatarUrl(
+                            context.watch<AuthController>().currentUser,
+                          ),
                         ),
                         const SizedBox(height: 24),
                         OrdersTitle(
@@ -233,13 +239,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
                             child: OrderItemCard(
                               order: order,
                               onTap: () {
-                                Navigator.push(
+                                pushOrderDetailsById(
                                   context,
-                                  MaterialPageRoute(
-                                    builder: (context) => OrderDetailsScreen(
-                                      orderId: order.id,
-                                    ),
-                                  ),
+                                  orderId: order.id,
                                 );
                               },
                             ),

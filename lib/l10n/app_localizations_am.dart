@@ -547,6 +547,10 @@ class AppLocalizationsAm extends AppLocalizations {
   String get validationPasswordMin => 'የይለፍ ቃል ቢያንስ 8 ቁምፊዎች መሆን አለበት።';
 
   @override
+  String get validationPasswordComplexity =>
+      'Password must include uppercase, lowercase, a number, and a special character';
+
+  @override
   String get validationEmailRequired => 'እባክህ ኢሜልህን አስገባ';
 
   @override

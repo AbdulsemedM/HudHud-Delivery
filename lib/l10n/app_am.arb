@@ -230,6 +230,7 @@
   "validationEmailOrPhoneInvalid": "እባክዎ የሚሰራ ኢሜይል ወይም ስልክ ቁጥር ያስገቡ",
   "validationPasswordRequired": "እባክህ የይለፍ ቃልህን አስገባ",
   "validationPasswordMin": "የይለፍ ቃል ቢያንስ 8 ቁምፊዎች መሆን አለበት።",
+  "validationPasswordComplexity": "Password must include uppercase, lowercase, a number, and a special character",
   "validationEmailRequired": "እባክህ ኢሜልህን አስገባ",
   "validationEmailInvalid": "እባክህን ትክክለኛ ኢሜል አስገባ",
   "mainDemoTitle": "ሁድሁድ መላኪያ ማሳያ",

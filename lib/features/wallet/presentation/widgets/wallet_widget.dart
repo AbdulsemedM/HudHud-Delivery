@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
+import 'package:hudhud_delivery/core/widgets/user_avatar.dart';
 import 'package:hudhud_delivery/features/orders/presentation/widgets/orders_widget.dart';
 
 class WalletHeader extends StatelessWidget {
-  const WalletHeader({super.key});
+  const WalletHeader({super.key, this.avatarUrl});
+
+  final String? avatarUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -11,11 +14,8 @@ class WalletHeader extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const StoryRing(
-            child: CircleAvatar(
-              radius: 20,
-            backgroundImage: AssetImage('assets/images/profile.png'),
-          ),
+        StoryRing(
+          child: UserAvatar(radius: 20, imageUrl: avatarUrl),
         ),
         IconButton(
           icon: Icon(

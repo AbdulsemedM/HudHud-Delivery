@@ -559,6 +559,10 @@ class AppLocalizationsSo extends AppLocalizations {
       'Erayga sirta ah waa inuu ahaadaa ugu yaraan 8 xaraf';
 
   @override
+  String get validationPasswordComplexity =>
+      'Password must include uppercase, lowercase, a number, and a special character';
+
+  @override
   String get validationEmailRequired => 'Fadlan gali iimaylkaga';
 
   @override

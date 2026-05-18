@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/validation/password_validator.dart';
 import 'package:hudhud_delivery/features/forgot_password/bloc/forgot_password_reset_cubit.dart';
 import 'package:hudhud_delivery/features/forgot_password/data/repository/forgot_password_repository.dart';
 import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
@@ -172,15 +173,7 @@ class _ForgotPasswordNewPasswordViewState
                           ),
                         ),
                       ),
-                      validator: (v) {
-                        if (v == null || v.isEmpty) {
-                          return l10n.validationPasswordRequired;
-                        }
-                        if (v.length < 8) {
-                          return l10n.validationPasswordMin;
-                        }
-                        return null;
-                      },
+                      validator: (v) => validatePasswordStrength(v, l10n),
                     ),
                     const SizedBox(height: 16),
                     Text(

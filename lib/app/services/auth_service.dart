@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -407,10 +408,14 @@ class AuthService {
 
       if (response.statusCode == 200 && response.data != null) {
         final data = response.data as Map<String, dynamic>;
-        // API returns { success: true, data: { ...user } } or { user: { ... } }
-        final userMap =
-            (data['data'] ?? data['user'] ?? data) as Map<String, dynamic>;
-        // Preserve permissions from login if profile API doesn't return them
+        var userMap = UserModel.userMapFromApiEnvelope(data);
+        if (userMap == null &&
+            (data['id'] != null ||
+                data['email'] != null ||
+                data['name'] != null)) {
+          userMap = Map<String, dynamic>.from(data);
+        }
+        if (userMap == null) return null;
         if (userMap['permissions'] == null && _currentUser?.permissions != null) {
           userMap['permissions'] = _currentUser!.permissions;
         }
@@ -433,15 +438,15 @@ class AuthService {
     }
   }
 
-  // Update user profile with enhanced validation
+  // Update user profile — POST /api/update-profile (multipart form-data)
   Future<Map<String, dynamic>> updateProfile({
     String? name,
     String? email,
     String? phone,
     String? address,
+    String? avatarPath,
   }) async {
     try {
-      // Check authentication
       if (!isLoggedIn) {
         return {
           'success': false,
@@ -449,7 +454,6 @@ class AuthService {
         };
       }
 
-      // Check token validity and refresh if needed
       if (!hasValidToken) {
         final refreshed = await refreshToken();
         if (!refreshed) {
@@ -461,36 +465,83 @@ class AuthService {
         }
       }
 
-      // Prepare update data
-      final updateData = <String, dynamic>{};
-      if (name != null && name.trim().isNotEmpty)
-        updateData['name'] = name.trim();
-      if (email != null && email.trim().isNotEmpty)
-        updateData['email'] = email.trim();
-      if (phone != null && phone.trim().isNotEmpty)
-        updateData['phone'] = normalizePhoneToBackend(phone);
-      if (address != null && address.trim().isNotEmpty)
-        updateData['address'] = address.trim();
+      final previousEmail =
+          _currentUser?.email?.trim().toLowerCase();
+      final previousPhone = _currentUser?.phone != null
+          ? normalizePhoneToBackend(_currentUser!.phone)
+          : null;
 
-      if (updateData.isEmpty) {
+      final formData = FormData();
+      var hasField = false;
+
+      if (name != null && name.trim().isNotEmpty) {
+        formData.fields.add(MapEntry('name', name.trim()));
+        hasField = true;
+      }
+      if (email != null && email.trim().isNotEmpty) {
+        formData.fields.add(MapEntry('email', email.trim()));
+        hasField = true;
+      }
+      if (phone != null && phone.trim().isNotEmpty) {
+        formData.fields.add(
+          MapEntry('phone', normalizePhoneToBackend(phone)),
+        );
+        hasField = true;
+      }
+      if (address != null && address.trim().isNotEmpty) {
+        formData.fields.add(MapEntry('address', address.trim()));
+        hasField = true;
+      }
+      if (avatarPath != null && avatarPath.isNotEmpty) {
+        final file = File(avatarPath);
+        if (await file.exists()) {
+          formData.files.add(
+            MapEntry(
+              'avatar',
+              await MultipartFile.fromFile(
+                avatarPath,
+                filename: avatarPath.split(Platform.pathSeparator).last,
+              ),
+            ),
+          );
+          hasField = true;
+        }
+      }
+
+      if (!hasField) {
         return {
           'success': false,
           'message': 'No valid data provided for update',
         };
       }
 
-      final response = await _apiService.put(
+      final response = await _apiService.post(
         ApiConstants.updateProfile,
-        data: updateData,
+        data: formData,
       );
 
-      if (response.statusCode == 200 && response.data != null) {
+      final status = response.statusCode ?? 0;
+      if ((status == 200 || status == 201) && response.data != null) {
         final responseData = response.data as Map<String, dynamic>;
+        final userMap = UserModel.userMapFromApiEnvelope(responseData);
+        if (responseData['success'] == true && userMap != null) {
+          if (userMap['permissions'] == null &&
+              _currentUser?.permissions != null) {
+            userMap['permissions'] = _currentUser!.permissions;
+          }
+          final user = UserModel.fromMap(userMap);
 
-        if (responseData['user'] != null) {
-          final user = UserModel.fromMap(responseData);
+          final newEmail = user.email?.trim().toLowerCase();
+          final newPhone =
+              user.phone != null ? normalizePhoneToBackend(user.phone) : null;
+          final emailOrPhoneChanged =
+              (previousEmail != null &&
+                  newEmail != null &&
+                  previousEmail != newEmail) ||
+              (previousPhone != null &&
+                  newPhone != null &&
+                  previousPhone != newPhone);
 
-          // Update cached user and store
           _currentUser = user;
           await _storeUser(user);
 
@@ -498,17 +549,22 @@ class AuthService {
             'success': true,
             'user': user,
             'message':
-                responseData['message'] ?? 'Profile updated successfully',
+                responseData['message']?.toString() ??
+                    'Profile updated successfully',
+            'emailOrPhoneChanged': emailOrPhoneChanged,
           };
         }
       }
 
+      final responseData = response.data;
+      final message = responseData is Map
+          ? responseData['message']?.toString()
+          : null;
       return {
         'success': false,
-        'message': 'Failed to update profile',
+        'message': message ?? 'Failed to update profile',
       };
     } on ApiException catch (e) {
-      // Handle unauthorized access
       if (e.statusCode == 401) {
         await _clearSession();
         return {
@@ -748,45 +804,6 @@ class AuthService {
       return {
         'success': false,
         'message': 'An unexpected error occurred while verifying phone',
-      };
-    }
-  }
-
-  // Reset password
-  Future<Map<String, dynamic>> resetPassword({
-    required String token,
-    required String newPassword,
-  }) async {
-    try {
-      final response = await _apiService.post(
-        ApiConstants.resetPassword,
-        data: {
-          'token': token,
-          'password': newPassword,
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final data = response.data as Map<String, dynamic>;
-        return {
-          'success': true,
-          'message': data['message'] ?? 'Password reset successfully',
-        };
-      }
-
-      return {
-        'success': false,
-        'message': 'Failed to reset password',
-      };
-    } on ApiException catch (e) {
-      return {
-        'success': false,
-        'message': e.message,
-      };
-    } catch (e) {
-      return {
-        'success': false,
-        'message': 'An unexpected error occurred while resetting password',
       };
     }
   }

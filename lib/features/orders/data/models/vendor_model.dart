@@ -3,7 +3,7 @@ import 'package:equatable/equatable.dart';
 class VendorModel extends Equatable {
   final int id;
 
-  /// User ID of the vendor (use this for product APIs like by-vendor/{user_id}).
+  /// Linked user account id (not used for vendor product APIs).
   final int? userId;
   final String name;
   final String email;
@@ -236,9 +236,6 @@ class VendorModel extends Equatable {
   bool get isActive => status == 'active';
   bool get isEmailVerified => emailVerifiedAt != null;
   bool get isPhoneVerified => phoneVerifiedAt != null;
-
-  /// ID to use for vendor product APIs (prefer user_id when available).
-  int get productApiId => userId ?? id;
 
   @override
   List<Object?> get props => [

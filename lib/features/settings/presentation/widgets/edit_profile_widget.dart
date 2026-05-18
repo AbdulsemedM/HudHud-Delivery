@@ -1,39 +1,45 @@
-import 'package:flutter/material.dart';
 import 'package:country_picker/country_picker.dart';
+import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/core/widgets/user_avatar.dart';
 
 class ProfileImagePicker extends StatelessWidget {
-  final String imageUrl;
+  final String? networkImageUrl;
+  final String? localImagePath;
   final VoidCallback onImageTap;
 
   const ProfileImagePicker({
     super.key,
-    required this.imageUrl,
+    this.networkImageUrl,
+    this.localImagePath,
     required this.onImageTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onImageTap,
       child: Stack(
         children: [
-          CircleAvatar(
+          UserAvatar(
             radius: 40,
-            backgroundImage: AssetImage(imageUrl),
+            imageUrl: networkImageUrl,
+            localImagePath: localImagePath,
           ),
           Positioned(
             bottom: 0,
             right: 0,
             child: Container(
               padding: const EdgeInsets.all(4),
-              decoration: const BoxDecoration(
-                color: Colors.white,
+              decoration: BoxDecoration(
+                color: colorScheme.surface,
                 shape: BoxShape.circle,
+                border: Border.all(color: colorScheme.outlineVariant),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.camera_alt,
                 size: 20,
-                color: Colors.black54,
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
           ),
@@ -45,53 +51,54 @@ class ProfileImagePicker extends StatelessWidget {
 
 class ProfileTextField extends StatelessWidget {
   final String label;
-  final String value;
-  final ValueChanged<String> onChanged;
+  final TextEditingController controller;
   final bool readOnly;
   final TextInputType keyboardType;
 
   const ProfileTextField({
     super.key,
     required this.label,
-    required this.value,
-    required this.onChanged,
+    required this.controller,
     this.readOnly = false,
     this.keyboardType = TextInputType.text,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: theme.textTheme.bodyMedium?.copyWith(
             fontSize: 14,
-            color: Colors.grey[600],
+            color: colorScheme.onSurfaceVariant,
           ),
         ),
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: Colors.grey[100],
+            color: colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
           ),
-          child: TextField(
-            controller: TextEditingController(text: value),
-            onChanged: onChanged,
+          child: TextFormField(
+            controller: controller,
             readOnly: readOnly,
             keyboardType: keyboardType,
-            decoration: const InputDecoration(
+            style: theme.textTheme.bodyLarge?.copyWith(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: colorScheme.onSurface,
+            ),
+            decoration: InputDecoration(
               border: InputBorder.none,
-              contentPadding: EdgeInsets.symmetric(
+              contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
                 vertical: 12,
               ),
-            ),
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
             ),
           ),
         ),
@@ -102,89 +109,122 @@ class ProfileTextField extends StatelessWidget {
 
 class PhoneNumberField extends StatelessWidget {
   final String countryCode;
-  final String number;
-  final ValueChanged<String> onNumberChanged;
+  final TextEditingController numberController;
   final ValueChanged<Country> onCountryChanged;
 
   const PhoneNumberField({
     super.key,
     required this.countryCode,
-    required this.number,
-    required this.onNumberChanged,
+    required this.numberController,
     required this.onCountryChanged,
   });
 
+  void _showCountryPicker(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    showCountryPicker(
+      context: context,
+      showPhoneCode: true,
+      onSelect: onCountryChanged,
+      countryListTheme: CountryListThemeData(
+        backgroundColor: colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+        textStyle: theme.textTheme.bodyLarge?.copyWith(
+          color: colorScheme.onSurface,
+        ),
+        searchTextStyle: theme.textTheme.bodyLarge?.copyWith(
+          color: colorScheme.onSurface,
+        ),
+        inputDecoration: InputDecoration(
+          hintText: 'Search country',
+          hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
+          filled: true,
+          fillColor: colorScheme.surfaceContainerHighest,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: colorScheme.outlineVariant),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: colorScheme.outlineVariant),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: colorScheme.primary, width: 2),
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 12,
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final fieldDecoration = BoxDecoration(
+      color: colorScheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
+    );
+    final codeText = countryCode.startsWith('+') ? countryCode : '+$countryCode';
+    final dialDigits = codeText.replaceFirst('+', '');
+    final country = CountryService().findByPhoneCode(dialDigits);
+
     return Row(
       children: [
-        // Country Code Selector
         GestureDetector(
-          onTap: () {
-            showCountryPicker(
-              context: context,
-              showPhoneCode: true,
-              onSelect: onCountryChanged,
-              countryListTheme: CountryListThemeData(
-                borderRadius: BorderRadius.circular(12),
-                inputDecoration: InputDecoration(
-                  hintText: 'Search country',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                ),
-              ),
-            );
-          },
+          onTap: () => _showCountryPicker(context),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(12),
-            ),
+            decoration: fieldDecoration,
             child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
+                if (country != null) ...[
+                  Text(
+                    country.flagEmoji,
+                    style: const TextStyle(fontSize: 20),
+                  ),
+                  const SizedBox(width: 6),
+                ],
                 Text(
-                  countryCode,
-                  style: const TextStyle(
+                  codeText,
+                  style: theme.textTheme.bodyLarge?.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
+                    color: colorScheme.onSurface,
                   ),
                 ),
-                const Icon(
+                Icon(
                   Icons.arrow_drop_down,
-                  color: Colors.black54,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ],
             ),
           ),
         ),
         const SizedBox(width: 8),
-        // Phone Number Field
         Expanded(
           child: Container(
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: TextField(
-              controller: TextEditingController(text: number),
-              onChanged: onNumberChanged,
+            decoration: fieldDecoration,
+            child: TextFormField(
+              controller: numberController,
               keyboardType: TextInputType.phone,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: colorScheme.onSurface,
+              ),
               decoration: const InputDecoration(
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 12,
                 ),
-              ),
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
               ),
             ),
           ),
@@ -195,11 +235,13 @@ class PhoneNumberField extends StatelessWidget {
 }
 
 class UpdateButton extends StatelessWidget {
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
+  final bool isLoading;
 
   const UpdateButton({
     super.key,
     required this.onPressed,
+    this.isLoading = false,
   });
 
   @override
@@ -207,22 +249,32 @@ class UpdateButton extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: onPressed,
+        onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF4A148C),
+          foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        child: const Text(
-          'Update',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
+        child: isLoading
+            ? const SizedBox(
+                height: 22,
+                width: 22,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+            : const Text(
+                'Update',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
       ),
     );
   }

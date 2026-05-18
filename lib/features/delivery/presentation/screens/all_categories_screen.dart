@@ -679,7 +679,7 @@ class _CategoriesGrid extends StatelessWidget {
                             builder: (context) => StoreDetailScreen(
                               storeName: vendor.name,
                               storeImage: vendor.avatar.isNotEmpty ? vendor.avatar : null,
-                              vendorId: vendor.productApiId,
+                              vendorId: vendor.id,
                               vendor: vendor,
                             ),
                           ),

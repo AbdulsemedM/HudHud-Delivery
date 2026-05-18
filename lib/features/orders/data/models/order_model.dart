@@ -80,6 +80,30 @@ class OrderModel extends Equatable {
     return int.tryParse(v.toString()) ?? 0;
   }
 
+  static VendorModel _parseVendor(dynamic raw) {
+    if (raw is! Map) {
+      return VendorModel(
+        id: 0,
+        name: 'Vendor',
+        email: '',
+        phone: '',
+        type: 'vendor',
+        status: 'active',
+        avatar: '',
+        language: 'en',
+        timezone: 'UTC',
+        referralCode: '',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+    }
+    final map = Map<String, dynamic>.from(raw);
+    if (map['shop_name'] != null) {
+      return VendorModel.fromVendorListJson(map);
+    }
+    return VendorModel.fromJson(map);
+  }
+
   factory OrderModel.fromJson(Map<String, dynamic> json) {
     return OrderModel(
       id: _parseInt(json['id']),
@@ -125,14 +149,20 @@ class OrderModel extends Equatable {
       createdAt: DateTime.parse(json['created_at'].toString()),
       updatedAt: DateTime.parse(json['updated_at'].toString()),
       items: (json['items'] as List<dynamic>? ?? [])
-          .map((item) => OrderItemModel.fromJson(item as Map<String, dynamic>))
+          .map((item) => OrderItemModel.fromJson(
+                Map<String, dynamic>.from(item as Map),
+              ))
           .toList(),
-      vendor: VendorModel.fromJson(json['vendor'] as Map<String, dynamic>),
-      customer: json['customer'] != null
-          ? CustomerModel.fromJson(json['customer'] as Map<String, dynamic>)
+      vendor: _parseVendor(json['vendor']),
+      customer: json['customer'] is Map
+          ? CustomerModel.fromJson(
+              Map<String, dynamic>.from(json['customer'] as Map),
+            )
           : null,
-      driver: json['driver'] != null
-          ? DriverModel.fromJson(json['driver'] as Map<String, dynamic>)
+      driver: json['driver'] is Map
+          ? DriverModel.fromJson(
+              Map<String, dynamic>.from(json['driver'] as Map),
+            )
           : null,
     );
   }

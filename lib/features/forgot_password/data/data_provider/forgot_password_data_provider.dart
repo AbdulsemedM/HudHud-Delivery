@@ -1,7 +1,9 @@
 import 'package:hudhud_delivery/core/api/api_constants.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 
-class ForgotPasswordDataProvider {
+import 'forgot_password_data_source.dart';
+
+class ForgotPasswordDataProvider implements ForgotPasswordDataSource {
   ForgotPasswordDataProvider({required this.apiService});
 
   final ApiService apiService;

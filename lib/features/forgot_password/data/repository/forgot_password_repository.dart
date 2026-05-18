@@ -1,5 +1,6 @@
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/features/forgot_password/data/data_provider/forgot_password_data_provider.dart';
+import 'package:hudhud_delivery/features/forgot_password/data/data_provider/forgot_password_data_source.dart';
 
 /// Result of POST /password/reset-otp
 class ResetOtpResult {
@@ -40,13 +41,16 @@ class ForgotPasswordRepository {
     );
   }
 
-  final ForgotPasswordDataProvider _dataProvider;
+  final ForgotPasswordDataSource _dataProvider;
 
   /// Same email/phone heuristic as login form.
   static String methodForIdentifier(String trimmed) {
     final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-    return emailRegex.hasMatch(trimmed) ? 'email' : 'sms';
+    return emailRegex.hasMatch(trimmed) ? 'email' : 'phone';
   }
+
+  static bool _isSuccess(int? code) =>
+      code != null && code >= 200 && code < 300;
 
   static String _cleanErrorMessage(String raw) {
     var s = raw.replaceFirst(RegExp(r'^Validation error:\s*'), '').trim();
@@ -62,7 +66,7 @@ class ForgotPasswordRepository {
       method: method,
     );
     final code = response['statusCode'] as int?;
-    if (code == 200) {
+    if (_isSuccess(code)) {
       final data = response['data'];
       if (data is! Map) {
         throw 'Invalid server response';
@@ -96,7 +100,7 @@ class ForgotPasswordRepository {
       otp: otp.trim(),
     );
     final code = response['statusCode'] as int?;
-    if (code == 200) {
+    if (_isSuccess(code)) {
       final data = response['data'];
       if (data is! Map) {
         throw 'Invalid server response';
@@ -123,7 +127,7 @@ class ForgotPasswordRepository {
   Future<int?> resendOtp(String resetId) async {
     final response = await _dataProvider.resendOtp(resetId: resetId);
     final code = response['statusCode'] as int?;
-    if (code == 200) {
+    if (_isSuccess(code)) {
       final data = response['data'];
       if (data is Map) {
         final map = Map<String, dynamic>.from(data);
@@ -147,7 +151,7 @@ class ForgotPasswordRepository {
       passwordConfirmation: passwordConfirmation,
     );
     final code = response['statusCode'] as int?;
-    if (code == 200) {
+    if (_isSuccess(code)) {
       final data = response['data'];
       if (data is Map) {
         final map = Map<String, dynamic>.from(data);

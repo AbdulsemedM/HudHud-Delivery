@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hudhud_delivery/core/widgets/user_avatar.dart';
 import 'package:hudhud_delivery/features/orders/presentation/widgets/orders_widget.dart';
 import 'package:hudhud_delivery/features/settings/presentation/screen/notifications_screen.dart';
 
 class SettingsHeader extends StatelessWidget {
-  const SettingsHeader({super.key});
+  const SettingsHeader({super.key, this.avatarUrl});
+
+  final String? avatarUrl;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const StoryRing(
-          child: CircleAvatar(
-            radius: 25,
-            backgroundImage: AssetImage('assets/images/profile.png'),
-          ),
+        StoryRing(
+          child: UserAvatar(radius: 25, imageUrl: avatarUrl),
         ),
         IconButton(
           icon: const Icon(
@@ -45,6 +45,7 @@ class AccountSettingsSection extends StatelessWidget {
   final String name;
   final String phone;
   final String email;
+  final String? avatarUrl;
 
   const AccountSettingsSection({
     super.key,
@@ -52,6 +53,7 @@ class AccountSettingsSection extends StatelessWidget {
     required this.name,
     required this.phone,
     required this.email,
+    this.avatarUrl,
   });
 
   @override
@@ -90,11 +92,8 @@ class AccountSettingsSection extends StatelessWidget {
           ),
           child: Row(
             children: [
-              const StoryRing(
-                child: CircleAvatar(
-                  radius: 30,
-                  backgroundImage: AssetImage('assets/images/profile.png'),
-                ),
+              StoryRing(
+                child: UserAvatar(radius: 30, imageUrl: avatarUrl),
               ),
               const SizedBox(width: 16),
               Expanded(

@@ -230,6 +230,7 @@
   "validationEmailOrPhoneInvalid": "Fadlan geli iimayl ama lambar taleefoon sax ah",
   "validationPasswordRequired": "Fadlan geli eraygaaga sirta ah",
   "validationPasswordMin": "Erayga sirta ah waa inuu ahaadaa ugu yaraan 8 xaraf",
+  "validationPasswordComplexity": "Password must include uppercase, lowercase, a number, and a special character",
   "validationEmailRequired": "Fadlan gali iimaylkaga",
   "validationEmailInvalid": "Fadlan geli ciwaan email sax ah",
   "mainDemoTitle": "HudHud Delivery Demo",

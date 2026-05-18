@@ -22,6 +22,7 @@ import 'change_password_screen.dart';
 import 'faqs_screen.dart';
 import 'language_screen.dart';
 import 'notifications_screen.dart';
+import 'edit_profile_screen.dart';
 import 'personal_details_screen.dart';
 import 'terms_conditions_screen.dart';
 import 'package:hudhud_delivery/features/wishlist/presentation/screen/wishlist_screen.dart';
@@ -194,7 +195,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const PersonalDetailsScreen(),
+                      builder: (context) => const EditProfileScreen(),
                     ),
                   ).then((_) => _loadUserData());
                 },

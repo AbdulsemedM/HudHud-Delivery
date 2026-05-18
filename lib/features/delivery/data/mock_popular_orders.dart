@@ -20,7 +20,7 @@ class MockPopularOrder {
 }
 
 /// Mock data for Popular Orders - used on Delivery feed and All Categories screens.
-/// vendorId must be the vendor's user_id for the products API (e.g. 7, 8, 9 from /api/vendors).
+/// vendorId is the vendor shop `id` from /api/vendors (e.g. 1, 2, 3).
 final List<MockPopularOrder> mockPopularOrders = [
   const MockPopularOrder(
     name: 'Adenine Kitchen',
@@ -29,7 +29,7 @@ final List<MockPopularOrder> mockPopularOrders = [
     deliveryTime: '10-25 min',
     promoText: '5 orders until ETB 800 reward',
     imageUrl: 'assets/images/categories.jpg',
-    vendorId: 7,
+    vendorId: 1,
   ),
   const MockPopularOrder(
     name: 'Cardinal Chips',
@@ -37,7 +37,7 @@ final List<MockPopularOrder> mockPopularOrders = [
     deliveryFee: 120,
     deliveryTime: '10-25 min',
     imageUrl: 'assets/images/categories.jpg',
-    vendorId: 8,
+    vendorId: 2,
   ),
   const MockPopularOrder(
     name: 'Urban Bites',
@@ -46,7 +46,7 @@ final List<MockPopularOrder> mockPopularOrders = [
     deliveryTime: '15-30 min',
     promoText: 'Free delivery on orders over ETB 500',
     imageUrl: 'assets/images/categories.jpg',
-    vendorId: 9,
+    vendorId: 3,
   ),
   const MockPopularOrder(
     name: 'Green Bowl',
@@ -54,7 +54,7 @@ final List<MockPopularOrder> mockPopularOrders = [
     deliveryFee: 100,
     deliveryTime: '20-35 min',
     imageUrl: 'assets/images/categories.jpg',
-    vendorId: 7,
+    vendorId: 1,
   ),
   const MockPopularOrder(
     name: 'Sunset Grill',
@@ -63,6 +63,6 @@ final List<MockPopularOrder> mockPopularOrders = [
     deliveryTime: '25-40 min',
     promoText: '20% off first order',
     imageUrl: 'assets/images/categories.jpg',
-    vendorId: 8,
+    vendorId: 2,
   ),
 ];

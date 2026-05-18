@@ -83,8 +83,14 @@ class CheckoutRepository {
       final response = await checkoutDataProvider.getOrderHistory();
 
       if (response['statusCode'] == 200) {
-        final List<dynamic> orders = response['data']['data'] ?? [];
-        return orders;
+        final body = response['data'];
+        if (body is! Map<String, dynamic>) return [];
+        final inner = body['data'];
+        if (inner is List) return inner;
+        if (inner is Map<String, dynamic> && inner['data'] is List) {
+          return inner['data'] as List<dynamic>;
+        }
+        return [];
       } else {
         String errorMessage =
             response['errorMessage'] ?? 'Error fetching order history';

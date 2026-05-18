@@ -31,22 +31,40 @@ class CategoryModel extends Equatable {
     this.deletedAt,
   });
 
+  static int _parseInt(dynamic v, {int fallback = 0}) {
+    if (v == null) return fallback;
+    if (v is int) return v;
+    return int.tryParse(v.toString()) ?? fallback;
+  }
+
+  static bool _parseBool(dynamic v, {bool fallback = false}) {
+    if (v == null) return fallback;
+    if (v is bool) return v;
+    if (v is int) return v != 0;
+    final s = v.toString().toLowerCase();
+    return s == 'true' || s == '1';
+  }
+
   factory CategoryModel.fromJson(Map<String, dynamic> json) {
     return CategoryModel(
-      id: json['id'],
-      name: json['name'],
-      slug: json['slug'],
-      description: json['description'],
-      imagePath: json['image_path'],
-      position: json['position'],
-      isActive: json['is_active'],
-      isFeatured: json['is_featured'],
-      parentId: json['parent_id'],
-      meta: Map<String, dynamic>.from(json['meta'] ?? {}),
-      createdAt: DateTime.parse(json['created_at']),
-      updatedAt: DateTime.parse(json['updated_at']),
-      deletedAt: json['deleted_at'] != null 
-          ? DateTime.parse(json['deleted_at']) 
+      id: _parseInt(json['id']),
+      name: json['name']?.toString() ?? '',
+      slug: json['slug']?.toString() ?? '',
+      description: json['description']?.toString() ?? '',
+      imagePath: json['image_path']?.toString(),
+      position: _parseInt(json['position']),
+      isActive: _parseBool(json['is_active'], fallback: true),
+      isFeatured: _parseBool(json['is_featured']),
+      parentId: json['parent_id'] != null ? _parseInt(json['parent_id']) : null,
+      meta: json['meta'] is Map
+          ? Map<String, dynamic>.from(json['meta'] as Map)
+          : {},
+      createdAt: DateTime.tryParse(json['created_at']?.toString() ?? '') ??
+          DateTime.now(),
+      updatedAt: DateTime.tryParse(json['updated_at']?.toString() ?? '') ??
+          DateTime.now(),
+      deletedAt: json['deleted_at'] != null
+          ? DateTime.tryParse(json['deleted_at'].toString())
           : null,
     );
   }
@@ -70,8 +88,8 @@ class CategoryModel extends Equatable {
   }
 
   // Helper methods
-  String? get icon => meta['icon'];
-  String? get color => meta['color'];
+  String? get icon => meta['icon']?.toString();
+  String? get color => meta['color']?.toString();
   bool get hasParent => parentId != null;
 
   @override

@@ -1136,6 +1136,12 @@ abstract class AppLocalizations {
   /// **'Password must be at least 8 characters'**
   String get validationPasswordMin;
 
+  /// No description provided for @validationPasswordComplexity.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must include uppercase, lowercase, a number, and a special character'**
+  String get validationPasswordComplexity;
+
   /// No description provided for @validationEmailRequired.
   ///
   /// In en, this message translates to:

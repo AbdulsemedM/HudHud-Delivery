@@ -234,6 +234,7 @@
   "validationEmailOrPhoneInvalid": "الرجاء إدخال بريد إلكتروني أو رقم هاتف صالح",
   "validationPasswordRequired": "الرجاء إدخال كلمة المرور الخاصة بك",
   "validationPasswordMin": "يجب أن تتكون كلمة المرور من 8 أحرف على الأقل",
+  "validationPasswordComplexity": "يجب أن تتضمن كلمة المرور حرفًا كبيرًا وحرفًا صغيرًا ورقمًا ورمزًا خاصًا",
   "validationEmailRequired": "الرجاء إدخال البريد الإلكتروني الخاص بك",
   "validationEmailInvalid": "يرجى إدخال عنوان بريد إلكتروني صالح",
   "mainDemoTitle": "عرض تسليم HudHud",

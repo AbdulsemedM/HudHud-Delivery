@@ -555,6 +555,10 @@ class AppLocalizationsAr extends AppLocalizations {
       'يجب أن تتكون كلمة المرور من 8 أحرف على الأقل';
 
   @override
+  String get validationPasswordComplexity =>
+      'يجب أن تتضمن كلمة المرور حرفًا كبيرًا وحرفًا صغيرًا ورقمًا ورمزًا خاصًا';
+
+  @override
   String get validationEmailRequired =>
       'الرجاء إدخال البريد الإلكتروني الخاص بك';
 

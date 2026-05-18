@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hudhud_delivery/controllers/auth_controller.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
+import 'package:hudhud_delivery/core/utils/avatar_util.dart';
+import 'package:provider/provider.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/features/wallet/bloc/wallet_bloc.dart';
@@ -132,7 +135,11 @@ class _WalletContent extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          const WalletHeader(),
+          WalletHeader(
+            avatarUrl: getDisplayAvatarUrl(
+              context.watch<AuthController>().currentUser,
+            ),
+          ),
           const SizedBox(height: 24),
           BalanceCard(
             balance:

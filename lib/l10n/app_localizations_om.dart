@@ -563,6 +563,10 @@ class AppLocalizationsOm extends AppLocalizations {
       'Jechi icciitii yoo xiqqaate arfiilee 8 ta\'uu qaba';
 
   @override
+  String get validationPasswordComplexity =>
+      'Password must include uppercase, lowercase, a number, and a special character';
+
+  @override
   String get validationEmailRequired => 'Mee email keessan galchaa';
 
   @override

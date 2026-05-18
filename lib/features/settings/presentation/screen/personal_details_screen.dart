@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/utils/avatar_util.dart';
+import 'package:hudhud_delivery/core/utils/phone_util.dart';
+import 'package:hudhud_delivery/core/widgets/user_avatar.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/models/user_model.dart';
 
@@ -44,6 +46,11 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
   String _formatDateOfBirth(DateTime? date) {
     if (date == null) return 'Not set';
     return DateFormat('d MMM yyyy').format(date);
+  }
+
+  String _formatPhone(String? phone) {
+    final formatted = formatPhoneForDisplay(phone);
+    return formatted.isNotEmpty ? formatted : '—';
   }
 
   Future<void> _copyReferralCode(String referralCode) async {
@@ -89,28 +96,9 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                   // Profile Picture
                   Stack(
                     children: [
-                      Container(
-                        width: 100,
-                        height: 100,
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryColor,
-                          shape: BoxShape.circle,
-                        ),
-                        child: ClipOval(
-                          child: getDisplayAvatarUrl(_user) != null
-                              ? Image.network(
-                                  getDisplayAvatarUrl(_user)!,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      _buildDefaultAvatar(),
-                                )
-                              : Image.asset(
-                                  'assets/images/profile.png',
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      _buildDefaultAvatar(),
-                                ),
-                        ),
+                      UserAvatar(
+                        radius: 50,
+                        imageUrl: getDisplayAvatarUrl(_user),
                       ),
                 Positioned(
                   bottom: 0,
@@ -167,7 +155,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                         _DetailCard(
                           icon: Icons.phone,
                           label: 'Phone number',
-                          value: _user?.phone ?? '—',
+                          value: _formatPhone(_user?.phone),
                         ),
                         const SizedBox(height: 16),
                         _DetailCard(
@@ -205,13 +193,6 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
     );
   }
 
-  Widget _buildDefaultAvatar() {
-    return const Icon(
-      Icons.person,
-      size: 50,
-      color: Colors.white,
-    );
-  }
 }
 
 class _DetailCard extends StatelessWidget {

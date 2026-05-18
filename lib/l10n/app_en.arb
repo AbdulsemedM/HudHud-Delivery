@@ -224,6 +224,7 @@
   "validationEmailOrPhoneInvalid": "Please enter a valid email or phone number",
   "validationPasswordRequired": "Please enter your password",
   "validationPasswordMin": "Password must be at least 8 characters",
+  "validationPasswordComplexity": "Password must include uppercase, lowercase, a number, and a special character",
   "validationEmailRequired": "Please enter your email",
   "validationEmailInvalid": "Please enter a valid email address",
   "mainDemoTitle": "HudHud Delivery Demo",

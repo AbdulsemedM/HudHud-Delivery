@@ -555,6 +555,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get validationPasswordMin => 'Password must be at least 8 characters';
 
   @override
+  String get validationPasswordComplexity =>
+      'Password must include uppercase, lowercase, a number, and a special character';
+
+  @override
   String get validationEmailRequired => 'Please enter your email';
 
   @override

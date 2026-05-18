@@ -76,8 +76,11 @@ class OrdersRepositoryImpl implements OrdersRepository {
       );
 
       if (response['statusCode'] == 200 && response['data'] != null) {
-        return OrdersResponseModel.fromJson(
-            response['data'] as Map<String, dynamic>);
+        final body = response['data'];
+        if (body is Map<String, dynamic>) {
+          return OrdersResponseModel.fromJson(body);
+        }
+        throw const OrdersRepositoryException('Invalid orders response');
       } else {
         throw OrdersRepositoryException(
             response['errorMessage'] ?? 'Failed to fetch orders');

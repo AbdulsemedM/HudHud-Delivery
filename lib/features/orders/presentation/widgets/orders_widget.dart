@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/core/widgets/user_avatar.dart';
 import '../../data/models/order_model.dart';
 import 'package:intl/intl.dart';
 
@@ -33,10 +34,12 @@ class StoryRing extends StatelessWidget {
 
 class OrdersHeader extends StatelessWidget {
   final VoidCallback onFilterTap;
+  final String? avatarUrl;
 
   const OrdersHeader({
     super.key,
     required this.onFilterTap,
+    this.avatarUrl,
   });
 
   @override
@@ -44,13 +47,14 @@ class OrdersHeader extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Row(
+        Row(
           children: [
             StoryRing(
-              child: CircleAvatar(
+              child: UserAvatar(
                 radius: 20,
+                imageUrl: avatarUrl,
                 backgroundColor: Colors.white,
-                backgroundImage: AssetImage('assets/images/profile.png'),
+                iconColor: Colors.grey,
               ),
             ),
           ],
@@ -256,46 +260,57 @@ class OrderItemCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: statusColor.withOpacity(0.3),
-                        width: 1,
+                  Flexible(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
                       ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          statusIcon,
-                          size: 16,
-                          color: statusColor,
+                      decoration: BoxDecoration(
+                        color: statusColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: statusColor.withOpacity(0.3),
+                          width: 1,
                         ),
-                        const SizedBox(width: 4),
-                        Text(
-                          order.status.replaceAll('_', ' ').toUpperCase(),
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            statusIcon,
+                            size: 16,
                             color: statusColor,
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: Text(
+                              order.status.replaceAll('_', ' ').toUpperCase(),
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: statusColor,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  const Spacer(),
-                  Text(
-                    'Order #${order.orderNumber}',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.grey[600],
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      'Order #${order.orderNumber}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[600],
+                      ),
+                      textAlign: TextAlign.end,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
@@ -399,28 +414,36 @@ class OrderItemCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        'ETB ${double.tryParse(order.totalAmount)?.toStringAsFixed(2) ?? order.totalAmount}',
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      if ((double.tryParse(order.deliveryFee) ?? 0) > 0) ...[
-                        const SizedBox(height: 2),
+                  Flexible(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
                         Text(
-                          '+ ETB ${double.tryParse(order.deliveryFee)?.toStringAsFixed(2) ?? order.deliveryFee} delivery',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
+                          'ETB ${double.tryParse(order.totalAmount)?.toStringAsFixed(2) ?? order.totalAmount}',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.end,
                         ),
+                        if ((double.tryParse(order.deliveryFee) ?? 0) > 0) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            '+ ETB ${double.tryParse(order.deliveryFee)?.toStringAsFixed(2) ?? order.deliveryFee} delivery',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.end,
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
                 ],
               ),

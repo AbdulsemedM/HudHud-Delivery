@@ -52,8 +52,10 @@ class OrderItemModel extends Equatable {
       total: json['total']?.toString() ?? '0',
       createdAt: DateTime.parse(json['created_at'].toString()),
       updatedAt: DateTime.parse(json['updated_at'].toString()),
-      product: json['product'] != null
-          ? ProductModel.fromJson(json['product'] as Map<String, dynamic>)
+      product: json['product'] is Map
+          ? ProductModel.fromJson(
+              Map<String, dynamic>.from(json['product'] as Map),
+            )
           : null,
     );
   }

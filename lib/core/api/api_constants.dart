@@ -19,8 +19,6 @@ class ApiConstants {
   static const String guest = '$auth/guest';
   /// POST body: `id_token`, optional `user_type`, optional `device_token`.
   static const String googleLogin = '$auth/google-login';
-  static const String resetPassword = '$auth/reset-password';
-
   /// Password reset OTP flow (unauthenticated): POST `/api/password/...`
   static const String passwordResetOtp = 'password/reset-otp';
   static const String passwordVerifyOtp = 'password/verify-otp';
@@ -34,7 +32,8 @@ class ApiConstants {
   static const String users = '/users';
   static const String profile =
       'profile'; // GET /api/profile returns user object at root
-  static const String updateProfile = '$users/profile';
+  /// POST multipart: name, email, phone, optional avatar file.
+  static const String updateProfile = 'update-profile';
   static const String changePassword = '$users/change-password';
   static const String updatePassword = 'update-password';
   static const String sendEmailVerification = 'send-email-verification';
@@ -88,7 +87,7 @@ class ApiConstants {
   // Vendors endpoints
   static const String vendors = 'vendors';
 
-  /// Path param is vendor's user_id (from /api/vendors list).
+  /// Path param is vendor shop id (from /api/vendors list `id` field).
   static const String vendorProducts = 'vendor/products/by-vendor/{id}';
 
   // Notifications endpoints (GET /api/notifications, GET /api/notifications/{id})

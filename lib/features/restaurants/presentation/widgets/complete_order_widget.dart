@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:hudhud_delivery/features/orders/presentation/widgets/orders_widget.dart';
 import 'package:hudhud_delivery/core/widgets/custom_text_field.dart';
+import 'package:hudhud_delivery/core/widgets/user_avatar.dart';
+import 'package:hudhud_delivery/features/orders/presentation/widgets/orders_widget.dart';
 
 class DeliverySummaryCard extends StatelessWidget {
   final double amount;
@@ -280,10 +281,12 @@ class DriverInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const StoryRing(
-          child: CircleAvatar(
+        StoryRing(
+          child: UserAvatar(
             radius: 20,
-            backgroundImage: AssetImage('assets/images/profile.png'),
+            imageUrl: imageUrl.isNotEmpty && imageUrl.startsWith('http')
+                ? imageUrl
+                : null,
           ),
         ),
         const SizedBox(width: 16),

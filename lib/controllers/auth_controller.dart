@@ -164,6 +164,7 @@ class AuthController extends ChangeNotifier {
     String? email,
     String? phone,
     String? address,
+    String? avatarPath,
   }) async {
     try {
       _setLoading(true);
@@ -174,10 +175,12 @@ class AuthController extends ChangeNotifier {
         email: email,
         phone: phone,
         address: address,
+        avatarPath: avatarPath,
       );
       
       if (result['success'] == true) {
-        _currentUser = result['user'];
+        _currentUser = result['user'] as UserModel?;
+        notifyListeners();
         return true;
       } else {
         _setError(result['message'] ?? 'Profile update failed');
@@ -221,37 +224,6 @@ class AuthController extends ChangeNotifier {
       return false;
     } catch (e) {
       _setError('An unexpected error occurred while changing password');
-      return false;
-    } finally {
-      _setLoading(false);
-    }
-  }
-  
-  // Reset password
-  Future<bool> resetPassword({
-    required String token,
-    required String newPassword,
-  }) async {
-    try {
-      _setLoading(true);
-      _clearError();
-      
-      final result = await _authService.resetPassword(
-        token: token,
-        newPassword: newPassword,
-      );
-      
-      if (result['success'] == true) {
-        return true;
-      } else {
-        _setError(result['message'] ?? 'Password reset failed');
-        return false;
-      }
-    } on ApiException catch (e) {
-      _setError(e.message);
-      return false;
-    } catch (e) {
-      _setError('An unexpected error occurred while resetting password');
       return false;
     } finally {
       _setLoading(false);

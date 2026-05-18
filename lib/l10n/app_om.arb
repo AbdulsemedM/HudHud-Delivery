@@ -230,6 +230,7 @@
   "validationEmailOrPhoneInvalid": "Mee email ykn lakkoofsa bilbilaa sirrii ta'e galchaa",
   "validationPasswordRequired": "Mee password keessan galchaa",
   "validationPasswordMin": "Jechi icciitii yoo xiqqaate arfiilee 8 ta'uu qaba",
+  "validationPasswordComplexity": "Password must include uppercase, lowercase, a number, and a special character",
   "validationEmailRequired": "Mee email keessan galchaa",
   "validationEmailInvalid": "Mee teessoo imeelii sirrii ta'e galchi",
   "mainDemoTitle": "HudHud Demo Geejjibaa",

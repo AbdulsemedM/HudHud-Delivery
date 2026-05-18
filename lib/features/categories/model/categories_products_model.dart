@@ -153,6 +153,24 @@ class CategoriesProductsModel {
     };
   }
 
+  static Map<String, dynamic>? _parseOptions(dynamic value) {
+    if (value == null) return null;
+    if (value is Map) {
+      return Map<String, dynamic>.from(value);
+    }
+    return null;
+  }
+
+  static List<String>? _parseStringList(dynamic value) {
+    if (value == null || value is! List) return null;
+    final items = value
+        .where((e) => e != null)
+        .map((e) => e.toString())
+        .where((s) => s.isNotEmpty)
+        .toList();
+    return items.isEmpty ? null : items;
+  }
+
   /// Parses gallery_images from API: list of { original, thumb, small, medium, large, webp } -> list of URLs.
   static List<String>? _parseGalleryImages(dynamic value) {
     if (value == null || value is! List) return null;
@@ -180,13 +198,13 @@ class CategoriesProductsModel {
       barcode: map['barcode'] != null ? map['barcode'] as String : null,
       image_path: (map['image_path'] ?? (map['main_image'] is Map ? (map['main_image'] as Map)['medium'] : null))?.toString(),
       gallery_images: _parseGalleryImages(map['gallery_images']),
-      ingredients: map['ingredients'] != null ? List<String>.from(map['ingredients']) : null,
-      allergens: map['allergens'] != null ? List<String>.from(map['allergens']) : null,
+      ingredients: _parseStringList(map['ingredients']),
+      allergens: _parseStringList(map['allergens']),
       protein: map['nutrition_facts'] != null && map['nutrition_facts']['protein'] != null ? map['nutrition_facts']['protein'].toString() : null,
       calories: map['nutrition_facts'] != null && map['nutrition_facts']['calories'] != null ? (map['nutrition_facts']['calories'] is String ? int.tryParse(map['nutrition_facts']['calories']) : map['nutrition_facts']['calories'] as int) : null,
       preparation_time: map['preparation_time'] != null ? (map['preparation_time'] is String ? int.tryParse(map['preparation_time']) : map['preparation_time'] as int) : null,
-      options: map['options'] != null ? Map<String, dynamic>.from(map['options']) : null,
-      addons: map['addons'] != null ? List<String>.from(map['addons']) : null,
+      options: _parseOptions(map['options']),
+      addons: _parseStringList(map['addons']),
       min_selection: map['min_selection'] != null ? (map['min_selection'] is String ? int.tryParse(map['min_selection']) : map['min_selection'] as int) : null,
       max_selection: map['max_selection'] != null ? (map['max_selection'] is String ? int.tryParse(map['max_selection']) : map['max_selection'] as int) : null,
       current_price: map['current_price']?.toString(),
