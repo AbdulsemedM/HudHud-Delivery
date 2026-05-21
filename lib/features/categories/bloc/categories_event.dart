@@ -11,6 +11,21 @@ class FetchCategoriesListEvent extends CategoriesEvent {
 }
 
 class FetchCategoriesProductsEvent extends CategoriesEvent {
-  final String categoryId;
-  FetchCategoriesProductsEvent(this.categoryId);
+  final int categoryId;
+  final String? search;
+  final String? minPrice;
+  final String? maxPrice;
+  final String? status;
+  final int page;
+  final bool loadMore;
+
+  FetchCategoriesProductsEvent({
+    required this.categoryId,
+    this.search,
+    this.minPrice,
+    this.maxPrice,
+    this.status = 'active',
+    this.page = 1,
+    this.loadMore = false,
+  });
 }

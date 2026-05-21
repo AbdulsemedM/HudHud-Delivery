@@ -84,33 +84,6 @@ class CategoriesRepository {
     }
   }
 
-  Future<List<CategoriesProductsModel>> getCategoriesProducts(
-      {required int categoryId}) async {
-    try {
-      final response = await categoriesDataProvider.getCategoriesProducts(
-        categoryId: categoryId,
-      );
-      if (response['statusCode'] == 200) {
-        final body = response['data'] as Map<String, dynamic>?;
-        final paginated = body?['data'] as Map<String, dynamic>?;
-        final list = paginated?['data'] as List?;
-        if (list == null) return [];
-        return list
-            .map((e) => CategoriesProductsModel.fromMap(e as Map<String, dynamic>))
-            .toList();
-      } else {
-        String errorMessage =
-            response['errorMessage'] ?? " Error Fetching products";
-        errorMessage = _cleanErrorMessage(errorMessage);
-        throw Exception(errorMessage);
-      }
-    } catch (e) {
-      String errorMessage = e.toString();
-      errorMessage = _cleanErrorMessage(errorMessage);
-      throw Exception(errorMessage);
-    }
-  }
-
   /// GET /api/products/{id}
   Future<CategoriesProductsModel?> getProductById(int productId) async {
     try {

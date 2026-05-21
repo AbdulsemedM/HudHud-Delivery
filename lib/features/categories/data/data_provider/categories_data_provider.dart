@@ -51,28 +51,6 @@ class CategoriesDataProvider {
     }
   }
 
-  Future<Map<String, dynamic>> getCategoriesProducts(
-      {required int categoryId}) async {
-    try {
-      final response = await apiService.get(
-        '${ApiConstants.baseUrl}${ApiConstants.categories}/$categoryId/products',
-      );
-      return {
-        'statusCode': response.statusCode,
-        'data': response.data,
-        "errorMessage": null
-      };
-    } on ApiException catch (apiException) {
-      return {
-        'statusCode': apiException.statusCode,
-        'data': null,
-        "errorMessage": apiException.message
-      };
-    } on Exception catch (e) {
-      return {'statusCode': 500, 'data': null, "errorMessage": e.toString()};
-    }
-  }
-
   /// GET /api/products/{id}
   Future<Map<String, dynamic>> getProductById(int productId) async {
     try {

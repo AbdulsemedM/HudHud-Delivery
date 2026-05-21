@@ -1,16 +1,18 @@
 import 'package:hudhud_delivery/core/api/api_constants.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
+import 'package:hudhud_delivery/features/products/model/products_query.dart';
 
-class VendorsDataProvider {
+class ProductsDataProvider {
   final ApiService apiService;
-  VendorsDataProvider({required this.apiService});
 
-  /// GET /api/vendors?page=1
-  Future<Map<String, dynamic>> getVendors({int page = 1}) async {
+  ProductsDataProvider({required this.apiService});
+
+  /// GET /api/products with query params from [query].
+  Future<Map<String, dynamic>> getProducts(ProductsQuery query) async {
     try {
       final response = await apiService.get(
-        '${ApiConstants.baseUrl}${ApiConstants.vendors}',
-        queryParameters: {'page': page},
+        '${ApiConstants.baseUrl}${ApiConstants.products}',
+        queryParameters: query.toQueryParameters(),
       );
       return {
         'statusCode': response.statusCode,
@@ -27,5 +29,4 @@ class VendorsDataProvider {
       return {'statusCode': 500, 'data': null, 'errorMessage': e.toString()};
     }
   }
-
 }

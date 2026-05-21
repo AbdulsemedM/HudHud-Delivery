@@ -124,6 +124,84 @@ class _TaxiScreenState extends State<TaxiScreen> {
     }
   }
 
+  /// Parses GET /api/user/rides/active body; returns null if no real active ride.
+  Map<String, dynamic>? _parseActiveRidePayload(dynamic raw) {
+    if (raw == null) return null;
+
+    Map<String, dynamic>? ride;
+    if (raw is Map<String, dynamic>) {
+      final inner = raw['data'];
+      if (inner is Map) {
+        ride = Map<String, dynamic>.from(inner);
+      } else if (raw['ride'] is Map) {
+        ride = Map<String, dynamic>.from(raw['ride'] as Map);
+      } else if (raw.containsKey('id')) {
+        ride = raw;
+      }
+    }
+
+    if (ride == null) return null;
+
+    final id = ride['id'];
+    if (id == null || id.toString().isEmpty || id.toString() == '0') {
+      return null;
+    }
+
+    final status = (ride['status'] as String? ?? '').toLowerCase();
+    const terminal = {
+      'completed',
+      'cancelled',
+      'canceled',
+      'failed',
+      'expired',
+      'rejected',
+    };
+    if (terminal.contains(status)) return null;
+
+    return ride;
+  }
+
+  bool _hasAssignedDriver(Map<String, dynamic> ride) {
+    final driverId = ride['driver_id'];
+    return driverId != null &&
+        driverId.toString().isNotEmpty &&
+        driverId.toString() != '0';
+  }
+
+  bool _isInProgressRideStatus(String status) {
+    return {
+      'accepted',
+      'driver_arrived',
+      'started',
+      'in_progress',
+      'arrived',
+    }.contains(status);
+  }
+
+  /// Active ride sheet only when there is a real trip to track — not when
+  /// searching with zero drivers nearby (show normal booking UI instead).
+  bool _shouldShowActiveRideUI() {
+    final ride = _activeRide;
+    if (ride == null) return false;
+
+    final status = (ride['status'] as String? ?? '').toLowerCase();
+    if (_hasAssignedDriver(ride) || _isInProgressRideStatus(status)) {
+      return true;
+    }
+
+    if (status == 'searching' && (_totalAvailable ?? 0) == 0) {
+      return false;
+    }
+
+    return status == 'searching' && (_totalAvailable ?? 0) > 0;
+  }
+
+  void _reconcileActiveRideUI() {
+    if (_activeRide != null && !_shouldShowActiveRideUI()) {
+      _activeRide = null;
+    }
+  }
+
   Future<void> _checkActiveRide() async {
     final result = await _rideDataProvider.getActiveRide();
 
@@ -131,14 +209,15 @@ class _TaxiScreenState extends State<TaxiScreen> {
 
     setState(() {
       _isCheckingActiveRide = false;
-      if (result['statusCode'] == 200 && result['data'] != null) {
-        _activeRide = result['data'] as Map<String, dynamic>;
+      if (result['statusCode'] == 200) {
+        _activeRide = _parseActiveRidePayload(result['data']);
       } else {
         _activeRide = null;
       }
+      _reconcileActiveRideUI();
     });
 
-    if (_activeRide != null) {
+    if (_shouldShowActiveRideUI()) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _centerMapOnActiveRide());
     }
   }
@@ -170,7 +249,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
   }
 
   void _onTrackActiveRide() {
-    if (_activeRide == null) return;
+    if (!_shouldShowActiveRideUI()) return;
 
     final l10n = context.l10n;
     final pickupLat = double.tryParse(_activeRide!['pickup_latitude']?.toString() ?? '');
@@ -262,10 +341,16 @@ class _TaxiScreenState extends State<TaxiScreen> {
         ));
       }
 
+      final totalRaw = data['total_available'];
+      final total = totalRaw is int
+          ? totalRaw
+          : int.tryParse(totalRaw?.toString() ?? '');
+
       setState(() {
         _availableDrivers = drivers;
-        _totalAvailable = data['total_available'] as int?;
+        _totalAvailable = total ?? 0;
         _estimatedWaitTime = data['estimated_wait_time'] as int?;
+        _reconcileActiveRideUI();
       });
     }
   }
@@ -546,7 +631,10 @@ class _TaxiScreenState extends State<TaxiScreen> {
     }
   }
 
-  Widget _buildActiveRideSheet(BuildContext context) {
+  Widget _buildActiveRideSheet(
+    BuildContext context,
+    ScrollController scrollController,
+  ) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final l10n = context.l10n;
@@ -562,51 +650,60 @@ class _TaxiScreenState extends State<TaxiScreen> {
           topRight: Radius.circular(20),
         ),
       ),
-      child: Column(
+      child: ListView(
+        controller: scrollController,
+        padding: const EdgeInsets.only(bottom: 24),
         children: [
-          Container(
-            margin: const EdgeInsets.only(top: 8),
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: colorScheme.outlineVariant,
-              borderRadius: BorderRadius.circular(2),
+          Center(
+            child: Container(
+              margin: const EdgeInsets.only(top: 8),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: colorScheme.outlineVariant,
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(Icons.local_taxi, color: colorScheme.primary, size: 24),
               const SizedBox(width: 8),
-              Text(
-                l10n.taxiActiveRide,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: colorScheme.primary,
+              Flexible(
+                child: Text(
+                  l10n.taxiActiveRide,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.primary,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
               ),
             ],
           ),
           const SizedBox(height: 8),
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 20),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: colorScheme.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              _activeRideStatusLabel(l10n),
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: colorScheme.primary,
+          Center(
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: colorScheme.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                _activeRideStatusLabel(l10n),
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: colorScheme.primary,
+                ),
               ),
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
@@ -618,7 +715,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
                   pickupLocation,
                   colorScheme.primary,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 _buildLocationRow(
                   context,
                   Icons.location_on,
@@ -626,7 +723,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
                   colorScheme.error,
                 ),
                 if (estimatedFare != null && estimatedFare != 'null') ...[
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -637,15 +734,19 @@ class _TaxiScreenState extends State<TaxiScreen> {
                           color: colorScheme.onSurfaceVariant,
                         ),
                       ),
-                      Text(
-                        l10n.taxiFareAmount(
-                          double.tryParse(estimatedFare)?.toStringAsFixed(2) ??
-                              estimatedFare,
-                        ),
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.onSurface,
+                      Flexible(
+                        child: Text(
+                          l10n.taxiFareAmount(
+                            double.tryParse(estimatedFare)
+                                    ?.toStringAsFixed(2) ??
+                                estimatedFare,
+                          ),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: colorScheme.onSurface,
+                          ),
+                          textAlign: TextAlign.end,
                         ),
                       ),
                     ],
@@ -654,12 +755,12 @@ class _TaxiScreenState extends State<TaxiScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: SizedBox(
               width: double.infinity,
-              height: 50,
+              height: 48,
               child: FilledButton(
                 onPressed: _onTrackActiveRide,
                 style: FilledButton.styleFrom(
@@ -679,29 +780,31 @@ class _TaxiScreenState extends State<TaxiScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 12),
-          TextButton(
-            onPressed: _isCheckingActiveRide
-                ? null
-                : () {
-                    setState(() => _isCheckingActiveRide = true);
-                    _checkActiveRide();
-                  },
-            child: _isCheckingActiveRide
-                ? SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: colorScheme.primary,
+          const SizedBox(height: 8),
+          Center(
+            child: TextButton(
+              onPressed: _isCheckingActiveRide
+                  ? null
+                  : () {
+                      setState(() => _isCheckingActiveRide = true);
+                      _checkActiveRide();
+                    },
+              child: _isCheckingActiveRide
+                  ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: colorScheme.primary,
+                      ),
+                    )
+                  : Text(
+                      l10n.taxiRefreshStatus,
+                      style:
+                          TextStyle(color: colorScheme.primary, fontSize: 14),
                     ),
-                  )
-                : Text(
-                    l10n.taxiRefreshStatus,
-                    style: TextStyle(color: colorScheme.primary, fontSize: 14),
-                  ),
+            ),
           ),
-          const SizedBox(height: 16),
         ],
       ),
     );
@@ -821,12 +924,12 @@ class _TaxiScreenState extends State<TaxiScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final l10n = context.l10n;
-    final hasActiveRide = _activeRide != null;
-    final activePickup = _activePickup;
-    final activeDropoff = _activeDropoff;
+    final showActiveRide = _shouldShowActiveRideUI();
+    final activePickup = showActiveRide ? _activePickup : null;
+    final activeDropoff = showActiveRide ? _activeDropoff : null;
 
     final screenHeight = MediaQuery.of(context).size.height;
-    final bottomSheetInitialFraction = hasActiveRide ? 0.45 : 0.35;
+    final bottomSheetInitialFraction = showActiveRide ? 0.45 : 0.35;
     final mapBottom = screenHeight * bottomSheetInitialFraction;
 
     return Scaffold(
@@ -839,13 +942,13 @@ class _TaxiScreenState extends State<TaxiScreen> {
             bottom: mapBottom,
             child: _buildMapOrFallback(
               context,
-              hasActiveRide,
+              showActiveRide,
               activePickup,
               activeDropoff,
             ),
           ),
           // Available cars info chip - hide when active ride
-          if (!hasActiveRide && _totalAvailable != null && _totalAvailable! > 0)
+          if (!showActiveRide && _totalAvailable != null && _totalAvailable! > 0)
             Positioned(
               top: 95,
               left: 16,
@@ -924,12 +1027,12 @@ class _TaxiScreenState extends State<TaxiScreen> {
           ),
           // Bottom Sheet Modal
           DraggableScrollableSheet(
-            initialChildSize: hasActiveRide ? 0.45 : 0.35,
+            initialChildSize: showActiveRide ? 0.45 : 0.35,
             minChildSize: 0.25,
             maxChildSize: 0.75,
             builder: (context, scrollController) {
-              if (hasActiveRide) {
-                return _buildActiveRideSheet(context);
+              if (showActiveRide) {
+                return _buildActiveRideSheet(context, scrollController);
               }
               return Container(
                 decoration: BoxDecoration(
@@ -977,8 +1080,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
                       ),
                     ),
                     // Distance in KM when destination is set
-                    if (!hasActiveRide &&
-                        _destinationPosition != null &&
+                    if (_destinationPosition != null &&
                         (_routeDistanceKm != null || _isLoadingRoute))
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -1007,8 +1109,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
                           ],
                         ),
                       ),
-                    if (!hasActiveRide &&
-                        _destinationPosition != null &&
+                    if (_destinationPosition != null &&
                         (_routeDistanceKm != null || _isLoadingRoute))
                       const SizedBox(height: 12),
                     // Search Bar and Now Button

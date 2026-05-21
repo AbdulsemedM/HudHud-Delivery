@@ -200,19 +200,66 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     ),
                                   ),
                                 ],
+                                if (!_product!.canOrder) ...[
+                                  const SizedBox(height: 16),
+                                  Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 12),
+                                    decoration: BoxDecoration(
+                                      color: colorScheme.surfaceContainerHighest,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.block,
+                                          size: 20,
+                                          color: colorScheme.onSurfaceVariant,
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Expanded(
+                                          child: Text(
+                                            'This product is currently unavailable',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w600,
+                                              color: colorScheme.onSurfaceVariant,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                                 const SizedBox(height: 32),
                                 SizedBox(
                                   width: double.infinity,
                                   child: FilledButton.icon(
-                                    onPressed: () {
-                                      // TODO: Add to cart
-                                    },
-                                    icon: const Icon(Icons.add_shopping_cart),
-                                    label: const Text('Add to cart'),
+                                    onPressed: _product!.canOrder
+                                        ? () {
+                                            // TODO: Add to cart
+                                          }
+                                        : null,
+                                    icon: Icon(
+                                      _product!.canOrder
+                                          ? Icons.add_shopping_cart
+                                          : Icons.block,
+                                    ),
+                                    label: Text(
+                                      _product!.canOrder
+                                          ? 'Add to cart'
+                                          : 'Unavailable',
+                                    ),
                                     style: FilledButton.styleFrom(
                                       backgroundColor: AppColors.primaryColor,
                                       foregroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(vertical: 16),
+                                      disabledBackgroundColor:
+                                          colorScheme.surfaceContainerHighest,
+                                      disabledForegroundColor:
+                                          colorScheme.onSurfaceVariant,
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 16),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(12),
                                       ),

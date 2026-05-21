@@ -1,4 +1,3 @@
-import 'package:hudhud_delivery/features/categories/model/categories_products_model.dart';
 import 'package:hudhud_delivery/features/orders/data/models/vendor_model.dart';
 
 import '../data_provider/vendors_data_provider.dart';
@@ -32,36 +31,6 @@ class VendorsRepository {
     }
     return list
         .map((e) => VendorModel.fromVendorListJson(Map<String, dynamic>.from(e as Map)))
-        .toList();
-  }
-
-  /// GET /api/vendor/products/by-vendor/{id}
-  /// [vendorId] is the vendor shop `id` from the vendors list (e.g. 1, 2, 3).
-  Future<List<CategoriesProductsModel>> getVendorProducts(int vendorId) async {
-    final response = await vendorsDataProvider.getVendorProducts(vendorId);
-    if (response['statusCode'] != 200) {
-      throw Exception(_clean(response['errorMessage']?.toString() ?? 'Error fetching vendor products'));
-    }
-    final data = response['data'];
-    if (data == null) return [];
-    List<dynamic> list;
-    // Products endpoint may return a raw array of product objects.
-    if (data is List) {
-      list = data;
-    } else if (data is Map) {
-      final inner = data['data'];
-      if (inner is List) {
-        list = inner;
-      } else {
-        list = [];
-      }
-    } else {
-      list = [];
-    }
-    return list
-        .map((e) => CategoriesProductsModel.fromMap(
-              Map<String, dynamic>.from(e as Map),
-            ))
         .toList();
   }
 

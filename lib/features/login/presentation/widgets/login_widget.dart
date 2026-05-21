@@ -19,7 +19,7 @@ class LogoWidget extends StatelessWidget {
         color: theme.colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: theme.colorScheme.shadow.withOpacity(0.26),
+            color: theme.colorScheme.shadow.withValues(alpha: 0.22),
             blurRadius: 20,
             spreadRadius: 5,
           ),
@@ -41,26 +41,36 @@ class LoginTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
+    final headline = theme.textTheme.headlineSmall?.copyWith(
+          fontWeight: FontWeight.bold,
+          color: theme.colorScheme.onSurface,
+          letterSpacing: 0.2,
+        ) ??
+        TextStyle(
+          fontSize: 26,
+          fontWeight: FontWeight.bold,
+          color: theme.colorScheme.onSurface,
+          letterSpacing: 0.2,
+        );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           l10n.loginTitle,
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: theme.colorScheme.onSurface,
-            letterSpacing: 0.5,
-          ),
+          style: headline,
         ),
         const SizedBox(height: 8),
         Text(
           l10n.loginSubtitle,
-          style: TextStyle(
-            fontSize: 13,
-            color: theme.colorScheme.onSurfaceVariant,
-            height: 1.4,
-          ),
+          style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                height: 1.45,
+              ) ??
+              TextStyle(
+                fontSize: 14,
+                color: theme.colorScheme.onSurfaceVariant,
+                height: 1.45,
+              ),
         ),
       ],
     );
@@ -105,6 +115,11 @@ class _LoginFormState extends State<LoginForm> {
                   controller: _emailPhoneController,
                   keyboardType: TextInputType.text,
                   decoration: InputDecoration(
+                    prefixIcon: Icon(
+                      Icons.alternate_email_outlined,
+                      color: theme.colorScheme.onSurfaceVariant,
+                      size: 22,
+                    ),
                     hintText: l10n.hintEmailPhone,
                     hintStyle: TextStyle(
                       color: theme.colorScheme.onSurfaceVariant,
@@ -129,8 +144,10 @@ class _LoginFormState extends State<LoginForm> {
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide(color: theme.colorScheme.error, width: 2),
                     ),
-                    contentPadding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 18,
+                    ),
                   ),
                   style: TextStyle(
                     color: theme.colorScheme.onSurface,
@@ -153,6 +170,11 @@ class _LoginFormState extends State<LoginForm> {
                   controller: _passwordController,
                   obscureText: !_isPasswordVisible,
                   decoration: InputDecoration(
+                    prefixIcon: Icon(
+                      Icons.lock_outline_rounded,
+                      color: theme.colorScheme.onSurfaceVariant,
+                      size: 22,
+                    ),
                     hintText: l10n.hintPassword,
                     hintStyle: TextStyle(
                       color: theme.colorScheme.onSurfaceVariant,
@@ -190,8 +212,10 @@ class _LoginFormState extends State<LoginForm> {
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide(color: theme.colorScheme.error, width: 2),
                     ),
-                    contentPadding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 18,
+                    ),
                   ),
                   style: TextStyle(
                     color: theme.colorScheme.onSurface,
@@ -237,7 +261,7 @@ class _LoginFormState extends State<LoginForm> {
             // Sign In Button
             SizedBox(
               width: double.infinity,
-              height: 48,
+              height: 52,
               child: BlocBuilder<LoginBloc, LoginState>(
                 builder: (context, state) {
                   final signInBackground = theme.brightness == Brightness.dark
@@ -249,9 +273,10 @@ class _LoginFormState extends State<LoginForm> {
                       backgroundColor: signInBackground,
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(14),
                       ),
-                      elevation: 0,
+                      elevation: theme.brightness == Brightness.dark ? 2 : 1,
+                      shadowColor: signInBackground.withValues(alpha: 0.35),
                     ),
                     child: state is LoginLoading
                         ? const SizedBox(

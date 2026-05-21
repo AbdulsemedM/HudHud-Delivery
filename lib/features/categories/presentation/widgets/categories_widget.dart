@@ -381,6 +381,33 @@ class ProductDetailsModal extends StatelessWidget {
                   ),
                 const SizedBox(height: 16),
 
+                if (!product.canOrder) ...[
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade200,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.block, size: 18, color: Colors.grey[700]),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Currently unavailable',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[800],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+
                 // Product Name
                 Text(
                   product.name ?? 'Unknown Product',
@@ -943,9 +970,12 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final canOrder = product.canOrder;
     return GestureDetector(
       onTap: onTap,
-      child: Container(
+      child: Opacity(
+        opacity: canOrder ? 1 : 0.65,
+        child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -963,7 +993,9 @@ class ProductCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Product Image
-            Container(
+            Stack(
+              children: [
+                Container(
               height: 120,
               width: double.infinity,
               decoration: BoxDecoration(
@@ -979,6 +1011,29 @@ class ProductCard extends StatelessWidget {
                   fit: BoxFit.cover,
                 ),
               ),
+            ),
+                if (!canOrder)
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.65),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: const Text(
+                        'Unavailable',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
 
             // Product Info
@@ -1049,11 +1104,13 @@ class ProductCard extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF4A148C),
+                          color: canOrder
+                              ? const Color(0xFF4A148C)
+                              : Colors.grey.shade400,
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Icon(
-                          Icons.add,
+                        child: Icon(
+                          canOrder ? Icons.add : Icons.block,
                           color: Colors.white,
                           size: 20,
                         ),
@@ -1065,6 +1122,7 @@ class ProductCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }
@@ -1104,9 +1162,12 @@ class ProductItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final canOrder = product?.canOrder ?? true;
     return GestureDetector(
         onTap: onTap,
-        child: Container(
+        child: Opacity(
+          opacity: canOrder ? 1 : 0.6,
+          child: Container(
           padding: const EdgeInsets.all(16),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1118,6 +1179,8 @@ class ProductItem extends StatelessWidget {
                   width: 80,
                   height: 80,
                   fit: BoxFit.cover,
+                  color: canOrder ? null : Colors.grey,
+                  colorBlendMode: canOrder ? null : BlendMode.saturation,
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
                       width: 80,
@@ -1148,6 +1211,17 @@ class ProductItem extends StatelessWidget {
                         color: Colors.grey[600],
                       ),
                     ),
+                    if (!canOrder) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        'Unavailable',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1203,17 +1277,21 @@ class ProductItem extends StatelessWidget {
                         const SizedBox(width: 4),
                         if (!isAdded)
                           TextButton(
-                            onPressed: onAddPressed,
+                            onPressed: canOrder ? onAddPressed : null,
                             style: TextButton.styleFrom(
-                              backgroundColor: const Color(0xFFFFEEE5),
+                              backgroundColor: canOrder
+                                  ? const Color(0xFFFFEEE5)
+                                  : Colors.grey.shade200,
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 16, vertical: 8),
+                              disabledForegroundColor: Colors.grey,
                             ),
-                            child: const Text(
-                              'ADD',
+                            child: Text(
+                              canOrder ? 'ADD' : 'UNAVAILABLE',
                               style: TextStyle(
-                                color: Colors.orange,
+                                color: canOrder ? Colors.orange : Colors.grey,
                                 fontWeight: FontWeight.bold,
+                                fontSize: canOrder ? null : 11,
                               ),
                             ),
                           )
@@ -1243,7 +1321,8 @@ class ProductItem extends StatelessWidget {
                                 ),
                                 IconButton(
                                   icon: const Icon(Icons.add, size: 16),
-                                  onPressed: onIncrementPressed,
+                                  onPressed:
+                                      canOrder ? onIncrementPressed : null,
                                   padding: EdgeInsets.zero,
                                   constraints: const BoxConstraints(
                                     minWidth: 32,
@@ -1279,6 +1358,7 @@ class ProductItem extends StatelessWidget {
               ),
             ],
           ),
+        ),
         ));
   }
 }

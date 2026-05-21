@@ -11,6 +11,10 @@ import 'package:hudhud_delivery/features/categories/presentation/screens/categor
 import 'package:hudhud_delivery/features/delivery/data/mock_popular_orders.dart';
 import 'package:hudhud_delivery/features/delivery/presentation/screens/store_detail_screen.dart';
 import 'package:hudhud_delivery/features/orders/data/models/vendor_model.dart';
+import 'package:hudhud_delivery/features/products/data/products_data_provider.dart';
+import 'package:hudhud_delivery/features/products/data/products_repository.dart';
+import 'package:hudhud_delivery/features/products/presentation/screens/product_search_results_screen.dart';
+import 'package:hudhud_delivery/features/products/presentation/widgets/product_search_field.dart';
 import 'package:hudhud_delivery/features/vendors/data/data_provider/vendors_data_provider.dart';
 import 'package:hudhud_delivery/features/vendors/data/repository/vendors_repository.dart';
 
@@ -27,9 +31,12 @@ class AllCategoriesScreen extends StatelessWidget {
         apiService: ApiService.instance,
       ),
     );
+    final productsRepository = ProductsRepository(
+      productsDataProvider: ProductsDataProvider(apiService: ApiService.instance),
+    );
     return BlocProvider(
-      create: (context) =>
-          CategoriesBloc(repository)..add(FetchCategoriesListEvent()),
+      create: (context) => CategoriesBloc(repository, productsRepository)
+        ..add(FetchCategoriesListEvent()),
       child: _AllCategoriesBody(embedded: embedded),
     );
   }
@@ -92,7 +99,7 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
 
-    final body = BlocBuilder<CategoriesBloc, CategoriesState>(
+    final gridBody = BlocBuilder<CategoriesBloc, CategoriesState>(
       buildWhen: (prev, curr) =>
           curr is FetchCategoriesListLoading ||
           curr is FetchCategoriesListSuccess ||
@@ -127,6 +134,28 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
         }
         return const SizedBox.shrink();
       },
+    );
+
+    final body = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 8),
+        ProductSearchField(
+          hint: 'Search products everywhere',
+          readOnly: true,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const ProductSearchResultsScreen(),
+              ),
+            );
+          },
+          onSearchChanged: (_) {},
+        ),
+        const SizedBox(height: 8),
+        Expanded(child: gridBody),
+      ],
     );
 
     if (widget.embedded) {

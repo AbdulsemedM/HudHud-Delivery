@@ -31,6 +31,8 @@ class CategoriesProductsModel {
   final String? formatted_original_price;
   final bool? is_on_discount;
   final int? discount_percentage;
+  final bool? is_available;
+  final String? status;
   CategoriesProductsModel({
     this.id,
     this.vendor_id,
@@ -59,7 +61,23 @@ class CategoriesProductsModel {
     this.formatted_original_price,
     this.is_on_discount,
     this.discount_percentage,
+    this.is_available,
+    this.status,
   });
+
+  /// Whether the product can be added to cart (API: is_available + active status).
+  bool get canOrder =>
+      is_available != false && (status == null || status == 'active');
+
+  static bool _parseBool(dynamic value, {required bool fallback}) {
+    if (value == null) return fallback;
+    if (value is bool) return value;
+    if (value is int) return value != 0;
+    final s = value.toString().toLowerCase();
+    if (s == 'true' || s == '1') return true;
+    if (s == 'false' || s == '0') return false;
+    return fallback;
+  }
 
   CategoriesProductsModel copyWith({
     int? id,
@@ -89,6 +107,8 @@ class CategoriesProductsModel {
     String? formatted_original_price,
     bool? is_on_discount,
     int? discount_percentage,
+    bool? is_available,
+    String? status,
   }) {
     return CategoriesProductsModel(
       id: id ?? this.id,
@@ -118,6 +138,8 @@ class CategoriesProductsModel {
       formatted_original_price: formatted_original_price ?? this.formatted_original_price,
       is_on_discount: is_on_discount ?? this.is_on_discount,
       discount_percentage: discount_percentage ?? this.discount_percentage,
+      is_available: is_available ?? this.is_available,
+      status: status ?? this.status,
     );
   }
 
@@ -150,6 +172,8 @@ class CategoriesProductsModel {
       'formatted_original_price': formatted_original_price,
       'is_on_discount': is_on_discount,
       'discount_percentage': discount_percentage,
+      'is_available': is_available,
+      'status': status,
     };
   }
 
@@ -212,6 +236,8 @@ class CategoriesProductsModel {
       formatted_original_price: map['formatted_original_price']?.toString(),
       is_on_discount: map['is_on_discount'] as bool?,
       discount_percentage: map['discount_percentage'] != null ? (map['discount_percentage'] is String ? int.tryParse(map['discount_percentage']) : map['discount_percentage'] as int) : null,
+      is_available: _parseBool(map['is_available'], fallback: true),
+      status: map['status']?.toString(),
     );
   }
 
@@ -255,7 +281,9 @@ class CategoriesProductsModel {
       other.formatted_price == formatted_price &&
       other.formatted_original_price == formatted_original_price &&
       other.is_on_discount == is_on_discount &&
-      other.discount_percentage == discount_percentage;
+      other.discount_percentage == discount_percentage &&
+      other.is_available == is_available &&
+      other.status == status;
   }
 
   @override
@@ -286,6 +314,8 @@ class CategoriesProductsModel {
       formatted_price.hashCode ^
       formatted_original_price.hashCode ^
       is_on_discount.hashCode ^
-      discount_percentage.hashCode;
+      discount_percentage.hashCode ^
+      is_available.hashCode ^
+      status.hashCode;
   }
 }

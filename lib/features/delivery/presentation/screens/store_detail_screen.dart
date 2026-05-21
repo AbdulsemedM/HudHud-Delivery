@@ -8,8 +8,11 @@ import 'package:hudhud_delivery/features/categories/presentation/widgets/categor
 import 'package:hudhud_delivery/features/checkout/presentation/screen/checkout_screen.dart';
 import 'package:hudhud_delivery/features/delivery/presentation/screens/product_detail_screen.dart';
 import 'package:hudhud_delivery/features/orders/data/models/vendor_model.dart';
-import 'package:hudhud_delivery/features/vendors/data/data_provider/vendors_data_provider.dart';
-import 'package:hudhud_delivery/features/vendors/data/repository/vendors_repository.dart';
+import 'package:hudhud_delivery/features/products/data/products_data_provider.dart';
+import 'package:hudhud_delivery/features/products/data/products_repository.dart';
+import 'package:hudhud_delivery/features/products/model/products_query.dart';
+import 'package:hudhud_delivery/features/products/presentation/widgets/product_price_filter_sheet.dart';
+import 'package:hudhud_delivery/features/products/presentation/widgets/product_search_field.dart';
 
 class StoreDetailScreen extends StatefulWidget {
   final String storeName;
@@ -32,12 +35,18 @@ class StoreDetailScreen extends StatefulWidget {
 
 class _StoreDetailScreenState extends State<StoreDetailScreen> {
   String _selectedTab = 'Featured';
-  final TextEditingController _searchController = TextEditingController();
 
   List<CategoriesProductsModel> _products = [];
   bool _productsLoading = false;
+  bool _productsLoadingMore = false;
   String? _productsError;
-  late final VendorsRepository _vendorsRepository;
+  late final ProductsRepository _productsRepository;
+
+  String _search = '';
+  String? _minPrice;
+  String? _maxPrice;
+  int _currentPage = 1;
+  bool _hasMore = false;
 
   /// Cart: productId -> quantity (same pattern as categories screen).
   final Map<String, int> _cartItems = {};
@@ -45,36 +54,85 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _vendorsRepository = VendorsRepository(
-      vendorsDataProvider: VendorsDataProvider(apiService: ApiService.instance),
+    _productsRepository = ProductsRepository(
+      productsDataProvider:
+          ProductsDataProvider(apiService: ApiService.instance),
     );
     if (widget.vendorId != null) {
       _loadVendorProducts();
     }
   }
 
-  Future<void> _loadVendorProducts() async {
+  Future<void> _loadVendorProducts({int page = 1, bool loadMore = false}) async {
     final vendorId = widget.vendorId;
     if (vendorId == null) return;
     setState(() {
-      _productsLoading = true;
-      _productsError = null;
+      if (loadMore) {
+        _productsLoadingMore = true;
+      } else {
+        _productsLoading = true;
+        _productsError = null;
+      }
     });
     try {
-      final list = await _vendorsRepository.getVendorProducts(vendorId);
+      final result = await _productsRepository.getProducts(
+        ProductsQuery.forVendor(
+          vendorId,
+          page: page,
+          search: _search.isEmpty ? null : _search,
+          minPrice: _minPrice,
+          maxPrice: _maxPrice,
+        ),
+      );
       setState(() {
-        _products = list;
+        if (loadMore && page > 1) {
+          _products = [..._products, ...result.items];
+        } else {
+          _products = result.items;
+        }
+        _currentPage = result.currentPage;
+        _hasMore = result.hasMore;
         _productsLoading = false;
+        _productsLoadingMore = false;
       });
     } catch (e) {
       setState(() {
         _productsError = e.toString();
         _productsLoading = false;
+        _productsLoadingMore = false;
       });
     }
   }
 
+  void _onSearchChanged(String value) {
+    _search = value;
+    _loadVendorProducts();
+  }
+
+  Future<void> _openPriceFilter() async {
+    final result = await showProductPriceFilterSheet(
+      context,
+      initialMin: _minPrice,
+      initialMax: _maxPrice,
+    );
+    if (result == null) return;
+    setState(() {
+      _minPrice = result.minPrice;
+      _maxPrice = result.maxPrice;
+    });
+    _loadVendorProducts();
+  }
+
+  CategoriesProductsModel? _productById(String productId) {
+    for (final p in _products) {
+      if (p.id?.toString() == productId) return p;
+    }
+    return null;
+  }
+
   void _addToCart(String productId) {
+    final product = _productById(productId);
+    if (product != null && !product.canOrder) return;
     setState(() {
       _cartItems[productId] = (_cartItems[productId] ?? 0) + 1;
     });
@@ -87,6 +145,8 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
   }
 
   void _incrementQuantity(String productId) {
+    final product = _productById(productId);
+    if (product != null && !product.canOrder) return;
     setState(() {
       _cartItems[productId] = (_cartItems[productId] ?? 0) + 1;
     });
@@ -139,12 +199,6 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
     return total;
   }
 
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
   String get _displayName => widget.vendor?.name ?? widget.storeName;
 
   @override
@@ -182,32 +236,22 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                   ],
                 ),
               ),
-            // Search Bar
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Search stores and produ...',
-                    hintStyle: TextStyle(color: Colors.grey[600]),
-                    prefixIcon: Icon(
-                      Icons.search,
-                      color: Colors.grey[600],
-                    ),
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
+            if (widget.vendorId != null) ...[
+              ProductSearchField(
+                hint: 'Search in $_displayName',
+                onSearchChanged: _onSearchChanged,
+                onFilterTap: _openPriceFilter,
+              ),
+              if (_minPrice != null || _maxPrice != null)
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  child: Text(
+                    'Price: ${_minPrice ?? '—'} – ${_maxPrice ?? '—'}',
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
                 ),
-              ),
-            ),
+            ],
             const SizedBox(height: 16),
             // Category Tabs
             Padding(
@@ -377,7 +421,9 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (widget.storeImage != null && widget.storeImage!.isNotEmpty)
+              if (widget.vendor == null &&
+                  widget.storeImage != null &&
+                  widget.storeImage!.isNotEmpty)
                 ClipRRect(
                   child: Image.network(
                     widget.storeImage!,
@@ -387,7 +433,7 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                     errorBuilder: (_, __, ___) => const SizedBox.shrink(),
                   ),
                 )
-              else
+              else if (widget.vendor == null)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Container(
@@ -408,7 +454,7 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                     ),
                   ),
                 ),
-              const SizedBox(height: 24),
+              if (widget.vendor == null) const SizedBox(height: 24),
               ...sections.map((e) {
                 final title = e.key != null ? 'Category ${e.key}' : 'Products';
                 return Padding(
@@ -425,6 +471,21 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                   ),
                 );
               }),
+              if (_hasMore)
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Center(
+                    child: _productsLoadingMore
+                        ? const CircularProgressIndicator()
+                        : TextButton(
+                            onPressed: () => _loadVendorProducts(
+                              page: _currentPage + 1,
+                              loadMore: true,
+                            ),
+                            child: const Text('Load more'),
+                          ),
+                  ),
+                ),
               if (_totalItems > 0) const SizedBox(height: 80),
               const SizedBox(height: 24),
             ],
@@ -543,6 +604,8 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
 }
 
 class _VendorDetailHeader extends StatelessWidget {
+  static const double _heroHeight = 280;
+
   final VendorModel vendor;
   final VoidCallback onBack;
 
@@ -551,43 +614,40 @@ class _VendorDetailHeader extends StatelessWidget {
     required this.onBack,
   });
 
+  String? get _heroImageUrl {
+    if (vendor.bannerPath != null && vendor.bannerPath!.isNotEmpty) {
+      return vendor.bannerPath;
+    }
+    if (vendor.avatar.isNotEmpty && vendor.avatar.startsWith('http')) {
+      return vendor.avatar;
+    }
+    return null;
+  }
+
+  bool get _hasHours =>
+      (vendor.openingTime != null && vendor.openingTime!.isNotEmpty) ||
+      (vendor.closingTime != null && vendor.closingTime!.isNotEmpty);
+
   @override
   Widget build(BuildContext context) {
-    final hasBanner = vendor.bannerPath != null && vendor.bannerPath!.isNotEmpty;
-    final logoUrl = vendor.avatar.isNotEmpty ? vendor.avatar : null;
+    final heroUrl = _heroImageUrl;
+    final tag = vendor.cuisineType?.trim();
+    final hasTag = tag != null && tag.isNotEmpty;
 
     return SizedBox(
-      height: 200,
+      height: _heroHeight,
       child: Stack(
+        fit: StackFit.expand,
         children: [
-          // Banner or gradient background
-          Container(
-            height: 200,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              gradient: hasBanner
-                  ? null
-                  : LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        AppColors.primaryColor.withOpacity(0.85),
-                        AppColors.primaryColor,
-                        AppColors.primaryDarkColor,
-                      ],
-                    ),
-            ),
-            child: hasBanner
+          Positioned.fill(
+            child: heroUrl != null
                 ? Image.network(
-                    vendor.bannerPath!,
+                    heroUrl,
                     fit: BoxFit.cover,
-                    width: double.infinity,
-                    height: double.infinity,
                     errorBuilder: (_, __, ___) => _gradientFallback(),
                   )
                 : _gradientFallback(),
           ),
-          // Dark overlay for readability
           Positioned.fill(
             child: DecoratedBox(
               decoration: BoxDecoration(
@@ -595,10 +655,11 @@ class _VendorDetailHeader extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withOpacity(0.2),
-                    Colors.black.withOpacity(0.5),
-                    Colors.black.withOpacity(0.75),
+                    Colors.black.withValues(alpha: 0.15),
+                    Colors.black.withValues(alpha: 0.35),
+                    Colors.black.withValues(alpha: 0.82),
                   ],
+                  stops: const [0.0, 0.45, 1.0],
                 ),
               ),
             ),
@@ -608,133 +669,148 @@ class _VendorDetailHeader extends StatelessWidget {
             top: 8,
             left: 8,
             child: ClipRRect(
+              borderRadius: BorderRadius.circular(24),
               child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                 child: Material(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(24),
+                  color: Colors.black.withValues(alpha: 0.28),
                   child: InkWell(
                     onTap: onBack,
                     borderRadius: BorderRadius.circular(24),
                     child: const Padding(
                       padding: EdgeInsets.all(10),
-                      child: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
+                      child: Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
           ),
-          // Bottom content: logo + name + details
           Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  // Logo
-                  Container(
-                    width: 72,
-                    height: 72,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 3),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.25),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: ClipOval(
-                      child: logoUrl != null && logoUrl.startsWith('http')
-                          ? Image.network(
-                              logoUrl,
-                              fit: BoxFit.cover,
-                              width: 72,
-                              height: 72,
-                              errorBuilder: (_, __, ___) => _logoPlaceholder(),
-                            )
-                          : _logoPlaceholder(),
-                    ),
+            left: 16,
+            right: 16,
+            bottom: 20,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  vendor.name,
+                  style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                    height: 1.15,
+                    letterSpacing: -0.8,
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          vendor.name,
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            letterSpacing: -0.5,
-                            shadows: [
-                              Shadow(color: Colors.black26, offset: Offset(0, 1), blurRadius: 4),
-                            ],
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    if (hasTag)
+                      _VendorInfoChip(
+                        icon: Icons.local_offer_outlined,
+                        label: tag,
+                        accent: AppColors.primaryLightColor,
+                      ),
+                    if (vendor.status == 'active')
+                      const _VendorInfoChip(
+                        icon: Icons.check_circle_outline,
+                        label: 'Open for orders',
+                        accent: AppColors.successLightColor,
+                      ),
+                  ],
+                ),
+                if (_hasHours) ...[
+                  const SizedBox(height: 12),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(14),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 12,
                         ),
-                        if (vendor.cuisineType != null && vendor.cuisineType!.isNotEmpty) ...[
-                          const SizedBox(height: 6),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.25),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              vendor.cuisineType!,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.14),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.22),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: AppColors.primaryColor
+                                    .withValues(alpha: 0.9),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: const Icon(
+                                Icons.schedule_rounded,
                                 color: Colors.white,
+                                size: 20,
                               ),
                             ),
-                          ),
-                        ],
-                        if (vendor.openingTime != null || vendor.closingTime != null) ...[
-                          const SizedBox(height: 6),
-                          Row(
-                            children: [
-                              Icon(Icons.schedule_rounded, size: 14, color: Colors.white.withOpacity(0.9)),
-                              const SizedBox(width: 4),
-                              Text(
-                                '${vendor.openingTime ?? '—'} – ${vendor.closingTime ?? '—'}',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.white.withOpacity(0.95),
-                                  fontWeight: FontWeight.w500,
-                                ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Opening hours',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white
+                                          .withValues(alpha: 0.75),
+                                      letterSpacing: 0.4,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    '${vendor.openingTime ?? '—'}  →  ${vendor.closingTime ?? '—'}',
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                        ],
-                        if (vendor.description != null && vendor.description!.isNotEmpty) ...[
-                          const SizedBox(height: 6),
-                          Text(
-                            vendor.description!,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.white.withOpacity(0.9),
-                              height: 1.35,
                             ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ],
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ],
-              ),
+                if (vendor.description != null &&
+                    vendor.description!.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  Text(
+                    vendor.description!,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.white.withValues(alpha: 0.88),
+                      height: 1.4,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ],
             ),
           ),
         ],
@@ -743,23 +819,64 @@ class _VendorDetailHeader extends StatelessWidget {
   }
 
   Widget _gradientFallback() => Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.primaryColor.withOpacity(0.9),
-            AppColors.primaryColor,
-            AppColors.primaryDarkColor,
-          ],
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.primaryLightColor,
+              AppColors.primaryColor,
+              AppColors.primaryDarkColor,
+            ],
+          ),
         ),
+        child: Center(
+          child: Icon(
+            Icons.storefront_rounded,
+            size: 88,
+            color: Colors.white38,
+          ),
+        ),
+      );
+}
+
+class _VendorInfoChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color accent;
+
+  const _VendorInfoChip({
+    required this.icon,
+    required this.label,
+    required this.accent,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.35),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: accent.withValues(alpha: 0.55)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: accent),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
+          ),
+        ],
       ),
     );
-
-  Widget _logoPlaceholder() => Container(
-      color: Colors.white.withOpacity(0.3),
-      child: const Icon(Icons.store_rounded, size: 36, color: Colors.white70),
-    );
+  }
 }
 
 class _CategoryTab extends StatelessWidget {

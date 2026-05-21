@@ -246,12 +246,27 @@ class _WishlistScreenState extends State<WishlistScreen> {
                     ),
                     subtitle: Padding(
                       padding: const EdgeInsets.only(top: 4),
-                      child: Text(
-                        _priceLabel(product),
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: AppColors.primaryColor,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _priceLabel(product),
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: AppColors.primaryColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          if (!product.canOrder) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              'Unavailable',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: cs.onSurfaceVariant,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
                     trailing: IconButton(
