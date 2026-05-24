@@ -6,6 +6,9 @@ import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import '../../bloc/orders_bloc.dart';
 import '../../data/models/order_model.dart';
 import '../../data/models/order_tracking_model.dart';
+import 'package:hudhud_delivery/features/chat/utils/chat_navigation.dart';
+import 'package:hudhud_delivery/l10n/app_localizations.dart';
+
 import '../widgets/order_details_widgets.dart';
 
 class OrderDetailsScreen extends StatefulWidget {
@@ -119,6 +122,12 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
             ),
           ),
           actions: [
+            IconButton(
+              tooltip: AppLocalizations.of(context)!.chatOrderTitle,
+              icon: const Icon(Icons.chat_bubble_outline_rounded,
+                  color: Colors.white),
+              onPressed: () => openOrderChat(context, order.id),
+            ),
             IconButton(
               tooltip: 'Copy order ID',
               icon: const Icon(Icons.copy_outlined, color: Colors.white),

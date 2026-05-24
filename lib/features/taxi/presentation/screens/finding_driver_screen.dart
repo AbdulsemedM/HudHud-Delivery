@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/features/chat/utils/chat_navigation.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:lottie/lottie.dart';
@@ -97,6 +98,14 @@ class _FindingDriverScreenState extends State<FindingDriverScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            if (widget.rideId != null)
+              Align(
+                alignment: Alignment.topRight,
+                child: IconButton(
+                  icon: const Icon(Icons.chat_bubble_outline_rounded),
+                  onPressed: () => openRideChat(context, widget.rideId!),
+                ),
+              ),
             // Loading Animation
             SizedBox(
               width: 200,

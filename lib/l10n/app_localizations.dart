@@ -494,6 +494,12 @@ abstract class AppLocalizations {
   /// **'Favorites'**
   String get profileMenuFavorites;
 
+  /// No description provided for @profileMenuMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'Messages'**
+  String get profileMenuMessages;
+
   /// No description provided for @profileMenuAccountSettings.
   ///
   /// In en, this message translates to:
@@ -1093,6 +1099,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Email address or Phone number'**
   String get labelEmailOrPhone;
+
+  /// No description provided for @loginTabEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get loginTabEmail;
+
+  /// No description provided for @loginTabPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get loginTabPhone;
+
+  /// No description provided for @loginTabEmailSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with email'**
+  String get loginTabEmailSemantics;
+
+  /// No description provided for @loginTabPhoneSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with phone'**
+  String get loginTabPhoneSemantics;
+
+  /// No description provided for @labelEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get labelEmail;
+
+  /// No description provided for @hintEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Eg. JohnDoe@gmail.com'**
+  String get hintEmail;
+
+  /// No description provided for @hintPhoneNational.
+  ///
+  /// In en, this message translates to:
+  /// **'912 345 678'**
+  String get hintPhoneNational;
+
+  /// No description provided for @validationPhoneRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your phone number'**
+  String get validationPhoneRequired;
+
+  /// No description provided for @validationPhoneInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid phone number'**
+  String get validationPhoneInvalid;
 
   /// No description provided for @hintEmailPhone.
   ///
@@ -3769,6 +3829,528 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Passwords do not match'**
   String get validationPasswordsDoNotMatch;
+
+  /// No description provided for @addressesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My Addresses'**
+  String get addressesTitle;
+
+  /// No description provided for @addressesEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved addresses'**
+  String get addressesEmptyTitle;
+
+  /// No description provided for @addressesEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an address to speed up checkout and delivery.'**
+  String get addressesEmptySubtitle;
+
+  /// No description provided for @addressesAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add address'**
+  String get addressesAdd;
+
+  /// No description provided for @addressesAddFromMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick on map'**
+  String get addressesAddFromMap;
+
+  /// No description provided for @addressesAddManual.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter manually'**
+  String get addressesAddManual;
+
+  /// No description provided for @addressesDefaultBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get addressesDefaultBadge;
+
+  /// No description provided for @addressesSetDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as default'**
+  String get addressesSetDefault;
+
+  /// No description provided for @addressesEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get addressesEdit;
+
+  /// No description provided for @addressesDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete address?'**
+  String get addressesDeleteTitle;
+
+  /// No description provided for @addressesDeleteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This address will be removed from your account.'**
+  String get addressesDeleteMessage;
+
+  /// No description provided for @addressesBulkDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete selected addresses?'**
+  String get addressesBulkDeleteTitle;
+
+  /// No description provided for @addressesBulkDeleteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {count} address(es)?'**
+  String addressesBulkDeleteMessage(int count);
+
+  /// No description provided for @addressesBulkDeleteForce.
+  ///
+  /// In en, this message translates to:
+  /// **'Also delete default address'**
+  String get addressesBulkDeleteForce;
+
+  /// No description provided for @addressesSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get addressesSelect;
+
+  /// No description provided for @addressesDeleteSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete selected'**
+  String get addressesDeleteSelected;
+
+  /// No description provided for @addressesTypeHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get addressesTypeHome;
+
+  /// No description provided for @addressesTypeWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Work'**
+  String get addressesTypeWork;
+
+  /// No description provided for @addressesTypeOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get addressesTypeOther;
+
+  /// No description provided for @addressFormAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add address'**
+  String get addressFormAddTitle;
+
+  /// No description provided for @addressFormEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit address'**
+  String get addressFormEditTitle;
+
+  /// No description provided for @addressFormLine1.
+  ///
+  /// In en, this message translates to:
+  /// **'Address line 1'**
+  String get addressFormLine1;
+
+  /// No description provided for @addressFormLine2.
+  ///
+  /// In en, this message translates to:
+  /// **'Address line 2 (optional)'**
+  String get addressFormLine2;
+
+  /// No description provided for @addressFormCity.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get addressFormCity;
+
+  /// No description provided for @addressFormState.
+  ///
+  /// In en, this message translates to:
+  /// **'State / region'**
+  String get addressFormState;
+
+  /// No description provided for @addressFormPostalCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Postal code'**
+  String get addressFormPostalCode;
+
+  /// No description provided for @addressFormCountry.
+  ///
+  /// In en, this message translates to:
+  /// **'Country'**
+  String get addressFormCountry;
+
+  /// No description provided for @addressFormLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Label'**
+  String get addressFormLabel;
+
+  /// No description provided for @addressFormLandmark.
+  ///
+  /// In en, this message translates to:
+  /// **'Landmark (optional)'**
+  String get addressFormLandmark;
+
+  /// No description provided for @addressFormType.
+  ///
+  /// In en, this message translates to:
+  /// **'Address type'**
+  String get addressFormType;
+
+  /// No description provided for @addressFormSetDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as default address'**
+  String get addressFormSetDefault;
+
+  /// No description provided for @addressFormPickOnMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick location on map'**
+  String get addressFormPickOnMap;
+
+  /// No description provided for @addressFormRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'This field is required'**
+  String get addressFormRequired;
+
+  /// No description provided for @addressMapPickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick location'**
+  String get addressMapPickerTitle;
+
+  /// No description provided for @addressMapUseLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this location'**
+  String get addressMapUseLocation;
+
+  /// No description provided for @deliveryAddressTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery address'**
+  String get deliveryAddressTitle;
+
+  /// No description provided for @deliveryAddressChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get deliveryAddressChange;
+
+  /// No description provided for @deliveryAddressSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved addresses'**
+  String get deliveryAddressSaved;
+
+  /// No description provided for @deliveryAddressPickMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick on map'**
+  String get deliveryAddressPickMap;
+
+  /// No description provided for @deliveryAddressAddNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Add new address'**
+  String get deliveryAddressAddNew;
+
+  /// No description provided for @deliveryAddressSelectPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Select delivery address'**
+  String get deliveryAddressSelectPrompt;
+
+  /// No description provided for @addressesSignInTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to manage addresses'**
+  String get addressesSignInTitle;
+
+  /// No description provided for @addressesSignInSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save multiple delivery addresses and set a default.'**
+  String get addressesSignInSubtitle;
+
+  /// No description provided for @addressesLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load addresses'**
+  String get addressesLoadError;
+
+  /// No description provided for @addressesCreatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Address saved'**
+  String get addressesCreatedSuccess;
+
+  /// No description provided for @addressesUpdatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Address updated'**
+  String get addressesUpdatedSuccess;
+
+  /// No description provided for @addressesDeletedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Address deleted'**
+  String get addressesDeletedSuccess;
+
+  /// No description provided for @chatTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Messages'**
+  String get chatTitle;
+
+  /// No description provided for @chatEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No conversations yet'**
+  String get chatEmpty;
+
+  /// No description provided for @chatEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start chatting about an order or contact support.'**
+  String get chatEmptySubtitle;
+
+  /// No description provided for @chatContactSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact support'**
+  String get chatContactSupport;
+
+  /// No description provided for @chatViewOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'View orders'**
+  String get chatViewOrders;
+
+  /// No description provided for @chatSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search messages'**
+  String get chatSearchHint;
+
+  /// No description provided for @chatTypeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Type a message…'**
+  String get chatTypeMessage;
+
+  /// No description provided for @chatSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get chatSend;
+
+  /// No description provided for @chatSupportSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'What do you need help with?'**
+  String get chatSupportSubject;
+
+  /// No description provided for @chatSupportSubjectHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Brief subject'**
+  String get chatSupportSubjectHint;
+
+  /// No description provided for @chatSupportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New support chat'**
+  String get chatSupportTitle;
+
+  /// No description provided for @chatEdited.
+  ///
+  /// In en, this message translates to:
+  /// **'edited'**
+  String get chatEdited;
+
+  /// No description provided for @chatDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'This message was deleted'**
+  String get chatDeleted;
+
+  /// No description provided for @chatSendFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t send message'**
+  String get chatSendFailed;
+
+  /// No description provided for @chatOrderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Order chat'**
+  String get chatOrderTitle;
+
+  /// No description provided for @chatSupportChatTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get chatSupportChatTitle;
+
+  /// No description provided for @chatRideTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ride chat'**
+  String get chatRideTitle;
+
+  /// No description provided for @chatAttachImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get chatAttachImage;
+
+  /// No description provided for @chatAttachFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Document'**
+  String get chatAttachFile;
+
+  /// No description provided for @chatAttachAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice'**
+  String get chatAttachAudio;
+
+  /// No description provided for @chatShareLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get chatShareLocation;
+
+  /// No description provided for @chatEditingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Editing message'**
+  String get chatEditingMessage;
+
+  /// No description provided for @chatCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get chatCopy;
+
+  /// No description provided for @chatEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get chatEdit;
+
+  /// No description provided for @chatDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get chatDelete;
+
+  /// No description provided for @chatRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to retry'**
+  String get chatRetry;
+
+  /// No description provided for @chatOpenMaps.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in Maps'**
+  String get chatOpenMaps;
+
+  /// No description provided for @chatNewSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'New support chat'**
+  String get chatNewSupport;
+
+  /// No description provided for @chatTypeOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Order'**
+  String get chatTypeOrder;
+
+  /// No description provided for @chatTypeSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get chatTypeSupport;
+
+  /// No description provided for @chatTypeRide.
+  ///
+  /// In en, this message translates to:
+  /// **'Ride'**
+  String get chatTypeRide;
+
+  /// No description provided for @chatOpenOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'View order'**
+  String get chatOpenOrder;
+
+  /// No description provided for @chatRecording.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording…'**
+  String get chatRecording;
+
+  /// No description provided for @chatSlideToCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Slide up to cancel'**
+  String get chatSlideToCancel;
+
+  /// No description provided for @chatPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo'**
+  String get chatPhoto;
+
+  /// No description provided for @chatVoiceMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice message'**
+  String get chatVoiceMessage;
+
+  /// No description provided for @chatLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get chatLocation;
+
+  /// No description provided for @chatFile.
+  ///
+  /// In en, this message translates to:
+  /// **'File'**
+  String get chatFile;
+
+  /// No description provided for @chatLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load messages'**
+  String get chatLoadError;
+
+  /// No description provided for @chatCreateSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Start chat'**
+  String get chatCreateSupport;
 }
 
 class _AppLocalizationsDelegate

@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import '../../../home/presentation/screen/home_screen.dart';
 import '../../../settings/presentation/screen/settings_screen.dart';
 import '../../../orders/presentation/screen/orders_screen.dart';
+import '../../../addresses/presentation/screens/addresses_list_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -36,6 +37,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _homeTabActivation.value = _homeTabActivation.value + 1;
       _openPendingFcmOrderIfAny();
+      _openPendingFcmChatIfAny();
+      syncDefaultAddressFromApi();
     });
   }
 
@@ -44,6 +47,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (id == null) return;
     if (!mounted) return;
     pushOrderDetailsById(context, orderId: id);
+  }
+
+  void _openPendingFcmChatIfAny() {
+    final id = PendingFcmChatNavigation.takePending();
+    if (id == null) return;
+    if (!mounted) return;
+    pushChatRoomById(context, conversationId: id);
   }
 
   @override

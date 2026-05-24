@@ -21,7 +21,9 @@ import '../../bloc/home_bloc.dart';
 import '../widgets/home_widget.dart';
 import '../../data/repository/home_repository.dart';
 import '../../data/data_provider/home_data_provider.dart';
-import 'location_search_screen.dart';
+import 'package:hudhud_delivery/features/addresses/data/addresses_data_provider.dart';
+import 'package:hudhud_delivery/features/addresses/data/addresses_repository.dart';
+import 'package:hudhud_delivery/features/addresses/presentation/widgets/delivery_address_selector.dart';
 
 class HomeScreen extends StatefulWidget {
   /// Incremented whenever the user selects the Home tab (including first open).
@@ -161,6 +163,24 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         _isLoadingLocation = true;
       });
 
+      if (_authService.isLoggedIn) {
+        try {
+          final repo = AddressesRepository(
+            addressesDataProvider: AddressesDataProvider(
+              apiService: ApiService.instance,
+            ),
+          );
+          final def = await repo.getDefaultAddress();
+          if (def != null && mounted) {
+            setState(() {
+              _currentLocation = def.displayText;
+              _isLoadingLocation = false;
+            });
+            return;
+          }
+        } catch (_) {}
+      }
+
       // On resume: check if user just granted permission in Settings, then re-fetch.
       if (resumeRefresh) {
         StartupLocationService.isPermanentlyDenied = false;
@@ -284,35 +304,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
   }
 
-  Future<void> _openLocationSearch() async {
-    final result = await Navigator.push<Map<String, dynamic>>(
-      context,
-      MaterialPageRoute(
-        builder: (context) => LocationSearchScreen(
-          currentLocation: _currentLocation,
-        ),
-      ),
+  void _openLocationSearch() {
+    showDeliveryAddressPicker(
+      context: context,
+      currentAddress: _currentLocation,
+      onAddressChanged: ({
+        required String address,
+        double? latitude,
+        double? longitude,
+      }) {
+        setState(() => _currentLocation = address);
+      },
     );
-
-    if (result != null && result['address'] != null) {
-      final address = result['address'] as String;
-      final latitude = (result['latitude'] as num?)?.toDouble();
-      final longitude = (result['longitude'] as num?)?.toDouble();
-      if (latitude != null && longitude != null) {
-        await SavedLocationService.saveLocationData(
-          address: address,
-          latitude: latitude,
-          longitude: longitude,
-        );
-      } else {
-        await SavedLocationService.saveAddress(address);
-      }
-      if (mounted) {
-        setState(() {
-          _currentLocation = address;
-        });
-      }
-    }
   }
 
   Future<void> _openVerifyPhoneFlow() async {

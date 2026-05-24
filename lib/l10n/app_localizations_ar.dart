@@ -206,6 +206,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get profileMenuFavorites => 'المفضلة';
 
   @override
+  String get profileMenuMessages => 'الرسائل';
+
+  @override
   String get profileMenuAccountSettings => 'إعدادات الحساب';
 
   @override
@@ -529,6 +532,33 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get labelEmailOrPhone => 'عنوان البريد الإلكتروني أو رقم الهاتف';
+
+  @override
+  String get loginTabEmail => 'البريد الإلكتروني';
+
+  @override
+  String get loginTabPhone => 'الهاتف';
+
+  @override
+  String get loginTabEmailSemantics => 'تسجيل الدخول بالبريد الإلكتروني';
+
+  @override
+  String get loginTabPhoneSemantics => 'تسجيل الدخول بالهاتف';
+
+  @override
+  String get labelEmail => 'البريد الإلكتروني';
+
+  @override
+  String get hintEmail => 'مثال: JohnDoe@gmail.com';
+
+  @override
+  String get hintPhoneNational => '912 345 678';
+
+  @override
+  String get validationPhoneRequired => 'يرجى إدخال رقم هاتفك';
+
+  @override
+  String get validationPhoneInvalid => 'يرجى إدخال رقم هاتف صالح';
 
   @override
   String get hintEmailPhone => 'على سبيل المثال. JohnDoe@gmail.com';
@@ -1971,4 +2001,267 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get validationPasswordsDoNotMatch => 'Passwords do not match';
+
+  @override
+  String get addressesTitle => 'عناويني';
+
+  @override
+  String get addressesEmptyTitle => 'لا توجد عناوين محفوظة';
+
+  @override
+  String get addressesEmptySubtitle => 'أضف عنوانًا لتسريع الدفع والتوصيل.';
+
+  @override
+  String get addressesAdd => 'إضافة عنوان';
+
+  @override
+  String get addressesAddFromMap => 'اختر على الخريطة';
+
+  @override
+  String get addressesAddManual => 'إدخال يدوي';
+
+  @override
+  String get addressesDefaultBadge => 'افتراضي';
+
+  @override
+  String get addressesSetDefault => 'تعيين كافتراضي';
+
+  @override
+  String get addressesEdit => 'تعديل';
+
+  @override
+  String get addressesDeleteTitle => 'حذف العنوان؟';
+
+  @override
+  String get addressesDeleteMessage => 'سيتم إزالة هذا العنوان من حسابك.';
+
+  @override
+  String get addressesBulkDeleteTitle => 'حذف العناوين المحددة؟';
+
+  @override
+  String addressesBulkDeleteMessage(int count) {
+    return 'حذف $count عنوان؟';
+  }
+
+  @override
+  String get addressesBulkDeleteForce => 'حذف العنوان الافتراضي أيضًا';
+
+  @override
+  String get addressesSelect => 'تحديد';
+
+  @override
+  String get addressesDeleteSelected => 'حذف المحدد';
+
+  @override
+  String get addressesTypeHome => 'المنزل';
+
+  @override
+  String get addressesTypeWork => 'العمل';
+
+  @override
+  String get addressesTypeOther => 'أخرى';
+
+  @override
+  String get addressFormAddTitle => 'إضافة عنوان';
+
+  @override
+  String get addressFormEditTitle => 'تعديل العنوان';
+
+  @override
+  String get addressFormLine1 => 'السطر 1';
+
+  @override
+  String get addressFormLine2 => 'السطر 2 (اختياري)';
+
+  @override
+  String get addressFormCity => 'المدينة';
+
+  @override
+  String get addressFormState => 'الولاية / المنطقة';
+
+  @override
+  String get addressFormPostalCode => 'الرمز البريدي';
+
+  @override
+  String get addressFormCountry => 'الدولة';
+
+  @override
+  String get addressFormLabel => 'التسمية';
+
+  @override
+  String get addressFormLandmark => 'معلم (اختياري)';
+
+  @override
+  String get addressFormType => 'نوع العنوان';
+
+  @override
+  String get addressFormSetDefault => 'تعيين كعنوان افتراضي';
+
+  @override
+  String get addressFormPickOnMap => 'اختر الموقع على الخريطة';
+
+  @override
+  String get addressFormRequired => 'هذا الحقل مطلوب';
+
+  @override
+  String get addressMapPickerTitle => 'اختر الموقع';
+
+  @override
+  String get addressMapUseLocation => 'استخدم هذا الموقع';
+
+  @override
+  String get deliveryAddressTitle => 'عنوان التوصيل';
+
+  @override
+  String get deliveryAddressChange => 'تغيير';
+
+  @override
+  String get deliveryAddressSaved => 'العناوين المحفوظة';
+
+  @override
+  String get deliveryAddressPickMap => 'اختر على الخريطة';
+
+  @override
+  String get deliveryAddressAddNew => 'إضافة عنوان جديد';
+
+  @override
+  String get deliveryAddressSelectPrompt => 'اختر عنوان التوصيل';
+
+  @override
+  String get addressesSignInTitle => 'سجّل الدخول لإدارة العناوين';
+
+  @override
+  String get addressesSignInSubtitle => 'احفظ عناوين متعددة وحدد الافتراضي.';
+
+  @override
+  String get addressesLoadError => 'تعذر تحميل العناوين';
+
+  @override
+  String get addressesCreatedSuccess => 'تم حفظ العنوان';
+
+  @override
+  String get addressesUpdatedSuccess => 'تم تحديث العنوان';
+
+  @override
+  String get addressesDeletedSuccess => 'تم حذف العنوان';
+
+  @override
+  String get chatTitle => 'الرسائل';
+
+  @override
+  String get chatEmpty => 'لا توجد محادثات بعد';
+
+  @override
+  String get chatEmptySubtitle => 'ابدأ محادثة حول طلب أو تواصل مع الدعم.';
+
+  @override
+  String get chatContactSupport => 'تواصل مع الدعم';
+
+  @override
+  String get chatViewOrders => 'عرض الطلبات';
+
+  @override
+  String get chatSearchHint => 'بحث في الرسائل';
+
+  @override
+  String get chatTypeMessage => 'اكتب رسالة…';
+
+  @override
+  String get chatSend => 'إرسال';
+
+  @override
+  String get chatSupportSubject => 'بماذا تحتاج المساعدة؟';
+
+  @override
+  String get chatSupportSubjectHint => 'موضوع مختصر';
+
+  @override
+  String get chatSupportTitle => 'محادثة دعم جديدة';
+
+  @override
+  String get chatEdited => 'معدّلة';
+
+  @override
+  String get chatDeleted => 'تم حذف هذه الرسالة';
+
+  @override
+  String get chatSendFailed => 'تعذر إرسال الرسالة';
+
+  @override
+  String get chatOrderTitle => 'محادثة الطلب';
+
+  @override
+  String get chatSupportChatTitle => 'الدعم';
+
+  @override
+  String get chatRideTitle => 'محادثة الرحلة';
+
+  @override
+  String get chatAttachImage => 'معرض';
+
+  @override
+  String get chatAttachFile => 'مستند';
+
+  @override
+  String get chatAttachAudio => 'صوت';
+
+  @override
+  String get chatShareLocation => 'موقع';
+
+  @override
+  String get chatEditingMessage => 'تعديل الرسالة';
+
+  @override
+  String get chatCopy => 'نسخ';
+
+  @override
+  String get chatEdit => 'تعديل';
+
+  @override
+  String get chatDelete => 'حذف';
+
+  @override
+  String get chatRetry => 'اضغط لإعادة المحاولة';
+
+  @override
+  String get chatOpenMaps => 'فتح في الخرائط';
+
+  @override
+  String get chatNewSupport => 'محادثة دعم جديدة';
+
+  @override
+  String get chatTypeOrder => 'طلب';
+
+  @override
+  String get chatTypeSupport => 'دعم';
+
+  @override
+  String get chatTypeRide => 'رحلة';
+
+  @override
+  String get chatOpenOrder => 'عرض الطلب';
+
+  @override
+  String get chatRecording => 'جاري التسجيل…';
+
+  @override
+  String get chatSlideToCancel => 'اسحب للأعلى للإلغاء';
+
+  @override
+  String get chatPhoto => 'صورة';
+
+  @override
+  String get chatVoiceMessage => 'رسالة صوتية';
+
+  @override
+  String get chatLocation => 'موقع';
+
+  @override
+  String get chatFile => 'ملف';
+
+  @override
+  String get chatLoadError => 'تعذر تحميل الرسائل';
+
+  @override
+  String get chatCreateSupport => 'بدء المحادثة';
 }

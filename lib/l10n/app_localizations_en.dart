@@ -206,6 +206,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileMenuFavorites => 'Favorites';
 
   @override
+  String get profileMenuMessages => 'Messages';
+
+  @override
   String get profileMenuAccountSettings => 'Account Settings';
 
   @override
@@ -530,6 +533,33 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get labelEmailOrPhone => 'Email address or Phone number';
+
+  @override
+  String get loginTabEmail => 'Email';
+
+  @override
+  String get loginTabPhone => 'Phone';
+
+  @override
+  String get loginTabEmailSemantics => 'Sign in with email';
+
+  @override
+  String get loginTabPhoneSemantics => 'Sign in with phone';
+
+  @override
+  String get labelEmail => 'Email';
+
+  @override
+  String get hintEmail => 'Eg. JohnDoe@gmail.com';
+
+  @override
+  String get hintPhoneNational => '912 345 678';
+
+  @override
+  String get validationPhoneRequired => 'Please enter your phone number';
+
+  @override
+  String get validationPhoneInvalid => 'Please enter a valid phone number';
 
   @override
   String get hintEmailPhone => 'Eg. JohnDoe@gmail.com';
@@ -1972,4 +2002,271 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get validationPasswordsDoNotMatch => 'Passwords do not match';
+
+  @override
+  String get addressesTitle => 'My Addresses';
+
+  @override
+  String get addressesEmptyTitle => 'No saved addresses';
+
+  @override
+  String get addressesEmptySubtitle =>
+      'Add an address to speed up checkout and delivery.';
+
+  @override
+  String get addressesAdd => 'Add address';
+
+  @override
+  String get addressesAddFromMap => 'Pick on map';
+
+  @override
+  String get addressesAddManual => 'Enter manually';
+
+  @override
+  String get addressesDefaultBadge => 'Default';
+
+  @override
+  String get addressesSetDefault => 'Set as default';
+
+  @override
+  String get addressesEdit => 'Edit';
+
+  @override
+  String get addressesDeleteTitle => 'Delete address?';
+
+  @override
+  String get addressesDeleteMessage =>
+      'This address will be removed from your account.';
+
+  @override
+  String get addressesBulkDeleteTitle => 'Delete selected addresses?';
+
+  @override
+  String addressesBulkDeleteMessage(int count) {
+    return 'Delete $count address(es)?';
+  }
+
+  @override
+  String get addressesBulkDeleteForce => 'Also delete default address';
+
+  @override
+  String get addressesSelect => 'Select';
+
+  @override
+  String get addressesDeleteSelected => 'Delete selected';
+
+  @override
+  String get addressesTypeHome => 'Home';
+
+  @override
+  String get addressesTypeWork => 'Work';
+
+  @override
+  String get addressesTypeOther => 'Other';
+
+  @override
+  String get addressFormAddTitle => 'Add address';
+
+  @override
+  String get addressFormEditTitle => 'Edit address';
+
+  @override
+  String get addressFormLine1 => 'Address line 1';
+
+  @override
+  String get addressFormLine2 => 'Address line 2 (optional)';
+
+  @override
+  String get addressFormCity => 'City';
+
+  @override
+  String get addressFormState => 'State / region';
+
+  @override
+  String get addressFormPostalCode => 'Postal code';
+
+  @override
+  String get addressFormCountry => 'Country';
+
+  @override
+  String get addressFormLabel => 'Label';
+
+  @override
+  String get addressFormLandmark => 'Landmark (optional)';
+
+  @override
+  String get addressFormType => 'Address type';
+
+  @override
+  String get addressFormSetDefault => 'Set as default address';
+
+  @override
+  String get addressFormPickOnMap => 'Pick location on map';
+
+  @override
+  String get addressFormRequired => 'This field is required';
+
+  @override
+  String get addressMapPickerTitle => 'Pick location';
+
+  @override
+  String get addressMapUseLocation => 'Use this location';
+
+  @override
+  String get deliveryAddressTitle => 'Delivery address';
+
+  @override
+  String get deliveryAddressChange => 'Change';
+
+  @override
+  String get deliveryAddressSaved => 'Saved addresses';
+
+  @override
+  String get deliveryAddressPickMap => 'Pick on map';
+
+  @override
+  String get deliveryAddressAddNew => 'Add new address';
+
+  @override
+  String get deliveryAddressSelectPrompt => 'Select delivery address';
+
+  @override
+  String get addressesSignInTitle => 'Sign in to manage addresses';
+
+  @override
+  String get addressesSignInSubtitle =>
+      'Save multiple delivery addresses and set a default.';
+
+  @override
+  String get addressesLoadError => 'Could not load addresses';
+
+  @override
+  String get addressesCreatedSuccess => 'Address saved';
+
+  @override
+  String get addressesUpdatedSuccess => 'Address updated';
+
+  @override
+  String get addressesDeletedSuccess => 'Address deleted';
+
+  @override
+  String get chatTitle => 'Messages';
+
+  @override
+  String get chatEmpty => 'No conversations yet';
+
+  @override
+  String get chatEmptySubtitle =>
+      'Start chatting about an order or contact support.';
+
+  @override
+  String get chatContactSupport => 'Contact support';
+
+  @override
+  String get chatViewOrders => 'View orders';
+
+  @override
+  String get chatSearchHint => 'Search messages';
+
+  @override
+  String get chatTypeMessage => 'Type a message…';
+
+  @override
+  String get chatSend => 'Send';
+
+  @override
+  String get chatSupportSubject => 'What do you need help with?';
+
+  @override
+  String get chatSupportSubjectHint => 'Brief subject';
+
+  @override
+  String get chatSupportTitle => 'New support chat';
+
+  @override
+  String get chatEdited => 'edited';
+
+  @override
+  String get chatDeleted => 'This message was deleted';
+
+  @override
+  String get chatSendFailed => 'Couldn\'t send message';
+
+  @override
+  String get chatOrderTitle => 'Order chat';
+
+  @override
+  String get chatSupportChatTitle => 'Support';
+
+  @override
+  String get chatRideTitle => 'Ride chat';
+
+  @override
+  String get chatAttachImage => 'Gallery';
+
+  @override
+  String get chatAttachFile => 'Document';
+
+  @override
+  String get chatAttachAudio => 'Voice';
+
+  @override
+  String get chatShareLocation => 'Location';
+
+  @override
+  String get chatEditingMessage => 'Editing message';
+
+  @override
+  String get chatCopy => 'Copy';
+
+  @override
+  String get chatEdit => 'Edit';
+
+  @override
+  String get chatDelete => 'Delete';
+
+  @override
+  String get chatRetry => 'Tap to retry';
+
+  @override
+  String get chatOpenMaps => 'Open in Maps';
+
+  @override
+  String get chatNewSupport => 'New support chat';
+
+  @override
+  String get chatTypeOrder => 'Order';
+
+  @override
+  String get chatTypeSupport => 'Support';
+
+  @override
+  String get chatTypeRide => 'Ride';
+
+  @override
+  String get chatOpenOrder => 'View order';
+
+  @override
+  String get chatRecording => 'Recording…';
+
+  @override
+  String get chatSlideToCancel => 'Slide up to cancel';
+
+  @override
+  String get chatPhoto => 'Photo';
+
+  @override
+  String get chatVoiceMessage => 'Voice message';
+
+  @override
+  String get chatLocation => 'Location';
+
+  @override
+  String get chatFile => 'File';
+
+  @override
+  String get chatLoadError => 'Could not load messages';
+
+  @override
+  String get chatCreateSupport => 'Start chat';
 }

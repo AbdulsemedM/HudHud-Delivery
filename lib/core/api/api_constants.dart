@@ -125,6 +125,25 @@ class ApiConstants {
   static const String customerServiceRequestRate =
       'customer/service-requests/{id}/rate';
 
+  // Chat endpoints
+  static const String chatConversations = 'chat/conversations';
+  static const String chatConversationDetails = 'chat/conversations/{id}';
+  static const String chatConversationMessages =
+      'chat/conversations/{id}/messages';
+  static const String chatConversationRead = 'chat/conversations/{id}/read';
+  static const String chatUnreadCount = 'chat/unread-count';
+  static const String chatOrder = 'chat/order/{orderId}';
+  static const String chatSupport = 'chat/support';
+  static const String chatRide = 'chat/ride/{rideId}';
+  static const String chatMessage = 'chat/messages/{id}';
+
+  // Address endpoints
+  static const String addresses = 'addresses';
+  static const String addressDetails = 'addresses/{id}';
+  static const String addressSetDefault = 'addresses/{id}/set-default';
+  static const String addressesDefault = 'addresses-default';
+  static const String addressesBulkDelete = 'addresses/bulk/delete';
+
   // Settings endpoints
   static const String settings = '/settings';
   static const String notifications = '$settings/notifications';

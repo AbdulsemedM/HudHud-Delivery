@@ -3,14 +3,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
-import 'package:hudhud_delivery/app/services/saved_location_service.dart';
 import 'package:hudhud_delivery/controllers/theme_controller.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/utils/support_launcher.dart';
 import 'package:hudhud_delivery/core/utils/avatar_util.dart';
-import 'package:hudhud_delivery/features/home/presentation/screen/location_search_screen.dart';
+import 'package:hudhud_delivery/features/addresses/presentation/screens/addresses_list_screen.dart';
+import 'package:hudhud_delivery/features/chat/presentation/screens/conversations_list_screen.dart';
+import 'package:hudhud_delivery/features/chat/presentation/screens/support_chat_start_screen.dart';
 import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
 import 'package:hudhud_delivery/features/wallet/data/providers/wallet_data_provider.dart';
 import 'package:hudhud_delivery/features/wallet/data/repositories/wallet_repository.dart';
@@ -266,15 +267,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     title: l10n.profileMenuAddresses,
                     colorScheme: colorScheme,
                     textTheme: textTheme,
-                    onTap: () async {
-                      final saved = await SavedLocationService.getSavedAddress();
-                      if (!context.mounted) return;
-                      await Navigator.push(
+                    onTap: () {
+                      Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => LocationSearchScreen(
-                            currentLocation: saved,
-                          ),
+                          builder: (context) => const AddressesListScreen(),
                         ),
                       );
                     },
@@ -291,6 +288,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => const WishlistScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _tileDivider(colorScheme),
+                  _KlikTile(
+                    icon: Icons.chat_bubble_outline,
+                    iconColor: _accentIconRed,
+                    title: l10n.profileMenuMessages,
+                    colorScheme: colorScheme,
+                    textTheme: textTheme,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              const ConversationsListScreen(),
                         ),
                       );
                     },
@@ -400,7 +414,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   _tileDivider(colorScheme),
                   _KlikTile(
-                    icon: Icons.chat_bubble_outline,
+                    icon: Icons.support_agent_outlined,
                     iconColor: _accentIconRed,
                     title: l10n.settingsSupport,
                     colorScheme: colorScheme,
@@ -409,7 +423,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const FAQsScreen(),
+                          builder: (context) =>
+                              const SupportChatStartScreen(),
                         ),
                       );
                     },

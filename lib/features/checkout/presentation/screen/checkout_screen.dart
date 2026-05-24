@@ -8,7 +8,9 @@ import '../../bloc/checkout_bloc.dart';
 import '../../data/data_provider/checkout_data_provider.dart';
 import '../../data/repository/checkout_repository.dart';
 import '../widgets/checkout_widgets.dart';
-import '../../../home/presentation/screen/map_location_screen.dart';
+import '../../../addresses/presentation/widgets/delivery_address_selector.dart';
+import '../../../addresses/data/addresses_data_provider.dart';
+import '../../../addresses/data/addresses_repository.dart';
 
 class CheckoutScreen extends StatefulWidget {
   final List<Map<String, dynamic>> cartItems;
@@ -42,6 +44,23 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   Future<void> _loadDeliveryAddress() async {
+    try {
+      final repo = AddressesRepository(
+        addressesDataProvider: AddressesDataProvider(
+          apiService: ApiService.instance,
+        ),
+      );
+      final def = await repo.getDefaultAddress();
+      if (def != null && mounted) {
+        setState(() {
+          _deliveryAddress = def.displayText;
+          _deliveryLatitude = def.latitude;
+          _deliveryLongitude = def.longitude;
+        });
+        return;
+      }
+    } catch (_) {}
+
     // 1. Try saved address
     final saved = await SavedLocationService.getSavedLocationData();
     final savedAddress = saved?['address'] as String?;
@@ -134,48 +153,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  void _onChangeAddress() async {
-    // Navigate to map location screen
-    final Map<String, dynamic>? result = await Navigator.push<Map<String, dynamic>>(
-      context,
-      MaterialPageRoute(
-        builder: (context) => MapLocationScreen(
-          currentLocation: _deliveryAddress,
-        ),
-      ),
-    );
-
-    // Update address if user selected a new one
-    final newAddress = result?['address'] as String?;
-    final latitude = (result?['latitude'] as num?)?.toDouble();
-    final longitude = (result?['longitude'] as num?)?.toDouble();
-    if (newAddress != null && newAddress.isNotEmpty) {
-      if (latitude != null && longitude != null) {
-        await SavedLocationService.saveLocationData(
-          address: newAddress,
-          latitude: latitude,
-          longitude: longitude,
-        );
-      } else {
-        await SavedLocationService.saveAddress(newAddress);
-      }
-      if (mounted) {
-        setState(() {
-          _deliveryAddress = newAddress;
-          _deliveryLatitude = latitude;
-          _deliveryLongitude = longitude;
-        });
-      }
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Address updated to: $newAddress'),
-            backgroundColor: AppColors.primaryColor,
-          ),
-        );
-      }
-    }
+  void _onDeliveryAddressChanged({
+    required String address,
+    double? latitude,
+    double? longitude,
+  }) {
+    setState(() {
+      _deliveryAddress = address;
+      _deliveryLatitude = latitude;
+      _deliveryLongitude = longitude;
+    });
   }
 
   void _onConfirmOrder(BuildContext blocContext) {
@@ -401,9 +388,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 }).toList(),
 
                 // Delivery Address Section
-                DeliveryAddressSection(
-                  currentAddress: _deliveryAddress,
-                  onChangeAddress: _onChangeAddress,
+                DeliveryAddressSelector(
+                  address: _deliveryAddress,
+                  latitude: _deliveryLatitude,
+                  longitude: _deliveryLongitude,
+                  onAddressChanged: _onDeliveryAddressChanged,
                 ),
 
                 // Notes Section

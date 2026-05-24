@@ -206,6 +206,9 @@ class AppLocalizationsOm extends AppLocalizations {
   String get profileMenuFavorites => 'Jaallatamoo';
 
   @override
+  String get profileMenuMessages => 'Messages';
+
+  @override
   String get profileMenuAccountSettings => 'Qindaa\'ina Herrega';
 
   @override
@@ -537,6 +540,33 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get labelEmailOrPhone => 'Teessoo imeelii ykn Lakkoofsa bilbilaa';
+
+  @override
+  String get loginTabEmail => 'Email';
+
+  @override
+  String get loginTabPhone => 'Phone';
+
+  @override
+  String get loginTabEmailSemantics => 'Sign in with email';
+
+  @override
+  String get loginTabPhoneSemantics => 'Sign in with phone';
+
+  @override
+  String get labelEmail => 'Email';
+
+  @override
+  String get hintEmail => 'Eg. JohnDoe@gmail.com';
+
+  @override
+  String get hintPhoneNational => '912 345 678';
+
+  @override
+  String get validationPhoneRequired => 'Please enter your phone number';
+
+  @override
+  String get validationPhoneInvalid => 'Please enter a valid phone number';
 
   @override
   String get hintEmailPhone => 'Fkn. JohnDoe@gmail.com irraa argattu';
@@ -1984,4 +2014,271 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get validationPasswordsDoNotMatch => 'Passwords do not match';
+
+  @override
+  String get addressesTitle => 'Teessoo Koo';
+
+  @override
+  String get addressesEmptyTitle => 'Teessoon hin kayyamne';
+
+  @override
+  String get addressesEmptySubtitle =>
+      'Teessoo dabaluu gurgurtaa fi geessituu saffisiisa.';
+
+  @override
+  String get addressesAdd => 'Teessoo dabaluu';
+
+  @override
+  String get addressesAddFromMap => 'Kaartaa irra filadhu';
+
+  @override
+  String get addressesAddManual => 'Harkaan galchi';
+
+  @override
+  String get addressesDefaultBadge => 'Baramaa';
+
+  @override
+  String get addressesSetDefault => 'Akka baramaatti kaa\'i';
+
+  @override
+  String get addressesEdit => 'Gulaali';
+
+  @override
+  String get addressesDeleteTitle => 'Teessoo haquu?';
+
+  @override
+  String get addressesDeleteMessage =>
+      'Teessoon kun herrega kee irraa ni haqama.';
+
+  @override
+  String get addressesBulkDeleteTitle => 'Teessoo filataman haquu?';
+
+  @override
+  String addressesBulkDeleteMessage(int count) {
+    return 'Teessoo $count haquu?';
+  }
+
+  @override
+  String get addressesBulkDeleteForce => 'Teessoo baramaa illee haqi';
+
+  @override
+  String get addressesSelect => 'Filadhu';
+
+  @override
+  String get addressesDeleteSelected => 'Filataman haqi';
+
+  @override
+  String get addressesTypeHome => 'Mana';
+
+  @override
+  String get addressesTypeWork => 'Hojii';
+
+  @override
+  String get addressesTypeOther => 'Kan biraa';
+
+  @override
+  String get addressFormAddTitle => 'Teessoo dabaluu';
+
+  @override
+  String get addressFormEditTitle => 'Teessoo gulaali';
+
+  @override
+  String get addressFormLine1 => 'Sarara teessoo 1';
+
+  @override
+  String get addressFormLine2 => 'Sarara teessoo 2 (filannoo)';
+
+  @override
+  String get addressFormCity => 'Magaalaa';
+
+  @override
+  String get addressFormState => 'Naannoo / gobolaa';
+
+  @override
+  String get addressFormPostalCode => 'Koodii poostaa';
+
+  @override
+  String get addressFormCountry => 'Biyya';
+
+  @override
+  String get addressFormLabel => 'Maqaa';
+
+  @override
+  String get addressFormLandmark => 'Mallattoo (filannoo)';
+
+  @override
+  String get addressFormType => 'Gosa teessoo';
+
+  @override
+  String get addressFormSetDefault => 'Akka teessoo baramaatti kaa\'i';
+
+  @override
+  String get addressFormPickOnMap => 'Bakka kaartaa irra filadhu';
+
+  @override
+  String get addressFormRequired => 'Dirreen kun barbaachisaa dha';
+
+  @override
+  String get addressMapPickerTitle => 'Bakka filadhu';
+
+  @override
+  String get addressMapUseLocation => 'Bakka kana fayyadami';
+
+  @override
+  String get deliveryAddressTitle => 'Teessoo geessituu';
+
+  @override
+  String get deliveryAddressChange => 'Jijjiiri';
+
+  @override
+  String get deliveryAddressSaved => 'Teessoo kayyamame';
+
+  @override
+  String get deliveryAddressPickMap => 'Kaartaa irra filadhu';
+
+  @override
+  String get deliveryAddressAddNew => 'Teessoo haaraa dabaluu';
+
+  @override
+  String get deliveryAddressSelectPrompt => 'Teessoo geessituu filadhu';
+
+  @override
+  String get addressesSignInTitle => 'Teessoo bulchuuf seeni';
+
+  @override
+  String get addressesSignInSubtitle =>
+      'Teessoo hedduu kayyadi, baramaa kaa\'i.';
+
+  @override
+  String get addressesLoadError => 'Teessoo fe\'uu hin dandeenye';
+
+  @override
+  String get addressesCreatedSuccess => 'Teessoon kayyamame';
+
+  @override
+  String get addressesUpdatedSuccess => 'Teessoon haaromfame';
+
+  @override
+  String get addressesDeletedSuccess => 'Teessoon haqame';
+
+  @override
+  String get chatTitle => 'Messages';
+
+  @override
+  String get chatEmpty => 'No conversations yet';
+
+  @override
+  String get chatEmptySubtitle =>
+      'Start chatting about an order or contact support.';
+
+  @override
+  String get chatContactSupport => 'Contact support';
+
+  @override
+  String get chatViewOrders => 'View orders';
+
+  @override
+  String get chatSearchHint => 'Search messages';
+
+  @override
+  String get chatTypeMessage => 'Type a message…';
+
+  @override
+  String get chatSend => 'Send';
+
+  @override
+  String get chatSupportSubject => 'What do you need help with?';
+
+  @override
+  String get chatSupportSubjectHint => 'Brief subject';
+
+  @override
+  String get chatSupportTitle => 'New support chat';
+
+  @override
+  String get chatEdited => 'edited';
+
+  @override
+  String get chatDeleted => 'This message was deleted';
+
+  @override
+  String get chatSendFailed => 'Couldn\'t send message';
+
+  @override
+  String get chatOrderTitle => 'Order chat';
+
+  @override
+  String get chatSupportChatTitle => 'Support';
+
+  @override
+  String get chatRideTitle => 'Ride chat';
+
+  @override
+  String get chatAttachImage => 'Gallery';
+
+  @override
+  String get chatAttachFile => 'Document';
+
+  @override
+  String get chatAttachAudio => 'Voice';
+
+  @override
+  String get chatShareLocation => 'Location';
+
+  @override
+  String get chatEditingMessage => 'Editing message';
+
+  @override
+  String get chatCopy => 'Copy';
+
+  @override
+  String get chatEdit => 'Edit';
+
+  @override
+  String get chatDelete => 'Delete';
+
+  @override
+  String get chatRetry => 'Tap to retry';
+
+  @override
+  String get chatOpenMaps => 'Open in Maps';
+
+  @override
+  String get chatNewSupport => 'New support chat';
+
+  @override
+  String get chatTypeOrder => 'Order';
+
+  @override
+  String get chatTypeSupport => 'Support';
+
+  @override
+  String get chatTypeRide => 'Ride';
+
+  @override
+  String get chatOpenOrder => 'View order';
+
+  @override
+  String get chatRecording => 'Recording…';
+
+  @override
+  String get chatSlideToCancel => 'Slide up to cancel';
+
+  @override
+  String get chatPhoto => 'Photo';
+
+  @override
+  String get chatVoiceMessage => 'Voice message';
+
+  @override
+  String get chatLocation => 'Location';
+
+  @override
+  String get chatFile => 'File';
+
+  @override
+  String get chatLoadError => 'Could not load messages';
+
+  @override
+  String get chatCreateSupport => 'Start chat';
 }

@@ -206,6 +206,9 @@ class AppLocalizationsSo extends AppLocalizations {
   String get profileMenuFavorites => 'Kuwa aad jeceshahay';
 
   @override
+  String get profileMenuMessages => 'Messages';
+
+  @override
   String get profileMenuAccountSettings => 'Dejinta Akoonka';
 
   @override
@@ -533,6 +536,33 @@ class AppLocalizationsSo extends AppLocalizations {
 
   @override
   String get labelEmailOrPhone => 'Cinwaanka iimaylka ama lambarka telefoonka';
+
+  @override
+  String get loginTabEmail => 'Email';
+
+  @override
+  String get loginTabPhone => 'Phone';
+
+  @override
+  String get loginTabEmailSemantics => 'Sign in with email';
+
+  @override
+  String get loginTabPhoneSemantics => 'Sign in with phone';
+
+  @override
+  String get labelEmail => 'Email';
+
+  @override
+  String get hintEmail => 'Eg. JohnDoe@gmail.com';
+
+  @override
+  String get hintPhoneNational => '912 345 678';
+
+  @override
+  String get validationPhoneRequired => 'Please enter your phone number';
+
+  @override
+  String get validationPhoneInvalid => 'Please enter a valid phone number';
 
   @override
   String get hintEmailPhone => 'Tusaale. JohnDoe@gmail.com';
@@ -1981,4 +2011,272 @@ class AppLocalizationsSo extends AppLocalizations {
 
   @override
   String get validationPasswordsDoNotMatch => 'Passwords do not match';
+
+  @override
+  String get addressesTitle => 'Cinwaanadayda';
+
+  @override
+  String get addressesEmptyTitle => 'Ma jiraan cinwaano kaydsan';
+
+  @override
+  String get addressesEmptySubtitle =>
+      'Ku dar cinwaan si aad u dardargeliso lacag bixinta iyo gaarsiinta.';
+
+  @override
+  String get addressesAdd => 'Ku dar cinwaan';
+
+  @override
+  String get addressesAddFromMap => 'Kaadhka ka dooro';
+
+  @override
+  String get addressesAddManual => 'Gacanta ku qor';
+
+  @override
+  String get addressesDefaultBadge => 'Asal ahaan';
+
+  @override
+  String get addressesSetDefault => 'U dhig midka asalka ah';
+
+  @override
+  String get addressesEdit => 'Wax ka beddel';
+
+  @override
+  String get addressesDeleteTitle => 'Cinwaanka tirtir?';
+
+  @override
+  String get addressesDeleteMessage =>
+      'Cinwaankan waxaa laga saari doonaa akoonkaaga.';
+
+  @override
+  String get addressesBulkDeleteTitle => 'Cinwaannada la doortay tirtir?';
+
+  @override
+  String addressesBulkDeleteMessage(int count) {
+    return 'Tirtir $count cinwaan?';
+  }
+
+  @override
+  String get addressesBulkDeleteForce =>
+      'Sidoo kale tirtir cinwaanka asalka ah';
+
+  @override
+  String get addressesSelect => 'Dooro';
+
+  @override
+  String get addressesDeleteSelected => 'Tirtir kuwa la doortay';
+
+  @override
+  String get addressesTypeHome => 'Guri';
+
+  @override
+  String get addressesTypeWork => 'Shaqo';
+
+  @override
+  String get addressesTypeOther => 'Kale';
+
+  @override
+  String get addressFormAddTitle => 'Ku dar cinwaan';
+
+  @override
+  String get addressFormEditTitle => 'Wax ka beddel cinwaanka';
+
+  @override
+  String get addressFormLine1 => 'Khadka cinwaanka 1';
+
+  @override
+  String get addressFormLine2 => 'Khadka cinwaanka 2 (ikhtiyaari)';
+
+  @override
+  String get addressFormCity => 'Magaalo';
+
+  @override
+  String get addressFormState => 'Gobol';
+
+  @override
+  String get addressFormPostalCode => 'Koodhka boostada';
+
+  @override
+  String get addressFormCountry => 'Wadan';
+
+  @override
+  String get addressFormLabel => 'Calaamad';
+
+  @override
+  String get addressFormLandmark => 'Calaamad muuqata (ikhtiyaari)';
+
+  @override
+  String get addressFormType => 'Nooca cinwaanka';
+
+  @override
+  String get addressFormSetDefault => 'U dhig cinwaanka asalka ah';
+
+  @override
+  String get addressFormPickOnMap => 'Goobta kaadhka ka dooro';
+
+  @override
+  String get addressFormRequired => 'Goobtan waa lagama maarmaan';
+
+  @override
+  String get addressMapPickerTitle => 'Dooro goob';
+
+  @override
+  String get addressMapUseLocation => 'Isticmaal goobtan';
+
+  @override
+  String get deliveryAddressTitle => 'Cinwaanka gaarsiinta';
+
+  @override
+  String get deliveryAddressChange => 'Beddel';
+
+  @override
+  String get deliveryAddressSaved => 'Cinwaannada kaydsan';
+
+  @override
+  String get deliveryAddressPickMap => 'Kaadhka ka dooro';
+
+  @override
+  String get deliveryAddressAddNew => 'Ku dar cinwaan cusub';
+
+  @override
+  String get deliveryAddressSelectPrompt => 'Dooro cinwaanka gaarsiinta';
+
+  @override
+  String get addressesSignInTitle => 'Soo gal si aad u maamusho cinwaannada';
+
+  @override
+  String get addressesSignInSubtitle =>
+      'Kaydi cinwaanno badan oo deji midka asalka ah.';
+
+  @override
+  String get addressesLoadError => 'Cinwaannada lama soo dejin karin';
+
+  @override
+  String get addressesCreatedSuccess => 'Cinwaanka waa la kaydiyay';
+
+  @override
+  String get addressesUpdatedSuccess => 'Cinwaanka waa la cusbooneysiiyay';
+
+  @override
+  String get addressesDeletedSuccess => 'Cinwaanka waa la tirtiray';
+
+  @override
+  String get chatTitle => 'Messages';
+
+  @override
+  String get chatEmpty => 'No conversations yet';
+
+  @override
+  String get chatEmptySubtitle =>
+      'Start chatting about an order or contact support.';
+
+  @override
+  String get chatContactSupport => 'Contact support';
+
+  @override
+  String get chatViewOrders => 'View orders';
+
+  @override
+  String get chatSearchHint => 'Search messages';
+
+  @override
+  String get chatTypeMessage => 'Type a message…';
+
+  @override
+  String get chatSend => 'Send';
+
+  @override
+  String get chatSupportSubject => 'What do you need help with?';
+
+  @override
+  String get chatSupportSubjectHint => 'Brief subject';
+
+  @override
+  String get chatSupportTitle => 'New support chat';
+
+  @override
+  String get chatEdited => 'edited';
+
+  @override
+  String get chatDeleted => 'This message was deleted';
+
+  @override
+  String get chatSendFailed => 'Couldn\'t send message';
+
+  @override
+  String get chatOrderTitle => 'Order chat';
+
+  @override
+  String get chatSupportChatTitle => 'Support';
+
+  @override
+  String get chatRideTitle => 'Ride chat';
+
+  @override
+  String get chatAttachImage => 'Gallery';
+
+  @override
+  String get chatAttachFile => 'Document';
+
+  @override
+  String get chatAttachAudio => 'Voice';
+
+  @override
+  String get chatShareLocation => 'Location';
+
+  @override
+  String get chatEditingMessage => 'Editing message';
+
+  @override
+  String get chatCopy => 'Copy';
+
+  @override
+  String get chatEdit => 'Edit';
+
+  @override
+  String get chatDelete => 'Delete';
+
+  @override
+  String get chatRetry => 'Tap to retry';
+
+  @override
+  String get chatOpenMaps => 'Open in Maps';
+
+  @override
+  String get chatNewSupport => 'New support chat';
+
+  @override
+  String get chatTypeOrder => 'Order';
+
+  @override
+  String get chatTypeSupport => 'Support';
+
+  @override
+  String get chatTypeRide => 'Ride';
+
+  @override
+  String get chatOpenOrder => 'View order';
+
+  @override
+  String get chatRecording => 'Recording…';
+
+  @override
+  String get chatSlideToCancel => 'Slide up to cancel';
+
+  @override
+  String get chatPhoto => 'Photo';
+
+  @override
+  String get chatVoiceMessage => 'Voice message';
+
+  @override
+  String get chatLocation => 'Location';
+
+  @override
+  String get chatFile => 'File';
+
+  @override
+  String get chatLoadError => 'Could not load messages';
+
+  @override
+  String get chatCreateSupport => 'Start chat';
 }

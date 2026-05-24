@@ -8,6 +8,7 @@ import 'package:hudhud_delivery/controllers/auth_controller.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/utils/avatar_util.dart';
 import 'package:hudhud_delivery/core/utils/phone_util.dart';
+import 'package:hudhud_delivery/core/widgets/phone_number_field.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
