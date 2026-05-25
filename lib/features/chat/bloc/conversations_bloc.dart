@@ -114,13 +114,17 @@ class ConversationsBloc extends Bloc<ConversationsEvent, ConversationsState> {
   List<ChatConversationModel> _sortConversations(
     List<ChatConversationModel> list,
   ) {
-    final copy = List<ChatConversationModel>.from(list);
-    copy.sort((a, b) {
+    final seenIds = <int>{};
+    final deduped = <ChatConversationModel>[];
+    for (final c in list) {
+      if (seenIds.add(c.id)) deduped.add(c);
+    }
+    deduped.sort((a, b) {
       final at = a.lastMessageAt ?? a.createdAt ?? DateTime(1970);
       final bt = b.lastMessageAt ?? b.createdAt ?? DateTime(1970);
       return bt.compareTo(at);
     });
-    return copy;
+    return deduped;
   }
 
   List<ChatConversationModel> _filter(

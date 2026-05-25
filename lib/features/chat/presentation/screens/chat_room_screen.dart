@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hudhud_delivery/app/navigation/fcm_order_navigation.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/app/services/startup_location_service.dart';
 import 'package:hudhud_delivery/features/chat/bloc/chat_room_bloc.dart';
@@ -12,10 +13,10 @@ import 'package:hudhud_delivery/features/chat/presentation/theme/chat_theme.dart
 import 'package:hudhud_delivery/features/chat/presentation/widgets/attachment_picker_sheet.dart';
 import 'package:hudhud_delivery/features/chat/presentation/widgets/chat_context_banner.dart';
 import 'package:hudhud_delivery/features/chat/presentation/widgets/chat_input_bar.dart';
+import 'package:hudhud_delivery/features/chat/presentation/widgets/chat_messages_shimmer.dart';
 import 'package:hudhud_delivery/features/chat/presentation/widgets/chat_scroll_to_bottom_fab.dart';
 import 'package:hudhud_delivery/features/chat/presentation/widgets/message_bubble.dart';
 import 'package:hudhud_delivery/features/chat/utils/chat_format_utils.dart';
-import 'package:hudhud_delivery/features/orders/presentation/screen/order_details_screen.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
 
 class ChatRoomScreen extends StatelessWidget {
@@ -107,10 +108,7 @@ class _ChatRoomViewState extends State<_ChatRoomView> {
       },
       builder: (context, state) {
         if (state is ChatRoomLoading) {
-          return Scaffold(
-            appBar: AppBar(),
-            body: const Center(child: CircularProgressIndicator()),
-          );
+          return const ChatRoomLoadingScaffold();
         }
         if (state is! ChatRoomLoaded) {
           return Scaffold(
@@ -148,12 +146,9 @@ class _ChatRoomViewState extends State<_ChatRoomView> {
                 onTap: conv.conversationableId != null &&
                         conv.type == ChatConversationType.order
                     ? () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => OrderDetailsScreen(
-                              orderId: conv.conversationableId!,
-                            ),
-                          ),
+                        pushOrderDetailsById(
+                          context,
+                          orderId: conv.conversationableId!,
                         );
                       }
                     : null,
@@ -175,28 +170,30 @@ class _ChatRoomViewState extends State<_ChatRoomView> {
                   ],
                 ),
               Expanded(
-                child: Stack(
-                  children: [
-                    _MessageList(
-                      messages: state.messages,
-                      scrollController: _scrollController,
-                      currentUserId: _userId,
-                      onRetry: (id) => context
-                          .read<ChatRoomBloc>()
-                          .add(RetrySendMessageEvent(id)),
-                      onLongPress: (message) =>
-                          _showMessageActions(context, message),
-                    ),
-                    if (_showScrollFab)
-                      Positioned(
-                        right: 16,
-                        bottom: 16,
-                        child: ChatScrollToBottomFab(
-                          onPressed: _scrollToBottom,
-                        ),
+                child: state.isLoadingHistory
+                    ? const ChatMessagesShimmer()
+                    : Stack(
+                        children: [
+                          _MessageList(
+                            messages: state.messages,
+                            scrollController: _scrollController,
+                            currentUserId: _userId,
+                            onRetry: (id) => context
+                                .read<ChatRoomBloc>()
+                                .add(RetrySendMessageEvent(id)),
+                            onLongPress: (message) =>
+                                _showMessageActions(context, message),
+                          ),
+                          if (_showScrollFab)
+                            Positioned(
+                              right: 16,
+                              bottom: 16,
+                              child: ChatScrollToBottomFab(
+                                onPressed: _scrollToBottom,
+                              ),
+                            ),
+                        ],
                       ),
-                  ],
-                ),
               ),
               ChatInputBar(
                 controller: _textController,

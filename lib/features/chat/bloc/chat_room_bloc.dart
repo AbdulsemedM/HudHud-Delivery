@@ -17,6 +17,8 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
   final int? currentUserId;
 
   Timer? _pollTimer;
+  bool _pollInFlight = false;
+  bool _sendInFlight = false;
   int _tempIdCounter = -1;
   final Map<int, SendChatMessageRequest> _pendingRetries = {};
 
@@ -47,8 +49,10 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
 
   void _startPolling(int conversationId) {
     _pollTimer?.cancel();
-    _pollTimer = Timer.periodic(const Duration(seconds: 5), (_) {
-      if (!isClosed) add(const PollChatMessagesEvent());
+    _pollTimer = Timer.periodic(const Duration(seconds: 8), (_) {
+      if (!isClosed && !_pollInFlight && !_sendInFlight) {
+        add(const PollChatMessagesEvent());
+      }
     });
   }
 
@@ -56,33 +60,46 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
     OpenChatRoomEvent event,
     Emitter<ChatRoomState> emit,
   ) async {
-    emit(const ChatRoomLoading());
     try {
-      final ChatConversationDetailResult detail;
       if (event.initialDetail != null) {
-        detail = event.initialDetail!;
-      } else {
-        detail = await repository.getConversationWithRetry(
-          event.conversationId,
+        final detail = event.initialDetail!;
+        emit(
+          ChatRoomLoaded(
+            conversation: detail.conversation,
+            messages: detail.messages,
+            participants: detail.participants,
+            isLoadingHistory: detail.messages.isEmpty,
+          ),
         );
+        _startPolling(event.conversationId);
+        unawaited(_markReadAndRefresh(event.conversationId));
+        return;
       }
+
+      emit(const ChatRoomLoading());
+      final detail = await repository.getConversationWithRetry(
+        event.conversationId,
+      );
       emit(
         ChatRoomLoaded(
           conversation: detail.conversation,
           messages: detail.messages,
           participants: detail.participants,
+          isLoadingHistory: false,
         ),
       );
-      try {
-        await repository.markConversationRead(event.conversationId);
-      } catch (_) {}
       _startPolling(event.conversationId);
-      if (event.initialDetail != null) {
-        add(const PollChatMessagesEvent());
-      }
+      unawaited(_markReadAndRefresh(event.conversationId));
     } catch (e) {
       emit(ChatRoomFailure(e.toString()));
     }
+  }
+
+  Future<void> _markReadAndRefresh(int conversationId) async {
+    try {
+      await repository.markConversationRead(conversationId);
+    } catch (_) {}
+    if (!isClosed) add(const PollChatMessagesEvent());
   }
 
   Future<void> _onPoll(
@@ -90,36 +107,85 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
     Emitter<ChatRoomState> emit,
   ) async {
     final current = state;
-    if (current is! ChatRoomLoaded) return;
+    if (current is! ChatRoomLoaded || _pollInFlight || _sendInFlight) return;
+    _pollInFlight = true;
     try {
       final detail =
           await repository.getConversation(current.conversation.id);
       final merged = _mergeMessages(current.messages, detail.messages);
+      if (!_messagesChanged(current.messages, merged) &&
+          !current.isLoadingHistory) {
+        return;
+      }
       emit(
         current.copyWith(
           conversation: detail.conversation,
           messages: merged,
           participants: detail.participants,
+          isLoadingHistory: false,
         ),
       );
-    } catch (_) {}
+    } catch (_) {
+      if (current.isLoadingHistory) {
+        emit(current.copyWith(isLoadingHistory: false));
+      }
+    } finally {
+      _pollInFlight = false;
+    }
+  }
+
+  bool _messagesChanged(
+    List<ChatMessageModel> before,
+    List<ChatMessageModel> after,
+  ) {
+    if (before.length != after.length) return true;
+    for (var i = 0; i < before.length; i++) {
+      final a = before[i];
+      final b = after[i];
+      if (a.id != b.id ||
+          a.body != b.body ||
+          a.isRead != b.isRead ||
+          a.isDelivered != b.isDelivered ||
+          a.localStatus != b.localStatus) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool _matchesOptimistic(ChatMessageModel server, ChatMessageModel optimistic) {
+    if (server.senderId != optimistic.senderId) return false;
+    if (server.type != optimistic.type) return false;
+    if (server.body.trim() != optimistic.body.trim()) return false;
+    final serverTime = server.createdAt ?? server.deliveredAt;
+    final optimisticTime = optimistic.createdAt;
+    if (serverTime == null || optimisticTime == null) return true;
+    return serverTime.difference(optimisticTime).inMinutes.abs() <= 2;
   }
 
   List<ChatMessageModel> _mergeMessages(
     List<ChatMessageModel> existing,
     List<ChatMessageModel> incoming,
   ) {
-    final optimistic = existing.where((m) => m.id < 0).toList();
     final map = <int, ChatMessageModel>{};
     for (final m in incoming) {
-      map[m.id] = m;
+      if (m.id > 0) map[m.id] = m;
     }
-    for (final m in optimistic) {
-      if (m.localStatus == ChatMessageStatus.sending ||
-          m.localStatus == ChatMessageStatus.failed) {
-        map[m.id] = m;
+
+    for (final m in existing) {
+      if (m.id < 0) {
+        if (m.localStatus != ChatMessageStatus.sending &&
+            m.localStatus != ChatMessageStatus.failed) {
+          continue;
+        }
+        final hasServerCopy =
+            incoming.any((s) => _matchesOptimistic(s, m));
+        if (!hasServerCopy) map[m.id] = m;
+        continue;
       }
+      map.putIfAbsent(m.id, () => m);
     }
+
     final list = map.values.toList()
       ..sort((a, b) {
         final at = a.createdAt ?? a.deliveredAt ?? DateTime(1970);
@@ -237,36 +303,67 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
       ),
     );
 
+    _sendInFlight = true;
     try {
       final sent = await repository.sendMessage(
         current.conversation.id,
         request,
       );
       _pendingRetries.remove(tempId);
-      final updated = current.messages
+      final loaded = state;
+      if (loaded is! ChatRoomLoaded) return;
+      final updated = loaded.messages
           .where((m) => m.id != tempId)
           .toList()
         ..add(sent);
       emit(
-        (state as ChatRoomLoaded).copyWith(
+        loaded.copyWith(
           messages: updated,
           isSending: false,
         ),
       );
+      if (!_pollInFlight) add(const PollChatMessagesEvent());
       add(const MarkChatReadEvent());
     } catch (e) {
+      final loaded = state;
+      if (loaded is! ChatRoomLoaded) return;
       final failed = optimistic.copyWith(
         localStatus: ChatMessageStatus.failed,
       );
-      final updated = current.messages.map((m) {
-        return m.id == tempId ? failed : m;
-      }).toList();
+      final messages = loaded.messages.any((m) => m.id == tempId)
+          ? loaded.messages
+              .map((m) => m.id == tempId ? failed : m)
+              .toList(growable: false)
+          : [...loaded.messages, failed];
       emit(
-        current.copyWith(
-          messages: updated,
+        loaded.copyWith(
+          messages: messages,
           isSending: false,
         ),
       );
+      unawaited(_syncAfterSendError(tempId, optimistic));
+    } finally {
+      _sendInFlight = false;
+    }
+  }
+
+  /// If POST timed out, the server may still have saved the message — refresh once.
+  Future<void> _syncAfterSendError(
+    int tempId,
+    ChatMessageModel optimistic,
+  ) async {
+    await Future.delayed(const Duration(milliseconds: 1500));
+    if (isClosed || _sendInFlight) return;
+    final loaded = state;
+    if (loaded is! ChatRoomLoaded) return;
+    try {
+      final detail = await repository.getConversation(loaded.conversation.id);
+      if (detail.messages.any((m) => _matchesOptimistic(m, optimistic))) {
+        _pendingRetries.remove(tempId);
+      }
+    } catch (_) {}
+    if (!isClosed && !_pollInFlight && !_sendInFlight) {
+      add(const PollChatMessagesEvent());
     }
   }
 

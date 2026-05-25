@@ -239,15 +239,37 @@ class _ConversationsListBodyState extends State<_ConversationsListBody> {
 class _ShimmerList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final scheme = theme.colorScheme;
+    final baseColor = isDark
+        ? scheme.surfaceContainerHigh
+        : Colors.grey.shade300;
+    final highlightColor = isDark
+        ? scheme.surfaceContainerHighest
+        : Colors.grey.shade100;
+    final placeholder = isDark
+        ? scheme.surfaceContainerHighest
+        : Colors.white;
+
     return Shimmer.fromColors(
-      baseColor: Colors.grey.shade300,
-      highlightColor: Colors.grey.shade100,
+      baseColor: baseColor,
+      highlightColor: highlightColor,
       child: ListView.builder(
         itemCount: 8,
-        itemBuilder: (_, __) => const ListTile(
-          leading: CircleAvatar(radius: 28),
-          title: SizedBox(height: 14, child: ColoredBox(color: Colors.white)),
-          subtitle: SizedBox(height: 12, child: ColoredBox(color: Colors.white)),
+        itemBuilder: (_, __) => ListTile(
+          leading: CircleAvatar(
+            radius: 28,
+            backgroundColor: placeholder,
+          ),
+          title: SizedBox(
+            height: 14,
+            child: ColoredBox(color: placeholder),
+          ),
+          subtitle: SizedBox(
+            height: 12,
+            child: ColoredBox(color: placeholder),
+          ),
         ),
       ),
     );

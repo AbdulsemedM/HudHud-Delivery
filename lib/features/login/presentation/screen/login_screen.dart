@@ -15,6 +15,9 @@ import '../../../../core/api/api_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/dashboard/presentation/screen/dashboard_screen.dart';
 
+/// True while a [LoginScreen] is in the widget tree (used to avoid 401 re-push loops).
+bool loginScreenIsActive = false;
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
@@ -23,6 +26,24 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  late final LoginBloc _loginBloc;
+
+  @override
+  void initState() {
+    super.initState();
+    loginScreenIsActive = true;
+    _loginBloc = LoginBloc(
+      LoginRepository(LoginDataProvider(apiService: ApiService.instance)),
+    );
+  }
+
+  @override
+  void dispose() {
+    loginScreenIsActive = false;
+    _loginBloc.close();
+    super.dispose();
+  }
+
   Future<bool> _onWillPop() async {
     final l10n = context.l10n;
     final theme = Theme.of(context);
@@ -111,10 +132,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => LoginBloc(
-        LoginRepository(LoginDataProvider(apiService: ApiService.instance)),
-      ),
+    return BlocProvider.value(
+      value: _loginBloc,
       child: PopScope(
         canPop: false,
         onPopInvokedWithResult: (didPop, result) async {
@@ -128,6 +147,8 @@ class _LoginScreenState extends State<LoginScreen> {
             final theme = Theme.of(context);
             final colorScheme = theme.colorScheme;
             return BlocListener<LoginBloc, LoginState>(
+              listenWhen: (previous, current) =>
+                  current is LoginSuccess || current is LoginFailure,
               listener: (context, state) {
                 if (state is LoginSuccess) {
                   Navigator.pushReplacement(

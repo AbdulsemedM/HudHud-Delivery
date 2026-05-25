@@ -9,6 +9,8 @@ class DioClient {
   static DioClient? _instance;
   late Dio _dio;
   void Function()? _onUnauthorized;
+  bool _handlingUnauthorized = false;
+  bool _unauthorizedRedirectScheduled = false;
 
   DioClient._internal() : _onUnauthorized = null {
     _dio = Dio();
@@ -78,21 +80,32 @@ class DioClient {
     }
   }
 
+  void _scheduleUnauthorizedRedirect() {
+    if (_unauthorizedRedirectScheduled) return;
+    _unauthorizedRedirectScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _unauthorizedRedirectScheduled = false;
+      _onUnauthorized?.call();
+    });
+  }
+
   Future<void> _handleUnauthorized() async {
+    if (_handlingUnauthorized) return;
+    _handlingUnauthorized = true;
     try {
       final authService = AuthService();
-      
+
       // Try to refresh the token first
       final refreshed = await authService.refreshToken();
-      
+
       if (!refreshed) {
         // If refresh fails, clear the session
         await authService.clearAllData();
-        
+
         if (kDebugMode) {
           print('Token refresh failed, session cleared');
         }
-        WidgetsBinding.instance.addPostFrameCallback((_) => _onUnauthorized?.call());
+        _scheduleUnauthorizedRedirect();
       }
     } catch (e) {
       if (kDebugMode) {
@@ -100,7 +113,9 @@ class DioClient {
       }
       final authService = AuthService();
       await authService.clearAllData();
-      WidgetsBinding.instance.addPostFrameCallback((_) => _onUnauthorized?.call());
+      _scheduleUnauthorizedRedirect();
+    } finally {
+      _handlingUnauthorized = false;
     }
   }
 

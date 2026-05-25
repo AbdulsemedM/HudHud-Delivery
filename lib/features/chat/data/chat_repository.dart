@@ -92,7 +92,7 @@ class ChatRepository {
     final response = await dataProvider.sendMessage(conversationId, request);
     _ensureSuccess(response, 'Error sending message');
     final data = _extractDataMap(response['data']);
-    final messageRaw = data['data'] ?? data;
+    final messageRaw = _parseSendMessagePayload(data);
     if (messageRaw is Map<String, dynamic>) {
       return ChatMessageModel.fromJson(messageRaw);
     }
@@ -150,6 +150,17 @@ class ChatRepository {
       conversationId: conversationId,
       conversation: conversation,
     );
+  }
+
+  dynamic _parseSendMessagePayload(Map<String, dynamic> data) {
+    final nested = data['data'];
+    if (nested is Map<String, dynamic>) return nested;
+    if (nested is Map) return Map<String, dynamic>.from(nested);
+    if (data['id'] != null &&
+        (data['message'] != null || data['message_id'] != null)) {
+      return data;
+    }
+    return data;
   }
 
   Map<String, dynamic> _extractDataMap(dynamic root) {

@@ -29,7 +29,6 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
   late final TextEditingController _line2;
   late final TextEditingController _city;
   late final TextEditingController _state;
-  late final TextEditingController _postal;
   late final TextEditingController _country;
   late final TextEditingController _label;
   late final TextEditingController _landmark;
@@ -58,9 +57,6 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
     _state = TextEditingController(
       text: e?.state ?? m?['state']?.toString() ?? '',
     );
-    _postal = TextEditingController(
-      text: e?.postalCode ?? m?['postal_code']?.toString() ?? '',
-    );
     _country = TextEditingController(
       text: e?.country ?? m?['country']?.toString() ?? 'Kenya',
     );
@@ -81,7 +77,6 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
     _line2.dispose();
     _city.dispose();
     _state.dispose();
-    _postal.dispose();
     _country.dispose();
     _label.dispose();
     _landmark.dispose();
@@ -98,7 +93,6 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
       _line1.text = result['address_line_1']?.toString() ?? _line1.text;
       _city.text = result['city']?.toString() ?? _city.text;
       _state.text = result['state']?.toString() ?? _state.text;
-      _postal.text = result['postal_code']?.toString() ?? _postal.text;
       _country.text = result['country']?.toString() ?? _country.text;
       if (result['label'] != null) {
         _label.text = result['label'].toString();
@@ -116,7 +110,7 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
       addressLine2: _line2.text.trim().isEmpty ? null : _line2.text.trim(),
       city: _city.text.trim(),
       state: _state.text.trim().isEmpty ? null : _state.text.trim(),
-      postalCode: _postal.text.trim().isEmpty ? null : _postal.text.trim(),
+      postalCode: AddressPayload.defaultPostalCode,
       country: _country.text.trim(),
       latitude: _latitude,
       longitude: _longitude,
@@ -179,7 +173,6 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
                   _field(_line2, l10n.addressFormLine2),
                   _field(_city, l10n.addressFormCity, required: true),
                   _field(_state, l10n.addressFormState),
-                  _field(_postal, l10n.addressFormPostalCode),
                   _field(_country, l10n.addressFormCountry, required: true),
                   _field(_label, l10n.addressFormLabel),
                   _field(_landmark, l10n.addressFormLandmark),

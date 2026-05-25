@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import '../../bloc/orders_bloc.dart';
 import '../../data/models/order_model.dart';
 import '../../data/models/order_tracking_model.dart';
 import 'package:hudhud_delivery/features/chat/utils/chat_navigation.dart';
-import 'package:hudhud_delivery/l10n/app_localizations.dart';
 
+import '../widgets/order_details_header.dart';
 import '../widgets/order_details_widgets.dart';
 
 class OrderDetailsScreen extends StatefulWidget {
@@ -88,75 +86,14 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
 
   Widget _buildOrderDetails(
       BuildContext context, OrderModel order, OrderTrackingModel? tracking) {
-    final colorScheme = Theme.of(context).colorScheme;
     return CustomScrollView(
       slivers: [
-        // Custom App Bar
-        SliverAppBar(
-          expandedHeight: 120,
-          floating: false,
-          pinned: true,
-          backgroundColor: colorScheme.surface,
-          elevation: 0,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          flexibleSpace: FlexibleSpaceBar(
-            title: Text(
-              context.l10n.orderAppBarTitle(order.orderNumber),
-              style: TextStyle(
-                color: colorScheme.onSurface,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            background: Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Colors.orange, Colors.deepOrange],
-                ),
-              ),
-            ),
-          ),
-          actions: [
-            IconButton(
-              tooltip: AppLocalizations.of(context)!.chatOrderTitle,
-              icon: const Icon(Icons.chat_bubble_outline_rounded,
-                  color: Colors.white),
-              onPressed: () => openOrderChat(context, order.id),
-            ),
-            IconButton(
-              tooltip: 'Copy order ID',
-              icon: const Icon(Icons.copy_outlined, color: Colors.white),
-              onPressed: () async {
-                await Clipboard.setData(ClipboardData(text: '${order.id}'));
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(context.l10n.orderIdCopied)),
-                  );
-                }
-              },
-            ),
-            IconButton(
-              tooltip: 'Share order',
-              icon: const Icon(Icons.share_outlined, color: Colors.white),
-              onPressed: () {
-                final l10n = context.l10n;
-                Share.share(
-                  'Order #${order.orderNumber} (ID: ${order.id})\n${order.status}',
-                  subject: l10n.orderShareSubject,
-                );
-              },
-            ),
-            if (order.canBeCancelled)
-              IconButton(
-                icon: const Icon(Icons.cancel_outlined, color: Colors.red),
-                onPressed: () => _showCancelOrderDialog(context, order),
-              ),
-          ],
+        OrderDetailsSliverHeader(
+          order: order,
+          onChat: () => openOrderChat(context, order.id),
+          onCancel: order.canBeCancelled
+              ? () => _showCancelOrderDialog(context, order)
+              : null,
         ),
 
         // Order Content

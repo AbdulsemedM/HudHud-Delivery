@@ -5,6 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:hudhud_delivery/app/services/custom_location_service.dart';
 import 'package:hudhud_delivery/app/services/google_places_service.dart';
 import 'package:hudhud_delivery/app/models/place_result.dart';
+import 'package:hudhud_delivery/app/utils/human_readable_address.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/widgets/centered_pin_map.dart';
@@ -51,10 +52,9 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
 
       if (!mounted) return;
 
-      if (places.isNotEmpty) {
-        setState(() {
-          _selectedPlace = places.first;
-        });
+      final best = HumanReadableAddress.pickBestPlace(places);
+      if (best != null) {
+        setState(() => _selectedPlace = best);
       }
     } catch (e) {
       if (mounted) {

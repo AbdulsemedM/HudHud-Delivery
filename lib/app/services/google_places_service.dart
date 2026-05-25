@@ -99,8 +99,16 @@ class GooglePlacesService {
         final lng = (location['lng'] as num?)?.toDouble();
         if (lat == null || lng == null) continue;
 
+        final resultTypes =
+            (map['types'] as List<dynamic>?)?.cast<String>() ?? [];
+        final isPlusCodeOnly = resultTypes.length == 1 &&
+            resultTypes.contains('plus_code');
+
         final components = map['address_components'] as List<dynamic>? ?? [];
         String? street;
+        String? neighborhood;
+        String? sublocality;
+        String? establishment;
         String? city;
         String? state;
         String? country;
@@ -110,8 +118,22 @@ class GooglePlacesService {
           final comp = c as Map<String, dynamic>;
           final types = (comp['types'] as List<dynamic>?)?.cast<String>() ?? [];
           final long = comp['long_name'] as String? ?? '';
+          if (long.isEmpty) continue;
+
           if (types.contains('street_number') || types.contains('route')) {
             street = (street ?? '') + (street != null ? ' ' : '') + long;
+          } else if (types.contains('neighborhood')) {
+            neighborhood ??= long;
+          } else if (types.contains('sublocality') ||
+              types.contains('sublocality_level_1')) {
+            sublocality ??= long;
+          } else if (types.contains('administrative_area_level_2') &&
+              sublocality == null) {
+            sublocality = long;
+          } else if (types.contains('establishment') ||
+              types.contains('point_of_interest') ||
+              types.contains('premise')) {
+            establishment ??= long;
           } else if (types.contains('locality')) {
             city = long;
           } else if (types.contains('administrative_area_level_1')) {
@@ -123,14 +145,19 @@ class GooglePlacesService {
           }
         }
 
+        final trimmedStreet = street?.trim();
         results.add(PlaceResult(
           displayName: formatted,
           coordinates: LatLng(lat, lng),
-          street: street?.trim().isEmpty == true ? null : street?.trim(),
+          street: trimmedStreet?.isEmpty == true ? null : trimmedStreet,
+          neighborhood: neighborhood,
+          sublocality: sublocality,
+          establishment: establishment,
           city: city,
           state: state,
           country: country,
           postcode: postcode,
+          isPlusCodeOnly: isPlusCodeOnly,
         ));
       }
       return results;

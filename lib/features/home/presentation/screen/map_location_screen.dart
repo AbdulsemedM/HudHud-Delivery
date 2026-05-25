@@ -3,6 +3,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
 import 'package:hudhud_delivery/app/services/google_places_service.dart';
 import 'package:hudhud_delivery/app/models/place_result.dart';
+import 'package:hudhud_delivery/app/utils/human_readable_address.dart';
 import 'package:hudhud_delivery/app/services/custom_location_service.dart';
 import 'package:hudhud_delivery/app/services/startup_location_service.dart';
 import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
@@ -247,9 +248,9 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
         g.longitude,
       );
       if (!mounted || places.isEmpty) return;
-      setState(() {
-        _centerPickPlace = places.first;
-      });
+      final best = HumanReadableAddress.pickBestPlace(places);
+      if (best == null) return;
+      setState(() => _centerPickPlace = best);
     } catch (_) {
       // Non-fatal: user can still pick from search markers.
     }
@@ -267,10 +268,10 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
         g.longitude,
       );
       if (!mounted || places.isEmpty) return;
-      setState(() {
-        _centerPickPlace = places.first;
-      });
-      _showPlaceDetails(places.first);
+      final best = HumanReadableAddress.pickBestPlace(places);
+      if (best == null) return;
+      setState(() => _centerPickPlace = best);
+      _showPlaceDetails(best);
     } catch (_) {}
   }
 

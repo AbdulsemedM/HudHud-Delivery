@@ -83,8 +83,9 @@ void main() async {
   // Initialize auth service
   final authService = AuthService();
 
-  // Register 401 redirect to login
+  // Register 401 redirect to login (skip if login is already showing).
   DioClient.instance.setOnUnauthorized(() {
+    if (loginScreenIsActive) return;
     navigatorKey.currentState?.pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const LoginScreen()),
       (route) => false,

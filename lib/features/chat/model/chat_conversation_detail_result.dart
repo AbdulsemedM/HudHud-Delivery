@@ -76,13 +76,18 @@ class ChatConversationDetailResult {
 
   static List<ChatMessageModel> _parseMessages(dynamic raw) {
     final list = <ChatMessageModel>[];
+    final seenIds = <int>{};
     if (raw is! List) return list;
     for (final item in raw) {
+      ChatMessageModel? message;
       if (item is Map<String, dynamic>) {
-        list.add(ChatMessageModel.fromJson(item));
+        message = ChatMessageModel.fromJson(item);
       } else if (item is Map) {
-        list.add(ChatMessageModel.fromJson(Map<String, dynamic>.from(item)));
+        message = ChatMessageModel.fromJson(Map<String, dynamic>.from(item));
       }
+      if (message == null || message.id <= 0) continue;
+      if (!seenIds.add(message.id)) continue;
+      list.add(message);
     }
     // API returns newest first; UI uses reverse list — keep chronological asc.
     list.sort((a, b) {

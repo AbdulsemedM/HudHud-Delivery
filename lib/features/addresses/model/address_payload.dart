@@ -1,6 +1,9 @@
 import 'address_model.dart';
 
 class AddressPayload {
+  /// Default postal code when the user does not enter one (Ethiopia app).
+  static const defaultPostalCode = '1000';
+
   final String addressLine1;
   final String? addressLine2;
   final String city;
@@ -38,8 +41,9 @@ class AddressPayload {
         'address_line_2': addressLine2,
       'city': city,
       if (state != null && state!.isNotEmpty) 'state': state,
-      if (postalCode != null && postalCode!.isNotEmpty)
-        'postal_code': postalCode,
+      'postal_code': (postalCode != null && postalCode!.isNotEmpty)
+          ? postalCode
+          : defaultPostalCode,
       'country': country,
       if (latitude != null) 'latitude': latitude,
       if (longitude != null) 'longitude': longitude,

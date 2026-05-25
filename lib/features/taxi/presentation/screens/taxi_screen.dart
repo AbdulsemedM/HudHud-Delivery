@@ -9,6 +9,7 @@ import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
 import 'package:hudhud_delivery/core/widgets/centered_pin_map.dart';
 import 'package:hudhud_delivery/app/models/place_result.dart';
+import 'package:hudhud_delivery/app/utils/human_readable_address.dart';
 import 'package:hudhud_delivery/features/taxi/data/ride_data_provider.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
@@ -418,7 +419,8 @@ class _TaxiScreenState extends State<TaxiScreen> {
 
       if (!mounted || places.isEmpty) return;
 
-      final place = places.first;
+      final place = HumanReadableAddress.pickBestPlace(places);
+      if (place == null) return;
       setState(() {
         _destinationPosition = latLng;
         _destinationController.text = place.shortAddress;
@@ -505,7 +507,8 @@ class _TaxiScreenState extends State<TaxiScreen> {
       );
 
       if (mounted && places.isNotEmpty) {
-        final place = places.first;
+        final place = HumanReadableAddress.pickBestPlace(places);
+        if (place == null) return;
         setState(() {
           _destinationPosition = latLng;
           _destinationController.text = place.shortAddress;
