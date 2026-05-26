@@ -132,6 +132,42 @@ class AppLocalizationsAm extends AppLocalizations {
   String get settingsChangePassword => 'የይለፍ ቃል ቀይር';
 
   @override
+  String get settingsBiometricLogin => 'ባዮሜትሪክ መግቢያ';
+
+  @override
+  String get settingsBiometricLoginSubtitle =>
+      'በዚህ መሣሪያ ላይ በጣት አሻራ ወይም Face ID በፍጥነት ይግቡ';
+
+  @override
+  String get biometricAuthReason => 'ለመቀጠል ማንነትዎን ያረጋግጡ';
+
+  @override
+  String get biometricEnableEnterPassword =>
+      'ባዮሜትሪክ መግቢያን ለማንቃት የይለፍ ቃልዎን ያስገቡ';
+
+  @override
+  String get biometricNotAvailable => 'ባዮሜትሪክ መግቢያ በዚህ መሣሪያ ላይ አይገኝም';
+
+  @override
+  String get biometricNoCredentials => 'የተቀመጠ መግቢያ የለም። በመጀመሪያ በይለፍ ቃል ይግቡ።';
+
+  @override
+  String get biometricLoginFailed =>
+      'ባዮሜትሪክ መግቢያ አልተሳካም። እንደገና ይሞክሩ ወይም የይለፍ ቃል ይጠቀሙ።';
+
+  @override
+  String get biometricEnabledSuccess => 'ባዮሜትሪክ መግቢያ ተነቅቷል';
+
+  @override
+  String get biometricDisabledSuccess => 'ባዮሜትሪክ መግቢያ ተዘግቷል';
+
+  @override
+  String get loginBiometricButtonSemantics => 'በባዮሜትሪክ ይግቡ';
+
+  @override
+  String get loginBiometricOrDivider => 'ወይም በባዮሜትሪክ ይግቡ';
+
+  @override
   String get settingsNotifications => 'ማሳወቂያዎች';
 
   @override

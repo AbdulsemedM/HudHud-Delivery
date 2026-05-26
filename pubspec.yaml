@@ -33,6 +33,7 @@ dependencies:
 
   # Secure Storage
   flutter_secure_storage: ^9.0.0
+  local_auth: ^2.3.0
 
   # Shared Preferences
   shared_preferences: ^2.2.2

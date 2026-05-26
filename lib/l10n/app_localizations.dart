@@ -350,6 +350,72 @@ abstract class AppLocalizations {
   /// **'Change Password'**
   String get settingsChangePassword;
 
+  /// No description provided for @settingsBiometricLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometric login'**
+  String get settingsBiometricLogin;
+
+  /// No description provided for @settingsBiometricLoginSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in quickly with fingerprint or Face ID on this device'**
+  String get settingsBiometricLoginSubtitle;
+
+  /// No description provided for @biometricAuthReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify your identity to continue'**
+  String get biometricAuthReason;
+
+  /// No description provided for @biometricEnableEnterPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your password to enable biometric login'**
+  String get biometricEnableEnterPassword;
+
+  /// No description provided for @biometricNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometric login is not available on this device'**
+  String get biometricNotAvailable;
+
+  /// No description provided for @biometricNoCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved login found. Sign in with your password first.'**
+  String get biometricNoCredentials;
+
+  /// No description provided for @biometricLoginFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometric sign-in failed. Try again or use your password.'**
+  String get biometricLoginFailed;
+
+  /// No description provided for @biometricEnabledSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometric login enabled'**
+  String get biometricEnabledSuccess;
+
+  /// No description provided for @biometricDisabledSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometric login disabled'**
+  String get biometricDisabledSuccess;
+
+  /// No description provided for @loginBiometricButtonSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with biometrics'**
+  String get loginBiometricButtonSemantics;
+
+  /// No description provided for @loginBiometricOrDivider.
+  ///
+  /// In en, this message translates to:
+  /// **'or sign in with biometrics'**
+  String get loginBiometricOrDivider;
+
   /// No description provided for @settingsNotifications.
   ///
   /// In en, this message translates to:

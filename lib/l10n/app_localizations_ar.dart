@@ -132,6 +132,44 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsChangePassword => 'تغيير كلمة المرور';
 
   @override
+  String get settingsBiometricLogin => 'تسجيل الدخول البيومتري';
+
+  @override
+  String get settingsBiometricLoginSubtitle =>
+      'سجّل الدخول بسرعة ببصمة الإصبع أو Face ID على هذا الجهاز';
+
+  @override
+  String get biometricAuthReason => 'تحقق من هويتك للمتابعة';
+
+  @override
+  String get biometricEnableEnterPassword =>
+      'أدخل كلمة المرور لتفعيل تسجيل الدخول البيومتري';
+
+  @override
+  String get biometricNotAvailable =>
+      'تسجيل الدخول البيومتري غير متاح على هذا الجهاز';
+
+  @override
+  String get biometricNoCredentials =>
+      'لا يوجد تسجيل دخول محفوظ. سجّل الدخول بكلمة المرور أولاً.';
+
+  @override
+  String get biometricLoginFailed =>
+      'فشل تسجيل الدخول البيومتري. حاول مرة أخرى أو استخدم كلمة المرور.';
+
+  @override
+  String get biometricEnabledSuccess => 'تم تفعيل تسجيل الدخول البيومتري';
+
+  @override
+  String get biometricDisabledSuccess => 'تم إيقاف تسجيل الدخول البيومتري';
+
+  @override
+  String get loginBiometricButtonSemantics => 'تسجيل الدخول بالبيومترية';
+
+  @override
+  String get loginBiometricOrDivider => 'أو سجّل الدخول بالبيومترية';
+
+  @override
   String get settingsNotifications => 'إشعارات';
 
   @override

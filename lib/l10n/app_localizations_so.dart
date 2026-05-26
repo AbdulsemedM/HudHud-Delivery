@@ -132,6 +132,46 @@ class AppLocalizationsSo extends AppLocalizations {
   String get settingsChangePassword => 'Beddel erayga sirta ah';
 
   @override
+  String get settingsBiometricLogin => 'Galitaanka bayoomatrika';
+
+  @override
+  String get settingsBiometricLoginSubtitle =>
+      'Si degdeg ah ugu gal farta ama Face ID aaladdan';
+
+  @override
+  String get biometricAuthReason => 'Xaqiiji aqoonsigaaga si aad u sii wadato';
+
+  @override
+  String get biometricEnableEnterPassword =>
+      'Geli erayga sirta si aad u karti geliso galitaanka bayoomatrika';
+
+  @override
+  String get biometricNotAvailable =>
+      'Galitaanka bayoomatrika kuma heli karo aaladdan';
+
+  @override
+  String get biometricNoCredentials =>
+      'Galitaan la kaydiyay ma jiro. Marka hore erayga sirta ku gal.';
+
+  @override
+  String get biometricLoginFailed =>
+      'Galitaanka bayoomatrika wuu fashilmay. Isku day mar kale ama isticmaal erayga sirta.';
+
+  @override
+  String get biometricEnabledSuccess =>
+      'Galitaanka bayoomatrika waa la karti geliyay';
+
+  @override
+  String get biometricDisabledSuccess =>
+      'Galitaanka bayoomatrika waa la joojiyay';
+
+  @override
+  String get loginBiometricButtonSemantics => 'Ku gal bayoomatrika';
+
+  @override
+  String get loginBiometricOrDivider => 'ama ku gal bayoomatrika';
+
+  @override
   String get settingsNotifications => 'Ogeysiisyada';
 
   @override

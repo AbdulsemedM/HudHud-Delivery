@@ -132,6 +132,46 @@ class AppLocalizationsOm extends AppLocalizations {
   String get settingsChangePassword => 'Jecha Darbii Jijjiiri';
 
   @override
+  String get settingsBiometricLogin => 'Seensa baayomeetirikii';
+
+  @override
+  String get settingsBiometricLoginSubtitle =>
+      'Meeshaa kana irratti asharaa qubaa yookiin Face ID fayyadamuun saffisaan seeni';
+
+  @override
+  String get biometricAuthReason => 'Itti fufuuf eenyummaa kee mirkaneessi';
+
+  @override
+  String get biometricEnableEnterPassword =>
+      'Seensa baayomeetirikii dandeessisuuf jecha darbii kee galchi';
+
+  @override
+  String get biometricNotAvailable =>
+      'Seensi baayomeetirikii meeshaa kana irratti hin jiru';
+
+  @override
+  String get biometricNoCredentials =>
+      'Seensi kuufame hin jiru. Dura jecha darbiitiin seeni.';
+
+  @override
+  String get biometricLoginFailed =>
+      'Seensi baayomeetirikii hin milkoofne. Irra deebi\'ii yookiin jecha darbii fayyadami.';
+
+  @override
+  String get biometricEnabledSuccess => 'Seensi baayomeetirikii dandeessifame';
+
+  @override
+  String get biometricDisabledSuccess => 'Seensi baayomeetirikii cufame';
+
+  @override
+  String get loginBiometricButtonSemantics =>
+      'Baayomeetirikii fayyadamuun seeni';
+
+  @override
+  String get loginBiometricOrDivider =>
+      'yookiin baayomeetirikii fayyadamuun seeni';
+
+  @override
   String get settingsNotifications => 'Beeksisa';
 
   @override

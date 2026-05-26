@@ -1,6 +1,9 @@
 import 'package:country_picker/country_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hudhud_delivery/app/services/biometric_credential_service.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/utils/phone_util.dart';
@@ -64,19 +67,19 @@ class LoginTitle extends StatelessWidget {
           l10n.loginTitle,
           style: headline,
         ),
-        const SizedBox(height: 8),
-        Text(
-          l10n.loginSubtitle,
-          style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-                height: 1.45,
-              ) ??
-              TextStyle(
-                fontSize: 14,
-                color: theme.colorScheme.onSurfaceVariant,
-                height: 1.45,
-              ),
-        ),
+        // const SizedBox(height: 8),
+        // Text(
+        //   l10n.loginSubtitle,
+        //   style: theme.textTheme.bodyMedium?.copyWith(
+        //         color: theme.colorScheme.onSurfaceVariant,
+        //         height: 1.45,
+        //       ) ??
+        //       TextStyle(
+        //         fontSize: 14,
+        //         color: theme.colorScheme.onSurfaceVariant,
+        //         height: 1.45,
+        //       ),
+        // ),
       ],
     );
   }
@@ -97,6 +100,105 @@ class _LoginFormState extends State<LoginForm> {
   bool _isPasswordVisible = false;
   LoginMethod _method = LoginMethod.email;
   String _countryCode = kDefaultPhoneDialCode;
+  bool _showBiometricButton = false;
+  bool _useFaceBiometricIcon = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshBiometricButton();
+  }
+
+  Future<void> _refreshBiometricButton() async {
+    if (kIsWeb) return;
+    final biometric = BiometricCredentialService();
+    final hasCreds = await biometric.hasStoredCredentials();
+    final types = await biometric.getAvailableBiometrics();
+    if (!mounted) return;
+    setState(() {
+      _showBiometricButton = hasCreds;
+      _useFaceBiometricIcon = types.contains(BiometricType.face) ||
+          types.contains(BiometricType.strong);
+    });
+  }
+
+  void _onBiometricTap(BuildContext context, AppLocalizations l10n) {
+    context.read<LoginBloc>().add(
+          BiometricLoginRequested(
+            authReason: l10n.biometricAuthReason,
+            noCredentialsMessage: l10n.biometricNoCredentials,
+            authFailedMessage: l10n.biometricLoginFailed,
+          ),
+        );
+  }
+
+  Widget _buildBiometricLoginButton(
+    BuildContext context,
+    AppLocalizations l10n,
+    ThemeData theme,
+    bool isLoading,
+  ) {
+    final primary = theme.brightness == Brightness.dark
+        ? AppColors.primaryLightColor
+        : AppColors.primaryColor;
+
+    return Column(
+      children: [
+        const SizedBox(height: 8),
+        Text(
+          l10n.loginBiometricOrDivider,
+          textAlign: TextAlign.center,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Semantics(
+          button: true,
+          label: l10n.loginBiometricButtonSemantics,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: isLoading ? null : () => _onBiometricTap(context, l10n),
+              customBorder: const CircleBorder(),
+              child: Ink(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: theme.colorScheme.surface.withValues(alpha: 0.92),
+                  border: Border.all(color: primary, width: 2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: primary.withValues(alpha: 0.28),
+                      blurRadius: 16,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: isLoading
+                    ? Padding(
+                        padding: const EdgeInsets.all(22),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: primary,
+                        ),
+                      )
+                    : Icon(
+                        _useFaceBiometricIcon
+                            ? Icons.face_rounded
+                            : Icons.fingerprint_rounded,
+                        size: 36,
+                        color: primary,
+                      ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
+      ],
+    );
+  }
 
   InputDecoration _fieldDecoration(
     BuildContext context, {
@@ -145,21 +247,27 @@ class _LoginFormState extends State<LoginForm> {
     );
   }
 
-  Widget _fieldLabel(BuildContext context, String text) {
-    final theme = Theme.of(context);
-    return Text(
-      text,
-      style: TextStyle(
-        fontSize: 13,
-        color: theme.colorScheme.onSurfaceVariant,
-        fontWeight: FontWeight.w500,
-      ),
-    );
-  }
+  // Widget _fieldLabel(BuildContext context, String text) {
+  //   final theme = Theme.of(context);
+  //   return Text(
+  //     text,
+  //     style: TextStyle(
+  //       fontSize: 13,
+  //       color: theme.colorScheme.onSurfaceVariant,
+  //       fontWeight: FontWeight.w500,
+  //     ),
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
-    return Form(
+    return BlocListener<LoginBloc, LoginState>(
+      listenWhen: (previous, current) =>
+          current is LoginFailure || current is LoginSuccess,
+      listener: (context, state) {
+        _refreshBiometricButton();
+      },
+      child: Form(
       key: _formKey,
       child: Builder(
         builder: (context) {
@@ -197,7 +305,7 @@ class _LoginFormState extends State<LoginForm> {
                     : _buildPhonePane(context, l10n, theme),
               ),
               const SizedBox(height: 16),
-              _fieldLabel(context, '${l10n.labelPassword}*'),
+              // _fieldLabel(context, '${l10n.labelPassword}*'),
               const SizedBox(height: 6),
               TextFormField(
                 controller: _passwordController,
@@ -264,6 +372,20 @@ class _LoginFormState extends State<LoginForm> {
                 ),
               ),
               const SizedBox(height: 24),
+              BlocBuilder<LoginBloc, LoginState>(
+                builder: (context, state) {
+                  final isLoading = state is LoginLoading;
+                  if (_showBiometricButton && !kIsWeb) {
+                    return _buildBiometricLoginButton(
+                      context,
+                      l10n,
+                      theme,
+                      isLoading,
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
               SizedBox(
                 width: double.infinity,
                 height: 52,
@@ -312,6 +434,7 @@ class _LoginFormState extends State<LoginForm> {
           );
         },
       ),
+    ),
     );
   }
 
@@ -324,7 +447,7 @@ class _LoginFormState extends State<LoginForm> {
       key: const ValueKey('login_email'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _fieldLabel(context, '${l10n.labelEmail}*'),
+        // _fieldLabel(context, '${l10n.labelEmail}*'),
         const SizedBox(height: 6),
         TextFormField(
           controller: _emailController,
@@ -358,7 +481,7 @@ class _LoginFormState extends State<LoginForm> {
       key: const ValueKey('login_phone'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _fieldLabel(context, '${l10n.labelPhone}*'),
+        // _fieldLabel(context, '${l10n.labelPhone}*'),
         const SizedBox(height: 6),
         PhoneNumberField(
           countryCode: _countryCode,

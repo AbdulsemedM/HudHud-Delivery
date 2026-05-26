@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
+import 'package:hudhud_delivery/app/services/biometric_credential_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
@@ -66,6 +67,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     setState(() => _isChangingPassword = false);
 
     if (result['success'] == true) {
+      await BiometricCredentialService().setBiometricLoginEnabled(false);
+      if (!mounted) return;
       Navigator.pop(context, result['message'] ?? 'Password updated successfully');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(

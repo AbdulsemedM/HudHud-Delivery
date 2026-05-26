@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'package:hudhud_delivery/app/services/auth_service.dart';
+import 'package:hudhud_delivery/app/services/biometric_credential_service.dart';
 import 'package:hudhud_delivery/app/services/fcm_service.dart';
 import 'package:hudhud_delivery/app/services/google_auth_helper.dart';
 import 'package:hudhud_delivery/features/login/data/data_provider/login_data_provider.dart';
@@ -20,7 +21,13 @@ class LoginRepository {
           throw 'Invalid server response: missing required data';
         }
 
-        return _completeSessionFromLoginData(data, authService);
+        final user = await _completeSessionFromLoginData(data, authService);
+        await _maybeRefreshBiometricCredentials(
+          emailOrPhone: emailOrPhone,
+          password: password,
+          fieldType: fieldType,
+        );
+        return user;
       } else {
         // Get clean error message from data provider
         String errorMessage = response['errorMessage'] ?? 'Login failed';
@@ -146,6 +153,20 @@ class LoginRepository {
       );
       return loginUser;
     }
+  }
+
+  Future<void> _maybeRefreshBiometricCredentials({
+    required String emailOrPhone,
+    required String password,
+    required String fieldType,
+  }) async {
+    final biometric = BiometricCredentialService();
+    if (!await biometric.isBiometricLoginEnabled()) return;
+    await biometric.saveCredentials(
+      identifier: emailOrPhone,
+      password: password,
+      fieldType: fieldType,
+    );
   }
 
   String _cleanErrorMessage(String message) {

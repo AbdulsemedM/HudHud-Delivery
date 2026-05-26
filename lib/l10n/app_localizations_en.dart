@@ -132,6 +132,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsChangePassword => 'Change Password';
 
   @override
+  String get settingsBiometricLogin => 'Biometric login';
+
+  @override
+  String get settingsBiometricLoginSubtitle =>
+      'Sign in quickly with fingerprint or Face ID on this device';
+
+  @override
+  String get biometricAuthReason => 'Verify your identity to continue';
+
+  @override
+  String get biometricEnableEnterPassword =>
+      'Enter your password to enable biometric login';
+
+  @override
+  String get biometricNotAvailable =>
+      'Biometric login is not available on this device';
+
+  @override
+  String get biometricNoCredentials =>
+      'No saved login found. Sign in with your password first.';
+
+  @override
+  String get biometricLoginFailed =>
+      'Biometric sign-in failed. Try again or use your password.';
+
+  @override
+  String get biometricEnabledSuccess => 'Biometric login enabled';
+
+  @override
+  String get biometricDisabledSuccess => 'Biometric login disabled';
+
+  @override
+  String get loginBiometricButtonSemantics => 'Sign in with biometrics';
+
+  @override
+  String get loginBiometricOrDivider => 'or sign in with biometrics';
+
+  @override
   String get settingsNotifications => 'Notifications';
 
   @override

@@ -202,22 +202,22 @@ class _LoginScreenState extends State<LoginScreen> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.stretch,
                                     children: [
-                                      Padding(
-                                        padding:
-                                            const EdgeInsetsDirectional.only(
-                                          start: 2,
-                                          top: 4,
-                                          bottom: 4,
-                                          end: 4,
-                                        ),
-                                        child: Align(
-                                          alignment: AlignmentDirectional
-                                              .centerStart,
-                                          child: _GlassBackButton(
-                                            onPressed: () => _onWillPop(),
-                                          ),
-                                        ),
-                                      ),
+                                      // Padding(
+                                      //   padding:
+                                      //       const EdgeInsetsDirectional.only(
+                                      //     start: 2,
+                                      //     top: 4,
+                                      //     bottom: 4,
+                                      //     end: 4,
+                                      //   ),
+                                      //   child: Align(
+                                      //     alignment: AlignmentDirectional
+                                      //         .centerStart,
+                                      //     child: _GlassBackButton(
+                                      //       onPressed: () => _onWillPop(),
+                                      //     ),
+                                      //   ),
+                                      // ),
                                       const Padding(
                                         padding: EdgeInsets.only(
                                           top: 8,
@@ -325,39 +325,39 @@ class _LoginScreenTopBadge extends StatelessWidget {
   }
 }
 
-class _GlassBackButton extends StatelessWidget {
-  const _GlassBackButton({required this.onPressed});
+// class _GlassBackButton extends StatelessWidget {
+//   const _GlassBackButton({required this.onPressed});
 
-  final VoidCallback onPressed;
+//   final VoidCallback onPressed;
 
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return ClipOval(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-        child: Material(
-          color: Colors.white.withValues(alpha: 0.22),
-          child: InkWell(
-            onTap: onPressed,
-            customBorder: const CircleBorder(),
-            child: SizedBox(
-              width: 44,
-              height: 44,
-              child: Icon(
-                Icons.arrow_back,
-                color: colorScheme.brightness == Brightness.dark
-                    ? colorScheme.onSurface
-                    : Colors.white,
-                size: 22,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     final colorScheme = Theme.of(context).colorScheme;
+//     return ClipOval(
+//       child: BackdropFilter(
+//         filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+//         child: Material(
+//           color: Colors.white.withValues(alpha: 0.22),
+//           child: InkWell(
+//             onTap: onPressed,
+//             customBorder: const CircleBorder(),
+//             child: SizedBox(
+//               width: 44,
+//               height: 44,
+//               child: Icon(
+//                 Icons.arrow_back,
+//                 color: colorScheme.brightness == Brightness.dark
+//                     ? colorScheme.onSurface
+//                     : Colors.white,
+//                 size: 22,
+//               ),
+//             ),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
 
 class _SignUpPrompt extends StatelessWidget {
   const _SignUpPrompt({required this.onPressed});

@@ -976,9 +976,15 @@ class AuthService {
     );
   }
 
-  // Clear all stored data
+  // Clear session data only (preserves biometric credential storage).
   Future<void> clearAllData() async {
-    await _storage.deleteAll();
+    await Future.wait([
+      _storage.delete(key: _tokenKey),
+      _storage.delete(key: _refreshTokenKey),
+      _storage.delete(key: _userKey),
+      _storage.delete(key: _tokenExpiryKey),
+      _storage.delete(key: _lastLoginKey),
+    ]);
     _currentUser = null;
     _currentToken = null;
     _tokenExpiry = null;

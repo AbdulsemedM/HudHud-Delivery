@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:hudhud_delivery/app/services/biometric_credential_service.dart';
 import 'package:hudhud_delivery/app/services/google_auth_helper.dart';
 import '../data/repository/login_repository.dart';
 
@@ -45,5 +46,46 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         emit(LoginFailure(e.toString()));
       }
     });
+    on<BiometricLoginRequested>((event, emit) async {
+      final biometricService = BiometricCredentialService();
+      final authenticated = await biometricService.authenticate(
+        localizedReason: event.authReason,
+      );
+      if (!authenticated) {
+        emit(LoginFailure(event.authFailedMessage));
+        return;
+      }
+
+      final credentials = await biometricService.readCredentials();
+      if (credentials == null) {
+        emit(LoginFailure(event.noCredentialsMessage));
+        return;
+      }
+
+      emit(LoginLoading());
+      try {
+        await loginRepository.login(
+          credentials.identifier,
+          credentials.password,
+          credentials.fieldType,
+        );
+        emit(LoginSuccess());
+      } catch (e) {
+        final message = e.toString();
+        if (_isInvalidCredentialsError(message)) {
+          await biometricService.setBiometricLoginEnabled(false);
+        }
+        emit(LoginFailure(message));
+      }
+    });
+  }
+
+  bool _isInvalidCredentialsError(String message) {
+    final lower = message.toLowerCase();
+    return lower.contains('invalid') &&
+        (lower.contains('credential') ||
+            lower.contains('password') ||
+            lower.contains('email') ||
+            lower.contains('phone'));
   }
 }

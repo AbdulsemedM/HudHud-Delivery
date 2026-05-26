@@ -1,5 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hudhud_delivery/app/services/biometric_credential_service.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
@@ -9,6 +12,7 @@ import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/utils/support_launcher.dart';
 import 'package:hudhud_delivery/core/utils/avatar_util.dart';
+import 'package:hudhud_delivery/core/utils/phone_util.dart';
 import 'package:hudhud_delivery/features/addresses/presentation/screens/addresses_list_screen.dart';
 import 'package:hudhud_delivery/features/chat/presentation/screens/conversations_list_screen.dart';
 import 'package:hudhud_delivery/features/chat/presentation/screens/support_chat_start_screen.dart';
@@ -20,7 +24,7 @@ import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import 'package:hudhud_delivery/models/user_model.dart';
 import 'appearance_screen.dart';
 import 'change_password_screen.dart';
-import 'faqs_screen.dart';
+// import 'faqs_screen.dart';
 import 'language_screen.dart';
 import 'notifications_screen.dart';
 import 'edit_profile_screen.dart';
@@ -52,6 +56,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _smsNotificationsEnabled = true;
   double? _walletTotal;
   PackageInfo? _packageInfo;
+  bool _biometricEnabled = false;
+  bool _biometricAvailable = false;
+  bool _biometricBusy = false;
+  bool _useFaceBiometricIcon = false;
+  final BiometricCredentialService _biometricService =
+      BiometricCredentialService();
 
   static const Color _accentIconRed = AppColors.errorColor;
 
@@ -66,7 +76,158 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _loadUserData(),
       _loadWalletSummary(),
       _loadPackageInfo(),
+      _loadBiometricState(),
     ]);
+  }
+
+  Future<void> _loadBiometricState() async {
+    if (kIsWeb) return;
+    final available = await _biometricService.isDeviceSupported();
+    final enabled = await _biometricService.isBiometricLoginEnabled();
+    final types = await _biometricService.getAvailableBiometrics();
+    if (mounted) {
+      setState(() {
+        _biometricAvailable = available;
+        _biometricEnabled = enabled;
+        _useFaceBiometricIcon = types.contains(BiometricType.face);
+      });
+    }
+  }
+
+  Future<void> _onBiometricLoginChanged(bool value) async {
+    if (_biometricBusy) return;
+    final l10n = context.l10n;
+
+    if (!value) {
+      setState(() => _biometricBusy = true);
+      await _biometricService.setBiometricLoginEnabled(false);
+      if (!mounted) return;
+      setState(() {
+        _biometricEnabled = false;
+        _biometricBusy = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.biometricDisabledSuccess)),
+      );
+      return;
+    }
+
+    if (!_biometricAvailable) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.biometricNotAvailable)),
+      );
+      return;
+    }
+
+    final authenticated = await _biometricService.authenticate(
+      localizedReason: l10n.biometricAuthReason,
+    );
+    if (!authenticated || !mounted) return;
+
+    final saved = await _showBiometricEnableDialog();
+    if (!mounted) return;
+    if (saved) {
+      setState(() => _biometricEnabled = true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.biometricEnabledSuccess)),
+      );
+    }
+  }
+
+  Future<bool> _showBiometricEnableDialog() async {
+    final l10n = context.l10n;
+    final user = _user;
+    final hasEmail = user?.email != null && user!.email!.trim().isNotEmpty;
+    final fieldType = hasEmail ? 'email' : 'phone';
+    final identifierController = TextEditingController(
+      text: hasEmail ? user.email!.trim() : (user?.phone?.trim() ?? ''),
+    );
+    final passwordController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    final saved = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Text(l10n.biometricEnableEnterPassword),
+          content: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: identifierController,
+                  keyboardType: hasEmail
+                      ? TextInputType.emailAddress
+                      : TextInputType.phone,
+                  decoration: InputDecoration(
+                    labelText: hasEmail ? l10n.labelEmail : l10n.labelPhone,
+                  ),
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) {
+                      return hasEmail
+                          ? l10n.validationEmailRequired
+                          : l10n.validationPhoneRequired;
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: passwordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: l10n.labelPassword,
+                  ),
+                  validator: (v) {
+                    if (v == null || v.isEmpty) {
+                      return l10n.validationPasswordRequired;
+                    }
+                    if (v.length < 8) {
+                      return l10n.validationPasswordMin;
+                    }
+                    return null;
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(l10n.actionCancel),
+            ),
+            FilledButton(
+              onPressed: () {
+                if (formKey.currentState?.validate() != true) return;
+                Navigator.of(dialogContext).pop(true);
+              },
+              child: Text(l10n.actionSave),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (saved != true) {
+      identifierController.dispose();
+      passwordController.dispose();
+      return false;
+    }
+
+    var identifier = identifierController.text.trim();
+    if (fieldType == 'phone') {
+      identifier = normalizePhoneToBackend(identifier);
+    }
+    await _biometricService.saveCredentials(
+      identifier: identifier,
+      password: passwordController.text,
+      fieldType: fieldType,
+    );
+    identifierController.dispose();
+    passwordController.dispose();
+    return true;
   }
 
   Future<void> _loadUserData() async {
@@ -310,6 +471,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     },
                   ),
                   _tileDivider(colorScheme),
+                  if (!kIsWeb)
+                    SwitchListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 4,
+                      ),
+                      secondary: Icon(
+                        _useFaceBiometricIcon
+                            ? Icons.face_outlined
+                            : Icons.fingerprint_outlined,
+                        color: _accentIconRed,
+                      ),
+                      title: Text(
+                        l10n.settingsBiometricLogin,
+                        style: textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+                      subtitle: Text(
+                        l10n.settingsBiometricLoginSubtitle,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      value: _biometricEnabled,
+                      onChanged: _biometricAvailable && !_biometricBusy
+                          ? _onBiometricLoginChanged
+                          : null,
+                    ),
+                  if (!kIsWeb) _tileDivider(colorScheme),
                   _KlikTile(
                     icon: Icons.manage_accounts_outlined,
                     iconColor: _accentIconRed,
