@@ -22,11 +22,15 @@ ConversationsBloc createConversationsBloc({AuthService? authService}) {
   );
 }
 
-ChatRoomBloc createChatRoomBloc({AuthService? authService}) {
+ChatRoomBloc createChatRoomBloc({
+  AuthService? authService,
+  int? packageDeliveryId,
+}) {
   final auth = authService ?? AuthService();
   return ChatRoomBloc(
     repository: createChatRepository(),
     currentUserId: auth.currentUser?.id,
+    packageDeliveryId: packageDeliveryId,
   );
 }
 
@@ -41,11 +45,12 @@ BlocProvider<ConversationsBloc> conversationsBlocProvider({
 
 BlocProvider<ChatRoomBloc> chatRoomBlocProvider({
   required int conversationId,
+  int? packageDeliveryId,
   ChatConversationDetailResult? initialDetail,
   required Widget child,
 }) {
   return BlocProvider(
-    create: (_) => createChatRoomBloc()
+    create: (_) => createChatRoomBloc(packageDeliveryId: packageDeliveryId)
       ..add(
         OpenChatRoomEvent(
           conversationId,

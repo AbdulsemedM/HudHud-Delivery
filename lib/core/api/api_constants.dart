@@ -137,6 +137,18 @@ class ApiConstants {
   static const String chatRide = 'chat/ride/{rideId}';
   static const String chatMessage = 'chat/messages/{id}';
 
+  // Package delivery chat endpoints
+  static const String packageDeliveryUnreadCount =
+      'package-delivery/unread-count';
+  static const String packageDeliveryConversations =
+      'package-delivery/conversations';
+  static const String packageDeliveryConversation =
+      'package-delivery/{deliveryId}/conversation';
+  static const String packageDeliveryRead =
+      'package-delivery/{deliveryId}/read';
+  static const String packageDeliveryMessage =
+      'package-delivery/{deliveryId}/message';
+
   // Address endpoints
   static const String addresses = 'addresses';
   static const String addressDetails = 'addresses/{id}';

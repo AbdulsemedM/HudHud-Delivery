@@ -113,6 +113,8 @@ class ConversationListTile extends StatelessWidget {
         return l10n.chatTypeSupport;
       case ChatConversationType.ride:
         return l10n.chatTypeRide;
+      case ChatConversationType.packageDelivery:
+        return 'Delivery';
       case ChatConversationType.unknown:
         return '';
     }

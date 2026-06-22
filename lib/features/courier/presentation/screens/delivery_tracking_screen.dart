@@ -6,6 +6,7 @@ import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
+import 'package:hudhud_delivery/features/chat/utils/chat_navigation.dart';
 
 class DeliveryTrackingScreen extends StatefulWidget {
   final int? deliveryId;
@@ -153,6 +154,17 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
         });
       }
     }
+  }
+
+  bool get _hasAssignedDriver {
+    final driver = _trackData?['driver'];
+    return driver != null && driver is Map && driver.isNotEmpty;
+  }
+
+  void _openDriverChat() {
+    final deliveryId = widget.deliveryId;
+    if (deliveryId == null || !_hasAssignedDriver) return;
+    openPackageDeliveryChat(context, deliveryId);
   }
 
   String _formatTimestamp(dynamic value) {
@@ -394,9 +406,10 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                             ),
                             child: IconButton(
                               icon: const Icon(Icons.send, color: Colors.white),
-                              onPressed: () {
-                                // TODO: Implement send action
-                              },
+                              onPressed: _hasAssignedDriver &&
+                                      widget.deliveryId != null
+                                  ? _openDriverChat
+                                  : null,
                             ),
                           ),
                         ],
@@ -444,9 +457,7 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                                       onCall: () {
                                         // TODO: Implement call
                                       },
-                                      onMessage: () {
-                                        // TODO: Implement message
-                                      },
+                                      onMessage: _openDriverChat,
                                     ),
                                     const SizedBox(height: 16),
                                   ],

@@ -15,6 +15,7 @@ part 'chat_room_state.dart';
 class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
   final ChatRepository repository;
   final int? currentUserId;
+  final int? packageDeliveryId;
 
   Timer? _pollTimer;
   bool _pollInFlight = false;
@@ -25,6 +26,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
   ChatRoomBloc({
     required this.repository,
     this.currentUserId,
+    this.packageDeliveryId,
   }) : super(const ChatRoomInitial()) {
     on<OpenChatRoomEvent>(_onOpen);
     on<PollChatMessagesEvent>(_onPoll);
@@ -77,9 +79,13 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
       }
 
       emit(const ChatRoomLoading());
-      final detail = await repository.getConversationWithRetry(
-        event.conversationId,
-      );
+      final detail = packageDeliveryId != null
+          ? await repository.getPackageDeliveryConversation(
+              packageDeliveryId!,
+            )
+          : await repository.getConversationWithRetry(
+              event.conversationId,
+            );
       emit(
         ChatRoomLoaded(
           conversation: detail.conversation,
@@ -97,9 +103,22 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
 
   Future<void> _markReadAndRefresh(int conversationId) async {
     try {
-      await repository.markConversationRead(conversationId);
+      if (packageDeliveryId != null) {
+        await repository.markPackageDeliveryRead(packageDeliveryId!);
+      } else {
+        await repository.markConversationRead(conversationId);
+      }
     } catch (_) {}
     if (!isClosed) add(const PollChatMessagesEvent());
+  }
+
+  Future<ChatConversationDetailResult> _fetchConversationDetail(
+    ChatRoomLoaded current,
+  ) {
+    if (packageDeliveryId != null) {
+      return repository.getPackageDeliveryConversation(packageDeliveryId!);
+    }
+    return repository.getConversation(current.conversation.id);
   }
 
   Future<void> _onPoll(
@@ -110,8 +129,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
     if (current is! ChatRoomLoaded || _pollInFlight || _sendInFlight) return;
     _pollInFlight = true;
     try {
-      final detail =
-          await repository.getConversation(current.conversation.id);
+      final detail = await _fetchConversationDetail(current);
       final merged = _mergeMessages(current.messages, detail.messages);
       if (!_messagesChanged(current.messages, merged) &&
           !current.isLoadingHistory) {
@@ -305,10 +323,15 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
 
     _sendInFlight = true;
     try {
-      final sent = await repository.sendMessage(
-        current.conversation.id,
-        request,
-      );
+      final sent = packageDeliveryId != null
+          ? await repository.sendPackageDeliveryMessage(
+              packageDeliveryId!,
+              request,
+            )
+          : await repository.sendMessage(
+              current.conversation.id,
+              request,
+            );
       _pendingRetries.remove(tempId);
       final loaded = state;
       if (loaded is! ChatRoomLoaded) return;
@@ -357,7 +380,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
     final loaded = state;
     if (loaded is! ChatRoomLoaded) return;
     try {
-      final detail = await repository.getConversation(loaded.conversation.id);
+      final detail = await _fetchConversationDetail(loaded);
       if (detail.messages.any((m) => _matchesOptimistic(m, optimistic))) {
         _pendingRetries.remove(tempId);
       }
@@ -435,7 +458,11 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
     final current = state;
     if (current is! ChatRoomLoaded) return;
     try {
-      await repository.markConversationRead(current.conversation.id);
+      if (packageDeliveryId != null) {
+        await repository.markPackageDeliveryRead(packageDeliveryId!);
+      } else {
+        await repository.markConversationRead(current.conversation.id);
+      }
     } catch (_) {}
   }
 

@@ -65,6 +65,39 @@ Future<void> openRideChat(BuildContext context, int rideId) async {
   }
 }
 
+Future<void> openPackageDeliveryChat(
+  BuildContext context,
+  int deliveryId,
+) async {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => const Center(child: CircularProgressIndicator()),
+  );
+  try {
+    final repo = createChatRepository();
+    final detail = await repo.getPackageDeliveryConversation(deliveryId);
+    if (!context.mounted) return;
+    Navigator.of(context).pop();
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ChatRoomScreen(
+          conversationId: detail.conversation.id,
+          packageDeliveryId: deliveryId,
+          initialDetail: detail,
+        ),
+      ),
+    );
+  } catch (e) {
+    if (context.mounted) {
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    }
+  }
+}
+
 Future<void> openChatRoom(BuildContext context, int conversationId) async {
   await Navigator.of(context).push(
     MaterialPageRoute(

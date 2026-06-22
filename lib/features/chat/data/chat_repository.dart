@@ -6,6 +6,7 @@ import 'package:hudhud_delivery/features/chat/model/chat_message_model.dart';
 import 'package:hudhud_delivery/features/chat/model/chat_open_conversation_result.dart';
 import 'package:hudhud_delivery/features/chat/model/send_chat_message_request.dart';
 import 'package:hudhud_delivery/features/chat/utils/chat_conversations_response_parser.dart';
+import 'package:hudhud_delivery/features/chat/utils/package_delivery_chat_mapper.dart';
 
 class ChatRepository {
   final ChatDataProvider dataProvider;
@@ -124,6 +125,53 @@ class ChatRepository {
   Future<void> deleteMessage(int messageId) async {
     final response = await dataProvider.deleteMessage(messageId);
     _ensureSuccess(response, 'Error deleting message');
+  }
+
+  Future<ChatConversationDetailResult> getPackageDeliveryConversation(
+    int deliveryId, {
+    int maxAttempts = 4,
+    Duration delay = const Duration(milliseconds: 500),
+  }) async {
+    Object? lastError;
+    for (var attempt = 0; attempt < maxAttempts; attempt++) {
+      try {
+        final response =
+            await dataProvider.getPackageDeliveryConversation(deliveryId);
+        _ensureSuccess(response, 'Error loading package delivery chat');
+        final data = _extractDataMap(response['data']);
+        final detail = ChatConversationDetailResult.fromResponseData(data);
+        return PackageDeliveryChatMapper.enrichDetail(detail, data);
+      } catch (e) {
+        lastError = e;
+        if (attempt < maxAttempts - 1) {
+          await Future.delayed(delay);
+        }
+      }
+    }
+    throw lastError ?? Exception('Error loading package delivery chat');
+  }
+
+  Future<void> markPackageDeliveryRead(int deliveryId) async {
+    final response = await dataProvider.markPackageDeliveryRead(deliveryId);
+    _ensureSuccess(response, 'Error marking package delivery chat read');
+  }
+
+  Future<ChatMessageModel> sendPackageDeliveryMessage(
+    int deliveryId,
+    SendChatMessageRequest request,
+  ) async {
+    final response =
+        await dataProvider.sendPackageDeliveryMessage(deliveryId, request);
+    _ensureSuccess(response, 'Error sending message');
+    final data = _extractDataMap(response['data']);
+    final messageRaw = _parseSendMessagePayload(data);
+    if (messageRaw is Map<String, dynamic>) {
+      return ChatMessageModel.fromJson(messageRaw);
+    }
+    if (messageRaw is Map) {
+      return ChatMessageModel.fromJson(Map<String, dynamic>.from(messageRaw));
+    }
+    throw Exception('Invalid message response');
   }
 
   ChatOpenConversationResult _parseOpenConversation(dynamic root) {
