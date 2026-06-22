@@ -46,6 +46,38 @@ class PaymentRepository {
     }
   }
 
+  Future<Map<String, dynamic>> initiatePayment({
+    required String paymentMethodCode,
+    required int orderId,
+    required double amount,
+    required String currency,
+    String type = 'order',
+    Map<String, dynamic>? paymentDetails,
+  }) async {
+    try {
+      if (paymentMethodCode.isEmpty) {
+        throw Exception('Payment method is required');
+      }
+      if (orderId <= 0) {
+        throw Exception('Invalid order id: $orderId');
+      }
+      if (amount <= 0) {
+        throw Exception('Invalid payment amount: $amount');
+      }
+
+      return await paymentDataProvider.initiatePayment(
+        paymentMethodCode: paymentMethodCode,
+        orderId: orderId,
+        amount: amount,
+        currency: currency,
+        type: type,
+        paymentDetails: paymentDetails,
+      );
+    } catch (e) {
+      throw Exception('Payment initiation failed: $e');
+    }
+  }
+
   Future<Map<String, dynamic>> validatePayment({
     required String transactionId,
     required String paymentMethod,

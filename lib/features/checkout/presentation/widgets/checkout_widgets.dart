@@ -474,26 +474,22 @@ class OrderSummarySection extends StatelessWidget {
 // Payment method grid shown directly on the checkout screen
 // ---------------------------------------------------------------------------
 
-/// Static list of payment methods so the checkout page doesn't need a BLoC.
-const List<Map<String, dynamic>> _kCheckoutPaymentMethods = [
-  {'id': 'cash_on_delivery', 'name': 'Cash on Delivery', 'enabled': true},
-  {'id': 'telebirr',         'name': 'TeleBirr',          'enabled': true},
-  {'id': 'cbe',              'name': 'CBE Birr',           'enabled': true},
-  {'id': 'chapa',            'name': 'Chapa',              'enabled': true},
-  {'id': 'amole',            'name': 'Amole',              'enabled': true},
-  {'id': 'wallet',           'name': 'Wallet',             'enabled': true},
-  {'id': 'card',             'name': 'Card',               'enabled': true},
-  {'id': 'ebirr',            'name': 'eBirr',              'enabled': true},
-];
-
 class PaymentMethodGridSection extends StatelessWidget {
+  final List<Map<String, dynamic>> methods;
   final String? selectedId;
   final ValueChanged<String> onSelected;
+  final bool isLoading;
+  final String? error;
+  final VoidCallback? onRetry;
 
   const PaymentMethodGridSection({
     super.key,
+    required this.methods,
     required this.selectedId,
     required this.onSelected,
+    this.isLoading = false,
+    this.error,
+    this.onRetry,
   });
 
   @override
@@ -515,6 +511,32 @@ class PaymentMethodGridSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
+          if (isLoading)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(24),
+                child: CircularProgressIndicator(),
+              ),
+            )
+          else if (error != null)
+            Column(
+              children: [
+                Text(
+                  'Failed to load payment methods',
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+                if (onRetry != null)
+                  TextButton(onPressed: onRetry, child: const Text('Retry')),
+              ],
+            )
+          else if (methods.isEmpty)
+            Text(
+              'No payment methods available',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            )
+          else
           GridView.builder(
             physics: const NeverScrollableScrollPhysics(),
             shrinkWrap: true,
@@ -524,12 +546,12 @@ class PaymentMethodGridSection extends StatelessWidget {
               crossAxisSpacing: 10,
               childAspectRatio: 0.85,
             ),
-            itemCount: _kCheckoutPaymentMethods.length,
+            itemCount: methods.length,
             itemBuilder: (context, index) {
-              final method = _kCheckoutPaymentMethods[index];
+              final method = methods[index];
               final id = method['id'] as String;
-              final name = method['name'] as String;
-              final enabled = method['enabled'] as bool;
+              final name = method['name'] as String? ?? id;
+              final enabled = method['enabled'] as bool? ?? true;
               final isSelected = selectedId == id;
 
               final color = PaymentMethodCard.colorForId(id);
@@ -611,7 +633,7 @@ class PaymentMethodGridSection extends StatelessWidget {
 }
 
 class ConfirmOrderButton extends StatelessWidget {
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final bool isLoading;
 
   const ConfirmOrderButton({

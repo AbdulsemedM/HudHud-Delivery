@@ -140,6 +140,8 @@ class PaymentMethodCard extends StatelessWidget {
         return Icons.account_balance_wallet_rounded;
       case 'amole':
         return Icons.mobile_friendly;
+      case 'qpay':
+        return Icons.qr_code_2;
       default:
         return Icons.payment;
     }
@@ -172,6 +174,8 @@ class PaymentMethodCard extends StatelessWidget {
         return const Color(0xFF00A86B);
       case 'amole':
         return const Color(0xFF9C27B0);
+      case 'qpay':
+        return const Color(0xFF1565C0);
       default:
         return AppColors.primaryColor;
     }

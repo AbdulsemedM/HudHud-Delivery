@@ -70,6 +70,7 @@ class ApiConstants {
   static const String payments = '/payments';
   static const String paymentMethods = 'payment-methods';
   static const String processPayment = '$payments/process';
+  static const String paymentsInitiate = 'payments/initiate';
 
   // Wallet endpoints
   static const String wallets = 'wallets';

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../app/services/auth_service.dart';
 import '../../../../app/services/guest_browse_service.dart';
 import '../../../../app/services/location_service.dart';
 import '../../../../app/services/saved_location_service.dart';
@@ -14,6 +15,12 @@ import '../widgets/checkout_widgets.dart';
 import '../../../addresses/presentation/widgets/delivery_address_selector.dart';
 import '../../../addresses/data/addresses_data_provider.dart';
 import '../../../addresses/data/addresses_repository.dart';
+import '../../../payment/data/data_provider/payment_data_provider.dart';
+import '../../../payment/data/repository/payment_repository.dart';
+import '../../../payment/model/payment_initiate_result.dart';
+import '../../../payment/presentation/screen/payment_initiate_result_screen.dart';
+import '../../../payment/presentation/widgets/payment_details_form.dart';
+import '../../../payment/presentation/widgets/payment_methods_loader.dart';
 
 class CheckoutScreen extends StatefulWidget {
   final List<Map<String, dynamic>> cartItems;
@@ -37,11 +44,19 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   String? _selectedPaymentMethod;
   String? _validatedCouponCode;
   Map<String, dynamic>? _validatedCouponData;
+  Map<String, dynamic> _paymentDetails = {};
+  String _ebirrProvider = 'ebirr';
+  bool _paymentMethodsLoading = true;
   static const String _serviceType = 'restaurant';
+
+  late final PaymentRepository _paymentRepository;
 
   @override
   void initState() {
     super.initState();
+    _paymentRepository = PaymentRepository(
+      paymentDataProvider: PaymentDataProvider(apiService: ApiService.instance),
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (GuestBrowseService().isGuestBrowseMode && mounted) {
         final l10n = AppLocalizations.of(context)!;
@@ -223,6 +238,29 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       return;
     }
 
+    if (_paymentMethodsLoading) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Payment methods are still loading'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (paymentMethodNeedsDetailsForm(_selectedPaymentMethod)) {
+      final phone = _paymentDetails['phone']?.toString() ?? '';
+      if (phone.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please enter a valid phone number for payment'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+    }
+
     blocContext.read<CheckoutBloc>().add(
           CreateOrderEvent(
             vendorId: _vendorId,
@@ -241,6 +279,89 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 : _notesController.text.trim(),
           ),
         );
+  }
+
+  Future<void> _onOrderCreated(
+    BuildContext ctx,
+    Map<String, dynamic> orderData,
+  ) async {
+    final method = _selectedPaymentMethod;
+    if (method == null) return;
+
+    if (paymentMethodSkipsInitiate(method)) {
+      _showOrderSuccessDialog(ctx, orderData);
+      return;
+    }
+
+    final orderPayload = orderData['order'] is Map<String, dynamic>
+        ? orderData['order'] as Map<String, dynamic>
+        : orderData;
+    final orderId = int.tryParse(orderPayload['id']?.toString() ?? '') ?? 0;
+    if (orderId <= 0) {
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        const SnackBar(
+          content: Text('Order created but payment could not be started'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final amount = double.tryParse(
+          orderPayload['total']?.toString() ??
+              orderPayload['amount']?.toString() ??
+              _total.toString(),
+        ) ??
+        _total;
+    final currency =
+        orderPayload['currency']?.toString() ?? 'ETB';
+
+    showDialog(
+      context: ctx,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      final details = buildInitiatePaymentDetails(
+        paymentMethodCode: method,
+        collectedDetails: _paymentDetails,
+        orderId: orderId,
+      );
+
+      final raw = await _paymentRepository.initiatePayment(
+        paymentMethodCode: method,
+        orderId: orderId,
+        amount: amount,
+        currency: currency,
+        paymentDetails: details,
+      );
+
+      if (!ctx.mounted) return;
+      Navigator.of(ctx).pop();
+
+      final result = PaymentInitiateResult.fromJson(raw);
+      await Navigator.of(ctx).push(
+        MaterialPageRoute(
+          builder: (_) => PaymentInitiateResultScreen(
+            result: result,
+            orderId: orderId.toString(),
+          ),
+        ),
+      );
+      if (ctx.mounted) {
+        Navigator.of(ctx).pop();
+      }
+    } catch (e) {
+      if (!ctx.mounted) return;
+      Navigator.of(ctx).pop();
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        SnackBar(
+          content: Text('Payment initiation failed: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void _showOrderSuccessDialog(BuildContext ctx, Map<String, dynamic> orderData) {
@@ -362,7 +483,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         body: BlocListener<CheckoutBloc, CheckoutState>(
           listener: (context, state) {
             if (state is OrderCreatedSuccess) {
-              _showOrderSuccessDialog(context, state.orderData);
+              _onOrderCreated(context, state.orderData);
             } else if (state is CheckoutError) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -429,9 +550,56 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 ],
 
                 // Payment Method Grid
-                PaymentMethodGridSection(
-                  selectedId: _selectedPaymentMethod,
-                  onSelected: (id) => setState(() => _selectedPaymentMethod = id),
+                PaymentMethodsLoader(
+                  repository: _paymentRepository,
+                  builder: (context, methods, isLoading, error, reload) {
+                    if (!isLoading &&
+                        methods.isNotEmpty &&
+                        _selectedPaymentMethod == null) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (!mounted) return;
+                        setState(() {
+                          _selectedPaymentMethod = methods.first['id'] as String?;
+                          _paymentMethodsLoading = false;
+                        });
+                      });
+                    } else if (!isLoading && mounted && _paymentMethodsLoading) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (!mounted) return;
+                        setState(() => _paymentMethodsLoading = false);
+                      });
+                    }
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        PaymentMethodGridSection(
+                          methods: methods,
+                          selectedId: _selectedPaymentMethod,
+                          isLoading: isLoading,
+                          error: error,
+                          onRetry: reload,
+                          onSelected: (id) => setState(() {
+                            _selectedPaymentMethod = id;
+                            _paymentDetails = {};
+                          }),
+                        ),
+                        if (_selectedPaymentMethod != null)
+                          PaymentDetailsForm(
+                            key: ValueKey(_selectedPaymentMethod),
+                            paymentMethodCode: _selectedPaymentMethod!,
+                            initialPhone: AuthService().currentUser?.phone,
+                            ebirrProvider: _ebirrProvider,
+                            onEbirrProviderChanged: (provider) {
+                              setState(() => _ebirrProvider = provider);
+                            },
+                            onChanged: (details) {
+                              _paymentDetails = details;
+                            },
+                          ),
+                      ],
+                    );
+                  },
                 ),
 
                 // Order Summary Section
@@ -443,9 +611,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 // Confirm Order Button
                 BlocBuilder<CheckoutBloc, CheckoutState>(
                   builder: (context, state) {
+                    final isLoading = state is CheckoutLoading;
+                    final disabled = isLoading ||
+                        _paymentMethodsLoading ||
+                        _selectedPaymentMethod == null;
                     return ConfirmOrderButton(
-                      onPressed: () => _onConfirmOrder(blocContext),
-                      isLoading: state is CheckoutLoading,
+                      onPressed: disabled ? null : () => _onConfirmOrder(blocContext),
+                      isLoading: isLoading,
                     );
                   },
                 ),

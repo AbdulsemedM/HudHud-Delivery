@@ -1,5 +1,6 @@
 import '../../../../core/api/api_constants.dart';
 import '../../../../core/api/api_service.dart';
+import '../../utils/payment_methods_parser.dart';
 
 class PaymentDataProvider {
   final ApiService apiService;
@@ -13,45 +14,42 @@ class PaymentDataProvider {
     );
     final data = response.data;
 
-    if (data == null || data is! Map<String, dynamic>) {
+    if (data == null || data is! Map) {
       return [];
     }
 
-    final list = data['data'];
-    if (list == null || list is! List) {
-      return [];
-    }
+    final map = Map<String, dynamic>.from(data);
+    return parsePaymentMethodsList(map['data']);
+  }
 
-    final List<Map<String, dynamic>> methods = [];
-    for (final item in list) {
-      if (item is Map<String, dynamic>) {
-        final isActive = item['is_active'] == true;
-        final code = item['code']?.toString();
-        final name = item['name']?.toString() ?? code ?? 'Unknown';
-        final description = item['description']?.toString() ?? 'Pay with $name';
-        final sortOrder =
-            int.tryParse(item['sort_order']?.toString() ?? '0') ?? 0;
-
-        if (code != null && code.isNotEmpty) {
-          methods.add({
-            'id': code,
-            'name': name,
-            'description': description,
-            'icon': item['icon'],
-            'enabled': isActive,
-            '_sortOrder': sortOrder,
-          });
-        }
+  Future<Map<String, dynamic>> initiatePayment({
+    required String paymentMethodCode,
+    required int orderId,
+    required double amount,
+    required String currency,
+    String type = 'order',
+    Map<String, dynamic>? paymentDetails,
+  }) async {
+    try {
+      final response = await apiService.post(
+        '${ApiConstants.baseUrl}${ApiConstants.paymentsInitiate}',
+        data: {
+          'payment_method_code': paymentMethodCode,
+          'order_id': orderId,
+          'amount': amount,
+          'type': type,
+          'currency': currency,
+          'payment_details': paymentDetails ?? {},
+        },
+      );
+      final data = response.data;
+      if (data is Map) {
+        return Map<String, dynamic>.from(data);
       }
+      return {'success': false, 'message': 'Invalid payment response'};
+    } catch (e) {
+      throw Exception('Failed to initiate payment: $e');
     }
-
-    methods.sort(
-        (a, b) => (a['_sortOrder'] as int).compareTo(b['_sortOrder'] as int));
-    for (final m in methods) {
-      m.remove('_sortOrder');
-    }
-
-    return methods;
   }
 
   Future<Map<String, dynamic>> processPayment({

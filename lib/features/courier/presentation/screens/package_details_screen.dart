@@ -3,6 +3,7 @@ import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/payment/data/data_provider/payment_data_provider.dart';
 import 'package:hudhud_delivery/features/payment/data/repository/payment_repository.dart';
+import 'package:hudhud_delivery/features/payment/presentation/widgets/payment_methods_loader.dart';
 import 'package:latlong2/latlong.dart';
 import 'confirm_details_screen.dart';
 
@@ -48,10 +49,6 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
   String? _paymentType; // API id (e.g. 'wallet', 'card')
   String? _packageImagePath;
 
-  List<Map<String, dynamic>> _paymentMethods = [];
-  bool _isLoadingPaymentMethods = true;
-  String? _paymentMethodsError;
-
   final List<String> _itemTypes = [
     'Electronics/Gadgets',
     'Documents',
@@ -71,33 +68,11 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
         apiService: ApiService.instance,
       ),
     );
-    _fetchPaymentMethods();
   }
 
-  Future<void> _fetchPaymentMethods() async {
-    try {
-      final methods = await _paymentRepository.getPaymentMethods();
-      if (mounted) {
-        setState(() {
-          _paymentMethods = methods;
-          _isLoadingPaymentMethods = false;
-          _paymentMethodsError = null;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _paymentMethods = [];
-          _isLoadingPaymentMethods = false;
-          _paymentMethodsError = 'Failed to load payment methods';
-        });
-      }
-    }
-  }
-
-  String? _getSelectedPaymentName() {
+  String? _getSelectedPaymentName(List<Map<String, dynamic>> methods) {
     if (_paymentType == null) return null;
-    for (final method in _paymentMethods) {
+    for (final method in methods) {
       if (method['id'] == _paymentType) {
         return method['name'] as String?;
       }
@@ -430,79 +405,90 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                       ],
                     ),
                     const SizedBox(height: 24),
-                    // Payment type
-                    Text(
-                      'Payment type',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    GestureDetector(
-                      onTap: _isLoadingPaymentMethods
-                          ? null
-                          : () {
-                              showModalBottomSheet(
-                                context: context,
-                                builder: (context) => Container(
-                                  padding: const EdgeInsets.all(20),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: _paymentMethods.map((method) {
-                                      final id = method['id'] as String?;
-                                      final name =
-                                          method['name'] as String? ?? id ?? '';
-                                      return ListTile(
-                                        title: Text(name),
-                                        onTap: () {
-                                          setState(() {
-                                            _paymentType = id;
-                                          });
-                                          Navigator.pop(context);
-                                        },
-                                      );
-                                    }).toList(),
-                                  ),
-                                ),
-                              );
-                            },
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: fieldFill,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: outline),
-                        ),
-                        child: Row(
+                    PaymentMethodsLoader(
+                      repository: _paymentRepository,
+                      builder: (context, methods, isLoading, error, reload) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Expanded(
-                              child: _isLoadingPaymentMethods
-                                  ? Text(
-                                      'Loading payment methods...',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: colorScheme.outline,
-                                      ),
-                                    )
-                                  : Text(
-                                      _paymentMethodsError ??
-                                          _getSelectedPaymentName() ??
-                                          'Select payment type',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: _paymentType == null
-                                            ? colorScheme.outline
-                                            : colorScheme.onSurface,
-                                      ),
-                                    ),
+                            Text(
+                              'Payment type',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: colorScheme.onSurface,
+                              ),
                             ),
-                            Icon(Icons.keyboard_arrow_down,
-                                color: colorScheme.outline),
+                            const SizedBox(height: 12),
+                            GestureDetector(
+                              onTap: isLoading || methods.isEmpty
+                                  ? null
+                                  : () {
+                                      showModalBottomSheet(
+                                        context: context,
+                                        builder: (context) => Container(
+                                          padding: const EdgeInsets.all(20),
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: methods.map((method) {
+                                              final id = method['id'] as String?;
+                                              final name = method['name'] as String? ??
+                                                  id ??
+                                                  '';
+                                              return ListTile(
+                                                title: Text(name),
+                                                onTap: () {
+                                                  setState(() {
+                                                    _paymentType = id;
+                                                  });
+                                                  Navigator.pop(context);
+                                                },
+                                              );
+                                            }).toList(),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                              child: Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: fieldFill,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: outline),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: isLoading
+                                          ? Text(
+                                              'Loading payment methods...',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: colorScheme.outline,
+                                              ),
+                                            )
+                                          : Text(
+                                              error ??
+                                                  _getSelectedPaymentName(
+                                                      methods) ??
+                                                  'Select payment type',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: _paymentType == null
+                                                    ? colorScheme.outline
+                                                    : colorScheme.onSurface,
+                                              ),
+                                            ),
+                                    ),
+                                    Icon(Icons.keyboard_arrow_down,
+                                        color: colorScheme.outline),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ],
-                        ),
-                      ),
+                        );
+                      },
                     ),
                     const SizedBox(height: 24),
                     // Recipient Information
