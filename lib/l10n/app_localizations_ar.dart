@@ -2451,4 +2451,72 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get wishlistMigrateError =>
       'Could not sync saved items to your account';
+
+  @override
+  String get tipsTitle => 'Tips';
+
+  @override
+  String get tipsAddTitle => 'Add a tip';
+
+  @override
+  String get tipsHistoryTitle => 'Tip history';
+
+  @override
+  String get tipsRecipientLabel => 'Tip recipient';
+
+  @override
+  String get tipsRecipientDriver => 'Driver';
+
+  @override
+  String get tipsRecipientVendor => 'Restaurant';
+
+  @override
+  String get tipsRecipientBoth => 'Both';
+
+  @override
+  String tipsCalculatedAmount(String amount) {
+    return 'Tip amount: ETB $amount';
+  }
+
+  @override
+  String get tipsSubmit => 'Send tip';
+
+  @override
+  String get tipsSuccess => 'Tip sent successfully';
+
+  @override
+  String get tipsLoadError => 'Could not load tips';
+
+  @override
+  String get tipsCardComingSoon => 'Card payments coming soon';
+
+  @override
+  String get tipsAnonymous => 'Send anonymously';
+
+  @override
+  String get tipsMessageHint => 'Add a message (optional)';
+
+  @override
+  String get tipsStatsTotal => 'Tips given';
+
+  @override
+  String get tipsStatsAmount => 'Total tipped';
+
+  @override
+  String get tipsStatsAverage => 'Average tip';
+
+  @override
+  String get tipsHistoryEmpty => 'No tips yet';
+
+  @override
+  String get tipsPaymentWallet => 'Wallet';
+
+  @override
+  String get tipsPaymentCard => 'Card';
+
+  @override
+  String get tipsStatusCompleted => 'Completed';
+
+  @override
+  String get tipsStatusAll => 'All';
 }

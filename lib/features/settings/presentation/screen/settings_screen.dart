@@ -32,6 +32,7 @@ import 'edit_profile_screen.dart';
 import 'personal_details_screen.dart';
 import 'terms_conditions_screen.dart';
 import 'package:hudhud_delivery/features/wishlist/presentation/screen/wishlist_screen.dart';
+import 'package:hudhud_delivery/features/tips/presentation/screens/tips_history_screen.dart';
 
 String _themeModeLabel(AppLocalizations l10n, ThemeController themeController) {
   switch (themeController.themeMode) {
@@ -466,6 +467,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => const WishlistScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _tileDivider(colorScheme),
+                  _KlikTile(
+                    icon: Icons.volunteer_activism_outlined,
+                    iconColor: _accentIconRed,
+                    title: l10n.tipsHistoryTitle,
+                    colorScheme: colorScheme,
+                    textTheme: textTheme,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const TipsHistoryScreen(),
                         ),
                       );
                     },

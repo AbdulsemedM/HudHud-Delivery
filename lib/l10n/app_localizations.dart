@@ -4699,6 +4699,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not sync saved items to your account'**
   String get wishlistMigrateError;
+
+  /// No description provided for @tipsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tips'**
+  String get tipsTitle;
+
+  /// No description provided for @tipsAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a tip'**
+  String get tipsAddTitle;
+
+  /// No description provided for @tipsHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip history'**
+  String get tipsHistoryTitle;
+
+  /// No description provided for @tipsRecipientLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip recipient'**
+  String get tipsRecipientLabel;
+
+  /// No description provided for @tipsRecipientDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver'**
+  String get tipsRecipientDriver;
+
+  /// No description provided for @tipsRecipientVendor.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant'**
+  String get tipsRecipientVendor;
+
+  /// No description provided for @tipsRecipientBoth.
+  ///
+  /// In en, this message translates to:
+  /// **'Both'**
+  String get tipsRecipientBoth;
+
+  /// No description provided for @tipsCalculatedAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip amount: ETB {amount}'**
+  String tipsCalculatedAmount(String amount);
+
+  /// No description provided for @tipsSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Send tip'**
+  String get tipsSubmit;
+
+  /// No description provided for @tipsSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip sent successfully'**
+  String get tipsSuccess;
+
+  /// No description provided for @tipsLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load tips'**
+  String get tipsLoadError;
+
+  /// No description provided for @tipsCardComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Card payments coming soon'**
+  String get tipsCardComingSoon;
+
+  /// No description provided for @tipsAnonymous.
+  ///
+  /// In en, this message translates to:
+  /// **'Send anonymously'**
+  String get tipsAnonymous;
+
+  /// No description provided for @tipsMessageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a message (optional)'**
+  String get tipsMessageHint;
+
+  /// No description provided for @tipsStatsTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Tips given'**
+  String get tipsStatsTotal;
+
+  /// No description provided for @tipsStatsAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Total tipped'**
+  String get tipsStatsAmount;
+
+  /// No description provided for @tipsStatsAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Average tip'**
+  String get tipsStatsAverage;
+
+  /// No description provided for @tipsHistoryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No tips yet'**
+  String get tipsHistoryEmpty;
+
+  /// No description provided for @tipsPaymentWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet'**
+  String get tipsPaymentWallet;
+
+  /// No description provided for @tipsPaymentCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Card'**
+  String get tipsPaymentCard;
+
+  /// No description provided for @tipsStatusCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get tipsStatusCompleted;
+
+  /// No description provided for @tipsStatusAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get tipsStatusAll;
 }
 
 class _AppLocalizationsDelegate

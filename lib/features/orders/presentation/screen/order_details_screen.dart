@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
+import 'package:hudhud_delivery/features/tips/presentation/widgets/tip_order_card.dart';
+import 'package:hudhud_delivery/features/tips/tips_bloc_provider.dart';
 import '../../bloc/orders_bloc.dart';
 import '../../data/models/order_model.dart';
 import '../../data/models/order_tracking_model.dart';
@@ -28,9 +30,10 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      body: BlocConsumer<OrdersBloc, OrdersState>(
+    return tipsBlocProvider(
+      child: Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        body: BlocConsumer<OrdersBloc, OrdersState>(
         listener: (context, state) {
           if (state is OrdersError) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -80,6 +83,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
             child: Text(context.l10n.orderDetailsLoadingMessage),
           );
         },
+      ),
       ),
     );
   }
@@ -145,6 +149,8 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                           );
                     },
                   ),
+                  const SizedBox(height: 16),
+                  TipOrderCard(order: order),
                 ],
                 const SizedBox(height: 100), // Bottom padding
               ],

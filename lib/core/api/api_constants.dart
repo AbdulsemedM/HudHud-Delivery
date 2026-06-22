@@ -176,6 +176,12 @@ class ApiConstants {
   static const String wishlistShare = 'wishlist/share';
   static const String wishlistPriceDrops = 'wishlist/price-drops';
 
+  // Tips endpoints
+  static const String tipsRates = 'tips/rates';
+  static const String tipsCalculate = 'tips/calculate';
+  static const String tipsAdd = 'tips/add';
+  static const String tipsHistory = 'tips/history';
+
   // Address endpoints
   static const String addresses = 'addresses';
   static const String addressDetails = 'addresses/{id}';

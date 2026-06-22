@@ -31,7 +31,6 @@ class CheckoutScreen extends StatefulWidget {
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
   final TextEditingController _notesController = TextEditingController();
-  double _tipAmount = 0.0;
   String _deliveryAddress = 'Loading address...';
   double? _deliveryLatitude;
   double? _deliveryLongitude;
@@ -121,9 +120,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return 7;
   }
 
-  double get _total {
-    return widget.subtotal + _tipAmount;
-  }
+  double get _total => widget.subtotal;
 
   Future<void> _onPromoCodeApplied(String promoCode) async {
     final normalizedCode = promoCode.trim().toUpperCase();
@@ -414,18 +411,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   notesController: _notesController,
                 ),
 
-                // Tip Section
-                TipSection(
-                  currentTip: _tipAmount,
-                  onTipChanged: (value) {
-                    setState(() {
-                      _tipAmount = value;
-                      _validatedCouponCode = null;
-                      _validatedCouponData = null;
-                    });
-                  },
-                ),
-
                 // Promo Code Section
                 PromoCodeSection(
                   onPromoCodeApplied: _onPromoCodeApplied,
@@ -452,7 +437,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 // Order Summary Section
                 OrderSummarySection(
                   subtotal: widget.subtotal,
-                  tipAmount: _tipAmount,
                   total: _total,
                 ),
 

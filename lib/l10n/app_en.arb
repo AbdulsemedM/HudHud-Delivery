@@ -1046,5 +1046,34 @@
   "wishlistShareSuccess": "Wishlist shared successfully",
   "wishlistPriceDropsTitle": "Price drop",
   "wishlistPriceDropsEmpty": "No price drops right now",
-  "wishlistMigrateError": "Could not sync saved items to your account"
+  "wishlistMigrateError": "Could not sync saved items to your account",
+  "tipsTitle": "Tips",
+  "tipsAddTitle": "Add a tip",
+  "tipsHistoryTitle": "Tip history",
+  "tipsRecipientLabel": "Tip recipient",
+  "tipsRecipientDriver": "Driver",
+  "tipsRecipientVendor": "Restaurant",
+  "tipsRecipientBoth": "Both",
+  "tipsCalculatedAmount": "Tip amount: ETB {amount}",
+  "@tipsCalculatedAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "tipsSubmit": "Send tip",
+  "tipsSuccess": "Tip sent successfully",
+  "tipsLoadError": "Could not load tips",
+  "tipsCardComingSoon": "Card payments coming soon",
+  "tipsAnonymous": "Send anonymously",
+  "tipsMessageHint": "Add a message (optional)",
+  "tipsStatsTotal": "Tips given",
+  "tipsStatsAmount": "Total tipped",
+  "tipsStatsAverage": "Average tip",
+  "tipsHistoryEmpty": "No tips yet",
+  "tipsPaymentWallet": "Wallet",
+  "tipsPaymentCard": "Card",
+  "tipsStatusCompleted": "Completed",
+  "tipsStatusAll": "All"
 }
