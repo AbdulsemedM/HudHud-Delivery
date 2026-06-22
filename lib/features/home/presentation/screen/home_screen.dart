@@ -8,6 +8,7 @@ import 'package:hudhud_delivery/features/courier/presentation/screens/courier_sc
 import 'package:hudhud_delivery/features/taxi/presentation/screens/taxi_screen.dart';
 import '../widgets/home_service_tab_bar.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
+import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
 import 'package:hudhud_delivery/app/services/custom_location_service.dart';
 import 'package:hudhud_delivery/app/services/geocoding_service.dart';
 import 'package:hudhud_delivery/app/services/location_service.dart';
@@ -23,6 +24,8 @@ import '../../data/repository/home_repository.dart';
 import '../../data/data_provider/home_data_provider.dart';
 import 'package:hudhud_delivery/features/addresses/data/addresses_data_provider.dart';
 import 'package:hudhud_delivery/features/addresses/data/addresses_repository.dart';
+import 'package:hudhud_delivery/features/guest/utils/guest_sign_in_prompt.dart';
+import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import 'package:hudhud_delivery/features/addresses/presentation/widgets/delivery_address_selector.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -108,6 +111,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _loadUserData() async {
+    if (GuestBrowseService().isGuestBrowseMode) {
+      if (mounted) setState(() => _currentUser = null);
+      return;
+    }
     // Fetch fresh profile from API to get updated verification status; fallback to stored user
     final user = await _authService.getUserProfile() ??
         await _authService.getStoredUser();
@@ -293,6 +300,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   void _openNotifications() {
+    if (GuestBrowseService().isGuestBrowseMode) {
+      final l10n = AppLocalizations.of(context)!;
+      showGuestSignInRequiredDialog(
+        context,
+        message: l10n.guestSignInRequiredMessage,
+      );
+      return;
+    }
     Navigator.push<void>(
       context,
       MaterialPageRoute<void>(
@@ -350,6 +365,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            if (GuestBrowseService().isGuestBrowseMode)
+              _GuestBrowseBanner(
+                onSignIn: () => showGuestSignInRequiredDialog(context),
+              ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 2, 16, 6),
               child: UserProfileHeader(
@@ -362,6 +381,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             HomeServiceTabBar(
               selected: _serviceMode,
               onSelected: (mode) {
+                if (GuestBrowseService().isGuestBrowseMode &&
+                    mode != HomeServiceMode.foodGroceries) {
+                  final l10n = AppLocalizations.of(context)!;
+                  showGuestSignInRequiredDialog(
+                    context,
+                    message: l10n.guestServiceSignIn,
+                  );
+                  return;
+                }
                 setState(() => _serviceMode = mode);
                 context.read<ServiceAccentController>().updateHomeServiceMode(mode);
               },
@@ -376,6 +404,40 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   const HandymanScreen(embedded: true),
                 ],
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _GuestBrowseBanner extends StatelessWidget {
+  final VoidCallback onSignIn;
+
+  const _GuestBrowseBanner({required this.onSignIn});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final colorScheme = Theme.of(context).colorScheme;
+    return Material(
+      color: colorScheme.primaryContainer.withValues(alpha: 0.5),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                l10n.guestBrowseBanner,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onPrimaryContainer,
+                    ),
+              ),
+            ),
+            TextButton(
+              onPressed: onSignIn,
+              child: Text(l10n.guestBrowseSignIn),
             ),
           ],
         ),

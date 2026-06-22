@@ -4609,6 +4609,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Saving…'**
   String get sosSaving;
+
+  /// No description provided for @guestBrowseBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Browsing as guest'**
+  String get guestBrowseBanner;
+
+  /// No description provided for @guestBrowseSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get guestBrowseSignIn;
+
+  /// No description provided for @guestSignInRequiredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in required'**
+  String get guestSignInRequiredTitle;
+
+  /// No description provided for @guestSignInRequiredMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Create an account or sign in to use this feature.'**
+  String get guestSignInRequiredMessage;
+
+  /// No description provided for @guestSignInRequiredCheckout.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to place orders and complete checkout.'**
+  String get guestSignInRequiredCheckout;
+
+  /// No description provided for @guestOrdersSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to view your order history.'**
+  String get guestOrdersSignIn;
+
+  /// No description provided for @guestProfileSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to access your profile and settings.'**
+  String get guestProfileSignIn;
+
+  /// No description provided for @guestServiceSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to use this service.'**
+  String get guestServiceSignIn;
 }
 
 class _AppLocalizationsDelegate

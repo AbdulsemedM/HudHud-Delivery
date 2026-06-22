@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/app/navigation/fcm_order_navigation.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
+import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
 import 'package:hudhud_delivery/app/services/fcm_service.dart';
 import 'package:hudhud_delivery/app/services/startup_location_service.dart';
 import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
@@ -42,15 +43,16 @@ class _SplashScreenState extends State<SplashScreen> {
       // Wait for minimum splash screen duration (3 seconds)
       await Future.delayed(Duration(seconds: 3));
 
-      // Check if user is authenticated
       final isAuthenticated = await _authService.isAuthenticated();
+      final isGuestBrowse = await GuestBrowseService().isActive();
 
       if (mounted) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) =>
-                isAuthenticated ? const DashboardScreen() : const LoginScreen(),
+            builder: (context) => (isAuthenticated || isGuestBrowse)
+                ? const DashboardScreen()
+                : const LoginScreen(),
           ),
         );
       }

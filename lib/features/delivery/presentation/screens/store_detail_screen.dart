@@ -1,13 +1,18 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/categories/model/categories_products_model.dart';
 import 'package:hudhud_delivery/features/categories/presentation/widgets/categories_widget.dart';
 import 'package:hudhud_delivery/features/checkout/presentation/screen/checkout_screen.dart';
 import 'package:hudhud_delivery/features/delivery/presentation/screens/product_detail_screen.dart';
+import 'package:hudhud_delivery/features/guest/data/branches_repository.dart';
+import 'package:hudhud_delivery/features/guest/model/branch_model.dart';
+import 'package:hudhud_delivery/features/guest/utils/guest_sign_in_prompt.dart';
 import 'package:hudhud_delivery/features/orders/data/models/vendor_model.dart';
+import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import 'package:hudhud_delivery/features/products/data/products_data_provider.dart';
 import 'package:hudhud_delivery/features/products/data/products_repository.dart';
 import 'package:hudhud_delivery/features/products/model/products_query.dart';
@@ -37,10 +42,14 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
   String _selectedTab = 'Featured';
 
   List<CategoriesProductsModel> _products = [];
+  List<CategoriesProductsModel> _featuredProducts = [];
+  List<BranchModel> _branches = [];
   bool _productsLoading = false;
+  bool _featuredLoading = false;
   bool _productsLoadingMore = false;
   String? _productsError;
   late final ProductsRepository _productsRepository;
+  late final BranchesRepository _branchesRepository;
 
   String _search = '';
   String? _minPrice;
@@ -58,9 +67,47 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
       productsDataProvider:
           ProductsDataProvider(apiService: ApiService.instance),
     );
+    _branchesRepository = BranchesRepository();
     if (widget.vendorId != null) {
       _loadVendorProducts();
+      _loadFeaturedProducts();
+      _loadBranches();
     }
+  }
+
+  Future<void> _loadFeaturedProducts() async {
+    setState(() => _featuredLoading = true);
+    try {
+      final all = await _productsRepository.getFeaturedProducts(limit: 20);
+      final vendorId = widget.vendorId;
+      setState(() {
+        _featuredProducts = vendorId == null
+            ? all
+            : all.where((p) => p.vendor_id == vendorId).toList();
+        _featuredLoading = false;
+      });
+    } catch (_) {
+      if (mounted) setState(() => _featuredLoading = false);
+    }
+  }
+
+  Future<void> _loadBranches() async {
+    final vendorId = widget.vendorId;
+    if (vendorId == null) return;
+    try {
+      final branches = await _branchesRepository.getBranches(vendorId: vendorId);
+      if (mounted) setState(() => _branches = branches);
+    } catch (_) {}
+  }
+
+  List<CategoriesProductsModel> get _activeProducts {
+    if (_selectedTab == 'Featured') return _featuredProducts;
+    return _products;
+  }
+
+  bool get _isLoadingActiveProducts {
+    if (_selectedTab == 'Featured') return _featuredLoading;
+    return _productsLoading;
   }
 
   Future<void> _loadVendorProducts({int page = 1, bool loadMore = false}) async {
@@ -124,7 +171,13 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
   }
 
   CategoriesProductsModel? _productById(String productId) {
+    for (final p in _activeProducts) {
+      if (p.id?.toString() == productId) return p;
+    }
     for (final p in _products) {
+      if (p.id?.toString() == productId) return p;
+    }
+    for (final p in _featuredProducts) {
       if (p.id?.toString() == productId) return p;
     }
     return null;
@@ -186,15 +239,12 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
   double get _totalPrice {
     double total = 0;
     _cartItems.forEach((productId, quantity) {
-      try {
-        final product = _products.firstWhere(
-          (p) => p.id.toString() == productId,
-        );
-        final price = product.discount_price?.isNotEmpty == true
-            ? double.tryParse(product.discount_price!) ?? 0
-            : double.tryParse(product.price ?? '0') ?? 0;
-        total += price * quantity;
-      } catch (_) {}
+      final product = _productById(productId);
+      if (product == null) return;
+      final price = product.discount_price?.isNotEmpty == true
+          ? double.tryParse(product.discount_price!) ?? 0
+          : double.tryParse(product.price ?? '0') ?? 0;
+      total += price * quantity;
     });
     return total;
   }
@@ -212,6 +262,7 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
             if (widget.vendor != null)
               _VendorDetailHeader(
                 vendor: widget.vendor!,
+                branches: _branches,
                 onBack: () => Navigator.pop(context),
               )
             else
@@ -282,6 +333,14 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                     label: 'Orders',
                     isSelected: _selectedTab == 'Orders',
                     onTap: () {
+                      if (GuestBrowseService().isGuestBrowseMode) {
+                        final l10n = AppLocalizations.of(context)!;
+                        showGuestSignInRequiredDialog(
+                          context,
+                          message: l10n.guestOrdersSignIn,
+                        );
+                        return;
+                      }
                       setState(() {
                         _selectedTab = 'Orders';
                       });
@@ -295,9 +354,11 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
             Expanded(
               child: widget.vendorId == null
                   ? _buildStaticContent()
-                  : _productsLoading
+                  : _selectedTab == 'Orders'
+                      ? const Center(child: Text('No orders yet'))
+                      : _isLoadingActiveProducts
                       ? const Center(child: CircularProgressIndicator())
-                      : _productsError != null
+                      : _productsError != null && _selectedTab != 'Featured'
                           ? Center(
                               child: Padding(
                                 padding: const EdgeInsets.all(24),
@@ -321,7 +382,7 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                                 ),
                               ),
                             )
-                          : _products.isEmpty
+                          : _activeProducts.isEmpty
                               ? const Center(child: Text('No products yet'))
                               : _buildProductsContent(),
             ),
@@ -410,7 +471,7 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
 
   Widget _buildProductsContent() {
     final grouped = <int?, List<CategoriesProductsModel>>{};
-    for (final p in _products) {
+    for (final p in _activeProducts) {
       grouped.putIfAbsent(p.category_id, () => []).add(p);
     }
     final sections = grouped.entries.toList();
@@ -471,7 +532,7 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                   ),
                 );
               }),
-              if (_hasMore)
+              if (_hasMore && _selectedTab != 'Featured')
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Center(
@@ -570,13 +631,22 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
     );
   }
 
-  void _goToCart() {
+  void _goToCart() async {
+    if (GuestBrowseService().isGuestBrowseMode) {
+      final l10n = AppLocalizations.of(context)!;
+      await showGuestSignInRequiredDialog(
+        context,
+        message: l10n.guestSignInRequiredCheckout,
+      );
+      return;
+    }
     final List<Map<String, dynamic>> cartItems = _cartItems.entries.map((entry) {
       final productId = entry.key;
       final quantity = entry.value;
-      final product = _products.firstWhere(
-        (p) => p.id.toString() == productId,
-      );
+      final product = _productById(productId);
+      if (product == null) {
+        throw StateError('Product not found');
+      }
       final price = product.discount_price?.isNotEmpty == true
           ? double.tryParse(product.discount_price!) ?? 0.0
           : double.tryParse(product.price ?? '0') ?? 0.0;
@@ -607,10 +677,12 @@ class _VendorDetailHeader extends StatelessWidget {
   static const double _heroHeight = 280;
 
   final VendorModel vendor;
+  final List<BranchModel> branches;
   final VoidCallback onBack;
 
   const _VendorDetailHeader({
     required this.vendor,
+    this.branches = const [],
     required this.onBack,
   });
 
@@ -729,6 +801,18 @@ class _VendorDetailHeader extends StatelessWidget {
                       ),
                   ],
                 ),
+                if (branches.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  Text(
+                    branches.map((b) => b.name).join(' · '),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.white.withValues(alpha: 0.85),
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
                 if (_hasHours) ...[
                   const SizedBox(height: 12),
                   ClipRRect(

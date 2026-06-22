@@ -9,6 +9,7 @@ import '../../core/api/api_constants.dart';
 import '../../core/utils/phone_util.dart';
 import '../../models/user_model.dart';
 import 'fcm_service.dart';
+import 'guest_browse_service.dart';
 
 class AuthService {
   // Singleton pattern
@@ -89,6 +90,7 @@ class AuthService {
     _currentToken = null;
     _tokenExpiry = null;
     await clearAllData();
+    await GuestBrowseService().clearGuestBrowseMode();
   }
 
   /// Get device ID for FCM token registration (Android: id, iOS: identifierForVendor).
@@ -237,6 +239,8 @@ class AuthService {
         if (refreshToken != null) _storeRefreshToken(refreshToken),
       ]);
 
+      await GuestBrowseService().clearGuestBrowseMode();
+
       // Fire-and-forget: send FCM token to backend
       _sendFcmTokenToBackend();
     } catch (e) {
@@ -254,6 +258,7 @@ class AuthService {
     int? expiresIn,
   }) async {
     await clearAllData();
+    await GuestBrowseService().clearGuestBrowseMode();
     _currentToken = token;
     _tokenExpiry =
         DateTime.now().add(Duration(seconds: expiresIn ?? 86400));

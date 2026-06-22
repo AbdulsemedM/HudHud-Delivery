@@ -2375,4 +2375,31 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get sosSaving => 'Saving…';
+
+  @override
+  String get guestBrowseBanner => 'Browsing as guest';
+
+  @override
+  String get guestBrowseSignIn => 'Sign in';
+
+  @override
+  String get guestSignInRequiredTitle => 'Sign in required';
+
+  @override
+  String get guestSignInRequiredMessage =>
+      'Create an account or sign in to use this feature.';
+
+  @override
+  String get guestSignInRequiredCheckout =>
+      'Sign in to place orders and complete checkout.';
+
+  @override
+  String get guestOrdersSignIn => 'Sign in to view your order history.';
+
+  @override
+  String get guestProfileSignIn =>
+      'Sign in to access your profile and settings.';
+
+  @override
+  String get guestServiceSignIn => 'Sign in to use this service.';
 }

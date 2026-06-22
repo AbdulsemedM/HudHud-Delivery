@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../app/services/guest_browse_service.dart';
 import '../../../../app/services/location_service.dart';
 import '../../../../app/services/saved_location_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/api/api_service.dart';
+import '../../../../l10n/app_localizations.dart';
+import '../../../guest/utils/guest_sign_in_prompt.dart';
 import '../../bloc/checkout_bloc.dart';
 import '../../data/data_provider/checkout_data_provider.dart';
 import '../../data/repository/checkout_repository.dart';
@@ -40,7 +43,18 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   @override
   void initState() {
     super.initState();
-    _loadDeliveryAddress();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (GuestBrowseService().isGuestBrowseMode && mounted) {
+        final l10n = AppLocalizations.of(context)!;
+        await showGuestSignInRequiredDialog(
+          context,
+          message: l10n.guestSignInRequiredCheckout,
+        );
+        if (mounted) Navigator.of(context).pop();
+        return;
+      }
+      _loadDeliveryAddress();
+    });
   }
 
   Future<void> _loadDeliveryAddress() async {
