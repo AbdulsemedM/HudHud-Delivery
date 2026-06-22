@@ -14,6 +14,7 @@ import 'package:hudhud_delivery/core/utils/support_launcher.dart';
 import 'package:hudhud_delivery/core/utils/avatar_util.dart';
 import 'package:hudhud_delivery/core/utils/phone_util.dart';
 import 'package:hudhud_delivery/features/addresses/presentation/screens/addresses_list_screen.dart';
+import 'package:hudhud_delivery/features/sos/presentation/screens/sos_settings_screen.dart';
 import 'package:hudhud_delivery/features/chat/presentation/screens/conversations_list_screen.dart';
 import 'package:hudhud_delivery/features/chat/presentation/screens/support_chat_start_screen.dart';
 import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
@@ -433,6 +434,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => const AddressesListScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _tileDivider(colorScheme),
+                  _KlikTile(
+                    icon: Icons.sos_outlined,
+                    iconColor: _accentIconRed,
+                    title: l10n.sosSettingsTitle,
+                    colorScheme: colorScheme,
+                    textTheme: textTheme,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SosSettingsScreen(),
                         ),
                       );
                     },

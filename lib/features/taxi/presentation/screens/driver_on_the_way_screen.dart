@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
+import 'package:hudhud_delivery/features/sos/presentation/widgets/sos_trigger_button.dart';
 
 class DriverOnTheWayScreen extends StatefulWidget {
   final LatLng pickupLocation;
@@ -13,6 +14,7 @@ class DriverOnTheWayScreen extends StatefulWidget {
   final String tripType;
   final int price;
   final String paymentMethod;
+  final int? rideId;
 
   const DriverOnTheWayScreen({
     super.key,
@@ -23,6 +25,7 @@ class DriverOnTheWayScreen extends StatefulWidget {
     required this.tripType,
     required this.price,
     required this.paymentMethod,
+    this.rideId,
   });
 
   @override
@@ -144,6 +147,27 @@ class _DriverOnTheWayScreenState extends State<DriverOnTheWayScreen> {
               ),
             ),
           ),
+          if (widget.rideId != null)
+            Positioned(
+              top: 40,
+              right: 16,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 4,
+                    ),
+                  ],
+                ),
+                child: SosTriggerButton(
+                  compact: true,
+                  orderId: widget.rideId,
+                ),
+              ),
+            ),
           // Bottom Sheet Modal
           DraggableScrollableSheet(
             initialChildSize: 0.45,

@@ -7,6 +7,7 @@ import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/chat/utils/chat_navigation.dart';
+import 'package:hudhud_delivery/features/sos/presentation/widgets/sos_trigger_button.dart';
 
 class DeliveryTrackingScreen extends StatefulWidget {
   final int? deliveryId;
@@ -290,6 +291,28 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
               ),
             ),
           ),
+          // SOS (when delivery id available)
+          if (widget.deliveryId != null)
+            Positioned(
+              top: 88,
+              right: 16,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: colorScheme.shadow.withOpacity(0.2),
+                      blurRadius: 4,
+                    ),
+                  ],
+                ),
+                child: SosTriggerButton(
+                  compact: true,
+                  orderId: widget.deliveryId,
+                ),
+              ),
+            ),
           // Status badge
           Positioned(
             top: 40,

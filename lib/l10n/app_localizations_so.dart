@@ -2319,4 +2319,104 @@ class AppLocalizationsSo extends AppLocalizations {
 
   @override
   String get chatCreateSupport => 'Start chat';
+
+  @override
+  String get sosSettingsTitle => 'Safety & SOS';
+
+  @override
+  String get sosEmergencyContacts => 'Emergency contacts';
+
+  @override
+  String get sosEmergencyContactsSubtitle =>
+      'People notified when you trigger SOS';
+
+  @override
+  String get sosHistory => 'SOS history';
+
+  @override
+  String get sosHistorySubtitle => 'View past alerts';
+
+  @override
+  String get sosTrigger => 'Trigger SOS';
+
+  @override
+  String get sosTriggerSubtitle => 'Send an emergency alert with your location';
+
+  @override
+  String get sosTriggerConfirmTitle => 'Send SOS alert?';
+
+  @override
+  String get sosTriggerConfirmMessage =>
+      'Your emergency contacts will be notified with your current location. Only use in a real emergency.';
+
+  @override
+  String get sosDescriptionHint => 'Describe your situation (optional)';
+
+  @override
+  String get sosLocationRequired =>
+      'Location is required to send an SOS alert. Please enable location permissions.';
+
+  @override
+  String get sosContactAdded => 'Emergency contact added';
+
+  @override
+  String get sosContactUpdated => 'Emergency contact updated';
+
+  @override
+  String get sosContactDeleted => 'Emergency contact deleted';
+
+  @override
+  String get sosTriggered => 'SOS alert sent successfully';
+
+  @override
+  String get sosAddContact => 'Add contact';
+
+  @override
+  String get sosEditContact => 'Edit contact';
+
+  @override
+  String get sosNoContacts => 'No emergency contacts yet';
+
+  @override
+  String get sosNoContactsSubtitle =>
+      'Add someone who should be notified in an emergency.';
+
+  @override
+  String get sosNoHistory => 'No SOS alerts yet';
+
+  @override
+  String get sosName => 'Full name';
+
+  @override
+  String get sosPhone => 'Phone number';
+
+  @override
+  String get sosEmail => 'Email (optional)';
+
+  @override
+  String get sosRelationship => 'Relationship';
+
+  @override
+  String get sosPrimaryContact => 'Primary contact';
+
+  @override
+  String get sosDeleteContact => 'Delete contact';
+
+  @override
+  String get sosDeleteContactConfirm => 'Remove this emergency contact?';
+
+  @override
+  String get sosStatusActive => 'Active';
+
+  @override
+  String get sosStatusAll => 'All';
+
+  @override
+  String get sosCancel => 'Cancel';
+
+  @override
+  String get sosSendAlert => 'Send alert';
+
+  @override
+  String get sosSaving => 'Saving…';
 }

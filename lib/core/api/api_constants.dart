@@ -149,6 +149,12 @@ class ApiConstants {
   static const String packageDeliveryMessage =
       'package-delivery/{deliveryId}/message';
 
+  // SOS endpoints
+  static const String sosTrigger = 'sos/trigger';
+  static const String sosHistory = 'sos/history';
+  static const String sosContacts = 'sos/contacts';
+  static const String sosContactDetails = 'sos/contacts/{id}';
+
   // Address endpoints
   static const String addresses = 'addresses';
   static const String addressDetails = 'addresses/{id}';

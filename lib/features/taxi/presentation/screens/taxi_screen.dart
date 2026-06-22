@@ -301,6 +301,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
             tripType: tripName,
             price: estimatedFare,
             paymentMethod: paymentMethod,
+            rideId: _activeRide!['id'] as int?,
           ),
         ),
       ).then((_) => _checkActiveRide());
