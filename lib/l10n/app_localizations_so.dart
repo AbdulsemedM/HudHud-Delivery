@@ -2446,4 +2446,26 @@ class AppLocalizationsSo extends AppLocalizations {
 
   @override
   String get guestServiceSignIn => 'Sign in to use this service.';
+
+  @override
+  String get wishlistNotesHint => 'Add a note (optional)';
+
+  @override
+  String get wishlistNotesUpdated => 'Note updated';
+
+  @override
+  String get wishlistShareTitle => 'Share wishlist';
+
+  @override
+  String get wishlistShareSuccess => 'Wishlist shared successfully';
+
+  @override
+  String get wishlistPriceDropsTitle => 'Price drop';
+
+  @override
+  String get wishlistPriceDropsEmpty => 'No price drops right now';
+
+  @override
+  String get wishlistMigrateError =>
+      'Could not sync saved items to your account';
 }

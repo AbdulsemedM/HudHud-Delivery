@@ -1039,5 +1039,12 @@
   "guestSignInRequiredCheckout": "Sign in to place orders and complete checkout.",
   "guestOrdersSignIn": "Sign in to view your order history.",
   "guestProfileSignIn": "Sign in to access your profile and settings.",
-  "guestServiceSignIn": "Sign in to use this service."
+  "guestServiceSignIn": "Sign in to use this service.",
+  "wishlistNotesHint": "Add a note (optional)",
+  "wishlistNotesUpdated": "Note updated",
+  "wishlistShareTitle": "Share wishlist",
+  "wishlistShareSuccess": "Wishlist shared successfully",
+  "wishlistPriceDropsTitle": "Price drop",
+  "wishlistPriceDropsEmpty": "No price drops right now",
+  "wishlistMigrateError": "Could not sync saved items to your account"
 }

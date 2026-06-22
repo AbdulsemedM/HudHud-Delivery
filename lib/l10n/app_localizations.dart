@@ -4657,6 +4657,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sign in to use this service.'**
   String get guestServiceSignIn;
+
+  /// No description provided for @wishlistNotesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a note (optional)'**
+  String get wishlistNotesHint;
+
+  /// No description provided for @wishlistNotesUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Note updated'**
+  String get wishlistNotesUpdated;
+
+  /// No description provided for @wishlistShareTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Share wishlist'**
+  String get wishlistShareTitle;
+
+  /// No description provided for @wishlistShareSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Wishlist shared successfully'**
+  String get wishlistShareSuccess;
+
+  /// No description provided for @wishlistPriceDropsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Price drop'**
+  String get wishlistPriceDropsTitle;
+
+  /// No description provided for @wishlistPriceDropsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No price drops right now'**
+  String get wishlistPriceDropsEmpty;
+
+  /// No description provided for @wishlistMigrateError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not sync saved items to your account'**
+  String get wishlistMigrateError;
 }
 
 class _AppLocalizationsDelegate

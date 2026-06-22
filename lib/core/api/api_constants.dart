@@ -167,6 +167,15 @@ class ApiConstants {
   static const String sosContacts = 'sos/contacts';
   static const String sosContactDetails = 'sos/contacts/{id}';
 
+  // Wishlist endpoints
+  static const String wishlist = 'wishlist';
+  static const String wishlistAdd = 'wishlist/add';
+  static const String wishlistItem = 'wishlist/{id}';
+  static const String wishlistItemNotes = 'wishlist/{id}/notes';
+  static const String wishlistBulkRemove = 'wishlist/bulk-remove';
+  static const String wishlistShare = 'wishlist/share';
+  static const String wishlistPriceDrops = 'wishlist/price-drops';
+
   // Address endpoints
   static const String addresses = 'addresses';
   static const String addressDetails = 'addresses/{id}';

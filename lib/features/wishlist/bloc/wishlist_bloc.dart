@@ -2,6 +2,11 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/features/categories/model/categories_products_model.dart';
 import 'package:hudhud_delivery/features/wishlist/data/wishlist_repository.dart';
+import 'package:hudhud_delivery/features/wishlist/model/wishlist_item_model.dart';
+import 'package:hudhud_delivery/features/wishlist/model/wishlist_list_result.dart';
+import 'package:hudhud_delivery/features/wishlist/model/wishlist_query.dart';
+import 'package:hudhud_delivery/features/wishlist/model/wishlist_share_result.dart';
+import 'package:hudhud_delivery/features/wishlist/model/wishlist_vendor_group_model.dart';
 
 part 'wishlist_event.dart';
 part 'wishlist_state.dart';
@@ -14,6 +19,10 @@ class WishlistBloc extends Bloc<WishlistEvent, WishlistState> {
     on<ToggleWishlistEvent>(_onToggle);
     on<RemoveWishlistEvent>(_onRemove);
     on<RefreshWishlistEvent>(_onRefresh);
+    on<UpdateWishlistNotesEvent>(_onUpdateNotes);
+    on<BulkRemoveWishlistEvent>(_onBulkRemove);
+    on<ShareWishlistEvent>(_onShare);
+    on<CheckPriceDropsEvent>(_onCheckPriceDrops);
   }
 
   final WishlistRepository _repository;
@@ -24,8 +33,17 @@ class WishlistBloc extends Bloc<WishlistEvent, WishlistState> {
   ) async {
     emit(WishlistLoading());
     try {
-      final items = await _repository.getWishlist(userId: event.userId);
-      emit(WishlistLoaded(items: items));
+      await _repository.migrateIfNeeded(event.userId);
+      final result = await _repository.getWishlist(
+        query: event.query ?? const WishlistQuery(),
+      );
+      emit(WishlistLoaded(
+        items: result.items,
+        vendorGroups: result.vendorGroups,
+        currentPage: result.currentPage,
+        lastPage: result.lastPage,
+        total: result.total,
+      ));
     } catch (e) {
       emit(WishlistError(e.toString()));
     }
@@ -35,50 +53,77 @@ class WishlistBloc extends Bloc<WishlistEvent, WishlistState> {
     RefreshWishlistEvent event,
     Emitter<WishlistState> emit,
   ) async {
-    add(LoadWishlistEvent(userId: event.userId));
+    add(LoadWishlistEvent(userId: event.userId, query: event.query));
   }
 
   Future<void> _onToggle(
     ToggleWishlistEvent event,
     Emitter<WishlistState> emit,
   ) async {
-    final current = state;
-    if (current is! WishlistLoaded) {
-      // If not loaded yet, toggle then load.
-      await _repository.toggleWishlist(userId: event.userId, product: event.product);
-      add(LoadWishlistEvent(userId: event.userId));
-      return;
-    }
-
     final productId = event.product.id;
     if (productId == null) return;
 
-    final wasWishlisted = current.wishlistedProductIds.contains(productId);
-    final optimisticItems = wasWishlisted
-        ? current.items.where((p) => p.id != productId).toList(growable: false)
-        : <CategoriesProductsModel>[event.product, ...current.items]
-            .fold<List<CategoriesProductsModel>>([], (acc, p) {
-            // Deduplicate by id (newest first)
-            final id = p.id;
-            if (id == null) return acc;
-            if (acc.any((x) => x.id == id)) return acc;
-            acc.add(p);
-            return acc;
-          }).toList(growable: false);
+    final current = state;
+    WishlistLoaded? loaded;
+    if (current is WishlistLoaded) {
+      loaded = current;
+    }
 
-    emit(current.copyWith(items: optimisticItems));
+    WishlistItemModel? existingItem;
+    if (loaded != null) {
+      for (final item in loaded.items) {
+        if (item.productId == productId) {
+          existingItem = item;
+          break;
+        }
+      }
+    }
+    existingItem ??= _repository.findCachedByProductId(productId);
+    final wasWishlisted = existingItem != null;
+
+    if (loaded != null) {
+      final optimistic = wasWishlisted
+          ? loaded.items.where((i) => i.productId != productId).toList()
+          : [
+              WishlistItemModel(
+                id: -productId,
+                userId: event.userId,
+                productId: productId,
+                product: event.product,
+              ),
+              ...loaded.items,
+            ];
+      emit(loaded.copyWith(items: optimistic));
+    }
 
     try {
-      await _repository.toggleWishlist(userId: event.userId, product: event.product);
-      // Re-sync to ensure DB order/timestamps are reflected.
-      final synced = await _repository.getWishlist(userId: event.userId);
-      emit(current.copyWith(items: synced));
+      await _repository.toggleProduct(
+        productId: productId,
+        product: event.product,
+        notes: event.notes,
+        wishlistId: existingItem?.id,
+      );
+      final result = await _repository.getWishlist();
+      if (loaded != null) {
+        emit(loaded.copyWith(
+          items: result.items,
+          vendorGroups: result.vendorGroups,
+          currentPage: result.currentPage,
+          lastPage: result.lastPage,
+          total: result.total,
+        ));
+      } else {
+        emit(WishlistLoaded(items: result.items));
+      }
     } catch (e) {
-      // Roll back by reloading from DB.
-      try {
-        final rollback = await _repository.getWishlist(userId: event.userId);
-        emit(current.copyWith(items: rollback));
-      } catch (_) {
+      if (loaded != null) {
+        try {
+          final result = await _repository.getWishlist();
+          emit(loaded.copyWith(items: result.items));
+        } catch (_) {
+          emit(WishlistError(e.toString()));
+        }
+      } else {
         emit(WishlistError(e.toString()));
       }
     }
@@ -89,27 +134,109 @@ class WishlistBloc extends Bloc<WishlistEvent, WishlistState> {
     Emitter<WishlistState> emit,
   ) async {
     final current = state;
-    final previousItems =
-        current is WishlistLoaded ? List<CategoriesProductsModel>.from(current.items) : null;
+    final previous =
+        current is WishlistLoaded ? List<WishlistItemModel>.from(current.items) : null;
+
     if (current is WishlistLoaded) {
       emit(current.copyWith(
-        items: current.items.where((p) => p.id != event.productId).toList(growable: false),
+        items: current.items
+            .where((i) => i.id != event.wishlistId && i.productId != event.productId)
+            .toList(growable: false),
       ));
     }
+
     try {
-      await _repository.remove(userId: event.userId, productId: event.productId);
+      if (event.wishlistId > 0) {
+        await _repository.removeByWishlistId(event.wishlistId);
+      } else {
+        await _repository.bulkRemoveByProductIds([event.productId]);
+      }
     } catch (e) {
-      if (previousItems != null) {
-        try {
-          final synced = await _repository.getWishlist(userId: event.userId);
-          emit(WishlistLoaded(items: synced));
-        } catch (_) {
-          emit(WishlistLoaded(items: previousItems));
-        }
+      if (previous != null && current is WishlistLoaded) {
+        emit(current.copyWith(items: previous));
       } else {
         emit(WishlistError(e.toString()));
       }
     }
   }
-}
 
+  Future<void> _onUpdateNotes(
+    UpdateWishlistNotesEvent event,
+    Emitter<WishlistState> emit,
+  ) async {
+    final current = state;
+    if (current is! WishlistLoaded) return;
+    try {
+      final updated =
+          await _repository.updateNotes(event.wishlistId, event.notes);
+      emit(current.copyWith(
+        items: current.items
+            .map((i) => i.id == event.wishlistId ? updated : i)
+            .toList(growable: false),
+      ));
+    } catch (e) {
+      emit(WishlistError(e.toString()));
+    }
+  }
+
+  Future<void> _onBulkRemove(
+    BulkRemoveWishlistEvent event,
+    Emitter<WishlistState> emit,
+  ) async {
+    final current = state;
+    if (current is! WishlistLoaded) return;
+    final previous = List<WishlistItemModel>.from(current.items);
+    emit(current.copyWith(
+      items: current.items
+          .where((i) => !event.productIds.contains(i.productId))
+          .toList(growable: false),
+    ));
+    try {
+      await _repository.bulkRemoveByProductIds(event.productIds);
+    } catch (e) {
+      emit(current.copyWith(items: previous));
+      emit(WishlistError(e.toString()));
+    }
+  }
+
+  Future<void> _onShare(
+    ShareWishlistEvent event,
+    Emitter<WishlistState> emit,
+  ) async {
+    final current = state;
+    try {
+      final result = await _repository.shareWishlist(
+        email: event.email,
+        permission: event.permission,
+        expiresInDays: event.expiresInDays,
+      );
+      if (current is WishlistLoaded) {
+        emit(current.copyWith(lastShareResult: result));
+      } else {
+        emit(WishlistShareSuccess(result));
+      }
+    } catch (e) {
+      emit(WishlistError(e.toString()));
+    }
+  }
+
+  Future<void> _onCheckPriceDrops(
+    CheckPriceDropsEvent event,
+    Emitter<WishlistState> emit,
+  ) async {
+    final current = state;
+    try {
+      final result = await _repository.getPriceDrops();
+      if (current is WishlistLoaded) {
+        emit(current.copyWith(
+          priceDropsResult: result,
+          items: result.items.isNotEmpty ? result.items : current.items,
+        ));
+      } else {
+        emit(WishlistPriceDropsChecked(result));
+      }
+    } catch (e) {
+      emit(WishlistError(e.toString()));
+    }
+  }
+}
