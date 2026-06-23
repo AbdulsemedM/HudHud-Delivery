@@ -16,6 +16,7 @@ class ChatInputBar extends StatefulWidget {
   final void Function(String path) onAudioRecorded;
   final List<String> pendingAttachmentPaths;
   final void Function(int index) onRemoveAttachment;
+  final bool textOnly;
 
   const ChatInputBar({
     super.key,
@@ -27,6 +28,7 @@ class ChatInputBar extends StatefulWidget {
     required this.onAudioRecorded,
     this.pendingAttachmentPaths = const [],
     required this.onRemoveAttachment,
+    this.textOnly = false,
   });
 
   @override
@@ -138,10 +140,11 @@ class _ChatInputBarState extends State<ChatInputBar> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  IconButton(
-                    onPressed: widget.isSending ? null : widget.onAttach,
-                    icon: const Icon(Icons.add_circle_outline_rounded),
-                  ),
+                  if (!widget.textOnly)
+                    IconButton(
+                      onPressed: widget.isSending ? null : widget.onAttach,
+                      icon: const Icon(Icons.add_circle_outline_rounded),
+                    ),
                   Expanded(
                     child: TextField(
                       controller: widget.controller,
@@ -182,7 +185,7 @@ class _ChatInputBarState extends State<ChatInputBar> {
                       HapticFeedback.lightImpact();
                       widget.onSendText();
                     })
-                  else
+                  else if (!widget.textOnly)
                     GestureDetector(
                       onLongPressStart: (_) => _startRecording(),
                       onLongPressEnd: (_) => _stopRecording(),

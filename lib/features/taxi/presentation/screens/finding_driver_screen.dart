@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/features/chat/utils/chat_navigation.dart';
+import 'package:hudhud_delivery/features/sos/presentation/widgets/sos_trigger_button.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:lottie/lottie.dart';
@@ -57,6 +58,7 @@ class _FindingDriverScreenState extends State<FindingDriverScreen> {
             tripType: widget.tripType,
             price: widget.price,
             paymentMethod: widget.paymentMethod,
+            rideId: widget.rideId,
           ),
         ),
       );
@@ -99,11 +101,20 @@ class _FindingDriverScreenState extends State<FindingDriverScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (widget.rideId != null)
-              Align(
-                alignment: Alignment.topRight,
-                child: IconButton(
-                  icon: const Icon(Icons.chat_bubble_outline_rounded),
-                  onPressed: () => openRideChat(context, widget.rideId!),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    SosTriggerButton(
+                      compact: true,
+                      orderId: widget.rideId,
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.chat_bubble_outline_rounded),
+                      onPressed: () => openRideChat(context, widget.rideId!),
+                    ),
+                  ],
                 ),
               ),
             // Loading Animation

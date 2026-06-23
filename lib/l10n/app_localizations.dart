@@ -4417,6 +4417,420 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Start chat'**
   String get chatCreateSupport;
+
+  /// No description provided for @sosSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety & SOS'**
+  String get sosSettingsTitle;
+
+  /// No description provided for @sosEmergencyContacts.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency contacts'**
+  String get sosEmergencyContacts;
+
+  /// No description provided for @sosEmergencyContactsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'People notified when you trigger SOS'**
+  String get sosEmergencyContactsSubtitle;
+
+  /// No description provided for @sosHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'SOS history'**
+  String get sosHistory;
+
+  /// No description provided for @sosHistorySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'View past alerts'**
+  String get sosHistorySubtitle;
+
+  /// No description provided for @sosTrigger.
+  ///
+  /// In en, this message translates to:
+  /// **'Trigger SOS'**
+  String get sosTrigger;
+
+  /// No description provided for @sosTriggerSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send an emergency alert with your location'**
+  String get sosTriggerSubtitle;
+
+  /// No description provided for @sosTriggerConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send SOS alert?'**
+  String get sosTriggerConfirmTitle;
+
+  /// No description provided for @sosTriggerConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your emergency contacts will be notified with your current location. Only use in a real emergency.'**
+  String get sosTriggerConfirmMessage;
+
+  /// No description provided for @sosDescriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe your situation (optional)'**
+  String get sosDescriptionHint;
+
+  /// No description provided for @sosLocationRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Location is required to send an SOS alert. Please enable location permissions.'**
+  String get sosLocationRequired;
+
+  /// No description provided for @sosContactAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency contact added'**
+  String get sosContactAdded;
+
+  /// No description provided for @sosContactUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency contact updated'**
+  String get sosContactUpdated;
+
+  /// No description provided for @sosContactDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency contact deleted'**
+  String get sosContactDeleted;
+
+  /// No description provided for @sosTriggered.
+  ///
+  /// In en, this message translates to:
+  /// **'SOS alert sent successfully'**
+  String get sosTriggered;
+
+  /// No description provided for @sosAddContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Add contact'**
+  String get sosAddContact;
+
+  /// No description provided for @sosEditContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit contact'**
+  String get sosEditContact;
+
+  /// No description provided for @sosNoContacts.
+  ///
+  /// In en, this message translates to:
+  /// **'No emergency contacts yet'**
+  String get sosNoContacts;
+
+  /// No description provided for @sosNoContactsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add someone who should be notified in an emergency.'**
+  String get sosNoContactsSubtitle;
+
+  /// No description provided for @sosNoHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'No SOS alerts yet'**
+  String get sosNoHistory;
+
+  /// No description provided for @sosName.
+  ///
+  /// In en, this message translates to:
+  /// **'Full name'**
+  String get sosName;
+
+  /// No description provided for @sosPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number'**
+  String get sosPhone;
+
+  /// No description provided for @sosEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email (optional)'**
+  String get sosEmail;
+
+  /// No description provided for @sosRelationship.
+  ///
+  /// In en, this message translates to:
+  /// **'Relationship'**
+  String get sosRelationship;
+
+  /// No description provided for @sosPrimaryContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary contact'**
+  String get sosPrimaryContact;
+
+  /// No description provided for @sosDeleteContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete contact'**
+  String get sosDeleteContact;
+
+  /// No description provided for @sosDeleteContactConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this emergency contact?'**
+  String get sosDeleteContactConfirm;
+
+  /// No description provided for @sosStatusActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get sosStatusActive;
+
+  /// No description provided for @sosStatusAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get sosStatusAll;
+
+  /// No description provided for @sosCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get sosCancel;
+
+  /// No description provided for @sosSendAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'Send alert'**
+  String get sosSendAlert;
+
+  /// No description provided for @sosSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get sosSaving;
+
+  /// No description provided for @guestBrowseBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Browsing as guest'**
+  String get guestBrowseBanner;
+
+  /// No description provided for @guestBrowseSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get guestBrowseSignIn;
+
+  /// No description provided for @guestSignInRequiredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in required'**
+  String get guestSignInRequiredTitle;
+
+  /// No description provided for @guestSignInRequiredMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Create an account or sign in to use this feature.'**
+  String get guestSignInRequiredMessage;
+
+  /// No description provided for @guestSignInRequiredCheckout.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to place orders and complete checkout.'**
+  String get guestSignInRequiredCheckout;
+
+  /// No description provided for @guestOrdersSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to view your order history.'**
+  String get guestOrdersSignIn;
+
+  /// No description provided for @guestProfileSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to access your profile and settings.'**
+  String get guestProfileSignIn;
+
+  /// No description provided for @guestServiceSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to use this service.'**
+  String get guestServiceSignIn;
+
+  /// No description provided for @wishlistNotesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a note (optional)'**
+  String get wishlistNotesHint;
+
+  /// No description provided for @wishlistNotesUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Note updated'**
+  String get wishlistNotesUpdated;
+
+  /// No description provided for @wishlistShareTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Share wishlist'**
+  String get wishlistShareTitle;
+
+  /// No description provided for @wishlistShareSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Wishlist shared successfully'**
+  String get wishlistShareSuccess;
+
+  /// No description provided for @wishlistPriceDropsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Price drop'**
+  String get wishlistPriceDropsTitle;
+
+  /// No description provided for @wishlistPriceDropsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No price drops right now'**
+  String get wishlistPriceDropsEmpty;
+
+  /// No description provided for @wishlistMigrateError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not sync saved items to your account'**
+  String get wishlistMigrateError;
+
+  /// No description provided for @tipsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tips'**
+  String get tipsTitle;
+
+  /// No description provided for @tipsAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a tip'**
+  String get tipsAddTitle;
+
+  /// No description provided for @tipsHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip history'**
+  String get tipsHistoryTitle;
+
+  /// No description provided for @tipsRecipientLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip recipient'**
+  String get tipsRecipientLabel;
+
+  /// No description provided for @tipsRecipientDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver'**
+  String get tipsRecipientDriver;
+
+  /// No description provided for @tipsRecipientVendor.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant'**
+  String get tipsRecipientVendor;
+
+  /// No description provided for @tipsRecipientBoth.
+  ///
+  /// In en, this message translates to:
+  /// **'Both'**
+  String get tipsRecipientBoth;
+
+  /// No description provided for @tipsCalculatedAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip amount: ETB {amount}'**
+  String tipsCalculatedAmount(String amount);
+
+  /// No description provided for @tipsSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Send tip'**
+  String get tipsSubmit;
+
+  /// No description provided for @tipsSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip sent successfully'**
+  String get tipsSuccess;
+
+  /// No description provided for @tipsLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load tips'**
+  String get tipsLoadError;
+
+  /// No description provided for @tipsCardComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Card payments coming soon'**
+  String get tipsCardComingSoon;
+
+  /// No description provided for @tipsAnonymous.
+  ///
+  /// In en, this message translates to:
+  /// **'Send anonymously'**
+  String get tipsAnonymous;
+
+  /// No description provided for @tipsMessageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a message (optional)'**
+  String get tipsMessageHint;
+
+  /// No description provided for @tipsStatsTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Tips given'**
+  String get tipsStatsTotal;
+
+  /// No description provided for @tipsStatsAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Total tipped'**
+  String get tipsStatsAmount;
+
+  /// No description provided for @tipsStatsAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Average tip'**
+  String get tipsStatsAverage;
+
+  /// No description provided for @tipsHistoryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No tips yet'**
+  String get tipsHistoryEmpty;
+
+  /// No description provided for @tipsPaymentWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet'**
+  String get tipsPaymentWallet;
+
+  /// No description provided for @tipsPaymentCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Card'**
+  String get tipsPaymentCard;
+
+  /// No description provided for @tipsStatusCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get tipsStatusCompleted;
+
+  /// No description provided for @tipsStatusAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get tipsStatusAll;
 }
 
 class _AppLocalizationsDelegate

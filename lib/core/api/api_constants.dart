@@ -70,6 +70,7 @@ class ApiConstants {
   static const String payments = '/payments';
   static const String paymentMethods = 'payment-methods';
   static const String processPayment = '$payments/process';
+  static const String paymentsInitiate = 'payments/initiate';
 
   // Wallet endpoints
   static const String wallets = 'wallets';
@@ -87,6 +88,18 @@ class ApiConstants {
 
   // Vendors endpoints
   static const String vendors = 'vendors';
+
+  // Public (unauthenticated) catalog endpoints
+  static const String publicProducts = 'public/products';
+  static const String publicProductDetails = 'public/products/{id}';
+  static const String publicProductsFeatured = 'public/products/featured';
+  static const String publicSearch = 'public/search';
+  static const String publicCategories = 'public/categories';
+  static const String publicCategoryProducts = 'public/categories/{id}/products';
+  static const String publicVendors = 'public/vendors';
+  static const String publicVendorProducts = 'public/vendors/{id}/products';
+  static const String publicBranches = 'public/branches';
+  static const String publicBranchesNearby = 'public/branches/nearby';
 
   // Notifications endpoints (GET /api/notifications, GET /api/notifications/{id})
   static const String notificationsList = 'notifications';
@@ -136,6 +149,39 @@ class ApiConstants {
   static const String chatSupport = 'chat/support';
   static const String chatRide = 'chat/ride/{rideId}';
   static const String chatMessage = 'chat/messages/{id}';
+
+  // Package delivery chat endpoints
+  static const String packageDeliveryUnreadCount =
+      'package-delivery/unread-count';
+  static const String packageDeliveryConversations =
+      'package-delivery/conversations';
+  static const String packageDeliveryConversation =
+      'package-delivery/{deliveryId}/conversation';
+  static const String packageDeliveryRead =
+      'package-delivery/{deliveryId}/read';
+  static const String packageDeliveryMessage =
+      'package-delivery/{deliveryId}/message';
+
+  // SOS endpoints
+  static const String sosTrigger = 'sos/trigger';
+  static const String sosHistory = 'sos/history';
+  static const String sosContacts = 'sos/contacts';
+  static const String sosContactDetails = 'sos/contacts/{id}';
+
+  // Wishlist endpoints
+  static const String wishlist = 'wishlist';
+  static const String wishlistAdd = 'wishlist/add';
+  static const String wishlistItem = 'wishlist/{id}';
+  static const String wishlistItemNotes = 'wishlist/{id}/notes';
+  static const String wishlistBulkRemove = 'wishlist/bulk-remove';
+  static const String wishlistShare = 'wishlist/share';
+  static const String wishlistPriceDrops = 'wishlist/price-drops';
+
+  // Tips endpoints
+  static const String tipsRates = 'tips/rates';
+  static const String tipsCalculate = 'tips/calculate';
+  static const String tipsAdd = 'tips/add';
+  static const String tipsHistory = 'tips/history';
 
   // Address endpoints
   static const String addresses = 'addresses';

@@ -15,7 +15,8 @@ class ChatContextBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (conversation.type != ChatConversationType.order &&
-        conversation.type != ChatConversationType.ride) {
+        conversation.type != ChatConversationType.ride &&
+        conversation.type != ChatConversationType.packageDelivery) {
       return const SizedBox.shrink();
     }
 
@@ -25,12 +26,28 @@ class ChatContextBanner extends StatelessWidget {
 
     String title;
     String subtitle;
+    IconData icon;
     if (conversation.type == ChatConversationType.order) {
+      icon = Icons.receipt_long_rounded;
       title = meta['order_number']?.toString() ?? l10n.chatTypeOrder;
       final amount = meta['total_amount']?.toString();
       final service = meta['service_type']?.toString();
       subtitle = [service, amount].where((e) => e != null && e.isNotEmpty).join(' · ');
+    } else if (conversation.type == ChatConversationType.packageDelivery) {
+      icon = Icons.local_shipping_outlined;
+      title = meta['tracking_number']?.toString() ?? 'Package delivery';
+      final status = meta['delivery_status_label']?.toString() ??
+          meta['delivery_status']?.toString();
+      final route = [
+        meta['pickup_location'],
+        meta['dropoff_location'],
+      ].whereType<String>().where((s) => s.isNotEmpty).join(' → ');
+      subtitle = [status, route]
+          .whereType<String>()
+          .where((e) => e.isNotEmpty)
+          .join(' · ');
     } else {
+      icon = Icons.local_taxi_rounded;
       title = l10n.chatTypeRide;
       subtitle = [
         meta['pickup_location'],
@@ -52,9 +69,7 @@ class ChatContextBanner extends StatelessWidget {
             child: Row(
               children: [
                 Icon(
-                  conversation.type == ChatConversationType.order
-                      ? Icons.receipt_long_rounded
-                      : Icons.local_taxi_rounded,
+                  icon,
                   color: theme.colorScheme.primary,
                 ),
                 const SizedBox(width: 12),

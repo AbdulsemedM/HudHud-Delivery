@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/orders/data/models/order_model.dart';
+import 'package:hudhud_delivery/features/sos/presentation/widgets/sos_trigger_button.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -59,6 +60,7 @@ class OrderDetailsSliverHeader extends StatelessWidget {
       ),
       centerTitle: false,
       actions: [
+        SosTriggerButton(compact: true, orderId: order.id),
         _OrderHeaderMenu(order: order, onCancel: onCancel),
         const SizedBox(width: 4),
       ],

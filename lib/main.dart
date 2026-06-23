@@ -1,43 +1,43 @@
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
+import 'core/api/dio_client.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'features/wishlist/bloc/wishlist_bloc.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
 import 'package:hudhud_delivery/features/splash/presentation/screen/splash_screen.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
 
-import 'features/wishlist/bloc/wishlist_bloc.dart';
 
 // Core imports
 import 'core/theme/app_theme.dart';
 import 'core/api/api_service.dart';
-import 'core/api/dio_client.dart';
-import 'core/utils/snackbar_util.dart';
 import 'core/utils/button_util.dart';
-
-// Controllers
-import 'controllers/theme_controller.dart';
-import 'controllers/locale_controller.dart';
-import 'controllers/auth_controller.dart';
-import 'controllers/service_accent_controller.dart';
-
+import 'core/utils/snackbar_util.dart';
 import 'core/theme/service_tab_palette.dart';
 
+// Controllers
+import 'controllers/auth_controller.dart';
+import 'controllers/theme_controller.dart';
+import 'controllers/locale_controller.dart';
+import 'controllers/service_accent_controller.dart';
+
+
 // Services
-import 'app/navigation/fcm_order_navigation.dart';
-import 'app/services/auth_service.dart';
 import 'app/services/fcm_service.dart';
+import 'app/services/auth_service.dart';
+import 'app/navigation/fcm_order_navigation.dart';
 
 // Orders feature
 import 'features/orders/data/providers/orders_data_provider.dart';
 import 'features/orders/data/repositories/orders_repository.dart';
 
 // Widgets
-import 'app/widgets/app_connectivity_banner.dart';
 import 'app/widgets/primary_button.dart';
 import 'app/widgets/secondary_button.dart';
+import 'app/widgets/app_connectivity_banner.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

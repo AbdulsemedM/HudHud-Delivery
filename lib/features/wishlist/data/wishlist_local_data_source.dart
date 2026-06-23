@@ -93,6 +93,21 @@ class WishlistLocalDataSource {
     return 1;
   }
 
+  Future<void> clearLocalForUser({required int userId}) async {
+    try {
+      final database = await _db.database;
+      await database.delete(
+        table,
+        where: 'user_id = ?',
+        whereArgs: [userId],
+      );
+    } on MissingPluginException {
+      _memoryStore.remove(userId);
+    } on DatabaseException {
+      _memoryStore.remove(userId);
+    }
+  }
+
   Future<List<CategoriesProductsModel>> getAll({required int userId}) async {
     try {
       final database = await _db.database;

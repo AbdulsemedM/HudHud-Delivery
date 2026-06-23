@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/features/categories/model/categories_products_model.dart';
 import 'package:hudhud_delivery/features/delivery/data/mock_popular_orders.dart';
 import 'package:hudhud_delivery/features/delivery/presentation/screens/all_categories_screen.dart';
+import 'package:hudhud_delivery/features/delivery/presentation/screens/product_detail_screen.dart';
 import 'package:hudhud_delivery/features/delivery/presentation/screens/store_detail_screen.dart';
 import 'package:hudhud_delivery/features/orders/data/models/vendor_model.dart';
+import 'package:hudhud_delivery/features/products/data/products_data_provider.dart';
+import 'package:hudhud_delivery/features/products/data/products_repository.dart';
 import 'package:hudhud_delivery/features/vendors/data/data_provider/vendors_data_provider.dart';
 import 'package:hudhud_delivery/features/vendors/data/repository/vendors_repository.dart';
 import 'category_stores_screen.dart';
@@ -21,9 +25,12 @@ class _DeliveryFeedScreenState extends State<DeliveryFeedScreen> {
   String _selectedTime = 'Now';
 
   List<VendorModel> _vendors = [];
+  List<CategoriesProductsModel> _featuredProducts = [];
   bool _vendorsLoading = true;
+  bool _featuredLoading = false;
   String? _vendorsError;
   late final VendorsRepository _vendorsRepository;
+  late final ProductsRepository _productsRepository;
 
   @override
   void initState() {
@@ -31,7 +38,24 @@ class _DeliveryFeedScreenState extends State<DeliveryFeedScreen> {
     _vendorsRepository = VendorsRepository(
       vendorsDataProvider: VendorsDataProvider(apiService: ApiService.instance),
     );
+    _productsRepository = ProductsRepository(
+      productsDataProvider: ProductsDataProvider(apiService: ApiService.instance),
+    );
     _loadVendors();
+    _loadFeaturedProducts();
+  }
+
+  Future<void> _loadFeaturedProducts() async {
+    setState(() => _featuredLoading = true);
+    try {
+      final list = await _productsRepository.getFeaturedProducts(limit: 10);
+      setState(() {
+        _featuredProducts = list;
+        _featuredLoading = false;
+      });
+    } catch (_) {
+      if (mounted) setState(() => _featuredLoading = false);
+    }
   }
 
   Future<void> _loadVendors() async {
@@ -198,6 +222,100 @@ class _DeliveryFeedScreenState extends State<DeliveryFeedScreen> {
                         ],
                       ),
                     ),
+                    if (_featuredLoading)
+                      const Padding(
+                        padding: EdgeInsets.all(24),
+                        child: Center(child: CircularProgressIndicator()),
+                      )
+                    else if (_featuredProducts.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Featured',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              height: 160,
+                              child: ListView.separated(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: _featuredProducts.length,
+                                separatorBuilder: (_, __) =>
+                                    const SizedBox(width: 12),
+                                itemBuilder: (context, index) {
+                                  final p = _featuredProducts[index];
+                                  return GestureDetector(
+                                    onTap: () {
+                                      if (p.id != null) {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => ProductDetailScreen(
+                                              productId: p.id!,
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    },
+                                    child: SizedBox(
+                                      width: 140,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            child: Image.network(
+                                              p.image_path ?? '',
+                                              width: 140,
+                                              height: 100,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (_, __, ___) =>
+                                                  Container(
+                                                width: 140,
+                                                height: 100,
+                                                color: Colors.grey[300],
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 6),
+                                          Text(
+                                            p.name ?? '',
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          Text(
+                                            p.formatted_price ??
+                                                p.price ??
+                                                '',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey[600],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                          ],
+                        ),
+                      ),
                     // Popular Orders Section (mock data). order.vendorId is vendor shop id.
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),

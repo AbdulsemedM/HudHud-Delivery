@@ -204,5 +204,50 @@ class ChatDataProvider {
     );
   }
 
+  Future<Map<String, dynamic>> getPackageDeliveryConversation(
+    int deliveryId,
+  ) {
+    return _wrap(
+      () => apiService.get(
+        _url(
+          ApiConstants.replacePathParams(
+            ApiConstants.packageDeliveryConversation,
+            {'deliveryId': deliveryId},
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<Map<String, dynamic>> markPackageDeliveryRead(int deliveryId) {
+    return _wrap(
+      () => apiService.post(
+        _url(
+          ApiConstants.replacePathParams(
+            ApiConstants.packageDeliveryRead,
+            {'deliveryId': deliveryId},
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<Map<String, dynamic>> sendPackageDeliveryMessage(
+    int deliveryId,
+    SendChatMessageRequest request,
+  ) {
+    return _wrap(
+      () => apiService.post(
+        _url(
+          ApiConstants.replacePathParams(
+            ApiConstants.packageDeliveryMessage,
+            {'deliveryId': deliveryId},
+          ),
+        ),
+        data: request.toJsonBody(),
+      ),
+    );
+  }
+
   bool isSuccess(Map<String, dynamic> response) => _apiSuccess(response);
 }

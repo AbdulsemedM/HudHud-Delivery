@@ -2321,4 +2321,221 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get chatCreateSupport => 'Start chat';
+
+  @override
+  String get sosSettingsTitle => 'Safety & SOS';
+
+  @override
+  String get sosEmergencyContacts => 'Emergency contacts';
+
+  @override
+  String get sosEmergencyContactsSubtitle =>
+      'People notified when you trigger SOS';
+
+  @override
+  String get sosHistory => 'SOS history';
+
+  @override
+  String get sosHistorySubtitle => 'View past alerts';
+
+  @override
+  String get sosTrigger => 'Trigger SOS';
+
+  @override
+  String get sosTriggerSubtitle => 'Send an emergency alert with your location';
+
+  @override
+  String get sosTriggerConfirmTitle => 'Send SOS alert?';
+
+  @override
+  String get sosTriggerConfirmMessage =>
+      'Your emergency contacts will be notified with your current location. Only use in a real emergency.';
+
+  @override
+  String get sosDescriptionHint => 'Describe your situation (optional)';
+
+  @override
+  String get sosLocationRequired =>
+      'Location is required to send an SOS alert. Please enable location permissions.';
+
+  @override
+  String get sosContactAdded => 'Emergency contact added';
+
+  @override
+  String get sosContactUpdated => 'Emergency contact updated';
+
+  @override
+  String get sosContactDeleted => 'Emergency contact deleted';
+
+  @override
+  String get sosTriggered => 'SOS alert sent successfully';
+
+  @override
+  String get sosAddContact => 'Add contact';
+
+  @override
+  String get sosEditContact => 'Edit contact';
+
+  @override
+  String get sosNoContacts => 'No emergency contacts yet';
+
+  @override
+  String get sosNoContactsSubtitle =>
+      'Add someone who should be notified in an emergency.';
+
+  @override
+  String get sosNoHistory => 'No SOS alerts yet';
+
+  @override
+  String get sosName => 'Full name';
+
+  @override
+  String get sosPhone => 'Phone number';
+
+  @override
+  String get sosEmail => 'Email (optional)';
+
+  @override
+  String get sosRelationship => 'Relationship';
+
+  @override
+  String get sosPrimaryContact => 'Primary contact';
+
+  @override
+  String get sosDeleteContact => 'Delete contact';
+
+  @override
+  String get sosDeleteContactConfirm => 'Remove this emergency contact?';
+
+  @override
+  String get sosStatusActive => 'Active';
+
+  @override
+  String get sosStatusAll => 'All';
+
+  @override
+  String get sosCancel => 'Cancel';
+
+  @override
+  String get sosSendAlert => 'Send alert';
+
+  @override
+  String get sosSaving => 'Saving…';
+
+  @override
+  String get guestBrowseBanner => 'Browsing as guest';
+
+  @override
+  String get guestBrowseSignIn => 'Sign in';
+
+  @override
+  String get guestSignInRequiredTitle => 'Sign in required';
+
+  @override
+  String get guestSignInRequiredMessage =>
+      'Create an account or sign in to use this feature.';
+
+  @override
+  String get guestSignInRequiredCheckout =>
+      'Sign in to place orders and complete checkout.';
+
+  @override
+  String get guestOrdersSignIn => 'Sign in to view your order history.';
+
+  @override
+  String get guestProfileSignIn =>
+      'Sign in to access your profile and settings.';
+
+  @override
+  String get guestServiceSignIn => 'Sign in to use this service.';
+
+  @override
+  String get wishlistNotesHint => 'Add a note (optional)';
+
+  @override
+  String get wishlistNotesUpdated => 'Note updated';
+
+  @override
+  String get wishlistShareTitle => 'Share wishlist';
+
+  @override
+  String get wishlistShareSuccess => 'Wishlist shared successfully';
+
+  @override
+  String get wishlistPriceDropsTitle => 'Price drop';
+
+  @override
+  String get wishlistPriceDropsEmpty => 'No price drops right now';
+
+  @override
+  String get wishlistMigrateError =>
+      'Could not sync saved items to your account';
+
+  @override
+  String get tipsTitle => 'Tips';
+
+  @override
+  String get tipsAddTitle => 'Add a tip';
+
+  @override
+  String get tipsHistoryTitle => 'Tip history';
+
+  @override
+  String get tipsRecipientLabel => 'Tip recipient';
+
+  @override
+  String get tipsRecipientDriver => 'Driver';
+
+  @override
+  String get tipsRecipientVendor => 'Restaurant';
+
+  @override
+  String get tipsRecipientBoth => 'Both';
+
+  @override
+  String tipsCalculatedAmount(String amount) {
+    return 'Tip amount: ETB $amount';
+  }
+
+  @override
+  String get tipsSubmit => 'Send tip';
+
+  @override
+  String get tipsSuccess => 'Tip sent successfully';
+
+  @override
+  String get tipsLoadError => 'Could not load tips';
+
+  @override
+  String get tipsCardComingSoon => 'Card payments coming soon';
+
+  @override
+  String get tipsAnonymous => 'Send anonymously';
+
+  @override
+  String get tipsMessageHint => 'Add a message (optional)';
+
+  @override
+  String get tipsStatsTotal => 'Tips given';
+
+  @override
+  String get tipsStatsAmount => 'Total tipped';
+
+  @override
+  String get tipsStatsAverage => 'Average tip';
+
+  @override
+  String get tipsHistoryEmpty => 'No tips yet';
+
+  @override
+  String get tipsPaymentWallet => 'Wallet';
+
+  @override
+  String get tipsPaymentCard => 'Card';
+
+  @override
+  String get tipsStatusCompleted => 'Completed';
+
+  @override
+  String get tipsStatusAll => 'All';
 }

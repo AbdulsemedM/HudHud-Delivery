@@ -2,6 +2,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../checkout/data/repository/checkout_repository.dart';
 import '../data/repository/payment_repository.dart';
+import '../model/payment_initiate_result.dart';
+import '../presentation/widgets/payment_details_form.dart';
 
 // Events
 abstract class PaymentEvent extends Equatable {
@@ -61,6 +63,19 @@ class PaymentSuccess extends PaymentState {
   List<Object?> get props => [transactionId, message];
 }
 
+class PaymentInitiated extends PaymentState {
+  final PaymentInitiateResult result;
+  final String orderId;
+
+  const PaymentInitiated({
+    required this.result,
+    required this.orderId,
+  });
+
+  @override
+  List<Object?> get props => [result, orderId];
+}
+
 class PaymentFailure extends PaymentState {
   final String error;
 
@@ -101,11 +116,10 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
       final orderDetails =
           event.paymentDetails?['order_details'] as Map<String, dynamic>?;
       if (orderDetails == null) {
-        emit(PaymentFailure(error: 'Order details missing'));
+        emit(const PaymentFailure(error: 'Order details missing'));
         return;
       }
 
-      // 1. Create order via POST /api/customer/orders
       final orderResult = await checkoutRepository.createOrder(
         vendorId: orderDetails['vendor_id'] as int,
         items: List<Map<String, dynamic>>.from(orderDetails['items'] as List),
@@ -132,20 +146,52 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
         return;
       }
 
+      final orderData = orderResult['data'] is Map
+          ? Map<String, dynamic>.from(orderResult['data'] as Map)
+          : <String, dynamic>{};
+      final orderPayload = orderData['order'] is Map
+          ? Map<String, dynamic>.from(orderData['order'] as Map)
+          : orderData;
       final createdOrderId =
-          orderResult['data']?['id']?.toString() ?? event.orderId;
+          int.tryParse(orderPayload['id']?.toString() ?? event.orderId) ?? 0;
 
-      // 2. Process payment
-      final result = await paymentRepository.processPayment(
-        paymentMethod: event.paymentMethod,
-        amount: event.amount,
+      if (paymentMethodSkipsInitiate(event.paymentMethod)) {
+        emit(PaymentSuccess(
+          transactionId: createdOrderId.toString(),
+          message: orderResult['message'] ?? 'Order placed successfully',
+        ));
+        return;
+      }
+
+      final currency = orderPayload['currency']?.toString() ?? 'ETB';
+      final collectedDetails = Map<String, dynamic>.from(
+        (event.paymentDetails ?? {})..remove('order_details'),
+      );
+      final initiateDetails = buildInitiatePaymentDetails(
+        paymentMethodCode: event.paymentMethod,
+        collectedDetails: collectedDetails,
         orderId: createdOrderId,
-        paymentDetails: event.paymentDetails,
       );
 
-      emit(PaymentSuccess(
-        transactionId: result['transaction_id'] ?? createdOrderId,
-        message: result['message'] ?? 'Order placed successfully',
+      final raw = await paymentRepository.initiatePayment(
+        paymentMethodCode: event.paymentMethod,
+        orderId: createdOrderId,
+        amount: event.amount,
+        currency: currency,
+        paymentDetails: initiateDetails,
+      );
+
+      final result = PaymentInitiateResult.fromJson(raw);
+      if (!result.isSuccess) {
+        emit(PaymentFailure(
+          error: result.message ?? 'Payment initiation failed',
+        ));
+        return;
+      }
+
+      emit(PaymentInitiated(
+        result: result,
+        orderId: createdOrderId.toString(),
       ));
     } catch (e) {
       emit(PaymentFailure(error: e.toString()));

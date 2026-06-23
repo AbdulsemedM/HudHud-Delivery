@@ -6,6 +6,7 @@ import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/payment/data/data_provider/payment_data_provider.dart';
 import 'package:hudhud_delivery/features/payment/data/repository/payment_repository.dart';
+import 'package:hudhud_delivery/features/payment/presentation/widgets/payment_methods_loader.dart';
 import 'package:hudhud_delivery/features/wallet/bloc/wallet_bloc.dart';
 import 'package:hudhud_delivery/features/wallet/data/models/wallet_model.dart';
 import 'package:hudhud_delivery/features/wallet/data/providers/wallet_data_provider.dart';
@@ -29,8 +30,6 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
   final _amountController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  List<Map<String, dynamic>> _paymentMethods = [];
-  bool _isLoadingPaymentMethods = true;
   WalletModel? _selectedWallet;
   String? _selectedMethodId;
   bool _showCardDetails = false;
@@ -50,32 +49,8 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
     _paymentRepository = PaymentRepository(
       paymentDataProvider: PaymentDataProvider(apiService: ApiService.instance),
     );
-    _fetchPaymentMethods();
     if (widget.wallets.isNotEmpty && _selectedWallet == null) {
       _selectedWallet = widget.wallets.first;
-    }
-  }
-
-  Future<void> _fetchPaymentMethods() async {
-    try {
-      final methods = await _paymentRepository.getPaymentMethods();
-      if (mounted) {
-        setState(() {
-          _paymentMethods = methods;
-          _isLoadingPaymentMethods = false;
-          if (methods.isNotEmpty && _selectedMethodId == null) {
-            _selectedMethodId = methods.first['id'] as String?;
-            _showCardDetails = _selectedMethodId == 'card';
-          }
-        });
-      }
-    } catch (_) {
-      if (mounted) {
-        setState(() {
-          _paymentMethods = [];
-          _isLoadingPaymentMethods = false;
-        });
-      }
     }
   }
 
@@ -172,71 +147,95 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
                       ),
                       const SizedBox(height: 16),
                     ],
-                    if (_isLoadingPaymentMethods)
-                      const Center(
-                        child: Padding(
-                          padding: EdgeInsets.all(24),
-                          child: CircularProgressIndicator(),
-                        ),
-                      )
-                    else if (_paymentMethods.isEmpty)
-                      Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Text(
-                          l10n.walletNoPaymentMethods,
-                          style: TextStyle(color: colorScheme.onSurfaceVariant),
-                        ),
-                      )
-                    else ...[
-                      DropdownButtonFormField<String>(
-                        value: _selectedMethodId,
-                        decoration: InputDecoration(
-                          labelText: l10n.paymentMethod,
-                          border: const OutlineInputBorder(),
-                        ),
-                        items: _paymentMethods
-                            .map((m) => DropdownMenuItem(
-                                  value: m['id'] as String?,
-                                  child: Text(m['name'] as String? ?? ''),
-                                ))
-                            .toList(),
-                        onChanged: (id) => setState(() {
-                          _selectedMethodId = id;
-                          _showCardDetails = id == 'card';
-                        }),
-                      ),
-                      if (_showCardDetails) ...[
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _transactionIdController,
-                          decoration: InputDecoration(
-                            labelText: l10n.transactionId,
-                            hintText: l10n.transactionIdHint,
-                            border: const OutlineInputBorder(),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: _cardLastFourController,
-                          decoration: InputDecoration(
-                            labelText: l10n.cardLast4,
-                            hintText: l10n.cardLast4Hint,
-                            border: const OutlineInputBorder(),
-                          ),
-                          keyboardType: TextInputType.number,
-                          maxLength: 4,
-                        ),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: _cardBrandController,
-                          decoration: InputDecoration(
-                            labelText: l10n.cardBrand,
-                            hintText: l10n.cardBrandHint,
-                            border: const OutlineInputBorder(),
-                          ),
-                        ),
-                      ],
-                    ],
+                    PaymentMethodsLoader(
+                      repository: _paymentRepository,
+                      builder: (context, methods, isLoading, error, reload) {
+                        if (!isLoading &&
+                            methods.isNotEmpty &&
+                            _selectedMethodId == null) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (!mounted) return;
+                            setState(() {
+                              _selectedMethodId = methods.first['id'] as String?;
+                              _showCardDetails = _selectedMethodId == 'card';
+                            });
+                          });
+                        }
+
+                        if (isLoading) {
+                          return const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(24),
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
+                        }
+                        if (methods.isEmpty) {
+                          return Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Text(
+                              l10n.walletNoPaymentMethods,
+                              style:
+                                  TextStyle(color: colorScheme.onSurfaceVariant),
+                            ),
+                          );
+                        }
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            DropdownButtonFormField<String>(
+                              value: _selectedMethodId,
+                              decoration: InputDecoration(
+                                labelText: l10n.paymentMethod,
+                                border: const OutlineInputBorder(),
+                              ),
+                              items: methods
+                                  .map((m) => DropdownMenuItem(
+                                        value: m['id'] as String?,
+                                        child: Text(m['name'] as String? ?? ''),
+                                      ))
+                                  .toList(),
+                              onChanged: (id) => setState(() {
+                                _selectedMethodId = id;
+                                _showCardDetails = id == 'card';
+                              }),
+                            ),
+                            if (_showCardDetails) ...[
+                              const SizedBox(height: 16),
+                              TextFormField(
+                                controller: _transactionIdController,
+                                decoration: InputDecoration(
+                                  labelText: l10n.transactionId,
+                                  hintText: l10n.transactionIdHint,
+                                  border: const OutlineInputBorder(),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              TextFormField(
+                                controller: _cardLastFourController,
+                                decoration: InputDecoration(
+                                  labelText: l10n.cardLast4,
+                                  hintText: l10n.cardLast4Hint,
+                                  border: const OutlineInputBorder(),
+                                ),
+                                keyboardType: TextInputType.number,
+                                maxLength: 4,
+                              ),
+                              const SizedBox(height: 12),
+                              TextFormField(
+                                controller: _cardBrandController,
+                                decoration: InputDecoration(
+                                  labelText: l10n.cardBrand,
+                                  hintText: l10n.cardBrandHint,
+                                  border: const OutlineInputBorder(),
+                                ),
+                              ),
+                            ],
+                          ],
+                        );
+                      },
+                    ),
                     const SizedBox(height: 32),
                     ElevatedButton(
                       onPressed: isLoading ? null : _submit,

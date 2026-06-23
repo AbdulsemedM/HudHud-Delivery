@@ -394,204 +394,14 @@ class NotesSection extends StatelessWidget {
   }
 }
 
-class TipSection extends StatefulWidget {
-  final Function(double) onTipChanged;
-  final double currentTip;
-
-  const TipSection({
-    super.key,
-    required this.onTipChanged,
-    required this.currentTip,
-  });
-
-  @override
-  State<TipSection> createState() => _TipSectionState();
-}
-
-class _TipSectionState extends State<TipSection> {
-  final TextEditingController _tipController = TextEditingController();
-  final List<double> _suggestedTips = [10.0, 20.0, 50.0, 100.0];
-  double _selectedTip = 0.0;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedTip = widget.currentTip;
-    _tipController.text = _selectedTip > 0 ? _selectedTip.toString() : '';
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Add Tip/Bonus',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: isDarkMode
-                  ? AppColors.darkOnSurface
-                  : AppColors.lightTextPrimary,
-            ),
-          ),
-          const SizedBox(height: 8),
-
-          // Suggested tip amounts
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: _suggestedTips.map((tip) {
-              final bool isSelected = _selectedTip == tip;
-              return InkWell(
-                onTap: () {
-                  setState(() {
-                    _selectedTip = tip;
-                    _tipController.text = tip.toString();
-                  });
-                  widget.onTipChanged(tip);
-                },
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? (isDarkMode
-                            ? AppColors.primaryLightColor
-                            : AppColors.primaryColor)
-                        : (isDarkMode ? AppColors.darkSurface : Colors.white),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: isSelected
-                          ? (isDarkMode
-                              ? AppColors.primaryLightColor
-                              : AppColors.primaryColor)
-                          : (isDarkMode
-                              ? AppColors.darkBorder
-                              : Colors.grey.withOpacity(0.3)),
-                    ),
-                  ),
-                  child: Text(
-                    '${tip.toStringAsFixed(0)} Birr',
-                    style: TextStyle(
-                      color: isSelected
-                          ? Colors.white
-                          : (isDarkMode
-                              ? AppColors.darkOnSurface
-                              : AppColors.lightTextPrimary),
-                      fontWeight:
-                          isSelected ? FontWeight.bold : FontWeight.normal,
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-
-          const SizedBox(height: 16),
-
-          // Custom tip amount
-          TextField(
-            controller: _tipController,
-            keyboardType: TextInputType.numberWithOptions(decimal: true),
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
-            ],
-            decoration: InputDecoration(
-              hintText: 'Enter custom tip amount',
-              hintStyle: TextStyle(
-                color: isDarkMode
-                    ? AppColors.darkOnSurface.withOpacity(0.6)
-                    : AppColors.lightTextSecondary.withOpacity(0.7),
-              ),
-              filled: isDarkMode,
-              fillColor: isDarkMode ? AppColors.darkSurface : null,
-              prefixIcon: const Icon(Icons.attach_money, size: 20),
-              suffixIcon: TextButton(
-                onPressed: () {
-                  if (_tipController.text.isNotEmpty) {
-                    final double customTip =
-                        double.tryParse(_tipController.text) ?? 0.0;
-                    setState(() {
-                      _selectedTip = customTip;
-                    });
-                    widget.onTipChanged(customTip);
-                  }
-                },
-                child: Text(
-                  'Apply',
-                  style: TextStyle(
-                    color: isDarkMode
-                        ? AppColors.primaryLightColor
-                        : AppColors.primaryColor,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(
-                  color: isDarkMode
-                      ? AppColors.darkBorder
-                      : Colors.grey.withOpacity(0.3),
-                ),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(
-                  color: isDarkMode
-                      ? AppColors.darkBorder
-                      : Colors.grey.withOpacity(0.3),
-                ),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(
-                  color: isDarkMode
-                      ? AppColors.primaryLightColor
-                      : AppColors.primaryColor,
-                ),
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 12,
-              ),
-            ),
-            onSubmitted: (value) {
-              if (value.isNotEmpty) {
-                final double customTip = double.tryParse(value) ?? 0.0;
-                setState(() {
-                  _selectedTip = customTip;
-                });
-                widget.onTipChanged(customTip);
-              }
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _tipController.dispose();
-    super.dispose();
-  }
-}
-
 class OrderSummarySection extends StatelessWidget {
   final double subtotal;
   final double total;
-  final double tipAmount;
 
   const OrderSummarySection({
     super.key,
     required this.subtotal,
     required this.total,
-    this.tipAmount = 0.0,
   });
 
   @override
@@ -605,8 +415,6 @@ class OrderSummarySection extends StatelessWidget {
           _buildSummaryRow('Discount', 0.0, false, isDiscount: true),
           _buildSummaryRow('Extras', 0.0, false),
           _buildSummaryRow('Service Charge', 0.0, false),
-          if (tipAmount > 0)
-            _buildSummaryRow('Tip', tipAmount, false, showPlus: true),
           const Divider(thickness: 1),
           _buildSummaryRow('Total Amount', total, true),
         ],
@@ -666,26 +474,22 @@ class OrderSummarySection extends StatelessWidget {
 // Payment method grid shown directly on the checkout screen
 // ---------------------------------------------------------------------------
 
-/// Static list of payment methods so the checkout page doesn't need a BLoC.
-const List<Map<String, dynamic>> _kCheckoutPaymentMethods = [
-  {'id': 'cash_on_delivery', 'name': 'Cash on Delivery', 'enabled': true},
-  {'id': 'telebirr',         'name': 'TeleBirr',          'enabled': true},
-  {'id': 'cbe',              'name': 'CBE Birr',           'enabled': true},
-  {'id': 'chapa',            'name': 'Chapa',              'enabled': true},
-  {'id': 'amole',            'name': 'Amole',              'enabled': true},
-  {'id': 'wallet',           'name': 'Wallet',             'enabled': true},
-  {'id': 'card',             'name': 'Card',               'enabled': true},
-  {'id': 'ebirr',            'name': 'eBirr',              'enabled': true},
-];
-
 class PaymentMethodGridSection extends StatelessWidget {
+  final List<Map<String, dynamic>> methods;
   final String? selectedId;
   final ValueChanged<String> onSelected;
+  final bool isLoading;
+  final String? error;
+  final VoidCallback? onRetry;
 
   const PaymentMethodGridSection({
     super.key,
+    required this.methods,
     required this.selectedId,
     required this.onSelected,
+    this.isLoading = false,
+    this.error,
+    this.onRetry,
   });
 
   @override
@@ -707,6 +511,32 @@ class PaymentMethodGridSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
+          if (isLoading)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(24),
+                child: CircularProgressIndicator(),
+              ),
+            )
+          else if (error != null)
+            Column(
+              children: [
+                Text(
+                  'Failed to load payment methods',
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+                if (onRetry != null)
+                  TextButton(onPressed: onRetry, child: const Text('Retry')),
+              ],
+            )
+          else if (methods.isEmpty)
+            Text(
+              'No payment methods available',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            )
+          else
           GridView.builder(
             physics: const NeverScrollableScrollPhysics(),
             shrinkWrap: true,
@@ -716,12 +546,12 @@ class PaymentMethodGridSection extends StatelessWidget {
               crossAxisSpacing: 10,
               childAspectRatio: 0.85,
             ),
-            itemCount: _kCheckoutPaymentMethods.length,
+            itemCount: methods.length,
             itemBuilder: (context, index) {
-              final method = _kCheckoutPaymentMethods[index];
+              final method = methods[index];
               final id = method['id'] as String;
-              final name = method['name'] as String;
-              final enabled = method['enabled'] as bool;
+              final name = method['name'] as String? ?? id;
+              final enabled = method['enabled'] as bool? ?? true;
               final isSelected = selectedId == id;
 
               final color = PaymentMethodCard.colorForId(id);
@@ -803,7 +633,7 @@ class PaymentMethodGridSection extends StatelessWidget {
 }
 
 class ConfirmOrderButton extends StatelessWidget {
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final bool isLoading;
 
   const ConfirmOrderButton({

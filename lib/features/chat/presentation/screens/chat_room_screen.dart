@@ -21,11 +21,13 @@ import 'package:hudhud_delivery/l10n/app_localizations.dart';
 
 class ChatRoomScreen extends StatelessWidget {
   final int conversationId;
+  final int? packageDeliveryId;
   final ChatConversationDetailResult? initialDetail;
 
   const ChatRoomScreen({
     super.key,
     required this.conversationId,
+    this.packageDeliveryId,
     this.initialDetail,
   });
 
@@ -33,16 +35,24 @@ class ChatRoomScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return chatRoomBlocProvider(
       conversationId: conversationId,
+      packageDeliveryId: packageDeliveryId,
       initialDetail: initialDetail,
-      child: _ChatRoomView(conversationId: conversationId),
+      child: _ChatRoomView(
+        conversationId: conversationId,
+        packageDeliveryId: packageDeliveryId,
+      ),
     );
   }
 }
 
 class _ChatRoomView extends StatefulWidget {
   final int conversationId;
+  final int? packageDeliveryId;
 
-  const _ChatRoomView({required this.conversationId});
+  const _ChatRoomView({
+    required this.conversationId,
+    this.packageDeliveryId,
+  });
 
   @override
   State<_ChatRoomView> createState() => _ChatRoomViewState();
@@ -118,6 +128,8 @@ class _ChatRoomViewState extends State<_ChatRoomView> {
         }
 
         final conv = state.conversation;
+        final isPackageDelivery = widget.packageDeliveryId != null ||
+            conv.type == ChatConversationType.packageDelivery;
         final title = conv.counterpartyName(_userId) ??
             conv.displayTitle(currentUserId: _userId);
         final subtitle = conv.type == ChatConversationType.order
@@ -181,8 +193,10 @@ class _ChatRoomViewState extends State<_ChatRoomView> {
                             onRetry: (id) => context
                                 .read<ChatRoomBloc>()
                                 .add(RetrySendMessageEvent(id)),
-                            onLongPress: (message) =>
-                                _showMessageActions(context, message),
+                            onLongPress: isPackageDelivery
+                                ? null
+                                : (message) =>
+                                    _showMessageActions(context, message),
                           ),
                           if (_showScrollFab)
                             Positioned(
@@ -199,6 +213,7 @@ class _ChatRoomViewState extends State<_ChatRoomView> {
                 controller: _textController,
                 isSending: state.isSending,
                 isEditing: state.editingMessageId != null,
+                textOnly: isPackageDelivery,
                 pendingAttachmentPaths: _pendingPaths,
                 onRemoveAttachment: (i) {
                   setState(() => _pendingPaths.removeAt(i));
@@ -341,14 +356,14 @@ class _MessageList extends StatelessWidget {
   final ScrollController scrollController;
   final int? currentUserId;
   final void Function(int tempId) onRetry;
-  final void Function(ChatMessageModel message) onLongPress;
+  final void Function(ChatMessageModel message)? onLongPress;
 
   const _MessageList({
     required this.messages,
     required this.scrollController,
     required this.currentUserId,
     required this.onRetry,
-    required this.onLongPress,
+    this.onLongPress,
   });
 
   @override
@@ -430,7 +445,8 @@ class _MessageList extends StatelessWidget {
               onRetry: message.localStatus == ChatMessageStatus.failed
                   ? () => onRetry(message.id)
                   : null,
-              onLongPress: () => onLongPress(message),
+              onLongPress:
+                  onLongPress != null ? () => onLongPress!(message) : null,
             ),
           ],
         );

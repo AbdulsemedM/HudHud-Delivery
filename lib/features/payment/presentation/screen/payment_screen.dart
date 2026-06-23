@@ -8,6 +8,7 @@ import '../../../checkout/data/repository/checkout_repository.dart';
 import '../../bloc/payment_bloc.dart';
 import '../../data/data_provider/payment_data_provider.dart';
 import '../../data/repository/payment_repository.dart';
+import 'payment_initiate_result_screen.dart';
 import '../widgets/payment_widgets.dart';
 
 class PaymentScreen extends StatefulWidget {
@@ -143,6 +144,16 @@ class _PaymentScreenState extends State<PaymentScreen>
               if (state is PaymentSuccess) {
                 Navigator.of(context).pop(); // Close processing dialog
                 _showPaymentSuccessDialog(state.transactionId);
+              } else if (state is PaymentInitiated) {
+                Navigator.of(context).pop(); // Close processing dialog
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => PaymentInitiateResultScreen(
+                      result: state.result,
+                      orderId: state.orderId,
+                    ),
+                  ),
+                );
               } else if (state is PaymentFailure) {
                 Navigator.of(context).pop(); // Close processing dialog
                 ScaffoldMessenger.of(context).showSnackBar(

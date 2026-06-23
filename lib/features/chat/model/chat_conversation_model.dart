@@ -1,7 +1,7 @@
 import 'package:hudhud_delivery/features/chat/model/chat_message_model.dart';
 import 'package:hudhud_delivery/features/chat/model/chat_participant_model.dart';
 
-enum ChatConversationType { order, support, ride, unknown }
+enum ChatConversationType { order, support, ride, packageDelivery, unknown }
 
 class ChatConversationModel {
   final int id;
@@ -48,6 +48,10 @@ class ChatConversationModel {
           return pickup.length > 40 ? '${pickup.substring(0, 40)}…' : pickup;
         }
         return 'Ride #$conversationableId';
+      case ChatConversationType.packageDelivery:
+        final tracking = metadata['tracking_number']?.toString();
+        if (tracking != null && tracking.isNotEmpty) return tracking;
+        return 'Package #$conversationableId';
       case ChatConversationType.unknown:
         return counterpartyName(currentUserId) ?? 'Chat';
     }
@@ -96,6 +100,13 @@ class ChatConversationModel {
         final drop = metadata['dropoff_location']?.toString();
         if (drop != null && drop.isNotEmpty) return drop;
         return '';
+      case ChatConversationType.packageDelivery:
+        final pickup = metadata['pickup_location']?.toString();
+        final drop = metadata['dropoff_location']?.toString();
+        final parts = <String>[];
+        if (pickup != null && pickup.isNotEmpty) parts.add(pickup);
+        if (drop != null && drop.isNotEmpty) parts.add(drop);
+        return parts.join(' → ');
       case ChatConversationType.unknown:
         return '';
     }
@@ -180,6 +191,9 @@ class ChatConversationModel {
       case 'rides':
       case 'taxi':
         return ChatConversationType.ride;
+      case 'package_delivery':
+      case 'package-delivery':
+        return ChatConversationType.packageDelivery;
       default:
         return ChatConversationType.unknown;
     }

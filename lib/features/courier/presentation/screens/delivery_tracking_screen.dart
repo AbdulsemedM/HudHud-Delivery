@@ -6,6 +6,8 @@ import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
+import 'package:hudhud_delivery/features/chat/utils/chat_navigation.dart';
+import 'package:hudhud_delivery/features/sos/presentation/widgets/sos_trigger_button.dart';
 
 class DeliveryTrackingScreen extends StatefulWidget {
   final int? deliveryId;
@@ -155,6 +157,17 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
     }
   }
 
+  bool get _hasAssignedDriver {
+    final driver = _trackData?['driver'];
+    return driver != null && driver is Map && driver.isNotEmpty;
+  }
+
+  void _openDriverChat() {
+    final deliveryId = widget.deliveryId;
+    if (deliveryId == null || !_hasAssignedDriver) return;
+    openPackageDeliveryChat(context, deliveryId);
+  }
+
   String _formatTimestamp(dynamic value) {
     if (value == null) return '—';
     final str = value.toString();
@@ -278,6 +291,28 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
               ),
             ),
           ),
+          // SOS (when delivery id available)
+          if (widget.deliveryId != null)
+            Positioned(
+              top: 88,
+              right: 16,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: colorScheme.shadow.withOpacity(0.2),
+                      blurRadius: 4,
+                    ),
+                  ],
+                ),
+                child: SosTriggerButton(
+                  compact: true,
+                  orderId: widget.deliveryId,
+                ),
+              ),
+            ),
           // Status badge
           Positioned(
             top: 40,
@@ -394,9 +429,10 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                             ),
                             child: IconButton(
                               icon: const Icon(Icons.send, color: Colors.white),
-                              onPressed: () {
-                                // TODO: Implement send action
-                              },
+                              onPressed: _hasAssignedDriver &&
+                                      widget.deliveryId != null
+                                  ? _openDriverChat
+                                  : null,
                             ),
                           ),
                         ],
@@ -444,9 +480,7 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                                       onCall: () {
                                         // TODO: Implement call
                                       },
-                                      onMessage: () {
-                                        // TODO: Implement message
-                                      },
+                                      onMessage: _openDriverChat,
                                     ),
                                     const SizedBox(height: 16),
                                   ],

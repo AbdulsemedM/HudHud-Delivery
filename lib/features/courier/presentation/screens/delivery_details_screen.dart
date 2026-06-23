@@ -6,6 +6,7 @@ import 'package:hudhud_delivery/features/checkout/data/data_provider/checkout_da
 import 'package:hudhud_delivery/features/checkout/data/repository/checkout_repository.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
+import 'package:hudhud_delivery/features/chat/utils/chat_navigation.dart';
 import 'delivery_tracking_screen.dart';
 
 class DeliveryDetailsScreen extends StatefulWidget {
@@ -179,6 +180,16 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
         ),
       ),
     );
+  }
+
+  bool _hasAssignedDriver(Map<String, dynamic> delivery) {
+    final driver = delivery['driver'];
+    return driver != null && driver is Map && driver.isNotEmpty;
+  }
+
+  void _openDriverChat() {
+    if (_delivery == null || !_hasAssignedDriver(_delivery!)) return;
+    openPackageDeliveryChat(context, widget.deliveryId);
   }
 
   @override
@@ -408,6 +419,28 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
                               ),
                             ),
                           ),
+                          if (_delivery != null &&
+                              _hasAssignedDriver(_delivery!)) ...[
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              width: double.infinity,
+                              height: 50,
+                              child: OutlinedButton.icon(
+                                onPressed: _openDriverChat,
+                                icon: const Icon(Icons.chat_bubble_outline),
+                                label: const Text('Message driver'),
+                                style: OutlinedButton.styleFrom(
+                                  side: BorderSide(
+                                    color: AppColors.primaryColor,
+                                    width: 1.5,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                           const SizedBox(height: 12),
                           SizedBox(
                             width: double.infinity,

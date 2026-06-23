@@ -14,6 +14,7 @@ import 'package:hudhud_delivery/core/utils/support_launcher.dart';
 import 'package:hudhud_delivery/core/utils/avatar_util.dart';
 import 'package:hudhud_delivery/core/utils/phone_util.dart';
 import 'package:hudhud_delivery/features/addresses/presentation/screens/addresses_list_screen.dart';
+import 'package:hudhud_delivery/features/sos/presentation/screens/sos_settings_screen.dart';
 import 'package:hudhud_delivery/features/chat/presentation/screens/conversations_list_screen.dart';
 import 'package:hudhud_delivery/features/chat/presentation/screens/support_chat_start_screen.dart';
 import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
@@ -31,6 +32,7 @@ import 'edit_profile_screen.dart';
 import 'personal_details_screen.dart';
 import 'terms_conditions_screen.dart';
 import 'package:hudhud_delivery/features/wishlist/presentation/screen/wishlist_screen.dart';
+import 'package:hudhud_delivery/features/tips/presentation/screens/tips_history_screen.dart';
 
 String _themeModeLabel(AppLocalizations l10n, ThemeController themeController) {
   switch (themeController.themeMode) {
@@ -439,6 +441,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   _tileDivider(colorScheme),
                   _KlikTile(
+                    icon: Icons.sos_outlined,
+                    iconColor: _accentIconRed,
+                    title: l10n.sosSettingsTitle,
+                    colorScheme: colorScheme,
+                    textTheme: textTheme,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SosSettingsScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _tileDivider(colorScheme),
+                  _KlikTile(
                     icon: Icons.favorite_outline,
                     iconColor: _accentIconRed,
                     title: l10n.profileMenuFavorites,
@@ -449,6 +467,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => const WishlistScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _tileDivider(colorScheme),
+                  _KlikTile(
+                    icon: Icons.volunteer_activism_outlined,
+                    iconColor: _accentIconRed,
+                    title: l10n.tipsHistoryTitle,
+                    colorScheme: colorScheme,
+                    textTheme: textTheme,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const TipsHistoryScreen(),
                         ),
                       );
                     },

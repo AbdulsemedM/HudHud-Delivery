@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:hudhud_delivery/app/services/biometric_credential_service.dart';
 import 'package:hudhud_delivery/app/services/google_auth_helper.dart';
+import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
 import '../data/repository/login_repository.dart';
 
 part 'login_event.dart';
@@ -27,7 +28,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     on<GuestLoginRequested>((event, emit) async {
       emit(LoginLoading());
       try {
-        await loginRepository.guest();
+        await GuestBrowseService().enterGuestBrowseMode();
         emit(LoginSuccess());
       } catch (e) {
         emit(LoginFailure(e.toString()));
