@@ -43,6 +43,10 @@
 	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>This app uses your location to show your position on the map and to set pickup and delivery addresses.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>This app uses your location to show your position on the map, set pickup and delivery addresses, and improve delivery accuracy while you use the app.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app uses the microphone so you can record and send voice messages in chat with support or about your orders.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>This app uses the camera to update your profile photo.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
