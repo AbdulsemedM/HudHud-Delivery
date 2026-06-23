@@ -137,6 +137,7 @@ class _LoginFormState extends State<LoginForm> {
     AppLocalizations l10n,
     ThemeData theme,
     bool isLoading,
+    bool isAnyLoading,
   ) {
     final primary = theme.brightness == Brightness.dark
         ? AppColors.primaryLightColor
@@ -159,7 +160,7 @@ class _LoginFormState extends State<LoginForm> {
           child: Material(
             color: Colors.transparent,
             child: InkWell(
-              onTap: isLoading ? null : () => _onBiometricTap(context, l10n),
+              onTap: isAnyLoading ? null : () => _onBiometricTap(context, l10n),
               customBorder: const CircleBorder(),
               child: Ink(
                 width: 72,
@@ -374,13 +375,13 @@ class _LoginFormState extends State<LoginForm> {
               const SizedBox(height: 24),
               BlocBuilder<LoginBloc, LoginState>(
                 builder: (context, state) {
-                  final isLoading = state is LoginLoading;
                   if (_showBiometricButton && !kIsWeb) {
                     return _buildBiometricLoginButton(
                       context,
                       l10n,
                       theme,
-                      isLoading,
+                      state.isLoginLoading(LoginAction.biometric),
+                      state.isAnyLoginLoading,
                     );
                   }
                   return const SizedBox.shrink();
@@ -395,9 +396,10 @@ class _LoginFormState extends State<LoginForm> {
                         theme.brightness == Brightness.dark
                             ? AppColors.primaryLightColor
                             : AppColors.primaryColor;
+                    final isLoading =
+                        state.isLoginLoading(LoginAction.credentials);
                     return ElevatedButton(
-                      onPressed:
-                          state is LoginLoading ? null : _submitForm,
+                      onPressed: state.isAnyLoginLoading ? null : _submitForm,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: signInBackground,
                         foregroundColor: Colors.white,
@@ -409,7 +411,7 @@ class _LoginFormState extends State<LoginForm> {
                         shadowColor:
                             signInBackground.withValues(alpha: 0.35),
                       ),
-                      child: state is LoginLoading
+                      child: isLoading
                           ? const SizedBox(
                               height: 20,
                               width: 20,

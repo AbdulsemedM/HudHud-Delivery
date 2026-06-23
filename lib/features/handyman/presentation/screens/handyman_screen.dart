@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
@@ -30,7 +31,11 @@ class _HandymanScreenState extends State<HandymanScreen> {
     _repository = HandymanRepository(
       dataProvider: HandymanDataProvider(apiService: ApiService.instance),
     );
-    _fetchRequests();
+    if (GuestBrowseService().isGuestBrowseMode) {
+      _isLoading = false;
+    } else {
+      _fetchRequests();
+    }
   }
 
   Future<void> _fetchRequests() async {

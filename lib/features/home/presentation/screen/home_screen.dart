@@ -399,9 +399,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 index: _serviceMode.index,
                 children: [
                   const AllCategoriesScreen(embedded: true),
-                  const CourierScreen(),
-                  const TaxiScreen(),
-                  const HandymanScreen(embedded: true),
+                  GuestBrowseService().isGuestBrowseMode
+                      ? const SizedBox.shrink()
+                      : const CourierScreen(),
+                  GuestBrowseService().isGuestBrowseMode
+                      ? const SizedBox.shrink()
+                      : const TaxiScreen(),
+                  GuestBrowseService().isGuestBrowseMode
+                      ? const SizedBox.shrink()
+                      : const HandymanScreen(embedded: true),
                 ],
               ),
             ),

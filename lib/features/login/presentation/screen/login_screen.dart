@@ -413,9 +413,9 @@ class _GuestLoginButton extends StatelessWidget {
       width: double.infinity,
       child: BlocBuilder<LoginBloc, LoginState>(
         builder: (context, state) {
-          final loading = state is LoginLoading;
+          final loading = state.isLoginLoading(LoginAction.guest);
           return TextButton(
-            onPressed: loading
+            onPressed: state.isAnyLoginLoading
                 ? null
                 : () =>
                     context.read<LoginBloc>().add(GuestLoginRequested()),
@@ -459,7 +459,7 @@ class _GoogleSignInButton extends StatelessWidget {
         : Colors.white.withValues(alpha: 0.72);
     return BlocBuilder<LoginBloc, LoginState>(
       builder: (context, state) {
-        final loading = state is LoginLoading;
+        final loading = state.isLoginLoading(LoginAction.google);
         return Container(
           width: double.infinity,
           height: 52,
@@ -474,7 +474,7 @@ class _GoogleSignInButton extends StatelessWidget {
             ],
           ),
           child: OutlinedButton(
-            onPressed: loading
+            onPressed: state.isAnyLoginLoading
                 ? null
                 : () =>
                     context.read<LoginBloc>().add(GoogleLoginRequested()),

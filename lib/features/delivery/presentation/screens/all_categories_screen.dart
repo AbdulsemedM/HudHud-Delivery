@@ -75,17 +75,20 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
   }
 
   Future<void> _loadVendors() async {
+    if (!mounted) return;
     setState(() {
       _vendorsLoading = true;
       _vendorsError = null;
     });
     try {
       final list = await _vendorsRepository.getVendors(page: 1);
+      if (!mounted) return;
       setState(() {
         _vendors = list;
         _vendorsLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _vendorsError = e.toString();
         _vendorsLoading = false;

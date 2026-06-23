@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/features/settings/presentation/screen/notifications_screen.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
+import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
 import 'package:hudhud_delivery/app/services/location_service.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
@@ -42,8 +43,13 @@ class _CourierScreenState extends State<CourierScreen> {
       ),
     );
     _requestLocationAndUpdate();
-    _fetchDeliveries();
-    _fetchActiveDelivery();
+    if (!GuestBrowseService().isGuestBrowseMode) {
+      _fetchDeliveries();
+      _fetchActiveDelivery();
+    } else {
+      _isLoadingDeliveries = false;
+      _isLoadingActiveDelivery = false;
+    }
   }
 
   Future<void> _fetchActiveDelivery() async {

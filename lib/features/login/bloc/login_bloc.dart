@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/app/services/biometric_credential_service.dart';
 import 'package:hudhud_delivery/app/services/google_auth_helper.dart';
 import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
@@ -13,7 +14,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   final LoginRepository loginRepository;
   LoginBloc(this.loginRepository) : super(LoginInitial()) {
     on<LoginFormSubmitted>((event, emit) async {
-      emit(LoginLoading());
+      emit(LoginLoading(LoginAction.credentials));
       try {
         await loginRepository.login(
           event.emailOrPhone,
@@ -26,8 +27,9 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       }
     });
     on<GuestLoginRequested>((event, emit) async {
-      emit(LoginLoading());
+      emit(LoginLoading(LoginAction.guest));
       try {
+        await AuthService().clearAllData();
         await GuestBrowseService().enterGuestBrowseMode();
         emit(LoginSuccess());
       } catch (e) {
@@ -35,7 +37,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       }
     });
     on<GoogleLoginRequested>((event, emit) async {
-      emit(LoginLoading());
+      emit(LoginLoading(LoginAction.google));
       try {
         await loginRepository.googleLogin();
         emit(LoginSuccess());
@@ -63,7 +65,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         return;
       }
 
-      emit(LoginLoading());
+      emit(LoginLoading(LoginAction.biometric));
       try {
         await loginRepository.login(
           credentials.identifier,

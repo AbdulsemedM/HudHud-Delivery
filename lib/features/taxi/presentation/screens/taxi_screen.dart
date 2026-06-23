@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
+import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
 import 'package:hudhud_delivery/app/services/location_service.dart';
 import 'package:hudhud_delivery/core/widgets/location_search_field.dart';
 import 'package:hudhud_delivery/app/services/google_places_service.dart';
@@ -70,7 +71,11 @@ class _TaxiScreenState extends State<TaxiScreen> {
     _loadMapsAvailability();
     _getCurrentLocation();
     _loadSuggestedLocations();
-    _checkActiveRide();
+    if (GuestBrowseService().isGuestBrowseMode) {
+      _isCheckingActiveRide = false;
+    } else {
+      _checkActiveRide();
+    }
   }
 
   Future<void> _loadMapsAvailability() async {

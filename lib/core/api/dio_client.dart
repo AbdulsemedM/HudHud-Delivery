@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'api_constants.dart';
 import 'interceptors/logger_interceptor.dart';
 import '../../app/services/auth_service.dart';
+import '../../app/services/guest_browse_service.dart';
 
 class DioClient {
   static DioClient? _instance;
@@ -49,6 +50,10 @@ class DioClient {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
+          if (GuestBrowseService().isGuestBrowseMode) {
+            handler.next(options);
+            return;
+          }
           // Add auth token if available
           final token = await _getAuthToken();
           if (token != null) {
@@ -57,9 +62,8 @@ class DioClient {
           handler.next(options);
         },
         onError: (error, handler) async {
-          // Handle token refresh logic here if needed
-          if (error.response?.statusCode == 401) {
-            // Token expired, handle refresh or logout
+          if (error.response?.statusCode == 401 &&
+              !GuestBrowseService().isGuestBrowseMode) {
             await _handleUnauthorized();
           }
           handler.next(error);
@@ -90,7 +94,7 @@ class DioClient {
   }
 
   Future<void> _handleUnauthorized() async {
-    if (_handlingUnauthorized) return;
+    if (_handlingUnauthorized || GuestBrowseService().isGuestBrowseMode) return;
     _handlingUnauthorized = true;
     try {
       final authService = AuthService();
