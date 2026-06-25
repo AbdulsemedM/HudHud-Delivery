@@ -100,6 +100,7 @@ class ApiConstants {
   static const String publicVendorProducts = 'public/vendors/{id}/products';
   static const String publicBranches = 'public/branches';
   static const String publicBranchesNearby = 'public/branches/nearby';
+  static const String popularProducts = 'popular/products';
 
   // Notifications endpoints (GET /api/notifications, GET /api/notifications/{id})
   static const String notificationsList = 'notifications';

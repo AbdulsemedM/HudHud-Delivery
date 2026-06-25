@@ -54,8 +54,8 @@ android {
         applicationId = "com.hudhud.userapp"
         minSdkVersion = flutter.minSdkVersion
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.0.1"
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
         manifestPlaceholders = [
             googleMapsApiKey: googleMapsApiKey
         ]

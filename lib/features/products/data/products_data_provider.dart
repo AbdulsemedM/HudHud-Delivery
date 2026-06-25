@@ -29,4 +29,36 @@ class ProductsDataProvider {
       return {'statusCode': 500, 'data': null, 'errorMessage': e.toString()};
     }
   }
+
+  /// GET /api/popular/products
+  Future<Map<String, dynamic>> getPopularProducts({
+    int? vendorId,
+    int? categoryId,
+    bool excludeOutOfStock = true,
+  }) async {
+    try {
+      final queryParameters = <String, dynamic>{
+        if (vendorId != null) 'vendor_id': vendorId,
+        if (categoryId != null) 'category_id': categoryId,
+        'exclude_out_of_stock': excludeOutOfStock,
+      };
+      final response = await apiService.get(
+        '${ApiConstants.baseUrl}${ApiConstants.popularProducts}',
+        queryParameters: queryParameters,
+      );
+      return {
+        'statusCode': response.statusCode,
+        'data': response.data,
+        'errorMessage': null,
+      };
+    } on ApiException catch (e) {
+      return {
+        'statusCode': e.statusCode,
+        'data': null,
+        'errorMessage': e.message,
+      };
+    } on Exception catch (e) {
+      return {'statusCode': 500, 'data': null, 'errorMessage': e.toString()};
+    }
+  }
 }

@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/categories/model/categories_products_model.dart';
-import 'package:hudhud_delivery/features/delivery/data/mock_popular_orders.dart';
-import 'package:hudhud_delivery/features/delivery/presentation/screens/all_categories_screen.dart';
 import 'package:hudhud_delivery/features/delivery/presentation/screens/product_detail_screen.dart';
 import 'package:hudhud_delivery/features/delivery/presentation/screens/store_detail_screen.dart';
 import 'package:hudhud_delivery/features/orders/data/models/vendor_model.dart';
 import 'package:hudhud_delivery/features/products/data/products_data_provider.dart';
 import 'package:hudhud_delivery/features/products/data/products_repository.dart';
+import 'package:hudhud_delivery/features/products/model/popular_product_model.dart';
+import 'package:hudhud_delivery/features/delivery/presentation/screens/all_categories_screen.dart';
 import 'package:hudhud_delivery/features/vendors/data/data_provider/vendors_data_provider.dart';
 import 'package:hudhud_delivery/features/vendors/data/repository/vendors_repository.dart';
 import 'category_stores_screen.dart';
@@ -26,8 +26,10 @@ class _DeliveryFeedScreenState extends State<DeliveryFeedScreen> {
 
   List<VendorModel> _vendors = [];
   List<CategoriesProductsModel> _featuredProducts = [];
+  List<PopularProductModel> _popularProducts = [];
   bool _vendorsLoading = true;
   bool _featuredLoading = false;
+  bool _popularProductsLoading = true;
   String? _vendorsError;
   late final VendorsRepository _vendorsRepository;
   late final ProductsRepository _productsRepository;
@@ -43,18 +45,39 @@ class _DeliveryFeedScreenState extends State<DeliveryFeedScreen> {
     );
     _loadVendors();
     _loadFeaturedProducts();
+    _loadPopularProducts();
   }
 
   Future<void> _loadFeaturedProducts() async {
     setState(() => _featuredLoading = true);
     try {
       final list = await _productsRepository.getFeaturedProducts(limit: 10);
+      if (!mounted) return;
       setState(() {
         _featuredProducts = list;
         _featuredLoading = false;
       });
     } catch (_) {
       if (mounted) setState(() => _featuredLoading = false);
+    }
+  }
+
+  Future<void> _loadPopularProducts() async {
+    setState(() => _popularProductsLoading = true);
+    try {
+      final list = await _productsRepository.getPopularProducts();
+      if (!mounted) return;
+      setState(() {
+        _popularProducts = list;
+        _popularProductsLoading = false;
+      });
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _popularProducts = [];
+          _popularProductsLoading = false;
+        });
+      }
     }
   }
 
@@ -316,49 +339,48 @@ class _DeliveryFeedScreenState extends State<DeliveryFeedScreen> {
                           ],
                         ),
                       ),
-                    // Popular Orders Section (mock data). order.vendorId is vendor shop id.
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Popular Orders',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.onSurface,
+                    if (!_popularProductsLoading && _popularProducts.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Popular Orders',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 16),
-                          ...mockPopularOrders.map((order) => Padding(
-                                padding: const EdgeInsets.only(bottom: 16),
-                                child: _RestaurantCard(
-                                  name: order.name,
-                                  rating: order.rating,
-                                  deliveryFee: order.deliveryFee,
-                                  deliveryTime: order.deliveryTime,
-                                  promoText: order.promoText,
-                                  imageUrl: order.imageUrl,
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            StoreDetailScreen(
-                                          storeName: order.name,
-                                          storeImage: order.imageUrl,
-                                          vendorId: order.vendorId,
+                            const SizedBox(height: 16),
+                            ..._popularProducts.map((item) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 16),
+                                  child: _RestaurantCard(
+                                    name: item.displayName,
+                                    rating: item.shopRating,
+                                    secondaryLine: item.secondaryLine,
+                                    promoText: item.promoText,
+                                    imageUrl: item.imageUrl,
+                                    onTap: () {
+                                      final productId = item.product.id;
+                                      if (productId == null) return;
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              ProductDetailScreen(
+                                            productId: productId,
+                                          ),
                                         ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              )),
-                          const SizedBox(height: 24),
-                        ],
+                                      );
+                                    },
+                                  ),
+                                )),
+                            const SizedBox(height: 24),
+                          ],
+                        ),
                       ),
-                    ),
                     // Popular Stores Section
                     if (!_vendorsLoading && _vendorsError == null && _vendors.isNotEmpty)
                       Padding(
@@ -578,8 +600,7 @@ class _CategoryCard extends StatelessWidget {
 class _RestaurantCard extends StatelessWidget {
   final String name;
   final double rating;
-  final int deliveryFee;
-  final String deliveryTime;
+  final String? secondaryLine;
   final String? promoText;
   final String imageUrl;
   final VoidCallback onTap;
@@ -587,8 +608,7 @@ class _RestaurantCard extends StatelessWidget {
   const _RestaurantCard({
     required this.name,
     required this.rating,
-    required this.deliveryFee,
-    required this.deliveryTime,
+    this.secondaryLine,
     this.promoText,
     required this.imageUrl,
     required this.onTap,
@@ -705,28 +725,35 @@ class _RestaurantCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      Icon(
-                        Icons.star,
-                        size: 16,
-                        color: Colors.amber[700],
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        rating.toString(),
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: colorScheme.onSurface,
+                      if (rating > 0) ...[
+                        Icon(
+                          Icons.star,
+                          size: 16,
+                          color: Colors.amber[700],
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        'ETB $deliveryFee Delivery Fee • $deliveryTime',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: colorScheme.onSurfaceVariant,
+                        const SizedBox(width: 4),
+                        Text(
+                          rating.toStringAsFixed(1),
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: colorScheme.onSurface,
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: 12),
+                      ],
+                      if (secondaryLine != null && secondaryLine!.isNotEmpty)
+                        Expanded(
+                          child: Text(
+                            secondaryLine!,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
                     ],
                   ),
                 ],

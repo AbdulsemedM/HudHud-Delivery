@@ -4,6 +4,7 @@ import 'package:hudhud_delivery/features/categories/model/categories_products_mo
 import 'package:hudhud_delivery/features/guest/data/public_catalog_data_provider.dart';
 import 'package:hudhud_delivery/features/guest/data/public_catalog_repository.dart';
 import 'package:hudhud_delivery/features/products/data/products_data_provider.dart';
+import 'package:hudhud_delivery/features/products/model/popular_product_model.dart';
 import 'package:hudhud_delivery/features/products/model/products_list_result.dart';
 import 'package:hudhud_delivery/features/products/model/products_query.dart';
 
@@ -40,6 +41,27 @@ class ProductsRepository {
     int limit = 10,
   }) async {
     return publicCatalogRepository!.getFeaturedProducts(limit: limit);
+  }
+
+  Future<List<PopularProductModel>> getPopularProducts({
+    int? vendorId,
+    int? categoryId,
+    bool excludeOutOfStock = true,
+  }) async {
+    final response = await productsDataProvider.getPopularProducts(
+      vendorId: vendorId,
+      categoryId: categoryId,
+      excludeOutOfStock: excludeOutOfStock,
+    );
+    if (response['statusCode'] != 200) {
+      throw Exception(
+        _clean(
+          response['errorMessage']?.toString() ??
+              'Error fetching popular products',
+        ),
+      );
+    }
+    return PopularProductModel.parseResponse(response['data']);
   }
 
   String _clean(String message) {

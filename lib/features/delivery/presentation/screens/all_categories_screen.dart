@@ -8,11 +8,12 @@ import 'package:hudhud_delivery/features/categories/data/data_provider/categorie
 import 'package:hudhud_delivery/features/categories/data/repository/categories_repository.dart';
 import 'package:hudhud_delivery/features/categories/model/category_tree_model.dart';
 import 'package:hudhud_delivery/features/categories/presentation/screens/categories_screen.dart';
-import 'package:hudhud_delivery/features/delivery/data/mock_popular_orders.dart';
+import 'package:hudhud_delivery/features/delivery/presentation/screens/product_detail_screen.dart';
 import 'package:hudhud_delivery/features/delivery/presentation/screens/store_detail_screen.dart';
 import 'package:hudhud_delivery/features/orders/data/models/vendor_model.dart';
 import 'package:hudhud_delivery/features/products/data/products_data_provider.dart';
 import 'package:hudhud_delivery/features/products/data/products_repository.dart';
+import 'package:hudhud_delivery/features/products/model/popular_product_model.dart';
 import 'package:hudhud_delivery/features/products/presentation/screens/product_search_results_screen.dart';
 import 'package:hudhud_delivery/features/products/presentation/widgets/product_search_field.dart';
 import 'package:hudhud_delivery/features/vendors/data/data_provider/vendors_data_provider.dart';
@@ -57,7 +58,10 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
   List<VendorModel> _vendors = [];
   bool _vendorsLoading = true;
   String? _vendorsError;
+  List<PopularProductModel> _popularProducts = [];
+  bool _popularProductsLoading = true;
   late final VendorsRepository _vendorsRepository;
+  late final ProductsRepository _productsRepository;
 
   @override
   void initState() {
@@ -65,13 +69,20 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
     _vendorsRepository = VendorsRepository(
       vendorsDataProvider: VendorsDataProvider(apiService: ApiService.instance),
     );
+    _productsRepository = ProductsRepository(
+      productsDataProvider: ProductsDataProvider(apiService: ApiService.instance),
+    );
     _loadVendors();
+    _loadPopularProducts();
   }
 
   Future<void> _onPullToRefresh() async {
     if (!mounted) return;
     context.read<CategoriesBloc>().add(FetchCategoriesListEvent());
-    await _loadVendors();
+    await Future.wait([
+      _loadVendors(),
+      _loadPopularProducts(),
+    ]);
   }
 
   Future<void> _loadVendors() async {
@@ -92,6 +103,25 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
       setState(() {
         _vendorsError = e.toString();
         _vendorsLoading = false;
+      });
+    }
+  }
+
+  Future<void> _loadPopularProducts() async {
+    if (!mounted) return;
+    setState(() => _popularProductsLoading = true);
+    try {
+      final list = await _productsRepository.getPopularProducts();
+      if (!mounted) return;
+      setState(() {
+        _popularProducts = list;
+        _popularProductsLoading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _popularProducts = [];
+        _popularProductsLoading = false;
       });
     }
   }
@@ -129,6 +159,8 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
             vendors: _vendors,
             vendorsLoading: _vendorsLoading,
             vendorsError: _vendorsError,
+            popularProducts: _popularProducts,
+            popularProductsLoading: _popularProductsLoading,
             onCategoryTap: (category) => _onCategoryTap(context, category),
             onShowMore: () => setState(() => _showAllCategories = true),
             usePullToRefresh: true,
@@ -589,6 +621,8 @@ class _CategoriesGrid extends StatelessWidget {
   final List<VendorModel> vendors;
   final bool vendorsLoading;
   final String? vendorsError;
+  final List<PopularProductModel> popularProducts;
+  final bool popularProductsLoading;
   final void Function(CategoryTreeModel) onCategoryTap;
   final VoidCallback onShowMore;
   final bool usePullToRefresh;
@@ -600,6 +634,8 @@ class _CategoriesGrid extends StatelessWidget {
     required this.vendors,
     required this.vendorsLoading,
     required this.vendorsError,
+    required this.popularProducts,
+    required this.popularProductsLoading,
     required this.onCategoryTap,
     required this.onShowMore,
     this.usePullToRefresh = false,
@@ -725,53 +761,78 @@ class _CategoriesGrid extends StatelessWidget {
           ),
         ],
         const SliverToBoxAdapter(child: SizedBox(height: 16)),
-        // Popular Orders section (mock data)
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-            child: Text(
-              'Popular Orders',
-              style: textTheme.titleLarge?.copyWith(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+        if (popularProductsLoading) ...[
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              child: Text(
+                'Popular Orders',
+                style: textTheme.titleLarge?.copyWith(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
-        ),
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-          sliver: SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final order = mockPopularOrders[index];
-                return Padding(
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) => Padding(
                   padding: const EdgeInsets.only(bottom: 16),
-                  child: _PopularOrderCard(
-                    name: order.name,
-                    rating: order.rating,
-                    deliveryFee: order.deliveryFee,
-                    deliveryTime: order.deliveryTime,
-                    promoText: order.promoText,
-                    imageUrl: order.imageUrl,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => StoreDetailScreen(
-                            storeName: order.name,
-                            storeImage: order.imageUrl,
-                            vendorId: order.vendorId,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                );
-              },
-              childCount: mockPopularOrders.length,
+                  child: _PopularOrderSkeleton(),
+                ),
+                childCount: 3,
+              ),
             ),
           ),
-        ),
+        ] else if (popularProducts.isNotEmpty) ...[
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              child: Text(
+                'Popular Orders',
+                style: textTheme.titleLarge?.copyWith(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final item = popularProducts[index];
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: _PopularOrderCard(
+                      name: item.displayName,
+                      rating: item.shopRating,
+                      secondaryLine: item.secondaryLine,
+                      promoText: item.promoText,
+                      imageUrl: item.imageUrl,
+                      onTap: () {
+                        final productId = item.product.id;
+                        if (productId == null) return;
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ProductDetailScreen(
+                              productId: productId,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+                childCount: popularProducts.length,
+              ),
+            ),
+          ),
+        ],
         const SliverToBoxAdapter(child: SizedBox(height: 24)),
       ],
     );
@@ -915,8 +976,7 @@ class _VendorSliderCard extends StatelessWidget {
 class _PopularOrderCard extends StatelessWidget {
   final String name;
   final double rating;
-  final int deliveryFee;
-  final String deliveryTime;
+  final String? secondaryLine;
   final String? promoText;
   final String imageUrl;
   final VoidCallback onTap;
@@ -924,8 +984,7 @@ class _PopularOrderCard extends StatelessWidget {
   const _PopularOrderCard({
     required this.name,
     required this.rating,
-    required this.deliveryFee,
-    required this.deliveryTime,
+    this.secondaryLine,
     this.promoText,
     required this.imageUrl,
     required this.onTap,
@@ -1023,27 +1082,34 @@ class _PopularOrderCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        Icon(
-                          Icons.star,
-                          size: 16,
-                          color: Colors.amber[700],
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          rating.toString(),
-                          style: textTheme.bodyMedium?.copyWith(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
+                        if (rating > 0) ...[
+                          Icon(
+                            Icons.star,
+                            size: 16,
+                            color: Colors.amber[700],
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          'ETB $deliveryFee Delivery Fee • $deliveryTime',
-                          style: textTheme.bodySmall?.copyWith(
-                            fontSize: 12,
-                            color: colorScheme.onSurface.withOpacity(0.72),
+                          const SizedBox(width: 4),
+                          Text(
+                            rating.toStringAsFixed(1),
+                            style: textTheme.bodyMedium?.copyWith(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
-                        ),
+                          const SizedBox(width: 12),
+                        ],
+                        if (secondaryLine != null && secondaryLine!.isNotEmpty)
+                          Expanded(
+                            child: Text(
+                              secondaryLine!,
+                              style: textTheme.bodySmall?.copyWith(
+                                fontSize: 12,
+                                color: colorScheme.onSurface.withOpacity(0.72),
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                       ],
                     ),
                   ],
@@ -1062,7 +1128,7 @@ class _PopularOrderCard extends StatelessWidget {
       width: double.infinity,
       color: Colors.grey[200],
       child: const Icon(
-        Icons.restaurant,
+        Icons.shopping_bag_outlined,
         size: 48,
         color: Colors.grey,
       ),
