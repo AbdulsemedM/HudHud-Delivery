@@ -43,25 +43,31 @@ class ProductsRepository {
     return publicCatalogRepository!.getFeaturedProducts(limit: limit);
   }
 
+  /// GET /api/popular/products (auth) or /api/public/popular/products (guest).
   Future<List<PopularProductModel>> getPopularProducts({
+    String period = 'month',
     int? vendorId,
     int? categoryId,
-    bool excludeOutOfStock = true,
   }) async {
+    if (await _usePublicCatalog()) {
+      return publicCatalogRepository!.getPopularProducts(
+        period: period,
+        vendorId: vendorId,
+        categoryId: categoryId,
+      );
+    }
     final response = await productsDataProvider.getPopularProducts(
+      period: period,
       vendorId: vendorId,
       categoryId: categoryId,
-      excludeOutOfStock: excludeOutOfStock,
     );
     if (response['statusCode'] != 200) {
       throw Exception(
-        _clean(
-          response['errorMessage']?.toString() ??
-              'Error fetching popular products',
-        ),
+        _clean(response['errorMessage']?.toString() ??
+            'Error fetching popular products'),
       );
     }
-    return PopularProductModel.parseResponse(response['data']);
+    return PopularProductsResult.fromResponseData(response['data']).products;
   }
 
   String _clean(String message) {

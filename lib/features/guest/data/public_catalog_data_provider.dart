@@ -126,6 +126,21 @@ class PublicCatalogDataProvider {
     );
   }
 
+  Future<Map<String, dynamic>> getPopularProducts({
+    String period = 'month',
+    int? vendorId,
+    int? categoryId,
+    bool excludeOutOfStock = true,
+  }) {
+    final params = <String, dynamic>{
+      'period': period,
+      'exclude_out_of_stock': excludeOutOfStock,
+    };
+    if (vendorId != null) params['vendor_id'] = vendorId;
+    if (categoryId != null) params['category_id'] = categoryId;
+    return _get(ApiConstants.publicPopularProducts, queryParameters: params);
+  }
+
   Future<Map<String, dynamic>> getCategories() {
     return _get(ApiConstants.publicCategories);
   }
