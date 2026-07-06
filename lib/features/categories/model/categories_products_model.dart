@@ -234,7 +234,7 @@ class CategoriesProductsModel {
       current_price: map['current_price']?.toString(),
       formatted_price: map['formatted_price']?.toString(),
       formatted_original_price: map['formatted_original_price']?.toString(),
-      is_on_discount: map['is_on_discount'] as bool?,
+      is_on_discount: _parseBool(map['is_on_discount'], fallback: false),
       discount_percentage: map['discount_percentage'] != null ? (map['discount_percentage'] is String ? int.tryParse(map['discount_percentage']) : map['discount_percentage'] as int) : null,
       is_available: _parseBool(map['is_available'], fallback: true),
       status: map['status']?.toString(),

@@ -59,7 +59,7 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
   bool _vendorsLoading = true;
   String? _vendorsError;
   List<PopularProductModel> _popularProducts = [];
-  bool _popularProductsLoading = true;
+  bool _popularLoading = true;
   late final VendorsRepository _vendorsRepository;
   late final ProductsRepository _productsRepository;
 
@@ -109,19 +109,19 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
 
   Future<void> _loadPopularProducts() async {
     if (!mounted) return;
-    setState(() => _popularProductsLoading = true);
+    setState(() => _popularLoading = true);
     try {
       final list = await _productsRepository.getPopularProducts();
       if (!mounted) return;
       setState(() {
         _popularProducts = list;
-        _popularProductsLoading = false;
+        _popularLoading = false;
       });
     } catch (_) {
       if (!mounted) return;
       setState(() {
         _popularProducts = [];
-        _popularProductsLoading = false;
+        _popularLoading = false;
       });
     }
   }
@@ -160,7 +160,7 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
             vendorsLoading: _vendorsLoading,
             vendorsError: _vendorsError,
             popularProducts: _popularProducts,
-            popularProductsLoading: _popularProductsLoading,
+            popularLoading: _popularLoading,
             onCategoryTap: (category) => _onCategoryTap(context, category),
             onShowMore: () => setState(() => _showAllCategories = true),
             usePullToRefresh: true,
@@ -347,7 +347,7 @@ class _LoadingState extends StatelessWidget {
             ),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 16)),
-          // Popular Orders title
+          // Most Popular title
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
@@ -622,7 +622,7 @@ class _CategoriesGrid extends StatelessWidget {
   final bool vendorsLoading;
   final String? vendorsError;
   final List<PopularProductModel> popularProducts;
-  final bool popularProductsLoading;
+  final bool popularLoading;
   final void Function(CategoryTreeModel) onCategoryTap;
   final VoidCallback onShowMore;
   final bool usePullToRefresh;
@@ -635,7 +635,7 @@ class _CategoriesGrid extends StatelessWidget {
     required this.vendorsLoading,
     required this.vendorsError,
     required this.popularProducts,
-    required this.popularProductsLoading,
+    required this.popularLoading,
     required this.onCategoryTap,
     required this.onShowMore,
     this.usePullToRefresh = false,
@@ -761,12 +761,12 @@ class _CategoriesGrid extends StatelessWidget {
           ),
         ],
         const SliverToBoxAdapter(child: SizedBox(height: 16)),
-        if (popularProductsLoading) ...[
+        if (popularLoading) ...[
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
               child: Text(
-                'Popular Orders',
+                'Most Popular',
                 style: textTheme.titleLarge?.copyWith(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -778,11 +778,11 @@ class _CategoriesGrid extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate(
-                (context, index) => Padding(
+                (_, __) => Padding(
                   padding: const EdgeInsets.only(bottom: 16),
                   child: _PopularOrderSkeleton(),
                 ),
-                childCount: 3,
+                childCount: 2,
               ),
             ),
           ),
@@ -791,7 +791,7 @@ class _CategoriesGrid extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
               child: Text(
-                'Popular Orders',
+                'Most Popular',
                 style: textTheme.titleLarge?.copyWith(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -807,12 +807,8 @@ class _CategoriesGrid extends StatelessWidget {
                   final item = popularProducts[index];
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 16),
-                    child: _PopularOrderCard(
-                      name: item.displayName,
-                      rating: item.shopRating,
-                      secondaryLine: item.secondaryLine,
-                      promoText: item.promoText,
-                      imageUrl: item.imageUrl,
+                    child: _PopularProductCard(
+                      item: item,
                       onTap: () {
                         final productId = item.product.id;
                         if (productId == null) return;
@@ -825,6 +821,20 @@ class _CategoriesGrid extends StatelessWidget {
                           ),
                         );
                       },
+                      onShopTap: item.shopId != null
+                          ? () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => StoreDetailScreen(
+                                    storeName: item.shopName ?? 'Store',
+                                    storeImage: item.shopLogoUrl,
+                                    vendorId: item.shopId,
+                                  ),
+                                ),
+                              );
+                            }
+                          : null,
                     ),
                   );
                 },
@@ -973,27 +983,27 @@ class _VendorSliderCard extends StatelessWidget {
   }
 }
 
-class _PopularOrderCard extends StatelessWidget {
-  final String name;
-  final double rating;
-  final String? secondaryLine;
-  final String? promoText;
-  final String imageUrl;
+class _PopularProductCard extends StatelessWidget {
+  final PopularProductModel item;
   final VoidCallback onTap;
+  final VoidCallback? onShopTap;
 
-  const _PopularOrderCard({
-    required this.name,
-    required this.rating,
-    this.secondaryLine,
-    this.promoText,
-    required this.imageUrl,
+  const _PopularProductCard({
+    required this.item,
     required this.onTap,
+    this.onShopTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final imageUrl = item.displayImage;
+    final shopName = item.shopName;
+    final rating = item.shopRating;
+    final deliveryFee = item.deliveryFee;
+    final promoText = item.promoLabel;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -1030,13 +1040,7 @@ class _PopularOrderCard extends StatelessWidget {
                             fit: BoxFit.cover,
                             errorBuilder: (_, __, ___) => _imagePlaceholder(),
                           )
-                        : Image.asset(
-                            imageUrl,
-                            height: 160,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => _imagePlaceholder(),
-                          ),
+                        : _imagePlaceholder(),
                   ),
                   if (promoText != null)
                     Positioned(
@@ -1044,13 +1048,15 @@ class _PopularOrderCard extends StatelessWidget {
                       left: 12,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.green,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
-                          promoText!,
+                          promoText,
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 12,
@@ -1066,19 +1072,40 @@ class _PopularOrderCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            name,
-                            style: textTheme.titleSmall?.copyWith(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
+                    Text(
+                      item.product.name ?? '',
+                      style: textTheme.titleSmall?.copyWith(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'ETB ${item.displayPrice}',
+                      style: textTheme.titleSmall?.copyWith(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primaryColor,
+                      ),
+                    ),
+                    if (shopName != null && shopName.isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      GestureDetector(
+                        onTap: onShopTap,
+                        child: Text(
+                          shopName,
+                          style: textTheme.bodySmall?.copyWith(
+                            fontSize: 13,
+                            color: colorScheme.primary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 4),
                     Row(
                       children: [
@@ -1098,15 +1125,15 @@ class _PopularOrderCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 12),
                         ],
-                        if (secondaryLine != null && secondaryLine!.isNotEmpty)
+                        if (deliveryFee > 0)
                           Expanded(
                             child: Text(
-                              secondaryLine!,
+                              'ETB $deliveryFee delivery',
                               style: textTheme.bodySmall?.copyWith(
                                 fontSize: 12,
                                 color: colorScheme.onSurface.withOpacity(0.72),
                               ),
-                              maxLines: 2,
+                              maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),

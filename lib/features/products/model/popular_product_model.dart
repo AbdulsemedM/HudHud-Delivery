@@ -1,127 +1,137 @@
 import 'package:hudhud_delivery/features/categories/model/categories_products_model.dart';
 
-/// Product from GET /api/popular/products with popularity stats and vendor shop.
 class PopularProductModel {
   final CategoriesProductsModel product;
-  final int totalOrders;
-  final int totalQuantitySold;
-  final double popularityScore;
-  final String? vendorShopName;
+  final String? shopName;
+  final int? shopId;
   final String? shopLogoUrl;
   final double shopRating;
-  final String? deliveryFee;
-  final int? avgPreparationTime;
-  final int? vendorShopId;
-  final int? vendorUserId;
+  final int deliveryFee;
+  final int? popularityScore;
+  final String? totalOrders;
 
   const PopularProductModel({
     required this.product,
-    this.totalOrders = 0,
-    this.totalQuantitySold = 0,
-    this.popularityScore = 0,
-    this.vendorShopName,
+    this.shopName,
+    this.shopId,
     this.shopLogoUrl,
     this.shopRating = 0,
-    this.deliveryFee,
-    this.avgPreparationTime,
-    this.vendorShopId,
-    this.vendorUserId,
+    this.deliveryFee = 0,
+    this.popularityScore,
+    this.totalOrders,
   });
 
-  static List<PopularProductModel> parseResponse(dynamic body) {
-    if (body is! Map) return [];
-    final list = body['data'];
-    if (list is! List) return [];
-    return list
-        .whereType<Map>()
-        .map((e) => PopularProductModel.fromJson(Map<String, dynamic>.from(e)))
-        .toList();
-  }
+  String get displayImage =>
+      product.image_path?.trim().isNotEmpty == true
+          ? product.image_path!
+          : '';
 
-  factory PopularProductModel.fromJson(Map<String, dynamic> json) {
-    final vendorShop = json['vendor_shop'];
-    Map<String, dynamic>? shopMap;
-    if (vendorShop is Map) {
-      shopMap = Map<String, dynamic>.from(vendorShop);
-    }
-
-    final logoUrls = shopMap?['logo_urls'];
-    String? logoUrl = shopMap?['logo_path']?.toString();
-    if (logoUrl == null || logoUrl.isEmpty) {
-      if (logoUrls is Map) {
-        logoUrl = logoUrls['medium']?.toString() ??
-            logoUrls['thumb']?.toString() ??
-            logoUrls['original']?.toString();
-      }
-    }
-
-    final prepFromShop = shopMap?['avg_preparation_time'];
-    final prepFromProduct = json['preparation_time'];
-    final prepMinutes = _parseInt(prepFromShop) ?? _parseInt(prepFromProduct);
-
-    return PopularProductModel(
-      product: CategoriesProductsModel.fromMap(json),
-      totalOrders: _parseInt(json['total_orders']) ?? 0,
-      totalQuantitySold: _parseInt(json['total_quantity_sold']) ?? 0,
-      popularityScore: _parseDouble(json['popularity_score']) ?? 0,
-      vendorShopName: shopMap?['shop_name']?.toString(),
-      shopLogoUrl: logoUrl,
-      shopRating: _parseDouble(shopMap?['average_rating']) ?? 0,
-      deliveryFee: shopMap?['delivery_fee']?.toString(),
-      avgPreparationTime: prepMinutes,
-      vendorShopId: _parseInt(shopMap?['id']),
-      vendorUserId: _parseInt(json['vendor_id']),
-    );
-  }
-
-  String get displayName => product.name ?? 'Product';
-
-  String get imageUrl => product.image_path ?? '';
-
-  String get priceLabel =>
+  String get displayPrice =>
       product.formatted_price ??
       product.current_price ??
       product.price ??
       '';
 
-  int get deliveryFeeAmount =>
-      double.tryParse(deliveryFee ?? '')?.round() ?? 0;
-
-  String get deliveryTimeLabel {
-    final mins = avgPreparationTime ?? product.preparation_time;
-    if (mins == null || mins <= 0) return '';
-    return '$mins min';
-  }
-
-  String? get promoText {
-    if (totalOrders > 0) return '$totalOrders orders';
-    if (popularityScore > 0) return 'Popular';
+  String? get promoLabel {
+    if (product.is_on_discount == true &&
+        product.discount_percentage != null &&
+        product.discount_percentage! > 0) {
+      return '${product.discount_percentage}% off';
+    }
+    if (totalOrders != null && totalOrders!.isNotEmpty && totalOrders != '0') {
+      return '$totalOrders orders';
+    }
+    if (popularityScore != null && popularityScore! > 0) {
+      return 'Popular';
+    }
     return null;
   }
 
-  String get secondaryLine {
-    final parts = <String>[];
-    if (priceLabel.isNotEmpty) parts.add(priceLabel);
-    if (vendorShopName != null && vendorShopName!.isNotEmpty) {
-      parts.add(vendorShopName!);
-    }
-    if (deliveryFeeAmount > 0) {
-      parts.add('ETB $deliveryFeeAmount delivery');
-    }
-    final time = deliveryTimeLabel;
-    if (time.isNotEmpty) parts.add(time);
-    return parts.join(' • ');
-  }
+  factory PopularProductModel.fromMap(Map<String, dynamic> map) {
+    final vendorShop = map['vendor_shop'];
+    String? shopName;
+    int? shopId;
+    String? shopLogo;
+    double shopRating = 0;
+    int deliveryFee = 0;
 
-  static int? _parseInt(dynamic value) {
-    if (value == null) return null;
-    if (value is int) return value;
-    return int.tryParse(value.toString());
-  }
+    if (vendorShop is Map) {
+      final shop = Map<String, dynamic>.from(vendorShop);
+      shopName = shop['shop_name']?.toString();
+      shopId = int.tryParse(shop['id']?.toString() ?? '');
+      shopLogo = shop['logo_path']?.toString();
+      if (shopLogo == null || shopLogo.isEmpty) {
+        final logoUrls = shop['logo_urls'];
+        if (logoUrls is Map) {
+          shopLogo = logoUrls['medium']?.toString() ??
+              logoUrls['thumb']?.toString() ??
+              logoUrls['original']?.toString();
+        }
+      }
+      final ratingRaw = shop['average_rating'];
+      if (ratingRaw is num) {
+        shopRating = ratingRaw.toDouble();
+      } else {
+        shopRating = double.tryParse(ratingRaw?.toString() ?? '') ?? 0;
+      }
+      deliveryFee =
+          double.tryParse(shop['delivery_fee']?.toString() ?? '')?.round() ?? 0;
+    }
 
-  static double? _parseDouble(dynamic value) {
-    if (value == null) return null;
-    if (value is num) return value.toDouble();
-    return double.tryParse(value.toString());
+    return PopularProductModel(
+      product: CategoriesProductsModel.fromMap(map),
+      shopName: shopName,
+      shopId: shopId,
+      shopLogoUrl: shopLogo,
+      shopRating: shopRating,
+      deliveryFee: deliveryFee,
+      popularityScore: int.tryParse(map['popularity_score']?.toString() ?? ''),
+      totalOrders: map['total_orders']?.toString(),
+    );
+  }
+}
+
+class PopularProductsResult {
+  final List<PopularProductModel> products;
+  final Map<String, dynamic>? meta;
+
+  const PopularProductsResult({
+    required this.products,
+    this.meta,
+  });
+
+  factory PopularProductsResult.fromResponseData(dynamic data) {
+    if (data == null) {
+      return const PopularProductsResult(products: []);
+    }
+
+    if (data is List) {
+      return PopularProductsResult(
+        products: data
+            .whereType<Map>()
+            .map((item) =>
+                PopularProductModel.fromMap(Map<String, dynamic>.from(item)))
+            .toList(),
+      );
+    }
+
+    if (data is Map) {
+      final body = Map<String, dynamic>.from(data);
+      final list = body['data'];
+      if (list is List) {
+        return PopularProductsResult(
+          products: list
+              .whereType<Map>()
+              .map((item) =>
+                  PopularProductModel.fromMap(Map<String, dynamic>.from(item)))
+              .toList(),
+          meta: body['meta'] is Map
+              ? Map<String, dynamic>.from(body['meta'] as Map)
+              : null,
+        );
+      }
+    }
+
+    return const PopularProductsResult(products: []);
   }
 }

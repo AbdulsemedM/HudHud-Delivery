@@ -3,6 +3,7 @@ import 'package:hudhud_delivery/features/categories/model/category_tree_model.da
 import 'package:hudhud_delivery/features/guest/data/public_catalog_data_provider.dart';
 import 'package:hudhud_delivery/features/guest/model/branch_model.dart';
 import 'package:hudhud_delivery/features/orders/data/models/vendor_model.dart';
+import 'package:hudhud_delivery/features/products/model/popular_product_model.dart';
 import 'package:hudhud_delivery/features/products/model/products_list_result.dart';
 import 'package:hudhud_delivery/features/products/model/products_query.dart';
 
@@ -86,6 +87,22 @@ class PublicCatalogRepository {
               Map<String, dynamic>.from(e),
             ))
         .toList();
+  }
+
+  Future<List<PopularProductModel>> getPopularProducts({
+    String period = 'month',
+    int? vendorId,
+    int? categoryId,
+  }) async {
+    final response = await dataProvider.getPopularProducts(
+      period: period,
+      vendorId: vendorId,
+      categoryId: categoryId,
+    );
+    if (response['statusCode'] != 200) {
+      throw Exception(_clean(response['errorMessage']?.toString() ?? 'Error'));
+    }
+    return PopularProductsResult.fromResponseData(response['data']).products;
   }
 
   Future<CategoriesListResult> getCategories({int page = 1}) async {

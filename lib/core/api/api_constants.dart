@@ -85,6 +85,7 @@ class ApiConstants {
   static const String categories = 'categories';
   static const String products = 'products';
   static const String productDetails = 'products/{id}';
+  static const String popularProducts = 'popular/products';
 
   // Vendors endpoints
   static const String vendors = 'vendors';
@@ -93,6 +94,7 @@ class ApiConstants {
   static const String publicProducts = 'public/products';
   static const String publicProductDetails = 'public/products/{id}';
   static const String publicProductsFeatured = 'public/products/featured';
+  static const String publicPopularProducts = 'public/popular/products';
   static const String publicSearch = 'public/search';
   static const String publicCategories = 'public/categories';
   static const String publicCategoryProducts = 'public/categories/{id}/products';
@@ -100,7 +102,6 @@ class ApiConstants {
   static const String publicVendorProducts = 'public/vendors/{id}/products';
   static const String publicBranches = 'public/branches';
   static const String publicBranchesNearby = 'public/branches/nearby';
-  static const String popularProducts = 'popular/products';
 
   // Notifications endpoints (GET /api/notifications, GET /api/notifications/{id})
   static const String notificationsList = 'notifications';

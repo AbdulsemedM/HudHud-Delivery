@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/categories/model/categories_products_model.dart';
+import 'package:hudhud_delivery/features/delivery/presentation/screens/all_categories_screen.dart';
 import 'package:hudhud_delivery/features/delivery/presentation/screens/product_detail_screen.dart';
 import 'package:hudhud_delivery/features/delivery/presentation/screens/store_detail_screen.dart';
 import 'package:hudhud_delivery/features/orders/data/models/vendor_model.dart';
 import 'package:hudhud_delivery/features/products/data/products_data_provider.dart';
 import 'package:hudhud_delivery/features/products/data/products_repository.dart';
 import 'package:hudhud_delivery/features/products/model/popular_product_model.dart';
-import 'package:hudhud_delivery/features/delivery/presentation/screens/all_categories_screen.dart';
 import 'package:hudhud_delivery/features/vendors/data/data_provider/vendors_data_provider.dart';
 import 'package:hudhud_delivery/features/vendors/data/repository/vendors_repository.dart';
 import 'category_stores_screen.dart';
@@ -29,7 +29,7 @@ class _DeliveryFeedScreenState extends State<DeliveryFeedScreen> {
   List<PopularProductModel> _popularProducts = [];
   bool _vendorsLoading = true;
   bool _featuredLoading = false;
-  bool _popularProductsLoading = true;
+  bool _popularLoading = true;
   String? _vendorsError;
   late final VendorsRepository _vendorsRepository;
   late final ProductsRepository _productsRepository;
@@ -48,36 +48,36 @@ class _DeliveryFeedScreenState extends State<DeliveryFeedScreen> {
     _loadPopularProducts();
   }
 
+  Future<void> _loadPopularProducts() async {
+    setState(() => _popularLoading = true);
+    try {
+      final list = await _productsRepository.getPopularProducts();
+      if (mounted) {
+        setState(() {
+          _popularProducts = list;
+          _popularLoading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _popularProducts = [];
+          _popularLoading = false;
+        });
+      }
+    }
+  }
+
   Future<void> _loadFeaturedProducts() async {
     setState(() => _featuredLoading = true);
     try {
       final list = await _productsRepository.getFeaturedProducts(limit: 10);
-      if (!mounted) return;
       setState(() {
         _featuredProducts = list;
         _featuredLoading = false;
       });
     } catch (_) {
       if (mounted) setState(() => _featuredLoading = false);
-    }
-  }
-
-  Future<void> _loadPopularProducts() async {
-    setState(() => _popularProductsLoading = true);
-    try {
-      final list = await _productsRepository.getPopularProducts();
-      if (!mounted) return;
-      setState(() {
-        _popularProducts = list;
-        _popularProductsLoading = false;
-      });
-    } catch (_) {
-      if (mounted) {
-        setState(() {
-          _popularProducts = [];
-          _popularProductsLoading = false;
-        });
-      }
     }
   }
 
@@ -339,14 +339,19 @@ class _DeliveryFeedScreenState extends State<DeliveryFeedScreen> {
                           ],
                         ),
                       ),
-                    if (!_popularProductsLoading && _popularProducts.isNotEmpty)
+                    if (_popularLoading)
+                      const Padding(
+                        padding: EdgeInsets.all(24),
+                        child: Center(child: CircularProgressIndicator()),
+                      )
+                    else if (_popularProducts.isNotEmpty)
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Popular Orders',
+                              'Most Popular',
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
@@ -354,29 +359,26 @@ class _DeliveryFeedScreenState extends State<DeliveryFeedScreen> {
                               ),
                             ),
                             const SizedBox(height: 16),
-                            ..._popularProducts.map((item) => Padding(
-                                  padding: const EdgeInsets.only(bottom: 16),
-                                  child: _RestaurantCard(
-                                    name: item.displayName,
-                                    rating: item.shopRating,
-                                    secondaryLine: item.secondaryLine,
-                                    promoText: item.promoText,
-                                    imageUrl: item.imageUrl,
-                                    onTap: () {
-                                      final productId = item.product.id;
-                                      if (productId == null) return;
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              ProductDetailScreen(
-                                            productId: productId,
-                                          ),
+                            ..._popularProducts.map(
+                              (item) => Padding(
+                                padding: const EdgeInsets.only(bottom: 16),
+                                child: _PopularProductListTile(
+                                  item: item,
+                                  onTap: () {
+                                    final productId = item.product.id;
+                                    if (productId == null) return;
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => ProductDetailScreen(
+                                          productId: productId,
                                         ),
-                                      );
-                                    },
-                                  ),
-                                )),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
                             const SizedBox(height: 24),
                           ],
                         ),
@@ -597,26 +599,24 @@ class _CategoryCard extends StatelessWidget {
   }
 }
 
-class _RestaurantCard extends StatelessWidget {
-  final String name;
-  final double rating;
-  final String? secondaryLine;
-  final String? promoText;
-  final String imageUrl;
+class _PopularProductListTile extends StatelessWidget {
+  final PopularProductModel item;
   final VoidCallback onTap;
 
-  const _RestaurantCard({
-    required this.name,
-    required this.rating,
-    this.secondaryLine,
-    this.promoText,
-    required this.imageUrl,
+  const _PopularProductListTile({
+    required this.item,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final imageUrl = item.displayImage;
+    final promoText = item.promoLabel;
+    final shopName = item.shopName;
+    final rating = item.shopRating;
+    final deliveryFee = item.deliveryFee;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -634,7 +634,6 @@ class _RestaurantCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image
             Stack(
               children: [
                 ClipRRect(
@@ -653,29 +652,21 @@ class _RestaurantCard extends StatelessWidget {
                               height: 180,
                               color: colorScheme.surfaceContainerHighest,
                               child: Icon(
-                                Icons.restaurant,
+                                Icons.shopping_bag_outlined,
                                 size: 50,
                                 color: colorScheme.onSurfaceVariant,
                               ),
                             );
                           },
                         )
-                      : Image.asset(
-                          imageUrl,
+                      : Container(
                           height: 180,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              height: 180,
-                              color: colorScheme.surfaceContainerHighest,
-                              child: Icon(
-                                Icons.restaurant,
-                                size: 50,
-                                color: colorScheme.onSurfaceVariant,
-                              ),
-                            );
-                          },
+                          color: colorScheme.surfaceContainerHighest,
+                          child: Icon(
+                            Icons.shopping_bag_outlined,
+                            size: 50,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
                         ),
                 ),
                 if (promoText != null)
@@ -684,13 +675,15 @@ class _RestaurantCard extends StatelessWidget {
                     left: 12,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.green,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        promoText!,
+                        promoText,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
@@ -701,36 +694,47 @@ class _RestaurantCard extends StatelessWidget {
                   ),
               ],
             ),
-            // Details
             Padding(
               padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          name,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: colorScheme.onSurface,
-                          ),
-                        ),
-                      ),
-                    ],
+                  Text(
+                    item.product.name ?? '',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: colorScheme.onSurface,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'ETB ${item.displayPrice}',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primaryColor,
+                    ),
+                  ),
+                  if (shopName != null && shopName.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      shopName,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                   const SizedBox(height: 4),
                   Row(
                     children: [
                       if (rating > 0) ...[
-                        Icon(
-                          Icons.star,
-                          size: 16,
-                          color: Colors.amber[700],
-                        ),
+                        Icon(Icons.star, size: 16, color: Colors.amber[700]),
                         const SizedBox(width: 4),
                         Text(
                           rating.toStringAsFixed(1),
@@ -742,16 +746,12 @@ class _RestaurantCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 12),
                       ],
-                      if (secondaryLine != null && secondaryLine!.isNotEmpty)
-                        Expanded(
-                          child: Text(
-                            secondaryLine!,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
+                      if (deliveryFee > 0)
+                        Text(
+                          'ETB $deliveryFee delivery',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: colorScheme.onSurfaceVariant,
                           ),
                         ),
                     ],

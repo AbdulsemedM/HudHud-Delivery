@@ -32,16 +32,19 @@ class ProductsDataProvider {
 
   /// GET /api/popular/products
   Future<Map<String, dynamic>> getPopularProducts({
+    String? period,
     int? vendorId,
     int? categoryId,
     bool excludeOutOfStock = true,
   }) async {
     try {
       final queryParameters = <String, dynamic>{
+        if (period != null && period.isNotEmpty) 'period': period,
         if (vendorId != null) 'vendor_id': vendorId,
         if (categoryId != null) 'category_id': categoryId,
         'exclude_out_of_stock': excludeOutOfStock,
       };
+
       final response = await apiService.get(
         '${ApiConstants.baseUrl}${ApiConstants.popularProducts}',
         queryParameters: queryParameters,
