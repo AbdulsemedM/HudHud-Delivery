@@ -14,9 +14,9 @@ void main() {
           'phone': '251946514836',
         },
         'avatar_url':
-            'https://hudapi.mbitrix.com/storage/42/scaled_avatar.jpg',
+            'https://api.hudhuddelivery.com/storage/42/scaled_avatar.jpg',
         'avatar_thumb_url':
-            'https://hudapi.mbitrix.com/storage/42/conversions/thumb.jpg',
+            'https://api.hudhuddelivery.com/storage/42/conversions/thumb.jpg',
       });
 
       expect(map, isNotNull);

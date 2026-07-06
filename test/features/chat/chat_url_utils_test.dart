@@ -5,14 +5,14 @@ void main() {
   group('ChatUrlUtils', () {
     test('normalize fixes duplicated host', () {
       const broken =
-          'https://hudapi.mbitrix.comhttps://hudapi.mbitrix.com/storage/foo.png';
+          'https://api.hudhuddelivery.comhttps://api.hudhuddelivery.com/storage/foo.png';
       final fixed = ChatUrlUtils.normalize(broken);
-      expect(fixed, 'https://hudapi.mbitrix.com/storage/foo.png');
+      expect(fixed, 'https://api.hudhuddelivery.com/storage/foo.png');
     });
 
     test('resolveAttachmentUrl prefers url field', () {
       final resolved = ChatUrlUtils.resolveAttachmentUrl(
-        url: 'https://hudapi.mbitrix.com/storage/a.png',
+        url: 'https://api.hudhuddelivery.com/storage/a.png',
         fullPath: null,
         filePath: null,
       );

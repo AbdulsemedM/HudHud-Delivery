@@ -1,6 +1,6 @@
 class ApiConstants {
   // Base URL
-  static const String baseUrl = 'https://hudapi.mbitrix.com/api/';
+  static const String baseUrl = 'https://api.hudhuddelivery.com/api/';
 
   // Timeout values (in milliseconds)
   static const int connectTimeout = 30000; // 30 seconds

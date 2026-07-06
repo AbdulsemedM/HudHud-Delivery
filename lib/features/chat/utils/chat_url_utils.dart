@@ -4,7 +4,10 @@ import 'package:hudhud_delivery/core/api/api_constants.dart';
 class ChatUrlUtils {
   ChatUrlUtils._();
 
-  static const String _storageHost = 'https://hudapi.mbitrix.com';
+  static String get _storageHost {
+    final base = ApiConstants.baseUrl.replaceFirst(RegExp(r'/api/?$'), '');
+    return base.endsWith('/') ? base.substring(0, base.length - 1) : base;
+  }
 
   static String? resolveAttachmentUrl({
     String? url,
@@ -25,8 +28,8 @@ class ChatUrlUtils {
     if (raw == null || raw.trim().isEmpty) return null;
     var value = raw.trim();
 
-    // Fix duplicated host: https://hudapi...https://hudapi...
-    const host = 'https://hudapi.mbitrix.com';
+    // Fix duplicated host: https://api...https://api...
+    final host = _storageHost;
     if (value.contains('$host$host')) {
       value = value.replaceAll('$host$host', host);
     }
@@ -39,9 +42,9 @@ class ChatUrlUtils {
       return value;
     }
     if (value.startsWith('/')) {
-      return '$_storageHost$value';
+      return '$host$value';
     }
-    return '$_storageHost/storage/$value';
+    return '$host/storage/$value';
   }
 
   static String? _fromFilePath(String? filePath) {
