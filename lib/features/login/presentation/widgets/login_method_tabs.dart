@@ -35,18 +35,18 @@ class LoginMethodTabs extends StatelessWidget {
           children: [
             Expanded(
               child: _TabSegment(
-                label: l10n.loginTabEmail,
-                isSelected: selected == LoginMethod.email,
-                semanticsLabel: l10n.loginTabEmailSemantics,
-                onTap: () => onChanged(LoginMethod.email),
-              ),
-            ),
-            Expanded(
-              child: _TabSegment(
                 label: l10n.loginTabPhone,
                 isSelected: selected == LoginMethod.phone,
                 semanticsLabel: l10n.loginTabPhoneSemantics,
                 onTap: () => onChanged(LoginMethod.phone),
+              ),
+            ),
+            Expanded(
+              child: _TabSegment(
+                label: l10n.loginTabEmail,
+                isSelected: selected == LoginMethod.email,
+                semanticsLabel: l10n.loginTabEmailSemantics,
+                onTap: () => onChanged(LoginMethod.email),
               ),
             ),
           ],

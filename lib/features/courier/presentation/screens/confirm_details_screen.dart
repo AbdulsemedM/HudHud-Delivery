@@ -9,6 +9,7 @@ import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/utils/phone_util.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
+import 'package:hudhud_delivery/features/guest/utils/guest_sign_in_prompt.dart';
 import 'finding_courier_screen.dart';
 
 class ConfirmDetailsScreen extends StatefulWidget {
@@ -173,6 +174,10 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
   }
 
   Future<void> _fetchEstimate() async {
+    if (!await requireSignInForBackend(context)) {
+      if (mounted) setState(() => _isLoadingEstimate = false);
+      return;
+    }
     if (widget.pickupPosition == null || widget.deliveryPosition == null) {
       setState(() {
         _isLoadingEstimate = false;
@@ -209,6 +214,8 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
   }
 
   Future<void> _createDeliveryRequest() async {
+    if (!await requireSignInForBackend(context)) return;
+
     final user = await AuthService().getStoredUser();
 
     final requestData = <String, dynamic>{

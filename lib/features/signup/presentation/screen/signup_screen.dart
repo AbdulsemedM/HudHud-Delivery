@@ -60,7 +60,9 @@ class _GoogleSignInButton extends StatelessWidget {
 }
 
 class SignupScreen extends StatelessWidget {
-  const SignupScreen({super.key});
+  final bool resumeAfterAuth;
+
+  const SignupScreen({super.key, this.resumeAfterAuth = false});
 
   @override
   Widget build(BuildContext context) {
@@ -128,7 +130,7 @@ class SignupScreen extends StatelessWidget {
                       createSignupForm(),
                       const SizedBox(height: 16),
                       // Sign Up Button
-                      SignupButton(),
+                      SignupButton(resumeAfterAuth: resumeAfterAuth),
                       const SizedBox(height: 16),
                       // Sign In Link
                       Center(

@@ -5,6 +5,7 @@ import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
 import 'package:hudhud_delivery/features/taxi/data/ride_data_provider.dart';
+import 'package:hudhud_delivery/features/guest/utils/guest_sign_in_prompt.dart';
 import 'finding_driver_screen.dart';
 
 class TripSelectionScreen extends StatefulWidget {
@@ -128,6 +129,15 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
   }
 
   Future<void> _fetchEstimates() async {
+    if (!await requireSignInForBackend(context)) {
+      if (mounted) {
+        setState(() {
+          _isLoadingEstimates = false;
+          _tripOptions = _getFallbackOptions();
+        });
+      }
+      return;
+    }
     setState(() {
       _isLoadingEstimates = true;
       _estimateError = null;
@@ -255,6 +265,7 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
 
   Future<void> _onSelectTrip(TripOption selectedOption) async {
     if (_isRequestingRide) return;
+    if (!await requireSignInForBackend(context)) return;
 
     setState(() => _isRequestingRide = true);
 

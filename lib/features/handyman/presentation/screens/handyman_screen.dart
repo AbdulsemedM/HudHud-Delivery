@@ -6,6 +6,7 @@ import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/handyman/data/data_provider/handyman_data_provider.dart';
 import 'package:hudhud_delivery/features/handyman/data/models/service_request_model.dart';
 import 'package:hudhud_delivery/features/handyman/data/repository/handyman_repository.dart';
+import 'package:hudhud_delivery/features/guest/utils/guest_sign_in_prompt.dart';
 import 'create_handyman_request_screen.dart';
 import 'service_request_details_screen.dart';
 
@@ -39,6 +40,10 @@ class _HandymanScreenState extends State<HandymanScreen> {
   }
 
   Future<void> _fetchRequests() async {
+    if (!await requireSignInForBackend(context)) {
+      if (mounted) setState(() => _isLoading = false);
+      return;
+    }
     if (!mounted) return;
     setState(() {
       _isLoading = true;

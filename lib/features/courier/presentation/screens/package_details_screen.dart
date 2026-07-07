@@ -5,6 +5,7 @@ import 'package:hudhud_delivery/features/payment/data/data_provider/payment_data
 import 'package:hudhud_delivery/features/payment/data/repository/payment_repository.dart';
 import 'package:hudhud_delivery/features/payment/presentation/widgets/payment_methods_loader.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
 import 'confirm_details_screen.dart';
 
 class PackageDetailsScreen extends StatefulWidget {
@@ -67,6 +68,113 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
       paymentDataProvider: PaymentDataProvider(
         apiService: ApiService.instance,
       ),
+    );
+  }
+
+  static const List<Map<String, dynamic>> _guestPaymentMethods = [
+    {'id': 'wallet', 'name': 'Wallet'},
+    {'id': 'cash', 'name': 'Cash'},
+  ];
+
+  Widget _buildPaymentTypeSection(
+    BuildContext context, {
+    required ColorScheme colorScheme,
+    required Color fieldFill,
+    required Color outline,
+  }) {
+    Widget buildSelector(
+      List<Map<String, dynamic>> methods, {
+      required bool isLoading,
+      String? error,
+    }) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Payment type',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 12),
+          GestureDetector(
+            onTap: isLoading || methods.isEmpty
+                ? null
+                : () {
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (context) => Container(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: methods.map((method) {
+                            final id = method['id'] as String?;
+                            final name =
+                                method['name'] as String? ?? id ?? '';
+                            return ListTile(
+                              title: Text(name),
+                              onTap: () {
+                                setState(() {
+                                  _paymentType = id;
+                                });
+                                Navigator.pop(context);
+                              },
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    );
+                  },
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: fieldFill,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: outline),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: isLoading
+                        ? Text(
+                            'Loading payment methods...',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: colorScheme.outline,
+                            ),
+                          )
+                        : Text(
+                            error ??
+                                _getSelectedPaymentName(methods) ??
+                                'Select payment type',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: _paymentType == null
+                                  ? colorScheme.outline
+                                  : colorScheme.onSurface,
+                            ),
+                          ),
+                  ),
+                  Icon(Icons.keyboard_arrow_down, color: colorScheme.outline),
+                ],
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    if (GuestBrowseService().isGuestBrowseMode) {
+      return buildSelector(_guestPaymentMethods, isLoading: false);
+    }
+
+    return PaymentMethodsLoader(
+      repository: _paymentRepository,
+      builder: (context, methods, isLoading, error, reload) {
+        return buildSelector(methods, isLoading: isLoading, error: error);
+      },
     );
   }
 
@@ -405,90 +513,11 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                       ],
                     ),
                     const SizedBox(height: 24),
-                    PaymentMethodsLoader(
-                      repository: _paymentRepository,
-                      builder: (context, methods, isLoading, error, reload) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Payment type',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: colorScheme.onSurface,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            GestureDetector(
-                              onTap: isLoading || methods.isEmpty
-                                  ? null
-                                  : () {
-                                      showModalBottomSheet(
-                                        context: context,
-                                        builder: (context) => Container(
-                                          padding: const EdgeInsets.all(20),
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: methods.map((method) {
-                                              final id = method['id'] as String?;
-                                              final name = method['name'] as String? ??
-                                                  id ??
-                                                  '';
-                                              return ListTile(
-                                                title: Text(name),
-                                                onTap: () {
-                                                  setState(() {
-                                                    _paymentType = id;
-                                                  });
-                                                  Navigator.pop(context);
-                                                },
-                                              );
-                                            }).toList(),
-                                          ),
-                                        ),
-                                      );
-                                    },
-                              child: Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: fieldFill,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: outline),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: isLoading
-                                          ? Text(
-                                              'Loading payment methods...',
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                color: colorScheme.outline,
-                                              ),
-                                            )
-                                          : Text(
-                                              error ??
-                                                  _getSelectedPaymentName(
-                                                      methods) ??
-                                                  'Select payment type',
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                color: _paymentType == null
-                                                    ? colorScheme.outline
-                                                    : colorScheme.onSurface,
-                                              ),
-                                            ),
-                                    ),
-                                    Icon(Icons.keyboard_arrow_down,
-                                        color: colorScheme.outline),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        );
-                      },
+                    _buildPaymentTypeSection(
+                      context,
+                      colorScheme: colorScheme,
+                      fieldFill: fieldFill,
+                      outline: outline,
                     ),
                     const SizedBox(height: 24),
                     // Recipient Information

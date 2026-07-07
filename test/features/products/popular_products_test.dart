@@ -35,16 +35,15 @@ void main() {
         ],
       };
 
-      final items = PopularProductModel.parseResponse(json);
+      final items = PopularProductsResult.fromResponseData(json).products;
       expect(items.length, 1);
-      expect(items.first.displayName, 'Gold ring');
-      expect(items.first.totalOrders, 1);
-      expect(items.first.vendorShopName, 'Vendor 1 shop');
+      expect(items.first.product.name, 'Gold ring');
+      expect(items.first.totalOrders, '1');
+      expect(items.first.shopName, 'Vendor 1 shop');
       expect(items.first.shopRating, 4.5);
-      expect(items.first.deliveryFeeAmount, 50);
-      expect(items.first.promoText, '1 orders');
-      expect(items.first.secondaryLine, contains('1,500.00'));
-      expect(items.first.secondaryLine, contains('Vendor 1 shop'));
+      expect(items.first.deliveryFee, 50);
+      expect(items.first.promoLabel, '1 orders');
+      expect(items.first.displayPrice, contains('1,500.00'));
     });
   });
 }

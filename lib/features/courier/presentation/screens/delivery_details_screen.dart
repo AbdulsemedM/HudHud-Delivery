@@ -7,6 +7,7 @@ import 'package:hudhud_delivery/features/checkout/data/repository/checkout_repos
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/chat/utils/chat_navigation.dart';
+import 'package:hudhud_delivery/features/guest/utils/guest_sign_in_prompt.dart';
 import 'delivery_tracking_screen.dart';
 
 class DeliveryDetailsScreen extends StatefulWidget {
@@ -43,6 +44,15 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
   }
 
   Future<void> _fetchDetails() async {
+    if (!await requireSignInForBackend(context)) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _error = 'Sign in required';
+        });
+      }
+      return;
+    }
     try {
       final result =
           await _courierRepository.getUserDeliveryDetails(widget.deliveryId);

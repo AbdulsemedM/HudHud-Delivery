@@ -520,7 +520,9 @@ class _SignupFormState extends State<SignupForm> {
 }
 
 class SignupButton extends StatelessWidget {
-  const SignupButton({super.key});
+  final bool resumeAfterAuth;
+
+  const SignupButton({super.key, this.resumeAfterAuth = false});
 
   void _handleSignup(BuildContext context) {
     final formState = signupFormKey.currentState;
@@ -580,12 +582,28 @@ class SignupButton extends StatelessWidget {
               backgroundColor: Colors.green,
             ),
           );
-          // Navigate to combined email + phone verification screen
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const VerifyContactScreen()),
-            (route) => false,
-          );
+          if (resumeAfterAuth) {
+            Navigator.push<bool>(
+              context,
+              MaterialPageRoute<bool>(
+                builder: (context) => VerifyContactScreen(
+                  resumeAfterAuth: true,
+                ),
+              ),
+            ).then((verified) {
+              if (verified == true && context.mounted) {
+                Navigator.pop(context, true);
+              }
+            });
+          } else {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const VerifyContactScreen(),
+              ),
+              (route) => false,
+            );
+          }
         } else if (state is SignupFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

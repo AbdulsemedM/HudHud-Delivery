@@ -98,7 +98,7 @@ class _LoginFormState extends State<LoginForm> {
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isPasswordVisible = false;
-  LoginMethod _method = LoginMethod.email;
+  LoginMethod _method = LoginMethod.phone;
   String _countryCode = kDefaultPhoneDialCode;
   bool _showBiometricButton = false;
   bool _useFaceBiometricIcon = false;

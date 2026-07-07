@@ -299,14 +299,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
-  void _openNotifications() {
+  void _openNotifications() async {
     if (GuestBrowseService().isGuestBrowseMode) {
       final l10n = AppLocalizations.of(context)!;
-      showGuestSignInRequiredDialog(
+      final authed = await showGuestSignInRequiredDialog(
         context,
         message: l10n.guestSignInRequiredMessage,
       );
-      return;
+      if (!authed || !mounted) return;
+      await _loadUserData();
     }
     Navigator.push<void>(
       context,
@@ -367,7 +368,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           children: [
             if (GuestBrowseService().isGuestBrowseMode)
               _GuestBrowseBanner(
-                onSignIn: () => showGuestSignInRequiredDialog(context),
+                onSignIn: () async {
+                  final authed = await showGuestSignInRequiredDialog(context);
+                  if (authed && mounted) await _loadUserData();
+                },
               ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 2, 16, 6),
@@ -381,15 +385,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             HomeServiceTabBar(
               selected: _serviceMode,
               onSelected: (mode) {
-                if (GuestBrowseService().isGuestBrowseMode &&
-                    mode != HomeServiceMode.foodGroceries) {
-                  final l10n = AppLocalizations.of(context)!;
-                  showGuestSignInRequiredDialog(
-                    context,
-                    message: l10n.guestServiceSignIn,
-                  );
-                  return;
-                }
                 setState(() => _serviceMode = mode);
                 context.read<ServiceAccentController>().updateHomeServiceMode(mode);
               },
@@ -397,17 +392,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             Expanded(
               child: IndexedStack(
                 index: _serviceMode.index,
-                children: [
-                  const AllCategoriesScreen(embedded: true),
-                  GuestBrowseService().isGuestBrowseMode
-                      ? const SizedBox.shrink()
-                      : const CourierScreen(),
-                  GuestBrowseService().isGuestBrowseMode
-                      ? const SizedBox.shrink()
-                      : const TaxiScreen(),
-                  GuestBrowseService().isGuestBrowseMode
-                      ? const SizedBox.shrink()
-                      : const HandymanScreen(embedded: true),
+                children: const [
+                  AllCategoriesScreen(embedded: true),
+                  CourierScreen(),
+                  TaxiScreen(),
+                  HandymanScreen(embedded: true),
                 ],
               ),
             ),

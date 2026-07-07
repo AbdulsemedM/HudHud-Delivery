@@ -6,6 +6,7 @@ import 'package:hudhud_delivery/features/handyman/data/data_provider/handyman_da
 import 'package:hudhud_delivery/features/handyman/data/models/service_request_model.dart';
 import 'package:hudhud_delivery/features/handyman/data/repository/handyman_repository.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
+import 'package:hudhud_delivery/features/guest/utils/guest_sign_in_prompt.dart';
 import 'handyman_details_screen.dart';
 import 'rate_service_screen.dart';
 import 'service_quotes_screen.dart';
@@ -99,6 +100,7 @@ class _ServiceRequestDetailsScreenState extends State<ServiceRequestDetailsScree
     );
 
     if (confirm != true || !mounted) return;
+    if (!await requireSignInForBackend(context)) return;
 
     final result = await _repository.cancelServiceRequest(_request.id);
 

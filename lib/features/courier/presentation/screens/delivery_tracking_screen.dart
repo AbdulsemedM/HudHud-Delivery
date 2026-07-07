@@ -7,6 +7,7 @@ import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/chat/utils/chat_navigation.dart';
+import 'package:hudhud_delivery/features/guest/utils/guest_sign_in_prompt.dart';
 import 'package:hudhud_delivery/features/sos/presentation/widgets/sos_trigger_button.dart';
 
 class DeliveryTrackingScreen extends StatefulWidget {
@@ -131,6 +132,10 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
 
   Future<void> _fetchTrackData() async {
     if (widget.deliveryId == null) return;
+    if (!await requireSignInForBackend(context)) {
+      if (mounted) setState(() => _isLoadingTrack = false);
+      return;
+    }
     try {
       final result =
           await _courierRepository.getDeliveryTrack(widget.deliveryId!);

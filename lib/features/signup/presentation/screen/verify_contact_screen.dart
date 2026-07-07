@@ -6,7 +6,9 @@ import '../../../../models/user_model.dart';
 import '../../../dashboard/presentation/screen/dashboard_screen.dart';
 
 class VerifyContactScreen extends StatefulWidget {
-  const VerifyContactScreen({super.key});
+  final bool resumeAfterAuth;
+
+  const VerifyContactScreen({super.key, this.resumeAfterAuth = false});
 
   @override
   State<VerifyContactScreen> createState() => _VerifyContactScreenState();
@@ -140,6 +142,10 @@ class _VerifyContactScreenState extends State<VerifyContactScreen> {
   }
 
   void _goToDashboard() {
+    if (widget.resumeAfterAuth) {
+      Navigator.pop(context, true);
+      return;
+    }
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => const DashboardScreen()),

@@ -3,6 +3,7 @@ import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/handyman/data/data_provider/handyman_data_provider.dart';
+import 'package:hudhud_delivery/features/guest/utils/guest_sign_in_prompt.dart';
 import 'package:hudhud_delivery/features/handyman/data/repository/handyman_repository.dart';
 
 class RateServiceScreen extends StatefulWidget {
@@ -42,6 +43,7 @@ class _RateServiceScreenState extends State<RateServiceScreen> {
 
   Future<void> _submit() async {
     final l10n = context.l10n;
+    if (!await requireSignInForBackend(context)) return;
     setState(() => _isSubmitting = true);
 
     final result = await _repository.rateServiceRequest(

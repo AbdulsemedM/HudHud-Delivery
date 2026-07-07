@@ -7,6 +7,7 @@ import 'package:hudhud_delivery/features/handyman/data/data_provider/handyman_da
 import 'package:hudhud_delivery/features/handyman/data/repository/handyman_repository.dart';
 import 'package:hudhud_delivery/features/home/presentation/screen/location_search_screen.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
+import 'package:hudhud_delivery/features/guest/utils/guest_sign_in_prompt.dart';
 import 'package:latlong2/latlong.dart';
 import 'service_request_details_screen.dart';
 
@@ -176,6 +177,8 @@ class _CreateHandymanRequestScreenState
       );
       return;
     }
+
+    if (!await requireSignInForBackend(context)) return;
 
     setState(() => _isSubmitting = true);
 

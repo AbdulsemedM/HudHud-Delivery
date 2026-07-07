@@ -14,6 +14,7 @@ import 'package:hudhud_delivery/app/utils/human_readable_address.dart';
 import 'package:hudhud_delivery/features/taxi/data/ride_data_provider.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
+import 'package:hudhud_delivery/features/guest/utils/guest_sign_in_prompt.dart';
 import 'finding_driver_screen.dart';
 import 'driver_on_the_way_screen.dart';
 import 'trip_selection_screen.dart';
@@ -112,7 +113,9 @@ class _TaxiScreenState extends State<TaxiScreen> {
           _mapController?.moveCamera(
             gmaps.CameraUpdate.newLatLngZoom(_toG(latLng), 13.0),
           );
-          _fetchAvailableVehicles();
+          if (!GuestBrowseService().isGuestBrowseMode) {
+            _fetchAvailableVehicles();
+          }
         }
       } else {
         if (mounted) {
@@ -209,6 +212,10 @@ class _TaxiScreenState extends State<TaxiScreen> {
   }
 
   Future<void> _checkActiveRide() async {
+    if (!await requireSignInForBackend(context)) {
+      if (mounted) setState(() => _isCheckingActiveRide = false);
+      return;
+    }
     final result = await _rideDataProvider.getActiveRide();
 
     if (!mounted) return;
@@ -254,7 +261,8 @@ class _TaxiScreenState extends State<TaxiScreen> {
     }
   }
 
-  void _onTrackActiveRide() {
+  void _onTrackActiveRide() async {
+    if (!await requireSignInForBackend(context)) return;
     if (!_shouldShowActiveRideUI()) return;
 
     final l10n = context.l10n;
@@ -314,6 +322,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
   }
 
   Future<void> _fetchAvailableVehicles() async {
+    if (GuestBrowseService().isGuestBrowseMode) return;
     final result = await _rideDataProvider.getAvailableVehicles(
       latitude: _currentPosition.latitude,
       longitude: _currentPosition.longitude,

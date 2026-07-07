@@ -13,13 +13,17 @@ import '../../data/repository/login_repository.dart';
 import '../../data/data_provider/login_data_provider.dart';
 import '../../../../core/api/api_service.dart';
 import '../../../../core/theme/app_colors.dart';
+import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/features/dashboard/presentation/screen/dashboard_screen.dart';
 
 /// True while a [LoginScreen] is in the widget tree (used to avoid 401 re-push loops).
 bool loginScreenIsActive = false;
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  /// When true, successful auth pops back to the caller instead of opening dashboard.
+  final bool resumeAfterAuth;
+
+  const LoginScreen({Key? key, this.resumeAfterAuth = false}) : super(key: key);
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -122,12 +126,18 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _openSignup(BuildContext context) {
-    Navigator.push<void>(
+    Navigator.push<bool>(
       context,
-      MaterialPageRoute<void>(
-        builder: (context) => const SignupScreen(),
+      MaterialPageRoute<bool>(
+        builder: (context) => SignupScreen(
+          resumeAfterAuth: widget.resumeAfterAuth,
+        ),
       ),
-    );
+    ).then((signupSucceeded) {
+      if (signupSucceeded == true && mounted && widget.resumeAfterAuth) {
+        Navigator.of(context).pop(true);
+      }
+    });
   }
 
   @override
@@ -135,11 +145,14 @@ class _LoginScreenState extends State<LoginScreen> {
     return BlocProvider.value(
       value: _loginBloc,
       child: PopScope(
-        canPop: false,
+        canPop: widget.resumeAfterAuth,
         onPopInvokedWithResult: (didPop, result) async {
-          if (!didPop) {
-            await _onWillPop();
+          if (didPop) return;
+          if (widget.resumeAfterAuth) {
+            Navigator.of(context).pop(false);
+            return;
           }
+          await _onWillPop();
         },
         child: Builder(
           builder: (context) {
@@ -149,14 +162,29 @@ class _LoginScreenState extends State<LoginScreen> {
             return BlocListener<LoginBloc, LoginState>(
               listenWhen: (previous, current) =>
                   current is LoginSuccess || current is LoginFailure,
-              listener: (context, state) {
+              listener: (context, state) async {
                 if (state is LoginSuccess) {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const DashboardScreen(),
-                    ),
-                  );
+                  if (widget.resumeAfterAuth) {
+                    final authed = await AuthService().isAuthenticated();
+                    if (!context.mounted) return;
+                    if (authed) {
+                      Navigator.pop(context, true);
+                    } else {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const DashboardScreen(),
+                        ),
+                      );
+                    }
+                  } else {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const DashboardScreen(),
+                      ),
+                    );
+                  }
                 } else if (state is LoginFailure) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
