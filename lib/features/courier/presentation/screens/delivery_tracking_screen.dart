@@ -7,6 +7,7 @@ import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/chat/utils/chat_navigation.dart';
+import 'package:hudhud_delivery/core/widgets/map_draggable_sheet_scaffold.dart';
 import 'package:hudhud_delivery/features/guest/utils/guest_sign_in_prompt.dart';
 import 'package:hudhud_delivery/features/sos/presentation/widgets/sos_trigger_button.dart';
 
@@ -259,25 +260,50 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
     }
 
     final colorScheme = Theme.of(context).colorScheme;
-    return Scaffold(
+    final overlayTop = mapOverlayTop(context);
+
+    return MapDraggableSheetScaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: Stack(
-        children: [
-          gmaps.GoogleMap(
-            initialCameraPosition: gmaps.CameraPosition(
-              target: _toG(mapCenter),
-              zoom: 13.0,
+      initialChildSize: 0.5,
+      minChildSize: 0.35,
+      maxChildSize: 0.85,
+      onSheetLayoutChanged: (_, __) => _fitBounds(),
+      map: gmaps.GoogleMap(
+        initialCameraPosition: gmaps.CameraPosition(
+          target: _toG(mapCenter),
+          zoom: 13.0,
+        ),
+        markers: markers,
+        polylines: polylines,
+        onMapCreated: (controller) {
+          _mapController = controller;
+          _fitBounds();
+        },
+      ),
+      mapOverlays: [
+        Positioned(
+          top: overlayTop,
+          left: 16,
+          child: Container(
+            decoration: BoxDecoration(
+              color: colorScheme.surface,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: colorScheme.shadow.withOpacity(0.2),
+                  blurRadius: 4,
+                ),
+              ],
             ),
-            markers: markers,
-            polylines: polylines,
-            onMapCreated: (controller) {
-              _mapController = controller;
-              _fitBounds();
-            },
+            child: IconButton(
+              icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
+              onPressed: () => Navigator.pop(context),
+            ),
           ),
-          // Back button
+        ),
+        if (widget.deliveryId != null)
           Positioned(
-            top: 40,
+            top: overlayTop + 52,
             left: 16,
             child: Container(
               decoration: BoxDecoration(
@@ -290,40 +316,21 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                   ),
                 ],
               ),
-              child: IconButton(
-                icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
-                onPressed: () => Navigator.pop(context),
+              child: SosTriggerButton(
+                compact: true,
+                orderId: widget.deliveryId,
               ),
             ),
           ),
-          // SOS (when delivery id available)
-          if (widget.deliveryId != null)
-            Positioned(
-              top: 88,
-              right: 16,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: colorScheme.surface,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: colorScheme.shadow.withOpacity(0.2),
-                      blurRadius: 4,
-                    ),
-                  ],
-                ),
-                child: SosTriggerButton(
-                  compact: true,
-                  orderId: widget.deliveryId,
-                ),
-              ),
-            ),
-          // Status badge
-          Positioned(
-            top: 40,
-            right: 16,
+        Positioned(
+          top: overlayTop,
+          right: 16,
+          left: 72,
+          child: Align(
+            alignment: Alignment.centerRight,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 color: AppColors.primaryColor,
                 borderRadius: BorderRadius.circular(20),
@@ -346,47 +353,38 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                     ),
                   ),
                   const SizedBox(width: 6),
-                  Text(
-                    _trackData?['current_status']?.toString() ??
-                        _trackData?['status']?.toString() ??
-                        'Delivery in progress',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
+                  Flexible(
+                    child: Text(
+                      _trackData?['current_status']?.toString() ??
+                          _trackData?['status']?.toString() ??
+                          'Delivery in progress',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
               ),
             ),
           ),
-          // Bottom Sheet Modal
-          DraggableScrollableSheet(
-            initialChildSize: 0.5,
-            minChildSize: 0.35,
-            maxChildSize: 0.85,
-            builder: (context, scrollController) {
-              return Container(
-                decoration: BoxDecoration(
-                  color: colorScheme.surface,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    // Drag handle
-                    Container(
-                      margin: const EdgeInsets.only(top: 8),
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: colorScheme.outlineVariant,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                    // Current Status Banner
+        ),
+      ],
+      sheetBuilder: (context, scrollController) {
+        return Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+          ),
+          child: Column(
+            children: [
+              const MapSheetDragHandle(),
+              // Current Status Banner
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(16),
@@ -525,10 +523,7 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                   ],
                 ),
               );
-            },
-          ),
-        ],
-      ),
+      },
     );
   }
 }

@@ -5,6 +5,7 @@ import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
 import 'package:hudhud_delivery/features/taxi/data/ride_data_provider.dart';
+import 'package:hudhud_delivery/core/widgets/map_draggable_sheet_scaffold.dart';
 import 'package:hudhud_delivery/features/guest/utils/guest_sign_in_prompt.dart';
 import 'finding_driver_screen.dart';
 
@@ -42,6 +43,7 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
   double? _routeDistanceKm;
   bool _isLoadingRoute = false;
   bool? _hasGoogleMapsApiKey;
+  double _mapBottomPadding = 0;
 
   late List<TripOption> _tripOptions;
 
@@ -88,6 +90,14 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
         _routeDistanceKm = result.distanceKm;
       }
     });
+  }
+
+  void _onSheetLayoutChanged(double extent, double bodyHeight) {
+    final padding = extent * bodyHeight;
+    if ((padding - _mapBottomPadding).abs() > 1) {
+      setState(() => _mapBottomPadding = padding);
+    }
+    _fitBounds();
   }
 
   void _fitBounds() {
@@ -321,115 +331,102 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final selectedOption = _tripOptions.firstWhere((opt) => opt.id == _selectedTrip);
-    
-    final screenHeight = MediaQuery.of(context).size.height;
-    const bottomSheetInitialFraction = 0.5;
-    final mapBottom = screenHeight * bottomSheetInitialFraction;
+    final selectedOption =
+        _tripOptions.firstWhere((opt) => opt.id == _selectedTrip);
+    final overlayTop = mapOverlayTop(context);
 
-    return Scaffold(
-      body: Stack(
-        children: [
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: mapBottom,
-            child: _buildMapOrFallback(),
-          ),
-          // Back button
-          Positioned(
-            top: 40,
-            left: 16,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 4,
-                  ),
-                ],
-              ),
-              child: IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () => Navigator.pop(context),
-              ),
+    return MapDraggableSheetScaffold(
+      initialChildSize: 0.5,
+      minChildSize: 0.35,
+      maxChildSize: 0.85,
+      onSheetLayoutChanged: _onSheetLayoutChanged,
+      map: _buildMapOrFallback(),
+      mapOverlays: [
+        Positioned(
+          top: overlayTop,
+          left: 16,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 4,
+                ),
+              ],
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => Navigator.pop(context),
             ),
           ),
-          // Bottom Sheet Modal
-          DraggableScrollableSheet(
-            initialChildSize: 0.5,
-            minChildSize: 0.35,
-            maxChildSize: 0.85,
-            builder: (context, scrollController) {
-              return Container(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
-                  ),
-                ),
-                child: Column(
+        ),
+      ],
+      sheetBuilder: (context, scrollController) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+          ),
+          child: _isLoadingEstimates
+              ? Column(
                   children: [
-                    // Drag handle
-                    Container(
-                      margin: const EdgeInsets.only(top: 8),
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(2),
-                      ),
+                    const MapSheetDragHandle(),
+                    const Expanded(
+                      child: Center(child: CircularProgressIndicator()),
                     ),
+                  ],
+                )
+              : ListView(
+                  controller: scrollController,
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                  children: [
+                    const MapSheetDragHandle(),
                     const SizedBox(height: 16),
-                    // Distance in KM
                     if (_routeDistanceKm != null || _isLoadingRoute)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Row(
-                          children: [
-                            Icon(Icons.straighten,
-                                size: 18, color: AppColors.primaryColor),
-                            const SizedBox(width: 8),
-                            if (_isLoadingRoute)
-                              const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            else if (_routeDistanceKm != null)
-                              Text(
-                                '${_routeDistanceKm!.toStringAsFixed(2)} KM',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.primaryColor,
-                                ),
+                      Row(
+                        children: [
+                          Icon(Icons.straighten,
+                              size: 18, color: AppColors.primaryColor),
+                          const SizedBox(width: 8),
+                          if (_isLoadingRoute)
+                            const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child:
+                                  CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          else if (_routeDistanceKm != null)
+                            Text(
+                              '${_routeDistanceKm!.toStringAsFixed(2)} KM',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.primaryColor,
                               ),
-                          ],
-                        ),
+                            ),
+                        ],
                       ),
                     if (_routeDistanceKm != null || _isLoadingRoute)
                       const SizedBox(height: 12),
-                    // Hint when road route failed (straight line = Directions API not enabled)
                     if (!_isLoadingRoute && _routePolylinePoints == null) ...[
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Row(
-                          children: [
-                            Icon(Icons.info_outline, size: 16, color: Colors.orange[800]),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                'Road route unavailable. Enable "Directions API" in Google Cloud Console for your API key (see MAPS_SETUP.md).',
-                                style: TextStyle(fontSize: 11, color: Colors.orange[800]),
-                              ),
+                      Row(
+                        children: [
+                          Icon(Icons.info_outline,
+                              size: 16, color: Colors.orange[800]),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Road route unavailable. Enable "Directions API" in Google Cloud Console for your API key (see MAPS_SETUP.md).',
+                              style: TextStyle(
+                                  fontSize: 11, color: Colors.orange[800]),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 8),
                     ],
@@ -442,100 +439,78 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
                       ),
                     ),
                     if (_estimateError != null) ...[
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Text(
-                          _estimateError!,
-                          style: TextStyle(fontSize: 12, color: Colors.orange[800]),
-                        ),
-                      ),
                       const SizedBox(height: 8),
+                      Text(
+                        _estimateError!,
+                        style:
+                            TextStyle(fontSize: 12, color: Colors.orange[800]),
+                      ),
                     ],
-                    Expanded(
-                      child: _isLoadingEstimates
-                          ? const Center(child: CircularProgressIndicator())
-                          : ListView.builder(
-                        controller: scrollController,
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        itemCount: _tripOptions.length,
-                        itemBuilder: (context, index) {
-                          final option = _tripOptions[index];
-                          final isSelected = _selectedTrip == option.id;
-                          
+                    const SizedBox(height: 12),
+                    ..._tripOptions.map((option) {
+                      final isSelected = _selectedTrip == option.id;
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: _TripOptionCard(
+                          option: option,
+                          isSelected: isSelected,
+                          onTap: () {
+                            setState(() => _selectedTrip = option.id);
+                          },
+                        ),
+                      );
+                    }),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Text('Payment: ',
+                            style: TextStyle(
+                                color: Colors.grey[700], fontSize: 14)),
+                        ...['wallet', 'card', 'cash'].map((method) {
+                          final isSelected = _paymentMethod == method;
                           return Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: _TripOptionCard(
-                              option: option,
-                              isSelected: isSelected,
-                              onTap: () {
-                                setState(() {
-                                  _selectedTrip = option.id;
-                                });
+                            padding: const EdgeInsets.only(right: 8),
+                            child: ChoiceChip(
+                              label: Text(method.toUpperCase()),
+                              selected: isSelected,
+                              onSelected: (selected) {
+                                if (selected) {
+                                  setState(() => _paymentMethod = method);
+                                }
                               },
                             ),
                           );
-                        },
-                      ),
+                        }),
+                      ],
                     ),
                     const SizedBox(height: 16),
-                    // Payment method selector
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Row(
-                        children: [
-                          Text('Payment: ', style: TextStyle(color: Colors.grey[700], fontSize: 14)),
-                          ...['wallet', 'card', 'cash'].map((method) {
-                            final isSelected = _paymentMethod == method;
-                            return Padding(
-                              padding: const EdgeInsets.only(right: 8),
-                              child: ChoiceChip(
-                                label: Text(method.toUpperCase()),
-                                selected: isSelected,
-                                onSelected: (selected) {
-                                  if (selected) setState(() => _paymentMethod = method);
-                                },
-                              ),
-                            );
-                          }),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // Select Button
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: SizedBox(
-                        width: double.infinity,
-                        height: 50,
-                        child: ElevatedButton(
-                          onPressed: _isRequestingRide
-                              ? null
-                              : () => _onSelectTrip(selectedOption),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: _isRequestingRide
+                            ? null
+                            : () => _onSelectTrip(selectedOption),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Text(
-                            'Select ${selectedOption.name}',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
+                        ),
+                        child: Text(
+                          'Select ${selectedOption.name}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20),
                   ],
                 ),
-              );
-            },
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -556,6 +531,12 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
     }
 
     return gmaps.GoogleMap(
+      padding: EdgeInsets.only(
+        bottom: _mapBottomPadding,
+        top: mapOverlayTop(context) + 48,
+        left: 16,
+        right: 16,
+      ),
       initialCameraPosition: gmaps.CameraPosition(
         target: _toG(widget.pickupLocation),
         zoom: 13.0,

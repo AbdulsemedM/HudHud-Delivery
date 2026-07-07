@@ -8,6 +8,7 @@ import 'package:hudhud_delivery/app/services/geocoding_service.dart';
 import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
 import 'package:hudhud_delivery/core/widgets/centered_pin_map.dart';
+import 'package:hudhud_delivery/core/widgets/map_draggable_sheet_scaffold.dart';
 import '../../../home/presentation/screen/location_search_screen.dart';
 import 'package_details_screen.dart';
 
@@ -284,128 +285,106 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final topPad = MediaQuery.paddingOf(context).top;
-    final screenHeight = MediaQuery.of(context).size.height;
-    const initialSheetSize = 0.5;
-    final mapHeight = screenHeight * (1 - initialSheetSize);
+    final overlayTop = mapOverlayTop(context);
 
-    return Scaffold(
+    return MapDraggableSheetScaffold(
       backgroundColor: colorScheme.surface,
-      body: Stack(
-        children: [
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            height: mapHeight,
-            child: _buildMapOrFallback(context),
-          ),
-          // Back button
-          Positioned(
-            top: topPad + 8,
-            left: 16,
-            child: Container(
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHigh,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: colorScheme.shadow.withValues(alpha: 0.15),
-                    blurRadius: 4,
-                  ),
-                ],
-              ),
-              child: IconButton(
-                icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
+      initialChildSize: 0.5,
+      minChildSize: 0.3,
+      maxChildSize: 0.85,
+      onSheetLayoutChanged: (_, __) => _fitBounds(),
+      map: _buildMapOrFallback(context),
+      mapOverlays: [
+        Positioned(
+          top: overlayTop,
+          left: 16,
+          child: Container(
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerHigh,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: colorScheme.shadow.withValues(alpha: 0.15),
+                  blurRadius: 4,
+                ),
+              ],
+            ),
+            child: IconButton(
+              icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
+              onPressed: () => Navigator.of(context).pop(),
             ),
           ),
-          // Recenter on current GPS — matches taxi / delivery map UX
-          Positioned(
-            top: topPad + 8,
-            left: 72,
-            right: 72,
-            child: Material(
-              color: colorScheme.surfaceContainerHigh.withValues(alpha: 0.92),
-              borderRadius: BorderRadius.circular(20),
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                child: Text(
-                  _activePinField == _PinField.pickup
-                      ? l10n.pickupLocationLabel
-                      : l10n.deliveryLocationLabel,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: colorScheme.onSurface,
-                    fontWeight: FontWeight.w600,
-                  ),
+        ),
+        Positioned(
+          top: overlayTop,
+          left: 72,
+          right: 72,
+          child: Material(
+            color: colorScheme.surfaceContainerHigh.withValues(alpha: 0.92),
+            borderRadius: BorderRadius.circular(20),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              child: Text(
+                _activePinField == _PinField.pickup
+                    ? l10n.pickupLocationLabel
+                    : l10n.deliveryLocationLabel,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: colorScheme.onSurface,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
           ),
-          Positioned(
-            top: topPad + 8,
-            right: 16,
-            child: FloatingActionButton(
-              heroTag: 'instant_delivery_my_location',
-              mini: true,
-              backgroundColor: colorScheme.surfaceContainerHigh,
-              onPressed: () async {
-                setState(() => _activePinField = _PinField.pickup);
-                await _getCurrentLocation();
-                if (_pickupPosition != null && mounted) {
-                  _skipNextIdleGeocode = true;
-                  _mapController?.moveCamera(
-                    gmaps.CameraUpdate.newLatLngZoom(
-                      _toG(_pickupPosition!),
-                      15,
-                    ),
-                  );
-                }
-              },
-              child: Icon(
-                Icons.my_location,
-                color: _isLoadingLocation
-                    ? colorScheme.onSurfaceVariant
-                    : colorScheme.primary,
-              ),
+        ),
+        Positioned(
+          top: overlayTop,
+          right: 16,
+          child: FloatingActionButton(
+            heroTag: 'instant_delivery_my_location',
+            mini: true,
+            backgroundColor: colorScheme.surfaceContainerHigh,
+            onPressed: () async {
+              setState(() => _activePinField = _PinField.pickup);
+              await _getCurrentLocation();
+              if (_pickupPosition != null && mounted) {
+                _skipNextIdleGeocode = true;
+                _mapController?.moveCamera(
+                  gmaps.CameraUpdate.newLatLngZoom(
+                    _toG(_pickupPosition!),
+                    15,
+                  ),
+                );
+              }
+            },
+            child: Icon(
+              Icons.my_location,
+              color: _isLoadingLocation
+                  ? colorScheme.onSurfaceVariant
+                  : colorScheme.primary,
             ),
           ),
-          // Bottom Sheet Modal
-          DraggableScrollableSheet(
-            initialChildSize: 0.5,
-            minChildSize: 0.3,
-            maxChildSize: 0.85,
-            builder: (context, scrollController) {
-              return Container(
-                decoration: BoxDecoration(
-                  color: colorScheme.surface,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    // Drag handle
-                    Container(
-                      margin: const EdgeInsets.only(top: 8),
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: colorScheme.outlineVariant,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        controller: scrollController,
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
+        ),
+      ],
+      sheetBuilder: (context, scrollController) {
+        return Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+          ),
+          child: Column(
+            children: [
+              const MapSheetDragHandle(),
+              Expanded(
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                             Text(
                               l10n.courierInstantTitle,
                               style: theme.textTheme.headlineSmall?.copyWith(
@@ -572,10 +551,7 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                   ],
                 ),
               );
-            },
-          ),
-        ],
-      ),
+      },
     );
   }
 

@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
+import 'package:hudhud_delivery/core/widgets/map_draggable_sheet_scaffold.dart';
 import 'package:hudhud_delivery/features/sos/presentation/widgets/sos_trigger_button.dart';
 
 class DriverOnTheWayScreen extends StatefulWidget {
@@ -39,6 +40,7 @@ class _DriverOnTheWayScreenState extends State<DriverOnTheWayScreen> {
   double? _routeDistanceKm;
   bool _isLoadingRoute = true;
   bool? _hasGoogleMapsApiKey;
+  double _mapBottomPadding = 0;
 
   static gmaps.LatLng _toG(LatLng p) => gmaps.LatLng(p.latitude, p.longitude);
 
@@ -86,6 +88,14 @@ class _DriverOnTheWayScreenState extends State<DriverOnTheWayScreen> {
     });
   }
 
+  void _onSheetLayoutChanged(double extent, double bodyHeight) {
+    final padding = extent * bodyHeight;
+    if ((padding - _mapBottomPadding).abs() > 1) {
+      setState(() => _mapBottomPadding = padding);
+    }
+    _fitBounds();
+  }
+
   void _fitBounds() {
     final bounds = gmaps.LatLngBounds(
       southwest: gmaps.LatLng(
@@ -112,24 +122,39 @@ class _DriverOnTheWayScreenState extends State<DriverOnTheWayScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-    const bottomSheetInitialFraction = 0.45;
-    final mapBottom = screenHeight * bottomSheetInitialFraction;
+    final overlayTop = mapOverlayTop(context);
 
-    return Scaffold(
-      body: Stack(
-        children: [
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: mapBottom,
-            child: _buildMapOrFallback(),
+    return MapDraggableSheetScaffold(
+      initialChildSize: 0.45,
+      minChildSize: 0.3,
+      maxChildSize: 0.8,
+      onSheetLayoutChanged: _onSheetLayoutChanged,
+      map: _buildMapOrFallback(),
+      mapOverlays: [
+        Positioned(
+          top: overlayTop,
+          left: 16,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 4,
+                ),
+              ],
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => Navigator.pop(context),
+            ),
           ),
-          // Back button
+        ),
+        if (widget.rideId != null)
           Positioned(
-            top: 40,
-            left: 16,
+            top: overlayTop,
+            right: 16,
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -141,66 +166,32 @@ class _DriverOnTheWayScreenState extends State<DriverOnTheWayScreen> {
                   ),
                 ],
               ),
-              child: IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () => Navigator.pop(context),
+              child: SosTriggerButton(
+                compact: true,
+                orderId: widget.rideId,
               ),
             ),
           ),
-          if (widget.rideId != null)
-            Positioned(
-              top: 40,
-              right: 16,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 4,
-                    ),
-                  ],
-                ),
-                child: SosTriggerButton(
-                  compact: true,
-                  orderId: widget.rideId,
-                ),
-              ),
+      ],
+      sheetBuilder: (context, scrollController) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
             ),
-          // Bottom Sheet Modal
-          DraggableScrollableSheet(
-            initialChildSize: 0.45,
-            minChildSize: 0.3,
-            maxChildSize: 0.8,
-            builder: (context, scrollController) {
-              return Container(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    // Drag handle
-                    Container(
-                      margin: const EdgeInsets.only(top: 8),
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        controller: scrollController,
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
+          ),
+          child: Column(
+            children: [
+              const MapSheetDragHandle(),
+              Expanded(
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                             // Title
                             const Text(
                               'Driver is on the way',
@@ -393,10 +384,7 @@ class _DriverOnTheWayScreenState extends State<DriverOnTheWayScreen> {
                   ],
                 ),
               );
-            },
-          ),
-        ],
-      ),
+      },
     );
   }
 
@@ -417,6 +405,12 @@ class _DriverOnTheWayScreenState extends State<DriverOnTheWayScreen> {
     }
 
     return gmaps.GoogleMap(
+      padding: EdgeInsets.only(
+        bottom: _mapBottomPadding,
+        top: mapOverlayTop(context) + 48,
+        left: 16,
+        right: 16,
+      ),
       initialCameraPosition: gmaps.CameraPosition(
         target: _toG(widget.pickupLocation),
         zoom: 13.0,

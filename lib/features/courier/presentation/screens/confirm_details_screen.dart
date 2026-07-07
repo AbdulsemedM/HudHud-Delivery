@@ -10,6 +10,7 @@ import 'package:hudhud_delivery/core/utils/phone_util.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/guest/utils/guest_sign_in_prompt.dart';
+import 'package:hudhud_delivery/core/widgets/map_draggable_sheet_scaffold.dart';
 import 'finding_courier_screen.dart';
 
 class ConfirmDetailsScreen extends StatefulWidget {
@@ -318,84 +319,78 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
     }
 
     final colorScheme = Theme.of(context).colorScheme;
-    return Scaffold(
+    final overlayTop = mapOverlayTop(context);
+
+    return MapDraggableSheetScaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: Stack(
-        children: [
-          _buildMapOrFallback(mapCenter),
-          Positioned(
-            top: 40,
-            left: 16,
-            child: Container(
-              decoration: BoxDecoration(
-                color: colorScheme.surface,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: colorScheme.shadow.withOpacity(0.2),
-                    blurRadius: 4,
-                  ),
-                ],
-              ),
-              child: IconButton(
-                icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ),
-          ),
-          Positioned(
-            top: 40,
-            right: 16,
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: colorScheme.surface,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: colorScheme.shadow.withOpacity(0.2),
-                    blurRadius: 4,
-                  ),
-                ],
-              ),
-              child: Icon(
-                Icons.two_wheeler,
-                color: AppColors.primaryColor,
-                size: 24,
-              ),
-            ),
-          ),
-          DraggableScrollableSheet(
-            initialChildSize: 0.5,
-            minChildSize: 0.35,
-            maxChildSize: 0.85,
-            builder: (context, scrollController) {
-              return Container(
-                decoration: BoxDecoration(
-                  color: colorScheme.surface,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
-                  ),
+      initialChildSize: 0.5,
+      minChildSize: 0.35,
+      maxChildSize: 0.85,
+      onSheetLayoutChanged: (_, __) => _fitBounds(),
+      map: _buildMapOrFallback(mapCenter),
+      mapOverlays: [
+        Positioned(
+          top: overlayTop,
+          left: 16,
+          child: Container(
+            decoration: BoxDecoration(
+              color: colorScheme.surface,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: colorScheme.shadow.withOpacity(0.2),
+                  blurRadius: 4,
                 ),
-                child: Column(
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.only(top: 8),
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: colorScheme.outlineVariant,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        controller: scrollController,
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
+              ],
+            ),
+            child: IconButton(
+              icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
+        ),
+        Positioned(
+          top: overlayTop,
+          right: 16,
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: colorScheme.surface,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: colorScheme.shadow.withOpacity(0.2),
+                  blurRadius: 4,
+                ),
+              ],
+            ),
+            child: Icon(
+              Icons.two_wheeler,
+              color: AppColors.primaryColor,
+              size: 24,
+            ),
+          ),
+        ),
+      ],
+      sheetBuilder: (context, scrollController) {
+        return Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+          ),
+          child: Column(
+            children: [
+              const MapSheetDragHandle(),
+              Expanded(
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                             const Text(
                               'Confirm Details',
                               style: TextStyle(
@@ -530,10 +525,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                   ],
                 ),
               );
-            },
-          ),
-        ],
-      ),
+      },
     );
   }
 
