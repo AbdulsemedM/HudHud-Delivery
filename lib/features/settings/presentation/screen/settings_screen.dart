@@ -17,7 +17,8 @@ import 'package:hudhud_delivery/features/addresses/presentation/screens/addresse
 import 'package:hudhud_delivery/features/sos/presentation/screens/sos_settings_screen.dart';
 import 'package:hudhud_delivery/features/chat/presentation/screens/conversations_list_screen.dart';
 import 'package:hudhud_delivery/features/chat/presentation/screens/support_chat_start_screen.dart';
-import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
+import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
+import 'package:hudhud_delivery/features/dashboard/presentation/screen/dashboard_screen.dart';
 import 'package:hudhud_delivery/features/wallet/data/providers/wallet_data_provider.dart';
 import 'package:hudhud_delivery/features/wallet/data/repositories/wallet_repository.dart';
 import 'package:hudhud_delivery/features/wallet/presentation/screens/wallet_screen.dart';
@@ -295,10 +296,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (shouldLogout == true) {
         final authService = AuthService();
         await authService.clearAllData();
+        await GuestBrowseService().enterGuestBrowseMode();
 
         if (context.mounted) {
           Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => const LoginScreen()),
+            MaterialPageRoute(builder: (context) => const DashboardScreen()),
             (route) => false,
           );
         }

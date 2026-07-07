@@ -38,4 +38,13 @@ class GuestBrowseService {
     _cachedActive = false;
     _initialized = true;
   }
+
+  /// Ensures guest browse mode matches auth state (public APIs when logged out).
+  Future<void> configureBrowseSession({required bool isAuthenticated}) async {
+    if (isAuthenticated) {
+      await clearGuestBrowseMode();
+    } else {
+      await enterGuestBrowseMode();
+    }
+  }
 }

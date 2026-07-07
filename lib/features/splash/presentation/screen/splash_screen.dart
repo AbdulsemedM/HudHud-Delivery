@@ -4,7 +4,6 @@ import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
 import 'package:hudhud_delivery/app/services/fcm_service.dart';
 import 'package:hudhud_delivery/app/services/startup_location_service.dart';
-import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
 import 'package:hudhud_delivery/features/dashboard/presentation/screen/dashboard_screen.dart';
 import '../widgets/splash_widget.dart';
 
@@ -44,26 +43,26 @@ class _SplashScreenState extends State<SplashScreen> {
       await Future.delayed(Duration(seconds: 3));
 
       final isAuthenticated = await _authService.isAuthenticated();
-      final isGuestBrowse = await GuestBrowseService().isActive();
+      await GuestBrowseService().configureBrowseSession(
+        isAuthenticated: isAuthenticated,
+      );
 
       if (mounted) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => (isAuthenticated || isGuestBrowse)
-                ? const DashboardScreen()
-                : const LoginScreen(),
+            builder: (context) => const DashboardScreen(),
           ),
         );
       }
     } catch (e) {
-      // If there's any error, ensure minimum splash duration then navigate to login
       await Future.delayed(Duration(seconds: 3));
+      await GuestBrowseService().enterGuestBrowseMode();
       if (mounted) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => const LoginScreen(),
+            builder: (context) => const DashboardScreen(),
           ),
         );
       }
