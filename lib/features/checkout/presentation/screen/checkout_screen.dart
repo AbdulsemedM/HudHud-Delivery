@@ -1,26 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../app/services/auth_service.dart';
-import '../../../../app/services/guest_browse_service.dart';
 import '../../../../app/services/location_service.dart';
 import '../../../../app/services/saved_location_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/api/api_service.dart';
-import '../../../../l10n/app_localizations.dart';
-import '../../../guest/utils/guest_sign_in_prompt.dart';
 import '../../bloc/checkout_bloc.dart';
 import '../../data/data_provider/checkout_data_provider.dart';
 import '../../data/repository/checkout_repository.dart';
 import '../widgets/checkout_widgets.dart';
-import '../../../addresses/presentation/widgets/delivery_address_selector.dart';
-import '../../../addresses/data/addresses_data_provider.dart';
-import '../../../addresses/data/addresses_repository.dart';
-import '../../../payment/data/data_provider/payment_data_provider.dart';
-import '../../../payment/data/repository/payment_repository.dart';
-import '../../../payment/model/payment_initiate_result.dart';
-import '../../../payment/presentation/screen/payment_initiate_result_screen.dart';
-import '../../../payment/presentation/widgets/payment_details_form.dart';
-import '../../../payment/presentation/widgets/payment_methods_loader.dart';
+import '../../../home/presentation/screen/map_location_screen.dart';
 
 class CheckoutScreen extends StatefulWidget {
   final List<Map<String, dynamic>> cartItems;
@@ -38,57 +26,19 @@ class CheckoutScreen extends StatefulWidget {
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
   final TextEditingController _notesController = TextEditingController();
+  double _tipAmount = 0.0;
   String _deliveryAddress = 'Loading address...';
   double? _deliveryLatitude;
   double? _deliveryLongitude;
   String? _selectedPaymentMethod;
-  String? _validatedCouponCode;
-  Map<String, dynamic>? _validatedCouponData;
-  Map<String, dynamic> _paymentDetails = {};
-  String _ebirrProvider = 'ebirr';
-  bool _paymentMethodsLoading = true;
-  static const String _serviceType = 'restaurant';
-
-  late final PaymentRepository _paymentRepository;
 
   @override
   void initState() {
     super.initState();
-    _paymentRepository = PaymentRepository(
-      paymentDataProvider: PaymentDataProvider(apiService: ApiService.instance),
-    );
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (GuestBrowseService().isGuestBrowseMode && mounted) {
-        final l10n = AppLocalizations.of(context)!;
-        await showGuestSignInRequiredDialog(
-          context,
-          message: l10n.guestSignInRequiredCheckout,
-        );
-        if (mounted) Navigator.of(context).pop();
-        return;
-      }
-      _loadDeliveryAddress();
-    });
+    _loadDeliveryAddress();
   }
 
   Future<void> _loadDeliveryAddress() async {
-    try {
-      final repo = AddressesRepository(
-        addressesDataProvider: AddressesDataProvider(
-          apiService: ApiService.instance,
-        ),
-      );
-      final def = await repo.getDefaultAddress();
-      if (def != null && mounted) {
-        setState(() {
-          _deliveryAddress = def.displayText;
-          _deliveryLatitude = def.latitude;
-          _deliveryLongitude = def.longitude;
-        });
-        return;
-      }
-    } catch (_) {}
-
     // 1. Try saved address
     final saved = await SavedLocationService.getSavedLocationData();
     final savedAddress = saved?['address'] as String?;
@@ -135,60 +85,62 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return 7;
   }
 
-  double get _total => widget.subtotal;
+  double get _total {
+    return widget.subtotal + _tipAmount;
+  }
 
-  Future<void> _onPromoCodeApplied(String promoCode) async {
-    final normalizedCode = promoCode.trim().toUpperCase();
-    if (normalizedCode.isEmpty) return;
-
-    final checkoutRepository = context.read<CheckoutBloc>().checkoutRepository;
-    final result = await checkoutRepository.validateCoupon(
-      code: normalizedCode,
-      orderAmount: _total,
-      vendorId: _vendorId,
-      serviceType: _serviceType,
-    );
-
-    if (!mounted) return;
-
-    if (result['success'] == true) {
-      final dataWrapper = result['data'] as Map<String, dynamic>?;
-      final couponData = dataWrapper?['data'] as Map<String, dynamic>?;
-      setState(() {
-        _validatedCouponCode = normalizedCode;
-        _validatedCouponData = couponData;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(result['message']?.toString() ?? 'Coupon is valid!'),
-          backgroundColor: AppColors.primaryColor,
-        ),
-      );
-      return;
-    }
-
-    setState(() {
-      _validatedCouponCode = null;
-      _validatedCouponData = null;
-    });
+  void _onPromoCodeApplied(String promoCode) {
+    // Handle promo code logic here
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(result['message']?.toString() ?? 'Invalid coupon'),
-        backgroundColor: Colors.red,
+        content: Text('Promo code "$promoCode" applied'),
+        backgroundColor: AppColors.primaryColor,
       ),
     );
   }
 
-  void _onDeliveryAddressChanged({
-    required String address,
-    double? latitude,
-    double? longitude,
-  }) {
-    setState(() {
-      _deliveryAddress = address;
-      _deliveryLatitude = latitude;
-      _deliveryLongitude = longitude;
-    });
+  void _onChangeAddress() async {
+    // Navigate to map location screen
+    final Map<String, dynamic>? result = await Navigator.push<Map<String, dynamic>>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MapLocationScreen(
+          currentLocation: _deliveryAddress,
+        ),
+      ),
+    );
+
+    // Update address if user selected a new one
+    final newAddress = result?['address'] as String?;
+    final latitude = (result?['latitude'] as num?)?.toDouble();
+    final longitude = (result?['longitude'] as num?)?.toDouble();
+    if (newAddress != null && newAddress.isNotEmpty) {
+      if (latitude != null && longitude != null) {
+        await SavedLocationService.saveLocationData(
+          address: newAddress,
+          latitude: latitude,
+          longitude: longitude,
+        );
+      } else {
+        await SavedLocationService.saveAddress(newAddress);
+      }
+      if (mounted) {
+        setState(() {
+          _deliveryAddress = newAddress;
+          _deliveryLatitude = latitude;
+          _deliveryLongitude = longitude;
+        });
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Address updated to: $newAddress'),
+            backgroundColor: AppColors.primaryColor,
+          ),
+        );
+      }
+    }
   }
 
   void _onConfirmOrder(BuildContext blocContext) {
@@ -238,29 +190,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       return;
     }
 
-    if (_paymentMethodsLoading) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Payment methods are still loading'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    if (paymentMethodNeedsDetailsForm(_selectedPaymentMethod)) {
-      final phone = _paymentDetails['phone']?.toString() ?? '';
-      if (phone.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please enter a valid phone number for payment'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
-      }
-    }
-
     blocContext.read<CheckoutBloc>().add(
           CreateOrderEvent(
             vendorId: _vendorId,
@@ -272,8 +201,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             deliveryLatitude: _deliveryLatitude!,
             deliveryLongitude: _deliveryLongitude!,
             paymentMethod: _selectedPaymentMethod!,
-            couponCode: _validatedCouponCode,
-            serviceType: _serviceType,
             notes: _notesController.text.trim().isEmpty
                 ? null
                 : _notesController.text.trim(),
@@ -281,97 +208,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         );
   }
 
-  Future<void> _onOrderCreated(
-    BuildContext ctx,
-    Map<String, dynamic> orderData,
-  ) async {
-    final method = _selectedPaymentMethod;
-    if (method == null) return;
-
-    if (paymentMethodSkipsInitiate(method)) {
-      _showOrderSuccessDialog(ctx, orderData);
-      return;
-    }
-
-    final orderPayload = orderData['order'] is Map<String, dynamic>
-        ? orderData['order'] as Map<String, dynamic>
-        : orderData;
-    final orderId = int.tryParse(orderPayload['id']?.toString() ?? '') ?? 0;
-    if (orderId <= 0) {
-      ScaffoldMessenger.of(ctx).showSnackBar(
-        const SnackBar(
-          content: Text('Order created but payment could not be started'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    final amount = double.tryParse(
-          orderPayload['total']?.toString() ??
-              orderPayload['amount']?.toString() ??
-              _total.toString(),
-        ) ??
-        _total;
-    final currency =
-        orderPayload['currency']?.toString() ?? 'ETB';
-
-    showDialog(
-      context: ctx,
-      barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
-    );
-
-    try {
-      final details = buildInitiatePaymentDetails(
-        paymentMethodCode: method,
-        collectedDetails: _paymentDetails,
-        orderId: orderId,
-      );
-
-      final raw = await _paymentRepository.initiatePayment(
-        paymentMethodCode: method,
-        orderId: orderId,
-        amount: amount,
-        currency: currency,
-        paymentDetails: details,
-      );
-
-      if (!ctx.mounted) return;
-      Navigator.of(ctx).pop();
-
-      final result = PaymentInitiateResult.fromJson(raw);
-      await Navigator.of(ctx).push(
-        MaterialPageRoute(
-          builder: (_) => PaymentInitiateResultScreen(
-            result: result,
-            orderId: orderId.toString(),
-          ),
-        ),
-      );
-      if (ctx.mounted) {
-        Navigator.of(ctx).pop();
-      }
-    } catch (e) {
-      if (!ctx.mounted) return;
-      Navigator.of(ctx).pop();
-      ScaffoldMessenger.of(ctx).showSnackBar(
-        SnackBar(
-          content: Text('Payment initiation failed: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
   void _showOrderSuccessDialog(BuildContext ctx, Map<String, dynamic> orderData) {
-    final orderPayload = orderData['order'] is Map<String, dynamic>
-        ? orderData['order'] as Map<String, dynamic>
-        : orderData;
-    final orderId = orderPayload['id']?.toString() ?? '—';
-    final couponApplied = orderData['coupon_applied'] as Map<String, dynamic>?;
-    final couponCode = couponApplied?['code']?.toString();
-    final couponSaved = couponApplied?['saved']?.toString();
+    final orderId = orderData['id']?.toString() ?? '—';
     showDialog(
       context: ctx,
       barrierDismissible: false,
@@ -405,16 +243,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 14, color: Colors.grey),
             ),
-            if (couponCode != null && couponCode.isNotEmpty) ...[
-              const SizedBox(height: 10),
-              Text(
-                couponSaved != null && couponSaved.isNotEmpty
-                    ? 'Coupon $couponCode applied. You saved $couponSaved.'
-                    : 'Coupon $couponCode applied successfully.',
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 13, color: Colors.green),
-              ),
-            ],
             const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
@@ -455,35 +283,30 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       ),
       child: Builder(
         builder: (blocContext) => Scaffold(
-        backgroundColor: Theme.of(context).brightness == Brightness.dark
-            ? AppColors.darkBackground
-            : Colors.grey[50],
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: Theme.of(context).brightness == Brightness.dark
-              ? AppColors.darkSurface
-              : Colors.white,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
+          surfaceTintColor: Colors.transparent,
           leading: IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.arrow_back,
-              color: AppColors.lightTextPrimary,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
             onPressed: () => Navigator.of(context).pop(),
           ),
-          title: const Text(
+          title: Text(
             'Checkout',
-            style: TextStyle(
-              color: AppColors.lightTextPrimary,
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-            ),
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
           ),
           centerTitle: true,
         ),
         body: BlocListener<CheckoutBloc, CheckoutState>(
           listener: (context, state) {
             if (state is OrderCreatedSuccess) {
-              _onOrderCreated(context, state.orderData);
+              _showOrderSuccessDialog(context, state.orderData);
             } else if (state is CheckoutError) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -520,11 +343,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 }).toList(),
 
                 // Delivery Address Section
-                DeliveryAddressSelector(
-                  address: _deliveryAddress,
-                  latitude: _deliveryLatitude,
-                  longitude: _deliveryLongitude,
-                  onAddressChanged: _onDeliveryAddressChanged,
+                DeliveryAddressSection(
+                  currentAddress: _deliveryAddress,
+                  onChangeAddress: _onChangeAddress,
                 ),
 
                 // Notes Section
@@ -532,92 +353,40 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   notesController: _notesController,
                 ),
 
+                // Tip Section
+                TipSection(
+                  currentTip: _tipAmount,
+                  onTipChanged: (value) {
+                    setState(() {
+                      _tipAmount = value;
+                    });
+                  },
+                ),
+
                 // Promo Code Section
                 PromoCodeSection(
                   onPromoCodeApplied: _onPromoCodeApplied,
                 ),
-                if (_validatedCouponCode != null) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    _validatedCouponData?['value_display'] != null
-                        ? 'Coupon ${_validatedCouponCode!} applied (${_validatedCouponData!['value_display']}).'
-                        : 'Coupon ${_validatedCouponCode!} applied.',
-                    style: const TextStyle(
-                      color: Colors.green,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
 
                 // Payment Method Grid
-                PaymentMethodsLoader(
-                  repository: _paymentRepository,
-                  builder: (context, methods, isLoading, error, reload) {
-                    if (!isLoading &&
-                        methods.isNotEmpty &&
-                        _selectedPaymentMethod == null) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (!mounted) return;
-                        setState(() {
-                          _selectedPaymentMethod = methods.first['id'] as String?;
-                          _paymentMethodsLoading = false;
-                        });
-                      });
-                    } else if (!isLoading && mounted && _paymentMethodsLoading) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (!mounted) return;
-                        setState(() => _paymentMethodsLoading = false);
-                      });
-                    }
-
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        PaymentMethodGridSection(
-                          methods: methods,
-                          selectedId: _selectedPaymentMethod,
-                          isLoading: isLoading,
-                          error: error,
-                          onRetry: reload,
-                          onSelected: (id) => setState(() {
-                            _selectedPaymentMethod = id;
-                            _paymentDetails = {};
-                          }),
-                        ),
-                        if (_selectedPaymentMethod != null)
-                          PaymentDetailsForm(
-                            key: ValueKey(_selectedPaymentMethod),
-                            paymentMethodCode: _selectedPaymentMethod!,
-                            initialPhone: AuthService().currentUser?.phone,
-                            ebirrProvider: _ebirrProvider,
-                            onEbirrProviderChanged: (provider) {
-                              setState(() => _ebirrProvider = provider);
-                            },
-                            onChanged: (details) {
-                              _paymentDetails = details;
-                            },
-                          ),
-                      ],
-                    );
-                  },
+                PaymentMethodGridSection(
+                  selectedId: _selectedPaymentMethod,
+                  onSelected: (id) => setState(() => _selectedPaymentMethod = id),
                 ),
 
                 // Order Summary Section
                 OrderSummarySection(
                   subtotal: widget.subtotal,
+                  tipAmount: _tipAmount,
                   total: _total,
                 ),
 
                 // Confirm Order Button
                 BlocBuilder<CheckoutBloc, CheckoutState>(
                   builder: (context, state) {
-                    final isLoading = state is CheckoutLoading;
-                    final disabled = isLoading ||
-                        _paymentMethodsLoading ||
-                        _selectedPaymentMethod == null;
                     return ConfirmOrderButton(
-                      onPressed: disabled ? null : () => _onConfirmOrder(blocContext),
-                      isLoading: isLoading,
+                      onPressed: () => _onConfirmOrder(blocContext),
+                      isLoading: state is CheckoutLoading,
                     );
                   },
                 ),

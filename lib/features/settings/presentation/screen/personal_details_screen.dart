@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/utils/avatar_util.dart';
-import 'package:hudhud_delivery/core/utils/phone_util.dart';
-import 'package:hudhud_delivery/core/widgets/user_avatar.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/models/user_model.dart';
 
@@ -48,19 +46,6 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
     return DateFormat('d MMM yyyy').format(date);
   }
 
-  String _formatPhone(String? phone) {
-    final formatted = formatPhoneForDisplay(phone);
-    return formatted.isNotEmpty ? formatted : '—';
-  }
-
-  Future<void> _copyReferralCode(String referralCode) async {
-    await Clipboard.setData(ClipboardData(text: referralCode));
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Referral code copied')),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -79,7 +64,10 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
         ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Padding(
+              padding: EdgeInsets.all(AppColors.spaceMD),
+              child: _PersonalDetailsShimmer(),
+            )
           : SingleChildScrollView(
               child: Column(
                 children: [
@@ -96,9 +84,28 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                   // Profile Picture
                   Stack(
                     children: [
-                      UserAvatar(
-                        radius: 50,
-                        imageUrl: getDisplayAvatarUrl(_user),
+                      Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryColor,
+                          shape: BoxShape.circle,
+                        ),
+                        child: ClipOval(
+                          child: getDisplayAvatarUrl(_user) != null
+                              ? Image.network(
+                                  getDisplayAvatarUrl(_user)!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      _buildDefaultAvatar(),
+                                )
+                              : Image.asset(
+                                  'assets/images/profile.png',
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      _buildDefaultAvatar(),
+                                ),
+                        ),
                       ),
                 Positioned(
                   bottom: 0,
@@ -155,7 +162,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                         _DetailCard(
                           icon: Icons.phone,
                           label: 'Phone number',
-                          value: _formatPhone(_user?.phone),
+                          value: _user?.phone ?? '—',
                         ),
                         const SizedBox(height: 16),
                         _DetailCard(
@@ -176,12 +183,6 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                             icon: Icons.card_giftcard,
                             label: 'Referral code',
                             value: _user!.referralCode!,
-                            trailing: IconButton(
-                              icon: const Icon(Icons.copy),
-                              tooltip: 'Copy referral code',
-                              onPressed: () =>
-                                  _copyReferralCode(_user!.referralCode!),
-                            ),
                           ),
                         ],
                       ],
@@ -193,19 +194,24 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
     );
   }
 
+  Widget _buildDefaultAvatar() {
+    return const Icon(
+      Icons.person,
+      size: 50,
+      color: Colors.white,
+    );
+  }
 }
 
 class _DetailCard extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
-  final Widget? trailing;
 
   const _DetailCard({
     required this.icon,
     required this.label,
     required this.value,
-    this.trailing,
   });
 
   @override
@@ -217,7 +223,7 @@ class _DetailCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
         border: Border.all(
           color: colorScheme.outlineVariant,
           width: 1,
@@ -254,9 +260,38 @@ class _DetailCard extends StatelessWidget {
               ],
             ),
           ),
-          if (trailing != null) trailing!,
         ],
       ),
+    );
+  }
+}
+
+class _PersonalDetailsShimmer extends StatelessWidget {
+  const _PersonalDetailsShimmer();
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseColor = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0);
+    final highlightColor =
+        isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF5F5F5);
+    return Column(
+      children: List.generate(4, (index) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Shimmer.fromColors(
+            baseColor: baseColor,
+            highlightColor: highlightColor,
+            child: Container(
+              height: 72,
+              decoration: BoxDecoration(
+                color: baseColor,
+                borderRadius: BorderRadius.circular(AppColors.radiusLG),
+              ),
+            ),
+          ),
+        );
+      }),
     );
   }
 }

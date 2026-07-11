@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/restaurants/presentation/screens/restaurant_screen.dart';
 import 'package:hudhud_delivery/core/widgets/custom_text_field.dart';
 
@@ -85,58 +86,54 @@ class RestaurantCircleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: 100,
         margin: const EdgeInsets.only(right: 16),
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: BorderRadius.circular(AppColors.radiusLG),
+          border: Border.all(color: colorScheme.outline.withOpacity(0.2)),
+        ),
         child: Column(
           children: [
             Container(
-              width: 60,
-              height: 60,
+              width: 56,
+              height: 56,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
-                    spreadRadius: 1,
-                    blurRadius: 5,
-                  ),
-                ],
+                border: Border.all(color: colorScheme.outline.withOpacity(0.15)),
               ),
               child: ClipOval(
-                child: Image.asset(
-                  imageAsset,
-                  fit: BoxFit.cover,
-                ),
+                child: Image.asset(imageAsset, fit: BoxFit.cover),
               ),
             ),
             const SizedBox(height: 8),
             Text(
               name,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: colorScheme.onSurface,
               ),
               textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   rating.toString(),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey,
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
-                const Icon(
-                  Icons.star,
-                  color: Colors.orange,
-                  size: 14,
-                ),
+                Icon(Icons.star_rounded, color: AppColors.ratingFilled, size: 14),
               ],
             ),
           ],
@@ -164,8 +161,15 @@ class RestaurantListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        border: Border.all(color: colorScheme.outline.withOpacity(0.2)),
+      ),
       child: Row(
         children: [
           Container(
@@ -173,14 +177,7 @@ class RestaurantListItem extends StatelessWidget {
             height: 60,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
-                  spreadRadius: 1,
-                  blurRadius: 5,
-                ),
-              ],
+              border: Border.all(color: colorScheme.outline.withOpacity(0.15)),
             ),
             child: ClipOval(
               child: Image.asset(
@@ -196,59 +193,34 @@ class RestaurantListItem extends StatelessWidget {
               children: [
                 Text(
                   name,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
+                    color: colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Text(
-                      'ETB ${avgPrice.toStringAsFixed(0)}',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    Text(
-                      ' • Avg Price',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    Text(
-                      ' • $deliveryTime Mins Delivery',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ],
+                Text(
+                  'ETB ${avgPrice.toStringAsFixed(0)} • Avg Price • $deliveryTime Mins Delivery',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+          Row(
             children: [
-              Row(
-                children: [
-                  Text(
-                    rating.toString(),
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const Icon(
-                    Icons.star,
-                    color: Colors.orange,
-                    size: 16,
-                  ),
-                ],
+              Text(
+                rating.toString(),
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: colorScheme.onSurface,
+                ),
               ),
+              Icon(Icons.star_rounded, color: AppColors.ratingFilled, size: 16),
             ],
           ),
         ],

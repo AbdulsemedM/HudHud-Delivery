@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/controllers/locale_controller.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
@@ -17,24 +18,46 @@ class LanguageScreen extends StatelessWidget {
       required String code,
       String? scriptLabel,
     }) {
-      return RadioListTile<String>(
-        value: code,
-        groupValue: controller.locale.languageCode,
-        title: Text(label, style: theme.textTheme.titleSmall),
-        subtitle: scriptLabel != null
-            ? Text(scriptLabel, style: theme.textTheme.bodySmall)
-            : null,
-        onChanged: (_) async {
-          await controller.setLocale(Locale(code));
-        },
+      final isSelected = controller.locale.languageCode == code;
+      return Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(AppColors.radiusLG),
+          border: Border.all(
+            color: isSelected
+                ? AppColors.primaryColor
+                : (theme.brightness == Brightness.dark
+                    ? const Color(0xFF2A2A2A)
+                    : const Color(0xFFEEEEEE)),
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: RadioListTile<String>(
+          value: code,
+          groupValue: controller.locale.languageCode,
+          activeColor: AppColors.primaryColor,
+          title: Text(label, style: theme.textTheme.titleSmall),
+          subtitle: scriptLabel != null
+              ? Text(scriptLabel, style: theme.textTheme.bodySmall)
+              : null,
+          onChanged: (_) async {
+            await controller.setLocale(Locale(code));
+          },
+        ),
       );
     }
 
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(l10n.languageTitle),
+        backgroundColor: theme.colorScheme.surface,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
       ),
       body: ListView(
+        padding: const EdgeInsets.all(AppColors.spaceMD),
         children: [
           tile(label: l10n.languageEnglish, code: LocaleController.langEnglish),
           tile(label: l10n.languageAmharic, code: LocaleController.langAmharic),

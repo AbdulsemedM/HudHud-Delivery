@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 
 class RestaurantHeader extends StatelessWidget {
   final String imageUrl;
@@ -207,10 +208,11 @@ class VegFoodToggle extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFFEEE5),
-        borderRadius: BorderRadius.circular(8),
-      ),
+        decoration: BoxDecoration(
+          color: AppColors.primaryColor.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(AppColors.radiusLG),
+          border: Border.all(color: AppColors.primaryColor.withOpacity(0.2)),
+        ),
       child: Row(
         children: [
           const Icon(
@@ -243,7 +245,7 @@ class VegFoodToggle extends StatelessWidget {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: Colors.orange,
+            activeColor: AppColors.primaryColor,
           ),
         ],
       ),
@@ -265,24 +267,35 @@ class MenuCategories extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return SizedBox(
       height: 40,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: categories.length,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: AppColors.spaceMD),
         itemBuilder: (context, index) {
           final isSelected = index == selectedIndex;
           return GestureDetector(
             onTap: () => onCategorySelected(index),
             child: Container(
-              margin: const EdgeInsets.only(right: 16),
+              margin: const EdgeInsets.only(right: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? AppColors.primaryColor
+                    : colorScheme.surface,
+                borderRadius: BorderRadius.circular(AppColors.radiusFull),
+                border: Border.all(
+                  color: AppColors.primaryColor.withOpacity(isSelected ? 1 : 0.35),
+                ),
+              ),
               child: Text(
                 categories[index],
                 style: TextStyle(
-                  fontSize: 16,
-                  color: isSelected ? Colors.black : Colors.grey,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  fontSize: 14,
+                  color: isSelected ? Colors.white : colorScheme.onSurface,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                 ),
               ),
             ),
@@ -321,13 +334,20 @@ class MenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(horizontal: AppColors.spaceMD, vertical: 6),
+      padding: const EdgeInsets.all(AppColors.spaceMD),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        border: Border.all(color: colorScheme.outline.withOpacity(0.2)),
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
             child: Image.asset(
               imageUrl,
               width: 80,
@@ -342,9 +362,10 @@ class MenuItem extends StatelessWidget {
               children: [
                 Text(
                   name,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
+                    color: colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -352,7 +373,7 @@ class MenuItem extends StatelessWidget {
                   description,
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.grey[600],
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -364,20 +385,25 @@ class MenuItem extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
+                        color: AppColors.primaryColor,
                       ),
                     ),
                     if (!isAdded)
                       TextButton(
                         onPressed: onAddPressed,
                         style: TextButton.styleFrom(
-                          backgroundColor: const Color(0xFFFFEEE5),
+                          backgroundColor: AppColors.primaryColor.withOpacity(0.1),
                           padding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.circular(AppColors.radiusFull),
+                          ),
                         ),
                         child: const Text(
                           'ADD',
                           style: TextStyle(
-                            color: Colors.orange,
+                            color: AppColors.primaryColor,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -385,8 +411,9 @@ class MenuItem extends StatelessWidget {
                     else
                       Container(
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey[300]!),
-                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(
+                              color: colorScheme.outline.withOpacity(0.3)),
+                          borderRadius: BorderRadius.circular(8),
                         ),
                         child: Row(
                           children: [
@@ -432,7 +459,7 @@ class MenuItem extends StatelessWidget {
                       child: const Text(
                         'REMOVE',
                         style: TextStyle(
-                          color: Colors.orange,
+                          color: AppColors.primaryColor,
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
                         ),

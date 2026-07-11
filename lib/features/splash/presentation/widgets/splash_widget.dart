@@ -1,59 +1,86 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 
 class SplashLogo extends StatelessWidget {
+  const SplashLogo({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return Image.asset(
-      'assets/images/logo.png',
-      width: MediaQuery.of(context).size.width * 0.5,
-      fit: BoxFit.contain,
-      errorBuilder: (context, error, stackTrace) {
-        return Container(
-          width: MediaQuery.of(context).size.width * 0.5,
-          height: 60,
-          color: Colors.grey[200],
-          child: Icon(Icons.image_not_supported),
-        );
-      },
+    return Container(
+      decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.25),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Image.asset(
+        'assets/images/logo.png',
+        width: 160,
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            width: 160,
+            height: 60,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.image_not_supported,
+              color: Colors.white,
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class SplashTagline extends StatelessWidget {
+  const SplashTagline({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Text(
+      l10n.appTitle,
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        color: Colors.white.withOpacity(0.85),
+        fontSize: 16,
+        fontWeight: FontWeight.w400,
+      ),
     );
   }
 }
 
 class LoadingIndicator extends StatefulWidget {
+  const LoadingIndicator({super.key});
+
   @override
-  _LoadingIndicatorState createState() => _LoadingIndicatorState();
+  State<LoadingIndicator> createState() => _LoadingIndicatorState();
 }
 
 class _LoadingIndicatorState extends State<LoadingIndicator>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late List<Animation<double>> _animations;
+  late Animation<double> _scaleAnimation;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 1200),
+      duration: const Duration(milliseconds: 800),
       vsync: this,
-    )..repeat();
+    )..repeat(reverse: true);
 
-    // Create staggered animations for each dot
-    // Each dot animates in sequence with proper intervals within [0.0, 1.0]
-    _animations = List.generate(4, (index) {
-      final delay = index * 0.2;
-      final start = delay;
-      final end = (delay + 0.4).clamp(0.0, 1.0);
-      return Tween<double>(begin: 0.3, end: 1.0).animate(
-        CurvedAnimation(
-          parent: _controller,
-          curve: Interval(
-            start,
-            end,
-            curve: Curves.easeInOut,
-          ),
-        ),
-      );
-    });
+    _scaleAnimation = Tween<double>(begin: 0.9, end: 1.1).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
   }
 
   @override
@@ -64,27 +91,26 @@ class _LoadingIndicatorState extends State<LoadingIndicator>
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(4, (index) {
-        return AnimatedBuilder(
-          animation: _animations[index],
-          builder: (context, child) {
-            return Opacity(
-              opacity: _animations[index].value,
-              child: Container(
-                margin: EdgeInsets.symmetric(horizontal: 4),
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
-                  shape: BoxShape.circle,
-                ),
-              ),
-            );
-          },
-        );
-      }),
+    return ScaleTransition(
+      scale: _scaleAnimation,
+      child: Container(
+        width: 56,
+        height: 56,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: AppColors.primaryLightColor.withOpacity(0.35),
+        ),
+        child: const Center(
+          child: SizedBox(
+            width: 28,
+            height: 28,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

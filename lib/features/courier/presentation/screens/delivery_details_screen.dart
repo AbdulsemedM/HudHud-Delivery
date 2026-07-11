@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/widgets/status_chip.dart';
+import '../../../home/presentation/widgets/home_widget.dart';
 import 'package:hudhud_delivery/features/checkout/data/data_provider/checkout_data_provider.dart';
 import 'package:hudhud_delivery/features/checkout/data/repository/checkout_repository.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
-import 'package:hudhud_delivery/features/chat/utils/chat_navigation.dart';
-import 'package:hudhud_delivery/features/guest/utils/guest_sign_in_prompt.dart';
 import 'delivery_tracking_screen.dart';
 
 class DeliveryDetailsScreen extends StatefulWidget {
@@ -44,15 +46,6 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
   }
 
   Future<void> _fetchDetails() async {
-    if (!await requireSignInForBackend(context)) {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-          _error = 'Sign in required';
-        });
-      }
-      return;
-    }
     try {
       final result =
           await _courierRepository.getUserDeliveryDetails(widget.deliveryId);
@@ -192,65 +185,90 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
     );
   }
 
-  bool _hasAssignedDriver(Map<String, dynamic> delivery) {
-    final driver = delivery['driver'];
-    return driver != null && driver is Map && driver.isNotEmpty;
-  }
-
-  void _openDriverChat() {
-    if (_delivery == null || !_hasAssignedDriver(_delivery!)) return;
-    openPackageDeliveryChat(context, widget.deliveryId);
-  }
-
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final borderColor =
+        isDark ? const Color(0xFF2A2A2A) : const Color(0xFFEEEEEE);
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: colorScheme.surface,
         elevation: 0,
+        surfaceTintColor: Colors.transparent,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           'Delivery #${widget.deliveryId}',
-          style: TextStyle(
-            color: colorScheme.onSurface,
-            fontSize: 18,
+          style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
           ),
         ),
         centerTitle: true,
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Padding(
+              padding: EdgeInsets.all(AppColors.spaceMD),
+              child: ShimmerListView(itemCount: 4),
+            )
           : _error != null
               ? Center(
                   child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Text(
-                      _error!,
-                      style: TextStyle(
-                        color: theme.textTheme.bodyMedium?.color?.withOpacity(0.8),
-                        fontSize: 14,
-                      ),
-                      textAlign: TextAlign.center,
+                    padding: const EdgeInsets.all(AppColors.spaceLG),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.wifi_off_rounded,
+                          size: 48,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(height: AppColors.spaceMD),
+                        Text(
+                          _error!,
+                          style: theme.textTheme.bodyMedium,
+                          textAlign: TextAlign.center,
+                        ),
+                        TextButton.icon(
+                          onPressed: () {
+                            setState(() => _isLoading = true);
+                            _fetchDetails();
+                          },
+                          icon: const Icon(Icons.refresh),
+                          label: Text(l10n.actionRetry),
+                        ),
+                      ],
                     ),
                   ),
                 )
               : _delivery == null
-                  ? const Center(child: Text('Delivery not found'))
+                  ? Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Lottie.asset('assets/animations/browse.json',
+                            width: 180),
+                        const SizedBox(height: AppColors.spaceMD),
+                        Text(
+                          'Delivery not found',
+                          style: theme.textTheme.titleMedium,
+                        ),
+                      ],
+                    )
                   : SingleChildScrollView(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(AppColors.spaceMD),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _DetailCard(
-                            title: 'Status',
-                            child: _StatusChip(
+                            title: l10n.deliveryDetailsStatus,
+                            borderColor: borderColor,
+                            child: StatusChip(
                               status: (_delivery!['current_status'] ??
                                           _delivery!['status'])
                                       ?.toString() ??
@@ -259,7 +277,8 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
                           ),
                           const SizedBox(height: 16),
                           _DetailCard(
-                            title: 'Pickup',
+                            title: l10n.deliveryDetailsPickup,
+                            borderColor: borderColor,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -282,7 +301,8 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
                           ),
                           const SizedBox(height: 16),
                           _DetailCard(
-                            title: 'Dropoff',
+                            title: l10n.deliveryDetailsDropoff,
+                            borderColor: borderColor,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -317,6 +337,7 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
                           const SizedBox(height: 16),
                           _DetailCard(
                             title: 'Package',
+                            borderColor: borderColor,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -354,6 +375,7 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
                           const SizedBox(height: 16),
                           _DetailCard(
                             title: 'Payment & Cost',
+                            borderColor: borderColor,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -378,6 +400,7 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
                           const SizedBox(height: 16),
                           _DetailCard(
                             title: 'Timeline',
+                            borderColor: borderColor,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -409,76 +432,56 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
                           const SizedBox(height: 24),
                           SizedBox(
                             width: double.infinity,
-                            height: 50,
+                            height: AppColors.buttonHeightMD,
                             child: ElevatedButton(
                               onPressed:
                                   _isCancelling ? null : _navigateToTracking,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.primaryColor,
+                                foregroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(
+                                      AppColors.radiusLG),
                                 ),
                               ),
                               child: const Text(
                                 'Track Delivery',
                                 style: TextStyle(
-                                  color: Colors.white,
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ),
                           ),
-                          if (_delivery != null &&
-                              _hasAssignedDriver(_delivery!)) ...[
-                            const SizedBox(height: 12),
-                            SizedBox(
-                              width: double.infinity,
-                              height: 50,
-                              child: OutlinedButton.icon(
-                                onPressed: _openDriverChat,
-                                icon: const Icon(Icons.chat_bubble_outline),
-                                label: const Text('Message driver'),
-                                style: OutlinedButton.styleFrom(
-                                  side: BorderSide(
-                                    color: AppColors.primaryColor,
-                                    width: 1.5,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
                           const SizedBox(height: 12),
                           SizedBox(
                             width: double.infinity,
-                            height: 50,
+                            height: AppColors.buttonHeightMD,
                             child: OutlinedButton(
                               onPressed: _isCancelling ? null : _cancelOrder,
                               style: OutlinedButton.styleFrom(
                                 side: BorderSide(
-                                  color: Colors.red[400]!,
+                                  color: AppColors.errorColor,
                                   width: 1.5,
                                 ),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(
+                                      AppColors.radiusLG),
                                 ),
                               ),
                               child: _isCancelling
-                                  ? SizedBox(
+                                  ? const SizedBox(
                                       width: 24,
                                       height: 24,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
-                                        color: Colors.red[400],
+                                        color: AppColors.errorColor,
                                       ),
                                     )
                                   : Text(
                                       'Cancel Order',
                                       style: TextStyle(
-                                        color: Colors.red[700],
+                                        color: AppColors.errorColor,
                                         fontSize: 16,
                                         fontWeight: FontWeight.w600,
                                       ),
@@ -495,36 +498,33 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
 class _DetailCard extends StatelessWidget {
   final String title;
   final Widget child;
+  final Color borderColor;
 
-  const _DetailCard({required this.title, required this.child});
+  const _DetailCard({
+    required this.title,
+    required this.child,
+    required this.borderColor,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppColors.spaceMD),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).colorScheme.shadow.withOpacity(0.08),
-            spreadRadius: 1,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: scheme.surface,
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        border: Border.all(color: borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Theme.of(context).textTheme.titleMedium?.color,
-            ),
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
           ),
           const SizedBox(height: 12),
           child,
@@ -542,6 +542,7 @@ class _DetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     final v = value?.trim();
     if (v == null || v.isEmpty || v == 'null') return const SizedBox.shrink();
     return Padding(
@@ -553,48 +554,20 @@ class _DetailRow extends StatelessWidget {
             width: 120,
             child: Text(
               label,
-              style: TextStyle(
-                fontSize: 13,
-                color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.8),
-              ),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
             ),
           ),
           Expanded(
             child: Text(
               v,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Theme.of(context).textTheme.bodyLarge?.color,
-              ),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _StatusChip extends StatelessWidget {
-  final String status;
-
-  const _StatusChip({required this.status});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: AppColors.primaryColor.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        status,
-        style: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          color: Theme.of(context).textTheme.titleMedium?.color,
-        ),
       ),
     );
   }

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lottie/lottie.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/models/notification_model.dart';
 import 'package:hudhud_delivery/features/notifications/bloc/notifications_bloc.dart';
 import 'package:hudhud_delivery/features/notifications/data/data_provider/notifications_data_provider.dart';
@@ -39,7 +42,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       body: BlocBuilder<NotificationsBloc, NotificationsState>(
         builder: (context, state) {
           if (state is NotificationsLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const Padding(
+              padding: EdgeInsets.all(AppColors.spaceMD),
+              child: _NotificationsShimmer(),
+            );
           }
           if (state is NotificationsFailure) {
             return Center(
@@ -81,15 +87,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.notifications_none,
-                        size: 64, color: Colors.grey[400]),
-                    const SizedBox(height: 16),
+                    Lottie.asset('assets/animations/browse.json', width: 160),
+                    const SizedBox(height: AppColors.spaceMD),
                     Text(
                       'No notifications yet',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: theme.textTheme.bodyMedium?.color?.withOpacity(0.75),
-                      ),
+                      style: theme.textTheme.titleMedium,
                     ),
                   ],
                 ),
@@ -199,21 +201,20 @@ class _NotificationItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final iconColor =
-        notification.isRead ? Colors.grey : (Colors.blue[700] ?? Colors.blue);
+    final iconColor = notification.isRead
+        ? colorScheme.onSurfaceVariant
+        : AppColors.primaryColor;
     final timeAgo = _formatTimeAgo(notification.createdAt);
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      padding: const EdgeInsets.all(AppColors.spaceMD),
       decoration: BoxDecoration(
         color: colorScheme.surface,
-        border: Border(
-          left: BorderSide(
-            color: notification.isRead
-                ? Colors.grey[300]!
-                : (Colors.blue[700] ?? Colors.blue),
-            width: 4,
-          ),
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        border: Border.all(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? const Color(0xFF2A2A2A)
+              : const Color(0xFFEEEEEE),
         ),
       ),
       child: Row(
@@ -288,6 +289,36 @@ class _NotificationItem extends StatelessWidget {
       return '${(diff.inDays / 7).floor()}w ago';
     }
     return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+  }
+}
+
+class _NotificationsShimmer extends StatelessWidget {
+  const _NotificationsShimmer();
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseColor = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0);
+    final highlightColor =
+        isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF5F5F5);
+    return Column(
+      children: List.generate(5, (index) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Shimmer.fromColors(
+            baseColor: baseColor,
+            highlightColor: highlightColor,
+            child: Container(
+              height: 72,
+              decoration: BoxDecoration(
+                color: baseColor,
+                borderRadius: BorderRadius.circular(AppColors.radiusLG),
+              ),
+            ),
+          ),
+        );
+      }),
+    );
   }
 }
 

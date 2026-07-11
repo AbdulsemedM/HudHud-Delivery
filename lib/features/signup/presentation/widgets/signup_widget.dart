@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
+import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../screen/verify_contact_screen.dart';
 import '../../bloc/signup_bloc.dart';
@@ -9,27 +11,23 @@ class SignupTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Sign Up',
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: isDark ? cs.onSurface : const Color(0xFF2C3E50),
-            letterSpacing: 0.5,
+          l10n.actionSignUp,
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: theme.colorScheme.onSurface,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppColors.spaceSM),
         Text(
-          'Create your account and proceed to access all the Businesses offered to you',
-          style: TextStyle(
-            fontSize: 13,
-            color: isDark ? cs.onSurfaceVariant : Colors.grey[600],
+          l10n.loginSubtitle,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
             height: 1.4,
           ),
         ),
@@ -45,7 +43,6 @@ class SignupForm extends StatefulWidget {
   _SignupFormState createState() => _SignupFormState();
 }
 
-// Create the form with the global key
 Widget createSignupForm() {
   return SignupForm(key: signupFormKey);
 }
@@ -57,7 +54,6 @@ class SignupFormData {
   final String password;
   final String confirmPassword;
   final String phoneNumber;
-  final String referralCode;
 
   SignupFormData({
     required this.firstName,
@@ -66,12 +62,11 @@ class SignupFormData {
     required this.password,
     required this.confirmPassword,
     required this.phoneNumber,
-    required this.referralCode,
   });
 }
 
-// Global key to access form state
-final GlobalKey<_SignupFormState> signupFormKey = GlobalKey<_SignupFormState>();
+final GlobalKey<_SignupFormState> signupFormKey =
+    GlobalKey<_SignupFormState>();
 
 class _SignupFormState extends State<SignupForm> {
   final _formKey = GlobalKey<FormState>();
@@ -81,34 +76,29 @@ class _SignupFormState extends State<SignupForm> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _referralCodeController = TextEditingController();
   String _phoneNumber = '';
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
   bool _termsAccepted = false;
   bool _dataProtectionAccepted = false;
 
-  // Ethiopian phone number validation
   String? validateAndFormatPhoneNumber(String input) {
-    // Remove all whitespace and trim
     input = input.trim().replaceAll(RegExp(r'\s+'), '');
 
-    // Must only contain digits
     if (!RegExp(r'^\d+$').hasMatch(input)) {
       return null;
     }
 
-    // Remove starting '0' if present
     if (input.startsWith('0')) {
       input = input.substring(1);
     }
 
-    // Check if it starts with valid Ethiopian prefixes and has correct length
-    if ((input.startsWith('9') || input.startsWith('7')) && input.length == 9) {
-      return input; // Valid and cleaned
+    if ((input.startsWith('9') || input.startsWith('7')) &&
+        input.length == 9) {
+      return input;
     }
 
-    return null; // Invalid
+    return null;
   }
 
   SignupFormData getFormData() {
@@ -118,8 +108,8 @@ class _SignupFormState extends State<SignupForm> {
       email: _emailController.text.trim(),
       password: _passwordController.text.trim(),
       confirmPassword: _confirmPasswordController.text.trim(),
-      phoneNumber: _phoneNumber.isNotEmpty ? _phoneNumber : _phoneController.text.trim(),
-      referralCode: _referralCodeController.text.trim(),
+      phoneNumber:
+          _phoneNumber.isNotEmpty ? _phoneNumber : _phoneController.text.trim(),
     );
   }
 
@@ -139,88 +129,62 @@ class _SignupFormState extends State<SignupForm> {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     _phoneController.dispose();
-    _referralCodeController.dispose();
     super.dispose();
   }
 
-  TextStyle _signupLabelStyle(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    return TextStyle(
-      fontSize: 13,
-      color: isDark ? theme.colorScheme.onSurfaceVariant : Colors.grey[700],
-      fontWeight: FontWeight.w500,
-    );
-  }
-
-  TextStyle _signupFieldTextStyle(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    return TextStyle(
-      color: isDark ? theme.colorScheme.onSurface : Colors.grey[800],
-      fontSize: 14,
-    );
-  }
-
-  InputDecoration _signupFieldDecoration(
-    BuildContext context, {
-    required String hintText,
+  InputDecoration _fieldDecoration({
+    required ThemeData theme,
+    required String hint,
     Widget? suffixIcon,
   }) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
-    final fieldFill =
-        isDark ? cs.surfaceContainerHighest : Colors.grey[50]!;
-    final borderColor =
-        isDark ? cs.outline.withValues(alpha: 0.45) : Colors.grey[200]!;
-    final hintColor = isDark
-        ? cs.onSurfaceVariant.withValues(alpha: 0.75)
-        : Colors.grey[400]!;
-
     return InputDecoration(
-      hintText: hintText,
+      hintText: hint,
       hintStyle: TextStyle(
-        color: hintColor,
+        color: theme.colorScheme.onSurfaceVariant,
         fontSize: 14,
       ),
       suffixIcon: suffixIcon,
       filled: true,
-      fillColor: fieldFill,
+      fillColor: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFF4F4F4),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         borderSide: BorderSide.none,
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: borderColor),
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide.none,
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: AppColors.primaryColor, width: 2),
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
       ),
       errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.red, width: 2),
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: theme.colorScheme.error, width: 2),
       ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.red, width: 2),
+      contentPadding:
+          const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    );
+  }
+
+  Widget _buildLabel(BuildContext context, String label) {
+    final theme = Theme.of(context);
+    return Text(
+      label,
+      style: theme.textTheme.labelMedium?.copyWith(
+        color: theme.colorScheme.onSurfaceVariant,
       ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
-    final iconMuted =
-        isDark ? cs.onSurfaceVariant : Colors.grey[600]!;
-    final checkboxBodyStyle = TextStyle(
-      fontSize: 13,
-      color: isDark ? cs.onSurfaceVariant : Colors.grey[700],
+    final colorScheme = theme.colorScheme;
+    final checkboxBodyStyle = theme.textTheme.bodySmall?.copyWith(
+      color: colorScheme.onSurfaceVariant,
       height: 1.4,
     );
 
@@ -229,29 +193,27 @@ class _SignupFormState extends State<SignupForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // First Name and Last Name in a Row
           Row(
             children: [
-              // First Name Field
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'First name',
-                      style: _signupLabelStyle(context),
-                    ),
-                    const SizedBox(height: 6),
+                    _buildLabel(context, l10n.firstName),
+                    const SizedBox(height: AppColors.spaceSM),
                     TextFormField(
                       controller: _firstNameController,
-                      decoration: _signupFieldDecoration(
-                        context,
-                        hintText: 'Eg. John',
+                      decoration: _fieldDecoration(
+                        theme: theme,
+                        hint: l10n.hintFirstName,
                       ),
-                      style: _signupFieldTextStyle(context),
+                      style: TextStyle(
+                        color: colorScheme.onSurface,
+                        fontSize: 14,
+                      ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'First name is required';
+                          return l10n.pleaseEnterRecipientName;
                         }
                         return null;
                       },
@@ -259,27 +221,26 @@ class _SignupFormState extends State<SignupForm> {
                   ],
                 ),
               ),
-              const SizedBox(width: 16),
-              // Last Name Field
+              const SizedBox(width: AppColors.spaceMD),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Last name',
-                      style: _signupLabelStyle(context),
-                    ),
-                    const SizedBox(height: 6),
+                    _buildLabel(context, l10n.lastName),
+                    const SizedBox(height: AppColors.spaceSM),
                     TextFormField(
                       controller: _lastNameController,
-                      decoration: _signupFieldDecoration(
-                        context,
-                        hintText: 'Eg. Doe',
+                      decoration: _fieldDecoration(
+                        theme: theme,
+                        hint: l10n.hintLastName,
                       ),
-                      style: _signupFieldTextStyle(context),
+                      style: TextStyle(
+                        color: colorScheme.onSurface,
+                        fontSize: 14,
+                      ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Last name is required';
+                          return l10n.pleaseEnterRecipientName;
                         }
                         return null;
                       },
@@ -289,93 +250,70 @@ class _SignupFormState extends State<SignupForm> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
-
-          // Email Field
-          Text(
-            'Email address',
-            style: _signupLabelStyle(context),
-          ),
-          const SizedBox(height: 6),
+          const SizedBox(height: AppColors.spaceMD),
+          _buildLabel(context, l10n.emailAddress),
+          const SizedBox(height: AppColors.spaceSM),
           TextFormField(
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
-            decoration: _signupFieldDecoration(
-              context,
-              hintText: 'Eg. JohnDoe@gmail.com',
+            decoration: _fieldDecoration(
+              theme: theme,
+              hint: l10n.hintEmailExample,
             ),
-            style: _signupFieldTextStyle(context),
+            style: TextStyle(
+              color: colorScheme.onSurface,
+              fontSize: 14,
+            ),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
-                return 'Email is required';
+                return l10n.validationEmailRequired;
               }
-              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                return 'Please enter a valid email address';
+              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                  .hasMatch(value)) {
+                return l10n.validationEmailInvalid;
               }
               return null;
             },
           ),
-          const SizedBox(height: 16),
-
-          // Phone Number Field
-          Text(
-            'Phone number',
-            style: _signupLabelStyle(context),
-          ),
-          const SizedBox(height: 6),
+          const SizedBox(height: AppColors.spaceMD),
+          _buildLabel(context, l10n.phoneNumber),
+          const SizedBox(height: AppColors.spaceSM),
           TextFormField(
             controller: _phoneController,
             keyboardType: TextInputType.phone,
-            decoration: _signupFieldDecoration(
-              context,
-              hintText: 'Eg. 0712345678',
+            decoration: _fieldDecoration(
+              theme: theme,
+              hint: l10n.hintPhoneExample,
             ),
-            style: _signupFieldTextStyle(context),
+            style: TextStyle(
+              color: colorScheme.onSurface,
+              fontSize: 14,
+            ),
             onChanged: (value) {
               _phoneNumber = value;
             },
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
-                return 'Phone number is required';
+                return l10n.pleaseEnterRecipientPhone;
               }
               return null;
             },
           ),
-          const SizedBox(height: 16),
-
-          // Referral Code Field (Optional)
-          Text(
-            'Referral code (optional)',
-            style: _signupLabelStyle(context),
-          ),
-          const SizedBox(height: 6),
-          TextFormField(
-            controller: _referralCodeController,
-            textCapitalization: TextCapitalization.characters,
-            decoration: _signupFieldDecoration(
-              context,
-              hintText: 'Eg. UCZXSD3O',
-            ),
-            style: _signupFieldTextStyle(context),
-          ),
-          const SizedBox(height: 16),
-
-          // Password Field
-          Text(
-            'Password',
-            style: _signupLabelStyle(context),
-          ),
-          const SizedBox(height: 6),
+          const SizedBox(height: AppColors.spaceMD),
+          _buildLabel(context, l10n.labelPassword),
+          const SizedBox(height: AppColors.spaceSM),
           TextFormField(
             controller: _passwordController,
             obscureText: !_isPasswordVisible,
-            decoration: _signupFieldDecoration(
-              context,
-              hintText: 'Enter password',
+            decoration: _fieldDecoration(
+              theme: theme,
+              hint: l10n.hintPassword,
               suffixIcon: IconButton(
                 icon: Icon(
-                  _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                  color: iconMuted,
+                  _isPasswordVisible
+                      ? Icons.visibility_rounded
+                      : Icons.visibility_off_rounded,
+                  color: colorScheme.onSurfaceVariant,
                 ),
                 onPressed: () {
                   setState(() {
@@ -384,35 +322,35 @@ class _SignupFormState extends State<SignupForm> {
                 },
               ),
             ),
-            style: _signupFieldTextStyle(context),
+            style: TextStyle(
+              color: colorScheme.onSurface,
+              fontSize: 14,
+            ),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
-                return 'Password is required';
+                return l10n.validationPasswordRequired;
               }
               if (value.length < 8) {
-                return 'Password must be at least 8 characters';
+                return l10n.validationPasswordMin;
               }
               return null;
             },
           ),
-          const SizedBox(height: 16),
-
-          // Confirm Password Field
-          Text(
-            'Confirm Password',
-            style: _signupLabelStyle(context),
-          ),
-          const SizedBox(height: 6),
+          const SizedBox(height: AppColors.spaceMD),
+          _buildLabel(context, l10n.confirmNewPassword),
+          const SizedBox(height: AppColors.spaceSM),
           TextFormField(
             controller: _confirmPasswordController,
             obscureText: !_isConfirmPasswordVisible,
-            decoration: _signupFieldDecoration(
-              context,
-              hintText: 'Enter password',
+            decoration: _fieldDecoration(
+              theme: theme,
+              hint: l10n.hintEnterPassword,
               suffixIcon: IconButton(
                 icon: Icon(
-                  _isConfirmPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                  color: iconMuted,
+                  _isConfirmPasswordVisible
+                      ? Icons.visibility_rounded
+                      : Icons.visibility_off_rounded,
+                  color: colorScheme.onSurfaceVariant,
                 ),
                 onPressed: () {
                   setState(() {
@@ -421,97 +359,67 @@ class _SignupFormState extends State<SignupForm> {
                 },
               ),
             ),
-            style: _signupFieldTextStyle(context),
+            style: TextStyle(
+              color: colorScheme.onSurface,
+              fontSize: 14,
+            ),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
-                return 'Please confirm your password';
+                return l10n.validationPasswordRequired;
               }
               if (value != _passwordController.text) {
-                return 'Passwords do not match';
+                return l10n.validationPasswordRequired;
               }
               return null;
             },
           ),
-          const SizedBox(height: 20),
-
-          // Terms & Conditions Checkbox
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Checkbox(
-                value: _termsAccepted,
-                onChanged: (value) {
-                  setState(() {
-                    _termsAccepted = value ?? false;
-                  });
-                },
-                activeColor: AppColors.primaryColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: RichText(
-                    text: TextSpan(
-                      style: checkboxBodyStyle,
-                      children: [
-                        TextSpan(text: "I have read and accepted "),
-                        TextSpan(
-                          text: "Hudhud's Terms & Conditions",
-                          style: TextStyle(
-                            color: AppColors.primaryColor,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
+          const SizedBox(height: AppColors.spaceLG),
+          _SignupCheckboxRow(
+            value: _termsAccepted,
+            onChanged: (value) {
+              setState(() {
+                _termsAccepted = value ?? false;
+              });
+            },
+            child: RichText(
+              text: TextSpan(
+                style: checkboxBodyStyle,
+                children: [
+                  TextSpan(text: '${l10n.actionAccept} '),
+                  TextSpan(
+                    text: l10n.settingsTermsConditions,
+                    style: TextStyle(
+                      color: AppColors.primaryColor,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
-          const SizedBox(height: 8),
-
-          // Data Protection Checkbox
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Checkbox(
-                value: _dataProtectionAccepted,
-                onChanged: (value) {
-                  setState(() {
-                    _dataProtectionAccepted = value ?? false;
-                  });
-                },
-                activeColor: AppColors.primaryColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: RichText(
-                    text: TextSpan(
-                      style: checkboxBodyStyle,
-                      children: [
-                        TextSpan(text: "I consent to the collection and processing of my personal data in accordance with the applicable "),
-                        TextSpan(
-                          text: "Data Protection",
-                          style: TextStyle(
-                            color: AppColors.primaryColor,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        TextSpan(text: " laws."),
-                      ],
+          const SizedBox(height: AppColors.spaceSM),
+          _SignupCheckboxRow(
+            value: _dataProtectionAccepted,
+            onChanged: (value) {
+              setState(() {
+                _dataProtectionAccepted = value ?? false;
+              });
+            },
+            child: RichText(
+              text: TextSpan(
+                style: checkboxBodyStyle,
+                children: [
+                  TextSpan(text: '${l10n.actionAccept} '),
+                  TextSpan(
+                    text: l10n.verificationStatus,
+                    style: TextStyle(
+                      color: AppColors.primaryColor,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
         ],
       ),
@@ -519,18 +427,51 @@ class _SignupFormState extends State<SignupForm> {
   }
 }
 
+class _SignupCheckboxRow extends StatelessWidget {
+  final bool value;
+  final ValueChanged<bool?> onChanged;
+  final Widget child;
+
+  const _SignupCheckboxRow({
+    required this.value,
+    required this.onChanged,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Checkbox(
+          value: value,
+          onChanged: onChanged,
+          activeColor: AppColors.primaryColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: child,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class SignupButton extends StatelessWidget {
-  final bool resumeAfterAuth;
+  const SignupButton({super.key});
 
-  const SignupButton({super.key, this.resumeAfterAuth = false});
-
-  void _handleSignup(BuildContext context) {
+  void _handleSignup(BuildContext context, AppLocalizations l10n) {
     final formState = signupFormKey.currentState;
     if (formState == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill in all required fields'),
-          backgroundColor: Colors.red,
+        SnackBar(
+          content: Text(l10n.validationHandymanSelectLocation),
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
       return;
@@ -538,9 +479,9 @@ class SignupButton extends StatelessWidget {
 
     if (!formState.isFormValid()) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill in all required fields'),
-          backgroundColor: Colors.red,
+        SnackBar(
+          content: Text(l10n.validationHandymanSelectLocation),
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
       return;
@@ -548,9 +489,9 @@ class SignupButton extends StatelessWidget {
 
     if (!formState.areCheckboxesAccepted()) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please accept the Terms & Conditions and Data Protection consent'),
-          backgroundColor: Colors.red,
+        SnackBar(
+          content: Text(l10n.paymentSelectMethodFirst),
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
       return;
@@ -558,57 +499,43 @@ class SignupButton extends StatelessWidget {
 
     final formData = formState.getFormData();
 
-    // Trigger signup event
     context.read<SignupBloc>().add(
           SignupFormSubmitted(
             '${formData.firstName} ${formData.lastName}',
             formData.email,
             formData.phoneNumber,
             formData.password,
-            formData.password, // confirmPassword same as password
-            formData.referralCode,
+            formData.password,
           ),
         );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colorScheme = Theme.of(context).colorScheme;
+
     return BlocListener<SignupBloc, SignupState>(
       listener: (context, state) {
         if (state is SignupSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Account created successfully!'),
-              backgroundColor: Colors.green,
+            SnackBar(
+              content: Text(l10n.profileRefreshed),
+              backgroundColor: AppColors.successColor,
             ),
           );
-          if (resumeAfterAuth) {
-            Navigator.push<bool>(
-              context,
-              MaterialPageRoute<bool>(
-                builder: (context) => VerifyContactScreen(
-                  resumeAfterAuth: true,
-                ),
-              ),
-            ).then((verified) {
-              if (verified == true && context.mounted) {
-                Navigator.pop(context, true);
-              }
-            });
-          } else {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const VerifyContactScreen(),
-              ),
-              (route) => false,
-            );
-          }
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const VerifyContactScreen(),
+            ),
+            (route) => false,
+          );
         } else if (state is SignupFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.message),
-              backgroundColor: Colors.red,
+              backgroundColor: colorScheme.error,
             ),
           );
         }
@@ -618,33 +545,43 @@ class SignupButton extends StatelessWidget {
           final isLoading = state is SignupLoading;
           return SizedBox(
             width: double.infinity,
-            height: 48,
-            child: ElevatedButton(
-              onPressed: isLoading ? null : () => _handleSignup(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+            height: 52,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: AppColors.primaryGradient,
                 ),
-                elevation: 0,
+                borderRadius: BorderRadius.circular(14),
               ),
-              child: isLoading
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
+              child: ElevatedButton(
+                onPressed: isLoading
+                    ? null
+                    : () => _handleSignup(context, l10n),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                child: isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : Text(
+                        l10n.actionSignUp,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    )
-                  : const Text(
-                      'Sign Up',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+              ),
             ),
           );
         },

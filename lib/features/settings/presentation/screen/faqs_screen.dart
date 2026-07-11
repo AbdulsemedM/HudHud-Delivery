@@ -90,7 +90,7 @@ class _FAQsScreenState extends State<FAQsScreen> {
                 Container(
                   decoration: BoxDecoration(
                     color: isDark ? colorScheme.surfaceContainerHighest : Colors.grey[100],
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(AppColors.radiusLG),
                   ),
                   child: TextField(
                     onChanged: (value) {
@@ -187,7 +187,7 @@ class _FAQsScreenState extends State<FAQsScreen> {
                     color: isExpanded
                         ? AppColors.primaryColor.withOpacity(0.1)
                         : colorScheme.surface,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(AppColors.radiusLG),
                     border: Border.all(
                       color: isDark ? colorScheme.outline : Colors.grey[200]!,
                       width: 1,

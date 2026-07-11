@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 
 class TermsConditionsScreen extends StatelessWidget {
   const TermsConditionsScreen({super.key});
@@ -71,27 +72,34 @@ class _ClauseSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Clause $clauseNumber',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: theme.textTheme.titleMedium?.color,
+    final isDark = theme.brightness == Brightness.dark;
+    final borderColor =
+        isDark ? const Color(0xFF2A2A2A) : const Color(0xFFEEEEEE);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppColors.spaceMD),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        border: Border.all(color: borderColor),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Clause $clauseNumber',
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: AppColors.primaryColor,
+            ),
           ),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          content,
-          style: TextStyle(
-            fontSize: 14,
-            color: theme.textTheme.bodyMedium?.color?.withOpacity(0.9),
-            height: 1.6,
+          const SizedBox(height: 12),
+          Text(
+            content,
+            style: theme.textTheme.bodyMedium?.copyWith(height: 1.6),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

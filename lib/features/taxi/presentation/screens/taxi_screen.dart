@@ -2,20 +2,17 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
-import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/app/services/location_service.dart';
 import 'package:hudhud_delivery/core/widgets/location_search_field.dart';
 import 'package:hudhud_delivery/app/services/google_places_service.dart';
 import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
-import 'package:hudhud_delivery/core/widgets/centered_pin_map.dart';
-import 'package:hudhud_delivery/core/widgets/map_draggable_sheet_scaffold.dart';
 import 'package:hudhud_delivery/app/models/place_result.dart';
-import 'package:hudhud_delivery/app/utils/human_readable_address.dart';
 import 'package:hudhud_delivery/features/taxi/data/ride_data_provider.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
-import 'package:hudhud_delivery/l10n/app_localizations.dart';
-import 'package:hudhud_delivery/features/guest/utils/guest_sign_in_prompt.dart';
+import 'package:hudhud_delivery/core/widgets/status_chip.dart';
+import 'package:shimmer/shimmer.dart';
 import 'finding_driver_screen.dart';
 import 'driver_on_the_way_screen.dart';
 import 'trip_selection_screen.dart';
@@ -61,10 +58,6 @@ class _TaxiScreenState extends State<TaxiScreen> {
   double? _routeDistanceKm;
   bool _isLoadingRoute = false;
   bool? _hasGoogleMapsApiKey;
-  double _mapBottomPadding = 0;
-
-  /// After programmatic camera moves, ignore one idle callback from [CenteredPinMap].
-  bool _skipNextIdleDestinationUpdate = false;
 
   static gmaps.LatLng _toG(LatLng p) => gmaps.LatLng(p.latitude, p.longitude);
 
@@ -74,11 +67,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
     _loadMapsAvailability();
     _getCurrentLocation();
     _loadSuggestedLocations();
-    if (GuestBrowseService().isGuestBrowseMode) {
-      _isCheckingActiveRide = false;
-    } else {
-      _checkActiveRide();
-    }
+    _checkActiveRide();
   }
 
   Future<void> _loadMapsAvailability() async {
@@ -111,13 +100,10 @@ class _TaxiScreenState extends State<TaxiScreen> {
             _isLoadingLocation = false;
           });
 
-          _skipNextIdleDestinationUpdate = true;
           _mapController?.moveCamera(
             gmaps.CameraUpdate.newLatLngZoom(_toG(latLng), 13.0),
           );
-          if (!GuestBrowseService().isGuestBrowseMode) {
-            _fetchAvailableVehicles();
-          }
+          _fetchAvailableVehicles();
         }
       } else {
         if (mounted) {
@@ -135,104 +121,21 @@ class _TaxiScreenState extends State<TaxiScreen> {
     }
   }
 
-  /// Parses GET /api/user/rides/active body; returns null if no real active ride.
-  Map<String, dynamic>? _parseActiveRidePayload(dynamic raw) {
-    if (raw == null) return null;
-
-    Map<String, dynamic>? ride;
-    if (raw is Map<String, dynamic>) {
-      final inner = raw['data'];
-      if (inner is Map) {
-        ride = Map<String, dynamic>.from(inner);
-      } else if (raw['ride'] is Map) {
-        ride = Map<String, dynamic>.from(raw['ride'] as Map);
-      } else if (raw.containsKey('id')) {
-        ride = raw;
-      }
-    }
-
-    if (ride == null) return null;
-
-    final id = ride['id'];
-    if (id == null || id.toString().isEmpty || id.toString() == '0') {
-      return null;
-    }
-
-    final status = (ride['status'] as String? ?? '').toLowerCase();
-    const terminal = {
-      'completed',
-      'cancelled',
-      'canceled',
-      'failed',
-      'expired',
-      'rejected',
-    };
-    if (terminal.contains(status)) return null;
-
-    return ride;
-  }
-
-  bool _hasAssignedDriver(Map<String, dynamic> ride) {
-    final driverId = ride['driver_id'];
-    return driverId != null &&
-        driverId.toString().isNotEmpty &&
-        driverId.toString() != '0';
-  }
-
-  bool _isInProgressRideStatus(String status) {
-    return {
-      'accepted',
-      'driver_arrived',
-      'started',
-      'in_progress',
-      'arrived',
-    }.contains(status);
-  }
-
-  /// Active ride sheet only when there is a real trip to track — not when
-  /// searching with zero drivers nearby (show normal booking UI instead).
-  bool _shouldShowActiveRideUI() {
-    final ride = _activeRide;
-    if (ride == null) return false;
-
-    final status = (ride['status'] as String? ?? '').toLowerCase();
-    if (_hasAssignedDriver(ride) || _isInProgressRideStatus(status)) {
-      return true;
-    }
-
-    if (status == 'searching' && (_totalAvailable ?? 0) == 0) {
-      return false;
-    }
-
-    return status == 'searching' && (_totalAvailable ?? 0) > 0;
-  }
-
-  void _reconcileActiveRideUI() {
-    if (_activeRide != null && !_shouldShowActiveRideUI()) {
-      _activeRide = null;
-    }
-  }
-
   Future<void> _checkActiveRide() async {
-    if (!await requireSignInForBackend(context)) {
-      if (mounted) setState(() => _isCheckingActiveRide = false);
-      return;
-    }
     final result = await _rideDataProvider.getActiveRide();
 
     if (!mounted) return;
 
     setState(() {
       _isCheckingActiveRide = false;
-      if (result['statusCode'] == 200) {
-        _activeRide = _parseActiveRidePayload(result['data']);
+      if (result['statusCode'] == 200 && result['data'] != null) {
+        _activeRide = result['data'] as Map<String, dynamic>;
       } else {
         _activeRide = null;
       }
-      _reconcileActiveRideUI();
     });
 
-    if (_shouldShowActiveRideUI()) {
+    if (_activeRide != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _centerMapOnActiveRide());
     }
   }
@@ -256,16 +159,14 @@ class _TaxiScreenState extends State<TaxiScreen> {
           pickup.longitude > dropoff.longitude ? pickup.longitude : dropoff.longitude,
         ),
       );
-      _skipNextIdleDestinationUpdate = true;
       _mapController?.moveCamera(
         gmaps.CameraUpdate.newLatLngBounds(bounds, 80),
       );
     }
   }
 
-  void _onTrackActiveRide() async {
-    if (!await requireSignInForBackend(context)) return;
-    if (!_shouldShowActiveRideUI()) return;
+  void _onTrackActiveRide() {
+    if (_activeRide == null) return;
 
     final l10n = context.l10n;
     final pickupLat = double.tryParse(_activeRide!['pickup_latitude']?.toString() ?? '');
@@ -316,7 +217,6 @@ class _TaxiScreenState extends State<TaxiScreen> {
             tripType: tripName,
             price: estimatedFare,
             paymentMethod: paymentMethod,
-            rideId: _activeRide!['id'] as int?,
           ),
         ),
       ).then((_) => _checkActiveRide());
@@ -324,7 +224,6 @@ class _TaxiScreenState extends State<TaxiScreen> {
   }
 
   Future<void> _fetchAvailableVehicles() async {
-    if (GuestBrowseService().isGuestBrowseMode) return;
     final result = await _rideDataProvider.getAvailableVehicles(
       latitude: _currentPosition.latitude,
       longitude: _currentPosition.longitude,
@@ -359,16 +258,10 @@ class _TaxiScreenState extends State<TaxiScreen> {
         ));
       }
 
-      final totalRaw = data['total_available'];
-      final total = totalRaw is int
-          ? totalRaw
-          : int.tryParse(totalRaw?.toString() ?? '');
-
       setState(() {
         _availableDrivers = drivers;
-        _totalAvailable = total ?? 0;
+        _totalAvailable = data['total_available'] as int?;
         _estimatedWaitTime = data['estimated_wait_time'] as int?;
-        _reconcileActiveRideUI();
       });
     }
   }
@@ -407,7 +300,6 @@ class _TaxiScreenState extends State<TaxiScreen> {
   }
 
   void _onLocationSelected(PlaceResult place) {
-    _skipNextIdleDestinationUpdate = true;
     setState(() {
       _destinationPosition = place.coordinates;
       _destinationController.text = place.shortAddress;
@@ -416,47 +308,6 @@ class _TaxiScreenState extends State<TaxiScreen> {
       _isLoadingRoute = true;
     });
     _fetchRouteAndNavigate(place.shortAddress);
-  }
-
-  Future<void> _onDestinationCenterChanged(gmaps.LatLng g) async {
-    if (_skipNextIdleDestinationUpdate) {
-      _skipNextIdleDestinationUpdate = false;
-      return;
-    }
-    final latLng = LatLng(g.latitude, g.longitude);
-    if (_calculateDistance(_currentPosition, latLng) < 100) {
-      return;
-    }
-
-    try {
-      final places = await GooglePlacesService.reverseGeocode(
-        g.latitude,
-        g.longitude,
-      );
-
-      if (!mounted || places.isEmpty) return;
-
-      final place = HumanReadableAddress.pickBestPlace(places);
-      if (place == null) return;
-      setState(() {
-        _destinationPosition = latLng;
-        _destinationController.text = place.shortAddress;
-        _routePolylinePoints = null;
-        _routeDistanceKm = null;
-        _isLoadingRoute = true;
-      });
-
-      await _fetchRouteDirections();
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(context.l10n.taxiErrorWithDetails(e.toString())),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      }
-    }
   }
 
   Future<void> _fetchRouteAndNavigate(String destinationAddress) async {
@@ -501,15 +352,12 @@ class _TaxiScreenState extends State<TaxiScreen> {
 
   Future<void> _handleMapTap(gmaps.LatLng point) async {
     final latLng = LatLng(point.latitude, point.longitude);
+    // Don't set destination if user tapped on their current location
     final distance = _calculateDistance(_currentPosition, latLng);
-    if (distance < 100) {
+    if (distance < 0.001) {
+      // Less than 100 meters, probably the same location
       return;
     }
-
-    _skipNextIdleDestinationUpdate = true;
-    await _mapController?.animateCamera(
-      gmaps.CameraUpdate.newLatLngZoom(point, 15.0),
-    );
 
     // Show loading indicator
     setState(() {
@@ -524,8 +372,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
       );
 
       if (mounted && places.isNotEmpty) {
-        final place = HumanReadableAddress.pickBestPlace(places);
-        if (place == null) return;
+        final place = places.first;
         setState(() {
           _destinationPosition = latLng;
           _destinationController.text = place.shortAddress;
@@ -534,6 +381,11 @@ class _TaxiScreenState extends State<TaxiScreen> {
           _routeDistanceKm = null;
           _isLoadingRoute = true;
         });
+
+        // Move map to show the destination
+        _mapController?.moveCamera(
+          gmaps.CameraUpdate.newLatLngZoom(point, 15.0),
+        );
 
         await _fetchRouteAndNavigate(place.shortAddress);
       } else {
@@ -582,7 +434,6 @@ class _TaxiScreenState extends State<TaxiScreen> {
 
   void _showTimePicker() {
     final theme = Theme.of(context);
-    final primary = theme.colorScheme.primary;
     final l10n = context.l10n;
     showModalBottomSheet<void>(
       context: context,
@@ -593,7 +444,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: Icon(Icons.access_time, color: primary),
+              leading: const Icon(Icons.access_time, color: AppColors.primaryColor),
               title: Text(l10n.taxiTimeNow),
               onTap: () {
                 setState(() {
@@ -603,7 +454,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.schedule, color: primary),
+              leading: const Icon(Icons.schedule, color: AppColors.primaryColor),
               title: Text(l10n.taxiScheduleForLater),
               onTap: () {
                 setState(() {
@@ -633,66 +484,12 @@ class _TaxiScreenState extends State<TaxiScreen> {
     return (lat != null && lng != null) ? LatLng(lat, lng) : null;
   }
 
-  String _activeRideStatusLabel(AppLocalizations l10n) {
-    final status = _activeRide?['status'] as String? ?? '';
-    switch (status) {
-      case 'searching':
-        return l10n.taxiStatusFindingDriver;
-      case 'accepted':
-        return l10n.taxiStatusDriverOnTheWay;
-      case 'driver_arrived':
-        return l10n.taxiStatusDriverArrived;
-      case 'started':
-        return l10n.taxiStatusTripInProgress;
-      default:
-        return status.isNotEmpty
-            ? status.replaceAll('_', ' ')
-            : l10n.taxiStatusActiveRide;
-    }
+  Color _cardBorder(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? AppColors.darkBorder : const Color(0xFFEEEEEE);
   }
 
-  void _onSheetLayoutChanged(double extent, double bodyHeight) {
-    final padding = extent * bodyHeight;
-    if ((padding - _mapBottomPadding).abs() > 1) {
-      setState(() => _mapBottomPadding = padding);
-    }
-    if (_shouldShowActiveRideUI()) {
-      _fitActiveRideBounds();
-    }
-  }
-
-  void _fitActiveRideBounds() {
-    final pickup = _activePickup;
-    final dropoff = _activeDropoff;
-    if (pickup == null || dropoff == null) return;
-
-    final bounds = gmaps.LatLngBounds(
-      southwest: gmaps.LatLng(
-        pickup.latitude < dropoff.latitude
-            ? pickup.latitude
-            : dropoff.latitude,
-        pickup.longitude < dropoff.longitude
-            ? pickup.longitude
-            : dropoff.longitude,
-      ),
-      northeast: gmaps.LatLng(
-        pickup.latitude > dropoff.latitude
-            ? pickup.latitude
-            : dropoff.latitude,
-        pickup.longitude > dropoff.longitude
-            ? pickup.longitude
-            : dropoff.longitude,
-      ),
-    );
-    _mapController?.moveCamera(
-      gmaps.CameraUpdate.newLatLngBounds(bounds, 50),
-    );
-  }
-
-  Widget _buildActiveRideSheet(
-    BuildContext context,
-    ScrollController scrollController,
-  ) {
+  Widget _buildActiveRideSheet(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final l10n = context.l10n;
@@ -700,111 +497,96 @@ class _TaxiScreenState extends State<TaxiScreen> {
     final dropoffLocation = _activeRide!['dropoff_location'] as String? ?? l10n.taxiDestination;
     final estimatedFare = _activeRide!['estimated_fare']?.toString();
 
+    final borderColor = _cardBorder(context);
+
     return Container(
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
+          topLeft: Radius.circular(AppColors.radiusXL),
+          topRight: Radius.circular(AppColors.radiusXL),
+        ),
+        border: Border(
+          top: BorderSide(color: borderColor),
+          left: BorderSide(color: borderColor),
+          right: BorderSide(color: borderColor),
         ),
       ),
-      child: ListView(
-        controller: scrollController,
-        padding: const EdgeInsets.only(bottom: 24),
+      child: Column(
         children: [
-          Center(
-            child: Container(
-              margin: const EdgeInsets.only(top: 8),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: colorScheme.outlineVariant,
-                borderRadius: BorderRadius.circular(2),
-              ),
+          Container(
+            margin: const EdgeInsets.only(top: 8),
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: colorScheme.outlineVariant,
+              borderRadius: BorderRadius.circular(2),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.local_taxi, color: colorScheme.primary, size: 24),
+              Icon(Icons.local_taxi, color: AppColors.primaryColor, size: 24),
               const SizedBox(width: 8),
-              Flexible(
-                child: Text(
-                  l10n.taxiActiveRide,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.primary,
-                  ),
-                  textAlign: TextAlign.center,
+              Text(
+                l10n.taxiActiveRide,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primaryColor,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          Center(
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 20),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: colorScheme.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                _activeRideStatusLabel(l10n),
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: colorScheme.primary,
-                ),
-              ),
+          const SizedBox(height: AppColors.spaceSM),
+          StatusChip(status: _activeRide?['status'] as String? ?? 'active'),
+          const SizedBox(height: AppColors.spaceMD),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: AppColors.spaceMD),
+            padding: const EdgeInsets.all(AppColors.spaceMD),
+            decoration: BoxDecoration(
+              color: colorScheme.surface,
+              borderRadius: BorderRadius.circular(AppColors.radiusLG),
+              border: Border.all(color: borderColor),
             ),
-          ),
-          const SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildLocationRow(
                   context,
-                  Icons.trip_origin,
+                  Icons.trip_origin_rounded,
                   pickupLocation,
-                  colorScheme.primary,
+                  AppColors.successColor,
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: AppColors.spaceMD),
                 _buildLocationRow(
                   context,
-                  Icons.location_on,
+                  Icons.location_on_rounded,
                   dropoffLocation,
-                  colorScheme.error,
+                  AppColors.errorColor,
                 ),
                 if (estimatedFare != null && estimatedFare != 'null') ...[
-                  const SizedBox(height: 10),
+                  const SizedBox(height: AppColors.spaceMD),
+                  Divider(color: borderColor, height: 1),
+                  const SizedBox(height: AppColors.spaceMD),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         l10n.taxiEstFare,
-                        style: TextStyle(
-                          fontSize: 14,
+                        style: theme.textTheme.bodyMedium?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),
                       ),
-                      Flexible(
-                        child: Text(
-                          l10n.taxiFareAmount(
-                            double.tryParse(estimatedFare)
-                                    ?.toStringAsFixed(2) ??
-                                estimatedFare,
-                          ),
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: colorScheme.onSurface,
-                          ),
-                          textAlign: TextAlign.end,
+                      Text(
+                        l10n.taxiFareAmount(
+                          double.tryParse(estimatedFare)?.toStringAsFixed(2) ??
+                              estimatedFare,
+                        ),
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primaryColor,
                         ),
                       ),
                     ],
@@ -813,19 +595,19 @@ class _TaxiScreenState extends State<TaxiScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppColors.spaceLG),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: AppColors.spaceMD),
             child: SizedBox(
               width: double.infinity,
-              height: 48,
+              height: AppColors.buttonHeightMD,
               child: FilledButton(
                 onPressed: _onTrackActiveRide,
                 style: FilledButton.styleFrom(
-                  backgroundColor: colorScheme.primary,
+                  backgroundColor: AppColors.primaryColor,
                   foregroundColor: colorScheme.onPrimary,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(AppColors.radiusLG),
                   ),
                 ),
                 child: Text(
@@ -838,31 +620,29 @@ class _TaxiScreenState extends State<TaxiScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 8),
-          Center(
-            child: TextButton(
-              onPressed: _isCheckingActiveRide
-                  ? null
-                  : () {
-                      setState(() => _isCheckingActiveRide = true);
-                      _checkActiveRide();
-                    },
-              child: _isCheckingActiveRide
-                  ? SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: colorScheme.primary,
-                      ),
-                    )
-                  : Text(
-                      l10n.taxiRefreshStatus,
-                      style:
-                          TextStyle(color: colorScheme.primary, fontSize: 14),
+          const SizedBox(height: 12),
+          TextButton(
+            onPressed: _isCheckingActiveRide
+                ? null
+                : () {
+                    setState(() => _isCheckingActiveRide = true);
+                    _checkActiveRide();
+                  },
+            child: _isCheckingActiveRide
+                ? SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.primaryColor,
                     ),
-            ),
+                  )
+                : Text(
+                    l10n.taxiRefreshStatus,
+                    style: TextStyle(color: AppColors.primaryColor, fontSize: 14),
+                  ),
           ),
+          const SizedBox(height: 16),
         ],
       ),
     );
@@ -905,6 +685,17 @@ class _TaxiScreenState extends State<TaxiScreen> {
     LatLng? activeDropoff,
   ) {
     final Set<gmaps.Marker> markers = {};
+    if (!hasActiveRide) {
+      markers.add(
+        gmaps.Marker(
+          markerId: const gmaps.MarkerId('current'),
+          position: _toG(_currentPosition),
+          icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+            gmaps.BitmapDescriptor.hueAzure,
+          ),
+        ),
+      );
+    }
     if (hasActiveRide && activePickup != null) {
       markers.add(
         gmaps.Marker(
@@ -912,6 +703,17 @@ class _TaxiScreenState extends State<TaxiScreen> {
           position: _toG(activePickup),
           icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
             gmaps.BitmapDescriptor.hueAzure,
+          ),
+        ),
+      );
+    }
+    if (_destinationPosition != null && !hasActiveRide) {
+      markers.add(
+        gmaps.Marker(
+          markerId: const gmaps.MarkerId('destination'),
+          position: _toG(_destinationPosition!),
+          icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+            gmaps.BitmapDescriptor.hueRed,
           ),
         ),
       );
@@ -948,7 +750,6 @@ class _TaxiScreenState extends State<TaxiScreen> {
     bool hasActiveRide,
     LatLng? activePickup,
     LatLng? activeDropoff,
-    Color routeColor,
   ) {
     final Set<gmaps.Polyline> polylines = {};
     if (_destinationPosition != null && !hasActiveRide) {
@@ -959,7 +760,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
         gmaps.Polyline(
           polylineId: const gmaps.PolylineId('route'),
           points: points,
-          color: routeColor,
+          color: AppColors.primaryColor,
           width: 3,
         ),
       );
@@ -969,7 +770,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
         gmaps.Polyline(
           polylineId: const gmaps.PolylineId('active_route'),
           points: [_toG(activePickup), _toG(activeDropoff)],
-          color: routeColor,
+          color: AppColors.primaryColor,
           width: 3,
         ),
       );
@@ -982,302 +783,341 @@ class _TaxiScreenState extends State<TaxiScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final l10n = context.l10n;
-    final showActiveRide = _shouldShowActiveRideUI();
-    final activePickup = showActiveRide ? _activePickup : null;
-    final activeDropoff = showActiveRide ? _activeDropoff : null;
+    final hasActiveRide = _activeRide != null;
+    final activePickup = _activePickup;
+    final activeDropoff = _activeDropoff;
 
-    final overlayTop = mapOverlayTop(context, includeStatusBarInset: false);
+    final borderColor = _cardBorder(context);
 
-    return MapDraggableSheetScaffold(
-      backgroundColor: colorScheme.surface,
-      initialChildSize: showActiveRide ? 0.45 : 0.35,
-      minChildSize: 0.25,
-      maxChildSize: 0.75,
-      onSheetLayoutChanged: _onSheetLayoutChanged,
-      map: _buildMapOrFallback(
-        context,
-        showActiveRide,
-        activePickup,
-        activeDropoff,
-      ),
-      mapOverlays: [
-        if (!showActiveRide && _totalAvailable != null && _totalAvailable! > 0)
+    final screenHeight = MediaQuery.of(context).size.height;
+    final bottomSheetInitialFraction = hasActiveRide ? 0.45 : 0.35;
+    final mapBottom = screenHeight * bottomSheetInitialFraction;
+
+    return Scaffold(
+      body: Stack(
+        children: [
           Positioned(
-            top: overlayTop + 48,
-            left: 16,
-            right: 16,
-            child: Center(
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHigh,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: colorScheme.shadow.withValues(alpha: 0.12),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.local_taxi,
-                        color: colorScheme.primary, size: 20),
-                    const SizedBox(width: 8),
-                    Text(
-                      l10n.taxiCarsNearby(_totalAvailable!),
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                    if (_estimatedWaitTime != null &&
-                        _estimatedWaitTime! > 0) ...[
-                      const SizedBox(width: 12),
-                      Icon(
-                        Icons.access_time,
-                        size: 16,
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                      const SizedBox(width: 4),
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: mapBottom,
+            child: _buildMapOrFallback(
+              context,
+              hasActiveRide,
+              activePickup,
+              activeDropoff,
+            ),
+          ),
+          // Available cars info chip - hide when active ride
+          if (!hasActiveRide && _totalAvailable != null && _totalAvailable! > 0)
+            Positioned(
+              top: 95,
+              left: 16,
+              right: 16,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppColors.spaceMD,
+                    vertical: AppColors.spaceSM,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colorScheme.surface,
+                    borderRadius: BorderRadius.circular(AppColors.radiusFull),
+                    border: Border.all(color: borderColor),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.local_taxi, color: AppColors.primaryColor, size: 20),
+                      const SizedBox(width: 8),
                       Text(
-                        l10n.taxiMinutesWait(_estimatedWaitTime!),
-                        style: theme.textTheme.bodySmall?.copyWith(
-                              fontSize: 13,
-                              color: colorScheme.onSurfaceVariant,
-                            ) ??
-                            TextStyle(
-                              fontSize: 13,
-                              color: colorScheme.onSurfaceVariant,
-                            ),
+                        l10n.taxiCarsNearby(_totalAvailable!),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                          color: colorScheme.onSurface,
+                        ),
                       ),
+                      if (_estimatedWaitTime != null && _estimatedWaitTime! > 0) ...[
+                        const SizedBox(width: 12),
+                        Icon(
+                          Icons.access_time,
+                          size: 16,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          l10n.taxiMinutesWait(_estimatedWaitTime!),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                                fontSize: 13,
+                                color: colorScheme.onSurfaceVariant,
+                              ) ??
+                              TextStyle(
+                                fontSize: 13,
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               ),
             ),
-          ),
-        Positioned(
-          right: 16,
-          top: overlayTop,
-          child: FloatingActionButton(
-            heroTag: 'current_location',
-            mini: true,
-            backgroundColor: colorScheme.surfaceContainerHigh,
-            onPressed: () async {
-              await _getCurrentLocation();
-              _fetchAvailableVehicles();
-            },
-            child: Icon(
-              Icons.my_location,
-              color: _isLoadingLocation
-                  ? colorScheme.onSurfaceVariant
-                  : colorScheme.primary,
+          // Current location button
+          Positioned(
+            right: 16,
+            top: 100,
+            child: FloatingActionButton(
+              heroTag: 'current_location',
+              mini: true,
+              elevation: 0,
+              backgroundColor: colorScheme.surface,
+              shape: CircleBorder(
+                side: BorderSide(color: borderColor),
+              ),
+              onPressed: () async {
+                await _getCurrentLocation();
+                _fetchAvailableVehicles();
+              },
+              child: Icon(
+                Icons.my_location,
+                color: _isLoadingLocation
+                    ? colorScheme.onSurfaceVariant
+                    : colorScheme.primary,
+              ),
             ),
           ),
-        ),
-      ],
-      sheetBuilder: (context, scrollController) {
-        if (showActiveRide) {
-          return _buildActiveRideSheet(context, scrollController);
-        }
-        return Container(
-          decoration: BoxDecoration(
-            color: colorScheme.surface,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
-            ),
-          ),
-          child: Column(
-            children: [
-              const MapSheetDragHandle(),
-              Expanded(
-                child: ListView(
-                  controller: scrollController,
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+          // Bottom Sheet Modal
+          DraggableScrollableSheet(
+            initialChildSize: hasActiveRide ? 0.45 : 0.35,
+            minChildSize: 0.25,
+            maxChildSize: 0.75,
+            builder: (context, scrollController) {
+              if (hasActiveRide) {
+                return _buildActiveRideSheet(context);
+              }
+              return Container(
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(AppColors.radiusXL),
+                    topRight: Radius.circular(AppColors.radiusXL),
+                  ),
+                  border: Border(
+                    top: BorderSide(color: borderColor),
+                    left: BorderSide(color: borderColor),
+                    right: BorderSide(color: borderColor),
+                  ),
+                ),
+                child: Column(
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          l10n.taxiBrandHudHud,
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: colorScheme.primary,
-                          ),
-                        ),
-                        Text(
-                          l10n.taxiBrandDelivery,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.normal,
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
+                    // Drag handle
+                    Container(
+                      margin: const EdgeInsets.only(top: 8),
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: colorScheme.outlineVariant,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
-                    const SizedBox(height: 12),
-                    if (_destinationPosition != null &&
-                        (_routeDistanceKm != null || _isLoadingRoute))
-                      Row(
+                    // Logo
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16, bottom: 12),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.straighten,
-                              size: 18, color: colorScheme.primary),
-                          const SizedBox(width: 8),
-                          if (_isLoadingRoute)
-                            const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          else if (_routeDistanceKm != null)
-                            Text(
-                              l10n.taxiDistanceKm(
-                                _routeDistanceKm!.toStringAsFixed(2),
-                              ),
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: colorScheme.primary,
-                              ),
+                          Text(
+                            l10n.taxiBrandHudHud,
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primaryColor,
                             ),
+                          ),
+                          Text(
+                            l10n.taxiBrandDelivery,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.normal,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
                         ],
                       ),
-                    if (_destinationPosition != null &&
+                    ),
+                    // Distance in KM when destination is set
+                    if (!hasActiveRide &&
+                        _destinationPosition != null &&
+                        (_routeDistanceKm != null || _isLoadingRoute))
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Row(
+                          children: [
+                            Icon(Icons.straighten,
+                                size: 18, color: AppColors.primaryColor),
+                            const SizedBox(width: 8),
+                            if (_isLoadingRoute)
+                              _TaxiInlineShimmer(width: 72, height: 14)
+                            else if (_routeDistanceKm != null)
+                              Text(
+                                l10n.taxiDistanceKm(
+                                  _routeDistanceKm!.toStringAsFixed(2),
+                                ),
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primaryColor,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    if (!hasActiveRide &&
+                        _destinationPosition != null &&
                         (_routeDistanceKm != null || _isLoadingRoute))
                       const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: colorScheme.surfaceContainerHighest,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: TextField(
-                              controller: _destinationController,
-                              style: TextStyle(color: colorScheme.onSurface),
-                              decoration: InputDecoration(
-                                hintText: l10n.whereTo,
-                                hintStyle: TextStyle(
-                                  color: colorScheme.onSurfaceVariant,
-                                ),
-                                prefixIcon: Icon(
-                                  Icons.search,
-                                  color: colorScheme.primary,
-                                ),
-                                border: InputBorder.none,
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
-                                ),
+                    // Search Bar and Now Button
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Row(
+                        children: [
+                          // Search Bar
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: colorScheme.surface,
+                                borderRadius:
+                                    BorderRadius.circular(AppColors.radiusLG),
+                                border: Border.all(color: borderColor),
                               ),
-                              onTap: () {
-                                showModalBottomSheet<void>(
-                                  context: context,
-                                  isScrollControlled: true,
-                                  backgroundColor: Colors.transparent,
-                                  builder: (sheetContext) => Container(
-                                    height: MediaQuery.of(sheetContext)
-                                            .size
-                                            .height *
-                                        0.7,
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(sheetContext)
-                                          .colorScheme
-                                          .surface,
-                                      borderRadius: const BorderRadius.only(
-                                        topLeft: Radius.circular(20),
-                                        topRight: Radius.circular(20),
+                              child: TextField(
+                                controller: _destinationController,
+                                style: TextStyle(color: colorScheme.onSurface),
+                                decoration: InputDecoration(
+                                  hintText: l10n.whereTo,
+                                  hintStyle: TextStyle(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                  prefixIcon: Icon(
+                                    Icons.search,
+                                    color: AppColors.primaryColor,
+                                  ),
+                                  border: InputBorder.none,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 12,
+                                  ),
+                                ),
+                                onTap: () {
+                                  // Show location search
+                                  showModalBottomSheet<void>(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    backgroundColor: Colors.transparent,
+                                    builder: (sheetContext) => Container(
+                                      height:
+                                          MediaQuery.of(sheetContext).size.height *
+                                              0.7,
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(sheetContext)
+                                            .colorScheme
+                                            .surface,
+                                        borderRadius: const BorderRadius.only(
+                                          topLeft: Radius.circular(20),
+                                          topRight: Radius.circular(20),
+                                        ),
+                                      ),
+                                      child: Column(
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.all(16),
+                                            child: LocationSearchField(
+                                              hintText: l10n.whereTo,
+                                              onLocationSelected: (place) {
+                                                _onLocationSelected(place);
+                                                Navigator.pop(sheetContext);
+                                              },
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                    child: Column(
-                                      children: [
-                                        Padding(
-                                          padding: const EdgeInsets.all(16),
-                                          child: LocationSearchField(
-                                            hintText: l10n.whereTo,
-                                            onLocationSelected: (place) {
-                                              _onLocationSelected(place);
-                                              Navigator.pop(sheetContext);
-                                            },
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        GestureDetector(
-                          onTap: _showTimePicker,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
-                            ),
-                            decoration: BoxDecoration(
-                              color: colorScheme.surfaceContainerHigh,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: colorScheme.outlineVariant,
-                                width: 1,
+                                  );
+                                },
                               ),
                             ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.access_time,
-                                  color: colorScheme.primary,
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  _timeChoice == _TaxiTimeChoice.now
-                                      ? l10n.taxiTimeNow
-                                      : l10n.taxiScheduleForLater,
-                                  style: TextStyle(
-                                    color: colorScheme.primary,
-                                    fontWeight: FontWeight.w600,
+                          ),
+                          const SizedBox(width: 12),
+                          // Now Button
+                          GestureDetector(
+                            onTap: _showTimePicker,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppColors.spaceMD,
+                                vertical: 12,
+                              ),
+                              decoration: BoxDecoration(
+                                color: colorScheme.surface,
+                                borderRadius:
+                                    BorderRadius.circular(AppColors.radiusLG),
+                                border: Border.all(color: borderColor),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.access_time,
+                                    color: AppColors.primaryColor,
+                                    size: 20,
                                   ),
-                                ),
-                                const SizedBox(width: 4),
-                                Icon(
-                                  Icons.keyboard_arrow_down,
-                                  color: colorScheme.primary,
-                                  size: 20,
-                                ),
-                              ],
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    _timeChoice == _TaxiTimeChoice.now
+                                        ? l10n.taxiTimeNow
+                                        : l10n.taxiScheduleForLater,
+                                    style: TextStyle(
+                                      color: AppColors.primaryColor,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Icon(
+                                    Icons.keyboard_arrow_down,
+                                    color: AppColors.primaryColor,
+                                    size: 20,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 12),
-                    ..._suggestedLocations.map(
-                      (location) => _SuggestedLocationItem(
-                        title: location.shortAddress,
-                        address: location.displayName,
-                        onTap: () => _selectSuggestedLocation(location),
+                    // Suggested Locations
+                    Expanded(
+                      child: ListView.builder(
+                        controller: scrollController,
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        itemCount: _suggestedLocations.length,
+                        itemBuilder: (context, index) {
+                          final location = _suggestedLocations[index];
+                          return _SuggestedLocationItem(
+                            title: location.shortAddress,
+                            address: location.displayName,
+                            borderColor: borderColor,
+                            onTap: () => _selectSuggestedLocation(location),
+                          );
+                        },
                       ),
                     ),
                   ],
                 ),
-              ),
-            ],
+              );
+            },
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 
@@ -1288,7 +1128,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
     LatLng? activeDropoff,
   ) {
     if (_hasGoogleMapsApiKey == null) {
-      return const Center(child: CircularProgressIndicator());
+      return _TaxiMapShimmer();
     }
 
     if (_hasGoogleMapsApiKey == false) {
@@ -1307,58 +1147,20 @@ class _TaxiScreenState extends State<TaxiScreen> {
       );
     }
 
-    if (hasActiveRide) {
-      final overlayTop = mapOverlayTop(context, includeStatusBarInset: false);
-      return gmaps.GoogleMap(
-        padding: EdgeInsets.only(
-          bottom: _mapBottomPadding,
-          top: overlayTop + 48,
-          left: 16,
-          right: 16,
-        ),
-        initialCameraPosition: gmaps.CameraPosition(
-          target: _toG(_currentPosition),
-          zoom: 13.0,
-        ),
-        markers: _buildTaxiMarkers(hasActiveRide, activePickup, activeDropoff),
-        polylines: _buildTaxiPolylines(
-          hasActiveRide,
-          activePickup,
-          activeDropoff,
-          Theme.of(context).colorScheme.primary,
-        ),
-        myLocationEnabled: true,
-        myLocationButtonEnabled: false,
-        mapType: gmaps.MapType.normal,
-        onMapCreated: (controller) {
-          _mapController = controller;
-          _fitActiveRideBounds();
-        },
-      );
-    }
-
-    return CenteredPinMap(
-      padding: EdgeInsets.only(bottom: _mapBottomPadding * 0.5),
+    return gmaps.GoogleMap(
       initialCameraPosition: gmaps.CameraPosition(
         target: _toG(_currentPosition),
         zoom: 13.0,
       ),
-      idleDebounce: const Duration(milliseconds: 400),
-      onCenterLatLngChanged: _onDestinationCenterChanged,
       markers: _buildTaxiMarkers(hasActiveRide, activePickup, activeDropoff),
-      polylines: _buildTaxiPolylines(
-        hasActiveRide,
-        activePickup,
-        activeDropoff,
-        Theme.of(context).colorScheme.primary,
-      ),
+      polylines: _buildTaxiPolylines(hasActiveRide, activePickup, activeDropoff),
       myLocationEnabled: true,
       myLocationButtonEnabled: false,
       mapType: gmaps.MapType.normal,
       onMapCreated: (controller) {
         _mapController = controller;
       },
-      onTap: _handleMapTap,
+      onTap: hasActiveRide ? null : _handleMapTap,
     );
   }
 }
@@ -1366,11 +1168,13 @@ class _TaxiScreenState extends State<TaxiScreen> {
 class _SuggestedLocationItem extends StatelessWidget {
   final String title;
   final String address;
+  final Color borderColor;
   final VoidCallback onTap;
 
   const _SuggestedLocationItem({
     required this.title,
     required this.address,
+    required this.borderColor,
     required this.onTap,
   });
 
@@ -1378,52 +1182,114 @@ class _SuggestedLocationItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(
-              Icons.access_time,
-              color: colorScheme.primary,
-              size: 20,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppColors.spaceSM),
+      child: Material(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppColors.radiusLG),
+          child: Container(
+            padding: const EdgeInsets.all(AppColors.spaceMD),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppColors.radiusLG),
+              border: Border.all(color: borderColor),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: colorScheme.onSurface,
-                        ) ??
-                        TextStyle(
-                          fontSize: 14,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(AppColors.radiusMD),
+                  ),
+                  child: const Icon(
+                    Icons.history_rounded,
+                    color: AppColors.primaryColor,
+                    size: 18,
+                  ),
+                ),
+                const SizedBox(width: AppColors.spaceMD),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: colorScheme.onSurface,
                         ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        address,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    address,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 14,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+class _TaxiInlineShimmer extends StatelessWidget {
+  final double width;
+  final double height;
+
+  const _TaxiInlineShimmer({required this.width, required this.height});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseColor = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0);
+    final highlightColor =
+        isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF5F5F5);
+
+    return Shimmer.fromColors(
+      baseColor: baseColor,
+      highlightColor: highlightColor,
+      child: Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: baseColor,
+          borderRadius: BorderRadius.circular(4),
+        ),
+      ),
+    );
+  }
+}
+
+class _TaxiMapShimmer extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseColor = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0);
+    final highlightColor =
+        isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF5F5F5);
+
+    return Shimmer.fromColors(
+      baseColor: baseColor,
+      highlightColor: highlightColor,
+      child: Container(color: baseColor),
     );
   }
 }

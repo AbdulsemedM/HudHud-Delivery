@@ -3,7 +3,6 @@ import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/handyman/data/data_provider/handyman_data_provider.dart';
-import 'package:hudhud_delivery/features/guest/utils/guest_sign_in_prompt.dart';
 import 'package:hudhud_delivery/features/handyman/data/repository/handyman_repository.dart';
 
 class RateServiceScreen extends StatefulWidget {
@@ -41,9 +40,40 @@ class _RateServiceScreenState extends State<RateServiceScreen> {
     super.dispose();
   }
 
+  Color _cardBorder(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? AppColors.darkBorder : const Color(0xFFEEEEEE);
+  }
+
+  InputDecoration _inputDecoration(BuildContext context, {
+    required String labelText,
+    String? hintText,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final borderColor = _cardBorder(context);
+
+    return InputDecoration(
+      labelText: labelText,
+      hintText: hintText,
+      filled: true,
+      fillColor: colorScheme.surface,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        borderSide: BorderSide(color: borderColor),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        borderSide: BorderSide(color: borderColor),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        borderSide: const BorderSide(color: AppColors.primaryColor, width: 1.5),
+      ),
+    );
+  }
+
   Future<void> _submit() async {
     final l10n = context.l10n;
-    if (!await requireSignInForBackend(context)) return;
     setState(() => _isSubmitting = true);
 
     final result = await _repository.rateServiceRequest(
@@ -80,138 +110,192 @@ class _RateServiceScreenState extends State<RateServiceScreen> {
     }
   }
 
+  Widget _starRow({
+    required int rating,
+    required ValueChanged<int> onChanged,
+    double size = 40,
+    int? toggleOffValue,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(5, (index) {
+        final starValue = index + 1;
+        final filled = toggleOffValue != null
+            ? (_providerRating != null && starValue <= _providerRating!)
+            : starValue <= rating;
+
+        return IconButton(
+          onPressed: () {
+            if (toggleOffValue != null) {
+              onChanged(_providerRating == starValue ? toggleOffValue : starValue);
+            } else {
+              onChanged(starValue);
+            }
+          },
+          icon: Icon(
+            filled ? Icons.star_rounded : Icons.star_border_rounded,
+            size: size,
+            color: AppColors.ratingFilled,
+          ),
+        );
+      }),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final l10n = context.l10n;
+    final borderColor = _cardBorder(context);
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           l10n.handymanRateServiceTitle,
-          style: TextStyle(
+          style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
-            fontSize: 18,
-            color: theme.colorScheme.onSurface,
+            color: colorScheme.onSurface,
           ),
         ),
-        backgroundColor: theme.colorScheme.surface,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-          color: theme.colorScheme.onSurface,
+          color: colorScheme.onSurface,
           onPressed: () => Navigator.pop(context),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(
-            color: theme.dividerColor.withOpacity(0.5),
+            color: colorScheme.outlineVariant.withValues(alpha: 0.5),
             height: 1,
           ),
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppColors.spaceMD),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              l10n.handymanHowWasService,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(AppColors.spaceMD),
+              decoration: BoxDecoration(
+                color: colorScheme.surface,
+                borderRadius: BorderRadius.circular(AppColors.radiusLG),
+                border: Border.all(color: borderColor),
               ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(5, (index) {
-                final starValue = index + 1;
-                return IconButton(
-                  onPressed: () => setState(() => _rating = starValue),
-                  icon: Icon(
-                    starValue <= _rating ? Icons.star : Icons.star_border,
-                    size: 40,
-                    color: AppColors.ratingFilled,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.handymanHowWasService,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                );
-              }),
-            ),
-            const SizedBox(height: 24),
-            TextFormField(
-              controller: _commentController,
-              decoration: InputDecoration(
-                labelText: l10n.commentOptional,
-                hintText: l10n.commentExperienceHint,
-                border: const OutlineInputBorder(),
-                alignLabelWithHint: true,
-              ),
-              maxLines: 3,
-            ),
-            const SizedBox(height: 20),
-            Text(
-              l10n.handymanRateTheHandyman,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
+                  const SizedBox(height: AppColors.spaceMD),
+                  _starRow(
+                    rating: _rating,
+                    onChanged: (value) => setState(() => _rating = value),
+                  ),
+                  const SizedBox(height: AppColors.spaceMD),
+                  TextFormField(
+                    controller: _commentController,
+                    decoration: _inputDecoration(
+                      context,
+                      labelText: l10n.commentOptional,
+                      hintText: l10n.commentExperienceHint,
+                    ).copyWith(alignLabelWithHint: true),
+                    maxLines: 3,
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 8),
-            Row(
-              children: List.generate(5, (index) {
-                final starValue = index + 1;
-                return IconButton(
-                  onPressed: () => setState(() {
-                    _providerRating = _providerRating == starValue ? null : starValue;
-                  }),
-                  icon: Icon(
-                    _providerRating != null && starValue <= _providerRating!
-                        ? Icons.star
-                        : Icons.star_border,
+            const SizedBox(height: AppColors.spaceMD),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(AppColors.spaceMD),
+              decoration: BoxDecoration(
+                color: colorScheme.surface,
+                borderRadius: BorderRadius.circular(AppColors.radiusLG),
+                border: Border.all(color: borderColor),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.handymanRateTheHandyman,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: AppColors.spaceSM),
+                  _starRow(
+                    rating: _providerRating ?? 0,
                     size: 32,
-                    color: AppColors.ratingFilled,
+                    toggleOffValue: 0,
+                    onChanged: (value) => setState(() {
+                      _providerRating = value == 0 ? null : value;
+                    }),
                   ),
-                );
-              }),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _providerCommentController,
-              decoration: InputDecoration(
-                labelText: l10n.handymanCommentAboutOptional,
-                hintText: l10n.commentHandymanHint,
-                border: const OutlineInputBorder(),
-                alignLabelWithHint: true,
+                  const SizedBox(height: AppColors.spaceMD),
+                  TextFormField(
+                    controller: _providerCommentController,
+                    decoration: _inputDecoration(
+                      context,
+                      labelText: l10n.handymanCommentAboutOptional,
+                      hintText: l10n.commentHandymanHint,
+                    ).copyWith(alignLabelWithHint: true),
+                    maxLines: 2,
+                  ),
+                ],
               ),
-              maxLines: 2,
             ),
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                Checkbox(
-                  value: _isPublic,
-                  onChanged: (v) => setState(() => _isPublic = v ?? true),
-                  activeColor: AppColors.primaryColor,
-                ),
-                Expanded(
-                  child: Text(
-                    l10n.handymanRatingPublic,
-                    style: const TextStyle(fontSize: 14),
+            const SizedBox(height: AppColors.spaceMD),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppColors.spaceMD,
+                vertical: AppColors.spaceSM,
+              ),
+              decoration: BoxDecoration(
+                color: colorScheme.surface,
+                borderRadius: BorderRadius.circular(AppColors.radiusLG),
+                border: Border.all(color: borderColor),
+              ),
+              child: Row(
+                children: [
+                  Checkbox(
+                    value: _isPublic,
+                    onChanged: (v) => setState(() => _isPublic = v ?? true),
+                    activeColor: AppColors.primaryColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
                   ),
-                ),
-              ],
+                  Expanded(
+                    child: Text(
+                      l10n.handymanRatingPublic,
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppColors.spaceLG),
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
+              height: AppColors.buttonHeightMD,
+              child: FilledButton(
                 onPressed: _isSubmitting ? null : _submit,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.colorScheme.primary,
-                  foregroundColor: theme.colorScheme.onPrimary,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.primaryColor,
+                  foregroundColor: colorScheme.onPrimary,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(AppColors.radiusLG),
                   ),
                 ),
                 child: _isSubmitting
@@ -221,7 +305,7 @@ class _RateServiceScreenState extends State<RateServiceScreen> {
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           valueColor:
-                              AlwaysStoppedAnimation<Color>(theme.colorScheme.onPrimary),
+                              AlwaysStoppedAnimation<Color>(colorScheme.onPrimary),
                         ),
                       )
                     : Text(l10n.handymanSubmitRating),

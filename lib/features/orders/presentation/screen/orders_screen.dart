@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hudhud_delivery/app/navigation/fcm_order_navigation.dart';
-import 'package:hudhud_delivery/controllers/auth_controller.dart';
-import 'package:hudhud_delivery/core/utils/avatar_util.dart';
-import 'package:provider/provider.dart';
+import 'package:lottie/lottie.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import '../../bloc/orders_bloc.dart';
 import '../widgets/orders_widget.dart';
 import '../../data/repositories/orders_repository.dart';
+import 'order_details_screen.dart';
 
 class OrdersScreen extends StatefulWidget {
   const OrdersScreen({super.key});
@@ -39,59 +39,16 @@ class _OrdersScreenState extends State<OrdersScreen> {
     }
   }
 
-  void _showFilterDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Filter Orders'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              title: const Text('All Orders'),
-              leading: Radio<String?>(
-                value: null,
-                groupValue: _selectedStatus,
-                onChanged: (value) {
-                  setState(() => _selectedStatus = value);
-                  Navigator.pop(context);
-                  context
-                      .read<OrdersBloc>()
-                      .add(FilterOrdersByStatusEvent(value));
-                },
-              ),
-            ),
-            ...[
-              'pending',
-              'confirmed',
-              'preparing',
-              'on_the_way',
-              'delivered',
-              'cancelled'
-            ].map(
-              (status) => ListTile(
-                title: Text(status.replaceAll('_', ' ').toUpperCase()),
-                leading: Radio<String?>(
-                  value: status,
-                  groupValue: _selectedStatus,
-                  onChanged: (value) {
-                    setState(() => _selectedStatus = value);
-                    Navigator.pop(context);
-                    context
-                        .read<OrdersBloc>()
-                        .add(FilterOrdersByStatusEvent(value));
-                  },
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+  void _onFilterChanged(String? status) {
+    setState(() => _selectedStatus = status);
+    context.read<OrdersBloc>().add(FilterOrdersByStatusEvent(status));
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colorScheme = Theme.of(context).colorScheme;
+
     return BlocProvider(
       create: (context) => OrdersBloc(
         ordersRepository: context.read<OrdersRepository>(),
@@ -107,20 +64,19 @@ class _OrdersScreenState extends State<OrdersScreen> {
               slivers: [
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.all(AppColors.spaceMD),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        OrdersHeader(
-                          onFilterTap: _showFilterDialog,
-                          avatarUrl: getDisplayAvatarUrl(
-                            context.watch<AuthController>().currentUser,
-                          ),
+                        const OrdersHeader(),
+                        const SizedBox(height: AppColors.spaceLG),
+                        const OrdersTitle(),
+                        const SizedBox(height: AppColors.spaceMD),
+                        OrderFilterChips(
+                          selectedStatus: _selectedStatus,
+                          onFilterChanged: _onFilterChanged,
                         ),
-                        const SizedBox(height: 24),
-                        OrdersTitle(
-                          onFilterTap: _showFilterDialog,
-                        ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: AppColors.spaceMD),
                       ],
                     ),
                   ),
@@ -128,9 +84,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 BlocBuilder<OrdersBloc, OrdersState>(
                   builder: (context, state) {
                     if (state is OrdersLoading && state.orders.isEmpty) {
-                      return const SliverFillRemaining(
-                        child: Center(
-                          child: CircularProgressIndicator(),
+                      return const SliverToBoxAdapter(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16),
+                          child: OrdersShimmer(),
                         ),
                       );
                     }
@@ -142,35 +99,25 @@ class _OrdersScreenState extends State<OrdersScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
-                                Icons.error_outline,
-                                size: 64,
-                                color: Colors.grey[400],
+                                Icons.wifi_off_rounded,
+                                size: 48,
+                                color: colorScheme.onSurfaceVariant,
                               ),
                               const SizedBox(height: 16),
                               Text(
-                                'Failed to load orders',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                state.message,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey[500],
-                                ),
+                                l10n.failedToLoadOrders(state.message),
                                 textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.bodyMedium,
                               ),
                               const SizedBox(height: 16),
-                              ElevatedButton(
+                              TextButton.icon(
                                 onPressed: () {
                                   context
                                       .read<OrdersBloc>()
                                       .add(const FetchOrdersEvent());
                                 },
-                                child: const Text('Retry'),
+                                icon: const Icon(Icons.refresh),
+                                label: Text(l10n.actionRetry),
                               ),
                             ],
                           ),
@@ -190,27 +137,29 @@ class _OrdersScreenState extends State<OrdersScreen> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(
-                                Icons.shopping_bag_outlined,
-                                size: 64,
-                                color: Colors.grey[400],
+                              Lottie.asset(
+                                'assets/animations/browse.json',
+                                width: 200,
                               ),
                               const SizedBox(height: 16),
                               Text(
-                                'No orders found',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  color: Colors.grey[600],
-                                ),
+                                l10n.orderHistoryEmptyTitle,
+                                style: Theme.of(context).textTheme.titleMedium,
                               ),
                               const SizedBox(height: 8),
-                              Text(
-                                'Your orders will appear here once you place them',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey[500],
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 32),
+                                child: Text(
+                                  l10n.orderHistoryEmptyHint,
+                                  textAlign: TextAlign.center,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
+                                        color: colorScheme.onSurfaceVariant,
+                                      ),
                                 ),
-                                textAlign: TextAlign.center,
                               ),
                             ],
                           ),
@@ -239,9 +188,13 @@ class _OrdersScreenState extends State<OrdersScreen> {
                             child: OrderItemCard(
                               order: order,
                               onTap: () {
-                                pushOrderDetailsById(
+                                Navigator.push(
                                   context,
-                                  orderId: order.id,
+                                  MaterialPageRoute(
+                                    builder: (context) => OrderDetailsScreen(
+                                      orderId: order.id,
+                                    ),
+                                  ),
                                 );
                               },
                             ),

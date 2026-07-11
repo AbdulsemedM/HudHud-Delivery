@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/widgets/status_chip.dart';
 import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
-import 'package:hudhud_delivery/core/widgets/map_draggable_sheet_scaffold.dart';
-import 'package:hudhud_delivery/features/sos/presentation/widgets/sos_trigger_button.dart';
+import 'package:shimmer/shimmer.dart';
 
 class DriverOnTheWayScreen extends StatefulWidget {
   final LatLng pickupLocation;
@@ -15,7 +16,6 @@ class DriverOnTheWayScreen extends StatefulWidget {
   final String tripType;
   final int price;
   final String paymentMethod;
-  final int? rideId;
 
   const DriverOnTheWayScreen({
     super.key,
@@ -26,7 +26,6 @@ class DriverOnTheWayScreen extends StatefulWidget {
     required this.tripType,
     required this.price,
     required this.paymentMethod,
-    this.rideId,
   });
 
   @override
@@ -40,7 +39,6 @@ class _DriverOnTheWayScreenState extends State<DriverOnTheWayScreen> {
   double? _routeDistanceKm;
   bool _isLoadingRoute = true;
   bool? _hasGoogleMapsApiKey;
-  double _mapBottomPadding = 0;
 
   static gmaps.LatLng _toG(LatLng p) => gmaps.LatLng(p.latitude, p.longitude);
 
@@ -49,7 +47,6 @@ class _DriverOnTheWayScreenState extends State<DriverOnTheWayScreen> {
     super.initState();
     _loadMapsAvailability();
 
-    // Calculate driver position (somewhere along the route)
     _driverPosition = LatLng(
       widget.pickupLocation.latitude +
           (widget.destinationLocation.latitude -
@@ -88,14 +85,6 @@ class _DriverOnTheWayScreenState extends State<DriverOnTheWayScreen> {
     });
   }
 
-  void _onSheetLayoutChanged(double extent, double bodyHeight) {
-    final padding = extent * bodyHeight;
-    if ((padding - _mapBottomPadding).abs() > 1) {
-      setState(() => _mapBottomPadding = padding);
-    }
-    _fitBounds();
-  }
-
   void _fitBounds() {
     final bounds = gmaps.LatLngBounds(
       southwest: gmaps.LatLng(
@@ -120,263 +109,294 @@ class _DriverOnTheWayScreenState extends State<DriverOnTheWayScreen> {
     );
   }
 
+  Color _cardBorder(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? AppColors.darkBorder : const Color(0xFFEEEEEE);
+  }
+
+  Widget _buildMapBackButton(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        shape: BoxShape.circle,
+        border: Border.all(color: _cardBorder(context)),
+      ),
+      child: IconButton(
+        icon: Icon(Icons.arrow_back_rounded, color: colorScheme.onSurface),
+        onPressed: () => Navigator.pop(context),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final overlayTop = mapOverlayTop(context);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final l10n = context.l10n;
+    final borderColor = _cardBorder(context);
 
-    return MapDraggableSheetScaffold(
-      initialChildSize: 0.45,
-      minChildSize: 0.3,
-      maxChildSize: 0.8,
-      onSheetLayoutChanged: _onSheetLayoutChanged,
-      map: _buildMapOrFallback(),
-      mapOverlays: [
-        Positioned(
-          top: overlayTop,
-          left: 16,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  blurRadius: 4,
-                ),
-              ],
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ),
-        ),
-        if (widget.rideId != null)
+    final screenHeight = MediaQuery.of(context).size.height;
+    const bottomSheetInitialFraction = 0.48;
+    final mapBottom = screenHeight * bottomSheetInitialFraction;
+
+    return Scaffold(
+      body: Stack(
+        children: [
           Positioned(
-            top: overlayTop,
-            right: 16,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 4,
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: mapBottom,
+            child: _buildMapOrFallback(context),
+          ),
+          Positioned(
+            top: 48,
+            left: AppColors.spaceMD,
+            child: _buildMapBackButton(context),
+          ),
+          DraggableScrollableSheet(
+            initialChildSize: 0.48,
+            minChildSize: 0.32,
+            maxChildSize: 0.82,
+            builder: (context, scrollController) {
+              return Container(
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(AppColors.radiusXL),
+                    topRight: Radius.circular(AppColors.radiusXL),
                   ),
-                ],
-              ),
-              child: SosTriggerButton(
-                compact: true,
-                orderId: widget.rideId,
-              ),
-            ),
-          ),
-      ],
-      sheetBuilder: (context, scrollController) {
-        return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
-            ),
-          ),
-          child: Column(
-            children: [
-              const MapSheetDragHandle(),
-              Expanded(
-                child: SingleChildScrollView(
-                  controller: scrollController,
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                            // Title
-                            const Text(
-                              'Driver is on the way',
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF2C3E50),
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            // Driver Information
+                  border: Border(
+                    top: BorderSide(color: borderColor),
+                    left: BorderSide(color: borderColor),
+                    right: BorderSide(color: borderColor),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.only(top: AppColors.spaceSM),
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: colorScheme.outlineVariant,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        controller: scrollController,
+                        padding: const EdgeInsets.all(AppColors.spaceMD),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                             Row(
                               children: [
-                                // Profile Picture
-                                Container(
-                                  width: 60,
-                                  height: 60,
-                                  decoration: BoxDecoration(
-                                    color: Colors.yellow[100],
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: const Icon(
-                                    Icons.person,
-                                    size: 40,
-                                    color: Colors.grey,
+                                Expanded(
+                                  child: Text(
+                                    l10n.taxiStatusDriverOnTheWay,
+                                    style: theme.textTheme.titleLarge?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: colorScheme.onSurface,
+                                    ),
                                   ),
                                 ),
-                                const SizedBox(width: 16),
-                                // Driver Name
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                StatusChip(status: 'on_the_way'),
+                              ],
+                            ),
+                            const SizedBox(height: AppColors.spaceMD),
+                            Container(
+                              padding: const EdgeInsets.all(AppColors.spaceMD),
+                              decoration: BoxDecoration(
+                                color: colorScheme.surface,
+                                borderRadius:
+                                    BorderRadius.circular(AppColors.radiusLG),
+                                border: Border.all(color: borderColor),
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 56,
+                                    height: 56,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primaryColor
+                                          .withValues(alpha: 0.12),
+                                      borderRadius: BorderRadius.circular(
+                                        AppColors.radiusMD,
+                                      ),
+                                    ),
+                                    child: Icon(
+                                      Icons.person_rounded,
+                                      size: 32,
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                  const SizedBox(width: AppColors.spaceMD),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Your Driver',
+                                          style: theme.textTheme.labelMedium
+                                              ?.copyWith(
+                                            color: colorScheme.onSurfaceVariant,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          'Ann Wanjiru',
+                                          style: theme.textTheme.titleMedium
+                                              ?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: colorScheme.onSurface,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          widget.tripType,
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(
+                                            color: AppColors.primaryColor,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  _ContactButton(
+                                    icon: Icons.message_rounded,
+                                    borderColor: borderColor,
+                                    onPressed: () {},
+                                  ),
+                                  const SizedBox(width: AppColors.spaceSM),
+                                  _ContactButton(
+                                    icon: Icons.phone_rounded,
+                                    borderColor: borderColor,
+                                    onPressed: () {},
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: AppColors.spaceMD),
+                            Container(
+                              padding: const EdgeInsets.all(AppColors.spaceMD),
+                              decoration: BoxDecoration(
+                                color: colorScheme.surface,
+                                borderRadius:
+                                    BorderRadius.circular(AppColors.radiusLG),
+                                border: Border.all(color: borderColor),
+                              ),
+                              child: Column(
+                                children: [
+                                  _LocationRow(
+                                    icon: Icons.trip_origin_rounded,
+                                    iconColor: AppColors.successColor,
+                                    label: l10n.taxiPickup,
+                                    address: widget.pickupAddress,
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 11),
+                                    child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: SizedBox(
+                                        height: 20,
+                                        child: CustomPaint(
+                                          painter: _DottedLinePainter(
+                                            color: colorScheme.outlineVariant,
+                                          ),
+                                          size: const Size(2, 20),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  _LocationRow(
+                                    icon: Icons.location_on_rounded,
+                                    iconColor: AppColors.errorColor,
+                                    label: l10n.taxiDestination,
+                                    address: widget.destinationAddress,
+                                  ),
+                                  if (_routeDistanceKm != null ||
+                                      _isLoadingRoute) ...[
+                                    const SizedBox(height: AppColors.spaceMD),
+                                    Divider(color: borderColor, height: 1),
+                                    const SizedBox(height: AppColors.spaceMD),
+                                    Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.straighten_rounded,
+                                          size: 18,
+                                          color: AppColors.primaryColor,
+                                        ),
+                                        const SizedBox(width: AppColors.spaceSM),
+                                        if (_isLoadingRoute)
+                                          _RouteShimmer()
+                                        else if (_routeDistanceKm != null)
+                                          Text(
+                                            l10n.taxiDistanceKm(
+                                              _routeDistanceKm!
+                                                  .toStringAsFixed(2),
+                                            ),
+                                            style: theme.textTheme.bodyMedium
+                                                ?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                              color: AppColors.primaryColor,
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: AppColors.spaceMD),
+                            Container(
+                              padding: const EdgeInsets.all(AppColors.spaceMD),
+                              decoration: BoxDecoration(
+                                color: colorScheme.surface,
+                                borderRadius:
+                                    BorderRadius.circular(AppColors.radiusLG),
+                                border: Border.all(color: borderColor),
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        'Your Driver',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.grey[600],
+                                        l10n.labelPaymentMethod,
+                                        style: theme.textTheme.labelMedium
+                                            ?.copyWith(
+                                          color: colorScheme.onSurfaceVariant,
                                         ),
                                       ),
                                       const SizedBox(height: 4),
-                                      const Text(
-                                        'Ann Wanjiru',
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color: Color(0xFF2C3E50),
+                                      Text(
+                                        widget.paymentMethod.toUpperCase(),
+                                        style: theme.textTheme.bodyMedium
+                                            ?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          color: colorScheme.onSurface,
                                         ),
                                       ),
                                     ],
                                   ),
-                                ),
-                                // Contact Buttons
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: AppColors.primaryColor.withOpacity(0.3),
-                                      width: 1.5,
-                                    ),
-                                  ),
-                                  child: IconButton(
-                                    icon: Icon(
-                                      Icons.message,
+                                  Text(
+                                    l10n.taxiFareAmount('${widget.price}'),
+                                    style: theme.textTheme.titleLarge?.copyWith(
+                                      fontWeight: FontWeight.bold,
                                       color: AppColors.primaryColor,
-                                      size: 20,
-                                    ),
-                                    onPressed: () {
-                                      // TODO: Implement messaging
-                                    },
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: AppColors.primaryColor.withOpacity(0.3),
-                                      width: 1.5,
                                     ),
                                   ),
-                                  child: IconButton(
-                                    icon: Icon(
-                                      Icons.phone,
-                                      color: AppColors.primaryColor,
-                                      size: 20,
-                                    ),
-                                    onPressed: () {
-                                      // TODO: Implement calling
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 24),
-                            // Pickup and Drop-off
-                            _LocationRow(
-                              icon: Icons.location_on,
-                              iconColor: Colors.green,
-                              label: 'Pickup location',
-                              address: widget.pickupAddress,
-                              isFirst: true,
-                            ),
-                            // Dotted line
-                            Padding(
-                              padding: const EdgeInsets.only(left: 30),
-                              child: Container(
-                                height: 20,
-                                child: CustomPaint(
-                                  painter: _DottedLinePainter(),
-                                  size: const Size(2, 20),
-                                ),
-                              ),
-                            ),
-                            _LocationRow(
-                              icon: Icons.location_on,
-                              iconColor: Colors.red,
-                              label: 'Drop off',
-                              address: widget.destinationAddress,
-                              isFirst: false,
-                            ),
-                            if (_routeDistanceKm != null || _isLoadingRoute) ...[
-                              const SizedBox(height: 16),
-                              Row(
-                                children: [
-                                  Icon(Icons.straighten,
-                                      size: 18, color: AppColors.primaryColor),
-                                  const SizedBox(width: 8),
-                                  if (_isLoadingRoute)
-                                    const SizedBox(
-                                      width: 16,
-                                      height: 16,
-                                      child: CircularProgressIndicator(strokeWidth: 2),
-                                    )
-                                  else if (_routeDistanceKm != null)
-                                    Text(
-                                      '${_routeDistanceKm!.toStringAsFixed(2)} KM',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                        color: AppColors.primaryColor,
-                                      ),
-                                    ),
                                 ],
                               ),
-                            ],
-                            const SizedBox(height: 24),
-                            // Payment Information
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Payment',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey[600],
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      'Card : ........ 7846',
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                        color: Color(0xFF2C3E50),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Text(
-                                  'ETB ${widget.price}',
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.primaryColor,
-                                  ),
-                                ),
-                              ],
                             ),
-                            const SizedBox(height: 20),
+                            const SizedBox(height: AppColors.spaceMD),
                           ],
                         ),
                       ),
@@ -384,33 +404,36 @@ class _DriverOnTheWayScreenState extends State<DriverOnTheWayScreen> {
                   ],
                 ),
               );
-      },
+            },
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildMapOrFallback() {
+  Widget _buildMapOrFallback(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+
     if (_hasGoogleMapsApiKey == null) {
-      return const Center(child: CircularProgressIndicator());
+      return _MapLoadingShimmer();
     }
     if (_hasGoogleMapsApiKey == false) {
-      return const Center(
+      return Center(
         child: Padding(
-          padding: EdgeInsets.all(24),
+          padding: const EdgeInsets.all(AppColors.spaceLG),
           child: Text(
-            'Google Maps is not configured on iOS. Add GOOGLE_MAPS_API_KEY and restart the app.',
+            l10n.taxiGoogleMapsNotConfigured,
             textAlign: TextAlign.center,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurface,
+            ),
           ),
         ),
       );
     }
 
     return gmaps.GoogleMap(
-      padding: EdgeInsets.only(
-        bottom: _mapBottomPadding,
-        top: mapOverlayTop(context) + 48,
-        left: 16,
-        right: 16,
-      ),
       initialCameraPosition: gmaps.CameraPosition(
         target: _toG(widget.pickupLocation),
         zoom: 13.0,
@@ -442,14 +465,15 @@ class _DriverOnTheWayScreenState extends State<DriverOnTheWayScreen> {
       polylines: {
         gmaps.Polyline(
           polylineId: const gmaps.PolylineId('route'),
-          points: _routePolylinePoints != null && _routePolylinePoints!.length >= 2
+          points: _routePolylinePoints != null &&
+                  _routePolylinePoints!.length >= 2
               ? _routePolylinePoints!.map(_toG).toList()
               : [
                   _toG(widget.pickupLocation),
                   _toG(widget.destinationLocation),
                 ],
           color: AppColors.primaryColor,
-          width: 3,
+          width: 4,
         ),
       },
       myLocationEnabled: true,
@@ -462,58 +486,73 @@ class _DriverOnTheWayScreenState extends State<DriverOnTheWayScreen> {
   }
 }
 
+class _ContactButton extends StatelessWidget {
+  final IconData icon;
+  final Color borderColor;
+  final VoidCallback onPressed;
+
+  const _ContactButton({
+    required this.icon,
+    required this.borderColor,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: AppColors.primaryColor.withValues(alpha: 0.35),
+        ),
+      ),
+      child: IconButton(
+        icon: Icon(icon, color: AppColors.primaryColor, size: 20),
+        onPressed: onPressed,
+      ),
+    );
+  }
+}
+
 class _LocationRow extends StatelessWidget {
   final IconData icon;
   final Color iconColor;
   final String label;
   final String address;
-  final bool isFirst;
 
   const _LocationRow({
     required this.icon,
     required this.iconColor,
     required this.label,
     required this.address,
-    required this.isFirst,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: 30,
-          height: 30,
-          decoration: BoxDecoration(
-            color: isFirst ? iconColor.withOpacity(0.1) : Colors.transparent,
-            shape: isFirst ? BoxShape.circle : BoxShape.rectangle,
-          ),
-          child: Icon(
-            icon,
-            color: iconColor,
-            size: isFirst ? 20 : 24,
-          ),
-        ),
-        const SizedBox(width: 12),
+        Icon(icon, color: iconColor, size: 22),
+        const SizedBox(width: AppColors.spaceMD),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 label,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 address,
-                style: const TextStyle(
-                  fontSize: 14,
+                style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF2C3E50),
+                  color: colorScheme.onSurface,
                 ),
               ),
             ],
@@ -525,10 +564,14 @@ class _LocationRow extends StatelessWidget {
 }
 
 class _DottedLinePainter extends CustomPainter {
+  final Color color;
+
+  _DottedLinePainter({required this.color});
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.grey[400]!
+      ..color = color
       ..strokeWidth = 1.5
       ..style = PaintingStyle.stroke;
 
@@ -547,6 +590,45 @@ class _DottedLinePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _DottedLinePainter oldDelegate) =>
+      oldDelegate.color != color;
 }
 
+class _RouteShimmer extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseColor = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0);
+    final highlightColor =
+        isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF5F5F5);
+
+    return Shimmer.fromColors(
+      baseColor: baseColor,
+      highlightColor: highlightColor,
+      child: Container(
+        width: 80,
+        height: 14,
+        decoration: BoxDecoration(
+          color: baseColor,
+          borderRadius: BorderRadius.circular(4),
+        ),
+      ),
+    );
+  }
+}
+
+class _MapLoadingShimmer extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseColor = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0);
+    final highlightColor =
+        isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF5F5F5);
+
+    return Shimmer.fromColors(
+      baseColor: baseColor,
+      highlightColor: highlightColor,
+      child: Container(color: baseColor),
+    );
+  }
+}
