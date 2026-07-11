@@ -97,7 +97,7 @@ class _AppearanceOption extends StatelessWidget {
                 width: isSelected ? 2 : 1,
               ),
               color: isSelected
-                  ? AppColors.primaryColor.withOpacity(0.08)
+                  ? AppColors.primaryColor.withValues(alpha: 0.08)
                   : null,
             ),
             child: Row(

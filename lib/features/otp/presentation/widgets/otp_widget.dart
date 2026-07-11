@@ -16,7 +16,7 @@ class OtpInputFieldsState extends State<OtpInputFields> {
   final List<TextEditingController> _controllers =
       List.generate(4, (_) => TextEditingController());
   final List<FocusNode> _focusNodes = List.generate(4, (_) => FocusNode());
-  List<String> _otpValues = ['', '', '', ''];
+  final List<String> _otpValues = ['', '', '', ''];
 
   @override
   void dispose() {
@@ -179,6 +179,8 @@ class OtpInputFieldsState extends State<OtpInputFields> {
 }
 
 class OtpResendTimer extends StatefulWidget {
+  const OtpResendTimer({super.key});
+
   @override
   State<OtpResendTimer> createState() => _OtpResendTimerState();
 }
@@ -228,7 +230,7 @@ class _OtpResendTimerState extends State<OtpResendTimer> {
   String _formatTime(int seconds) {
     final minutes = seconds ~/ 60;
     final secs = seconds % 60;
-    return '${minutes}:${secs.toString().padLeft(2, '0')}';
+    return '$minutes:${secs.toString().padLeft(2, '0')}';
   }
 
   @override
@@ -255,7 +257,7 @@ class _OtpResendTimerState extends State<OtpResendTimer> {
           ),
           Text(
             _formatTime(_remainingSeconds),
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
               color: AppColors.primaryColor,
@@ -266,7 +268,7 @@ class _OtpResendTimerState extends State<OtpResendTimer> {
             onTap: _resendCode,
             child: Text(
               l10n.actionResend,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
                 color: AppColors.primaryColor,

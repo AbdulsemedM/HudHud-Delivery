@@ -33,7 +33,7 @@ class FindingDriverScreen extends StatefulWidget {
 }
 
 class _FindingDriverScreenState extends State<FindingDriverScreen> {
-  bool _isLoading = true;
+  final bool _isLoading = true;
 
   @override
   void initState() {
@@ -166,7 +166,7 @@ class _FindingDriverScreenState extends State<FindingDriverScreen> {
                 ),
               ),
               const SizedBox(height: AppColors.spaceLG),
-              StatusChip(status: 'searching'),
+              const StatusChip(status: 'searching'),
               const SizedBox(height: AppColors.spaceMD),
               Text(
                 l10n.taxiStatusFindingDriver,
@@ -200,7 +200,7 @@ class _FindingDriverScreenState extends State<FindingDriverScreen> {
                   children: [
                     Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.local_taxi_rounded,
                           color: AppColors.primaryColor,
                           size: 20,

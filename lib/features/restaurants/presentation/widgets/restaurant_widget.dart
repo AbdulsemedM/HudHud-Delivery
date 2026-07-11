@@ -140,7 +140,7 @@ class RestaurantInfo extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: Colors.orange.withOpacity(0.1),
+                  color: Colors.orange.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Row(
@@ -209,9 +209,9 @@ class VegFoodToggle extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: AppColors.primaryColor.withOpacity(0.08),
+          color: AppColors.primaryColor.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(AppColors.radiusLG),
-          border: Border.all(color: AppColors.primaryColor.withOpacity(0.2)),
+          border: Border.all(color: AppColors.primaryColor.withValues(alpha: 0.2)),
         ),
       child: Row(
         children: [
@@ -245,7 +245,7 @@ class VegFoodToggle extends StatelessWidget {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: AppColors.primaryColor,
+            activeThumbColor: AppColors.primaryColor,
           ),
         ],
       ),
@@ -287,7 +287,7 @@ class MenuCategories extends StatelessWidget {
                     : colorScheme.surface,
                 borderRadius: BorderRadius.circular(AppColors.radiusFull),
                 border: Border.all(
-                  color: AppColors.primaryColor.withOpacity(isSelected ? 1 : 0.35),
+                  color: AppColors.primaryColor.withValues(alpha: isSelected ? 1 : 0.35),
                 ),
               ),
               child: Text(
@@ -341,7 +341,7 @@ class MenuItem extends StatelessWidget {
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(AppColors.radiusLG),
-        border: Border.all(color: colorScheme.outline.withOpacity(0.2)),
+        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -392,7 +392,7 @@ class MenuItem extends StatelessWidget {
                       TextButton(
                         onPressed: onAddPressed,
                         style: TextButton.styleFrom(
-                          backgroundColor: AppColors.primaryColor.withOpacity(0.1),
+                          backgroundColor: AppColors.primaryColor.withValues(alpha: 0.1),
                           padding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 8),
                           shape: RoundedRectangleBorder(
@@ -412,7 +412,7 @@ class MenuItem extends StatelessWidget {
                       Container(
                         decoration: BoxDecoration(
                           border: Border.all(
-                              color: colorScheme.outline.withOpacity(0.3)),
+                              color: colorScheme.outline.withValues(alpha: 0.3)),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Row(

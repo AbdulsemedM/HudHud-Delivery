@@ -11,7 +11,7 @@ class SplashLogo extends StatelessWidget {
       decoration: BoxDecoration(
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.25),
+            color: Colors.black.withValues(alpha: 0.25),
             blurRadius: 24,
             offset: const Offset(0, 8),
           ),
@@ -26,7 +26,7 @@ class SplashLogo extends StatelessWidget {
             width: 160,
             height: 60,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(
@@ -50,7 +50,7 @@ class SplashTagline extends StatelessWidget {
       l10n.appTitle,
       textAlign: TextAlign.center,
       style: TextStyle(
-        color: Colors.white.withOpacity(0.85),
+        color: Colors.white.withValues(alpha: 0.85),
         fontSize: 16,
         fontWeight: FontWeight.w400,
       ),
@@ -98,7 +98,7 @@ class _LoadingIndicatorState extends State<LoadingIndicator>
         height: 56,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: AppColors.primaryLightColor.withOpacity(0.35),
+          color: AppColors.primaryLightColor.withValues(alpha: 0.35),
         ),
         child: const Center(
           child: SizedBox(

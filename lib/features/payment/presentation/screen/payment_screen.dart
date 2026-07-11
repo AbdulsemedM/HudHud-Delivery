@@ -138,7 +138,7 @@ class _PaymentScreenState extends State<PaymentScreen>
         builder: (blocContext) {
           final l10n = blocContext.l10n;
           return Scaffold(
-          backgroundColor: colorScheme.background,
+          backgroundColor: colorScheme.surface,
           body: BlocListener<PaymentBloc, PaymentState>(
             listener: (context, state) {
               if (state is PaymentSuccess) {
@@ -178,7 +178,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                           end: Alignment.bottomRight,
                           colors: [
                             AppColors.primaryColor,
-                            AppColors.primaryColor.withOpacity(0.8),
+                            AppColors.primaryColor.withValues(alpha: 0.8),
                           ],
                         ),
                       ),
@@ -219,7 +219,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                               children: [
                                 Row(
                                   children: [
-                                    Icon(
+                                    const Icon(
                                       Icons.payment,
                                       color: AppColors.primaryColor,
                                       size: 24,
@@ -239,7 +239,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                                   l10n.paymentEthiopianOptionsSubtitle,
                                   style: textTheme.bodyMedium?.copyWith(
                                     fontSize: 14,
-                                    color: colorScheme.onSurface.withOpacity(0.72),
+                                    color: colorScheme.onSurface.withValues(alpha: 0.72),
                                   ),
                                 ),
                               ],
@@ -297,11 +297,11 @@ class _PaymentScreenState extends State<PaymentScreen>
                                   margin: const EdgeInsets.all(16),
                                   padding: const EdgeInsets.all(16),
                                   decoration: BoxDecoration(
-                                    color: AppColors.errorColor.withOpacity(
+                                    color: AppColors.errorColor.withValues(alpha: 
                                         isDark ? 0.16 : 0.08),
                                     borderRadius: BorderRadius.circular(12),
                                     border: Border.all(
-                                      color: AppColors.errorColor.withOpacity(0.4),
+                                      color: AppColors.errorColor.withValues(alpha: 0.4),
                                     ),
                                   ),
                                   child: Column(
@@ -327,7 +327,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                                         style: textTheme.bodyMedium?.copyWith(
                                           fontSize: 14,
                                           color: AppColors.errorColor
-                                              .withOpacity(0.9),
+                                              .withValues(alpha: 0.9),
                                         ),
                                       ),
                                       const SizedBox(height: 16),
@@ -366,7 +366,7 @@ class _PaymentScreenState extends State<PaymentScreen>
               color: colorScheme.surface,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 10,
                   offset: const Offset(0, -5),
                 ),
@@ -434,7 +434,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    color: AppColors.successColor.withOpacity(
+                    color: AppColors.successColor.withValues(alpha: 
                       isDark ? 0.2 : 0.14,
                     ),
                     shape: BoxShape.circle,
@@ -458,7 +458,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                   l10n.paymentTransactionIdLabel(transactionId),
                   style: textTheme.bodyMedium?.copyWith(
                     fontSize: 14,
-                    color: colorScheme.onSurface.withOpacity(0.72),
+                    color: colorScheme.onSurface.withValues(alpha: 0.72),
                   ),
                 ),
                 const SizedBox(height: 24),

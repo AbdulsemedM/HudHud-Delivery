@@ -92,9 +92,9 @@ class ProfileTextField extends StatelessWidget {
               fontWeight: FontWeight.w500,
               color: colorScheme.onSurface,
             ),
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(
+              contentPadding: EdgeInsets.symmetric(
                 horizontal: 16,
                 vertical: 12,
               ),

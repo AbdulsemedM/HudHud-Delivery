@@ -91,7 +91,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(
-            color: colorScheme.outline.withOpacity(0.2),
+            color: colorScheme.outline.withValues(alpha: 0.2),
             height: 1,
           ),
         ),
@@ -135,7 +135,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 borderRadius:
                                     BorderRadius.circular(AppColors.radiusLG),
                                 border: Border.all(
-                                  color: colorScheme.outline.withOpacity(0.2),
+                                  color: colorScheme.outline.withValues(alpha: 0.2),
                                 ),
                               ),
                               child: Column(

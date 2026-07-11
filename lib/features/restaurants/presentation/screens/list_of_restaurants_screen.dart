@@ -115,7 +115,7 @@ class ListOfRestaurantsScreen extends StatelessWidget {
                                 ),
                               );
                             },
-                            child: Text(
+                            child: const Text(
                               'See Favorites',
                               style: TextStyle(
                                 color: AppColors.primaryColor,

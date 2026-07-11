@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
@@ -6,13 +7,17 @@ import 'package:hudhud_delivery/core/widgets/status_chip.dart';
 import 'package:hudhud_delivery/features/handyman/data/data_provider/handyman_data_provider.dart';
 import 'package:hudhud_delivery/features/handyman/data/models/service_request_model.dart';
 import 'package:hudhud_delivery/features/handyman/data/repository/handyman_repository.dart';
+import 'package:hudhud_delivery/features/guest/utils/guest_sign_in_prompt.dart';
 import 'package:hudhud_delivery/features/home/presentation/widgets/home_widget.dart';
 import 'package:lottie/lottie.dart';
 import 'create_handyman_request_screen.dart';
 import 'service_request_details_screen.dart';
 
 class HandymanScreen extends StatefulWidget {
-  const HandymanScreen({super.key});
+  const HandymanScreen({super.key, this.embedded = false});
+
+  /// When true (embedded in home service tabs), hides [AppBar] and back button.
+  final bool embedded;
 
   @override
   State<HandymanScreen> createState() => _HandymanScreenState();
@@ -30,10 +35,18 @@ class _HandymanScreenState extends State<HandymanScreen> {
     _repository = HandymanRepository(
       dataProvider: HandymanDataProvider(apiService: ApiService.instance),
     );
-    _fetchRequests();
+    if (GuestBrowseService().isGuestBrowseMode) {
+      _isLoading = false;
+    } else {
+      _fetchRequests();
+    }
   }
 
   Future<void> _fetchRequests() async {
+    if (!await requireSignInForBackend(context)) {
+      if (mounted) setState(() => _isLoading = false);
+      return;
+    }
     if (!mounted) return;
     setState(() {
       _isLoading = true;
@@ -69,7 +82,9 @@ class _HandymanScreenState extends State<HandymanScreen> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
+      appBar: widget.embedded
+          ? null
+          : AppBar(
         title: Text(
           l10n.handymanServicesTitle,
           style: theme.textTheme.titleMedium?.copyWith(

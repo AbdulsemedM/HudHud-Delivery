@@ -9,7 +9,9 @@ import '../../../../models/user_model.dart';
 import '../../../dashboard/presentation/screen/dashboard_screen.dart';
 
 class VerifyContactScreen extends StatefulWidget {
-  const VerifyContactScreen({super.key});
+  final bool resumeAfterAuth;
+
+  const VerifyContactScreen({super.key, this.resumeAfterAuth = false});
 
   @override
   State<VerifyContactScreen> createState() => _VerifyContactScreenState();
@@ -175,6 +177,10 @@ class _VerifyContactScreenState extends State<VerifyContactScreen> {
   }
 
   void _goToDashboard() {
+    if (widget.resumeAfterAuth) {
+      Navigator.pop(context, true);
+      return;
+    }
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => const DashboardScreen()),
@@ -237,7 +243,7 @@ class _VerifyContactScreenState extends State<VerifyContactScreen> {
                   end: Alignment.bottomCenter,
                   colors: [
                     AppColors.primaryColor,
-                    AppColors.primaryColor.withOpacity(0.0),
+                    AppColors.primaryColor.withValues(alpha: 0.0),
                   ],
                 ),
               ),
@@ -250,7 +256,7 @@ class _VerifyContactScreenState extends State<VerifyContactScreen> {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.18),
+                          color: Colors.white.withValues(alpha: 0.18),
                           borderRadius: BorderRadius.circular(14),
                         ),
                         child: const Icon(
@@ -291,7 +297,7 @@ class _VerifyContactScreenState extends State<VerifyContactScreen> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: colorScheme.shadow.withOpacity(0.08),
+                    color: colorScheme.shadow.withValues(alpha: 0.08),
                     blurRadius: 24,
                     offset: const Offset(0, -4),
                   ),
@@ -563,7 +569,7 @@ class _VerificationCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isVerified
-              ? AppColors.successColor.withOpacity(0.4)
+              ? AppColors.successColor.withValues(alpha: 0.4)
               : borderColor,
         ),
       ),
@@ -576,8 +582,8 @@ class _VerificationCard extends StatelessWidget {
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: isVerified
-                      ? AppColors.successColor.withOpacity(0.12)
-                      : AppColors.primaryColor.withOpacity(0.12),
+                      ? AppColors.successColor.withValues(alpha: 0.12)
+                      : AppColors.primaryColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
@@ -636,10 +642,10 @@ class _VerificationCard extends StatelessWidget {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                       ),
-                      side: BorderSide(color: AppColors.primaryColor),
+                      side: const BorderSide(color: AppColors.primaryColor),
                     ),
                     child: isResending
-                        ? SizedBox(
+                        ? const SizedBox(
                             width: 16,
                             height: 16,
                             child: CircularProgressIndicator(

@@ -33,17 +33,20 @@ class LanguageScreen extends StatelessWidget {
             width: isSelected ? 2 : 1,
           ),
         ),
-        child: RadioListTile<String>(
-          value: code,
-          groupValue: controller.locale.languageCode,
-          activeColor: AppColors.primaryColor,
+        child: ListTile(
+          onTap: () async {
+            await controller.setLocale(Locale(code));
+          },
           title: Text(label, style: theme.textTheme.titleSmall),
           subtitle: scriptLabel != null
               ? Text(scriptLabel, style: theme.textTheme.bodySmall)
               : null,
-          onChanged: (_) async {
-            await controller.setLocale(Locale(code));
-          },
+          trailing: isSelected
+              ? const Icon(Icons.check_circle, color: AppColors.primaryColor)
+              : Icon(
+                  Icons.circle_outlined,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
         ),
       );
     }

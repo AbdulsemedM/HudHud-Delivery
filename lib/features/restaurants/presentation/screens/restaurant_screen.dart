@@ -174,7 +174,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                   color: AppColors.primaryColor,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 10,
                       offset: const Offset(0, -5),
                     ),
@@ -226,7 +226,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                               vertical: 8,
                             ),
                           ),
-                          child: Text(
+                          child: const Text(
                             'Go to Checkout',
                             style: TextStyle(
                               color: AppColors.primaryColor,

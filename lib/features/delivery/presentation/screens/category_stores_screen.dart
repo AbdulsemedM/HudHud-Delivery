@@ -47,7 +47,7 @@ class CategoryStoresScreen extends StatelessWidget {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => StoreDetailScreen(
+                                    builder: (context) => const StoreDetailScreen(
                                       storeName: 'Gopuff',
                                     ),
                                   ),
@@ -66,7 +66,7 @@ class CategoryStoresScreen extends StatelessWidget {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => StoreDetailScreen(
+                                    builder: (context) => const StoreDetailScreen(
                                       storeName: '7 Eleven Store',
                                     ),
                                   ),
@@ -101,7 +101,7 @@ class CategoryStoresScreen extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => StoreDetailScreen(
+                                  builder: (context) => const StoreDetailScreen(
                                     storeName: 'Begs & Megs',
                                   ),
                                 ),
@@ -117,7 +117,7 @@ class CategoryStoresScreen extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => StoreDetailScreen(
+                                  builder: (context) => const StoreDetailScreen(
                                     storeName: 'Pick \'n\' Save',
                                   ),
                                 ),
@@ -133,7 +133,7 @@ class CategoryStoresScreen extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => StoreDetailScreen(
+                                  builder: (context) => const StoreDetailScreen(
                                     storeName: 'Orange Inn',
                                   ),
                                 ),
@@ -150,7 +150,7 @@ class CategoryStoresScreen extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => StoreDetailScreen(
+                                  builder: (context) => const StoreDetailScreen(
                                     storeName: 'Vintage Berkeley',
                                   ),
                                 ),
@@ -201,7 +201,7 @@ class _CategoryHeader extends StatelessWidget {
       decoration: BoxDecoration(
         color: colorScheme.surface,
         border: Border(
-          bottom: BorderSide(color: colorScheme.outline.withOpacity(0.2)),
+          bottom: BorderSide(color: colorScheme.outline.withValues(alpha: 0.2)),
         ),
       ),
       child: Column(
@@ -229,7 +229,7 @@ class _CategoryHeader extends StatelessWidget {
             ],
           ),
           Material(
-            color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(AppColors.radiusFull),
             child: InkWell(
               onTap: onTimeTap,
@@ -240,7 +240,7 @@ class _CategoryHeader extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.schedule_rounded,
+                    const Icon(Icons.schedule_rounded,
                         size: 16, color: AppColors.primaryColor),
                     const SizedBox(width: 6),
                     Text(
@@ -293,7 +293,7 @@ class _FeaturedStoreCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: colorScheme.surface,
             borderRadius: BorderRadius.circular(AppColors.radiusLG),
-            border: Border.all(color: colorScheme.outline.withOpacity(0.2)),
+            border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -366,7 +366,7 @@ class _StoreListItem extends StatelessWidget {
           decoration: BoxDecoration(
             color: colorScheme.surface,
             borderRadius: BorderRadius.circular(AppColors.radiusLG),
-            border: Border.all(color: colorScheme.outline.withOpacity(0.2)),
+            border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
           ),
           child: Row(
             children: [
@@ -376,7 +376,7 @@ class _StoreListItem extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: colorScheme.outline.withOpacity(0.15),
+                    color: colorScheme.outline.withValues(alpha: 0.15),
                   ),
                 ),
                 child: ClipOval(
@@ -418,11 +418,11 @@ class _StoreListItem extends StatelessWidget {
                           vertical: 3,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.successColor.withOpacity(0.12),
+                          color: AppColors.successColor.withValues(alpha: 0.12),
                           borderRadius:
                               BorderRadius.circular(AppColors.radiusFull),
                           border: Border.all(
-                            color: AppColors.successColor.withOpacity(0.35),
+                            color: AppColors.successColor.withValues(alpha: 0.35),
                           ),
                         ),
                         child: Text(

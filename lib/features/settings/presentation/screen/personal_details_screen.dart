@@ -87,7 +87,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                       Container(
                         width: 100,
                         height: 100,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           color: AppColors.primaryColor,
                           shape: BoxShape.circle,
                         ),
@@ -121,7 +121,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                         width: 2,
                       ),
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.camera_alt,
                       size: 16,
                       color: AppColors.primaryColor,

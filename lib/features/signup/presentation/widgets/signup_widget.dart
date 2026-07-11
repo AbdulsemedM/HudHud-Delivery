@@ -40,7 +40,7 @@ class SignupForm extends StatefulWidget {
   const SignupForm({super.key});
 
   @override
-  _SignupFormState createState() => _SignupFormState();
+  State<SignupForm> createState() => SignupFormState();
 }
 
 Widget createSignupForm() {
@@ -65,10 +65,10 @@ class SignupFormData {
   });
 }
 
-final GlobalKey<_SignupFormState> signupFormKey =
-    GlobalKey<_SignupFormState>();
+final GlobalKey<SignupFormState> signupFormKey =
+    GlobalKey<SignupFormState>();
 
-class _SignupFormState extends State<SignupForm> {
+class SignupFormState extends State<SignupForm> {
   final _formKey = GlobalKey<FormState>();
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
@@ -388,7 +388,7 @@ class _SignupFormState extends State<SignupForm> {
                   TextSpan(text: '${l10n.actionAccept} '),
                   TextSpan(
                     text: l10n.settingsTermsConditions,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: AppColors.primaryColor,
                       fontWeight: FontWeight.w600,
                     ),
@@ -412,7 +412,7 @@ class _SignupFormState extends State<SignupForm> {
                   TextSpan(text: '${l10n.actionAccept} '),
                   TextSpan(
                     text: l10n.verificationStatus,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: AppColors.primaryColor,
                       fontWeight: FontWeight.w600,
                     ),
@@ -463,7 +463,9 @@ class _SignupCheckboxRow extends StatelessWidget {
 }
 
 class SignupButton extends StatelessWidget {
-  const SignupButton({super.key});
+  final bool resumeAfterAuth;
+
+  const SignupButton({super.key, this.resumeAfterAuth = false});
 
   void _handleSignup(BuildContext context, AppLocalizations l10n) {
     final formState = signupFormKey.currentState;
@@ -506,6 +508,7 @@ class SignupButton extends StatelessWidget {
             formData.phoneNumber,
             formData.password,
             formData.password,
+            null,
           ),
         );
   }
@@ -524,13 +527,28 @@ class SignupButton extends StatelessWidget {
               backgroundColor: AppColors.successColor,
             ),
           );
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const VerifyContactScreen(),
-            ),
-            (route) => false,
-          );
+          if (resumeAfterAuth) {
+            Navigator.push<bool>(
+              context,
+              MaterialPageRoute<bool>(
+                builder: (context) => const VerifyContactScreen(
+                  resumeAfterAuth: true,
+                ),
+              ),
+            ).then((verified) {
+              if (verified == true && context.mounted) {
+                Navigator.pop(context, true);
+              }
+            });
+          } else {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const VerifyContactScreen(),
+              ),
+              (route) => false,
+            );
+          }
         } else if (state is SignupFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

@@ -257,7 +257,7 @@ class _ChatRoomViewState extends State<_ChatRoomView> {
 
   Future<void> _handleAttach(BuildContext context) async {
     final result = await showAttachmentPickerSheet(context);
-    if (result == null || !mounted) return;
+    if (result == null || !context.mounted) return;
     final bloc = context.read<ChatRoomBloc>();
     final l10n = AppLocalizations.of(context)!;
 
@@ -281,7 +281,7 @@ class _ChatRoomViewState extends State<_ChatRoomView> {
       case AttachmentPickerAction.location:
         var loc = StartupLocationService.cached;
         loc ??= await StartupLocationService.fetchAtStartup();
-        if (!mounted) return;
+        if (!context.mounted) return;
         if (loc != null) {
           bloc.add(
             SendLocationMessageEvent(

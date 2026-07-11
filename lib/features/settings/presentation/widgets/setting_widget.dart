@@ -70,7 +70,7 @@ class AccountSettingsSection extends StatelessWidget {
             ),
             IconButton(
               onPressed: onEditTap,
-              icon: Icon(Icons.edit_outlined, color: AppColors.primaryColor),
+              icon: const Icon(Icons.edit_outlined, color: AppColors.primaryColor),
             ),
           ],
         ),
@@ -80,7 +80,7 @@ class AccountSettingsSection extends StatelessWidget {
           decoration: BoxDecoration(
             color: colorScheme.surface,
             borderRadius: BorderRadius.circular(AppColors.radiusLG),
-            border: Border.all(color: colorScheme.outline.withOpacity(0.2)),
+            border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
           ),
           child: Row(
             children: [
@@ -194,7 +194,7 @@ class SettingsItem extends StatelessWidget {
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: AppColors.primaryColor.withOpacity(0.1),
+          color: AppColors.primaryColor.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Icon(icon, color: AppColors.primaryColor, size: 20),
@@ -241,7 +241,7 @@ class ThemeToggleItem extends StatelessWidget {
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: AppColors.primaryColor.withOpacity(0.1),
+          color: AppColors.primaryColor.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Icon(icon, color: AppColors.primaryColor, size: 20),
@@ -254,7 +254,7 @@ class ThemeToggleItem extends StatelessWidget {
       trailing: Switch(
         value: isDarkMode,
         onChanged: (_) => onToggle(),
-        activeColor: AppColors.primaryColor,
+        activeThumbColor: AppColors.primaryColor,
       ),
       onTap: onToggle,
     );

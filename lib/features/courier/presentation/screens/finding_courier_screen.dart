@@ -39,7 +39,7 @@ class FindingCourierScreen extends StatefulWidget {
 }
 
 class _FindingCourierScreenState extends State<FindingCourierScreen> {
-  bool _isLoading = true;
+  final bool _isLoading = true;
 
   @override
   void initState() {
@@ -135,7 +135,7 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
                         return Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            CircularProgressIndicator(
+                            const CircularProgressIndicator(
                               valueColor: AlwaysStoppedAnimation<Color>(
                                 AppColors.primaryColor,
                               ),
@@ -181,13 +181,13 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
                 child: OutlinedButton(
                   onPressed: _cancelOrder,
                   style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: AppColors.errorColor, width: 1.5),
+                    side: const BorderSide(color: AppColors.errorColor, width: 1.5),
                     shape: RoundedRectangleBorder(
                       borderRadius:
                           BorderRadius.circular(AppColors.radiusLG),
                     ),
                   ),
-                  child: Text(
+                  child: const Text(
                     'Cancel Order',
                     style: TextStyle(
                       color: AppColors.errorColor,
@@ -246,7 +246,7 @@ class _LoadingDotsState extends State<_LoadingDots>
               width: 10,
               height: 10,
               decoration: BoxDecoration(
-                color: AppColors.primaryColor.withOpacity(opacity),
+                color: AppColors.primaryColor.withValues(alpha: opacity),
                 shape: BoxShape.circle,
               ),
             );

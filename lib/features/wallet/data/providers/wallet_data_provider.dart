@@ -20,12 +20,12 @@ class WalletDataProvider {
     final data = response.data;
 
     if (data == null || data is! Map<String, dynamic>) {
-      return WalletsResponse(wallets: [], currentPage: 1, lastPage: 1, total: 0);
+      return const WalletsResponse(wallets: [], currentPage: 1, lastPage: 1, total: 0);
     }
 
     final inner = data['data'];
     if (inner == null || inner is! Map<String, dynamic>) {
-      return WalletsResponse(wallets: [], currentPage: 1, lastPage: 1, total: 0);
+      return const WalletsResponse(wallets: [], currentPage: 1, lastPage: 1, total: 0);
     }
 
     final list = inner['data'];
@@ -86,7 +86,7 @@ class WalletDataProvider {
     final data = response.data;
 
     if (data == null || data is! Map<String, dynamic>) {
-      return WalletTransactionsResponse(
+      return const WalletTransactionsResponse(
         transactions: [],
         currentPage: 1,
         lastPage: 1,
@@ -96,7 +96,7 @@ class WalletDataProvider {
 
     final inner = data['data'];
     if (inner == null || inner is! Map<String, dynamic>) {
-      return WalletTransactionsResponse(
+      return const WalletTransactionsResponse(
         transactions: [],
         currentPage: 1,
         lastPage: 1,

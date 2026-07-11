@@ -220,7 +220,7 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
                     const SizedBox(height: AppColors.spaceMD),
                     if (widget.wallets.isNotEmpty) ...[
                       DropdownButtonFormField<WalletModel>(
-                        value: _selectedWallet,
+                        initialValue: _selectedWallet,
                         decoration: _fieldDecoration(context, l10n.wallet),
                         items: widget.wallets
                             .map((w) => DropdownMenuItem(
@@ -250,7 +250,7 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
                       )
                     else ...[
                       DropdownButtonFormField<String>(
-                        value: _selectedMethodId,
+                        initialValue: _selectedMethodId,
                         decoration:
                             _fieldDecoration(context, l10n.paymentMethod),
                         items: _paymentMethods

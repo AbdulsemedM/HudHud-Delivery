@@ -178,7 +178,7 @@ class _HandymanDetailsScreenState extends State<HandymanDetailsScreen> {
                                           .withValues(alpha: 0.25),
                                     ),
                                   ),
-                                  child: Icon(
+                                  child: const Icon(
                                     Icons.person_rounded,
                                     size: 48,
                                     color: AppColors.primaryColor,

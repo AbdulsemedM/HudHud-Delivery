@@ -126,7 +126,7 @@ class OrderFilterChips extends StatelessWidget {
               side: BorderSide(
                 color: selected
                     ? AppColors.primaryColor
-                    : Theme.of(context).colorScheme.outline.withOpacity(0.4),
+                    : Theme.of(context).colorScheme.outline.withValues(alpha: 0.4),
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppColors.radiusFull),
@@ -306,7 +306,7 @@ class OrderItemCard extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.12),
+                  color: statusColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(

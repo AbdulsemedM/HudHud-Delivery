@@ -460,7 +460,7 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
                             child: OutlinedButton(
                               onPressed: _isCancelling ? null : _cancelOrder,
                               style: OutlinedButton.styleFrom(
-                                side: BorderSide(
+                                side: const BorderSide(
                                   color: AppColors.errorColor,
                                   width: 1.5,
                                 ),
@@ -478,7 +478,7 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
                                         color: AppColors.errorColor,
                                       ),
                                     )
-                                  : Text(
+                                  : const Text(
                                       'Cancel Order',
                                       style: TextStyle(
                                         color: AppColors.errorColor,

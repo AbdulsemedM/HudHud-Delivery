@@ -422,7 +422,7 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                   Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
-                      color: Colors.black.withOpacity(0.3),
+                      color: Colors.black.withValues(alpha: 0.3),
                     ),
                     child: const Center(
                       child: Padding(
@@ -563,7 +563,7 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                 color: AppColors.primaryColor,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 10,
                     offset: const Offset(0, -5),
                   ),
@@ -611,7 +611,7 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                       minimumSize: Size.zero,
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
-                    child: FittedBox(
+                    child: const FittedBox(
                       fit: BoxFit.scaleDown,
                       child: Text(
                         'Go to Checkout',
@@ -914,7 +914,7 @@ class _VendorDetailHeader extends StatelessWidget {
             ],
           ),
         ),
-        child: Center(
+        child: const Center(
           child: Icon(
             Icons.storefront_rounded,
             size: 88,
@@ -1241,7 +1241,7 @@ class _ProductCard extends StatelessWidget {
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
+                        color: Colors.black.withValues(alpha: 0.2),
                         blurRadius: 4,
                         offset: const Offset(0, 2),
                       ),
@@ -1287,7 +1287,7 @@ class _ProductCard extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   'ETB ${product.price}',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                     color: AppColors.primaryColor,

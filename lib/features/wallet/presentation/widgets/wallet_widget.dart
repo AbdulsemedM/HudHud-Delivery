@@ -1,4 +1,3 @@
-import 'dart:ui' show FontFeature;
 
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
@@ -71,7 +70,7 @@ class BalanceCard extends StatelessWidget {
           Text(
             l10n.walletMyBalanceLabel,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.75),
+              color: Colors.white.withValues(alpha: 0.75),
               fontSize: 14,
               fontWeight: FontWeight.w500,
             ),
@@ -110,7 +109,7 @@ class WalletActionButton extends StatelessWidget {
       child: Column(
         children: [
           Material(
-            color: Colors.white.withOpacity(0.2),
+            color: Colors.white.withValues(alpha: 0.2),
             shape: const CircleBorder(),
             child: InkWell(
               onTap: onTap,
@@ -126,7 +125,7 @@ class WalletActionButton extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.9),
+              color: Colors.white.withValues(alpha: 0.9),
               fontSize: 11,
               fontWeight: FontWeight.w500,
             ),
@@ -213,7 +212,7 @@ class WalletSelectorChip extends StatelessWidget {
         side: BorderSide(
           color: selected
               ? AppColors.primaryColor
-              : scheme.outline.withOpacity(0.4),
+              : scheme.outline.withValues(alpha: 0.4),
         ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppColors.radiusFull),
@@ -384,7 +383,7 @@ class TransactionListItem extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: amountColor.withOpacity(0.12),
+              color: amountColor.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(

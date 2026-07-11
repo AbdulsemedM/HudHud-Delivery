@@ -96,7 +96,7 @@ class _ServicesScreenBody extends StatelessWidget {
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(
-            color: theme.dividerColor.withOpacity(0.5),
+            color: theme.dividerColor.withValues(alpha: 0.5),
             height: 1,
           ),
         ),
@@ -165,7 +165,7 @@ class _ServiceSkeleton extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: theme.colorScheme.shadow.withOpacity(0.04),
+            color: theme.colorScheme.shadow.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -225,10 +225,10 @@ class _ErrorState extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: AppColors.errorColor.withOpacity(0.08),
+                color: AppColors.errorColor.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.error_outline_rounded,
                 size: 48,
                 color: AppColors.errorColor,
@@ -291,7 +291,7 @@ class _EmptyState extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -419,7 +419,7 @@ class _ServiceCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: theme.shadowColor.withOpacity(isDark ? 0.35 : 0.06),
+                color: theme.shadowColor.withValues(alpha: isDark ? 0.35 : 0.06),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -510,8 +510,8 @@ class _IconPlaceholder extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            color.withOpacity(0.2),
-            color.withOpacity(0.08),
+            color.withValues(alpha: 0.2),
+            color.withValues(alpha: 0.08),
           ],
         ),
         borderRadius: BorderRadius.circular(14),

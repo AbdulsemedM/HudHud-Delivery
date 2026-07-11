@@ -25,7 +25,7 @@ class _GoogleSignInButton extends StatelessWidget {
         },
         style: OutlinedButton.styleFrom(
           side: BorderSide(
-            color: colorScheme.outline.withOpacity(0.5),
+            color: colorScheme.outline.withValues(alpha: 0.5),
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
@@ -65,7 +65,9 @@ class _GoogleSignInButton extends StatelessWidget {
 }
 
 class SignupScreen extends StatefulWidget {
-  const SignupScreen({super.key});
+  final bool resumeAfterAuth;
+
+  const SignupScreen({super.key, this.resumeAfterAuth = false});
 
   @override
   State<SignupScreen> createState() => _SignupScreenState();
@@ -128,7 +130,7 @@ class _SignupScreenState extends State<SignupScreen>
                         end: Alignment.bottomCenter,
                         colors: [
                           AppColors.primaryColor,
-                          AppColors.primaryColor.withOpacity(0.0),
+                          AppColors.primaryColor.withValues(alpha: 0.0),
                         ],
                       ),
                     ),
@@ -165,7 +167,7 @@ class _SignupScreenState extends State<SignupScreen>
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: colorScheme.shadow.withOpacity(0.08),
+                            color: colorScheme.shadow.withValues(alpha: 0.08),
                             blurRadius: 24,
                             offset: const Offset(0, -4),
                           ),
@@ -183,14 +185,14 @@ class _SignupScreenState extends State<SignupScreen>
                               const SizedBox(height: AppColors.spaceLG),
                               createSignupForm(),
                               const SizedBox(height: AppColors.spaceMD),
-                              const SignupButton(),
+                              SignupButton(resumeAfterAuth: widget.resumeAfterAuth),
                               const SizedBox(height: AppColors.spaceMD),
                               Center(
                                 child: GestureDetector(
                                   onTap: () => Navigator.pop(context),
                                   child: Text(
                                     l10n.loginTitle,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       color: AppColors.primaryColor,
                                       fontSize: 14,
                                       fontWeight: FontWeight.w600,

@@ -92,7 +92,7 @@ class FavoriteRestaurantsScreen extends StatelessWidget {
                       color: colorScheme.surface,
                       borderRadius: BorderRadius.circular(AppColors.radiusLG),
                       border: Border.all(
-                        color: colorScheme.outline.withOpacity(0.2),
+                        color: colorScheme.outline.withValues(alpha: 0.2),
                       ),
                     ),
                     child: Row(
@@ -103,7 +103,7 @@ class FavoriteRestaurantsScreen extends StatelessWidget {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: colorScheme.outline.withOpacity(0.15),
+                              color: colorScheme.outline.withValues(alpha: 0.15),
                             ),
                             image: DecorationImage(
                               image: AssetImage(restaurant['imageUrl']),
@@ -130,12 +130,12 @@ class FavoriteRestaurantsScreen extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 4),
-                            Icon(Icons.star_rounded,
+                            const Icon(Icons.star_rounded,
                                 color: AppColors.ratingFilled, size: 16),
                           ],
                         ),
                         const SizedBox(width: 12),
-                        Icon(Icons.favorite_rounded,
+                        const Icon(Icons.favorite_rounded,
                             color: AppColors.errorColor, size: 22),
                       ],
                     ),

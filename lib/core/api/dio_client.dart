@@ -32,9 +32,9 @@ class DioClient {
   void _setupDio() {
     _dio.options = BaseOptions(
       baseUrl: ApiConstants.baseUrl,
-      connectTimeout: Duration(milliseconds: ApiConstants.connectTimeout),
-      receiveTimeout: Duration(milliseconds: ApiConstants.receiveTimeout),
-      sendTimeout: Duration(milliseconds: ApiConstants.sendTimeout),
+      connectTimeout: const Duration(milliseconds: ApiConstants.connectTimeout),
+      receiveTimeout: const Duration(milliseconds: ApiConstants.receiveTimeout),
+      sendTimeout: const Duration(milliseconds: ApiConstants.sendTimeout),
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -78,7 +78,7 @@ class DioClient {
       return await authService.getStoredToken();
     } catch (e) {
       if (kDebugMode) {
-        print('Error retrieving auth token: $e');
+        debugPrint('Error retrieving auth token: $e');
       }
       return null;
     }
@@ -107,13 +107,13 @@ class DioClient {
         await authService.clearAllData();
 
         if (kDebugMode) {
-          print('Token refresh failed, session cleared');
+          debugPrint('Token refresh failed, session cleared');
         }
         _scheduleUnauthorizedRedirect();
       }
     } catch (e) {
       if (kDebugMode) {
-        print('Error handling unauthorized access: $e');
+        debugPrint('Error handling unauthorized access: $e');
       }
       final authService = AuthService();
       await authService.clearAllData();

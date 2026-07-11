@@ -47,17 +47,17 @@ class HotPicksSection extends StatelessWidget {
                   );
                 },
               ),
-              RestaurantCircleCard(
+              const RestaurantCircleCard(
                 imageAsset: 'assets/images/taco_bell.png',
                 name: 'Taco Bell',
                 rating: 4.3,
               ),
-              RestaurantCircleCard(
+              const RestaurantCircleCard(
                 imageAsset: 'assets/images/food_point.jpg',
                 name: 'Food Point',
                 rating: 4.3,
               ),
-              RestaurantCircleCard(
+              const RestaurantCircleCard(
                 imageAsset: 'assets/images/kalzbrgr.png',
                 name: 'Kalzbrgr',
                 rating: 4.3,
@@ -96,7 +96,7 @@ class RestaurantCircleCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: colorScheme.surface,
           borderRadius: BorderRadius.circular(AppColors.radiusLG),
-          border: Border.all(color: colorScheme.outline.withOpacity(0.2)),
+          border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
         ),
         child: Column(
           children: [
@@ -105,7 +105,7 @@ class RestaurantCircleCard extends StatelessWidget {
               height: 56,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: colorScheme.outline.withOpacity(0.15)),
+                border: Border.all(color: colorScheme.outline.withValues(alpha: 0.15)),
               ),
               child: ClipOval(
                 child: Image.asset(imageAsset, fit: BoxFit.cover),
@@ -133,7 +133,7 @@ class RestaurantCircleCard extends StatelessWidget {
                     color: colorScheme.onSurfaceVariant,
                   ),
                 ),
-                Icon(Icons.star_rounded, color: AppColors.ratingFilled, size: 14),
+                const Icon(Icons.star_rounded, color: AppColors.ratingFilled, size: 14),
               ],
             ),
           ],
@@ -168,7 +168,7 @@ class RestaurantListItem extends StatelessWidget {
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(AppColors.radiusLG),
-        border: Border.all(color: colorScheme.outline.withOpacity(0.2)),
+        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
@@ -177,7 +177,7 @@ class RestaurantListItem extends StatelessWidget {
             height: 60,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: colorScheme.outline.withOpacity(0.15)),
+              border: Border.all(color: colorScheme.outline.withValues(alpha: 0.15)),
             ),
             child: ClipOval(
               child: Image.asset(
@@ -220,7 +220,7 @@ class RestaurantListItem extends StatelessWidget {
                   color: colorScheme.onSurface,
                 ),
               ),
-              Icon(Icons.star_rounded, color: AppColors.ratingFilled, size: 16),
+              const Icon(Icons.star_rounded, color: AppColors.ratingFilled, size: 16),
             ],
           ),
         ],

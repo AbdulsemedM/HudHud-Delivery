@@ -401,7 +401,7 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
                             ),
                             const SizedBox(width: AppColors.spaceSM),
                             if (_isLoadingRoute)
-                              _InlineShimmer(width: 72, height: 14)
+                              const _InlineShimmer(width: 72, height: 14)
                             else if (_routeDistanceKm != null)
                               Text(
                                 l10n.taxiDistanceKm(
@@ -434,7 +434,7 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
                           ),
                           child: Row(
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.info_outline_rounded,
                                 size: 18,
                                 color: AppColors.warningDarkColor,
@@ -817,7 +817,7 @@ class _TripOptionCard extends StatelessWidget {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(
+                                const Icon(
                                   Icons.bolt_rounded,
                                   size: 12,
                                   color: AppColors.infoColor,

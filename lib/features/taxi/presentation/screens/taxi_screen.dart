@@ -527,11 +527,11 @@ class _TaxiScreenState extends State<TaxiScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.local_taxi, color: AppColors.primaryColor, size: 24),
+              const Icon(Icons.local_taxi, color: AppColors.primaryColor, size: 24),
               const SizedBox(width: 8),
               Text(
                 l10n.taxiActiveRide,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: AppColors.primaryColor,
@@ -629,7 +629,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
                     _checkActiveRide();
                   },
             child: _isCheckingActiveRide
-                ? SizedBox(
+                ? const SizedBox(
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(
@@ -639,7 +639,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
                   )
                 : Text(
                     l10n.taxiRefreshStatus,
-                    style: TextStyle(color: AppColors.primaryColor, fontSize: 14),
+                    style: const TextStyle(color: AppColors.primaryColor, fontSize: 14),
                   ),
           ),
           const SizedBox(height: 16),
@@ -828,7 +828,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.local_taxi, color: AppColors.primaryColor, size: 20),
+                      const Icon(Icons.local_taxi, color: AppColors.primaryColor, size: 20),
                       const SizedBox(width: 8),
                       Text(
                         l10n.taxiCarsNearby(_totalAvailable!),
@@ -929,7 +929,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
                         children: [
                           Text(
                             l10n.taxiBrandHudHud,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                               color: AppColors.primaryColor,
@@ -954,17 +954,17 @@ class _TaxiScreenState extends State<TaxiScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Row(
                           children: [
-                            Icon(Icons.straighten,
+                            const Icon(Icons.straighten,
                                 size: 18, color: AppColors.primaryColor),
                             const SizedBox(width: 8),
                             if (_isLoadingRoute)
-                              _TaxiInlineShimmer(width: 72, height: 14)
+                              const _TaxiInlineShimmer(width: 72, height: 14)
                             else if (_routeDistanceKm != null)
                               Text(
                                 l10n.taxiDistanceKm(
                                   _routeDistanceKm!.toStringAsFixed(2),
                                 ),
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
                                   color: AppColors.primaryColor,
@@ -999,7 +999,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
                                   hintStyle: TextStyle(
                                     color: colorScheme.onSurfaceVariant,
                                   ),
-                                  prefixIcon: Icon(
+                                  prefixIcon: const Icon(
                                     Icons.search,
                                     color: AppColors.primaryColor,
                                   ),
@@ -1066,7 +1066,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(
+                                  const Icon(
                                     Icons.access_time,
                                     color: AppColors.primaryColor,
                                     size: 20,
@@ -1076,13 +1076,13 @@ class _TaxiScreenState extends State<TaxiScreen> {
                                     _timeChoice == _TaxiTimeChoice.now
                                         ? l10n.taxiTimeNow
                                         : l10n.taxiScheduleForLater,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       color: AppColors.primaryColor,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                   const SizedBox(width: 4),
-                                  Icon(
+                                  const Icon(
                                     Icons.keyboard_arrow_down,
                                     color: AppColors.primaryColor,
                                     size: 20,

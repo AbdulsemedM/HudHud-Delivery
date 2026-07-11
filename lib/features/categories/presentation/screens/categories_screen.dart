@@ -860,7 +860,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 
                           BoxShadow(
 
-                            color: Colors.black.withOpacity(0.1),
+                            color: Colors.black.withValues(alpha: 0.1),
 
                             blurRadius: 10,
 
@@ -1028,7 +1028,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 
                                 ),
 
-                                child: Text(
+                                child: const Text(
 
                                   'Go to Checkout',
 

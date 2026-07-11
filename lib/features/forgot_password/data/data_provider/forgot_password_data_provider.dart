@@ -8,6 +8,7 @@ class ForgotPasswordDataProvider implements ForgotPasswordDataSource {
 
   final ApiService apiService;
 
+  @override
   Future<Map<String, dynamic>> requestResetOtp({
     required String identifier,
     required String method,
@@ -40,6 +41,7 @@ class ForgotPasswordDataProvider implements ForgotPasswordDataSource {
     }
   }
 
+  @override
   Future<Map<String, dynamic>> verifyOtp({
     required String resetId,
     required String otp,
@@ -72,6 +74,7 @@ class ForgotPasswordDataProvider implements ForgotPasswordDataSource {
     }
   }
 
+  @override
   Future<Map<String, dynamic>> resendOtp({required String resetId}) async {
     try {
       final response = await apiService.post(
@@ -98,6 +101,7 @@ class ForgotPasswordDataProvider implements ForgotPasswordDataSource {
     }
   }
 
+  @override
   Future<Map<String, dynamic>> resetWithToken({
     required String resetToken,
     required String password,

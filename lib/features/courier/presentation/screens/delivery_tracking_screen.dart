@@ -276,7 +276,7 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: colorScheme.shadow.withOpacity(0.2),
+                    color: colorScheme.shadow.withValues(alpha: 0.2),
                     blurRadius: 4,
                   ),
                 ],
@@ -299,7 +299,7 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                 border: Border.all(color: borderColor),
                 boxShadow: [
                   BoxShadow(
-                    color: colorScheme.shadow.withOpacity(0.15),
+                    color: colorScheme.shadow.withValues(alpha: 0.15),
                     blurRadius: 4,
                   ),
                 ],
@@ -391,7 +391,7 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                           ),
                           Container(
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
+                              color: Colors.white.withValues(alpha: 0.2),
                               shape: BoxShape.circle,
                             ),
                             child: IconButton(

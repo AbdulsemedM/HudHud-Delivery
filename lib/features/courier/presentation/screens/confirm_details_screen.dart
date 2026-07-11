@@ -330,7 +330,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: colorScheme.shadow.withOpacity(0.2),
+                    color: colorScheme.shadow.withValues(alpha: 0.2),
                     blurRadius: 4,
                   ),
                 ],
@@ -351,12 +351,12 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: colorScheme.shadow.withOpacity(0.2),
+                    color: colorScheme.shadow.withValues(alpha: 0.2),
                     blurRadius: 4,
                   ),
                 ],
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.two_wheeler,
                 color: AppColors.primaryColor,
                 size: 24,
@@ -517,7 +517,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                             const SizedBox(height: AppColors.spaceLG),
                             TextButton(
                               onPressed: () => Navigator.pop(context),
-                              child: Text(
+                              child: const Text(
                                 'Edit Details',
                                 style: TextStyle(
                                   color: AppColors.primaryColor,

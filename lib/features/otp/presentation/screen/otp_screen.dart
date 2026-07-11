@@ -67,7 +67,7 @@ class _OtpScreenState extends State<OtpScreen>
                   end: Alignment.bottomCenter,
                   colors: [
                     AppColors.primaryColor,
-                    AppColors.primaryColor.withOpacity(0.0),
+                    AppColors.primaryColor.withValues(alpha: 0.0),
                   ],
                 ),
               ),
@@ -104,7 +104,7 @@ class _OtpScreenState extends State<OtpScreen>
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: colorScheme.shadow.withOpacity(0.08),
+                      color: colorScheme.shadow.withValues(alpha: 0.08),
                       blurRadius: 24,
                       offset: const Offset(0, -4),
                     ),
@@ -151,7 +151,7 @@ class _OtpScreenState extends State<OtpScreen>
                                 },
                               ),
                               const SizedBox(height: AppColors.spaceLG),
-                              OtpResendTimer(),
+                              const OtpResendTimer(),
                             ],
                           ),
                         ),

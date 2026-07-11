@@ -98,7 +98,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
           Text(
             widget.label!,
             style: widget.labelStyle ??
-                TextStyle(
+                const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                   color: Colors.black87,
@@ -124,7 +124,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
                 ? null
                 : [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),

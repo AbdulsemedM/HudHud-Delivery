@@ -110,7 +110,7 @@ class _CompleteOrderScreenState extends State<CompleteOrderScreen> {
                   color: AppColors.primaryColor,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 10,
                       offset: const Offset(0, -5),
                     ),
@@ -141,7 +141,7 @@ class _CompleteOrderScreenState extends State<CompleteOrderScreen> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      child: Text(
+                      child: const Text(
                         'Complete My Order',
                         style: TextStyle(
                           color: AppColors.primaryColor,

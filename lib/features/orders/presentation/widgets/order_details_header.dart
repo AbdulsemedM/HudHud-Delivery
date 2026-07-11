@@ -456,12 +456,12 @@ class _OrderHeaderMenu extends StatelessWidget {
             subtitle: Text('#${order.id}', style: const TextStyle(fontSize: 12)),
           ),
         ),
-        PopupMenuItem(
+        const PopupMenuItem(
           value: 'share',
           child: ListTile(
             contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.share_rounded, size: 22),
-            title: const Text('Share order'),
+            leading: Icon(Icons.share_rounded, size: 22),
+            title: Text('Share order'),
           ),
         ),
         if (onCancel != null)

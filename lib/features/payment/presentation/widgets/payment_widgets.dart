@@ -34,7 +34,7 @@ class PaymentMethodCard extends StatelessWidget {
         side: BorderSide(
           color: isSelected
               ? AppColors.primaryColor
-              : colorScheme.outline.withOpacity(0.35),
+              : colorScheme.outline.withValues(alpha: 0.35),
           width: isSelected ? 2 : 1,
         ),
       ),
@@ -51,7 +51,7 @@ class PaymentMethodCard extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: _getPaymentMethodColor(id).withOpacity(0.1),
+                  color: _getPaymentMethodColor(id).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -73,7 +73,7 @@ class PaymentMethodCard extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                         color: enabled
                             ? colorScheme.onSurface
-                            : colorScheme.onSurface.withOpacity(0.5),
+                            : colorScheme.onSurface.withValues(alpha: 0.5),
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -82,8 +82,8 @@ class PaymentMethodCard extends StatelessWidget {
                       style: textTheme.bodyMedium?.copyWith(
                         fontSize: 14,
                         color: enabled
-                            ? colorScheme.onSurface.withOpacity(0.72)
-                            : colorScheme.onSurface.withOpacity(0.45),
+                            ? colorScheme.onSurface.withValues(alpha: 0.72)
+                            : colorScheme.onSurface.withValues(alpha: 0.45),
                       ),
                     ),
                   ],
@@ -250,7 +250,7 @@ class PaymentSummaryCard extends StatelessWidget {
               fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
               color: isTotal
                   ? colorScheme.onSurface
-                  : colorScheme.onSurface.withOpacity(0.72),
+                  : colorScheme.onSurface.withValues(alpha: 0.72),
             ),
           ),
           Text(
@@ -310,7 +310,7 @@ class PaymentProcessingDialog extends StatelessWidget {
               textAlign: TextAlign.center,
               style: textTheme.bodyMedium?.copyWith(
                 fontSize: 14,
-                color: colorScheme.onSurface.withOpacity(0.72),
+                color: colorScheme.onSurface.withValues(alpha: 0.72),
               ),
             ),
           ],

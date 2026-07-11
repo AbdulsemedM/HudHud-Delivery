@@ -134,7 +134,8 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     ).then((signupSucceeded) {
-      if (signupSucceeded == true && mounted && widget.resumeAfterAuth) {
+      if (!context.mounted) return;
+      if (signupSucceeded == true && widget.resumeAfterAuth) {
         Navigator.of(context).pop(true);
       }
     });

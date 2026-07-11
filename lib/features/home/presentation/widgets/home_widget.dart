@@ -3,6 +3,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:lottie/lottie.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/avatar_util.dart';
 import '../../../../models/user_model.dart';
 
 /// Shown when the user lands on the Home tab and email or phone is not verified.
@@ -72,79 +73,254 @@ class AccountVerificationPromptDialog extends StatelessWidget {
   }
 }
 
-class UserProfileHeader extends StatelessWidget {
-  final String location;
-  final bool isLoadingLocation;
-  final VoidCallback onLocationTap;
-  final VoidCallback onNotificationsTap;
+class VerificationStatusCard extends StatelessWidget {
+  final UserModel user;
+  final VoidCallback onVerifyEmail;
+  final VoidCallback onVerifyPhone;
 
-  const UserProfileHeader({
+  const VerificationStatusCard({
     super.key,
-    required this.location,
-    this.isLoadingLocation = false,
-    required this.onLocationTap,
-    required this.onNotificationsTap,
+    required this.user,
+    required this.onVerifyEmail,
+    required this.onVerifyPhone,
   });
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final colorScheme = Theme.of(context).colorScheme;
-    final primary = colorScheme.primary;
+    final textTheme = Theme.of(context).textTheme;
+    final emailVerified = user.isEmailVerified;
+    final phoneVerified = user.isPhoneVerified;
+
+    if (emailVerified && phoneVerified) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(AppColors.spaceMD),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        border: Border.all(
+          color: colorScheme.outline.withValues(alpha: 0.2),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.verificationStatus,
+            style: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: AppColors.spaceMD),
+          Row(
+            children: [
+              if (!emailVerified)
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: onVerifyEmail,
+                    icon: const Icon(Icons.mark_email_read_outlined, size: 18),
+                    label: Text(l10n.verifyEmail),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.primaryColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                    ),
+                  ),
+                ),
+              if (!emailVerified && !phoneVerified)
+                const SizedBox(width: AppColors.spaceMD),
+              if (!phoneVerified)
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: onVerifyPhone,
+                    icon: const Icon(Icons.phone_android_outlined, size: 18),
+                    label: Text(l10n.verifyPhone),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.primaryColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class UserProfileHeader extends StatefulWidget {
+  final String name;
+  final String location;
+  final bool isLoadingLocation;
+  final VoidCallback onLocationTap;
+  final VoidCallback onNotificationsTap;
+  final UserModel? user;
+
+  const UserProfileHeader({
+    super.key,
+    required this.name,
+    required this.location,
+    this.isLoadingLocation = false,
+    required this.onLocationTap,
+    required this.onNotificationsTap,
+    this.user,
+  });
+
+  @override
+  State<UserProfileHeader> createState() => _UserProfileHeaderState();
+}
+
+class _UserProfileHeaderState extends State<UserProfileHeader>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _chevronController;
+
+  @override
+  void initState() {
+    super.initState();
+    _chevronController = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+  }
+
+  @override
+  void dispose() {
+    _chevronController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Row(
       children: [
-        Expanded(
-          child: GestureDetector(
-            onTap: onLocationTap,
-            behavior: HitTestBehavior.opaque,
-            child: Row(
-              children: [
-                Icon(
-                  Icons.location_on,
-                  color: primary,
-                  size: 18,
-                ),
-                const SizedBox(width: 4),
-                Flexible(
-                  child: isLoadingLocation
-                      ? SizedBox(
-                          width: 12,
-                          height: 12,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 1.5,
-                            valueColor: AlwaysStoppedAnimation<Color>(primary),
-                          ),
-                        )
-                      : Text(
-                          location,
-                          style: TextStyle(
-                            color: primary,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                ),
-                const SizedBox(width: 2),
-                Icon(
-                  Icons.arrow_drop_down,
-                  color: primary,
-                  size: 18,
-                ),
-              ],
-            ),
+        Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white, width: 2.5),
+            boxShadow: [
+              BoxShadow(
+                color: colorScheme.shadow.withValues(alpha: 0.12),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: CircleAvatar(
+            radius: 22,
+            backgroundColor: AppColors.primaryColor,
+            backgroundImage: getDisplayAvatarUrl(widget.user) != null
+                ? NetworkImage(getDisplayAvatarUrl(widget.user)!)
+                : const AssetImage('assets/images/profile.png')
+                    as ImageProvider,
           ),
         ),
-        IconButton(
-          visualDensity: VisualDensity.compact,
-          padding: const EdgeInsets.all(4),
-          constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-          iconSize: 20,
-          icon: Icon(
-            Icons.notifications_outlined,
-            color: colorScheme.onSurface,
+        const SizedBox(width: AppColors.spaceMD),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                widget.name,
+                style: textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 2),
+              GestureDetector(
+                onTap: () {
+                  _chevronController.forward(from: 0).then((_) {
+                    _chevronController.reverse();
+                  });
+                  widget.onLocationTap();
+                },
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.location_on_rounded,
+                      color: AppColors.primaryColor,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 4),
+                    Flexible(
+                      child: widget.isLoadingLocation
+                          ? const SizedBox(
+                              width: 12,
+                              height: 12,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.primaryColor,
+                              ),
+                            )
+                          : Text(
+                              widget.location.isEmpty
+                                  ? l10n.yourLocation
+                                  : widget.location,
+                              style: textTheme.bodySmall?.copyWith(
+                                color: AppColors.primaryColor,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                    ),
+                    RotationTransition(
+                      turns: Tween<double>(begin: 0, end: 0.5)
+                          .animate(_chevronController),
+                      child: const Icon(
+                        Icons.chevron_right_rounded,
+                        color: AppColors.primaryColor,
+                        size: 18,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          onPressed: onNotificationsTap,
+        ),
+        Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFF4F4F4),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              IconButton(
+                icon: Icon(
+                  Icons.notifications_outlined,
+                  color: colorScheme.onSurface,
+                  size: 22,
+                ),
+                onPressed: widget.onNotificationsTap,
+              ),
+              Positioned(
+                top: 10,
+                right: 10,
+                child: Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    color: AppColors.primaryColor,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -190,7 +366,7 @@ class OrderTrackingCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Hello ${riderName}',
+                    'Hello $riderName',
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 14,
@@ -280,10 +456,10 @@ class ServiceCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: colorScheme.surface,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: colorScheme.outline.withOpacity(0.28), width: 1),
+            border: Border.all(color: colorScheme.outline.withValues(alpha: 0.28), width: 1),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.08),
+                color: Colors.black.withValues(alpha: 0.08),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -296,7 +472,7 @@ class ServiceCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryColor.withOpacity(0.1),
+                  color: AppColors.primaryColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(icon, color: AppColors.primaryColor, size: 22),
@@ -316,7 +492,7 @@ class ServiceCard extends StatelessWidget {
                   subtitle,
                   style: textTheme.bodySmall?.copyWith(
                     fontSize: 11,
-                    color: colorScheme.onSurface.withOpacity(0.7),
+                    color: colorScheme.onSurface.withValues(alpha: 0.7),
                     height: 1.3,
                   ),
                   maxLines: 2,
@@ -350,7 +526,7 @@ class OrderHistoryEmptyState extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             spreadRadius: 1,
             blurRadius: 4,
             offset: const Offset(0, 2),
@@ -363,13 +539,13 @@ class OrderHistoryEmptyState extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: colorScheme.onSurface.withOpacity(0.12),
+              color: colorScheme.onSurface.withValues(alpha: 0.12),
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.receipt_long_outlined,
               size: 48,
-              color: colorScheme.onSurface.withOpacity(0.55),
+              color: colorScheme.onSurface.withValues(alpha: 0.55),
             ),
           ),
           const SizedBox(height: 20),
@@ -501,18 +677,18 @@ class HistoryItem extends StatelessWidget {
                   ),
                   borderRadius: BorderRadius.circular(4),
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.two_wheeler,
                   size: 12,
-                  color: const Color(0xFF64B5F6), // Light blue
+                  color: Color(0xFF64B5F6), // Light blue
                 ),
               ),
               const SizedBox(width: 8),
               // Location pin icon in green
-              Icon(
+              const Icon(
                 Icons.location_on,
                 size: 16,
-                color: const Color(0xFF4CAF50), // Green
+                color: Color(0xFF4CAF50), // Green
               ),
               const SizedBox(width: 4),
               Text(
@@ -733,6 +909,76 @@ class SeeAllServicesCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class ShimmerListView extends StatelessWidget {
+  final int itemCount;
+
+  const ShimmerListView({super.key, this.itemCount = 3});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseColor = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0);
+    final highlightColor =
+        isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF5F5F5);
+
+    return Column(
+      children: List.generate(itemCount, (index) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: AppColors.spaceMD),
+          child: Shimmer.fromColors(
+            baseColor: baseColor,
+            highlightColor: highlightColor,
+            child: Container(
+              height: 88,
+              decoration: BoxDecoration(
+                color: baseColor,
+                borderRadius: BorderRadius.circular(AppColors.radiusLG),
+              ),
+            ),
+          ),
+        );
+      }),
+    );
+  }
+}
+
+class SectionHeader extends StatelessWidget {
+  final String title;
+  final String actionLabel;
+  final VoidCallback? onAction;
+
+  const SectionHeader({
+    super.key,
+    required this.title,
+    required this.actionLabel,
+    this.onAction,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text(
+          title,
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+        ),
+        const Spacer(),
+        if (onAction != null)
+          TextButton(
+            onPressed: onAction,
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.primaryColor,
+              textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+            ),
+            child: Text(actionLabel),
+          ),
+      ],
     );
   }
 }

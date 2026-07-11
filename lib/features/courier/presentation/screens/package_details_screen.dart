@@ -336,7 +336,7 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(AppColors.radiusLG),
-                          borderSide: BorderSide(color: AppColors.primaryColor),
+                          borderSide: const BorderSide(color: AppColors.primaryColor),
                         ),
                       ),
                     ),
@@ -364,7 +364,7 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(AppColors.radiusLG),
-                          borderSide: BorderSide(color: AppColors.primaryColor),
+                          borderSide: const BorderSide(color: AppColors.primaryColor),
                         ),
                       ),
                     ),
@@ -391,7 +391,7 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(AppColors.radiusLG),
-                          borderSide: BorderSide(color: AppColors.primaryColor),
+                          borderSide: const BorderSide(color: AppColors.primaryColor),
                         ),
                       ),
                     ),
@@ -535,7 +535,7 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(AppColors.radiusLG),
-                          borderSide: BorderSide(color: AppColors.primaryColor),
+                          borderSide: const BorderSide(color: AppColors.primaryColor),
                         ),
                       ),
                     ),
@@ -562,7 +562,7 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(AppColors.radiusLG),
-                          borderSide: BorderSide(color: AppColors.primaryColor),
+                          borderSide: const BorderSide(color: AppColors.primaryColor),
                         ),
                       ),
                     ),
@@ -669,7 +669,7 @@ class _RadioOption extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primaryColor.withOpacity(0.1)
+              ? AppColors.primaryColor.withValues(alpha: 0.1)
               : fieldFill,
           borderRadius: BorderRadius.circular(AppColors.radiusLG),
           border: Border.all(

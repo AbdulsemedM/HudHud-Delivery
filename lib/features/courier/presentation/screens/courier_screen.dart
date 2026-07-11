@@ -13,6 +13,7 @@ import 'package:hudhud_delivery/models/user_model.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../home/presentation/widgets/home_widget.dart';
 import '../../../home/presentation/screen/location_search_screen.dart';
+import '../../../settings/presentation/screen/notifications_screen.dart';
 import 'delivery_details_screen.dart';
 import 'delivery_tracking_screen.dart';
 import 'instant_delivery_screen.dart';
@@ -241,6 +242,7 @@ class _CourierScreenState extends State<CourierScreen> {
                 name: _currentUser?.name ?? l10n.userDefault,
                 location: _currentLocation,
                 isLoadingLocation: _isLoadingLocation,
+                user: _currentUser,
                 onLocationTap: () async {
                   final result = await Navigator.push<Map<String, dynamic>>(
                     context,
@@ -255,6 +257,14 @@ class _CourierScreenState extends State<CourierScreen> {
                       _currentLocation = result['address'] as String;
                     });
                   }
+                },
+                onNotificationsTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const NotificationsScreen(),
+                    ),
+                  );
                 },
               ),
               const SizedBox(height: AppColors.spaceLG),
@@ -456,7 +466,7 @@ class _FilterChip extends StatelessWidget {
       backgroundColor: scheme.surface,
       selectedColor: AppColors.primaryColor,
       side: BorderSide(
-        color: selected ? AppColors.primaryColor : scheme.outline.withOpacity(0.4),
+        color: selected ? AppColors.primaryColor : scheme.outline.withValues(alpha: 0.4),
       ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppColors.radiusFull),
@@ -516,7 +526,7 @@ class _InstantDeliveryCard extends StatelessWidget {
                   Text(
                     l10n.courierInstantSubtitle,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.85),
+                      color: Colors.white.withValues(alpha: 0.85),
                       fontSize: 11,
                     ),
                     maxLines: 2,
@@ -565,7 +575,7 @@ class _ScheduleDeliveryCard extends StatelessWidget {
                 right: 0,
                 child: Icon(
                   Icons.schedule_rounded,
-                  color: AppColors.primaryColor.withOpacity(0.5),
+                  color: AppColors.primaryColor.withValues(alpha: 0.5),
                   size: 32,
                 ),
               ),
@@ -686,7 +696,7 @@ class _ActiveDeliveryBanner extends StatelessWidget {
                           shape: BoxShape.circle,
                           color: index <= 1
                               ? AppColors.primaryColor
-                              : scheme.onSurfaceVariant.withOpacity(0.3),
+                              : scheme.onSurfaceVariant.withValues(alpha: 0.3),
                         ),
                       );
                     }),
@@ -745,7 +755,7 @@ class _DeliveryHistoryCard extends StatelessWidget {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.12),
+                    color: statusColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(

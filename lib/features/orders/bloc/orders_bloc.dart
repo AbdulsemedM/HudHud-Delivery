@@ -25,7 +25,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
     FetchOrdersEvent event,
     Emitter<OrdersState> emit,
   ) async {
-    emit(OrdersLoading());
+    emit(const OrdersLoading());
     
     try {
       final ordersResponse = await ordersRepository.fetchOrders(

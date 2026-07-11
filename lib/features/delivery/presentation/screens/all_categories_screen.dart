@@ -195,13 +195,13 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
 
     if (widget.embedded) {
       return ColoredBox(
-        color: colorScheme.background,
+        color: colorScheme.surface,
         child: body,
       );
     }
 
     return Scaffold(
-      backgroundColor: colorScheme.background,
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
         title: Text(
           'All categories',
@@ -221,7 +221,7 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(
-            color: colorScheme.outline.withOpacity(0.35),
+            color: colorScheme.outline.withValues(alpha: 0.35),
             height: 1,
           ),
         ),
@@ -392,7 +392,7 @@ class _PopularOrderSkeleton extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -455,7 +455,7 @@ class _CategorySkeleton extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -517,10 +517,10 @@ class _ErrorState extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: AppColors.errorColor.withOpacity(0.08),
+                color: AppColors.errorColor.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.error_outline_rounded,
                 size: 48,
                 color: AppColors.errorColor,
@@ -540,7 +540,7 @@ class _ErrorState extends StatelessWidget {
               textAlign: TextAlign.center,
               style: textTheme.bodyMedium?.copyWith(
                 fontSize: 14,
-                color: colorScheme.onSurface.withOpacity(0.75),
+                color: colorScheme.onSurface.withValues(alpha: 0.75),
                 height: 1.4,
               ),
             ),
@@ -583,13 +583,13 @@ class _EmptyState extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: colorScheme.onSurface.withOpacity(0.12),
+                color: colorScheme.onSurface.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.category_outlined,
                 size: 56,
-                color: colorScheme.onSurface.withOpacity(0.55),
+                color: colorScheme.onSurface.withValues(alpha: 0.55),
               ),
             ),
             const SizedBox(height: 24),
@@ -935,7 +935,7 @@ class _VendorSliderCard extends StatelessWidget {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -1015,7 +1015,7 @@ class _PopularProductCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -1131,7 +1131,7 @@ class _PopularProductCard extends StatelessWidget {
                               'ETB $deliveryFee delivery',
                               style: textTheme.bodySmall?.copyWith(
                                 fontSize: 12,
-                                color: colorScheme.onSurface.withOpacity(0.72),
+                                color: colorScheme.onSurface.withValues(alpha: 0.72),
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -1177,14 +1177,14 @@ class _MoreButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         child: Container(
           decoration: BoxDecoration(
-            color: AppColors.primaryColor.withOpacity(0.12),
+            color: AppColors.primaryColor.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: AppColors.primaryColor.withOpacity(0.4),
+              color: AppColors.primaryColor.withValues(alpha: 0.4),
               width: 1.5,
             ),
           ),
-          child: Column(
+          child: const Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
@@ -1192,7 +1192,7 @@ class _MoreButton extends StatelessWidget {
                 size: 36,
                 color: AppColors.primaryColor,
               ),
-              const SizedBox(height: 6),
+              SizedBox(height: 6),
               Text(
                 'More',
                 style: TextStyle(
@@ -1236,7 +1236,7 @@ class _CategoryCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -1332,8 +1332,8 @@ class _IconPlaceholder extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppColors.primaryColor.withOpacity(0.15),
-            AppColors.primaryLightColor.withOpacity(0.08),
+            AppColors.primaryColor.withValues(alpha: 0.15),
+            AppColors.primaryLightColor.withValues(alpha: 0.08),
           ],
         ),
         borderRadius: BorderRadius.circular(12),

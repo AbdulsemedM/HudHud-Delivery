@@ -62,7 +62,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 16,
-                        color: theme.textTheme.bodyMedium?.color?.withOpacity(0.85),
+                        color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.85),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -223,7 +223,7 @@ class _NotificationItem extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.1),
+              color: iconColor.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -251,7 +251,7 @@ class _NotificationItem extends StatelessWidget {
                   notification.message,
                   style: TextStyle(
                     fontSize: 14,
-                    color: theme.textTheme.bodyMedium?.color?.withOpacity(0.8),
+                    color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.8),
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -259,7 +259,7 @@ class _NotificationItem extends StatelessWidget {
                   timeAgo,
                   style: TextStyle(
                     fontSize: 12,
-                    color: theme.textTheme.bodySmall?.color?.withOpacity(0.75),
+                    color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.75),
                   ),
                 ),
               ],

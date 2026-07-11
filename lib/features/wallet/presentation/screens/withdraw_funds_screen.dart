@@ -202,7 +202,7 @@ class _WithdrawFundsScreenState extends State<WithdrawFundsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     DropdownButtonFormField<WalletModel>(
-                      value: _selectedWallet,
+                      initialValue: _selectedWallet,
                       decoration: _fieldDecoration(context, l10n.fromWallet),
                       items: widget.wallets
                           .map((w) => DropdownMenuItem(
@@ -256,7 +256,7 @@ class _WithdrawFundsScreenState extends State<WithdrawFundsScreen> {
                       )
                     else ...[
                       DropdownButtonFormField<String>(
-                        value: _selectedMethodId,
+                        initialValue: _selectedMethodId,
                         decoration:
                             _fieldDecoration(context, l10n.withdrawalMethod),
                         items: _paymentMethods

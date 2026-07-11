@@ -202,7 +202,7 @@ class _DriverOnTheWayScreenState extends State<DriverOnTheWayScreen> {
                                     ),
                                   ),
                                 ),
-                                StatusChip(status: 'on_the_way'),
+                                const StatusChip(status: 'on_the_way'),
                               ],
                             ),
                             const SizedBox(height: AppColors.spaceMD),

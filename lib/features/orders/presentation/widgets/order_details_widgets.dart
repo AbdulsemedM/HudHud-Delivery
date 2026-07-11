@@ -45,7 +45,7 @@ class OrderStatusCard extends StatelessWidget {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.access_time_rounded,
                     size: 16,
                     color: AppColors.primaryColor,
@@ -300,8 +300,8 @@ class _OrderTimelineCardState extends State<OrderTimelineCard>
                   child: CustomPaint(
                     painter: _DashedLinePainter(
                       color: step.isCompleted
-                          ? AppColors.primaryColor.withOpacity(0.5)
-                          : colorScheme.outline.withOpacity(0.4),
+                          ? AppColors.primaryColor.withValues(alpha: 0.5)
+                          : colorScheme.outline.withValues(alpha: 0.4),
                     ),
                     child: const SizedBox(width: 2),
                   ),
@@ -416,7 +416,7 @@ class PackageInfoCard extends StatelessWidget {
             _infoRow(
               context,
               l10n.labelWeight,
-              '${itemCount}',
+              '$itemCount',
             ),
             if (order.items.isNotEmpty)
               _infoRow(
@@ -522,7 +522,7 @@ class VendorInfoCard extends StatelessWidget {
                 ),
                 IconButton(
                   onPressed: () {},
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.call_rounded,
                     color: AppColors.successColor,
                   ),
@@ -676,7 +676,7 @@ class DeliveryInfoCard extends StatelessWidget {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: AppColors.primaryColor.withOpacity(0.1),
+                    color: AppColors.primaryColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Icon(
@@ -691,7 +691,7 @@ class DeliveryInfoCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
+                const Icon(
                   Icons.location_on_rounded,
                   color: AppColors.primaryColor,
                   size: 20,
@@ -738,7 +738,7 @@ class DeliveryInfoCard extends StatelessWidget {
                   ),
                   IconButton(
                     onPressed: () {},
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.call_rounded,
                       color: AppColors.successColor,
                     ),
@@ -1026,13 +1026,20 @@ class _CancelOrderDialogState extends State<CancelOrderDialog> {
           ),
           const SizedBox(height: 16),
           ..._cancelReasons.map(
-            (reason) => RadioListTile<String>(
-              title: Text(reason),
-              value: reason,
-              groupValue: _selectedReason,
-              onChanged: (value) => setState(() => _selectedReason = value),
-              contentPadding: EdgeInsets.zero,
-            ),
+            (reason) {
+              final selected = _selectedReason == reason;
+              return ListTile(
+                title: Text(reason),
+                contentPadding: EdgeInsets.zero,
+                trailing: selected
+                    ? const Icon(Icons.check_circle, color: AppColors.primaryColor)
+                    : Icon(
+                        Icons.circle_outlined,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                onTap: () => setState(() => _selectedReason = reason),
+              );
+            },
           ),
           if (_selectedReason == 'Other') ...[
             const SizedBox(height: 8),

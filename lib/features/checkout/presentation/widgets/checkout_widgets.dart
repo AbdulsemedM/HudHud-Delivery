@@ -121,8 +121,8 @@ class _PromoCodeSectionState extends State<PromoCodeSection> {
                     hintText: 'Enter Promo Code',
                     hintStyle: TextStyle(
                       color: Theme.of(context).brightness == Brightness.dark
-                          ? AppColors.darkOnSurface.withOpacity(0.6)
-                          : AppColors.lightTextSecondary.withOpacity(0.7),
+                          ? AppColors.darkOnSurface.withValues(alpha: 0.6)
+                          : AppColors.lightTextSecondary.withValues(alpha: 0.7),
                     ),
                     filled: Theme.of(context).brightness == Brightness.dark,
                     fillColor: Theme.of(context).brightness == Brightness.dark
@@ -133,7 +133,7 @@ class _PromoCodeSectionState extends State<PromoCodeSection> {
                       borderSide: BorderSide(
                         color: Theme.of(context).brightness == Brightness.dark
                             ? AppColors.darkBorder
-                            : Colors.grey.withOpacity(0.3),
+                            : Colors.grey.withValues(alpha: 0.3),
                       ),
                     ),
                     enabledBorder: OutlineInputBorder(
@@ -141,7 +141,7 @@ class _PromoCodeSectionState extends State<PromoCodeSection> {
                       borderSide: BorderSide(
                         color: Theme.of(context).brightness == Brightness.dark
                             ? AppColors.darkBorder
-                            : Colors.grey.withOpacity(0.3),
+                            : Colors.grey.withValues(alpha: 0.3),
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
@@ -270,7 +270,7 @@ class DeliveryAddressSection extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 14,
                           color: Theme.of(context).brightness == Brightness.dark
-                              ? AppColors.darkOnSurface.withOpacity(0.7)
+                              ? AppColors.darkOnSurface.withValues(alpha: 0.7)
                               : AppColors.lightTextSecondary,
                         ),
                       ),
@@ -282,7 +282,7 @@ class DeliveryAddressSection extends StatelessWidget {
                   icon: Icon(
                     Icons.edit,
                     color: Theme.of(context).brightness == Brightness.dark
-                        ? AppColors.darkOnSurface.withOpacity(0.7)
+                        ? AppColors.darkOnSurface.withValues(alpha: 0.7)
                         : AppColors.lightTextSecondary,
                   ),
                 ),
@@ -317,8 +317,8 @@ class NotesSection extends StatelessWidget {
               hintText: 'Additional note',
               hintStyle: TextStyle(
                 color: Theme.of(context).brightness == Brightness.dark
-                    ? AppColors.darkOnSurface.withOpacity(0.5)
-                    : AppColors.lightTextSecondary.withOpacity(0.7),
+                    ? AppColors.darkOnSurface.withValues(alpha: 0.5)
+                    : AppColors.lightTextSecondary.withValues(alpha: 0.7),
               ),
               filled: Theme.of(context).brightness == Brightness.dark,
               fillColor: Theme.of(context).brightness == Brightness.dark
@@ -328,16 +328,16 @@ class NotesSection extends StatelessWidget {
                 borderRadius: BorderRadius.circular(AppColors.radiusLG),
                 borderSide: BorderSide(
                   color: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.grey.withOpacity(0.5)
-                      : Colors.grey.withOpacity(0.3),
+                      ? Colors.grey.withValues(alpha: 0.5)
+                      : Colors.grey.withValues(alpha: 0.3),
                 ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppColors.radiusLG),
                 borderSide: BorderSide(
                   color: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.grey.withOpacity(0.5)
-                      : Colors.grey.withOpacity(0.3),
+                      ? Colors.grey.withValues(alpha: 0.5)
+                      : Colors.grey.withValues(alpha: 0.3),
                 ),
               ),
               focusedBorder: OutlineInputBorder(
@@ -432,7 +432,7 @@ class _TipSectionState extends State<TipSection> {
                               : AppColors.primaryColor)
                           : (isDarkMode
                               ? AppColors.darkBorder
-                              : Colors.grey.withOpacity(0.3)),
+                              : Colors.grey.withValues(alpha: 0.3)),
                     ),
                   ),
                   child: Text(
@@ -457,7 +457,7 @@ class _TipSectionState extends State<TipSection> {
           // Custom tip amount
           TextField(
             controller: _tipController,
-            keyboardType: TextInputType.numberWithOptions(decimal: true),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
             ],
@@ -465,8 +465,8 @@ class _TipSectionState extends State<TipSection> {
               hintText: 'Enter custom tip amount',
               hintStyle: TextStyle(
                 color: isDarkMode
-                    ? AppColors.darkOnSurface.withOpacity(0.6)
-                    : AppColors.lightTextSecondary.withOpacity(0.7),
+                    ? AppColors.darkOnSurface.withValues(alpha: 0.6)
+                    : AppColors.lightTextSecondary.withValues(alpha: 0.7),
               ),
               filled: isDarkMode,
               fillColor: isDarkMode ? AppColors.darkSurface : null,
@@ -497,7 +497,7 @@ class _TipSectionState extends State<TipSection> {
                 borderSide: BorderSide(
                   color: isDarkMode
                       ? AppColors.darkBorder
-                      : Colors.grey.withOpacity(0.3),
+                      : Colors.grey.withValues(alpha: 0.3),
                 ),
               ),
               enabledBorder: OutlineInputBorder(
@@ -505,7 +505,7 @@ class _TipSectionState extends State<TipSection> {
                 borderSide: BorderSide(
                   color: isDarkMode
                       ? AppColors.darkBorder
-                      : Colors.grey.withOpacity(0.3),
+                      : Colors.grey.withValues(alpha: 0.3),
                 ),
               ),
               focusedBorder: OutlineInputBorder(
@@ -694,7 +694,7 @@ class PaymentMethodGridSection extends StatelessWidget {
                   duration: const Duration(milliseconds: 180),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? color.withOpacity(isDark ? 0.25 : 0.12)
+                        ? color.withValues(alpha: isDark ? 0.25 : 0.12)
                         : (isDark ? AppColors.darkSurface : Colors.white),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
@@ -702,13 +702,13 @@ class PaymentMethodGridSection extends StatelessWidget {
                           ? color
                           : (isDark
                               ? AppColors.darkBorder
-                              : Colors.grey.withOpacity(0.3)),
+                              : Colors.grey.withValues(alpha: 0.3)),
                       width: isSelected ? 2 : 1,
                     ),
                     boxShadow: isSelected
                         ? [
                             BoxShadow(
-                              color: color.withOpacity(0.25),
+                              color: color.withValues(alpha: 0.25),
                               blurRadius: 6,
                               offset: const Offset(0, 2),
                             )
@@ -726,7 +726,7 @@ class PaymentMethodGridSection extends StatelessWidget {
                             width: 36,
                             height: 36,
                             decoration: BoxDecoration(
-                              color: color.withOpacity(0.12),
+                              color: color.withValues(alpha: 0.12),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(icon, color: color, size: 20),
