@@ -1,0 +1,95 @@
+// android/app/build.gradle
+
+plugins {
+    id "com.android.application"
+    id "org.jetbrains.kotlin.android"
+    // The Flutter Gradle Plugin must be applied after Android/Kotlin plugins
+    id "dev.flutter.flutter-gradle-plugin"
+    id "com.google.gms.google-services"
+}
+
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties')
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localProperties.load(new FileInputStream(localPropertiesFile))
+}
+
+// Read GOOGLE_MAPS_API_KEY from project root .env first, then android/local.properties
+def googleMapsApiKey = ''
+def projectRoot = rootProject.rootDir.parentFile
+def envFile = projectRoot != null ? new File(projectRoot, '.env') : null
+if (envFile != null && envFile.exists()) {
+    envFile.withReader('UTF-8') { reader ->
+        reader.eachLine { line ->
+            def m = line =~ /^\s*GOOGLE_MAPS_API_KEY\s*=\s*(.+)\s*$/
+            if (m) {
+                googleMapsApiKey = m.group(1).trim().replaceAll(/^["']|["']$/, '')
+            }
+        }
+    }
+}
+if (!googleMapsApiKey) {
+    googleMapsApiKey = localProperties.getProperty('GOOGLE_MAPS_API_KEY', '').trim()
+}
+if (!googleMapsApiKey) {
+    println 'WARNING: GOOGLE_MAPS_API_KEY not set. Add it to project root .env or android/local.properties. Google Maps will show a blank screen.'
+}
+
+android {
+    namespace = "com.hudhud.userapp"
+    compileSdk = 36
+    ndkVersion = "27.0.12077973"
+
+    buildFeatures {
+        buildConfig = true
+    }
+
+    defaultConfig {
+        applicationId = "com.hudhud.userapp"
+        minSdkVersion = flutter.minSdkVersion
+        targetSdk = 35
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
+        manifestPlaceholders = [
+            googleMapsApiKey: googleMapsApiKey
+        ]
+        buildConfigField "String", "GOOGLE_MAPS_API_KEY", "\"${googleMapsApiKey.replace('"', '\\"')}\""
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+        coreLibraryDesugaringEnabled true
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+
+    signingConfigs {
+        release {
+            if (keystorePropertiesFile.exists()) {
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+                storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
+                storePassword keystoreProperties['storePassword']
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig keystorePropertiesFile.exists() ? signingConfigs.release : signingConfigs.debug
+        }
+    }
+}
+
+dependencies {
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:2.0.4"
+}

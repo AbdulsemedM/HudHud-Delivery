@@ -1,0 +1,1017 @@
+import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
+import 'package:latlong2/latlong.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/app/services/location_service.dart';
+import 'package:hudhud_delivery/app/services/geocoding_service.dart';
+import 'package:hudhud_delivery/app/services/google_directions_service.dart';
+import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
+import 'package:hudhud_delivery/core/widgets/centered_pin_map.dart';
+import 'package:hudhud_delivery/core/widgets/map_draggable_sheet_scaffold.dart';
+import '../../../home/presentation/screen/location_search_screen.dart';
+import 'package_details_screen.dart';
+
+enum _SchedulePinField { pickup, delivery }
+
+class ScheduleDeliveryScreen extends StatefulWidget {
+  const ScheduleDeliveryScreen({super.key});
+
+  @override
+  State<ScheduleDeliveryScreen> createState() => _ScheduleDeliveryScreenState();
+}
+
+class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
+  gmaps.GoogleMapController? _mapController;
+  final TextEditingController _dateController = TextEditingController();
+  final TextEditingController _timeController = TextEditingController();
+  String _pickupLocation = '';
+  String _deliveryLocation = '';
+  bool _pickupResolveFailed = false;
+  String _selectedVehicle = 'motorcycle'; // motorcycle, car, van
+  String _timePeriod = 'pm'; // am or pm
+  /// Default map center (Addis Ababa) — same as taxi / instant until GPS resolves.
+  LatLng _currentPosition = const LatLng(9.0222, 38.7468);
+  LatLng? _pickupPosition;
+  LatLng? _deliveryPosition;
+  bool _isLoadingLocation = true;
+  List<LatLng>? _routePolylinePoints;
+  bool? _hasGoogleMapsApiKey;
+
+  _SchedulePinField _activePinField = _SchedulePinField.pickup;
+
+  bool _skipNextIdleGeocode = false;
+
+  static gmaps.LatLng _toG(LatLng p) => gmaps.LatLng(p.latitude, p.longitude);
+
+  Future<void> _fetchRouteDirections() async {
+    if (_pickupPosition == null || _deliveryPosition == null) return;
+    final result = await GoogleDirectionsService.getDirections(
+      originLat: _pickupPosition!.latitude,
+      originLng: _pickupPosition!.longitude,
+      destLat: _deliveryPosition!.latitude,
+      destLng: _deliveryPosition!.longitude,
+    );
+    if (!mounted) return;
+    setState(() {
+      _routePolylinePoints = result?.polylinePoints;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMapsAvailability();
+    _getCurrentLocation();
+  }
+
+  Future<void> _loadMapsAvailability() async {
+    final key = await GoogleMapsApiKeyProvider.getKey();
+    if (!mounted) return;
+    setState(() {
+      _hasGoogleMapsApiKey = key.trim().isNotEmpty;
+    });
+  }
+
+  @override
+  void dispose() {
+    _dateController.dispose();
+    _timeController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _getCurrentLocation() async {
+    setState(() {
+      _isLoadingLocation = true;
+    });
+
+    try {
+      final position = await LocationService.getCurrentPosition();
+      if (position != null) {
+        final latLng = LatLng(position.latitude, position.longitude);
+
+        final address = await GeocodingService.getAddressFromLatLng(
+          position.latitude,
+          position.longitude,
+        );
+
+        if (mounted) {
+          setState(() {
+            _currentPosition = latLng;
+            _pickupPosition = latLng;
+            _pickupLocation = address;
+            _pickupResolveFailed = false;
+            _isLoadingLocation = false;
+          });
+
+          _skipNextIdleGeocode = true;
+          _activePinField = _SchedulePinField.pickup;
+          _mapController?.moveCamera(
+            gmaps.CameraUpdate.newLatLngZoom(_toG(latLng), 15.0),
+          );
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _pickupResolveFailed = true;
+            _pickupLocation = '';
+            _isLoadingLocation = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _pickupResolveFailed = true;
+          _pickupLocation = '';
+          _isLoadingLocation = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _selectPickupLocation() async {
+    final result = await Navigator.push<Map<String, dynamic>>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LocationSearchScreen(
+          currentLocation: _pickupLocation,
+        ),
+      ),
+    );
+
+    if (result != null && mounted) {
+      final address = result['address'] as String?;
+      final coordinates = result['coordinates'] as LatLng?;
+
+      if (address != null && coordinates != null) {
+        setState(() {
+          _pickupLocation = address;
+          _pickupResolveFailed = false;
+          _pickupPosition = coordinates;
+          _routePolylinePoints = null;
+        });
+
+        if (_pickupPosition != null && _deliveryPosition != null) {
+          _fetchRouteDirections();
+          _skipNextIdleGeocode = true;
+          _fitBounds();
+        } else {
+          _skipNextIdleGeocode = true;
+          _mapController?.moveCamera(
+            gmaps.CameraUpdate.newLatLngZoom(_toG(coordinates), 15.0),
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _selectDeliveryLocation() async {
+    final result = await Navigator.push<Map<String, dynamic>>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LocationSearchScreen(
+          currentLocation: _pickupLocation,
+        ),
+      ),
+    );
+
+    if (result != null && mounted) {
+      final address = result['address'] as String?;
+      final coordinates = result['coordinates'] as LatLng?;
+
+      if (address != null && coordinates != null) {
+        setState(() {
+          _deliveryLocation = address;
+          _deliveryPosition = coordinates;
+          _routePolylinePoints = null;
+        });
+
+        if (_pickupPosition != null && _deliveryPosition != null) {
+          _fetchRouteDirections();
+          _skipNextIdleGeocode = true;
+          _fitBounds();
+        } else {
+          _skipNextIdleGeocode = true;
+          _mapController?.moveCamera(
+            gmaps.CameraUpdate.newLatLngZoom(_toG(coordinates), 15.0),
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _applyCenterPinChange(gmaps.LatLng g) async {
+    if (_skipNextIdleGeocode) {
+      _skipNextIdleGeocode = false;
+      return;
+    }
+    final point = LatLng(g.latitude, g.longitude);
+    try {
+      final address = await GeocodingService.getAddressFromLatLng(
+        point.latitude,
+        point.longitude,
+      );
+
+      if (!mounted) return;
+      setState(() {
+        if (_activePinField == _SchedulePinField.pickup) {
+          _pickupLocation = address;
+          _pickupPosition = point;
+          _pickupResolveFailed = false;
+        } else {
+          _deliveryLocation = address;
+          _deliveryPosition = point;
+        }
+        _routePolylinePoints = null;
+      });
+
+      if (_pickupPosition != null && _deliveryPosition != null) {
+        _fetchRouteDirections();
+        _skipNextIdleGeocode = true;
+        _fitBounds();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.l10n.errorGettingAddress(e.toString())),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _onMapTap(gmaps.LatLng g) async {
+    _skipNextIdleGeocode = true;
+    await _mapController?.animateCamera(
+      gmaps.CameraUpdate.newLatLngZoom(g, 15.0),
+    );
+    final point = LatLng(g.latitude, g.longitude);
+    try {
+      final address = await GeocodingService.getAddressFromLatLng(
+        point.latitude,
+        point.longitude,
+      );
+
+      if (!mounted) return;
+      setState(() {
+        if (_activePinField == _SchedulePinField.pickup) {
+          _pickupLocation = address;
+          _pickupPosition = point;
+          _pickupResolveFailed = false;
+        } else {
+          _deliveryLocation = address;
+          _deliveryPosition = point;
+        }
+        _routePolylinePoints = null;
+      });
+
+      if (_pickupPosition != null && _deliveryPosition != null) {
+        _fetchRouteDirections();
+        _skipNextIdleGeocode = true;
+        _fitBounds();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.l10n.errorGettingAddress(e.toString())),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    }
+  }
+
+  void _fitBounds() {
+    if (_pickupPosition != null && _deliveryPosition != null) {
+      final bounds = gmaps.LatLngBounds(
+        southwest: gmaps.LatLng(
+          _pickupPosition!.latitude < _deliveryPosition!.latitude
+              ? _pickupPosition!.latitude
+              : _deliveryPosition!.latitude,
+          _pickupPosition!.longitude < _deliveryPosition!.longitude
+              ? _pickupPosition!.longitude
+              : _deliveryPosition!.longitude,
+        ),
+        northeast: gmaps.LatLng(
+          _pickupPosition!.latitude > _deliveryPosition!.latitude
+              ? _pickupPosition!.latitude
+              : _deliveryPosition!.latitude,
+          _pickupPosition!.longitude > _deliveryPosition!.longitude
+              ? _pickupPosition!.longitude
+              : _deliveryPosition!.longitude,
+        ),
+      );
+      _mapController?.moveCamera(
+        gmaps.CameraUpdate.newLatLngBounds(bounds, 50),
+      );
+    }
+  }
+
+  DateTime? _parseScheduledDateTime() {
+    final dateStr = _dateController.text;
+    final timeStr = _timeController.text;
+    if (dateStr.isEmpty || timeStr.isEmpty) return null;
+
+    final dateParts = dateStr.split('/');
+    if (dateParts.length != 3) return null;
+    final day = int.tryParse(dateParts[0]);
+    final month = int.tryParse(dateParts[1]);
+    final year = int.tryParse(dateParts[2]);
+    if (day == null || month == null || year == null) return null;
+
+    final timeParts = timeStr.split(':');
+    if (timeParts.length != 2) return null;
+    final hour = int.tryParse(timeParts[0]);
+    final minute = int.tryParse(timeParts[1]);
+    if (hour == null || minute == null) return null;
+
+    try {
+      return DateTime(year, month, day, hour, minute);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> _selectDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
+    if (picked != null) {
+      setState(() {
+        _dateController.text =
+            '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}';
+      });
+    }
+  }
+
+  Future<void> _selectTime() async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        _timeController.text =
+            '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
+        _timePeriod = picked.period == DayPeriod.am ? 'am' : 'pm';
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    const initialSheetSize = 0.55;
+    final overlayTop = mapOverlayTop(context);
+
+    return MapDraggableSheetScaffold(
+      backgroundColor: colorScheme.surface,
+      initialChildSize: initialSheetSize,
+      minChildSize: 0.35,
+      maxChildSize: 0.9,
+      onSheetLayoutChanged: (_, __) => _fitBounds(),
+      map: _buildMapOrFallback(context),
+      mapOverlays: [
+        Positioned(
+          top: overlayTop,
+          left: 16,
+          child: Container(
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerHigh,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: colorScheme.shadow.withValues(alpha: 0.15),
+                  blurRadius: 4,
+                ),
+              ],
+            ),
+            child: IconButton(
+              icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ),
+        ),
+        Positioned(
+          top: overlayTop,
+          left: 72,
+          right: 72,
+          child: Material(
+            color: colorScheme.surfaceContainerHigh.withValues(alpha: 0.92),
+            borderRadius: BorderRadius.circular(20),
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              child: Text(
+                _activePinField == _SchedulePinField.pickup
+                    ? l10n.pickupLocationLabel
+                    : l10n.deliveryLocationLabel,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: colorScheme.onSurface,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          top: overlayTop,
+          right: 16,
+          child: FloatingActionButton(
+            heroTag: 'schedule_delivery_my_location',
+            mini: true,
+            backgroundColor: colorScheme.surfaceContainerHigh,
+            onPressed: () async {
+              setState(() => _activePinField = _SchedulePinField.pickup);
+              await _getCurrentLocation();
+              if (_pickupPosition != null && mounted) {
+                _skipNextIdleGeocode = true;
+                _mapController?.moveCamera(
+                  gmaps.CameraUpdate.newLatLngZoom(
+                    _toG(_pickupPosition!),
+                    15,
+                  ),
+                );
+              }
+            },
+            child: Icon(
+              Icons.my_location,
+              color: _isLoadingLocation
+                  ? colorScheme.onSurfaceVariant
+                  : colorScheme.primary,
+            ),
+          ),
+        ),
+      ],
+      sheetBuilder: (context, scrollController) {
+        return Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+          ),
+          child: Column(
+            children: [
+              const MapSheetDragHandle(),
+              Expanded(
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                            Text(
+                              l10n.courierScheduleTitle,
+                              style: theme.textTheme.headlineSmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: colorScheme.onSurface,
+                                  ) ??
+                                  TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: colorScheme.onSurface,
+                                  ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              l10n.courierScheduleSubtitle,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            _LocationField(
+                              label: l10n.pickupLocationLabel,
+                              value: _isLoadingLocation
+                                  ? l10n.locationGetting
+                                  : (_pickupResolveFailed
+                                      ? l10n.locationUnable
+                                      : (_pickupLocation.isEmpty
+                                          ? l10n.tapToSelectPickup
+                                          : _pickupLocation)),
+                              icon: Icons.location_on,
+                              iconColor: colorScheme.error,
+                              isReadOnly: false,
+                              onTap: () {
+                                setState(
+                                    () => _activePinField = _SchedulePinField.pickup);
+                                _selectPickupLocation();
+                              },
+                            ),
+                            const SizedBox(height: 16),
+                            _LocationField(
+                              label: l10n.deliveryLocationLabel,
+                              value: _deliveryLocation.isEmpty
+                                  ? l10n.tapToSelectDelivery
+                                  : _deliveryLocation,
+                              icon: Icons.location_on,
+                              iconColor: colorScheme.primary,
+                              isReadOnly: false,
+                              onTap: () {
+                                setState(() =>
+                                    _activePinField = _SchedulePinField.delivery);
+                                _selectDeliveryLocation();
+                              },
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        l10n.labelDate,
+                                        style: theme.textTheme.labelLarge
+                                            ?.copyWith(
+                                          color: colorScheme.onSurface,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      GestureDetector(
+                                        onTap: _selectDate,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(16),
+                                          decoration: BoxDecoration(
+                                            color: colorScheme
+                                                .surfaceContainerHighest,
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            border: Border.all(
+                                              color: colorScheme.outlineVariant,
+                                            ),
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Expanded(
+                                                child: Text(
+                                                  _dateController.text.isEmpty
+                                                      ? l10n.hintDateFormat
+                                                      : _dateController.text,
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                    color: _dateController
+                                                            .text.isEmpty
+                                                        ? colorScheme
+                                                            .onSurfaceVariant
+                                                        : colorScheme
+                                                            .onSurface,
+                                                  ),
+                                                ),
+                                              ),
+                                              Icon(
+                                                Icons.calendar_today,
+                                                size: 20,
+                                                color: colorScheme
+                                                    .onSurfaceVariant,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        l10n.labelTime,
+                                        style: theme.textTheme.labelLarge
+                                            ?.copyWith(
+                                          color: colorScheme.onSurface,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: GestureDetector(
+                                              onTap: _selectTime,
+                                              child: Container(
+                                                padding:
+                                                    const EdgeInsets.all(16),
+                                                decoration: BoxDecoration(
+                                                  color: colorScheme
+                                                      .surfaceContainerHighest,
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                  border: Border.all(
+                                                    color: colorScheme
+                                                        .outlineVariant,
+                                                  ),
+                                                ),
+                                                child: Text(
+                                                  _timeController.text.isEmpty
+                                                      ? l10n.hintTimeFormat
+                                                      : _timeController.text,
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                    color: _timeController
+                                                            .text.isEmpty
+                                                        ? colorScheme
+                                                            .onSurfaceVariant
+                                                        : colorScheme
+                                                            .onSurface,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 8, vertical: 4),
+                                            decoration: BoxDecoration(
+                                              color: colorScheme
+                                                  .surfaceContainerHighest,
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              border: Border.all(
+                                                color:
+                                                    colorScheme.outlineVariant,
+                                              ),
+                                            ),
+                                            child: DropdownButtonHideUnderline(
+                                              child: DropdownButton<String>(
+                                                value: _timePeriod,
+                                                dropdownColor: colorScheme
+                                                    .surfaceContainerHigh,
+                                                style: TextStyle(
+                                                  color: colorScheme.onSurface,
+                                                  fontSize: 14,
+                                                ),
+                                                items: [
+                                                  DropdownMenuItem(
+                                                    value: 'am',
+                                                    child:
+                                                        Text(l10n.meridiemAm),
+                                                  ),
+                                                  DropdownMenuItem(
+                                                    value: 'pm',
+                                                    child:
+                                                        Text(l10n.meridiemPm),
+                                                  ),
+                                                ],
+                                                onChanged: (value) {
+                                                  if (value == null) return;
+                                                  setState(() {
+                                                    _timePeriod = value;
+                                                  });
+                                                },
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 24),
+                            Text(
+                              l10n.vehicleType,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: colorScheme.onSurface,
+                                  ) ??
+                                  TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: colorScheme.onSurface,
+                                  ),
+                            ),
+                            const SizedBox(height: 12),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _VehicleTypeOption(
+                                    icon: Icons.two_wheeler,
+                                    label: l10n.vehicleMotorcycle,
+                                    isSelected:
+                                        _selectedVehicle == 'motorcycle',
+                                    onTap: () {
+                                      setState(() {
+                                        _selectedVehicle = 'motorcycle';
+                                      });
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: _VehicleTypeOption(
+                                    icon: Icons.directions_car,
+                                    label: l10n.vehicleCar,
+                                    isSelected: _selectedVehicle == 'car',
+                                    onTap: () {
+                                      setState(() {
+                                        _selectedVehicle = 'car';
+                                      });
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: _VehicleTypeOption(
+                                    icon: Icons.airport_shuttle,
+                                    label: l10n.vehicleVan,
+                                    isSelected: _selectedVehicle == 'van',
+                                    onTap: () {
+                                      setState(() {
+                                        _selectedVehicle = 'van';
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 32),
+                            SizedBox(
+                              width: double.infinity,
+                              height: 50,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  if (_pickupLocation.isEmpty ||
+                                      _deliveryLocation.isEmpty) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                            l10n.selectPickupAndDelivery),
+                                        backgroundColor: colorScheme.error,
+                                      ),
+                                    );
+                                    return;
+                                  }
+                                  if (_dateController.text.isEmpty ||
+                                      _timeController.text.isEmpty) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                            l10n.scheduleSelectDateTime),
+                                        backgroundColor: colorScheme.error,
+                                      ),
+                                    );
+                                    return;
+                                  }
+
+                                  final scheduledDateTime =
+                                      _parseScheduledDateTime();
+                                  if (scheduledDateTime == null) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content:
+                                            Text(l10n.scheduleInvalidDateTime),
+                                        backgroundColor: colorScheme.error,
+                                      ),
+                                    );
+                                    return;
+                                  }
+
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          PackageDetailsScreen(
+                                        pickupLocation: _pickupLocation,
+                                        deliveryLocation: _deliveryLocation,
+                                        pickupPosition: _pickupPosition,
+                                        deliveryPosition: _deliveryPosition,
+                                        selectedVehicle: _selectedVehicle,
+                                        isInstantDelivery: false,
+                                        scheduledPickup: scheduledDateTime,
+                                        scheduledDelivery: scheduledDateTime,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primaryColor,
+                                  foregroundColor: colorScheme.onPrimary,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: Text(
+                                  l10n.actionContinue,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+      },
+    );
+  }
+
+  Widget _buildMapOrFallback(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final l10n = context.l10n;
+    if (_hasGoogleMapsApiKey == null) {
+      return Center(
+        child: CircularProgressIndicator(
+          color: colorScheme.primary,
+        ),
+      );
+    }
+    if (_hasGoogleMapsApiKey == false) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(
+            l10n.taxiGoogleMapsNotConfigured,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurface,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return CenteredPinMap(
+      initialCameraPosition: gmaps.CameraPosition(
+        target: _toG(_currentPosition),
+        zoom: 15.0,
+      ),
+      idleDebounce: const Duration(milliseconds: 400),
+      onCenterLatLngChanged: _applyCenterPinChange,
+      myLocationEnabled: true,
+      myLocationButtonEnabled: false,
+      mapType: gmaps.MapType.normal,
+      polylines: _pickupPosition != null && _deliveryPosition != null
+          ? {
+              gmaps.Polyline(
+                polylineId: const gmaps.PolylineId('route'),
+                points: _routePolylinePoints != null &&
+                        _routePolylinePoints!.length >= 2
+                    ? _routePolylinePoints!.map(_toG).toList()
+                    : [_toG(_pickupPosition!), _toG(_deliveryPosition!)],
+                color: AppColors.primaryColor,
+                width: 3,
+              ),
+            }
+          : {},
+      onMapCreated: (controller) {
+        _mapController = controller;
+        if (!_isLoadingLocation) {
+          _skipNextIdleGeocode = true;
+          controller.moveCamera(
+            gmaps.CameraUpdate.newLatLngZoom(_toG(_currentPosition), 15),
+          );
+        }
+      },
+      onTap: _onMapTap,
+    );
+  }
+}
+
+class _LocationField extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
+  final Color iconColor;
+  final bool isReadOnly;
+  final VoidCallback onTap;
+
+  const _LocationField({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.iconColor,
+    this.isReadOnly = false,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: colorScheme.outlineVariant),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: iconColor, size: 24),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    value,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (!isReadOnly)
+              Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _VehicleTypeOption extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _VehicleTypeOption({
+    required this.icon,
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.primaryColor.withValues(alpha: 0.12)
+              : colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color:
+                isSelected ? AppColors.primaryColor : colorScheme.outlineVariant,
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              size: 32,
+              color: isSelected
+                  ? AppColors.primaryColor
+                  : colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                color: isSelected
+                    ? AppColors.primaryColor
+                    : colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

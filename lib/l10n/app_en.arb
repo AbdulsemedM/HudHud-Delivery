@@ -1,0 +1,1079 @@
+{
+  "@@locale": "en",
+  "appTitle": "HudHud Delivery",
+  "actionCancel": "Cancel",
+  "actionOk": "OK",
+  "actionRetry": "Retry",
+  "actionVerify": "Verify",
+  "actionSave": "Save",
+  "actionDelete": "Delete",
+  "actionClose": "Close",
+  "actionBack": "Back",
+  "actionNext": "Next",
+  "actionSkip": "Skip",
+  "actionDone": "Done",
+  "actionResend": "Resend Code",
+  "actionUndo": "UNDO",
+  "actionOpenSettings": "Open Settings",
+  "actionViewAll": "View all",
+  "actionTrackDelivery": "Track delivery",
+  "actionTryAgain": "Try again",
+  "actionAddToCart": "Add to cart",
+  "actionSeeAll": "see all",
+  "actionSending": "Sending...",
+  "actionSignIn": "Sign In",
+  "actionLogOut": "Logout",
+  "navHome": "Home",
+  "navCourier": "Courier",
+  "navWallet": "Wallet",
+  "navTaxi": "Taxi",
+  "navProfile": "Profile",
+  "navOrderHistory": "Order History",
+  "settingsProfile": "Profile",
+  "settingsAccount": "Account",
+  "settingsPreferences": "Preferences",
+  "settingsSupport": "Support",
+  "settingsContactEmail": "Email support",
+  "offlineNoConnection": "No internet connection",
+  "orderIdCopied": "Order ID copied",
+  "orderShareSubject": "HudHud order",
+  "settingsPersonalDetails": "Personal Details",
+  "settingsAppearance": "Appearance",
+  "appearanceChooseTheme": "Choose your preferred theme",
+  "settingsChangePassword": "Change Password",
+  "settingsBiometricLogin": "Biometric login",
+  "settingsBiometricLoginSubtitle": "Sign in quickly with fingerprint or Face ID on this device",
+  "biometricAuthReason": "Verify your identity to continue",
+  "biometricEnableEnterPassword": "Enter your password to enable biometric login",
+  "biometricNotAvailable": "Biometric login is not available on this device",
+  "biometricNoCredentials": "No saved login found. Sign in with your password first.",
+  "biometricLoginFailed": "Biometric sign-in failed. Try again or use your password.",
+  "biometricEnabledSuccess": "Biometric login enabled",
+  "biometricDisabledSuccess": "Biometric login disabled",
+  "loginBiometricButtonSemantics": "Sign in with biometrics",
+  "loginBiometricOrDivider": "or sign in with biometrics",
+  "settingsNotifications": "Notifications",
+  "settingsSmsNotifications": "SMS Notifications",
+  "settingsWishlist": "Wishlist",
+  "wishlistEmptyTitle": "No saved items yet",
+  "wishlistEmptySubtitle": "Save products you love — tap the heart on a product to add it here.",
+  "wishlistAddedSnack": "Added to wishlist",
+  "wishlistRemovedSnack": "Removed from wishlist",
+  "wishlistSignInTitle": "Sign in to use your wishlist",
+  "wishlistSignInSubtitle": "Your saved items are stored on this device when you are logged in.",
+  "wishlistLoadError": "Could not load wishlist",
+  "wishlistTooltipAdd": "Add to wishlist",
+  "wishlistTooltipRemove": "Remove from wishlist",
+  "settingsTermsConditions": "Terms & Conditions",
+  "settingsFaqs": "FAQs",
+  "settingsHelpDesk": "Help Desk",
+  "settingsLogOut": "Log Out",
+  "settingsVersion": "Version 1.0",
+  "settingsLanguage": "Language",
+  "profileEdit": "Edit",
+  "profileCoupons": "Coupons",
+  "profileWallet": "Wallet",
+  "profileMenuProfile": "Profile",
+  "profileMenuAddresses": "Addresses",
+  "profileMenuFavorites": "Favorites",
+  "profileMenuMessages": "Messages",
+  "profileMenuAccountSettings": "Account Settings",
+  "settingsGeneralPreferences": "General Preferences",
+  "settingsDeliveryPreferences": "Delivery Preferences",
+  "settingsAppSettings": "App Settings",
+  "profileCouponsComingSoon": "Coupons are not available yet.",
+  "profileTermsOfUse": "Terms of Use",
+  "profilePrivacyPolicy": "Privacy Policy",
+  "profileCopyright": "© {year} HudHud Delivery. All Rights Reserved.",
+  "@profileCopyright": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "profileVersionFormatted": "Version {version} (Build {buildNumber})",
+  "@profileVersionFormatted": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "buildNumber": {
+        "type": "String"
+      }
+    }
+  },
+  "logoutTitle": "Logout",
+  "logoutMessage": "Are you sure you want to logout?",
+  "logoutError": "Error during logout: {error}",
+  "@logoutError": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "themeSystem": "System",
+  "themeSubtitleLight": "Always use light theme",
+  "themeSubtitleDark": "Always use dark theme",
+  "themeSubtitleSystem": "Follow device theme",
+  "languageTitle": "Language",
+  "languageEnglish": "English",
+  "languageAmharic": "አማርኛ (Amharic)",
+  "languageOromo": "Afaan Oromo",
+  "languageSomali": "Somali",
+  "languageArabic": "العربية (Arabic)",
+  "greetingGoodMorning": "Good Morning",
+  "greetingGoodAfternoon": "Good Afternoon",
+  "greetingGoodEvening": "Good Evening",
+  "greetingGoodNight": "Good Night",
+  "userDefault": "User",
+  "emDash": "—",
+  "locationGetting": "Getting location...",
+  "locationAccessDenied": "Location access denied",
+  "locationDisabledSnackbar": "Location access is disabled. Enable it in Settings to see your position.",
+  "locationUnable": "Unable to get location",
+  "yourLocation": "Your Location",
+  "selectLocationTitle": "Select Location",
+  "refreshLocationTooltip": "Refresh current location",
+  "searchPlacesHint": "Search for places...",
+  "searchLocationHint": "Search for a location...",
+  "locationSearchScreenTitle": "Search location",
+  "locationSelectedHeading": "Selected location",
+  "locationCoordinatesFormat": "Coordinates: {lat}, {lng}",
+  "@locationCoordinatesFormat": {
+    "placeholders": {
+      "lat": {
+        "type": "String"
+      },
+      "lng": {
+        "type": "String"
+      }
+    }
+  },
+  "locationConfirmButton": "Confirm location",
+  "locationSearchNoResults": "No locations found",
+  "locationCurrentPositionFailed": "Could not get current location",
+  "currentLocationMap": "Current location",
+  "verificationStatus": "Verification status",
+  "verifyEmail": "Verify Email",
+  "verifyPhone": "Verify Phone",
+  "verifyEmailDialogTitle": "Verify Email",
+  "verifyPhoneDialogTitle": "Verify Phone",
+  "verificationCodeLabel": "Verification code",
+  "verificationCodeHintExample": "e.g. 111248",
+  "verificationCodeHintSms": "e.g. 056869",
+  "verifyEmailBody": "We sent a verification code to {email}. Enter it below.",
+  "@verifyEmailBody": {
+    "placeholders": {
+      "email": {"type": "String"}
+    }
+  },
+  "verifyPhoneBody": "We sent a verification code to {phone}. Enter it below.",
+  "@verifyPhoneBody": {
+    "placeholders": {
+      "phone": {"type": "String"}
+    }
+  },
+  "enterVerificationCodeError": "Enter the verification code",
+  "codeSentEmailDefault": "Code sent to your email.",
+  "codeSentPhoneDefault": "Code sent to your phone.",
+  "emailVerifiedSuccess": "Email verified successfully!",
+  "phoneVerifiedSuccess": "Phone number verified successfully!",
+  "accountVerificationBannerTitle": "Secure your account",
+  "accountVerificationEmailSubtitle": "Confirm your email for receipts and updates.",
+  "accountVerificationPhoneSubtitle": "Verify your phone for security and support.",
+  "failedToLoadOrders": "Failed to load orders: {error}",
+  "@failedToLoadOrders": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "homeWhatToDo": "What would you like to do?",
+  "homeFood": "Food",
+  "homeFoodSubtitle": "Order groceries from your favourite vendors.",
+  "homeCourierSubtitle": "Order courier services for pickup and drop off.",
+  "homeTaxi": "Taxi",
+  "homeTaxiSubtitle": "Request taxi at affordable rates from anywhere.",
+  "homeHandyman": "Handyman",
+  "homeHandymanSubtitle": "Request handy men for casual services at home.",
+  "history": "History",
+  "featuresSectionTitle": "What you can do with HudHud",
+  "featureFoodGroceries": "Food & groceries",
+  "featureFoodGroceriesDesc": "Order from your favourite vendors.",
+  "featureCourierTitle": "Courier",
+  "featureCourierDesc": "Pickup and drop-off.",
+  "featureTaxiTitle": "Taxi",
+  "featureTaxiDesc": "Request a ride anywhere.",
+  "featureHandymanTitle": "Handyman",
+  "featureHandymanDesc": "Home services on demand.",
+  "featureTrackOrders": "Track orders",
+  "featureTrackOrdersDesc": "Real-time delivery status.",
+  "courierWhatToDo": "What would you like to do?",
+  "courierActiveDelivery": "Active Delivery",
+  "courierNoHistory": "No delivery history",
+  "courierHistoryEmptySubtitle": "Your past deliveries will appear here",
+  "courierInstantTitle": "Instant Delivery",
+  "courierInstantSubtitle": "Courier takes only your package and delivers instantly.",
+  "courierScheduleTitle": "Schedule Delivery",
+  "courierScheduleSubtitle": "Courier comes to pick up on your specified date and time.",
+  "failedToLoadHistory": "Failed to load history",
+  "recipientLabel": "Recipient: {name}",
+  "@recipientLabel": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "inProgress": "In progress",
+  "loginTitle": "Sign In",
+  "loginSubtitle": "Please enter your credentials to access your account and all available services",
+  "loginContinueAsGuest": "Continue as guest",
+  "labelEmailOrPhone": "Email address or Phone number",
+  "loginTabEmail": "Email",
+  "loginTabPhone": "Phone",
+  "loginTabEmailSemantics": "Sign in with email",
+  "loginTabPhoneSemantics": "Sign in with phone",
+  "labelEmail": "Email",
+  "hintEmail": "Eg. JohnDoe@gmail.com",
+  "hintPhoneNational": "912 345 678",
+  "validationPhoneRequired": "Please enter your phone number",
+  "validationPhoneInvalid": "Please enter a valid phone number",
+  "hintEmailPhone": "Eg. JohnDoe@gmail.com",
+  "labelPassword": "Password",
+  "hintPassword": "Enter password",
+  "validationEmailOrPhoneRequired": "Please enter your email or phone number",
+  "validationEmailOrPhoneInvalid": "Please enter a valid email or phone number",
+  "validationPasswordRequired": "Please enter your password",
+  "validationPasswordMin": "Password must be at least 8 characters",
+  "validationPasswordComplexity": "Password must include uppercase, lowercase, a number, and a special character",
+  "validationEmailRequired": "Please enter your email",
+  "validationEmailInvalid": "Please enter a valid email address",
+  "mainDemoTitle": "HudHud Delivery Demo",
+  "toggleThemeTooltip": "Toggle Theme",
+  "themeSwitched": "Theme switched to {mode}",
+  "@themeSwitched": {
+    "placeholders": {
+      "mode": {"type": "String"}
+    }
+  },
+  "themeModeSet": "Theme mode set to {mode}",
+  "@themeModeSet": {
+    "placeholders": {
+      "mode": {"type": "String"}
+    }
+  },
+  "welcomeTitle": "Welcome to HudHud Delivery!",
+  "welcomeBody": "This is a demo showcasing the clean architecture with custom buttons, snackbars, and theme switching.",
+  "currentThemeLabel": "Current theme: {mode}",
+  "@currentThemeLabel": {
+    "placeholders": {
+      "mode": {"type": "String"}
+    }
+  },
+  "counterDemo": "Counter Demo",
+  "counterDecreased": "Counter decreased to {count}",
+  "@counterDecreased": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "counterIncreased": "Counter increased to {count}",
+  "@counterIncreased": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "buttonShowcase": "Button Showcase",
+  "primaryButton": "Primary Button",
+  "primaryButtonPressed": "Primary button pressed!",
+  "largePrimaryButton": "Large Primary Button",
+  "largePrimaryPressed": "Large primary button with icon pressed!",
+  "smallButton": "Small",
+  "smallButtonPressed": "Small button pressed!",
+  "iconButtonPressed": "Icon button pressed!",
+  "secondaryButton": "Secondary Button",
+  "secondaryPressed": "Secondary button pressed!",
+  "largeSecondaryButton": "Large Secondary Button",
+  "largeSecondaryPressed": "Large secondary button pressed!",
+  "smallSecondary": "Small Secondary",
+  "smallSecondaryPressed": "Small secondary button pressed!",
+  "ghostButton": "Ghost Button",
+  "ghostPressed": "Ghost button pressed!",
+  "snackbarShowcase": "Snackbar Showcase",
+  "snackbarSuccess": "This is a success message!",
+  "snackbarSuccessLabel": "Success",
+  "snackbarError": "This is an error message!",
+  "snackbarErrorLabel": "Error",
+  "snackbarWarning": "This is a warning message!",
+  "snackbarWarningLabel": "Warning",
+  "snackbarInfo": "This is an info message!",
+  "snackbarInfoLabel": "Info",
+  "undoActionPressed": "Undo action pressed",
+  "loadingData": "Loading data...",
+  "showLoadingButton": "Show Loading",
+  "dataLoadedSuccess": "Data loaded successfully!",
+  "hideSnackbar": "Hide Snackbar",
+  "apiDemo": "API Demo",
+  "sampleLogin": "Sample Login",
+  "loginSuccessWelcome": "Login successful! Welcome {name}",
+  "@loginSuccessWelcome": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "loginFailed": "Login failed: {error}",
+  "@loginFailed": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "getUserProfile": "Get User Profile",
+  "profileRefreshed": "Profile refreshed successfully!",
+  "profileRefreshFailed": "Failed to refresh profile: {error}",
+  "@profileRefreshFailed": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "currentUser": "Current User:",
+  "nameLabel": "Name:",
+  "emailLabel": "Email:",
+  "roleLabel": "Role:",
+  "logoutSuccess": "Logged out successfully!",
+  "errorPrefix": "Error: {message}",
+  "@errorPrefix": {
+    "placeholders": {
+      "message": {"type": "String"}
+    }
+  },
+  "utilityButtonsDemo": "Utility Buttons Demo",
+  "utilityPrimary": "Utility Primary Button",
+  "utilityPrimaryPressed": "Utility primary button pressed!",
+  "utilitySecondary": "Utility Secondary Button",
+  "utilitySecondaryPressed": "Utility secondary button pressed!",
+  "textButton": "Text Button",
+  "textButtonPressed": "Text button pressed!",
+  "sharePressed": "Share button pressed!",
+  "gradientButton": "Gradient Button",
+  "gradientPressed": "Gradient button pressed!",
+  "counterReset": "Counter reset!",
+  "decrease": "Decrease",
+  "increase": "Increase",
+  "orderStatusPending": "Pending",
+  "orderStatusConfirmed": "Confirmed",
+  "orderStatusPreparing": "Preparing",
+  "orderStatusReadyForPickup": "Ready for Pickup",
+  "orderStatusOutForDelivery": "Out for Delivery",
+  "orderStatusDelivered": "Delivered",
+  "orderStatusCancelled": "Cancelled",
+  "orderStatusTextPending": "Order Pending",
+  "orderStatusTextAccepted": "Order Accepted",
+  "orderStatusTextPreparing": "Preparing Order",
+  "orderStatusTextReadyPickup": "Ready for Pickup",
+  "orderStatusTextPickedUp": "Order Picked Up",
+  "orderStatusTextDelivered": "Order Delivered",
+  "orderStatusTextCancelled": "Order Cancelled",
+  "paymentCashOnDelivery": "Cash on Delivery",
+  "paymentPaidOnline": "Paid Online",
+  "estimatedDeliveryPlaceholder": "30-45 mins",
+  "searchRestaurantsHint": "Search restaurants by name",
+  "enterPromoCode": "Enter Promo Code",
+  "additionalNote": "Additional note",
+  "enterCustomTip": "Enter custom tip amount",
+  "hintFirstName": "Eg. John",
+  "hintLastName": "Eg. Doe",
+  "hintEmailExample": "Eg. JohnDoe@gmail.com",
+  "hintPhoneExample": "Eg. 0712345678",
+  "hintEnterPassword": "Enter password",
+  "pickupLocation": "Pickup location",
+  "dropOff": "Drop off",
+  "amount": "Amount",
+  "enterAmount": "Enter amount",
+  "wallet": "Wallet",
+  "paymentMethod": "Payment Method",
+  "transactionId": "Transaction ID",
+  "transactionIdHint": "From payment gateway",
+  "cardLast4": "Card last 4 digits",
+  "cardLast4Hint": "4242",
+  "cardBrand": "Card brand",
+  "cardBrandHint": "visa, mastercard",
+  "addFundsTitle": "Add Funds",
+  "selectPaymentMethod": "Select a payment method",
+  "searchCountry": "Search country",
+  "categoryGrocery": "Grocery",
+  "categoryAmerican": "American",
+  "categoryConvenience": "Convenience",
+  "categoryAlcohol": "Alcohol",
+  "categoryPetSupplies": "Pet Supplies",
+  "categoryMore": "More",
+  "pickupLocationLabel": "Pickup Location",
+  "deliveryLocationLabel": "Delivery Location",
+  "vehicleMotorcycle": "Motorcycle",
+  "vehicleCar": "Car",
+  "vehicleVan": "Van",
+  "fromWallet": "From Wallet",
+  "enterWithdrawAmount": "Enter amount to withdraw",
+  "withdrawalMethod": "Withdrawal Method",
+  "requestTitle": "Title",
+  "requestTitleHint": "e.g. Fix leaking faucet",
+  "requestDescription": "Description",
+  "requestDescriptionHint": "Describe the repair or maintenance needed",
+  "requestLocation": "Location",
+  "requestLocationHint": "Tap to select location",
+  "scheduledDateTime": "Scheduled Date & Time",
+  "estimatedCostOptional": "Estimated Cost (optional)",
+  "estimatedCostHint": "e.g. 100",
+  "toolsNeeded": "Tools needed (comma-separated)",
+  "toolsNeededHint": "e.g. wrench set, plumber's tape",
+  "estimatedHoursOptional": "Estimated hours (optional)",
+  "estimatedHoursHint": "e.g. 2",
+  "commentOptional": "Comment (optional)",
+  "commentExperienceHint": "Share your experience...",
+  "commentHandymanHint": "e.g. Very professional and courteous",
+  "whatSending": "What you are sending",
+  "recipient": "Recipient",
+  "recipientContactNumber": "Recipient contact number",
+  "payment": "Payment",
+  "commentsIfAny": "Your Comments if any....",
+  "walletNotFound": "Wallet not found",
+  "quantity": "Quantity",
+  "packageWeightKg": "Package Weight (kg)",
+  "packageDescriptionOptional": "Package Description (optional)",
+  "me": "Me",
+  "recipientNames": "Recipient Names",
+  "imagePickerTodo": "Image picker will be implemented",
+  "pleaseSelectItemType": "Please select item type",
+  "pleaseEnterQuantity": "Please enter quantity",
+  "pleaseEnterValidWeight": "Please enter a valid package weight (kg)",
+  "pleaseSelectPaymentType": "Please select payment type",
+  "pleaseEnterRecipientName": "Please enter recipient name",
+  "pleaseEnterRecipientPhone": "Please enter recipient phone number",
+  "walletDetailName": "Name",
+  "walletDetailType": "Type",
+  "walletDetailScreenTitle": "Wallet Details",
+  "walletInformation": "Wallet Information",
+  "walletDetailCurrencyLabel": "Currency",
+  "walletMyBalanceLabel": "My balance",
+  "walletMyWalletsSection": "My Wallets",
+  "walletRecentTransactions": "Recent Transactions",
+  "walletSeeAll": "See All",
+  "walletNoTransactionsYet": "No transactions yet",
+  "walletAddMoney": "Add Money",
+  "walletSendMoney": "Send Money",
+  "withdrawFundsTitle": "Withdraw Funds",
+  "walletNoWalletsForWithdraw": "No wallets available to withdraw from",
+  "walletNoPaymentMethods": "No payment methods available",
+  "validationEnterValidAmount": "Enter a valid amount",
+  "validationAmountExceedsWalletBalance": "Amount exceeds wallet balance",
+  "withdrawAction": "Withdraw",
+  "selectWalletPrompt": "Select a wallet",
+  "selectWithdrawalMethodPrompt": "Select a withdrawal method",
+  "walletDefaultTransactionLabel": "Transaction",
+  "walletTypeCurrency": "{type} • {currency}",
+  "@walletTypeCurrency": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "currencyEtb": "ETB",
+  "balance": "Balance",
+  "created": "Created",
+  "productNotFound": "Product not found",
+  "featured": "Featured",
+  "categories": "Categories",
+  "orders": "Orders",
+  "fruitsVegetables": "Fruits & Vegetables",
+  "beverages": "Beverages",
+  "noProductsYet": "No products yet",
+  "noProducts": "No products",
+  "searchStoresHint": "Search stores and produ...",
+  "failedToAddFunds": "Failed to add funds",
+  "failedToWithdrawFunds": "Failed to withdraw funds",
+  "currentPassword": "Current Password",
+  "newPassword": "New Password",
+  "confirmNewPassword": "Confirm New Password",
+  "firstName": "First Name",
+  "lastName": "Last Name",
+  "email": "Email",
+  "fullName": "Full Name",
+  "phoneNumber": "Phone number",
+  "emailAddress": "Email address",
+  "dateOfBirth": "Date of birth",
+  "referralCode": "Referral code",
+  "searchQuestions": "Search question",
+  "whereTo": "Where to?",
+  "taxiCurrentLocation": "Current location",
+  "taxiCouldNotGetLocationDetails": "Could not get location details",
+  "taxiTimeNow": "Now",
+  "taxiScheduleForLater": "Schedule for later",
+  "taxiActiveRide": "Active ride",
+  "taxiEstFare": "Est. fare",
+  "taxiTrackRide": "Track ride",
+  "taxiRefreshStatus": "Refresh status",
+  "taxiCarsNearby": "{count, plural, =1{1 car nearby} other{{count} cars nearby}}",
+  "@taxiCarsNearby": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "taxiMinutesWait": "~{minutes} min",
+  "@taxiMinutesWait": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "taxiBrandHudHud": "HUDHUD",
+  "taxiBrandDelivery": " delivery",
+  "taxiDistanceKm": "{distance} KM",
+  "@taxiDistanceKm": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "taxiGoogleMapsNotConfigured": "Google Maps is not configured. Add GOOGLE_MAPS_API_KEY and restart the app.",
+  "taxiStatusFindingDriver": "Finding a driver…",
+  "taxiStatusDriverOnTheWay": "Driver on the way",
+  "taxiStatusDriverArrived": "Driver has arrived",
+  "taxiStatusTripInProgress": "Trip in progress",
+  "taxiStatusActiveRide": "Active ride",
+  "taxiPickup": "Pickup",
+  "taxiDestination": "Destination",
+  "taxiFareAmount": "ETB {amount}",
+  "@taxiFareAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "taxiErrorWithDetails": "Error: {details}",
+  "@taxiErrorWithDetails": {
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "profileUpdatedSuccess": "Profile updated successfully",
+  "profileUpdateFailed": "Failed to update profile: {error}",
+  "@profileUpdateFailed": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "profileLoadFailed": "Failed to load profile: {error}",
+  "@profileLoadFailed": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "servicesTryAgain": "Try again",
+  "unexpectedCheckoutError": "An unexpected error occurred: {error}",
+  "@unexpectedCheckoutError": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "failedOrderHistory": "Failed to load order history: {error}",
+  "@failedOrderHistory": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "timelineOrderPlaced": "Order Placed",
+  "timelineOrderConfirmed": "Order Confirmed",
+  "timelinePreparing": "Preparing",
+  "timelineReadyPickup": "Ready for Pickup",
+  "timelineOutDelivery": "Out for Delivery",
+  "timelineDelivered": "Delivered",
+  "addReviewOptional": "Add a review (optional)",
+  "pleaseSpecify": "Please specify...",
+  "courierNumber": "Courier Number",
+  "from": "From",
+  "to": "To",
+  "deliveryDetailsStatus": "Status",
+  "deliveryDetailsPickup": "Pickup",
+  "deliveryDetailsDropoff": "Dropoff",
+  "labelLocation": "Location",
+  "labelInstructions": "Instructions",
+  "labelReceiver": "Receiver",
+  "labelPhone": "Phone",
+  "labelPackage": "Package",
+  "labelType": "Type",
+  "labelDescription": "Description",
+  "labelWeight": "Weight",
+  "labelSpecialInstructions": "Special instructions",
+  "paymentAndCost": "Payment & Cost",
+  "labelPaymentMethod": "Payment method",
+  "labelEstimatedCost": "Estimated cost",
+  "labelPaymentStatus": "Payment status",
+  "timeline": "Timeline",
+  "labelScheduledPickup": "Scheduled pickup",
+  "labelScheduledDelivery": "Scheduled delivery",
+  "labelDelivered": "Delivered",
+  "noEmailAvailable": "No email available",
+  "noPhoneAvailable": "No phone number available",
+  "emailVerificationTitle": "Email Verification",
+  "phoneVerificationTitle": "Phone Verification",
+  "enterEmailCode": "Enter email code",
+  "enterSmsCode": "Enter SMS code",
+  "noEmailAvailableShort": "No email available",
+  "addMoney": "Add Money",
+  "sendMoney": "Send Money",
+  "exitAppTitle": "Exit App",
+  "exitAppMessage": "Are you sure you want to exit the app?",
+  "actionExit": "Exit",
+  "loginNoAccountPrompt": "Don't have an account? ",
+  "loginOrContinueWith": "or continue with",
+  "continueWithGoogle": "Continue with Google",
+  "actionSignUp": "Sign Up",
+  "paymentScreenTitle": "Payment",
+  "paymentChooseMethodHeading": "Choose Payment Method",
+  "paymentEthiopianOptionsSubtitle": "Select your preferred Ethiopian payment option",
+  "paymentLoadMethodsError": "Failed to load payment methods",
+  "paymentSelectMethodFirst": "Please select a payment method",
+  "paymentMethodUnavailable": "Selected payment method is no longer available",
+  "paymentFailedWithError": "Payment failed: {error}",
+  "@paymentFailedWithError": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "paymentPayAmountBr": "Pay {amount} Br",
+  "@paymentPayAmountBr": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "paymentSuccessTitle": "Payment Successful!",
+  "paymentTransactionIdLabel": "Transaction ID: {id}",
+  "@paymentTransactionIdLabel": {
+    "placeholders": {
+      "id": {"type": "String"}
+    }
+  },
+  "continueShopping": "Continue Shopping",
+  "viewOrder": "View Order",
+  "handymanServicesTitle": "Handyman Services",
+  "handymanWhatToDo": "What would you like to do?",
+  "handymanMyRequests": "My Requests",
+  "handymanNoRequestsYet": "No service requests yet",
+  "handymanNoRequestsSubtitle": "Create a request to get quotes from handymen",
+  "handymanCreateNewRequest": "Create New Request",
+  "handymanCreateRequestSubtitle": "Describe your repair or maintenance need and get quotes from handymen.",
+  "instantDeliveryTitle": "Instant Delivery",
+  "tapToSelectPickup": "Tap to select pickup location",
+  "tapToSelectDelivery": "Tap to select delivery location",
+  "vehicleType": "Vehicle Type",
+  "selectPickupAndDelivery": "Please select both pickup and delivery locations",
+  "actionContinue": "Continue",
+  "errorGettingAddress": "Error getting address: {error}",
+  "@errorGettingAddress": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "googleMapsIosMissingKey": "Google Maps is not configured on iOS. Add GOOGLE_MAPS_API_KEY and restart the app.",
+  "dealsModalTitle": "Deals on deals",
+  "dealsModalSubtitle": "Get upto 50% off on your first Courier delivery fee!",
+  "dealsModalClaim": "Claim",
+  "dealsModalClose": "Maybe later",
+  "orderHistoryEmptyTitle": "No orders yet",
+  "orderHistoryEmptySubtitle": "Browse categories to place your first order.",
+  "orderHistoryEmptyHint": "Your order history will appear here once you place an order",
+  "browseDelivery": "Browse Delivery",
+  "browseCategories": "Browse categories",
+  "handymanQuoteCount": "{count} quote(s)",
+  "@handymanQuoteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "orderDetailsLoadingMessage": "Loading order details...",
+  "orderDetailsLoadErrorTitle": "Error loading order details",
+  "orderAppBarTitle": "Order #{orderNumber}",
+  "@orderAppBarTitle": {
+    "placeholders": {
+      "orderNumber": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentSummaryTitle": "Payment Summary",
+  "paymentSubtotalLabel": "Subtotal",
+  "paymentTotalAmountLabel": "Total Amount",
+  "paymentProcessingTitle": "Processing Payment",
+  "paymentProcessingMessage": "Please wait while we process your payment via {method}...",
+  "@paymentProcessingMessage": {
+    "placeholders": {
+      "method": {
+        "type": "String"
+      }
+    }
+  },
+  "courierRecipientLine": "Recipient: {name}",
+  "@courierRecipientLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "courierTrackDeliveryCta": "Track delivery",
+  "courierDeliveryStatusInProgress": "In progress",
+  "labelDate": "Date",
+  "hintDateFormat": "DD/MM/YYYY",
+  "labelTime": "Time",
+  "hintTimeFormat": "HH:MM",
+  "meridiemAm": "am",
+  "meridiemPm": "pm",
+  "scheduleSelectDateTime": "Please select date and time for delivery",
+  "scheduleInvalidDateTime": "Invalid date or time format",
+  "servicesScreenTitle": "Our Services",
+  "servicesWhatCanWeHelp": "What can we help you with?",
+  "servicesAvailableCount": "{count} services available",
+  "@servicesAvailableCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "servicesErrorTitle": "Something went wrong",
+  "servicesEmptyTitle": "No services yet",
+  "servicesEmptySubtitle": "Check back later for new services",
+  "handymanNewRequestTitle": "New Service Request",
+  "validationHandymanSelectLocation": "Please select a location",
+  "validationHandymanSelectDateTime": "Please select date and time",
+  "validationHandymanSelectSkill": "Please select at least one skill",
+  "handymanRequestCreatedToast": "Request created",
+  "handymanRequestCreateFailed": "Failed to create request",
+  "labelTitle": "Title",
+  "hintTitleHandymanExample": "e.g. Fix leaking faucet",
+  "validationTitleRequired": "Title is required",
+  "validationDescriptionRequired": "Description is required",
+  "hintDescribeRepair": "Describe the repair or maintenance needed",
+  "handymanTapToSelectLocation": "Tap to select location",
+  "labelScheduledDateTime": "Scheduled Date & Time",
+  "selectDateAndTime": "Select date and time",
+  "labelEstimatedCostOptional": "Estimated Cost (optional)",
+  "hintCostExample": "e.g. 100",
+  "handymanSkillsNeeded": "Skills needed",
+  "handymanSkillPlumbing": "Plumbing",
+  "handymanSkillElectrical": "Electrical",
+  "handymanSkillCarpentry": "Carpentry",
+  "handymanSkillPainting": "Painting",
+  "handymanSkillGeneral": "General",
+  "labelToolsCommaSeparated": "Tools needed (comma-separated)",
+  "hintToolsHandymanExample": "e.g. wrench set, plumber's tape",
+  "labelEstimatedHoursOptional": "Estimated hours (optional)",
+  "hintHoursExample": "e.g. 2",
+  "handymanCreateRequestCta": "Create Request",
+  "handymanDialogCancelRequestTitle": "Cancel Request",
+  "handymanDialogCancelRequestMessage": "Are you sure you want to cancel this service request?",
+  "actionNo": "No",
+  "actionYesCancel": "Yes, Cancel",
+  "handymanRequestCancelled": "Request cancelled",
+  "handymanCancelFailed": "Failed to cancel",
+  "handymanLabelScheduled": "Scheduled",
+  "handymanSectionRequirements": "Requirements",
+  "handymanToolsLine": "Tools: {tools}",
+  "@handymanToolsLine": {
+    "placeholders": {
+      "tools": {
+        "type": "String"
+      }
+    }
+  },
+  "handymanEstHoursLine": "Est. hours: {hours}",
+  "@handymanEstHoursLine": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "handymanViewQuotesCta": "View {count} quote(s)",
+  "@handymanViewQuotesCta": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "handymanCancelRequest": "Cancel Request",
+  "handymanRateServiceTitle": "Rate Service",
+  "handymanProviderFallback": "Provider",
+  "handymanQuotesTitle": "Quotes",
+  "handymanAcceptQuoteTitle": "Accept Quote",
+  "handymanAcceptQuoteMessage": "Accept {amount} from {name}?",
+  "@handymanAcceptQuoteMessage": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "actionAccept": "Accept",
+  "actionReject": "Reject",
+  "handymanQuoteAccepted": "Quote accepted",
+  "handymanAcceptQuoteFailed": "Failed to accept",
+  "handymanRejectQuoteTitle": "Reject Quote",
+  "handymanRejectQuoteMessage": "Reject quote from {name}?",
+  "@handymanRejectQuoteMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "handymanQuoteRejected": "Quote rejected",
+  "handymanRejectQuoteFailed": "Failed to reject",
+  "handymanNoQuotesYet": "No quotes yet",
+  "handymanNoQuotesSubtitle": "Handymen will send quotes soon",
+  "handymanViewProfile": "View Profile",
+  "handymanHowWasService": "How was the service?",
+  "handymanRateTheHandyman": "Rate the handyman",
+  "handymanCommentAboutOptional": "Comment about handyman (optional)",
+  "handymanRatingPublic": "Make my rating public",
+  "handymanSubmitRating": "Submit Rating",
+  "ratingThankYou": "Thank you for your rating!",
+  "ratingSubmitFailed": "Failed to submit rating",
+  "handymanNotFound": "Handyman not found",
+  "handymanProfileTitle": "Handyman Profile",
+  "handymanAbout": "About",
+  "handymanSkillsHeading": "Skills",
+  "handymanHourlyRateLabel": "Hourly Rate",
+  "handymanExperienceLabel": "Experience",
+  "handymanExperienceYears": "{years} years",
+  "@handymanExperienceYears": {
+    "placeholders": {
+      "years": {
+        "type": "String"
+      }
+    }
+  },
+  "labelAddress": "Address",
+  "handymanStatsHeading": "Stats",
+  "handymanStatServices": "Services",
+  "handymanStatRating": "Rating",
+  "handymanStatResponse": "Response",
+  "forgotPasswordLink": "Forgot password?",
+  "forgotPasswordRequestTitle": "Reset password",
+  "forgotPasswordRequestSubtitle": "Enter your email or phone number. We'll send a 6-digit verification code.",
+  "forgotPasswordSendCode": "Send code",
+  "forgotPasswordVerifyTitle": "Enter verification code",
+  "forgotPasswordVerifySubtitle": "We sent a code to {identifier}.",
+  "@forgotPasswordVerifySubtitle": {
+    "placeholders": {
+      "identifier": {
+        "type": "String"
+      }
+    }
+  },
+  "forgotPasswordOtpLabel": "6-digit code",
+  "forgotPasswordTimeRemaining": "Time remaining: {time}",
+  "@forgotPasswordTimeRemaining": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "forgotPasswordCodeExpired": "This code has expired. Tap resend for a new code.",
+  "forgotPasswordResend": "Resend code",
+  "forgotPasswordVerifyButton": "Verify",
+  "forgotPasswordNewTitle": "Create new password",
+  "forgotPasswordNewSubtitle": "Use at least 8 characters.",
+  "forgotPasswordLabelConfirmPassword": "Confirm password",
+  "forgotPasswordHintConfirmPassword": "Re-enter new password",
+  "forgotPasswordSaveButton": "Save password",
+  "forgotPasswordSuccessMessage": "Password updated. You can sign in now.",
+  "validationOtpLength": "Enter the 6-digit code",
+  "validationConfirmPasswordRequired": "Please confirm your password",
+  "validationPasswordsDoNotMatch": "Passwords do not match",
+  "addressesTitle": "My Addresses",
+  "addressesEmptyTitle": "No saved addresses",
+  "addressesEmptySubtitle": "Add an address to speed up checkout and delivery.",
+  "addressesAdd": "Add address",
+  "addressesAddFromMap": "Pick on map",
+  "addressesAddManual": "Enter manually",
+  "addressesDefaultBadge": "Default",
+  "addressesSetDefault": "Set as default",
+  "addressesEdit": "Edit",
+  "addressesDeleteTitle": "Delete address?",
+  "addressesDeleteMessage": "This address will be removed from your account.",
+  "addressesBulkDeleteTitle": "Delete selected addresses?",
+  "addressesBulkDeleteMessage": "Delete {count} address(es)?",
+  "@addressesBulkDeleteMessage": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "addressesBulkDeleteForce": "Also delete default address",
+  "addressesSelect": "Select",
+  "addressesDeleteSelected": "Delete selected",
+  "addressesTypeHome": "Home",
+  "addressesTypeWork": "Work",
+  "addressesTypeOther": "Other",
+  "addressFormAddTitle": "Add address",
+  "addressFormEditTitle": "Edit address",
+  "addressFormLine1": "Address line 1",
+  "addressFormLine2": "Address line 2 (optional)",
+  "addressFormCity": "City",
+  "addressFormState": "State / region",
+  "addressFormPostalCode": "Postal code",
+  "addressFormCountry": "Country",
+  "addressFormLabel": "Label",
+  "addressFormLandmark": "Landmark (optional)",
+  "addressFormType": "Address type",
+  "addressFormSetDefault": "Set as default address",
+  "addressFormPickOnMap": "Pick location on map",
+  "addressFormRequired": "This field is required",
+  "addressMapPickerTitle": "Pick location",
+  "addressMapUseLocation": "Use this location",
+  "deliveryAddressTitle": "Delivery address",
+  "deliveryAddressChange": "Change",
+  "deliveryAddressSaved": "Saved addresses",
+  "deliveryAddressPickMap": "Pick on map",
+  "deliveryAddressAddNew": "Add new address",
+  "deliveryAddressSelectPrompt": "Select delivery address",
+  "addressesSignInTitle": "Sign in to manage addresses",
+  "addressesSignInSubtitle": "Save multiple delivery addresses and set a default.",
+  "addressesLoadError": "Could not load addresses",
+  "addressesCreatedSuccess": "Address saved",
+  "addressesUpdatedSuccess": "Address updated",
+  "addressesDeletedSuccess": "Address deleted",
+  "chatTitle": "Messages",
+  "chatEmpty": "No conversations yet",
+  "chatEmptySubtitle": "Start chatting about an order or contact support.",
+  "chatContactSupport": "Contact support",
+  "chatViewOrders": "View orders",
+  "chatSearchHint": "Search messages",
+  "chatTypeMessage": "Type a message…",
+  "chatSend": "Send",
+  "chatSupportSubject": "What do you need help with?",
+  "chatSupportSubjectHint": "Brief subject",
+  "chatSupportTitle": "New support chat",
+  "chatEdited": "edited",
+  "chatDeleted": "This message was deleted",
+  "chatSendFailed": "Couldn't send message",
+  "chatOrderTitle": "Order chat",
+  "chatSupportChatTitle": "Support",
+  "chatRideTitle": "Ride chat",
+  "chatAttachImage": "Gallery",
+  "chatAttachFile": "Document",
+  "chatAttachAudio": "Voice",
+  "chatShareLocation": "Location",
+  "chatEditingMessage": "Editing message",
+  "chatCopy": "Copy",
+  "chatEdit": "Edit",
+  "chatDelete": "Delete",
+  "chatRetry": "Tap to retry",
+  "chatOpenMaps": "Open in Maps",
+  "chatNewSupport": "New support chat",
+  "chatTypeOrder": "Order",
+  "chatTypeSupport": "Support",
+  "chatTypeRide": "Ride",
+  "chatOpenOrder": "View order",
+  "chatRecording": "Recording…",
+  "chatSlideToCancel": "Slide up to cancel",
+  "chatPhoto": "Photo",
+  "chatVoiceMessage": "Voice message",
+  "chatLocation": "Location",
+  "chatFile": "File",
+  "chatLoadError": "Could not load messages",
+  "chatCreateSupport": "Start chat",
+  "sosSettingsTitle": "Safety & SOS",
+  "sosEmergencyContacts": "Emergency contacts",
+  "sosEmergencyContactsSubtitle": "People notified when you trigger SOS",
+  "sosHistory": "SOS history",
+  "sosHistorySubtitle": "View past alerts",
+  "sosTrigger": "Trigger SOS",
+  "sosTriggerSubtitle": "Send an emergency alert with your location",
+  "sosTriggerConfirmTitle": "Send SOS alert?",
+  "sosTriggerConfirmMessage": "Your emergency contacts will be notified with your current location. Only use in a real emergency.",
+  "sosDescriptionHint": "Describe your situation (optional)",
+  "sosLocationRequired": "Location is required to send an SOS alert. Please enable location permissions.",
+  "sosContactAdded": "Emergency contact added",
+  "sosContactUpdated": "Emergency contact updated",
+  "sosContactDeleted": "Emergency contact deleted",
+  "sosTriggered": "SOS alert sent successfully",
+  "sosAddContact": "Add contact",
+  "sosEditContact": "Edit contact",
+  "sosNoContacts": "No emergency contacts yet",
+  "sosNoContactsSubtitle": "Add someone who should be notified in an emergency.",
+  "sosNoHistory": "No SOS alerts yet",
+  "sosName": "Full name",
+  "sosPhone": "Phone number",
+  "sosEmail": "Email (optional)",
+  "sosRelationship": "Relationship",
+  "sosPrimaryContact": "Primary contact",
+  "sosDeleteContact": "Delete contact",
+  "sosDeleteContactConfirm": "Remove this emergency contact?",
+  "sosStatusActive": "Active",
+  "sosStatusAll": "All",
+  "sosCancel": "Cancel",
+  "sosSendAlert": "Send alert",
+  "sosSaving": "Saving…",
+  "guestBrowseBanner": "Browsing as guest",
+  "guestBrowseSignIn": "Sign in",
+  "guestSignInRequiredTitle": "Sign in required",
+  "guestSignInRequiredMessage": "Create an account or sign in to use this feature.",
+  "guestSignInRequiredCheckout": "Sign in to place orders and complete checkout.",
+  "guestOrdersSignIn": "Sign in to view your order history.",
+  "guestProfileSignIn": "Sign in to access your profile and settings.",
+  "guestServiceSignIn": "Sign in to use this service.",
+  "wishlistNotesHint": "Add a note (optional)",
+  "wishlistNotesUpdated": "Note updated",
+  "wishlistShareTitle": "Share wishlist",
+  "wishlistShareSuccess": "Wishlist shared successfully",
+  "wishlistPriceDropsTitle": "Price drop",
+  "wishlistPriceDropsEmpty": "No price drops right now",
+  "wishlistMigrateError": "Could not sync saved items to your account",
+  "tipsTitle": "Tips",
+  "tipsAddTitle": "Add a tip",
+  "tipsHistoryTitle": "Tip history",
+  "tipsRecipientLabel": "Tip recipient",
+  "tipsRecipientDriver": "Driver",
+  "tipsRecipientVendor": "Restaurant",
+  "tipsRecipientBoth": "Both",
+  "tipsCalculatedAmount": "Tip amount: ETB {amount}",
+  "@tipsCalculatedAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "tipsSubmit": "Send tip",
+  "tipsSuccess": "Tip sent successfully",
+  "tipsLoadError": "Could not load tips",
+  "tipsCardComingSoon": "Card payments coming soon",
+  "tipsAnonymous": "Send anonymously",
+  "tipsMessageHint": "Add a message (optional)",
+  "tipsStatsTotal": "Tips given",
+  "tipsStatsAmount": "Total tipped",
+  "tipsStatsAverage": "Average tip",
+  "tipsHistoryEmpty": "No tips yet",
+  "tipsPaymentWallet": "Wallet",
+  "tipsPaymentCard": "Card",
+  "tipsStatusCompleted": "Completed",
+  "tipsStatusAll": "All"
+}

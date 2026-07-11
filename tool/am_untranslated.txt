@@ -1,0 +1,183 @@
+﻿EN keys: 659
+AM keys: 659
+Missing in AM: 0
+Same as English (likely untranslated): 179
+  accountVerificationBannerTitle: Secure your account
+  accountVerificationEmailSubtitle: Confirm your email for receipts and updates.
+  accountVerificationPhoneSubtitle: Verify your phone for security and support.
+  actionAccept: Accept
+  actionContinue: Continue
+  actionExit: Exit
+  actionNo: No
+  actionReject: Reject
+  actionSignUp: Sign Up
+  actionYesCancel: Yes, Cancel
+  browseCategories: Browse categories
+  browseDelivery: Browse Delivery
+  cardLast4Hint: 4242
+  continueShopping: Continue Shopping
+  continueWithGoogle: Continue with Google
+  courierDeliveryStatusInProgress: In progress
+  courierRecipientLine: Recipient: {name}
+  courierTrackDeliveryCta: Track delivery
+  dealsModalClaim: Claim
+  dealsModalClose: Maybe later
+  dealsModalSubtitle: Get upto 50% off on your first Courier delivery fee!
+  dealsModalTitle: Deals on deals
+  errorGettingAddress: Error getting address: {error}
+  exitAppMessage: Are you sure you want to exit the app?
+  exitAppTitle: Exit App
+  forgotPasswordCodeExpired: This code has expired. Tap resend for a new code.
+  forgotPasswordHintConfirmPassword: Re-enter new password
+  forgotPasswordLabelConfirmPassword: Confirm password
+  forgotPasswordLink: Forgot password?
+  forgotPasswordNewSubtitle: Use at least 8 characters.
+  forgotPasswordNewTitle: Create new password
+  forgotPasswordOtpLabel: 6-digit code
+  forgotPasswordRequestSubtitle: Enter your email or phone number. We'll send a 6-digit verification code.
+  forgotPasswordRequestTitle: Reset password
+  forgotPasswordResend: Resend code
+  forgotPasswordSaveButton: Save password
+  forgotPasswordSendCode: Send code
+  forgotPasswordSuccessMessage: Password updated. You can sign in now.
+  forgotPasswordTimeRemaining: Time remaining: {time}
+  forgotPasswordVerifyButton: Verify
+  forgotPasswordVerifySubtitle: We sent a code to {identifier}.
+  forgotPasswordVerifyTitle: Enter verification code
+  googleMapsIosMissingKey: Google Maps is not configured on iOS. Add GOOGLE_MAPS_API_KEY and restart the ap...
+  handymanAbout: About
+  handymanAcceptQuoteFailed: Failed to accept
+  handymanAcceptQuoteMessage: Accept {amount} from {name}?
+  handymanAcceptQuoteTitle: Accept Quote
+  handymanCancelFailed: Failed to cancel
+  handymanCancelRequest: Cancel Request
+  handymanCommentAboutOptional: Comment about handyman (optional)
+  handymanCreateNewRequest: Create New Request
+  handymanCreateRequestCta: Create Request
+  handymanCreateRequestSubtitle: Describe your repair or maintenance need and get quotes from handymen.
+  handymanDialogCancelRequestMessage: Are you sure you want to cancel this service request?
+  handymanDialogCancelRequestTitle: Cancel Request
+  handymanEstHoursLine: Est. hours: {hours}
+  handymanExperienceLabel: Experience
+  handymanExperienceYears: {years} years
+  handymanHourlyRateLabel: Hourly Rate
+  handymanHowWasService: How was the service?
+  handymanLabelScheduled: Scheduled
+  handymanMyRequests: My Requests
+  handymanNewRequestTitle: New Service Request
+  handymanNoQuotesSubtitle: Handymen will send quotes soon
+  handymanNoQuotesYet: No quotes yet
+  handymanNoRequestsSubtitle: Create a request to get quotes from handymen
+  handymanNoRequestsYet: No service requests yet
+  handymanNotFound: Handyman not found
+  handymanProfileTitle: Handyman Profile
+  handymanProviderFallback: Provider
+  handymanQuoteAccepted: Quote accepted
+  handymanQuoteCount: {count} quote(s)
+  handymanQuoteRejected: Quote rejected
+  handymanQuotesTitle: Quotes
+  handymanRateServiceTitle: Rate Service
+  handymanRateTheHandyman: Rate the handyman
+  handymanRatingPublic: Make my rating public
+  handymanRejectQuoteFailed: Failed to reject
+  handymanRejectQuoteMessage: Reject quote from {name}?
+  handymanRejectQuoteTitle: Reject Quote
+  handymanRequestCancelled: Request cancelled
+  handymanRequestCreateFailed: Failed to create request
+  handymanRequestCreatedToast: Request created
+  handymanSectionRequirements: Requirements
+  handymanServicesTitle: Handyman Services
+  handymanSkillCarpentry: Carpentry
+  handymanSkillElectrical: Electrical
+  handymanSkillGeneral: General
+  handymanSkillPainting: Painting
+  handymanSkillPlumbing: Plumbing
+  handymanSkillsHeading: Skills
+  handymanSkillsNeeded: Skills needed
+  handymanStatRating: Rating
+  handymanStatResponse: Response
+  handymanStatServices: Services
+  handymanStatsHeading: Stats
+  handymanSubmitRating: Submit Rating
+  handymanTapToSelectLocation: Tap to select location
+  handymanToolsLine: Tools: {tools}
+  handymanViewProfile: View Profile
+  handymanViewQuotesCta: View {count} quote(s)
+  handymanWhatToDo: What would you like to do?
+  hintCostExample: e.g. 100
+  hintDateFormat: DD/MM/YYYY
+  hintDescribeRepair: Describe the repair or maintenance needed
+  hintHoursExample: e.g. 2
+  hintTimeFormat: HH:MM
+  hintTitleHandymanExample: e.g. Fix leaking faucet
+  hintToolsHandymanExample: e.g. wrench set, plumber's tape
+  instantDeliveryTitle: Instant Delivery
+  labelAddress: Address
+  labelDate: Date
+  labelEstimatedCostOptional: Estimated Cost (optional)
+  labelEstimatedHoursOptional: Estimated hours (optional)
+  labelScheduledDateTime: Scheduled Date & Time
+  labelTime: Time
+  labelTitle: Title
+  labelToolsCommaSeparated: Tools needed (comma-separated)
+  loginNoAccountPrompt: Don't have an account? 
+  loginOrContinueWith: or continue with
+  meridiemAm: am
+  meridiemPm: pm
+  orderAppBarTitle: Order #{orderNumber}
+  orderDetailsLoadErrorTitle: Error loading order details
+  orderDetailsLoadingMessage: Loading order details...
+  orderHistoryEmptyHint: Your order history will appear here once you place an order
+  orderHistoryEmptySubtitle: Browse categories to place your first order.
+  orderHistoryEmptyTitle: No orders yet
+  paymentChooseMethodHeading: Choose Payment Method
+  paymentEthiopianOptionsSubtitle: Select your preferred Ethiopian payment option
+  paymentFailedWithError: Payment failed: {error}
+  paymentLoadMethodsError: Failed to load payment methods
+  paymentMethodUnavailable: Selected payment method is no longer available
+  paymentPayAmountBr: Pay {amount} Br
+  paymentProcessingMessage: Please wait while we process your payment via {method}...
+  paymentProcessingTitle: Processing Payment
+  paymentScreenTitle: Payment
+  paymentSelectMethodFirst: Please select a payment method
+  paymentSubtotalLabel: Subtotal
+  paymentSuccessTitle: Payment Successful!
+  paymentSummaryTitle: Payment Summary
+  paymentTotalAmountLabel: Total Amount
+  paymentTransactionIdLabel: Transaction ID: {id}
+  ratingSubmitFailed: Failed to submit rating
+  ratingThankYou: Thank you for your rating!
+  selectDateAndTime: Select date and time
+  selectPickupAndDelivery: Please select both pickup and delivery locations
+  servicesAvailableCount: {count} services available
+  servicesEmptySubtitle: Check back later for new services
+  servicesEmptyTitle: No services yet
+  servicesErrorTitle: Something went wrong
+  servicesScreenTitle: Our Services
+  servicesWhatCanWeHelp: What can we help you with?
+  tapToSelectDelivery: Tap to select delivery location
+  tapToSelectPickup: Tap to select pickup location
+  taxiBrandHudHud: HUDHUD
+  taxiFareAmount: ETB {amount}
+  type: String
+  validationConfirmPasswordRequired: Please confirm your password
+  validationDescriptionRequired: Description is required
+  validationHandymanSelectDateTime: Please select date and time
+  validationHandymanSelectLocation: Please select a location
+  validationHandymanSelectSkill: Please select at least one skill
+  validationOtpLength: Enter the 6-digit code
+  validationPasswordComplexity: Password must include uppercase, lowercase, a number, and a special character
+  validationPasswordsDoNotMatch: Passwords do not match
+  validationTitleRequired: Title is required
+  vehicleType: Vehicle Type
+  viewOrder: View Order
+  walletTypeCurrency: {type} ò {currency}
+  wishlistAddedSnack: Added to wishlist
+  wishlistEmptySubtitle: Save products you love ù tap the heart on a product to add it here.
+  wishlistEmptyTitle: No saved items yet
+  wishlistLoadError: Could not load wishlist
+  wishlistRemovedSnack: Removed from wishlist
+  wishlistSignInSubtitle: Your saved items are stored on this device when you are logged in.
+  wishlistSignInTitle: Sign in to use your wishlist
+  wishlistTooltipAdd: Add to wishlist
+  wishlistTooltipRemove: Remove from wishlist

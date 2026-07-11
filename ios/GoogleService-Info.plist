@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>284030196855-g6brvhkvg2gcj0p3fjkklrl81ctec033.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.284030196855-g6brvhkvg2gcj0p3fjkklrl81ctec033</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>284030196855-q7i5a0ddmo9it46lem968bm5copb16de.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBB0nsMbAYTrd6VCEiMQYpvfq281GqpGAA</string>
+	<key>GCM_SENDER_ID</key>
+	<string>284030196855</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.hudhud.user</string>
+	<key>PROJECT_ID</key>
+	<string>hudhud-delivery-cus</string>
+	<key>STORAGE_BUCKET</key>
+	<string>hudhud-delivery-cus.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:284030196855:ios:1eb0eb28a4bf9549bc3a72</string>
+</dict>
+</plist>
