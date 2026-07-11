@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:hudhud_delivery/core/utils/api_error_message.dart';
 // import 'package:flutter/foundation.dart';
 import 'dio_client.dart';
 
@@ -174,16 +175,9 @@ class ApiService {
     final statusCode = error.response?.statusCode;
     final data = error.response?.data;
 
-    String message = 'An error occurred';
-
-    if (data is Map) {
-      final map = Map<String, dynamic>.from(data);
-      if (map.containsKey('message')) {
-        message = map['message']?.toString() ?? message;
-      }
-    } else if (data is String) {
-      message = data;
-    }
+    final message = data is String
+        ? data
+        : extractApiErrorMessage(data);
 
     Map<String, dynamic>? payload;
     if (data is Map) {
@@ -204,7 +198,7 @@ class ApiService {
         return ApiException('Not found: $message',
             statusCode: statusCode, data: payload);
       case 422:
-        return ApiException('Validation error: $message',
+        return ApiException(message,
             statusCode: statusCode, data: payload);
       case 429:
         return ApiException('HTTP $statusCode: $message',
