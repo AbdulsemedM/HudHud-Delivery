@@ -22,7 +22,8 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
         );
         emit(SignupSuccess());
       } catch (e) {
-        emit(SignupFailure(e.toString()));
+        final message = e is String ? e : e.toString();
+        emit(SignupFailure(message));
       }
     });
   }
