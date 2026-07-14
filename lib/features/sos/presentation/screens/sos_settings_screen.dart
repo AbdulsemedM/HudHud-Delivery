@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
+import 'package:hudhud_delivery/features/settings/presentation/widgets/profile_dark_page.dart';
 import 'package:hudhud_delivery/features/sos/presentation/screens/emergency_contacts_screen.dart';
 import 'package:hudhud_delivery/features/sos/presentation/screens/sos_history_screen.dart';
 import 'package:hudhud_delivery/features/sos/presentation/widgets/sos_trigger_dialog.dart';
@@ -11,19 +12,15 @@ class SosSettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.sosSettingsTitle),
-      ),
+    return ProfileDarkPage(
+      title: l10n.sosSettingsTitle,
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           _SosTile(
             icon: Icons.contact_emergency_outlined,
-            iconColor: AppColors.primaryColor,
+            iconColor: AuthScreenColors.orange,
             title: l10n.sosEmergencyContacts,
             subtitle: l10n.sosEmergencyContactsSubtitle,
             onTap: () {
@@ -38,7 +35,7 @@ class SosSettingsScreen extends StatelessWidget {
           const SizedBox(height: 12),
           _SosTile(
             icon: Icons.history,
-            iconColor: AppColors.primaryColor,
+            iconColor: AuthScreenColors.orange,
             title: l10n.sosHistory,
             subtitle: l10n.sosHistorySubtitle,
             onTap: () {
@@ -53,10 +50,10 @@ class SosSettingsScreen extends StatelessWidget {
           const SizedBox(height: 12),
           _SosTile(
             icon: Icons.sos,
-            iconColor: colorScheme.error,
+            iconColor: const Color(0xFFEF5350),
             title: l10n.sosTrigger,
             subtitle: l10n.sosTriggerSubtitle,
-            titleColor: colorScheme.error,
+            titleColor: const Color(0xFFEF5350),
             onTap: () => showSosTriggerDialog(context),
           ),
         ],
@@ -84,23 +81,26 @@ class _SosTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return Material(
-      color: colorScheme.surface,
-      borderRadius: BorderRadius.circular(12),
+      color: AuthScreenColors.surface,
+      borderRadius: BorderRadius.circular(16),
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         onTap: onTap,
-        child: Padding(
+        child: Container(
           padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AuthScreenColors.surfaceBorder),
+          ),
           child: Row(
             children: [
               Container(
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(12),
+                  color: iconColor.withValues(alpha: 0.12),
                 ),
                 child: Icon(icon, color: iconColor),
               ),
@@ -111,22 +111,27 @@ class _SosTile extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: titleColor ?? colorScheme.onSurface,
-                          ),
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                        color: titleColor ?? AuthScreenColors.textPrimary,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       subtitle,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: AuthScreenColors.textSecondary,
+                      ),
                     ),
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant),
+              const Icon(
+                Icons.chevron_right,
+                color: AuthScreenColors.textMuted,
+              ),
             ],
           ),
         ),

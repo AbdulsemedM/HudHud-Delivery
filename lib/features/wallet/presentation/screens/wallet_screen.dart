@@ -4,6 +4,8 @@ import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
+import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
+import 'package:hudhud_delivery/features/settings/presentation/widgets/profile_dark_page.dart';
 import 'package:hudhud_delivery/features/wallet/bloc/wallet_bloc.dart';
 import 'package:hudhud_delivery/features/wallet/data/models/wallet_model.dart';
 import 'package:hudhud_delivery/features/wallet/data/models/wallet_transaction_model.dart';
@@ -38,59 +40,61 @@ class _WalletScreenContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: BlocBuilder<WalletBloc, WalletState>(
-          builder: (context, state) {
-            if (state is WalletLoading) {
-              return const Padding(
-                padding: EdgeInsets.all(AppColors.spaceMD),
-                child: WalletShimmer(),
-              );
-            }
-            if (state is WalletError) {
-              final theme = Theme.of(context);
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.wifi_off_rounded,
-                        size: 48,
-                        color: theme.colorScheme.onSurfaceVariant,
+    final l10n = context.l10n;
+    return ProfileDarkPage(
+      title: l10n.profileWallet,
+      body: BlocBuilder<WalletBloc, WalletState>(
+        builder: (context, state) {
+          if (state is WalletLoading) {
+            return const Padding(
+              padding: EdgeInsets.all(AppColors.spaceMD),
+              child: WalletShimmer(),
+            );
+          }
+          if (state is WalletError) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.wifi_off_rounded,
+                      size: 48,
+                      color: AuthScreenColors.textMuted,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      state.message,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: AuthScreenColors.textSecondary,
                       ),
-                      const SizedBox(height: 16),
-                      Text(
-                        state.message,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
+                    ),
+                    const SizedBox(height: 24),
+                    TextButton.icon(
+                      style: TextButton.styleFrom(
+                        foregroundColor: AuthScreenColors.orange,
                       ),
-                      const SizedBox(height: 24),
-                      TextButton.icon(
-                        onPressed: () => context
-                            .read<WalletBloc>()
-                            .add(const FetchWalletsEvent()),
-                        icon: const Icon(Icons.refresh),
-                        label: Text(context.l10n.actionRetry),
-                      ),
-                    ],
-                  ),
+                      onPressed: () => context
+                          .read<WalletBloc>()
+                          .add(const FetchWalletsEvent()),
+                      icon: const Icon(Icons.refresh),
+                      label: Text(l10n.actionRetry),
+                    ),
+                  ],
                 ),
-              );
-            }
-            if (state is WalletsLoaded) {
-              return _WalletContent(
-                wallets: state.wallets,
-                transactions: state.transactions,
-              );
-            }
-            return const SizedBox.shrink();
-          },
-        ),
+              ),
+            );
+          }
+          if (state is WalletsLoaded) {
+            return _WalletContent(
+              wallets: state.wallets,
+              transactions: state.transactions,
+            );
+          }
+          return const SizedBox.shrink();
+        },
       ),
     );
   }
@@ -157,8 +161,6 @@ class _WalletContentState extends State<_WalletContent> {
       padding: const EdgeInsets.all(AppColors.spaceMD),
       child: Column(
         children: [
-          const WalletHeader(),
-          const SizedBox(height: AppColors.spaceLG),
           BalanceCard(
             balance: '${l10n.currencyEtb} ${displayBalance.toStringAsFixed(2)}',
           ),

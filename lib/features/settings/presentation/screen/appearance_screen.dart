@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:hudhud_delivery/controllers/theme_controller.dart';
-import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
+import 'package:hudhud_delivery/features/settings/presentation/widgets/profile_dark_page.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
 
 class AppearanceScreen extends StatelessWidget {
@@ -10,27 +11,21 @@ class AppearanceScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeController = Provider.of<ThemeController>(context);
-    final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: Text(l10n.settingsAppearance),
-        backgroundColor: theme.colorScheme.surface,
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-      ),
+    return ProfileDarkPage(
+      title: l10n.settingsAppearance,
       body: ListView(
-        padding: const EdgeInsets.all(AppColors.spaceMD),
+        padding: const EdgeInsets.all(16),
         children: [
           Text(
             l10n.appearanceChooseTheme,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+            style: const TextStyle(
+              color: AuthScreenColors.textSecondary,
+              fontSize: 15,
             ),
           ),
-          const SizedBox(height: AppColors.spaceMD),
+          const SizedBox(height: 16),
           _AppearanceOption(
             icon: Icons.dark_mode,
             title: l10n.themeDark,
@@ -75,29 +70,26 @@ class _AppearanceOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final borderColor =
-        isDark ? const Color(0xFF2A2A2A) : const Color(0xFFEEEEEE);
-
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Material(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        color: AuthScreenColors.surface,
+        borderRadius: BorderRadius.circular(16),
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(AppColors.radiusLG),
+          borderRadius: BorderRadius.circular(16),
           child: Container(
-            padding: const EdgeInsets.all(AppColors.spaceMD),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(AppColors.radiusLG),
+              borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: isSelected ? AppColors.primaryColor : borderColor,
+                color: isSelected
+                    ? AuthScreenColors.orange
+                    : AuthScreenColors.surfaceBorder,
                 width: isSelected ? 2 : 1,
               ),
               color: isSelected
-                  ? AppColors.primaryColor.withValues(alpha: 0.08)
+                  ? AuthScreenColors.orange.withValues(alpha: 0.08)
                   : null,
             ),
             child: Row(
@@ -105,8 +97,8 @@ class _AppearanceOption extends StatelessWidget {
                 Icon(
                   icon,
                   color: isSelected
-                      ? AppColors.primaryColor
-                      : theme.colorScheme.onSurfaceVariant,
+                      ? AuthScreenColors.orange
+                      : AuthScreenColors.textMuted,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -115,22 +107,27 @@ class _AppearanceOption extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: theme.textTheme.titleSmall?.copyWith(
+                        style: TextStyle(
                           fontWeight:
                               isSelected ? FontWeight.w600 : FontWeight.normal,
+                          color: AuthScreenColors.textPrimary,
                         ),
                       ),
                       Text(
                         subtitle,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: AuthScreenColors.textSecondary,
                         ),
                       ),
                     ],
                   ),
                 ),
                 if (isSelected)
-                  const Icon(Icons.check_circle, color: AppColors.primaryColor),
+                  const Icon(
+                    Icons.check_circle,
+                    color: AuthScreenColors.orange,
+                  ),
               ],
             ),
           ),

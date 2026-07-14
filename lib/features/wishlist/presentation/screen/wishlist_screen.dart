@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
-import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/utils/snackbar_util.dart';
 import 'package:hudhud_delivery/features/categories/model/categories_products_model.dart';
 import 'package:hudhud_delivery/features/delivery/presentation/screens/product_detail_screen.dart';
 import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
+import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
+import 'package:hudhud_delivery/features/settings/presentation/widgets/profile_dark_page.dart';
 import 'package:hudhud_delivery/features/wishlist/bloc/wishlist_bloc.dart';
 import 'package:hudhud_delivery/features/wishlist/model/wishlist_item_model.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
@@ -97,6 +98,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
     final saved = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
+      backgroundColor: AuthScreenColors.surface,
       builder: (ctx) => Padding(
         padding: EdgeInsets.only(
           left: 16,
@@ -119,6 +121,10 @@ class _WishlistScreenState extends State<WishlistScreen> {
             const SizedBox(height: 12),
             FilledButton(
               onPressed: () => Navigator.pop(ctx, true),
+              style: FilledButton.styleFrom(
+                backgroundColor: AuthScreenColors.orange,
+                foregroundColor: Colors.black,
+              ),
               child: Text(l10n.actionSave),
             ),
           ],
@@ -141,41 +147,44 @@ class _WishlistScreenState extends State<WishlistScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
 
     if (_resolvingUser) {
-      return Scaffold(
-        appBar: AppBar(title: Text(l10n.settingsWishlist)),
+      return ProfileDarkPage(
+        title: l10n.settingsWishlist,
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     if (_userId == null) {
-      return Scaffold(
-        appBar: AppBar(title: Text(l10n.settingsWishlist)),
+      return ProfileDarkPage(
+        title: l10n.settingsWishlist,
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.favorite_border,
-                    size: 64, color: cs.onSurfaceVariant),
+                const Icon(
+                  Icons.favorite_border,
+                  size: 64,
+                  color: AuthScreenColors.textMuted,
+                ),
                 const SizedBox(height: 16),
                 Text(
                   l10n.wishlistSignInTitle,
                   textAlign: TextAlign.center,
-                  style: theme.textTheme.titleMedium?.copyWith(
+                  style: const TextStyle(
+                    color: AuthScreenColors.textPrimary,
                     fontWeight: FontWeight.w600,
+                    fontSize: 16,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   l10n.wishlistSignInSubtitle,
                   textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: cs.onSurfaceVariant,
+                  style: const TextStyle(
+                    color: AuthScreenColors.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -189,8 +198,8 @@ class _WishlistScreenState extends State<WishlistScreen> {
                     });
                   },
                   style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.primaryColor,
-                    foregroundColor: Colors.white,
+                    backgroundColor: AuthScreenColors.orange,
+                    foregroundColor: Colors.black,
                   ),
                   child: Text(l10n.actionSignIn),
                 ),
@@ -228,22 +237,20 @@ class _WishlistScreenState extends State<WishlistScreen> {
           SnackbarUtil.showSuccess(context, msg);
         }
       },
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(l10n.settingsWishlist),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.trending_down),
-              tooltip: l10n.wishlistPriceDropsTitle,
-              onPressed: _checkPriceDrops,
-            ),
-            IconButton(
-              icon: const Icon(Icons.share_outlined),
-              tooltip: l10n.wishlistShareTitle,
-              onPressed: _showShareDialog,
-            ),
-          ],
-        ),
+      child: ProfileDarkPage(
+        title: l10n.settingsWishlist,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.trending_down),
+            tooltip: l10n.wishlistPriceDropsTitle,
+            onPressed: _checkPriceDrops,
+          ),
+          IconButton(
+            icon: const Icon(Icons.share_outlined),
+            tooltip: l10n.wishlistShareTitle,
+            onPressed: _showShareDialog,
+          ),
+        ],
         body: BlocBuilder<WishlistBloc, WishlistState>(
           builder: (context, state) {
             if (state is WishlistLoading) {
@@ -256,13 +263,20 @@ class _WishlistScreenState extends State<WishlistScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(l10n.wishlistLoadError, textAlign: TextAlign.center),
+                      Text(
+                        l10n.wishlistLoadError,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: AuthScreenColors.textPrimary,
+                        ),
+                      ),
                       const SizedBox(height: 8),
                       Text(
                         state.message,
                         textAlign: TextAlign.center,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: cs.onSurfaceVariant,
+                        style: const TextStyle(
+                          color: AuthScreenColors.textSecondary,
+                          fontSize: 12,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -272,6 +286,10 @@ class _WishlistScreenState extends State<WishlistScreen> {
                                 LoadWishlistEvent(userId: userId),
                               );
                         },
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AuthScreenColors.orange,
+                          foregroundColor: Colors.black,
+                        ),
                         child: Text(l10n.actionRetry),
                       ),
                     ],
@@ -297,22 +315,27 @@ class _WishlistScreenState extends State<WishlistScreen> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.favorite_border,
-                                  size: 56, color: cs.onSurfaceVariant),
+                              const Icon(
+                                Icons.favorite_border,
+                                size: 56,
+                                color: AuthScreenColors.textMuted,
+                              ),
                               const SizedBox(height: 16),
                               Text(
                                 l10n.wishlistEmptyTitle,
                                 textAlign: TextAlign.center,
-                                style: theme.textTheme.titleMedium?.copyWith(
+                                style: const TextStyle(
+                                  color: AuthScreenColors.textPrimary,
                                   fontWeight: FontWeight.w600,
+                                  fontSize: 16,
                                 ),
                               ),
                               const SizedBox(height: 8),
                               Text(
                                 l10n.wishlistEmptySubtitle,
                                 textAlign: TextAlign.center,
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: cs.onSurfaceVariant,
+                                style: const TextStyle(
+                                  color: AuthScreenColors.textSecondary,
                                 ),
                               ),
                             ],
@@ -337,7 +360,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                   if (pid <= 0) return const SizedBox.shrink();
 
                   return Material(
-                    color: cs.surface,
+                    color: AuthScreenColors.surface,
                     child: ListTile(
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
@@ -353,8 +376,10 @@ class _WishlistScreenState extends State<WishlistScreen> {
                         product?.name ?? '',
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleSmall?.copyWith(
+                        style: const TextStyle(
+                          color: AuthScreenColors.textPrimary,
                           fontWeight: FontWeight.w600,
+                          fontSize: 14,
                         ),
                       ),
                       subtitle: Padding(
@@ -364,8 +389,8 @@ class _WishlistScreenState extends State<WishlistScreen> {
                           children: [
                             Text(
                               _priceLabel(product),
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: AppColors.primaryColor,
+                              style: const TextStyle(
+                                color: AuthScreenColors.orange,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -376,8 +401,9 @@ class _WishlistScreenState extends State<WishlistScreen> {
                                 item.notes!,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: cs.onSurfaceVariant,
+                                style: const TextStyle(
+                                  color: AuthScreenColors.textSecondary,
+                                  fontSize: 12,
                                 ),
                               ),
                             ],
@@ -394,20 +420,22 @@ class _WishlistScreenState extends State<WishlistScreen> {
                                 ),
                                 child: Text(
                                   l10n.wishlistPriceDropsTitle,
-                                  style: theme.textTheme.labelSmall?.copyWith(
-                                    color: Colors.green.shade700,
+                                  style: TextStyle(
+                                    color: Colors.green.shade400,
                                     fontWeight: FontWeight.w600,
+                                    fontSize: 11,
                                   ),
                                 ),
                               ),
                             ],
                             if (product != null && !product.canOrder) ...[
                               const SizedBox(height: 4),
-                              Text(
+                              const Text(
                                 'Unavailable',
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: cs.onSurfaceVariant,
+                                style: TextStyle(
+                                  color: AuthScreenColors.textMuted,
                                   fontWeight: FontWeight.w600,
+                                  fontSize: 11,
                                 ),
                               ),
                             ],
@@ -418,13 +446,18 @@ class _WishlistScreenState extends State<WishlistScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                            icon: const Icon(Icons.note_alt_outlined),
+                            icon: const Icon(
+                              Icons.note_alt_outlined,
+                              color: AuthScreenColors.textMuted,
+                            ),
                             tooltip: l10n.wishlistNotesHint,
                             onPressed: () => _showNotesSheet(item),
                           ),
                           IconButton(
-                            icon: Icon(Icons.delete_outline,
-                                color: cs.onSurfaceVariant),
+                            icon: const Icon(
+                              Icons.delete_outline,
+                              color: AuthScreenColors.textMuted,
+                            ),
                             tooltip: l10n.actionDelete,
                             onPressed: () {
                               context.read<WishlistBloc>().add(
@@ -465,15 +498,16 @@ class _WishlistProductThumb extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     const size = 72.0;
     if (imageUrl.isEmpty) {
       return Container(
         width: size,
         height: size,
-        color: cs.surfaceContainerHighest,
-        child: Icon(Icons.image_not_supported_outlined,
-            color: cs.onSurfaceVariant),
+        color: AuthScreenColors.surfaceBorder,
+        child: const Icon(
+          Icons.image_not_supported_outlined,
+          color: AuthScreenColors.textMuted,
+        ),
       );
     }
     if (imageUrl.startsWith('http')) {
@@ -485,8 +519,11 @@ class _WishlistProductThumb extends StatelessWidget {
         errorBuilder: (_, __, ___) => Container(
           width: size,
           height: size,
-          color: cs.surfaceContainerHighest,
-          child: Icon(Icons.broken_image_outlined, color: cs.onSurfaceVariant),
+          color: AuthScreenColors.surfaceBorder,
+          child: const Icon(
+            Icons.broken_image_outlined,
+            color: AuthScreenColors.textMuted,
+          ),
         ),
       );
     }
@@ -498,8 +535,11 @@ class _WishlistProductThumb extends StatelessWidget {
       errorBuilder: (_, __, ___) => Container(
         width: size,
         height: size,
-        color: cs.surfaceContainerHighest,
-        child: Icon(Icons.broken_image_outlined, color: cs.onSurfaceVariant),
+        color: AuthScreenColors.surfaceBorder,
+        child: const Icon(
+          Icons.broken_image_outlined,
+          color: AuthScreenColors.textMuted,
+        ),
       ),
     );
   }

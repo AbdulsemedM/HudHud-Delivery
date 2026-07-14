@@ -4,11 +4,12 @@ import 'package:lottie/lottie.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
-import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/models/notification_model.dart';
+import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
 import 'package:hudhud_delivery/features/notifications/bloc/notifications_bloc.dart';
 import 'package:hudhud_delivery/features/notifications/data/data_provider/notifications_data_provider.dart';
 import 'package:hudhud_delivery/features/notifications/data/repository/notifications_repository.dart';
+import 'package:hudhud_delivery/features/settings/presentation/widgets/profile_dark_page.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -26,24 +27,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: const Text('Notifications'),
-        backgroundColor: colorScheme.surface,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
+    return ProfileDarkPage(
+      title: 'Notifications',
       body: BlocBuilder<NotificationsBloc, NotificationsState>(
         builder: (context, state) {
           if (state is NotificationsLoading) {
             return const Padding(
-              padding: EdgeInsets.all(AppColors.spaceMD),
+              padding: EdgeInsets.all(16),
               child: _NotificationsShimmer(),
             );
           }
@@ -54,15 +44,18 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.error_outline,
-                        size: 48, color: Colors.grey[600]),
+                    const Icon(
+                      Icons.error_outline,
+                      size: 48,
+                      color: AuthScreenColors.textMuted,
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       state.message,
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 16,
-                        color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.85),
+                        color: AuthScreenColors.textSecondary,
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -72,8 +65,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                             .read<NotificationsBloc>()
                             .add(FetchNotificationsEvent());
                       },
-                      icon: const Icon(Icons.refresh),
-                      label: const Text('Retry'),
+                      icon: const Icon(
+                        Icons.refresh,
+                        color: AuthScreenColors.orange,
+                      ),
+                      label: const Text(
+                        'Retry',
+                        style: TextStyle(color: AuthScreenColors.orange),
+                      ),
                     ),
                   ],
                 ),
@@ -88,10 +87,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Lottie.asset('assets/animations/browse.json', width: 160),
-                    const SizedBox(height: AppColors.spaceMD),
-                    Text(
+                    const SizedBox(height: 16),
+                    const Text(
                       'No notifications yet',
-                      style: theme.textTheme.titleMedium,
+                      style: TextStyle(
+                        color: AuthScreenColors.textPrimary,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ],
                 ),
@@ -144,7 +147,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       }
       grouped.putIfAbsent(key, () => []).add(n);
     }
-    // Sort keys: Today, Yesterday, Older
     final order = ['Today', 'Yesterday', 'Older'];
     final sorted = <String, List<NotificationModel>>{};
     for (final k in order) {
@@ -167,7 +169,6 @@ class _NotificationSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16),
       child: Column(
@@ -177,10 +178,10 @@ class _NotificationSection extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
               title,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: theme.textTheme.titleMedium?.color,
+                color: AuthScreenColors.textPrimary,
               ),
             ),
           ),
@@ -199,23 +200,17 @@ class _NotificationItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final iconColor = notification.isRead
-        ? colorScheme.onSurfaceVariant
-        : AppColors.primaryColor;
+        ? AuthScreenColors.textMuted
+        : AuthScreenColors.orange;
     final timeAgo = _formatTimeAgo(notification.createdAt);
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      padding: const EdgeInsets.all(AppColors.spaceMD),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(AppColors.radiusLG),
-        border: Border.all(
-          color: Theme.of(context).brightness == Brightness.dark
-              ? const Color(0xFF2A2A2A)
-              : const Color(0xFFEEEEEE),
-        ),
+        color: AuthScreenColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AuthScreenColors.surfaceBorder),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -243,23 +238,23 @@ class _NotificationItem extends StatelessWidget {
                     fontSize: 16,
                     fontWeight:
                         notification.isRead ? FontWeight.w500 : FontWeight.w600,
-                    color: theme.textTheme.titleMedium?.color,
+                    color: AuthScreenColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   notification.message,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 14,
-                    color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.8),
+                    color: AuthScreenColors.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   timeAgo,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12,
-                    color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.75),
+                    color: AuthScreenColors.textMuted,
                   ),
                 ),
               ],
@@ -297,22 +292,18 @@ class _NotificationsShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final baseColor = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0);
-    final highlightColor =
-        isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF5F5F5);
     return Column(
       children: List.generate(5, (index) {
         return Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: Shimmer.fromColors(
-            baseColor: baseColor,
-            highlightColor: highlightColor,
+            baseColor: AuthScreenColors.surface,
+            highlightColor: AuthScreenColors.surfaceBorder,
             child: Container(
               height: 72,
               decoration: BoxDecoration(
-                color: baseColor,
-                borderRadius: BorderRadius.circular(AppColors.radiusLG),
+                color: AuthScreenColors.surface,
+                borderRadius: BorderRadius.circular(16),
               ),
             ),
           ),

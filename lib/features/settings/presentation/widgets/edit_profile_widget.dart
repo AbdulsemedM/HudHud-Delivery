@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/widgets/user_avatar.dart';
+import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
 
 class ProfileImagePicker extends StatelessWidget {
   final String? networkImageUrl;
@@ -15,7 +16,6 @@ class ProfileImagePicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onImageTap,
       child: Stack(
@@ -31,14 +31,14 @@ class ProfileImagePicker extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
-                color: colorScheme.surface,
+                color: AuthScreenColors.surface,
                 shape: BoxShape.circle,
-                border: Border.all(color: colorScheme.outlineVariant),
+                border: Border.all(color: AuthScreenColors.surfaceBorder),
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.camera_alt,
                 size: 20,
-                color: colorScheme.onSurfaceVariant,
+                color: AuthScreenColors.textMuted,
               ),
             ),
           ),
@@ -64,33 +64,31 @@ class ProfileTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: theme.textTheme.bodyMedium?.copyWith(
+          style: const TextStyle(
             fontSize: 14,
-            color: colorScheme.onSurfaceVariant,
+            color: AuthScreenColors.textSecondary,
           ),
         ),
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerHighest,
+            color: AuthScreenColors.surface,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
+            border: Border.all(color: AuthScreenColors.surfaceBorder),
           ),
           child: TextFormField(
             controller: controller,
             readOnly: readOnly,
             keyboardType: keyboardType,
-            style: theme.textTheme.bodyLarge?.copyWith(
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
-              color: colorScheme.onSurface,
+              color: AuthScreenColors.textPrimary,
             ),
             decoration: const InputDecoration(
               border: InputBorder.none,
@@ -120,33 +118,43 @@ class UpdateButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      child: ElevatedButton(
-        onPressed: isLoading ? null : onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF4A148C),
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          gradient: const LinearGradient(
+            colors: AuthScreenColors.signInGradient,
           ),
         ),
-        child: isLoading
-            ? const SizedBox(
-                height: 22,
-                width: 22,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white,
+        child: ElevatedButton(
+          onPressed: isLoading ? null : onPressed,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.transparent,
+            shadowColor: Colors.transparent,
+            foregroundColor: Colors.white,
+            disabledForegroundColor: Colors.white70,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          child: isLoading
+              ? const SizedBox(
+                  height: 22,
+                  width: 22,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : const Text(
+                  'Update',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
-              )
-            : const Text(
-                'Update',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
+        ),
       ),
     );
   }

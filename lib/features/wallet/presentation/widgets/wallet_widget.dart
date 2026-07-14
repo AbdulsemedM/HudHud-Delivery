@@ -3,36 +3,46 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
 
 class WalletHeader extends StatelessWidget {
   const WalletHeader({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final onSurface = Theme.of(context).colorScheme.onSurface;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Container(
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: AppColors.primaryColor, width: 2),
+            border: Border.all(
+              color: AuthScreenColors.lavender.withValues(alpha: 0.7),
+              width: 2,
+            ),
           ),
           child: const CircleAvatar(
             radius: 22,
-            backgroundImage: AssetImage('assets/images/profile.png'),
+            backgroundColor: AuthScreenColors.surfaceBorder,
+            child: Icon(
+              Icons.account_balance_wallet_outlined,
+              color: AuthScreenColors.orange,
+            ),
           ),
         ),
         Container(
           width: 44,
           height: 44,
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFF4F4F4),
+            color: AuthScreenColors.surface,
             borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AuthScreenColors.surfaceBorder),
           ),
           child: IconButton(
-            icon: Icon(Icons.notifications_outlined, color: onSurface),
+            icon: const Icon(
+              Icons.notifications_outlined,
+              color: AuthScreenColors.textPrimary,
+            ),
             onPressed: () {},
           ),
         ),
@@ -60,7 +70,7 @@ class BalanceCard extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [AppColors.primaryColor, AppColors.primaryDarkColor],
+          colors: AuthScreenColors.signInGradient,
         ),
         borderRadius: BorderRadius.circular(AppColors.radiusXL),
       ),
@@ -194,7 +204,6 @@ class WalletSelectorChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.only(right: 8),
       child: FilterChip(
@@ -205,14 +214,14 @@ class WalletSelectorChip extends StatelessWidget {
         labelStyle: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w600,
-          color: selected ? Colors.white : scheme.onSurfaceVariant,
+          color: selected ? Colors.black : AuthScreenColors.textSecondary,
         ),
-        backgroundColor: scheme.surface,
-        selectedColor: AppColors.primaryColor,
+        backgroundColor: AuthScreenColors.surface,
+        selectedColor: AuthScreenColors.orange,
         side: BorderSide(
           color: selected
-              ? AppColors.primaryColor
-              : scheme.outline.withValues(alpha: 0.4),
+              ? AuthScreenColors.orange
+              : AuthScreenColors.surfaceBorder,
         ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppColors.radiusFull),

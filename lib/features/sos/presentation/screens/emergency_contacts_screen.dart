@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
+import 'package:hudhud_delivery/features/settings/presentation/widgets/profile_dark_page.dart';
 import 'package:hudhud_delivery/features/sos/bloc/sos_bloc.dart';
 import 'package:hudhud_delivery/features/sos/model/emergency_contact_model.dart';
 import 'package:hudhud_delivery/features/sos/presentation/screens/emergency_contact_form_screen.dart';
@@ -48,8 +50,15 @@ class _EmergencyContactsBodyState extends State<_EmergencyContactsBody> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(l10n.sosDeleteContact),
-        content: Text(l10n.sosDeleteContactConfirm),
+        backgroundColor: AuthScreenColors.surface,
+        title: Text(
+          l10n.sosDeleteContact,
+          style: const TextStyle(color: AuthScreenColors.textPrimary),
+        ),
+        content: Text(
+          l10n.sosDeleteContactConfirm,
+          style: const TextStyle(color: AuthScreenColors.textSecondary),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -59,7 +68,7 @@ class _EmergencyContactsBodyState extends State<_EmergencyContactsBody> {
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(
               l10n.sosDeleteContact,
-              style: TextStyle(color: Theme.of(ctx).colorScheme.error),
+              style: const TextStyle(color: Color(0xFFEF5350)),
             ),
           ),
         ],
@@ -74,10 +83,12 @@ class _EmergencyContactsBodyState extends State<_EmergencyContactsBody> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.sosEmergencyContacts)),
+    return ProfileDarkPage(
+      title: l10n.sosEmergencyContacts,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _openForm(),
+        backgroundColor: AuthScreenColors.orange,
+        foregroundColor: Colors.black,
         icon: const Icon(Icons.person_add_outlined),
         label: Text(l10n.sosAddContact),
       ),
@@ -113,21 +124,27 @@ class _EmergencyContactsBodyState extends State<_EmergencyContactsBody> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.contact_emergency_outlined,
                       size: 56,
-                      color: Theme.of(context).colorScheme.outline,
+                      color: AuthScreenColors.textMuted,
                     ),
                     const SizedBox(height: 16),
                     Text(
                       l10n.sosNoContacts,
-                      style: Theme.of(context).textTheme.titleMedium,
+                      style: const TextStyle(
+                        color: AuthScreenColors.textPrimary,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
                     Text(
                       l10n.sosNoContactsSubtitle,
-                      style: Theme.of(context).textTheme.bodyMedium,
+                      style: const TextStyle(
+                        color: AuthScreenColors.textSecondary,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -142,16 +159,27 @@ class _EmergencyContactsBodyState extends State<_EmergencyContactsBody> {
             separatorBuilder: (_, __) => const SizedBox(height: 8),
             itemBuilder: (context, index) {
               final contact = contacts[index];
-              return Card(
+              return Material(
+                color: AuthScreenColors.surface,
+                borderRadius: BorderRadius.circular(12),
                 child: ListTile(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: const BorderSide(color: AuthScreenColors.surfaceBorder),
+                  ),
                   leading: CircleAvatar(
+                    backgroundColor: AuthScreenColors.orange.withValues(alpha: 0.2),
+                    foregroundColor: AuthScreenColors.orange,
                     child: Text(
                       contact.name.isNotEmpty
                           ? contact.name[0].toUpperCase()
                           : '?',
                     ),
                   ),
-                  title: Text(contact.name),
+                  title: Text(
+                    contact.name,
+                    style: const TextStyle(color: AuthScreenColors.textPrimary),
+                  ),
                   subtitle: Text(
                     [
                       contact.phone,
@@ -160,8 +188,10 @@ class _EmergencyContactsBodyState extends State<_EmergencyContactsBody> {
                         contact.relationship,
                       if (contact.isPrimary) 'Primary',
                     ].whereType<String>().join(' · '),
+                    style: const TextStyle(color: AuthScreenColors.textSecondary),
                   ),
                   trailing: PopupMenuButton<String>(
+                    color: AuthScreenColors.surface,
                     onSelected: (value) {
                       if (value == 'edit') {
                         _openForm(contact: contact);
@@ -176,7 +206,10 @@ class _EmergencyContactsBodyState extends State<_EmergencyContactsBody> {
                       ),
                       PopupMenuItem(
                         value: 'delete',
-                        child: Text(l10n.sosDeleteContact),
+                        child: Text(
+                          l10n.sosDeleteContact,
+                          style: const TextStyle(color: Color(0xFFEF5350)),
+                        ),
                       ),
                     ],
                   ),

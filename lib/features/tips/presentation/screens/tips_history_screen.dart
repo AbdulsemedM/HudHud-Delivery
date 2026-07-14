@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
+import 'package:hudhud_delivery/features/settings/presentation/widgets/profile_dark_page.dart';
 import 'package:hudhud_delivery/features/tips/bloc/tips_bloc.dart';
 import 'package:hudhud_delivery/features/tips/model/tip_history_item_model.dart';
 import 'package:hudhud_delivery/features/tips/model/tip_history_result.dart';
@@ -70,10 +72,9 @@ class _TipsHistoryBodyState extends State<_TipsHistoryBody> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.tipsHistoryTitle)),
+    return ProfileDarkPage(
+      title: l10n.tipsHistoryTitle,
       body: Column(
         children: [
           Padding(
@@ -83,12 +84,30 @@ class _TipsHistoryBodyState extends State<_TipsHistoryBody> {
                 ChoiceChip(
                   label: Text(l10n.tipsStatusCompleted),
                   selected: _statusFilter == 'completed',
+                  selectedColor: AuthScreenColors.orange,
+                  checkmarkColor: Colors.black,
+                  labelStyle: TextStyle(
+                    color: _statusFilter == 'completed'
+                        ? Colors.black
+                        : AuthScreenColors.textPrimary,
+                  ),
+                  backgroundColor: AuthScreenColors.surface,
+                  side: const BorderSide(color: AuthScreenColors.surfaceBorder),
                   onSelected: (_) => _reload(status: 'completed'),
                 ),
                 const SizedBox(width: 8),
                 ChoiceChip(
                   label: Text(l10n.tipsStatusAll),
                   selected: _statusFilter == null,
+                  selectedColor: AuthScreenColors.orange,
+                  checkmarkColor: Colors.black,
+                  labelStyle: TextStyle(
+                    color: _statusFilter == null
+                        ? Colors.black
+                        : AuthScreenColors.textPrimary,
+                  ),
+                  backgroundColor: AuthScreenColors.surface,
+                  side: const BorderSide(color: AuthScreenColors.surfaceBorder),
                   onSelected: (_) => _reload(status: null),
                 ),
               ],
@@ -114,13 +133,28 @@ class _TipsHistoryBodyState extends State<_TipsHistoryBody> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(l10n.tipsLoadError),
+                          Text(
+                            l10n.tipsLoadError,
+                            style: const TextStyle(
+                              color: AuthScreenColors.textPrimary,
+                            ),
+                          ),
                           const SizedBox(height: 8),
-                          Text(state.message, textAlign: TextAlign.center),
+                          Text(
+                            state.message,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: AuthScreenColors.textSecondary,
+                            ),
+                          ),
                           const SizedBox(height: 16),
                           FilledButton(
                             onPressed: () =>
                                 _reload(status: _statusFilter),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: AuthScreenColors.orange,
+                              foregroundColor: Colors.black,
+                            ),
                             child: Text(l10n.actionRetry),
                           ),
                         ],
@@ -152,7 +186,9 @@ class _TipsHistoryBodyState extends State<_TipsHistoryBody> {
                           child: Center(
                             child: Text(
                               l10n.tipsHistoryEmpty,
-                              style: theme.textTheme.bodyLarge,
+                              style: const TextStyle(
+                                color: AuthScreenColors.textSecondary,
+                              ),
                             ),
                           ),
                         )
@@ -204,7 +240,6 @@ class _StatsHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Row(
@@ -213,7 +248,6 @@ class _StatsHeader extends StatelessWidget {
             child: _StatBox(
               label: l10n.tipsStatsTotal,
               value: '${stats.totalTipsGiven}',
-              theme: theme,
             ),
           ),
           const SizedBox(width: 8),
@@ -221,7 +255,6 @@ class _StatsHeader extends StatelessWidget {
             child: _StatBox(
               label: l10n.tipsStatsAmount,
               value: stats.totalAmountTipped.toString(),
-              theme: theme,
             ),
           ),
           const SizedBox(width: 8),
@@ -229,7 +262,6 @@ class _StatsHeader extends StatelessWidget {
             child: _StatBox(
               label: l10n.tipsStatsAverage,
               value: stats.averageTip.toString(),
-              theme: theme,
             ),
           ),
         ],
@@ -241,12 +273,10 @@ class _StatsHeader extends StatelessWidget {
 class _StatBox extends StatelessWidget {
   final String label;
   final String value;
-  final ThemeData theme;
 
   const _StatBox({
     required this.label,
     required this.value,
-    required this.theme,
   });
 
   @override
@@ -254,22 +284,28 @@ class _StatBox extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
+        color: AuthScreenColors.surface,
         borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AuthScreenColors.surfaceBorder),
       ),
       child: Column(
         children: [
           Text(
             value,
-            style: theme.textTheme.titleMedium?.copyWith(
+            style: const TextStyle(
+              color: AuthScreenColors.textPrimary,
               fontWeight: FontWeight.bold,
+              fontSize: 16,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             label,
             textAlign: TextAlign.center,
-            style: theme.textTheme.labelSmall,
+            style: const TextStyle(
+              color: AuthScreenColors.textSecondary,
+              fontSize: 11,
+            ),
           ),
         ],
       ),
@@ -290,27 +326,39 @@ class _TipHistoryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final orderNumber = item.order?.orderNumber ?? '#${item.orderId}';
     return ListTile(
       title: Text(
         orderNumber,
-        style: theme.textTheme.titleSmall?.copyWith(
+        style: const TextStyle(
+          color: AuthScreenColors.textPrimary,
           fontWeight: FontWeight.w600,
+          fontSize: 14,
         ),
       ),
-      subtitle: Text('$recipientLabel · ${item.paymentStatus}'),
+      subtitle: Text(
+        '$recipientLabel · ${item.paymentStatus}',
+        style: const TextStyle(color: AuthScreenColors.textSecondary),
+      ),
       trailing: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Text(
             'ETB ${item.amount}',
-            style: theme.textTheme.titleSmall?.copyWith(
+            style: const TextStyle(
+              color: AuthScreenColors.orange,
               fontWeight: FontWeight.w600,
+              fontSize: 14,
             ),
           ),
-          Text(dateLabel, style: theme.textTheme.labelSmall),
+          Text(
+            dateLabel,
+            style: const TextStyle(
+              color: AuthScreenColors.textMuted,
+              fontSize: 11,
+            ),
+          ),
         ],
       ),
     );

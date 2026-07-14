@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
-import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/addresses/bloc/addresses_bloc.dart';
 import 'package:hudhud_delivery/features/addresses/model/address_model.dart';
 import 'package:hudhud_delivery/features/addresses/model/address_payload.dart';
 import 'package:hudhud_delivery/features/addresses/presentation/screens/address_map_picker_screen.dart';
+import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
+import 'package:hudhud_delivery/features/settings/presentation/widgets/profile_dark_page.dart';
 
 class AddressFormScreen extends StatefulWidget {
   final AddressModel? existing;
@@ -129,6 +130,28 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
     }
   }
 
+  InputDecoration _decoration(String label) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(color: AuthScreenColors.textSecondary),
+      filled: true,
+      fillColor: AuthScreenColors.surface,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: AuthScreenColors.surfaceBorder),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: AuthScreenColors.surfaceBorder),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide:
+            const BorderSide(color: AuthScreenColors.orange, width: 1.5),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -150,14 +173,11 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
           );
         }
       },
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(_isEdit ? l10n.addressFormEditTitle : l10n.addressFormAddTitle),
-        ),
+      child: ProfileDarkPage(
+        title: _isEdit ? l10n.addressFormEditTitle : l10n.addressFormAddTitle,
         body: BlocBuilder<AddressesBloc, AddressesState>(
           builder: (context, state) {
-            final submitting =
-                state is AddressesLoaded && state.isSubmitting;
+            final submitting = state is AddressesLoaded && state.isSubmitting;
             return Form(
               key: _formKey,
               child: ListView(
@@ -165,6 +185,10 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
                 children: [
                   OutlinedButton.icon(
                     onPressed: submitting ? null : _pickOnMap,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AuthScreenColors.orange,
+                      side: const BorderSide(color: AuthScreenColors.orange),
+                    ),
                     icon: const Icon(Icons.map_outlined),
                     label: Text(l10n.addressFormPickOnMap),
                   ),
@@ -179,10 +203,9 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
                     initialValue: _addressType,
-                    decoration: InputDecoration(
-                      labelText: l10n.addressFormType,
-                      border: const OutlineInputBorder(),
-                    ),
+                    dropdownColor: AuthScreenColors.surface,
+                    style: const TextStyle(color: AuthScreenColors.textPrimary),
+                    decoration: _decoration(l10n.addressFormType),
                     items: [
                       DropdownMenuItem(
                         value: 'home',
@@ -204,7 +227,11 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
                           },
                   ),
                   SwitchListTile(
-                    title: Text(l10n.addressFormSetDefault),
+                    title: Text(
+                      l10n.addressFormSetDefault,
+                      style: const TextStyle(color: AuthScreenColors.textPrimary),
+                    ),
+                    activeThumbColor: AuthScreenColors.orange,
                     value: _isDefault,
                     onChanged: submitting
                         ? null
@@ -213,7 +240,8 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
                   const SizedBox(height: 24),
                   FilledButton(
                     style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.primaryColor,
+                      backgroundColor: AuthScreenColors.orange,
+                      foregroundColor: Colors.black,
                       minimumSize: const Size.fromHeight(48),
                     ),
                     onPressed: submitting ? null : _submit,
@@ -221,7 +249,10 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
                         ? const SizedBox(
                             height: 22,
                             width: 22,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.black,
+                            ),
                           )
                         : Text(l10n.actionSave),
                   ),
@@ -243,10 +274,8 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
       padding: const EdgeInsets.only(bottom: 12),
       child: TextFormField(
         controller: controller,
-        decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
-        ),
+        style: const TextStyle(color: AuthScreenColors.textPrimary),
+        decoration: _decoration(label),
         validator: required
             ? (v) {
                 if (v == null || v.trim().isEmpty) {

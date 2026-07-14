@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
+import 'package:hudhud_delivery/features/settings/presentation/widgets/profile_dark_page.dart';
 import 'package:hudhud_delivery/features/sos/bloc/sos_bloc.dart';
 import 'package:hudhud_delivery/features/sos/model/sos_alert_model.dart';
 import 'package:hudhud_delivery/features/sos/sos_bloc_provider.dart';
@@ -48,8 +50,8 @@ class _SosHistoryBodyState extends State<_SosHistoryBody> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.sosHistory)),
+    return ProfileDarkPage(
+      title: l10n.sosHistory,
       body: Column(
         children: [
           Padding(
@@ -59,12 +61,30 @@ class _SosHistoryBodyState extends State<_SosHistoryBody> {
                 ChoiceChip(
                   label: Text(l10n.sosStatusAll),
                   selected: _statusFilter == null,
+                  selectedColor: AuthScreenColors.orange,
+                  checkmarkColor: Colors.black,
+                  labelStyle: TextStyle(
+                    color: _statusFilter == null
+                        ? Colors.black
+                        : AuthScreenColors.textPrimary,
+                  ),
+                  backgroundColor: AuthScreenColors.surface,
+                  side: const BorderSide(color: AuthScreenColors.surfaceBorder),
                   onSelected: (_) => _reload(status: null),
                 ),
                 const SizedBox(width: 8),
                 ChoiceChip(
                   label: Text(l10n.sosStatusActive),
                   selected: _statusFilter == 'active',
+                  selectedColor: AuthScreenColors.orange,
+                  checkmarkColor: Colors.black,
+                  labelStyle: TextStyle(
+                    color: _statusFilter == 'active'
+                        ? Colors.black
+                        : AuthScreenColors.textPrimary,
+                  ),
+                  backgroundColor: AuthScreenColors.surface,
+                  side: const BorderSide(color: AuthScreenColors.surfaceBorder),
                   onSelected: (_) => _reload(status: 'active'),
                 ),
               ],
@@ -93,7 +113,9 @@ class _SosHistoryBodyState extends State<_SosHistoryBody> {
                   return Center(
                     child: Text(
                       l10n.sosNoHistory,
-                      style: Theme.of(context).textTheme.bodyLarge,
+                      style: const TextStyle(
+                        color: AuthScreenColors.textSecondary,
+                      ),
                     ),
                   );
                 }
@@ -122,35 +144,62 @@ class _SosHistoryBodyState extends State<_SosHistoryBody> {
                         return const SizedBox.shrink();
                       }
                       final alert = history[index];
-                      return Card(
+                      return Material(
+                        color: AuthScreenColors.surface,
+                        borderRadius: BorderRadius.circular(12),
                         child: ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor: Theme.of(context)
-                                .colorScheme
-                                .errorContainer,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: const BorderSide(
+                              color: AuthScreenColors.surfaceBorder,
+                            ),
+                          ),
+                          leading: const CircleAvatar(
+                            backgroundColor: Color(0x33EF5350),
                             child: Icon(
                               Icons.sos,
-                              color: Theme.of(context).colorScheme.error,
+                              color: Color(0xFFEF5350),
                             ),
                           ),
                           title: Text(
                             '${alert.alertType} · ${alert.status}',
+                            style: const TextStyle(
+                              color: AuthScreenColors.textPrimary,
+                            ),
                           ),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               if (alert.description != null &&
                                   alert.description!.isNotEmpty)
-                                Text(alert.description!),
+                                Text(
+                                  alert.description!,
+                                  style: const TextStyle(
+                                    color: AuthScreenColors.textSecondary,
+                                  ),
+                                ),
                               if (alert.locationAddress != null)
                                 Text(
                                   alert.locationAddress!,
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    color: AuthScreenColors.textMuted,
+                                  ),
                                 ),
                               if (alert.orderNumber != null)
-                                Text('Order: ${alert.orderNumber}'),
-                              Text(_formatDate(alert.createdAt)),
+                                Text(
+                                  'Order: ${alert.orderNumber}',
+                                  style: const TextStyle(
+                                    color: AuthScreenColors.textSecondary,
+                                  ),
+                                ),
+                              Text(
+                                _formatDate(alert.createdAt),
+                                style: const TextStyle(
+                                  color: AuthScreenColors.textMuted,
+                                ),
+                              ),
                             ],
                           ),
                           isThreeLine: true,

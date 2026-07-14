@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
-import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/addresses/model/address_model.dart';
+import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
 
 class AddressListTile extends StatelessWidget {
   final AddressModel address;
@@ -40,15 +40,19 @@ class AddressListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     return Card(
+      color: AuthScreenColors.surface,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: const BorderSide(color: AuthScreenColors.surfaceBorder),
+      ),
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: InkWell(
         onTap: onTap,
         onLongPress: onLongPress,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -62,8 +66,8 @@ class AddressListTile extends StatelessWidget {
                         ? Icons.check_circle
                         : Icons.radio_button_unchecked,
                     color: isSelected
-                        ? AppColors.primaryColor
-                        : colorScheme.onSurfaceVariant,
+                        ? AuthScreenColors.orange
+                        : AuthScreenColors.textMuted,
                   ),
                 ),
               Expanded(
@@ -75,8 +79,10 @@ class AddressListTile extends StatelessWidget {
                         Expanded(
                           child: Text(
                             address.title,
-                            style: theme.textTheme.titleMedium?.copyWith(
+                            style: const TextStyle(
                               fontWeight: FontWeight.w600,
+                              color: AuthScreenColors.textPrimary,
+                              fontSize: 16,
                             ),
                           ),
                         ),
@@ -87,15 +93,16 @@ class AddressListTile extends StatelessWidget {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: AppColors.primaryColor.withValues(
-                                alpha: 0.12,
+                              color: AuthScreenColors.orange.withValues(
+                                alpha: 0.15,
                               ),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
                               l10n.addressesDefaultBadge,
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: AppColors.primaryColor,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: AuthScreenColors.orange,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -105,13 +112,23 @@ class AddressListTile extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       address.displayText,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
+                      style: const TextStyle(
+                        color: AuthScreenColors.textSecondary,
+                        fontSize: 13,
                       ),
                     ),
                     const SizedBox(height: 8),
                     Chip(
-                      label: Text(_typeLabel(context)),
+                      label: Text(
+                        _typeLabel(context),
+                        style: const TextStyle(
+                          color: AuthScreenColors.textPrimary,
+                          fontSize: 12,
+                        ),
+                      ),
+                      backgroundColor:
+                          AuthScreenColors.orange.withValues(alpha: 0.12),
+                      side: BorderSide.none,
                       visualDensity: VisualDensity.compact,
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
@@ -120,6 +137,11 @@ class AddressListTile extends StatelessWidget {
               ),
               if (!isSelectionMode)
                 PopupMenuButton<String>(
+                  color: AuthScreenColors.surface,
+                  icon: const Icon(
+                    Icons.more_vert,
+                    color: AuthScreenColors.textMuted,
+                  ),
                   onSelected: (value) {
                     switch (value) {
                       case 'default':

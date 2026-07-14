@@ -1,24 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
+import 'package:hudhud_delivery/features/settings/presentation/widgets/profile_dark_page.dart';
 
 class TermsConditionsScreen extends StatelessWidget {
   const TermsConditionsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: const Text('Terms & Conditions'),
-        backgroundColor: colorScheme.surface,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: const SingleChildScrollView(
+    return const ProfileDarkPage(
+      title: 'Terms & Conditions',
+      body: SingleChildScrollView(
         padding: EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,41 +62,34 @@ class _ClauseSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final borderColor =
-        isDark ? const Color(0xFF2A2A2A) : const Color(0xFFEEEEEE);
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppColors.spaceMD),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(AppColors.radiusLG),
-        border: Border.all(color: borderColor),
+        color: AuthScreenColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AuthScreenColors.surfaceBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Clause $clauseNumber',
-            style: theme.textTheme.titleSmall?.copyWith(
+            style: const TextStyle(
               fontWeight: FontWeight.w700,
-              color: AppColors.primaryColor,
+              color: AuthScreenColors.orange,
             ),
           ),
           const SizedBox(height: 12),
           Text(
             content,
-            style: theme.textTheme.bodyMedium?.copyWith(height: 1.6),
+            style: const TextStyle(
+              height: 1.6,
+              color: AuthScreenColors.textMuted,
+            ),
           ),
         ],
       ),
     );
   }
 }
-
-
-
-
-
-

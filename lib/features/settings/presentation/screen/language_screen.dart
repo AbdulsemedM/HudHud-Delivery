@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/controllers/locale_controller.dart';
-import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
+import 'package:hudhud_delivery/features/settings/presentation/widgets/profile_dark_page.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
@@ -11,7 +12,6 @@ class LanguageScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final controller = context.watch<LocaleController>();
-    final theme = Theme.of(context);
 
     Widget tile({
       required String label,
@@ -22,14 +22,12 @@ class LanguageScreen extends StatelessWidget {
       return Container(
         margin: const EdgeInsets.only(bottom: 8),
         decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-          borderRadius: BorderRadius.circular(AppColors.radiusLG),
+          color: AuthScreenColors.surface,
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected
-                ? AppColors.primaryColor
-                : (theme.brightness == Brightness.dark
-                    ? const Color(0xFF2A2A2A)
-                    : const Color(0xFFEEEEEE)),
+                ? AuthScreenColors.orange
+                : AuthScreenColors.surfaceBorder,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -37,30 +35,30 @@ class LanguageScreen extends StatelessWidget {
           onTap: () async {
             await controller.setLocale(Locale(code));
           },
-          title: Text(label, style: theme.textTheme.titleSmall),
+          title: Text(
+            label,
+            style: const TextStyle(color: AuthScreenColors.textPrimary),
+          ),
           subtitle: scriptLabel != null
-              ? Text(scriptLabel, style: theme.textTheme.bodySmall)
+              ? Text(
+                  scriptLabel,
+                  style: const TextStyle(color: AuthScreenColors.textSecondary),
+                )
               : null,
           trailing: isSelected
-              ? const Icon(Icons.check_circle, color: AppColors.primaryColor)
-              : Icon(
+              ? const Icon(Icons.check_circle, color: AuthScreenColors.orange)
+              : const Icon(
                   Icons.circle_outlined,
-                  color: theme.colorScheme.onSurfaceVariant,
+                  color: AuthScreenColors.textMuted,
                 ),
         ),
       );
     }
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: Text(l10n.languageTitle),
-        backgroundColor: theme.colorScheme.surface,
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-      ),
+    return ProfileDarkPage(
+      title: l10n.languageTitle,
       body: ListView(
-        padding: const EdgeInsets.all(AppColors.spaceMD),
+        padding: const EdgeInsets.all(16),
         children: [
           tile(label: l10n.languageEnglish, code: LocaleController.langEnglish),
           tile(label: l10n.languageAmharic, code: LocaleController.langAmharic),

@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
-import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/addresses/addresses_bloc_provider.dart';
 import 'package:hudhud_delivery/features/addresses/bloc/addresses_bloc.dart';
 import 'package:hudhud_delivery/features/addresses/data/addresses_data_provider.dart';
@@ -12,6 +11,8 @@ import 'package:hudhud_delivery/features/addresses/presentation/screens/address_
 import 'package:hudhud_delivery/features/addresses/presentation/screens/address_map_picker_screen.dart';
 import 'package:hudhud_delivery/features/addresses/presentation/widgets/address_list_tile.dart';
 import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
+import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
+import 'package:hudhud_delivery/features/settings/presentation/widgets/profile_dark_page.dart';
 
 class AddressesListScreen extends StatefulWidget {
   const AddressesListScreen({super.key});
@@ -41,53 +42,63 @@ class _AddressesListScreenState extends State<AddressesListScreen> {
     final l10n = context.l10n;
     showModalBottomSheet<void>(
       context: context,
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.map_outlined),
-              title: Text(l10n.addressesAddFromMap),
-              onTap: () async {
-                Navigator.pop(ctx);
-                final mapResult = await Navigator.push<Map<String, dynamic>>(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const AddressMapPickerScreen(),
-                  ),
-                );
-                if (mapResult == null || !context.mounted) return;
-                await Navigator.push<bool>(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => BlocProvider.value(
-                      value: context.read<AddressesBloc>(),
-                      child: AddressFormScreen(
-                        mapPrefill: mapResult,
-                        fromMap: true,
+      backgroundColor: AuthScreenColors.surface,
+      builder: (ctx) => Theme(
+        data: AuthScreenColors.darkTheme(Theme.of(context)),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(
+                  Icons.map_outlined,
+                  color: AuthScreenColors.orange,
+                ),
+                title: Text(l10n.addressesAddFromMap),
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  final mapResult = await Navigator.push<Map<String, dynamic>>(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const AddressMapPickerScreen(),
+                    ),
+                  );
+                  if (mapResult == null || !context.mounted) return;
+                  await Navigator.push<bool>(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => BlocProvider.value(
+                        value: context.read<AddressesBloc>(),
+                        child: AddressFormScreen(
+                          mapPrefill: mapResult,
+                          fromMap: true,
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.edit_outlined),
-              title: Text(l10n.addressesAddManual),
-              onTap: () async {
-                Navigator.pop(ctx);
-                await Navigator.push<bool>(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => BlocProvider.value(
-                      value: context.read<AddressesBloc>(),
-                      child: const AddressFormScreen(),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(
+                  Icons.edit_outlined,
+                  color: AuthScreenColors.orange,
+                ),
+                title: Text(l10n.addressesAddManual),
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  await Navigator.push<bool>(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => BlocProvider.value(
+                        value: context.read<AddressesBloc>(),
+                        child: const AddressFormScreen(),
+                      ),
                     ),
-                  ),
-                );
-              },
-            ),
-          ],
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -173,15 +184,17 @@ class _AddressesListScreenState extends State<AddressesListScreen> {
     final l10n = context.l10n;
 
     if (_isLoggedIn == null) {
-      return Scaffold(
-        appBar: AppBar(title: Text(l10n.addressesTitle)),
-        body: const Center(child: CircularProgressIndicator()),
+      return ProfileDarkPage(
+        title: l10n.addressesTitle,
+        body: const Center(
+          child: CircularProgressIndicator(color: AuthScreenColors.orange),
+        ),
       );
     }
 
     if (_isLoggedIn == false) {
-      return Scaffold(
-        appBar: AppBar(title: Text(l10n.addressesTitle)),
+      return ProfileDarkPage(
+        title: l10n.addressesTitle,
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -190,16 +203,25 @@ class _AddressesListScreenState extends State<AddressesListScreen> {
               children: [
                 Text(
                   l10n.addressesSignInTitle,
-                  style: Theme.of(context).textTheme.titleLarge,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: AuthScreenColors.textPrimary,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
                 Text(
                   l10n.addressesSignInSubtitle,
                   textAlign: TextAlign.center,
+                  style: const TextStyle(color: AuthScreenColors.textSecondary),
                 ),
                 const SizedBox(height: 24),
                 FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AuthScreenColors.orange,
+                    foregroundColor: Colors.black,
+                  ),
                   onPressed: () {
                     Navigator.pushReplacement(
                       context,
@@ -251,41 +273,39 @@ class _AddressesListBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.addressesTitle),
-        actions: [
-          BlocBuilder<AddressesBloc, AddressesState>(
-            builder: (context, state) {
-              if (state is! AddressesLoaded) return const SizedBox.shrink();
-              if (state.isSelectionMode) {
-                return Row(
-                  children: [
-                    if (state.selectedIds.isNotEmpty)
-                      IconButton(
-                        icon: const Icon(Icons.delete_outline),
-                        onPressed: () => onConfirmBulkDelete(state),
-                      ),
+    return ProfileDarkPage(
+      title: l10n.addressesTitle,
+      actions: [
+        BlocBuilder<AddressesBloc, AddressesState>(
+          builder: (context, state) {
+            if (state is! AddressesLoaded) return const SizedBox.shrink();
+            if (state.isSelectionMode) {
+              return Row(
+                children: [
+                  if (state.selectedIds.isNotEmpty)
                     IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => context
-                          .read<AddressesBloc>()
-                          .add(const ExitSelectionModeEvent()),
+                      icon: const Icon(Icons.delete_outline),
+                      onPressed: () => onConfirmBulkDelete(state),
                     ),
-                  ],
-                );
-              }
-              return IconButton(
-                icon: const Icon(Icons.checklist),
-                tooltip: l10n.addressesSelect,
-                onPressed: () => context
-                    .read<AddressesBloc>()
-                    .add(const EnterSelectionModeEvent()),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => context
+                        .read<AddressesBloc>()
+                        .add(const ExitSelectionModeEvent()),
+                  ),
+                ],
               );
-            },
-          ),
-        ],
-      ),
+            }
+            return IconButton(
+              icon: const Icon(Icons.checklist),
+              tooltip: l10n.addressesSelect,
+              onPressed: () => context
+                  .read<AddressesBloc>()
+                  .add(const EnterSelectionModeEvent()),
+            );
+          },
+        ),
+      ],
       floatingActionButton: BlocBuilder<AddressesBloc, AddressesState>(
         builder: (context, state) {
           if (state is AddressesLoaded && state.isSelectionMode) {
@@ -293,7 +313,8 @@ class _AddressesListBody extends StatelessWidget {
           }
           return FloatingActionButton.extended(
             onPressed: onAdd,
-            backgroundColor: AppColors.primaryColor,
+            backgroundColor: AuthScreenColors.orange,
+            foregroundColor: Colors.black,
             icon: const Icon(Icons.add),
             label: Text(l10n.addressesAdd),
           );
@@ -302,18 +323,31 @@ class _AddressesListBody extends StatelessWidget {
       body: BlocBuilder<AddressesBloc, AddressesState>(
         builder: (context, state) {
           if (state is AddressesLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+              child: CircularProgressIndicator(color: AuthScreenColors.orange),
+            );
           }
           if (state is AddressesError) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(l10n.addressesLoadError),
+                  Text(
+                    l10n.addressesLoadError,
+                    style: const TextStyle(color: AuthScreenColors.textPrimary),
+                  ),
                   const SizedBox(height: 8),
-                  Text(state.message, textAlign: TextAlign.center),
+                  Text(
+                    state.message,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: AuthScreenColors.textSecondary),
+                  ),
                   const SizedBox(height: 16),
                   FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AuthScreenColors.orange,
+                      foregroundColor: Colors.black,
+                    ),
                     onPressed: () => context
                         .read<AddressesBloc>()
                         .add(const LoadAddressesEvent()),
@@ -331,20 +365,27 @@ class _AddressesListBody extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.location_off_outlined,
                         size: 64,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        color: AuthScreenColors.textMuted,
                       ),
                       const SizedBox(height: 16),
                       Text(
                         l10n.addressesEmptyTitle,
-                        style: Theme.of(context).textTheme.titleLarge,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          color: AuthScreenColors.textPrimary,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         l10n.addressesEmptySubtitle,
                         textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: AuthScreenColors.textSecondary,
+                        ),
                       ),
                     ],
                   ),
@@ -352,6 +393,7 @@ class _AddressesListBody extends StatelessWidget {
               );
             }
             return RefreshIndicator(
+              color: AuthScreenColors.orange,
               onRefresh: () async {
                 context.read<AddressesBloc>().add(const RefreshAddressesEvent());
                 await context.read<AddressesBloc>().stream.firstWhere(
@@ -371,12 +413,17 @@ class _AddressesListBody extends StatelessWidget {
                   return false;
                 },
                 child: ListView.builder(
-                  itemCount: state.addresses.length + (state.isLoadingMore ? 1 : 0),
+                  itemCount:
+                      state.addresses.length + (state.isLoadingMore ? 1 : 0),
                   itemBuilder: (context, index) {
                     if (index >= state.addresses.length) {
                       return const Padding(
                         padding: EdgeInsets.all(16),
-                        child: Center(child: CircularProgressIndicator()),
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: AuthScreenColors.orange,
+                          ),
+                        ),
                       );
                     }
                     final address = state.addresses[index];

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/core/utils/phone_util.dart';
 import 'package:hudhud_delivery/core/widgets/phone_number_field.dart';
+import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
+import 'package:hudhud_delivery/features/settings/presentation/widgets/profile_dark_page.dart';
 import 'package:hudhud_delivery/features/sos/bloc/sos_bloc.dart';
 import 'package:hudhud_delivery/features/sos/model/emergency_contact_model.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
@@ -87,6 +89,27 @@ class _EmergencyContactFormScreenState
     }
   }
 
+  InputDecoration _fieldDecoration(String label) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(color: AuthScreenColors.textSecondary),
+      filled: true,
+      fillColor: AuthScreenColors.surface,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: AuthScreenColors.surfaceBorder),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: AuthScreenColors.surfaceBorder),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: AuthScreenColors.orange, width: 1.5),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -106,16 +129,11 @@ class _EmergencyContactFormScreenState
           Navigator.pop(context, true);
         }
       },
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            _isEditing ? l10n.sosEditContact : l10n.sosAddContact,
-          ),
-        ),
+      child: ProfileDarkPage(
+        title: _isEditing ? l10n.sosEditContact : l10n.sosAddContact,
         body: BlocBuilder<SosBloc, SosState>(
           builder: (context, state) {
-            final isSubmitting =
-                state is SosLoaded && state.isSubmitting;
+            final isSubmitting = state is SosLoaded && state.isSubmitting;
             return Form(
               key: _formKey,
               child: ListView(
@@ -123,10 +141,8 @@ class _EmergencyContactFormScreenState
                 children: [
                   TextFormField(
                     controller: _nameController,
-                    decoration: InputDecoration(
-                      labelText: l10n.sosName,
-                      border: const OutlineInputBorder(),
-                    ),
+                    style: const TextStyle(color: AuthScreenColors.textPrimary),
+                    decoration: _fieldDecoration(l10n.sosName),
                     validator: (v) =>
                         v == null || v.trim().isEmpty ? 'Required' : null,
                   ),
@@ -148,22 +164,22 @@ class _EmergencyContactFormScreenState
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      labelText: l10n.sosEmail,
-                      border: const OutlineInputBorder(),
-                    ),
+                    style: const TextStyle(color: AuthScreenColors.textPrimary),
+                    decoration: _fieldDecoration(l10n.sosEmail),
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _relationshipController,
-                    decoration: InputDecoration(
-                      labelText: l10n.sosRelationship,
-                      border: const OutlineInputBorder(),
-                    ),
+                    style: const TextStyle(color: AuthScreenColors.textPrimary),
+                    decoration: _fieldDecoration(l10n.sosRelationship),
                   ),
                   const SizedBox(height: 8),
                   SwitchListTile(
-                    title: Text(l10n.sosPrimaryContact),
+                    title: Text(
+                      l10n.sosPrimaryContact,
+                      style: const TextStyle(color: AuthScreenColors.textPrimary),
+                    ),
+                    activeThumbColor: AuthScreenColors.orange,
                     value: _isPrimary,
                     onChanged: isSubmitting
                         ? null
@@ -172,9 +188,18 @@ class _EmergencyContactFormScreenState
                   const SizedBox(height: 24),
                   FilledButton(
                     onPressed: isSubmitting ? null : _submit,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AuthScreenColors.orange,
+                      foregroundColor: Colors.black,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
                     child: isSubmitting
                         ? Text(l10n.sosSaving)
-                        : Text(_isEditing ? l10n.sosEditContact : l10n.sosAddContact),
+                        : Text(
+                            _isEditing
+                                ? l10n.sosEditContact
+                                : l10n.sosAddContact,
+                          ),
                   ),
                 ],
               ),

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/utils/avatar_util.dart';
 import 'package:hudhud_delivery/core/widgets/user_avatar.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
+import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
+import 'package:hudhud_delivery/features/settings/presentation/widgets/profile_dark_page.dart';
 import 'package:hudhud_delivery/models/user_model.dart';
 
 class PersonalDetailsScreen extends StatefulWidget {
@@ -47,26 +48,19 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
     return DateFormat('d MMM yyyy').format(date);
   }
 
+  String get _initial {
+    final name = _user?.name?.trim() ?? '';
+    if (name.isEmpty) return '?';
+    return name[0].toUpperCase();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final textTheme = theme.textTheme;
-
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: const Text('Personal Details'),
-        backgroundColor: colorScheme.surface,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
+    return ProfileDarkPage(
+      title: 'Personal Details',
       body: _isLoading
           ? const Padding(
-              padding: EdgeInsets.all(AppColors.spaceMD),
+              padding: EdgeInsets.all(16),
               child: _PersonalDetailsShimmer(),
             )
           : SingleChildScrollView(
@@ -82,12 +76,36 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                     ),
                   ],
                   const SizedBox(height: 20),
-                  // Profile Picture
                   Stack(
                     children: [
-                      UserAvatar(
-                        radius: 50,
-                        imageUrl: getDisplayAvatarUrl(_user),
+                      Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: AuthScreenColors.lavender.withValues(
+                              alpha: 0.7,
+                            ),
+                            width: 2,
+                          ),
+                        ),
+                        child: getDisplayAvatarUrl(_user) != null
+                            ? UserAvatar(
+                                radius: 50,
+                                imageUrl: getDisplayAvatarUrl(_user),
+                                backgroundColor: AuthScreenColors.surfaceBorder,
+                              )
+                            : CircleAvatar(
+                                radius: 50,
+                                backgroundColor: AuthScreenColors.surfaceBorder,
+                                child: Text(
+                                  _initial,
+                                  style: const TextStyle(
+                                    fontSize: 36,
+                                    fontWeight: FontWeight.w700,
+                                    color: AuthScreenColors.textPrimary,
+                                  ),
+                                ),
+                              ),
                       ),
                       Positioned(
                         bottom: 0,
@@ -96,41 +114,39 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                           width: 32,
                           height: 32,
                           decoration: BoxDecoration(
-                            color: colorScheme.surface,
+                            color: AuthScreenColors.surface,
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: AppColors.primaryColor,
+                              color: AuthScreenColors.orange,
                               width: 2,
                             ),
                           ),
                           child: const Icon(
                             Icons.camera_alt,
                             size: 16,
-                            color: AppColors.primaryColor,
+                            color: AuthScreenColors.orange,
                           ),
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 16),
-                  // Name
                   Text(
                     _user?.name ?? '—',
-                    style: textTheme.titleLarge?.copyWith(
+                    style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
+                      color: AuthScreenColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 4),
-                  // Email
                   Text(
                     _user?.email ?? '—',
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
+                    style: const TextStyle(
+                      color: AuthScreenColors.textSecondary,
                     ),
                   ),
                   const SizedBox(height: 32),
-                  // Details Cards
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Column(
@@ -170,12 +186,12 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                       ],
                     ),
                   ),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
     );
   }
-
 }
 
 class _DetailCard extends StatelessWidget {
@@ -191,25 +207,23 @@ class _DetailCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(AppColors.radiusLG),
-        border: Border.all(
-          color: colorScheme.outlineVariant,
-          width: 1,
-        ),
+        color: AuthScreenColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AuthScreenColors.surfaceBorder),
       ),
       child: Row(
         children: [
-          Icon(
-            icon,
-            color: colorScheme.onSurfaceVariant,
-            size: 24,
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: AuthScreenColors.orange.withValues(alpha: 0.12),
+            ),
+            child: Icon(icon, color: AuthScreenColors.orange, size: 22),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -218,18 +232,18 @@ class _DetailCard extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12,
-                    color: colorScheme.onSurfaceVariant,
+                    color: AuthScreenColors.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   value,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
-                    color: colorScheme.onSurface,
+                    color: AuthScreenColors.textPrimary,
                   ),
                 ),
               ],
@@ -246,22 +260,18 @@ class _PersonalDetailsShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final baseColor = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0);
-    final highlightColor =
-        isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF5F5F5);
     return Column(
       children: List.generate(4, (index) {
         return Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: Shimmer.fromColors(
-            baseColor: baseColor,
-            highlightColor: highlightColor,
+            baseColor: AuthScreenColors.surface,
+            highlightColor: AuthScreenColors.surfaceBorder,
             child: Container(
               height: 72,
               decoration: BoxDecoration(
-                color: baseColor,
-                borderRadius: BorderRadius.circular(AppColors.radiusLG),
+                color: AuthScreenColors.surface,
+                borderRadius: BorderRadius.circular(16),
               ),
             ),
           ),
@@ -270,9 +280,3 @@ class _PersonalDetailsShimmer extends StatelessWidget {
     );
   }
 }
-
-
-
-
-
-
