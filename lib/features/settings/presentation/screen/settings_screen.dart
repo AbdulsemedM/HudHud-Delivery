@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+﻿import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/app/services/biometric_credential_service.dart';
@@ -9,11 +9,12 @@ import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/controllers/theme_controller.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
-import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/utils/support_launcher.dart';
 import 'package:hudhud_delivery/core/utils/avatar_util.dart';
 import 'package:hudhud_delivery/core/utils/phone_util.dart';
 import 'package:hudhud_delivery/core/widgets/user_avatar.dart';
+import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
+import 'package:flutter/services.dart';
 import 'package:hudhud_delivery/features/addresses/presentation/screens/addresses_list_screen.dart';
 import 'package:hudhud_delivery/features/sos/presentation/screens/sos_settings_screen.dart';
 import 'package:hudhud_delivery/features/chat/presentation/screens/conversations_list_screen.dart';
@@ -66,8 +67,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _useFaceBiometricIcon = false;
   final BiometricCredentialService _biometricService =
       BiometricCredentialService();
-
-  static const Color _accentIconRed = AppColors.errorColor;
 
   @override
   void initState() {
@@ -319,19 +318,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  Color _pageBackground(ThemeData theme) {
-    if (theme.brightness == Brightness.dark) {
-      return theme.scaffoldBackgroundColor;
-    }
-    return const Color(0xFFF0F2F5);
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final textTheme = theme.textTheme;
+    final baseTheme = Theme.of(context);
+    final authTheme = AuthScreenColors.darkTheme(baseTheme);
     final themeController = Provider.of<ThemeController>(context);
     final displayName = _user?.name?.trim().isNotEmpty == true
         ? _user!.name!.trim()
@@ -344,376 +335,334 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ? '—'
         : '${l10n.currencyEtb} ${_walletTotal!.toStringAsFixed(2)}';
 
-    return Scaffold(
-      backgroundColor: _pageBackground(theme),
-      body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: _loadAll,
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
-            physics: const AlwaysScrollableScrollPhysics(),
-            children: [
-              _ProfileHeaderCard(
-                displayName: displayName,
-                phone: phone,
-                user: _user,
-                accentRed: _accentIconRed,
-                onEdit: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const EditProfileScreen(),
-                    ),
-                  ).then((_) => _loadUserData());
-                },
-              ),
-              const SizedBox(height: 14),
-              Row(
+    return Theme(
+      data: authTheme,
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+          statusBarBrightness: Brightness.dark,
+        ),
+        child: Scaffold(
+          backgroundColor: AuthScreenColors.background,
+          body: SafeArea(
+            child: RefreshIndicator(
+              color: AuthScreenColors.orange,
+              backgroundColor: AuthScreenColors.surface,
+              onRefresh: _loadAll,
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
+                physics: const AlwaysScrollableScrollPhysics(),
                 children: [
-                  Expanded(
-                    child: _StatCard(
-                      icon: Icons.local_activity_outlined,
-                      iconColor: _accentIconRed,
-                      title: l10n.profileCoupons,
-                      value: '0',
-                      colorScheme: colorScheme,
-                      textTheme: textTheme,
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(l10n.profileCouponsComingSoon)),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _StatCard(
-                      icon: Icons.account_balance_wallet_outlined,
-                      iconColor: _accentIconRed,
-                      title: l10n.profileWallet,
-                      value: walletText,
-                      colorScheme: colorScheme,
-                      textTheme: textTheme,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const WalletScreen(),
-                          ),
-                        ).then((_) => _loadWalletSummary());
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 22),
-              _SectionHeading(title: l10n.settingsAccount),
-              _KlikSectionCard(
-                colorScheme: colorScheme,
-                children: [
-                  _KlikTile(
-                    icon: Icons.person_outline,
-                    iconColor: _accentIconRed,
-                    title: l10n.profileMenuProfile,
-                    colorScheme: colorScheme,
-                    textTheme: textTheme,
-                    onTap: () {
+                  _ProfileHeaderCard(
+                    displayName: displayName,
+                    phone: phone,
+                    user: _user,
+                    onEdit: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const PersonalDetailsScreen(),
+                          builder: (context) => const EditProfileScreen(),
                         ),
                       ).then((_) => _loadUserData());
                     },
                   ),
-                  _tileDivider(colorScheme),
-                  _KlikTile(
-                    icon: Icons.location_on_outlined,
-                    iconColor: _accentIconRed,
-                    title: l10n.profileMenuAddresses,
-                    colorScheme: colorScheme,
-                    textTheme: textTheme,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const AddressesListScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  _tileDivider(colorScheme),
-                  _KlikTile(
-                    icon: Icons.sos_outlined,
-                    iconColor: _accentIconRed,
-                    title: l10n.sosSettingsTitle,
-                    colorScheme: colorScheme,
-                    textTheme: textTheme,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const SosSettingsScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  _tileDivider(colorScheme),
-                  _KlikTile(
-                    icon: Icons.favorite_outline,
-                    iconColor: _accentIconRed,
-                    title: l10n.profileMenuFavorites,
-                    colorScheme: colorScheme,
-                    textTheme: textTheme,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const WishlistScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  _tileDivider(colorScheme),
-                  _KlikTile(
-                    icon: Icons.volunteer_activism_outlined,
-                    iconColor: _accentIconRed,
-                    title: l10n.tipsHistoryTitle,
-                    colorScheme: colorScheme,
-                    textTheme: textTheme,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const TipsHistoryScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  _tileDivider(colorScheme),
-                  _KlikTile(
-                    icon: Icons.chat_bubble_outline,
-                    iconColor: _accentIconRed,
-                    title: l10n.profileMenuMessages,
-                    colorScheme: colorScheme,
-                    textTheme: textTheme,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              const ConversationsListScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  _tileDivider(colorScheme),
-                  if (!kIsWeb)
-                    SwitchListTile(
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 4,
-                      ),
-                      secondary: Icon(
-                        _useFaceBiometricIcon
-                            ? Icons.face_outlined
-                            : Icons.fingerprint_outlined,
-                        color: _accentIconRed,
-                      ),
-                      title: Text(
-                        l10n.settingsBiometricLogin,
-                        style: textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: colorScheme.onSurface,
-                        ),
-                      ),
-                      subtitle: Text(
-                        l10n.settingsBiometricLoginSubtitle,
-                        style: textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      value: _biometricEnabled,
-                      onChanged: _biometricAvailable && !_biometricBusy
-                          ? _onBiometricLoginChanged
-                          : null,
-                    ),
-                  if (!kIsWeb) _tileDivider(colorScheme),
-                  _KlikTile(
-                    icon: Icons.manage_accounts_outlined,
-                    iconColor: _accentIconRed,
-                    title: l10n.profileMenuAccountSettings,
-                    colorScheme: colorScheme,
-                    textTheme: textTheme,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => _AccountSettingsHubPage(
-                            themeModeLabel:
-                                _themeModeLabel(l10n, themeController),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              _SectionHeading(title: l10n.settingsPreferences),
-              _KlikSectionCard(
-                colorScheme: colorScheme,
-                children: [
-                  _KlikTile(
-                    icon: Icons.settings_outlined,
-                    iconColor: _accentIconRed,
-                    title: l10n.settingsGeneralPreferences,
-                    colorScheme: colorScheme,
-                    textTheme: textTheme,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const AppearanceScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  _tileDivider(colorScheme),
-                  _KlikTile(
-                    icon: Icons.pedal_bike_outlined,
-                    iconColor: _accentIconRed,
-                    title: l10n.settingsDeliveryPreferences,
-                    colorScheme: colorScheme,
-                    textTheme: textTheme,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => _DeliveryPreferencesPage(
-                            smsEnabled: _smsNotificationsEnabled,
-                            onSmsChanged: (v) {
-                              setState(() => _smsNotificationsEnabled = v);
-                            },
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              _SectionHeading(title: l10n.settingsAppSettings),
-              _KlikSectionCard(
-                colorScheme: colorScheme,
-                children: [
-                  _KlikTile(
-                    icon: Icons.notifications_outlined,
-                    iconColor: _accentIconRed,
-                    title: l10n.settingsNotifications,
-                    colorScheme: colorScheme,
-                    textTheme: textTheme,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => BlocProvider(
-                            create: (_) => createNotificationsBloc(),
-                            child: const NotificationsScreen(),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  _tileDivider(colorScheme),
-                  _KlikTile(
-                    icon: Icons.language_outlined,
-                    iconColor: _accentIconRed,
-                    title: l10n.settingsLanguage,
-                    colorScheme: colorScheme,
-                    textTheme: textTheme,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const LanguageScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  _tileDivider(colorScheme),
-                  _KlikTile(
-                    icon: Icons.support_agent_outlined,
-                    iconColor: _accentIconRed,
-                    title: l10n.settingsSupport,
-                    colorScheme: colorScheme,
-                    textTheme: textTheme,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              const SupportChatStartScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  _tileDivider(colorScheme),
-                  _KlikTile(
-                    icon: Icons.email_outlined,
-                    iconColor: _accentIconRed,
-                    title: l10n.settingsContactEmail,
-                    colorScheme: colorScheme,
-                    textTheme: textTheme,
-                    onTap: () async {
-                      final ok = await launchSupportEmail();
-                      if (context.mounted && !ok) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(l10n.actionTryAgain)),
-                        );
-                      }
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: _accentIconRed,
-                    side: BorderSide(
-                      color: colorScheme.outlineVariant.withValues(alpha: 0.6),
-                    ),
-                    shape: const StadiumBorder(),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    backgroundColor: colorScheme.surface,
-                  ),
-                  onPressed: () => _handleLogout(context),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  const SizedBox(height: 14),
+                  Row(
                     children: [
-                      const Icon(Icons.logout, color: _accentIconRed, size: 22),
-                      const SizedBox(width: 10),
-                      Text(
-                        l10n.actionLogOut,
-                        style: textTheme.titleSmall?.copyWith(
-                          color: _accentIconRed,
-                          fontWeight: FontWeight.w600,
+                      Expanded(
+                        child: _ProfileStatCard(
+                          icon: Icons.local_activity_outlined,
+                          iconColor: AuthScreenColors.orange,
+                          title: l10n.profileCoupons,
+                          value: '0',
+                          onTap: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(l10n.profileCouponsComingSoon),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _ProfileStatCard(
+                          icon: Icons.account_balance_wallet_outlined,
+                          iconColor: AuthScreenColors.lavender,
+                          title: l10n.profileWallet,
+                          value: walletText,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const WalletScreen(),
+                              ),
+                            ).then((_) => _loadWalletSummary());
+                          },
                         ),
                       ),
                     ],
                   ),
-                ),
+                  const SizedBox(height: 22),
+                  _ProfileSectionLabel(title: l10n.settingsAccount),
+                  _ProfileGroupCard(
+                    children: [
+                      _ProfileMenuTile(
+                        icon: Icons.person_outline,
+                        title: l10n.profileMenuProfile,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const PersonalDetailsScreen(),
+                            ),
+                          ).then((_) => _loadUserData());
+                        },
+                      ),
+                      const _ProfileTileDivider(),
+                      _ProfileMenuTile(
+                        icon: Icons.location_on_outlined,
+                        title: l10n.profileMenuAddresses,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const AddressesListScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      const _ProfileTileDivider(),
+                      _ProfileMenuTile(
+                        icon: Icons.shield_outlined,
+                        title: l10n.sosSettingsTitle,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const SosSettingsScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      const _ProfileTileDivider(),
+                      _ProfileMenuTile(
+                        icon: Icons.favorite_outline,
+                        title: l10n.profileMenuFavorites,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const WishlistScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      const _ProfileTileDivider(),
+                      _ProfileMenuTile(
+                        icon: Icons.volunteer_activism_outlined,
+                        title: l10n.tipsHistoryTitle,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const TipsHistoryScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      const _ProfileTileDivider(),
+                      _ProfileMenuTile(
+                        icon: Icons.chat_bubble_outline,
+                        title: l10n.profileMenuMessages,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const ConversationsListScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  _ProfileGroupCard(
+                    children: [
+                      if (!kIsWeb) ...[
+                        _ProfileBiometricTile(
+                          useFaceIcon: _useFaceBiometricIcon,
+                          enabled: _biometricEnabled,
+                          available: _biometricAvailable && !_biometricBusy,
+                          onChanged: _onBiometricLoginChanged,
+                        ),
+                        const _ProfileTileDivider(),
+                      ],
+                      _ProfileMenuTile(
+                        icon: Icons.tune_rounded,
+                        title: l10n.profileMenuAccountSettings,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => _AccountSettingsHubPage(
+                                themeModeLabel:
+                                    _themeModeLabel(l10n, themeController),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  _ProfileSectionLabel(title: l10n.settingsPreferences),
+                  _ProfileGroupCard(
+                    children: [
+                      _ProfileMenuTile(
+                        icon: Icons.settings_outlined,
+                        title: l10n.settingsGeneralPreferences,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AppearanceScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      const _ProfileTileDivider(),
+                      _ProfileMenuTile(
+                        icon: Icons.moped_outlined,
+                        title: l10n.settingsDeliveryPreferences,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => _DeliveryPreferencesPage(
+                                smsEnabled: _smsNotificationsEnabled,
+                                onSmsChanged: (v) {
+                                  setState(() => _smsNotificationsEnabled = v);
+                                },
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  _ProfileSectionLabel(title: l10n.settingsAppSettings),
+                  _ProfileGroupCard(
+                    children: [
+                      _ProfileMenuTile(
+                        icon: Icons.notifications_outlined,
+                        title: l10n.settingsNotifications,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => BlocProvider(
+                                create: (_) => createNotificationsBloc(),
+                                child: const NotificationsScreen(),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      const _ProfileTileDivider(),
+                      _ProfileMenuTile(
+                        icon: Icons.language_outlined,
+                        title: l10n.settingsLanguage,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const LanguageScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      const _ProfileTileDivider(),
+                      _ProfileMenuTile(
+                        icon: Icons.headset_mic_outlined,
+                        title: l10n.settingsSupport,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const SupportChatStartScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      const _ProfileTileDivider(),
+                      _ProfileMenuTile(
+                        icon: Icons.email_outlined,
+                        title: l10n.settingsContactEmail,
+                        onTap: () async {
+                          final ok = await launchSupportEmail();
+                          if (context.mounted && !ok) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(l10n.actionTryAgain)),
+                            );
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AuthScreenColors.orange,
+                        side: const BorderSide(
+                          color: AuthScreenColors.orange,
+                          width: 1.2,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        backgroundColor: AuthScreenColors.surface,
+                      ),
+                      onPressed: () => _handleLogout(context),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.logout_rounded,
+                            color: AuthScreenColors.orange,
+                            size: 22,
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            l10n.actionLogOut,
+                            style: const TextStyle(
+                              color: AuthScreenColors.orange,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  _LegalFooter(
+                    packageInfo: _packageInfo,
+                    l10n: l10n,
+                  ),
+                ],
               ),
-              const SizedBox(height: 20),
-              _LegalFooter(
-                colorScheme: colorScheme,
-                textTheme: textTheme,
-                packageInfo: _packageInfo,
-                l10n: l10n,
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -721,64 +670,40 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 }
 
-Widget _tileDivider(ColorScheme colorScheme) {
-  return Divider(
-    height: 1,
-    thickness: 1,
-    indent: 52,
-    color: colorScheme.outlineVariant.withValues(alpha: 0.35),
-  );
-}
-
-class _SectionHeading extends StatelessWidget {
+class _ProfileSectionLabel extends StatelessWidget {
   final String title;
 
-  const _SectionHeading({required this.title});
+  const _ProfileSectionLabel({required this.title});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(left: 4, bottom: 10),
       child: Text(
-        title,
-        style: theme.textTheme.titleSmall?.copyWith(
-          fontWeight: FontWeight.w700,
-          color: theme.colorScheme.onSurface,
+        title.toUpperCase(),
+        style: const TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.8,
+          color: AuthScreenColors.textMuted,
         ),
       ),
     );
   }
 }
 
-class _KlikSectionCard extends StatelessWidget {
-  final ColorScheme colorScheme;
+class _ProfileGroupCard extends StatelessWidget {
   final List<Widget> children;
 
-  const _KlikSectionCard({
-    required this.colorScheme,
-    required this.children,
-  });
+  const _ProfileGroupCard({required this.children});
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: isDark
-            ? null
-            : [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-        border: Border.all(
-          color: colorScheme.outlineVariant.withValues(alpha: isDark ? 0.35 : 0.2),
-        ),
+        color: AuthScreenColors.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AuthScreenColors.surfaceBorder),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(children: children),
@@ -786,21 +711,30 @@ class _KlikSectionCard extends StatelessWidget {
   }
 }
 
-class _KlikTile extends StatelessWidget {
+class _ProfileTileDivider extends StatelessWidget {
+  const _ProfileTileDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Divider(
+      height: 1,
+      thickness: 1,
+      indent: 60,
+      endIndent: 16,
+      color: AuthScreenColors.surfaceBorder,
+    );
+  }
+}
+
+class _ProfileMenuTile extends StatelessWidget {
   final IconData icon;
-  final Color iconColor;
   final String title;
-  final ColorScheme colorScheme;
-  final TextTheme textTheme;
   final VoidCallback onTap;
   final Widget? trailing;
 
-  const _KlikTile({
+  const _ProfileMenuTile({
     required this.icon,
-    required this.iconColor,
     required this.title,
-    required this.colorScheme,
-    required this.textTheme,
     required this.onTap,
     this.trailing,
   });
@@ -819,21 +753,19 @@ class _KlikTile extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.65),
-                  border: Border.all(
-                    color: colorScheme.outlineVariant.withValues(alpha: 0.4),
-                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  color: AuthScreenColors.orange.withValues(alpha: 0.12),
                 ),
-                child: Icon(icon, color: iconColor, size: 22),
+                child: Icon(icon, color: AuthScreenColors.orange, size: 22),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   title,
-                  style: textTheme.titleSmall?.copyWith(
+                  style: const TextStyle(
                     fontWeight: FontWeight.w500,
-                    color: colorScheme.onSurface,
+                    fontSize: 15,
+                    color: AuthScreenColors.textPrimary,
                   ),
                 ),
               ),
@@ -841,9 +773,9 @@ class _KlikTile extends StatelessWidget {
                 trailing!,
                 const SizedBox(width: 4),
               ],
-              Icon(
-                Icons.chevron_right,
-                color: colorScheme.onSurfaceVariant,
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: AuthScreenColors.textSecondary,
                 size: 22,
               ),
             ],
@@ -854,28 +786,136 @@ class _KlikTile extends StatelessWidget {
   }
 }
 
-class _StatCard extends StatelessWidget {
+class _ProfileBiometricTile extends StatelessWidget {
+  final bool useFaceIcon;
+  final bool enabled;
+  final bool available;
+  final ValueChanged<bool> onChanged;
+
+  const _ProfileBiometricTile({
+    required this.useFaceIcon,
+    required this.enabled,
+    required this.available,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: AuthScreenColors.orange.withValues(alpha: 0.12),
+            ),
+            child: Icon(
+              useFaceIcon ? Icons.face_outlined : Icons.fingerprint_outlined,
+              color: AuthScreenColors.orange,
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.settingsBiometricLogin,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                    color: AuthScreenColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  l10n.settingsBiometricLoginSubtitle,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    height: 1.35,
+                    color: AuthScreenColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          _ProfileGradientSwitch(
+            value: enabled,
+            onChanged: available ? onChanged : null,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProfileGradientSwitch extends StatelessWidget {
+  final bool value;
+  final ValueChanged<bool>? onChanged;
+
+  const _ProfileGradientSwitch({
+    required this.value,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onChanged == null ? null : () => onChanged!(!value),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        width: 52,
+        height: 30,
+        padding: const EdgeInsets.all(3),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: value
+              ? const LinearGradient(
+                  colors: AuthScreenColors.signInGradient,
+                )
+              : null,
+          color: value ? null : AuthScreenColors.surfaceBorder,
+        ),
+        child: Align(
+          alignment: value ? Alignment.centerRight : Alignment.centerLeft,
+          child: Container(
+            width: 24,
+            height: 24,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ProfileStatCard extends StatelessWidget {
   final IconData icon;
   final Color iconColor;
   final String title;
   final String value;
-  final ColorScheme colorScheme;
-  final TextTheme textTheme;
   final VoidCallback onTap;
 
-  const _StatCard({
+  const _ProfileStatCard({
     required this.icon,
     required this.iconColor,
     required this.title,
     required this.value,
-    required this.colorScheme,
-    required this.textTheme,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -884,50 +924,49 @@ class _StatCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.fromLTRB(14, 14, 12, 14),
           decoration: BoxDecoration(
-            color: colorScheme.surface,
+            color: AuthScreenColors.surface,
             borderRadius: BorderRadius.circular(18),
-            boxShadow: isDark
-                ? null
-                : [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.04),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-            border: Border.all(
-              color: colorScheme.outlineVariant.withValues(alpha: isDark ? 0.35 : 0.2),
-            ),
+            border: Border.all(color: AuthScreenColors.surfaceBorder),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  Icon(icon, color: iconColor, size: 22),
-                  const SizedBox(width: 6),
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: iconColor.withValues(alpha: 0.15),
+                    ),
+                    child: Icon(icon, color: iconColor, size: 18),
+                  ),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       title,
-                      style: textTheme.labelLarge?.copyWith(
+                      style: const TextStyle(
                         fontWeight: FontWeight.w600,
-                        color: colorScheme.onSurface,
+                        fontSize: 13,
+                        color: AuthScreenColors.textPrimary,
                       ),
                     ),
                   ),
-                  Icon(
-                    Icons.chevron_right,
+                  const Icon(
+                    Icons.chevron_right_rounded,
                     size: 18,
-                    color: colorScheme.onSurfaceVariant,
+                    color: AuthScreenColors.textSecondary,
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
               Text(
                 value,
-                style: textTheme.headlineSmall?.copyWith(
+                style: const TextStyle(
                   fontWeight: FontWeight.w700,
-                  color: colorScheme.onSurface,
+                  fontSize: 22,
+                  color: AuthScreenColors.textPrimary,
                 ),
               ),
             ],
@@ -942,49 +981,37 @@ class _ProfileHeaderCard extends StatelessWidget {
   final String displayName;
   final String phone;
   final UserModel? user;
-  final Color accentRed;
   final VoidCallback onEdit;
 
   const _ProfileHeaderCard({
     required this.displayName,
     required this.phone,
     required this.user,
-    required this.accentRed,
     required this.onEdit,
   });
 
+  String get _initial {
+    final name = displayName.trim();
+    if (name.isEmpty || name == '—') return '?';
+    return name[0].toUpperCase();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final textTheme = theme.textTheme;
     final l10n = context.l10n;
-    final isDark = theme.brightness == Brightness.dark;
-
     final avatarUrl = getDisplayAvatarUrl(user);
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
+        color: AuthScreenColors.surface,
         borderRadius: BorderRadius.circular(22),
-        boxShadow: isDark
-            ? null
-            : [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 12,
-                  offset: const Offset(0, 3),
-                ),
-              ],
-        border: Border.all(
-          color: colorScheme.outlineVariant.withValues(alpha: isDark ? 0.35 : 0.2),
-        ),
+        border: Border.all(color: AuthScreenColors.surfaceBorder),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildAvatar(avatarUrl),
+          _ProfileAvatar(imageUrl: avatarUrl, initial: _initial),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -992,44 +1019,45 @@ class _ProfileHeaderCard extends StatelessWidget {
               children: [
                 Text(
                   displayName,
-                  style: textTheme.titleMedium?.copyWith(
+                  style: const TextStyle(
                     fontWeight: FontWeight.w700,
-                    color: colorScheme.onSurface,
+                    fontSize: 18,
+                    color: AuthScreenColors.textPrimary,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Flexible(
                       child: Text(
                         phone,
-                        style: textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: AuthScreenColors.textSecondary,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     const SizedBox(width: 8),
-                    TextButton(
+                    OutlinedButton.icon(
                       onPressed: onEdit,
-                      style: TextButton.styleFrom(
-                        foregroundColor: colorScheme.onSurfaceVariant,
+                      icon: const Icon(Icons.edit_outlined, size: 14),
+                      label: Text(l10n.profileEdit),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AuthScreenColors.orange,
+                        side: const BorderSide(color: AuthScreenColors.orange),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 10,
                           vertical: 4,
                         ),
                         minimumSize: Size.zero,
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        shape: StadiumBorder(
-                          side: BorderSide(
-                            color: colorScheme.outlineVariant,
-                          ),
+                        visualDensity: VisualDensity.compact,
+                        shape: const StadiumBorder(),
+                        textStyle: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
                         ),
-                      ),
-                      child: Text(
-                        l10n.profileEdit,
-                        style: textTheme.labelLarge,
                       ),
                     ),
                   ],
@@ -1038,22 +1066,53 @@ class _ProfileHeaderCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 6),
-          _LoyaltyRibbon(),
+          const _LoyaltyRibbon(),
         ],
       ),
     );
   }
+}
 
-  Widget _buildAvatar(String? avatarUrl) {
+class _ProfileAvatar extends StatelessWidget {
+  final String? imageUrl;
+  final String initial;
+
+  const _ProfileAvatar({
+    required this.imageUrl,
+    required this.initial,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
+      width: 64,
+      height: 64,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: accentRed, width: 2),
+        border: Border.all(
+          color: AuthScreenColors.lavender.withValues(alpha: 0.7),
+          width: 2,
+        ),
       ),
-      child: UserAvatar(
-        radius: 32,
-        imageUrl: avatarUrl,
-        backgroundColor: accentRed,
+      child: ClipOval(
+        child: imageUrl != null && imageUrl!.isNotEmpty
+            ? UserAvatar(
+                radius: 30,
+                imageUrl: imageUrl,
+                backgroundColor: AuthScreenColors.surfaceBorder,
+              )
+            : Container(
+                color: AuthScreenColors.surfaceBorder,
+                alignment: Alignment.center,
+                child: Text(
+                  initial,
+                  style: const TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w700,
+                    color: AuthScreenColors.textPrimary,
+                  ),
+                ),
+              ),
       ),
     );
   }
@@ -1061,47 +1120,45 @@ class _ProfileHeaderCard extends StatelessWidget {
 
 /// Decorative loyalty-style badge (not tied to a backend tier).
 class _LoyaltyRibbon extends StatelessWidget {
+  const _LoyaltyRibbon();
+
   @override
   Widget build(BuildContext context) {
     return Container(
       width: 44,
-      height: 52,
+      height: 44,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFFFF9800),
+            AuthScreenColors.orange,
             Color(0xFFFFC107),
           ],
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.orange.withValues(alpha: 0.25),
-            blurRadius: 6,
+            color: AuthScreenColors.orange.withValues(alpha: 0.35),
+            blurRadius: 8,
             offset: const Offset(0, 2),
           ),
         ],
       ),
       child: const Icon(
         Icons.workspace_premium_rounded,
-        color: Colors.white,
-        size: 26,
+        color: Colors.black,
+        size: 24,
       ),
     );
   }
 }
 
 class _LegalFooter extends StatelessWidget {
-  final ColorScheme colorScheme;
-  final TextTheme textTheme;
   final PackageInfo? packageInfo;
   final AppLocalizations l10n;
 
   const _LegalFooter({
-    required this.colorScheme,
-    required this.textTheme,
     required this.packageInfo,
     required this.l10n,
   });
@@ -1125,7 +1182,7 @@ class _LegalFooter extends StatelessWidget {
           children: [
             TextButton(
               style: TextButton.styleFrom(
-                foregroundColor: colorScheme.onSurfaceVariant,
+                foregroundColor: AuthScreenColors.orange,
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 minimumSize: Size.zero,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -1140,20 +1197,23 @@ class _LegalFooter extends StatelessWidget {
               },
               child: Text(
                 l10n.profileTermsOfUse,
-                style: textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
+                style: const TextStyle(
+                  color: AuthScreenColors.orange,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
-            Text(
-              '•',
-              style: textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+            const Text(
+              'â€¢',
+              style: TextStyle(
+                color: AuthScreenColors.textSecondary,
+                fontSize: 12,
               ),
             ),
             TextButton(
               style: TextButton.styleFrom(
-                foregroundColor: colorScheme.onSurfaceVariant,
+                foregroundColor: AuthScreenColors.orange,
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 minimumSize: Size.zero,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -1168,8 +1228,10 @@ class _LegalFooter extends StatelessWidget {
               },
               child: Text(
                 l10n.profilePrivacyPolicy,
-                style: textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
+                style: const TextStyle(
+                  color: AuthScreenColors.orange,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
@@ -1179,8 +1241,8 @@ class _LegalFooter extends StatelessWidget {
         Text(
           l10n.profileCopyright(year),
           textAlign: TextAlign.center,
-          style: textTheme.bodySmall?.copyWith(
-            color: colorScheme.onSurfaceVariant.withValues(alpha: 0.85),
+          style: TextStyle(
+            color: AuthScreenColors.textSecondary.withValues(alpha: 0.85),
             fontSize: 11,
           ),
         ),
@@ -1188,8 +1250,8 @@ class _LegalFooter extends StatelessWidget {
         Text(
           versionLine,
           textAlign: TextAlign.center,
-          style: textTheme.bodySmall?.copyWith(
-            color: colorScheme.onSurfaceVariant.withValues(alpha: 0.75),
+          style: TextStyle(
+            color: AuthScreenColors.textSecondary.withValues(alpha: 0.75),
             fontSize: 11,
           ),
         ),
@@ -1206,73 +1268,69 @@ class _AccountSettingsHubPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final textTheme = theme.textTheme;
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: Text(l10n.profileMenuAccountSettings),
-        elevation: 0,
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          _KlikSectionCard(
-            colorScheme: colorScheme,
-            children: [
-              _KlikTile(
-                icon: Icons.palette_outlined,
-                iconColor: AppColors.errorColor,
-                title: l10n.settingsAppearance,
-                colorScheme: colorScheme,
-                textTheme: textTheme,
-                trailing: Text(
-                  themeModeLabel,
-                  style: textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
+    return Theme(
+      data: AuthScreenColors.darkTheme(Theme.of(context)),
+      child: Scaffold(
+        backgroundColor: AuthScreenColors.background,
+        appBar: AppBar(
+          backgroundColor: AuthScreenColors.background,
+          foregroundColor: AuthScreenColors.textPrimary,
+          title: Text(l10n.profileMenuAccountSettings),
+          elevation: 0,
+        ),
+        body: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            _ProfileGroupCard(
+              children: [
+                _ProfileMenuTile(
+                  icon: Icons.palette_outlined,
+                  title: l10n.settingsAppearance,
+                  trailing: Text(
+                    themeModeLabel,
+                    style: const TextStyle(
+                      color: AuthScreenColors.textSecondary,
+                      fontSize: 12,
+                    ),
                   ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AppearanceScreen(),
+                      ),
+                    );
+                  },
                 ),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const AppearanceScreen(),
-                    ),
-                  );
-                },
-              ),
-              _tileDivider(colorScheme),
-              _KlikTile(
-                icon: Icons.lock_outline,
-                iconColor: AppColors.errorColor,
-                title: l10n.settingsChangePassword,
-                colorScheme: colorScheme,
-                textTheme: textTheme,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const ChangePasswordScreen(),
-                    ),
-                  ).then((result) {
-                    if (result is String &&
-                        result.isNotEmpty &&
-                        context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(result),
-                          backgroundColor: Colors.green,
-                        ),
-                      );
-                    }
-                  });
-                },
-              ),
-            ],
-          ),
-        ],
+                const _ProfileTileDivider(),
+                _ProfileMenuTile(
+                  icon: Icons.lock_outline,
+                  title: l10n.settingsChangePassword,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ChangePasswordScreen(),
+                      ),
+                    ).then((result) {
+                      if (result is String &&
+                          result.isNotEmpty &&
+                          context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(result),
+                            backgroundColor: Colors.green,
+                          ),
+                        );
+                      }
+                    });
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1304,45 +1362,67 @@ class _DeliveryPreferencesPageState extends State<_DeliveryPreferencesPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: Text(l10n.settingsDeliveryPreferences),
-        elevation: 0,
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              color: colorScheme.surface,
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(
-                color: colorScheme.outlineVariant.withValues(alpha: 0.35),
-              ),
+    return Theme(
+      data: AuthScreenColors.darkTheme(Theme.of(context)),
+      child: Scaffold(
+        backgroundColor: AuthScreenColors.background,
+        appBar: AppBar(
+          backgroundColor: AuthScreenColors.background,
+          foregroundColor: AuthScreenColors.textPrimary,
+          title: Text(l10n.settingsDeliveryPreferences),
+          elevation: 0,
+        ),
+        body: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            _ProfileGroupCard(
+              children: [
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          color: AuthScreenColors.orange.withValues(alpha: 0.12),
+                        ),
+                        child: const Icon(
+                          Icons.sms_outlined,
+                          color: AuthScreenColors.orange,
+                          size: 22,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          l10n.settingsSmsNotifications,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 15,
+                            color: AuthScreenColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                      _ProfileGradientSwitch(
+                        value: _sms,
+                        onChanged: (v) {
+                          setState(() => _sms = v);
+                          widget.onSmsChanged(v);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            child: SwitchListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 4,
-              ),
-              secondary: const Icon(
-                Icons.sms_outlined,
-                color: AppColors.errorColor,
-              ),
-              title: Text(l10n.settingsSmsNotifications),
-              value: _sms,
-              onChanged: (v) {
-                setState(() => _sms = v);
-                widget.onSmsChanged(v);
-              },
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
+
