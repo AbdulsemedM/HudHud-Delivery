@@ -12,6 +12,7 @@ import 'package:hudhud_delivery/features/addresses/presentation/screens/address_
 import 'package:hudhud_delivery/features/addresses/presentation/widgets/address_list_tile.dart';
 import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
+import 'package:hudhud_delivery/features/settings/presentation/widgets/auth_feedback.dart';
 import 'package:hudhud_delivery/features/settings/presentation/widgets/profile_dark_page.dart';
 
 class AddressesListScreen extends StatefulWidget {
@@ -40,65 +41,78 @@ class _AddressesListScreenState extends State<AddressesListScreen> {
 
   void _showAddOptions(BuildContext context) {
     final l10n = context.l10n;
-    showModalBottomSheet<void>(
+    AuthModal.sheet<void>(
       context: context,
-      backgroundColor: AuthScreenColors.surface,
-      builder: (ctx) => Theme(
-        data: AuthScreenColors.darkTheme(Theme.of(context)),
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(
-                  Icons.map_outlined,
-                  color: AuthScreenColors.orange,
-                ),
-                title: Text(l10n.addressesAddFromMap),
-                onTap: () async {
-                  Navigator.pop(ctx);
-                  final mapResult = await Navigator.push<Map<String, dynamic>>(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const AddressMapPickerScreen(),
-                    ),
-                  );
-                  if (mapResult == null || !context.mounted) return;
-                  await Navigator.push<bool>(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => BlocProvider.value(
-                        value: context.read<AddressesBloc>(),
-                        child: AddressFormScreen(
-                          mapPrefill: mapResult,
-                          fromMap: true,
-                        ),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AuthScreenColors.surfaceBorder,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 8),
+            ListTile(
+              leading: const Icon(
+                Icons.map_outlined,
+                color: AuthScreenColors.orange,
+              ),
+              title: Text(
+                l10n.addressesAddFromMap,
+                style: const TextStyle(color: AuthScreenColors.textPrimary),
+              ),
+              onTap: () async {
+                Navigator.pop(ctx);
+                final mapResult = await Navigator.push<Map<String, dynamic>>(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const AddressMapPickerScreen(),
+                  ),
+                );
+                if (mapResult == null || !context.mounted) return;
+                await Navigator.push<bool>(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => BlocProvider.value(
+                      value: context.read<AddressesBloc>(),
+                      child: AddressFormScreen(
+                        mapPrefill: mapResult,
+                        fromMap: true,
                       ),
                     ),
-                  );
-                },
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(
+                Icons.edit_outlined,
+                color: AuthScreenColors.orange,
               ),
-              ListTile(
-                leading: const Icon(
-                  Icons.edit_outlined,
-                  color: AuthScreenColors.orange,
-                ),
-                title: Text(l10n.addressesAddManual),
-                onTap: () async {
-                  Navigator.pop(ctx);
-                  await Navigator.push<bool>(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => BlocProvider.value(
-                        value: context.read<AddressesBloc>(),
-                        child: const AddressFormScreen(),
-                      ),
+              title: Text(
+                l10n.addressesAddManual,
+                style: const TextStyle(color: AuthScreenColors.textPrimary),
+              ),
+              onTap: () async {
+                Navigator.pop(ctx);
+                await Navigator.push<bool>(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => BlocProvider.value(
+                      value: context.read<AddressesBloc>(),
+                      child: const AddressFormScreen(),
                     ),
-                  );
-                },
-              ),
-            ],
-          ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
         ),
       ),
     );
@@ -109,22 +123,13 @@ class _AddressesListScreenState extends State<AddressesListScreen> {
     required int id,
   }) async {
     final l10n = context.l10n;
-    final ok = await showDialog<bool>(
+    final ok = await AuthModal.confirm(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.addressesDeleteTitle),
-        content: Text(l10n.addressesDeleteMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.actionCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l10n.actionDelete),
-          ),
-        ],
-      ),
+      title: l10n.addressesDeleteTitle,
+      message: l10n.addressesDeleteMessage,
+      confirmLabel: l10n.actionDelete,
+      cancelLabel: l10n.actionCancel,
+      destructive: true,
     );
     if (ok == true && context.mounted) {
       context.read<AddressesBloc>().add(DeleteAddressEvent(id));
@@ -138,11 +143,11 @@ class _AddressesListScreenState extends State<AddressesListScreen> {
         .any((a) => ids.contains(a.id) && a.isDefault);
     var force = false;
 
-    final ok = await showDialog<bool>(
+    final ok = await AuthModal.dialog<bool>(
       context: context,
       builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) => AlertDialog(
-          title: Text(l10n.addressesBulkDeleteTitle),
+        builder: (ctx, setDialogState) => AuthAlertDialog(
+          title: l10n.addressesBulkDeleteTitle,
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -152,7 +157,11 @@ class _AddressesListScreenState extends State<AddressesListScreen> {
                 const SizedBox(height: 12),
                 CheckboxListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: Text(l10n.addressesBulkDeleteForce),
+                  activeColor: AuthScreenColors.orange,
+                  title: Text(
+                    l10n.addressesBulkDeleteForce,
+                    style: const TextStyle(color: AuthScreenColors.textPrimary),
+                  ),
                   value: force,
                   onChanged: (v) => setDialogState(() => force = v ?? false),
                 ),
@@ -160,13 +169,15 @@ class _AddressesListScreenState extends State<AddressesListScreen> {
             ],
           ),
           actions: [
-            TextButton(
+            AuthDialogAction(
+              label: l10n.actionCancel,
               onPressed: () => Navigator.pop(ctx, false),
-              child: Text(l10n.actionCancel),
             ),
-            TextButton(
+            AuthDialogAction(
+              label: l10n.actionDelete,
+              filled: true,
+              destructive: true,
               onPressed: () => Navigator.pop(ctx, true),
-              child: Text(l10n.actionDelete),
             ),
           ],
         ),

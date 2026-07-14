@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../theme/app_colors.dart';
+import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
+import 'package:hudhud_delivery/features/settings/presentation/widgets/auth_feedback.dart';
 
 class SnackbarUtil {
   static void showSuccess(
@@ -8,12 +9,11 @@ class SnackbarUtil {
     Duration duration = const Duration(seconds: 3),
     SnackBarAction? action,
   }) {
-    _showSnackbar(
+    AuthSnackBar.show(
       context,
       message,
-      backgroundColor: AppColors.successColor,
-      textColor: Colors.white,
-      icon: Icons.check_circle,
+      icon: Icons.check_circle_rounded,
+      accent: const Color(0xFF4CAF50),
       duration: duration,
       action: action,
     );
@@ -25,12 +25,11 @@ class SnackbarUtil {
     Duration duration = const Duration(seconds: 4),
     SnackBarAction? action,
   }) {
-    _showSnackbar(
+    AuthSnackBar.show(
       context,
       message,
-      backgroundColor: AppColors.errorColor,
-      textColor: Colors.white,
-      icon: Icons.error,
+      icon: Icons.error_outline_rounded,
+      accent: const Color(0xFFEF5350),
       duration: duration,
       action: action,
     );
@@ -42,12 +41,11 @@ class SnackbarUtil {
     Duration duration = const Duration(seconds: 3),
     SnackBarAction? action,
   }) {
-    _showSnackbar(
+    AuthSnackBar.show(
       context,
       message,
-      backgroundColor: AppColors.warningColor,
-      textColor: Colors.white,
-      icon: Icons.warning,
+      icon: Icons.warning_amber_rounded,
+      accent: AuthScreenColors.orangeBright,
       duration: duration,
       action: action,
     );
@@ -59,12 +57,11 @@ class SnackbarUtil {
     Duration duration = const Duration(seconds: 3),
     SnackBarAction? action,
   }) {
-    _showSnackbar(
+    AuthSnackBar.show(
       context,
       message,
-      backgroundColor: AppColors.infoColor,
-      textColor: Colors.white,
-      icon: Icons.info,
+      icon: Icons.info_outline_rounded,
+      accent: AuthScreenColors.orange,
       duration: duration,
       action: action,
     );
@@ -79,122 +76,38 @@ class SnackbarUtil {
     Duration duration = const Duration(seconds: 3),
     SnackBarAction? action,
   }) {
-    _showSnackbar(
+    AuthSnackBar.show(
       context,
       message,
-      backgroundColor: backgroundColor ?? AppColors.primaryColor,
-      textColor: textColor ?? Colors.white,
-      icon: icon,
+      icon: icon ?? Icons.info_outline_rounded,
+      accent: backgroundColor ?? AuthScreenColors.orange,
       duration: duration,
       action: action,
     );
   }
 
-  static void _showSnackbar(
-    BuildContext context,
-    String message, {
-    required Color backgroundColor,
-    required Color textColor,
-    IconData? icon,
-    Duration duration = const Duration(seconds: 3),
-    SnackBarAction? action,
-  }) {
-    // Remove any existing snackbar
-    ScaffoldMessenger.of(context).removeCurrentSnackBar();
-
-    final snackBar = SnackBar(
-      content: Row(
-        children: [
-          if (icon != null) ...[
-            Icon(
-              icon,
-              color: textColor,
-              size: 20,
-            ),
-            const SizedBox(width: 12),
-          ],
-          Expanded(
-            child: Text(
-              message,
-              style: TextStyle(
-                color: textColor,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
-      ),
-      backgroundColor: backgroundColor,
-      duration: duration,
-      behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
-      margin: const EdgeInsets.all(16),
-      action: action,
-      elevation: 6,
-    );
-
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-  }
-
-  // Loading snackbar
   static void showLoading(
     BuildContext context,
     String message, {
     Duration? duration,
   }) {
-    ScaffoldMessenger.of(context).removeCurrentSnackBar();
-
-    final snackBar = SnackBar(
-      content: Row(
-        children: [
-          const SizedBox(
-            width: 20,
-            height: 20,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              message,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
-      ),
-      backgroundColor: AppColors.primaryColor,
-      duration: duration ?? const Duration(days: 1), // Long duration for loading
-      behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
-      margin: const EdgeInsets.all(16),
-      elevation: 6,
+    AuthSnackBar.show(
+      context,
+      message,
+      icon: Icons.hourglass_top_rounded,
+      accent: AuthScreenColors.purple,
+      duration: duration ?? const Duration(days: 1),
     );
-
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  // Hide current snackbar
   static void hide(BuildContext context) {
     ScaffoldMessenger.of(context).removeCurrentSnackBar();
   }
 
-  // Alias for hide method
   static void hideSnackbar(BuildContext context) {
     hide(context);
   }
 
-  // Show snackbar with custom widget
   static void showCustomWidget(
     BuildContext context,
     Widget content, {
@@ -202,21 +115,27 @@ class SnackbarUtil {
     Duration duration = const Duration(seconds: 3),
     SnackBarAction? action,
   }) {
-    ScaffoldMessenger.of(context).removeCurrentSnackBar();
-
-    final snackBar = SnackBar(
-      content: content,
-      backgroundColor: backgroundColor ?? AppColors.primaryColor,
-      duration: duration,
-      behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.removeCurrentSnackBar();
+    messenger.showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        padding: EdgeInsets.zero,
+        duration: duration,
+        content: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: backgroundColor ?? AuthScreenColors.surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AuthScreenColors.surfaceBorder),
+          ),
+          child: content,
+        ),
+        action: action,
       ),
-      margin: const EdgeInsets.all(16),
-      action: action,
-      elevation: 6,
     );
-
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 }

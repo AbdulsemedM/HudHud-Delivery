@@ -14,6 +14,7 @@ import 'package:hudhud_delivery/core/utils/avatar_util.dart';
 import 'package:hudhud_delivery/core/utils/phone_util.dart';
 import 'package:hudhud_delivery/core/widgets/user_avatar.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
+import 'package:hudhud_delivery/features/settings/presentation/widgets/auth_feedback.dart';
 import 'package:flutter/services.dart';
 import 'package:hudhud_delivery/features/addresses/presentation/screens/addresses_list_screen.dart';
 import 'package:hudhud_delivery/features/sos/presentation/screens/sos_settings_screen.dart';
@@ -109,16 +110,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _biometricEnabled = false;
         _biometricBusy = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.biometricDisabledSuccess)),
-      );
+      AuthSnackBar.success(context, l10n.biometricDisabledSuccess);
       return;
     }
 
     if (!_biometricAvailable) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.biometricNotAvailable)),
-      );
+      AuthSnackBar.info(context, l10n.biometricNotAvailable);
       return;
     }
 
@@ -131,9 +128,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (!mounted) return;
     if (saved) {
       setState(() => _biometricEnabled = true);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.biometricEnabledSuccess)),
-      );
+      AuthSnackBar.success(context, l10n.biometricEnabledSuccess);
     }
   }
 
@@ -148,12 +143,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final passwordController = TextEditingController();
     final formKey = GlobalKey<FormState>();
 
-    final saved = await showDialog<bool>(
+    final saved = await AuthModal.dialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) {
-        return AlertDialog(
-          title: Text(l10n.biometricEnableEnterPassword),
+        return AuthAlertDialog(
+          title: l10n.biometricEnableEnterPassword,
           content: Form(
             key: formKey,
             child: Column(
@@ -197,16 +192,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           actions: [
-            TextButton(
+            AuthDialogAction(
+              label: l10n.actionCancel,
               onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: Text(l10n.actionCancel),
             ),
-            FilledButton(
+            AuthDialogAction(
+              label: l10n.actionSave,
+              filled: true,
               onPressed: () {
                 if (formKey.currentState?.validate() != true) return;
                 Navigator.of(dialogContext).pop(true);
               },
-              child: Text(l10n.actionSave),
             ),
           ],
         );
@@ -275,22 +271,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _handleLogout(BuildContext context) async {
     try {
       final l10n = AppLocalizations.of(context)!;
-      final shouldLogout = await showDialog<bool>(
+      final shouldLogout = await AuthModal.confirm(
         context: context,
-        builder: (context) => AlertDialog(
-          title: Text(l10n.logoutTitle),
-          content: Text(l10n.logoutMessage),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: Text(l10n.actionCancel),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: Text(l10n.actionLogOut),
-            ),
-          ],
-        ),
+        title: l10n.logoutTitle,
+        message: l10n.logoutMessage,
+        confirmLabel: l10n.actionLogOut,
+        cancelLabel: l10n.actionCancel,
+        destructive: true,
       );
 
       if (shouldLogout == true) {
@@ -308,12 +295,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     } catch (e) {
       if (context.mounted) {
         final l10n = AppLocalizations.of(context)!;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.logoutError(e.toString())),
-            backgroundColor: Colors.red,
-          ),
-        );
+        AuthSnackBar.error(context, l10n.logoutError(e.toString()));
       }
     }
   }
@@ -377,10 +359,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           title: l10n.profileCoupons,
                           value: '0',
                           onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(l10n.profileCouponsComingSoon),
-                              ),
+                            AuthSnackBar.comingSoon(
+                              context,
+                              l10n.profileCouponsComingSoon,
                             );
                           },
                         ),
@@ -609,9 +590,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         onTap: () async {
                           final ok = await launchSupportEmail();
                           if (context.mounted && !ok) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(l10n.actionTryAgain)),
-                            );
+                            AuthSnackBar.error(context, l10n.actionTryAgain);
                           }
                         },
                       ),
@@ -1317,12 +1296,7 @@ class _AccountSettingsHubPage extends StatelessWidget {
                       if (result is String &&
                           result.isNotEmpty &&
                           context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(result),
-                            backgroundColor: Colors.green,
-                          ),
-                        );
+                        AuthSnackBar.success(context, result);
                       }
                     });
                   },

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/app/services/startup_location_service.dart';
+import 'package:hudhud_delivery/features/settings/presentation/widgets/auth_feedback.dart';
 import 'package:hudhud_delivery/features/sos/bloc/sos_bloc.dart';
 import 'package:hudhud_delivery/features/sos/model/sos_trigger_request.dart';
 import 'package:hudhud_delivery/features/sos/sos_bloc_provider.dart';
@@ -10,7 +11,7 @@ Future<bool> showSosTriggerDialog(
   BuildContext context, {
   int? orderId,
 }) async {
-  final result = await showDialog<bool>(
+  final result = await AuthModal.dialog<bool>(
     context: context,
     barrierDismissible: false,
     builder: (ctx) => sosBlocProvider(
@@ -46,9 +47,7 @@ class _SosTriggerDialogState extends State<_SosTriggerDialog> {
     if (!mounted) return;
     if (location == null) {
       setState(() => _isSending = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.sosLocationRequired)),
-      );
+      AuthSnackBar.error(context, l10n.sosLocationRequired);
       return;
     }
 
@@ -71,35 +70,34 @@ class _SosTriggerDialogState extends State<_SosTriggerDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
 
     return BlocListener<SosBloc, SosState>(
       listener: (context, state) {
         if (state is SosError) {
           setState(() => _isSending = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message)),
-          );
+          AuthSnackBar.error(context, state.message);
         }
         if (state is SosLoaded && state.successMessage == 'sos_triggered') {
           Navigator.of(context).pop(true);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                state.lastTriggerResult?.message ?? l10n.sosTriggered,
-              ),
-            ),
+          AuthSnackBar.success(
+            context,
+            state.lastTriggerResult?.message ?? l10n.sosTriggered,
           );
         }
       },
-      child: AlertDialog(
-        icon: Icon(Icons.sos, color: theme.colorScheme.error, size: 40),
-        title: Text(l10n.sosTriggerConfirmTitle),
+      child: AuthAlertDialog(
+        title: l10n.sosTriggerConfirmTitle,
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const Icon(
+                Icons.sos,
+                color: Color(0xFFEF5350),
+                size: 40,
+              ),
+              const SizedBox(height: 12),
               Text(l10n.sosTriggerConfirmMessage),
               const SizedBox(height: 16),
               TextField(
@@ -107,29 +105,23 @@ class _SosTriggerDialogState extends State<_SosTriggerDialog> {
                 maxLines: 3,
                 decoration: InputDecoration(
                   hintText: l10n.sosDescriptionHint,
-                  border: const OutlineInputBorder(),
                 ),
               ),
             ],
           ),
         ),
         actions: [
-          TextButton(
-            onPressed: _isSending ? null : () => Navigator.pop(context, false),
-            child: Text(l10n.sosCancel),
+          AuthDialogAction(
+            label: l10n.sosCancel,
+            enabled: !_isSending,
+            onPressed: () => Navigator.pop(context, false),
           ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: theme.colorScheme.error,
-            ),
-            onPressed: _isSending ? null : _submit,
-            child: _isSending
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(l10n.sosSendAlert),
+          AuthDialogAction(
+            label: l10n.sosSendAlert,
+            filled: true,
+            destructive: true,
+            enabled: !_isSending,
+            onPressed: _submit,
           ),
         ],
       ),

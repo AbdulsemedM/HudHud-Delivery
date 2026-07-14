@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
+import 'package:hudhud_delivery/features/settings/presentation/widgets/auth_feedback.dart';
 import 'package:hudhud_delivery/features/settings/presentation/widgets/profile_dark_page.dart';
 import 'package:hudhud_delivery/features/sos/bloc/sos_bloc.dart';
 import 'package:hudhud_delivery/features/sos/model/emergency_contact_model.dart';
@@ -47,32 +48,13 @@ class _EmergencyContactsBodyState extends State<_EmergencyContactsBody> {
 
   Future<void> _confirmDelete(EmergencyContactModel contact) async {
     final l10n = AppLocalizations.of(context)!;
-    final confirmed = await showDialog<bool>(
+    final confirmed = await AuthModal.confirm(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AuthScreenColors.surface,
-        title: Text(
-          l10n.sosDeleteContact,
-          style: const TextStyle(color: AuthScreenColors.textPrimary),
-        ),
-        content: Text(
-          l10n.sosDeleteContactConfirm,
-          style: const TextStyle(color: AuthScreenColors.textSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.sosCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(
-              l10n.sosDeleteContact,
-              style: const TextStyle(color: Color(0xFFEF5350)),
-            ),
-          ),
-        ],
-      ),
+      title: l10n.sosDeleteContact,
+      message: l10n.sosDeleteContactConfirm,
+      confirmLabel: l10n.sosDeleteContact,
+      cancelLabel: l10n.sosCancel,
+      destructive: true,
     );
     if (confirmed == true && mounted) {
       context.read<SosBloc>().add(DeleteEmergencyContactEvent(contact.id));
@@ -95,9 +77,7 @@ class _EmergencyContactsBodyState extends State<_EmergencyContactsBody> {
       body: BlocConsumer<SosBloc, SosState>(
         listener: (context, state) {
           if (state is SosError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
+            AuthSnackBar.error(context, state.message);
           }
           if (state is SosLoaded && state.successMessage != null) {
             final msg = switch (state.successMessage) {
@@ -106,9 +86,7 @@ class _EmergencyContactsBodyState extends State<_EmergencyContactsBody> {
               'contact_deleted' => l10n.sosContactDeleted,
               _ => state.successMessage!,
             };
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(msg)),
-            );
+            AuthSnackBar.success(context, msg);
           }
         },
         builder: (context, state) {

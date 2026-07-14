@@ -1,19 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/widgets/status_chip.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
-import 'package:hudhud_delivery/app/services/auth_service.dart';
-import 'package:hudhud_delivery/app/services/location_service.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
-import 'package:hudhud_delivery/models/user_model.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../home/presentation/widgets/home_widget.dart';
-import '../../../home/presentation/screen/location_search_screen.dart';
-import '../../../settings/presentation/screen/notifications_screen.dart';
 import 'delivery_details_screen.dart';
 import 'delivery_tracking_screen.dart';
 import 'instant_delivery_screen.dart';
@@ -27,11 +21,7 @@ class CourierScreen extends StatefulWidget {
 }
 
 class _CourierScreenState extends State<CourierScreen> {
-  final AuthService _authService = AuthService();
   late final CourierRepository _courierRepository;
-  UserModel? _currentUser;
-  String _currentLocation = '';
-  bool _isLoadingLocation = true;
   List<Map<String, dynamic>> _deliveries = [];
   bool _isLoadingDeliveries = true;
   String? _deliveriesError;
@@ -47,8 +37,6 @@ class _CourierScreenState extends State<CourierScreen> {
         apiService: ApiService.instance,
       ),
     );
-    _loadUserData();
-    _requestLocationAndUpdate();
     _fetchDeliveries();
     _fetchActiveDelivery();
   }
@@ -192,37 +180,6 @@ class _CourierScreenState extends State<CourierScreen> {
     );
   }
 
-  Future<void> _loadUserData() async {
-    final user = await _authService.getStoredUser();
-    if (mounted) {
-      setState(() {
-        _currentUser = user;
-      });
-    }
-  }
-
-  Future<void> _requestLocationAndUpdate() async {
-    try {
-      setState(() {
-        _isLoadingLocation = true;
-      });
-      final location = await LocationService.getCurrentLocationAddress();
-      if (mounted) {
-        setState(() {
-          _currentLocation = location;
-          _isLoadingLocation = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _currentLocation = context.l10n.locationUnable;
-          _isLoadingLocation = false;
-        });
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -238,36 +195,6 @@ class _CourierScreenState extends State<CourierScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              UserProfileHeader(
-                name: _currentUser?.name ?? l10n.userDefault,
-                location: _currentLocation,
-                isLoadingLocation: _isLoadingLocation,
-                user: _currentUser,
-                onLocationTap: () async {
-                  final result = await Navigator.push<Map<String, dynamic>>(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => LocationSearchScreen(
-                        currentLocation: _currentLocation,
-                      ),
-                    ),
-                  );
-                  if (result != null && result['address'] != null) {
-                    setState(() {
-                      _currentLocation = result['address'] as String;
-                    });
-                  }
-                },
-                onNotificationsTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const NotificationsScreen(),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: AppColors.spaceLG),
               Text(
                 l10n.courierWhatToDo,
                 style: theme.textTheme.titleSmall?.copyWith(
@@ -383,23 +310,44 @@ class _CourierScreenState extends State<CourierScreen> {
                   ],
                 )
               else if (_filteredDeliveries.isEmpty)
-                Column(
-                  children: [
-                    Lottie.asset('assets/animations/browse.json', width: 200),
-                    const SizedBox(height: AppColors.spaceMD),
-                    Text(
-                      l10n.courierNoHistory,
-                      style: theme.textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      l10n.courierHistoryEmptySubtitle,
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: scheme.onSurfaceVariant,
+                SizedBox(
+                  width: double.infinity,
+                  height: MediaQuery.sizeOf(context).height * 0.35,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 112,
+                        height: 112,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColors.primaryColor.withValues(alpha: 0.1),
+                        ),
+                        child: Icon(
+                          Icons.local_shipping_outlined,
+                          size: 56,
+                          color: AppColors.primaryColor.withValues(alpha: 0.85),
+                        ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: AppColors.spaceLG),
+                      Text(
+                        l10n.courierNoHistory,
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        l10n.courierHistoryEmptySubtitle,
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
                 )
               else
                 ..._filteredDeliveries.map((d) {

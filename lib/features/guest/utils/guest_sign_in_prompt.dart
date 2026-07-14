@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
 import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
+import 'package:hudhud_delivery/features/settings/presentation/widgets/auth_feedback.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
 
 /// Shows a sign-in dialog for guest browse mode.
@@ -12,22 +13,12 @@ Future<bool> showGuestSignInRequiredDialog(
   String? message,
 }) async {
   final l10n = AppLocalizations.of(context)!;
-  final result = await showDialog<bool>(
+  final result = await AuthModal.confirm(
     context: context,
-    builder: (ctx) => AlertDialog(
-      title: Text(title ?? l10n.guestSignInRequiredTitle),
-      content: Text(message ?? l10n.guestSignInRequiredMessage),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(ctx).pop(false),
-          child: Text(l10n.actionCancel),
-        ),
-        FilledButton(
-          onPressed: () => Navigator.of(ctx).pop(true),
-          child: Text(l10n.actionSignIn),
-        ),
-      ],
-    ),
+    title: title ?? l10n.guestSignInRequiredTitle,
+    message: message ?? l10n.guestSignInRequiredMessage,
+    confirmLabel: l10n.actionSignIn,
+    cancelLabel: l10n.actionCancel,
   );
   if (result != true || !context.mounted) return false;
 

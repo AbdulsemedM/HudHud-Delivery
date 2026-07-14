@@ -6,6 +6,7 @@ import 'package:hudhud_delivery/features/categories/model/categories_products_mo
 import 'package:hudhud_delivery/features/delivery/presentation/screens/product_detail_screen.dart';
 import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
+import 'package:hudhud_delivery/features/settings/presentation/widgets/auth_feedback.dart';
 import 'package:hudhud_delivery/features/settings/presentation/widgets/profile_dark_page.dart';
 import 'package:hudhud_delivery/features/wishlist/bloc/wishlist_bloc.dart';
 import 'package:hudhud_delivery/features/wishlist/model/wishlist_item_model.dart';
@@ -63,10 +64,10 @@ class _WishlistScreenState extends State<WishlistScreen> {
   Future<void> _showShareDialog() async {
     final l10n = AppLocalizations.of(context)!;
     final emailController = TextEditingController();
-    final result = await showDialog<bool>(
+    final result = await AuthModal.dialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.wishlistShareTitle),
+      builder: (ctx) => AuthAlertDialog(
+        title: l10n.wishlistShareTitle,
         content: TextField(
           controller: emailController,
           keyboardType: TextInputType.emailAddress,
@@ -75,13 +76,14 @@ class _WishlistScreenState extends State<WishlistScreen> {
           ),
         ),
         actions: [
-          TextButton(
+          AuthDialogAction(
+            label: l10n.actionCancel,
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.actionCancel),
           ),
-          FilledButton(
+          AuthDialogAction(
+            label: l10n.actionOk,
+            filled: true,
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l10n.actionOk),
           ),
         ],
       ),
@@ -95,10 +97,9 @@ class _WishlistScreenState extends State<WishlistScreen> {
   Future<void> _showNotesSheet(WishlistItemModel item) async {
     final l10n = AppLocalizations.of(context)!;
     final controller = TextEditingController(text: item.notes ?? '');
-    final saved = await showModalBottomSheet<bool>(
+    final saved = await AuthModal.sheet<bool>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AuthScreenColors.surface,
       builder: (ctx) => Padding(
         padding: EdgeInsets.only(
           left: 16,
@@ -110,12 +111,22 @@ class _WishlistScreenState extends State<WishlistScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: AuthScreenColors.surfaceBorder,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
             TextField(
               controller: controller,
               maxLines: 3,
               decoration: InputDecoration(
                 hintText: l10n.wishlistNotesHint,
-                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 12),
@@ -124,6 +135,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
               style: FilledButton.styleFrom(
                 backgroundColor: AuthScreenColors.orange,
                 foregroundColor: Colors.black,
+                shape: const StadiumBorder(),
               ),
               child: Text(l10n.actionSave),
             ),
