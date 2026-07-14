@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lottie/lottie.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
 import 'package:hudhud_delivery/app/services/location_service.dart';
@@ -244,15 +243,31 @@ class _OrdersScreenState extends State<OrdersScreen> {
                         child: Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Lottie.asset(
-                                'assets/animations/browse.json',
-                                width: 200,
+                              Container(
+                                width: 112,
+                                height: 112,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: AppColors.primaryColor
+                                      .withValues(alpha: 0.1),
+                                ),
+                                child: Icon(
+                                  Icons.receipt_long_outlined,
+                                  size: 56,
+                                  color: AppColors.primaryColor
+                                      .withValues(alpha: 0.85),
+                                ),
                               ),
-                              const SizedBox(height: 16),
+                              const SizedBox(height: 24),
                               Text(
                                 l10n.orderHistoryEmptyTitle,
-                                style: Theme.of(context).textTheme.titleMedium,
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(fontWeight: FontWeight.w600),
                               ),
                               const SizedBox(height: 8),
                               Padding(

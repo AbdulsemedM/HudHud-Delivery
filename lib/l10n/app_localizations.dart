@@ -1160,6 +1160,18 @@ abstract class AppLocalizations {
   /// **'DELIVERY, DELIVERED WELL'**
   String get brandTagline;
 
+  /// No description provided for @splashTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'YOUR CITY, DELIVERED'**
+  String get splashTagline;
+
+  /// No description provided for @splashStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Getting things moving…'**
+  String get splashStatus;
+
   /// No description provided for @loginContinueAsGuest.
   ///
   /// In en, this message translates to:

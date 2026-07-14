@@ -559,6 +559,12 @@ class AppLocalizationsAm extends AppLocalizations {
   String get brandTagline => 'DELIVERY, DELIVERED WELL';
 
   @override
+  String get splashTagline => 'YOUR CITY, DELIVERED';
+
+  @override
+  String get splashStatus => 'Getting things moving…';
+
+  @override
   String get loginContinueAsGuest => 'እንደ እንግዳ ይቀጥሉ';
 
   @override
