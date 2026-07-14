@@ -576,6 +576,9 @@ class AppLocalizationsOm extends AppLocalizations {
       'Maaloo akkaawuntii keessanii fi tajaajiloota jiran hunda argachuuf ragaa keessan galchaa';
 
   @override
+  String get brandTagline => 'DELIVERY, DELIVERED WELL';
+
+  @override
   String get loginContinueAsGuest => 'Akka keessummaa itti fufi';
 
   @override
@@ -660,7 +663,7 @@ class AppLocalizationsOm extends AppLocalizations {
   }
 
   @override
-  String get welcomeTitle => 'Baga gara HudHud Delivery dhuftan!';
+  String get welcomeTitle => 'Baga nagaan dhuftan';
 
   @override
   String get welcomeBody =>
@@ -1274,6 +1277,54 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get referralCode => 'Koodii rifaralaa';
+
+  @override
+  String get referralCodeOptional => 'Referral code — optional';
+
+  @override
+  String get hintReferralCode => 'UCZXSD3O';
+
+  @override
+  String get signupTitle => 'Create your account';
+
+  @override
+  String get signupSubtitle =>
+      'Join Hudhud to order from every business in your city.';
+
+  @override
+  String get hintCreatePassword => 'Create a password';
+
+  @override
+  String get hintReenterPassword => 'Re-enter your password';
+
+  @override
+  String get passwordStrengthHint => 'Use 8+ characters';
+
+  @override
+  String get signupAcceptTermsPrefix => 'I\'ve read and accepted Hudhud\'s ';
+
+  @override
+  String get signupTermsLink => 'terms and conditions';
+
+  @override
+  String get signupConsentDataPrefix =>
+      'I consent to my data being processed under applicable ';
+
+  @override
+  String get signupDataProtectionLink => 'data protection laws';
+
+  @override
+  String get alreadyHaveAccount => 'Already have an account? ';
+
+  @override
+  String get createAccount => 'Create account';
+
+  @override
+  String get signupFormIncomplete => 'Please fill in all required fields';
+
+  @override
+  String get signupAcceptLegalRequired =>
+      'Please accept the terms and data protection consent';
 
   @override
   String get searchQuestions => 'Gaaffii barbaacha';

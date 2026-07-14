@@ -572,6 +572,9 @@ class AppLocalizationsSo extends AppLocalizations {
       'Fadlan geli waraaqahaaga aqoonsiga si aad u gasho akoonkaaga iyo dhammaan adeegyada jira';
 
   @override
+  String get brandTagline => 'DELIVERY, DELIVERED WELL';
+
+  @override
   String get loginContinueAsGuest => 'Sii wad marti ahaan';
 
   @override
@@ -655,7 +658,7 @@ class AppLocalizationsSo extends AppLocalizations {
   }
 
   @override
-  String get welcomeTitle => 'Ku Soo Dhawoow Gaadhista HudHud!';
+  String get welcomeTitle => 'Kusoo dhawow';
 
   @override
   String get welcomeBody =>
@@ -1272,6 +1275,54 @@ class AppLocalizationsSo extends AppLocalizations {
 
   @override
   String get referralCode => 'Koodhka gudbinta';
+
+  @override
+  String get referralCodeOptional => 'Referral code — optional';
+
+  @override
+  String get hintReferralCode => 'UCZXSD3O';
+
+  @override
+  String get signupTitle => 'Create your account';
+
+  @override
+  String get signupSubtitle =>
+      'Join Hudhud to order from every business in your city.';
+
+  @override
+  String get hintCreatePassword => 'Create a password';
+
+  @override
+  String get hintReenterPassword => 'Re-enter your password';
+
+  @override
+  String get passwordStrengthHint => 'Use 8+ characters';
+
+  @override
+  String get signupAcceptTermsPrefix => 'I\'ve read and accepted Hudhud\'s ';
+
+  @override
+  String get signupTermsLink => 'terms and conditions';
+
+  @override
+  String get signupConsentDataPrefix =>
+      'I consent to my data being processed under applicable ';
+
+  @override
+  String get signupDataProtectionLink => 'data protection laws';
+
+  @override
+  String get alreadyHaveAccount => 'Already have an account? ';
+
+  @override
+  String get createAccount => 'Create account';
+
+  @override
+  String get signupFormIncomplete => 'Please fill in all required fields';
+
+  @override
+  String get signupAcceptLegalRequired =>
+      'Please accept the terms and data protection consent';
 
   @override
   String get searchQuestions => 'Raadi su\'aal';

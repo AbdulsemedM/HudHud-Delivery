@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/widgets/fallback_network_image.dart';
 import 'package:hudhud_delivery/features/categories/model/categories_products_model.dart';
 import 'package:hudhud_delivery/features/delivery/presentation/screens/all_categories_screen.dart';
 import 'package:hudhud_delivery/features/delivery/presentation/screens/product_detail_screen.dart';
@@ -807,10 +808,10 @@ class _StoreListItem extends StatelessWidget {
               ),
               child: ClipOval(
                 child: imageUrl.startsWith('http')
-                    ? Image.network(
-                        imageUrl,
+                    ? FallbackNetworkImage(
+                        url: imageUrl,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
+                        errorBuilder: (context) {
                           return Container(
                             color: colorScheme.surfaceContainerHigh,
                             child: Icon(

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:hudhud_delivery/core/utils/media_url_util.dart';
 
 class VendorModel extends Equatable {
   final int id;
@@ -132,28 +133,23 @@ class VendorModel extends Equatable {
   }
 
   /// Parses a vendor from the vendors list API (/api/vendors).
-  /// Uses shop_name as name and logo_path / logo_urls as avatar.
+  /// Uses shop_name as name and prefers logo_urls.original over logo_path
+  /// (logo_path often points at a broken medium conversion URL).
   factory VendorModel.fromVendorListJson(Map<String, dynamic> json) {
-    final logoPath = json['logo_path']?.toString();
-    final logoUrls = json['logo_urls'];
-    String avatar = logoPath ?? '';
-    if (avatar.isEmpty && logoUrls is Map) {
-      final urls = logoUrls as Map<String, dynamic>;
-      avatar = urls['medium']?.toString() ??
-          urls['small']?.toString() ??
-          urls['thumb']?.toString() ??
-          urls['original']?.toString() ??
-          '';
-    }
-    final bannerPath = json['banner_path']?.toString();
-    final bannerUrls = json['banner_urls'];
-    String? banner = bannerPath?.isNotEmpty == true ? bannerPath : null;
-    if (banner == null && bannerUrls is Map) {
-      final urls = bannerUrls as Map<String, dynamic>;
-      banner = urls['medium']?.toString() ??
-          urls['small']?.toString() ??
-          urls['thumb']?.toString();
-    }
+    final logoUrls = json['logo_urls'] is Map
+        ? Map<dynamic, dynamic>.from(json['logo_urls'] as Map)
+        : null;
+    final avatar = resolveVendorMediaUrl(
+      path: json['logo_path']?.toString(),
+      urls: logoUrls,
+    );
+    final bannerUrls = json['banner_urls'] is Map
+        ? Map<dynamic, dynamic>.from(json['banner_urls'] as Map)
+        : null;
+    final banner = resolveVendorMediaUrl(
+      path: json['banner_path']?.toString(),
+      urls: bannerUrls,
+    );
     final createdAt = DateTime.tryParse(json['created_at']?.toString() ?? '') ??
         DateTime.now();
     final updatedAt = DateTime.tryParse(json['updated_at']?.toString() ?? '') ??
@@ -187,7 +183,7 @@ class VendorModel extends Equatable {
       cuisineType: json['cuisine_type']?.toString(),
       openingTime: _formatTime(json['opening_time']?.toString()),
       closingTime: _formatTime(json['closing_time']?.toString()),
-      bannerPath: banner,
+      bannerPath: banner.isNotEmpty ? banner : null,
     );
   }
 

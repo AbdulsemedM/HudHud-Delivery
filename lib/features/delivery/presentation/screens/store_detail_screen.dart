@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/widgets/fallback_network_image.dart';
 import 'package:hudhud_delivery/features/categories/model/categories_products_model.dart';
 import 'package:hudhud_delivery/features/categories/presentation/widgets/categories_widget.dart';
 import 'package:hudhud_delivery/features/checkout/presentation/screen/checkout_screen.dart';
@@ -486,12 +487,12 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                   widget.storeImage != null &&
                   widget.storeImage!.isNotEmpty)
                 ClipRRect(
-                  child: Image.network(
-                    widget.storeImage!,
+                  child: FallbackNetworkImage(
+                    url: widget.storeImage!,
                     height: 150,
                     width: double.infinity,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                    errorBuilder: (_) => const SizedBox.shrink(),
                   ),
                 )
               else if (widget.vendor == null)
@@ -713,10 +714,10 @@ class _VendorDetailHeader extends StatelessWidget {
         children: [
           Positioned.fill(
             child: heroUrl != null
-                ? Image.network(
-                    heroUrl,
+                ? FallbackNetworkImage(
+                    url: heroUrl,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => _gradientFallback(),
+                    errorBuilder: (_) => _gradientFallback(),
                   )
                 : _gradientFallback(),
           ),

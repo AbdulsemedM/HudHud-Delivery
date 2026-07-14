@@ -1145,14 +1145,20 @@ abstract class AppLocalizations {
   /// No description provided for @loginTitle.
   ///
   /// In en, this message translates to:
-  /// **'Sign In'**
+  /// **'Sign in'**
   String get loginTitle;
 
   /// No description provided for @loginSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Please enter your credentials to access your account and all available services'**
+  /// **'Sign in to track your orders and get your next delivery moving.'**
   String get loginSubtitle;
+
+  /// No description provided for @brandTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'DELIVERY, DELIVERED WELL'**
+  String get brandTagline;
 
   /// No description provided for @loginContinueAsGuest.
   ///
@@ -1235,7 +1241,7 @@ abstract class AppLocalizations {
   /// No description provided for @hintPassword.
   ///
   /// In en, this message translates to:
-  /// **'Enter password'**
+  /// **'Enter your password'**
   String get hintPassword;
 
   /// No description provided for @validationEmailOrPhoneRequired.
@@ -1307,7 +1313,7 @@ abstract class AppLocalizations {
   /// No description provided for @welcomeTitle.
   ///
   /// In en, this message translates to:
-  /// **'Welcome to HudHud Delivery!'**
+  /// **'Welcome back'**
   String get welcomeTitle;
 
   /// No description provided for @welcomeBody.
@@ -1805,31 +1811,31 @@ abstract class AppLocalizations {
   /// No description provided for @hintFirstName.
   ///
   /// In en, this message translates to:
-  /// **'Eg. John'**
+  /// **'John'**
   String get hintFirstName;
 
   /// No description provided for @hintLastName.
   ///
   /// In en, this message translates to:
-  /// **'Eg. Doe'**
+  /// **'Doe'**
   String get hintLastName;
 
   /// No description provided for @hintEmailExample.
   ///
   /// In en, this message translates to:
-  /// **'Eg. JohnDoe@gmail.com'**
+  /// **'name@example.com'**
   String get hintEmailExample;
 
   /// No description provided for @hintPhoneExample.
   ///
   /// In en, this message translates to:
-  /// **'Eg. 0712345678'**
+  /// **'912 345 678'**
   String get hintPhoneExample;
 
   /// No description provided for @hintEnterPassword.
   ///
   /// In en, this message translates to:
-  /// **'Enter password'**
+  /// **'Re-enter your password'**
   String get hintEnterPassword;
 
   /// No description provided for @pickupLocation.
@@ -2441,19 +2447,19 @@ abstract class AppLocalizations {
   /// No description provided for @confirmNewPassword.
   ///
   /// In en, this message translates to:
-  /// **'Confirm New Password'**
+  /// **'Confirm password'**
   String get confirmNewPassword;
 
   /// No description provided for @firstName.
   ///
   /// In en, this message translates to:
-  /// **'First Name'**
+  /// **'First name'**
   String get firstName;
 
   /// No description provided for @lastName.
   ///
   /// In en, this message translates to:
-  /// **'Last Name'**
+  /// **'Last name'**
   String get lastName;
 
   /// No description provided for @email.
@@ -2491,6 +2497,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Referral code'**
   String get referralCode;
+
+  /// No description provided for @referralCodeOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Referral code — optional'**
+  String get referralCodeOptional;
+
+  /// No description provided for @hintReferralCode.
+  ///
+  /// In en, this message translates to:
+  /// **'UCZXSD3O'**
+  String get hintReferralCode;
+
+  /// No description provided for @signupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your account'**
+  String get signupTitle;
+
+  /// No description provided for @signupSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Join Hudhud to order from every business in your city.'**
+  String get signupSubtitle;
+
+  /// No description provided for @hintCreatePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a password'**
+  String get hintCreatePassword;
+
+  /// No description provided for @hintReenterPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enter your password'**
+  String get hintReenterPassword;
+
+  /// No description provided for @passwordStrengthHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Use 8+ characters'**
+  String get passwordStrengthHint;
+
+  /// No description provided for @signupAcceptTermsPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'ve read and accepted Hudhud\'s '**
+  String get signupAcceptTermsPrefix;
+
+  /// No description provided for @signupTermsLink.
+  ///
+  /// In en, this message translates to:
+  /// **'terms and conditions'**
+  String get signupTermsLink;
+
+  /// No description provided for @signupConsentDataPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'I consent to my data being processed under applicable '**
+  String get signupConsentDataPrefix;
+
+  /// No description provided for @signupDataProtectionLink.
+  ///
+  /// In en, this message translates to:
+  /// **'data protection laws'**
+  String get signupDataProtectionLink;
+
+  /// No description provided for @alreadyHaveAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account? '**
+  String get alreadyHaveAccount;
+
+  /// No description provided for @createAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Create account'**
+  String get createAccount;
+
+  /// No description provided for @signupFormIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Please fill in all required fields'**
+  String get signupFormIncomplete;
+
+  /// No description provided for @signupAcceptLegalRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please accept the terms and data protection consent'**
+  String get signupAcceptLegalRequired;
 
   /// No description provided for @searchQuestions.
   ///

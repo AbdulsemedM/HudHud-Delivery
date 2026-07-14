@@ -556,6 +556,9 @@ class AppLocalizationsAm extends AppLocalizations {
       'እባክህ መለያህን እና ሁሉንም ያሉትን አገልግሎቶች ለመድረስ ምስክርነትህን አስገባ';
 
   @override
+  String get brandTagline => 'DELIVERY, DELIVERED WELL';
+
+  @override
   String get loginContinueAsGuest => 'እንደ እንግዳ ይቀጥሉ';
 
   @override
@@ -636,7 +639,7 @@ class AppLocalizationsAm extends AppLocalizations {
   }
 
   @override
-  String get welcomeTitle => 'ወደ ሁድሁድ ማቅረቢያ እንኳን በደህና መጡ!';
+  String get welcomeTitle => 'እንኳን ደህና መጡ';
 
   @override
   String get welcomeBody =>
@@ -1245,6 +1248,54 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get referralCode => 'የማጣቀሻ ኮድ';
+
+  @override
+  String get referralCodeOptional => 'Referral code — optional';
+
+  @override
+  String get hintReferralCode => 'UCZXSD3O';
+
+  @override
+  String get signupTitle => 'Create your account';
+
+  @override
+  String get signupSubtitle =>
+      'Join Hudhud to order from every business in your city.';
+
+  @override
+  String get hintCreatePassword => 'Create a password';
+
+  @override
+  String get hintReenterPassword => 'Re-enter your password';
+
+  @override
+  String get passwordStrengthHint => 'Use 8+ characters';
+
+  @override
+  String get signupAcceptTermsPrefix => 'I\'ve read and accepted Hudhud\'s ';
+
+  @override
+  String get signupTermsLink => 'terms and conditions';
+
+  @override
+  String get signupConsentDataPrefix =>
+      'I consent to my data being processed under applicable ';
+
+  @override
+  String get signupDataProtectionLink => 'data protection laws';
+
+  @override
+  String get alreadyHaveAccount => 'Already have an account? ';
+
+  @override
+  String get createAccount => 'Create account';
+
+  @override
+  String get signupFormIncomplete => 'Please fill in all required fields';
+
+  @override
+  String get signupAcceptLegalRequired =>
+      'Please accept the terms and data protection consent';
 
   @override
   String get searchQuestions => 'ጥያቄ ፈልግ';

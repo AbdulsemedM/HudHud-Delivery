@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
-import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/validation/password_validator.dart';
 import 'package:hudhud_delivery/features/forgot_password/bloc/forgot_password_reset_cubit.dart';
 import 'package:hudhud_delivery/features/forgot_password/data/repository/forgot_password_repository.dart';
 import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
+import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
+import 'package:hudhud_delivery/features/login/presentation/widgets/auth_dark_scaffold.dart';
+import 'package:hudhud_delivery/features/login/presentation/widgets/auth_field_decoration.dart';
+import 'package:hudhud_delivery/features/login/presentation/widgets/auth_gradient_button.dart';
 
 class ForgotPasswordNewPasswordScreen extends StatelessWidget {
   const ForgotPasswordNewPasswordScreen({
@@ -63,12 +66,22 @@ class _ForgotPasswordNewPasswordViewState
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        title: Text(l10n.snackbarSuccessLabel),
-        content: Text(message.isNotEmpty ? message : l10n.forgotPasswordSuccessMessage),
+        backgroundColor: AuthScreenColors.surface,
+        title: Text(
+          l10n.snackbarSuccessLabel,
+          style: const TextStyle(color: AuthScreenColors.textPrimary),
+        ),
+        content: Text(
+          message.isNotEmpty ? message : l10n.forgotPasswordSuccessMessage,
+          style: const TextStyle(color: AuthScreenColors.textSecondary),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(l10n.actionOk),
+            child: Text(
+              l10n.actionOk,
+              style: const TextStyle(color: AuthScreenColors.orange),
+            ),
           ),
         ],
       ),
@@ -83,187 +96,135 @@ class _ForgotPasswordNewPasswordViewState
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final theme = Theme.of(context);
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ),
-      body: SafeArea(
-        child: BlocConsumer<ForgotPasswordResetCubit, ForgotPasswordResetState>(
-          listenWhen: (p, c) => p.error != c.error && c.error != null,
-          listener: (context, state) {
-            if (state.error != null) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.error!),
-                  backgroundColor: theme.colorScheme.error,
-                ),
-              );
-            }
-          },
-          builder: (context, state) {
-            return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.forgotPasswordNewTitle,
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      l10n.forgotPasswordNewSubtitle,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: theme.colorScheme.onSurfaceVariant,
-                        height: 1.4,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      l10n.labelPassword,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: theme.colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    TextFormField(
-                      controller: _passwordController,
-                      obscureText: _obscure1,
-                      enabled: !state.loading,
-                      decoration: InputDecoration(
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscure1 ? Icons.visibility : Icons.visibility_off,
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                          onPressed: () =>
-                              setState(() => _obscure1 = !_obscure1),
-                        ),
-                        filled: true,
-                        fillColor: theme.colorScheme.surfaceContainerHighest,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: theme.dividerColor),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: theme.colorScheme.primary,
-                            width: 2,
-                          ),
-                        ),
-                      ),
-                      validator: (v) => validatePasswordStrength(v, l10n),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      l10n.forgotPasswordLabelConfirmPassword,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: theme.colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    TextFormField(
-                      controller: _confirmController,
-                      obscureText: _obscure2,
-                      enabled: !state.loading,
-                      decoration: InputDecoration(
-                        hintText: l10n.forgotPasswordHintConfirmPassword,
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscure2 ? Icons.visibility : Icons.visibility_off,
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                          onPressed: () =>
-                              setState(() => _obscure2 = !_obscure2),
-                        ),
-                        filled: true,
-                        fillColor: theme.colorScheme.surfaceContainerHighest,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: theme.dividerColor),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: theme.colorScheme.primary,
-                            width: 2,
-                          ),
-                        ),
-                      ),
-                      validator: (v) {
-                        if (v == null || v.isEmpty) {
-                          return l10n.validationConfirmPasswordRequired;
-                        }
-                        if (v != _passwordController.text) {
-                          return l10n.validationPasswordsDoNotMatch;
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 28),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 48,
-                      child: ElevatedButton(
-                        onPressed: state.loading ? null : _submit,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryColor,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: state.loading
-                            ? const SizedBox(
-                                height: 22,
-                                width: 22,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : Text(
-                                l10n.forgotPasswordSaveButton,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                      ),
-                    ),
-                  ],
-                ),
+    return AuthDarkScaffold(
+      showBackButton: true,
+      child: BlocConsumer<ForgotPasswordResetCubit, ForgotPasswordResetState>(
+        listenWhen: (p, c) => p.error != c.error && c.error != null,
+        listener: (context, state) {
+          if (state.error != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.error!),
+                backgroundColor: AuthScreenColors.orange,
               ),
             );
-          },
-        ),
+          }
+        },
+        builder: (context, state) {
+          return Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.forgotPasswordNewTitle,
+                  style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w700,
+                    color: AuthScreenColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.forgotPasswordNewSubtitle,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: AuthScreenColors.textSecondary,
+                    height: 1.45,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  l10n.labelPassword,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AuthScreenColors.textSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: _obscure1,
+                  enabled: !state.loading,
+                  style: const TextStyle(
+                    color: AuthScreenColors.textPrimary,
+                    fontSize: 15,
+                  ),
+                  decoration: authFieldDecoration(
+                    hint: l10n.hintPassword,
+                    prefixIcon: const Icon(
+                      Icons.lock_outline_rounded,
+                      color: AuthScreenColors.textSecondary,
+                      size: 20,
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscure1
+                            ? Icons.visibility_rounded
+                            : Icons.visibility_off_rounded,
+                        color: AuthScreenColors.textSecondary,
+                      ),
+                      onPressed: () => setState(() => _obscure1 = !_obscure1),
+                    ),
+                  ),
+                  validator: (v) => validatePasswordStrength(v, l10n),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  l10n.forgotPasswordLabelConfirmPassword,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AuthScreenColors.textSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                TextFormField(
+                  controller: _confirmController,
+                  obscureText: _obscure2,
+                  enabled: !state.loading,
+                  style: const TextStyle(
+                    color: AuthScreenColors.textPrimary,
+                    fontSize: 15,
+                  ),
+                  decoration: authFieldDecoration(
+                    hint: l10n.forgotPasswordHintConfirmPassword,
+                    prefixIcon: const Icon(
+                      Icons.lock_outline_rounded,
+                      color: AuthScreenColors.textSecondary,
+                      size: 20,
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscure2
+                            ? Icons.visibility_rounded
+                            : Icons.visibility_off_rounded,
+                        color: AuthScreenColors.textSecondary,
+                      ),
+                      onPressed: () => setState(() => _obscure2 = !_obscure2),
+                    ),
+                  ),
+                  validator: (v) {
+                    if (v == null || v.isEmpty) {
+                      return l10n.validationConfirmPasswordRequired;
+                    }
+                    if (v != _passwordController.text) {
+                      return l10n.validationPasswordsDoNotMatch;
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 28),
+                AuthGradientButton(
+                  label: l10n.forgotPasswordSaveButton,
+                  loading: state.loading,
+                  onPressed: state.loading ? null : _submit,
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

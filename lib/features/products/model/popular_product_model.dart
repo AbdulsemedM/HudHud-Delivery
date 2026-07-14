@@ -1,3 +1,4 @@
+import 'package:hudhud_delivery/core/utils/media_url_util.dart';
 import 'package:hudhud_delivery/features/categories/model/categories_products_model.dart';
 
 class PopularProductModel {
@@ -59,15 +60,13 @@ class PopularProductModel {
       final shop = Map<String, dynamic>.from(vendorShop);
       shopName = shop['shop_name']?.toString();
       shopId = int.tryParse(shop['id']?.toString() ?? '');
-      shopLogo = shop['logo_path']?.toString();
-      if (shopLogo == null || shopLogo.isEmpty) {
-        final logoUrls = shop['logo_urls'];
-        if (logoUrls is Map) {
-          shopLogo = logoUrls['medium']?.toString() ??
-              logoUrls['thumb']?.toString() ??
-              logoUrls['original']?.toString();
-        }
-      }
+      shopLogo = resolveVendorMediaUrl(
+        path: shop['logo_path']?.toString(),
+        urls: shop['logo_urls'] is Map
+            ? Map<dynamic, dynamic>.from(shop['logo_urls'] as Map)
+            : null,
+      );
+      if (shopLogo.isEmpty) shopLogo = null;
       final ratingRaw = shop['average_rating'];
       if (ratingRaw is num) {
         shopRating = ratingRaw.toDouble();

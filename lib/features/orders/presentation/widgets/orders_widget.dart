@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/utils/avatar_util.dart';
 import 'package:hudhud_delivery/core/widgets/status_chip.dart';
+import 'package:hudhud_delivery/core/widgets/user_avatar.dart';
+import 'package:hudhud_delivery/models/user_model.dart';
 import '../../data/models/order_model.dart';
 import 'package:intl/intl.dart';
 
@@ -29,10 +32,12 @@ class StoryRing extends StatelessWidget {
 
 class OrdersHeader extends StatelessWidget {
   final VoidCallback? onFilterTap;
+  final UserModel? user;
 
   const OrdersHeader({
     super.key,
     this.onFilterTap,
+    this.user,
   });
 
   @override
@@ -42,10 +47,10 @@ class OrdersHeader extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const StoryRing(
-          child: CircleAvatar(
+        StoryRing(
+          child: UserAvatar(
             radius: 20,
-            backgroundImage: AssetImage('assets/images/profile.png'),
+            imageUrl: getDisplayAvatarUrl(user),
           ),
         ),
         Container(

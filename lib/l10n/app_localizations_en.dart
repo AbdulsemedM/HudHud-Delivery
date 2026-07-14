@@ -560,11 +560,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get inProgress => 'In progress';
 
   @override
-  String get loginTitle => 'Sign In';
+  String get loginTitle => 'Sign in';
 
   @override
   String get loginSubtitle =>
-      'Please enter your credentials to access your account and all available services';
+      'Sign in to track your orders and get your next delivery moving.';
+
+  @override
+  String get brandTagline => 'DELIVERY, DELIVERED WELL';
 
   @override
   String get loginContinueAsGuest => 'Continue as guest';
@@ -606,7 +609,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get labelPassword => 'Password';
 
   @override
-  String get hintPassword => 'Enter password';
+  String get hintPassword => 'Enter your password';
 
   @override
   String get validationEmailOrPhoneRequired =>
@@ -649,7 +652,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get welcomeTitle => 'Welcome to HudHud Delivery!';
+  String get welcomeTitle => 'Welcome back';
 
   @override
   String get welcomeBody =>
@@ -913,19 +916,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enterCustomTip => 'Enter custom tip amount';
 
   @override
-  String get hintFirstName => 'Eg. John';
+  String get hintFirstName => 'John';
 
   @override
-  String get hintLastName => 'Eg. Doe';
+  String get hintLastName => 'Doe';
 
   @override
-  String get hintEmailExample => 'Eg. JohnDoe@gmail.com';
+  String get hintEmailExample => 'name@example.com';
 
   @override
-  String get hintPhoneExample => 'Eg. 0712345678';
+  String get hintPhoneExample => '912 345 678';
 
   @override
-  String get hintEnterPassword => 'Enter password';
+  String get hintEnterPassword => 'Re-enter your password';
 
   @override
   String get pickupLocation => 'Pickup location';
@@ -1237,13 +1240,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newPassword => 'New Password';
 
   @override
-  String get confirmNewPassword => 'Confirm New Password';
+  String get confirmNewPassword => 'Confirm password';
 
   @override
-  String get firstName => 'First Name';
+  String get firstName => 'First name';
 
   @override
-  String get lastName => 'Last Name';
+  String get lastName => 'Last name';
 
   @override
   String get email => 'Email';
@@ -1262,6 +1265,54 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get referralCode => 'Referral code';
+
+  @override
+  String get referralCodeOptional => 'Referral code — optional';
+
+  @override
+  String get hintReferralCode => 'UCZXSD3O';
+
+  @override
+  String get signupTitle => 'Create your account';
+
+  @override
+  String get signupSubtitle =>
+      'Join Hudhud to order from every business in your city.';
+
+  @override
+  String get hintCreatePassword => 'Create a password';
+
+  @override
+  String get hintReenterPassword => 'Re-enter your password';
+
+  @override
+  String get passwordStrengthHint => 'Use 8+ characters';
+
+  @override
+  String get signupAcceptTermsPrefix => 'I\'ve read and accepted Hudhud\'s ';
+
+  @override
+  String get signupTermsLink => 'terms and conditions';
+
+  @override
+  String get signupConsentDataPrefix =>
+      'I consent to my data being processed under applicable ';
+
+  @override
+  String get signupDataProtectionLink => 'data protection laws';
+
+  @override
+  String get alreadyHaveAccount => 'Already have an account? ';
+
+  @override
+  String get createAccount => 'Create account';
+
+  @override
+  String get signupFormIncomplete => 'Please fill in all required fields';
+
+  @override
+  String get signupAcceptLegalRequired =>
+      'Please accept the terms and data protection consent';
 
   @override
   String get searchQuestions => 'Search question';

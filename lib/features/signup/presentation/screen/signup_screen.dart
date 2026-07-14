@@ -1,68 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hudhud_delivery/app/services/auth_service.dart';
+import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
-import '../../../../core/api/api_service.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../login/presentation/widgets/login_widget.dart';
-import '../widgets/signup_widget.dart';
-import '../../bloc/signup_bloc.dart';
-import '../../data/repository/signup_repository.dart';
-import '../../data/data_provider/signup_data_provider.dart';
-
-class _GoogleSignInButton extends StatelessWidget {
-  const _GoogleSignInButton();
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final colorScheme = Theme.of(context).colorScheme;
-    return SizedBox(
-      width: double.infinity,
-      height: 48,
-      child: OutlinedButton(
-        onPressed: () {
-          // TODO: Implement Google Sign In
-        },
-        style: OutlinedButton.styleFrom(
-          side: BorderSide(
-            color: colorScheme.outline.withValues(alpha: 0.5),
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
-          backgroundColor: colorScheme.surface,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(
-              'assets/images/Google_Favicon_2025.svg.png',
-              width: 20,
-              height: 20,
-              fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) {
-                return Icon(
-                  Icons.g_mobiledata,
-                  size: 20,
-                  color: colorScheme.onSurfaceVariant,
-                );
-              },
-            ),
-            const SizedBox(width: 12),
-            Text(
-              l10n.continueWithGoogle,
-              style: TextStyle(
-                color: colorScheme.onSurface,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+import 'package:hudhud_delivery/features/dashboard/presentation/screen/dashboard_screen.dart';
+import 'package:hudhud_delivery/features/login/bloc/login_bloc.dart';
+import 'package:hudhud_delivery/features/login/data/data_provider/login_data_provider.dart';
+import 'package:hudhud_delivery/features/login/data/repository/login_repository.dart';
+import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
+import 'package:hudhud_delivery/features/login/presentation/widgets/auth_dark_scaffold.dart';
+import 'package:hudhud_delivery/features/signup/bloc/signup_bloc.dart';
+import 'package:hudhud_delivery/features/signup/data/data_provider/signup_data_provider.dart';
+import 'package:hudhud_delivery/features/signup/data/repository/signup_repository.dart';
+import 'package:hudhud_delivery/features/signup/presentation/widgets/signup_widget.dart';
 
 class SignupScreen extends StatefulWidget {
   final bool resumeAfterAuth;
@@ -73,181 +23,299 @@ class SignupScreen extends StatefulWidget {
   State<SignupScreen> createState() => _SignupScreenState();
 }
 
-class _SignupScreenState extends State<SignupScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _slideController;
-  late Animation<Offset> _slideAnimation;
+class _SignupScreenState extends State<SignupScreen> {
+  late final SignupBloc _signupBloc;
+  late final LoginBloc _loginBloc;
 
   @override
   void initState() {
     super.initState();
-    _slideController = AnimationController(
-      duration: const Duration(milliseconds: 700),
-      vsync: this,
+    _signupBloc = SignupBloc(
+      SignupRepository(
+        SignupDataProvider(apiService: ApiService.instance),
+      ),
     );
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.15),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
+    _loginBloc = LoginBloc(
+      LoginRepository(LoginDataProvider(apiService: ApiService.instance)),
     );
-    _slideController.forward();
   }
 
   @override
   void dispose() {
-    _slideController.dispose();
+    _signupBloc.close();
+    _loginBloc.close();
     super.dispose();
+  }
+
+  Future<void> _onGoogleSuccess(BuildContext context) async {
+    if (widget.resumeAfterAuth) {
+      final authed = await AuthService().isAuthenticated();
+      if (!context.mounted) return;
+      if (authed) {
+        Navigator.pop(context, true);
+        return;
+      }
+    }
+    if (!context.mounted) return;
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const DashboardScreen()),
+      (route) => false,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => SignupBloc(
-        SignupRepository(
-          SignupDataProvider(apiService: ApiService.instance),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: _signupBloc),
+        BlocProvider.value(value: _loginBloc),
+      ],
+      child: BlocListener<LoginBloc, LoginState>(
+        listenWhen: (previous, current) =>
+            current is LoginSuccess || current is LoginFailure,
+        listener: (context, state) {
+          if (state is LoginSuccess) {
+            _onGoogleSuccess(context);
+          } else if (state is LoginFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.errorMessage),
+                backgroundColor: const Color(0xFFEF5350),
+              ),
+            );
+          }
+        },
+        child: AuthDarkScaffold(
+          padding: const EdgeInsets.fromLTRB(24, 4, 24, 28),
+          child: Builder(
+            builder: (context) {
+              final l10n = context.l10n;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const _SignupTopBar(),
+                  const SizedBox(height: 20),
+                  const SignupTitle(),
+                  const SizedBox(height: 24),
+                  createSignupForm(),
+                  const SizedBox(height: 24),
+                  SignupButton(resumeAfterAuth: widget.resumeAfterAuth),
+                  const SizedBox(height: 20),
+                  _SignInPrompt(
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      const Expanded(
+                        child: Divider(
+                          color: AuthScreenColors.textSecondary,
+                          thickness: 0.6,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Text(
+                          l10n.loginOrContinueWith,
+                          style: const TextStyle(
+                            color: AuthScreenColors.textSecondary,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                      const Expanded(
+                        child: Divider(
+                          color: AuthScreenColors.textSecondary,
+                          thickness: 0.6,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  const _GoogleSignInButton(),
+                  const SizedBox(height: 8),
+                ],
+              );
+            },
+          ),
         ),
       ),
-      child: Builder(
-        builder: (context) {
-          final l10n = context.l10n;
-          final theme = Theme.of(context);
-          final colorScheme = theme.colorScheme;
-          final isDark = theme.brightness == Brightness.dark;
-          final screenHeight = MediaQuery.of(context).size.height;
+    );
+  }
+}
 
-          return Scaffold(
-            backgroundColor: colorScheme.surface,
-            body: Column(
-              children: [
-                SizedBox(
-                  height: screenHeight * 0.28,
-                  width: double.infinity,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          AppColors.primaryColor,
-                          AppColors.primaryColor.withValues(alpha: 0.0),
-                        ],
-                      ),
-                    ),
-                    child: SafeArea(
-                      bottom: false,
-                      child: Stack(
-                        children: [
-                          Positioned(
-                            top: 8,
-                            left: 8,
-                            child: IconButton(
-                              icon: const Icon(
-                                Icons.arrow_back_rounded,
-                                color: Colors.white,
-                              ),
-                              onPressed: () => Navigator.pop(context),
-                            ),
-                          ),
-                          const Center(child: LogoWidget()),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: SlideTransition(
-                    position: _slideAnimation,
-                    child: Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: colorScheme.surface,
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(32),
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: colorScheme.shadow.withValues(alpha: 0.08),
-                            blurRadius: 24,
-                            offset: const Offset(0, -4),
-                          ),
-                        ],
-                      ),
-                      child: SafeArea(
-                        top: false,
-                        child: SingleChildScrollView(
-                          padding:
-                              const EdgeInsets.fromLTRB(24, 28, 24, 16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SignupTitle(),
-                              const SizedBox(height: AppColors.spaceLG),
-                              createSignupForm(),
-                              const SizedBox(height: AppColors.spaceMD),
-                              SignupButton(resumeAfterAuth: widget.resumeAfterAuth),
-                              const SizedBox(height: AppColors.spaceMD),
-                              Center(
-                                child: GestureDetector(
-                                  onTap: () => Navigator.pop(context),
-                                  child: Text(
-                                    l10n.loginTitle,
-                                    style: const TextStyle(
-                                      color: AppColors.primaryColor,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      decoration: TextDecoration.underline,
-                                      decorationColor: AppColors.primaryColor,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: AppColors.spaceMD),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Divider(
-                                      color: isDark
-                                          ? const Color(0xFF2A2A2A)
-                                          : const Color(0xFFEEEEEE),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                    ),
-                                    child: Text(
-                                      l10n.loginOrContinueWith,
-                                      style: theme.textTheme.bodyMedium
-                                          ?.copyWith(
-                                        color: colorScheme.onSurfaceVariant,
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Divider(
-                                      color: isDark
-                                          ? const Color(0xFF2A2A2A)
-                                          : const Color(0xFFEEEEEE),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: AppColors.spaceMD),
-                              const _GoogleSignInButton(),
-                              const SizedBox(height: AppColors.spaceSM),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+class _SignupTopBar extends StatelessWidget {
+  const _SignupTopBar();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Material(
+          color: AuthScreenColors.surface,
+          borderRadius: BorderRadius.circular(12),
+          child: InkWell(
+            onTap: () => Navigator.of(context).maybePop(),
+            borderRadius: BorderRadius.circular(12),
+            child: const SizedBox(
+              width: 44,
+              height: 44,
+              child: Icon(
+                Icons.chevron_left_rounded,
+                color: AuthScreenColors.textPrimary,
+                size: 28,
+              ),
             ),
-          );
-        },
+          ),
+        ),
+        const Spacer(),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(
+              'assets/images/logo.png',
+              width: 28,
+              height: 28,
+              fit: BoxFit.contain,
+              errorBuilder: (_, __, ___) => const Icon(
+                Icons.local_shipping_rounded,
+                size: 24,
+                color: AuthScreenColors.orange,
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: 'Hud',
+                    style: TextStyle(
+                      color: AuthScreenColors.orange,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.4,
+                    ),
+                  ),
+                  TextSpan(
+                    text: 'Hud',
+                    style: TextStyle(
+                      color: AuthScreenColors.lavender,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _SignInPrompt extends StatelessWidget {
+  const _SignInPrompt({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: onPressed,
+      child: Text.rich(
+        TextSpan(
+          style: const TextStyle(
+            color: AuthScreenColors.textMuted,
+            fontSize: 14,
+            height: 1.35,
+          ),
+          children: [
+            TextSpan(text: l10n.alreadyHaveAccount),
+            TextSpan(
+              text: l10n.loginTitle,
+              style: const TextStyle(
+                color: AuthScreenColors.orange,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+        textAlign: TextAlign.center,
       ),
+    );
+  }
+}
+
+class _GoogleSignInButton extends StatelessWidget {
+  const _GoogleSignInButton();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return BlocBuilder<LoginBloc, LoginState>(
+      builder: (context, state) {
+        final loading = state.isLoginLoading(LoginAction.google);
+        return SizedBox(
+          width: double.infinity,
+          height: 52,
+          child: OutlinedButton(
+            onPressed: state.isAnyLoginLoading
+                ? null
+                : () => context.read<LoginBloc>().add(GoogleLoginRequested()),
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(
+                color: AuthScreenColors.surfaceBorder,
+                width: 1.25,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              backgroundColor: AuthScreenColors.surface,
+            ),
+            child: loading
+                ? const SizedBox(
+                    height: 22,
+                    width: 22,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AuthScreenColors.orange,
+                    ),
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        'assets/images/Google_Favicon_2025.svg.png',
+                        width: 20,
+                        height: 20,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(
+                            Icons.g_mobiledata,
+                            size: 22,
+                            color: AuthScreenColors.textMuted,
+                          );
+                        },
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        l10n.continueWithGoogle,
+                        style: const TextStyle(
+                          color: AuthScreenColors.textPrimary,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
+        );
+      },
     );
   }
 }

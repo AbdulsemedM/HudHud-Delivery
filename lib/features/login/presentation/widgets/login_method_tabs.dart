@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
 
 enum LoginMethod { email, phone }
@@ -8,19 +9,25 @@ class LoginMethodTabs extends StatelessWidget {
   final LoginMethod selected;
   final ValueChanged<LoginMethod> onChanged;
 
+  /// When true, uses the always-dark auth mock styling (orange selected pill).
+  final bool authStyle;
+
   const LoginMethodTabs({
     super.key,
     required this.selected,
     required this.onChanged,
+    this.authStyle = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    final trackColor = theme.brightness == Brightness.dark
-        ? theme.colorScheme.surfaceContainerHighest
-        : const Color(0xFFE8EEF4);
+    final trackColor = authStyle
+        ? AuthScreenColors.surface
+        : (theme.brightness == Brightness.dark
+            ? theme.colorScheme.surfaceContainerHighest
+            : const Color(0xFFE8EEF4));
 
     return Semantics(
       container: true,
@@ -29,23 +36,30 @@ class LoginMethodTabs extends StatelessWidget {
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
           color: trackColor,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
+          border: authStyle
+              ? Border.all(color: AuthScreenColors.surfaceBorder)
+              : null,
         ),
         child: Row(
           children: [
             Expanded(
               child: _TabSegment(
                 label: l10n.loginTabPhone,
+                icon: Icons.phone_outlined,
                 isSelected: selected == LoginMethod.phone,
                 semanticsLabel: l10n.loginTabPhoneSemantics,
+                authStyle: authStyle,
                 onTap: () => onChanged(LoginMethod.phone),
               ),
             ),
             Expanded(
               child: _TabSegment(
                 label: l10n.loginTabEmail,
+                icon: Icons.mail_outline_rounded,
                 isSelected: selected == LoginMethod.email,
                 semanticsLabel: l10n.loginTabEmailSemantics,
+                authStyle: authStyle,
                 onTap: () => onChanged(LoginMethod.email),
               ),
             ),
@@ -58,23 +72,39 @@ class LoginMethodTabs extends StatelessWidget {
 
 class _TabSegment extends StatelessWidget {
   final String label;
+  final IconData icon;
   final String semanticsLabel;
   final bool isSelected;
+  final bool authStyle;
   final VoidCallback onTap;
 
   const _TabSegment({
     required this.label,
+    required this.icon,
     required this.semanticsLabel,
     required this.isSelected,
+    required this.authStyle,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final activeColor = theme.brightness == Brightness.dark
-        ? AppColors.primaryLightColor
-        : AppColors.primaryColor;
+    final Color activeColor;
+    final Color activeFg;
+    final Color inactiveFg;
+
+    if (authStyle) {
+      activeColor = AuthScreenColors.orange;
+      activeFg = Colors.black;
+      inactiveFg = AuthScreenColors.textMuted;
+    } else {
+      activeColor = theme.brightness == Brightness.dark
+          ? AppColors.primaryLightColor
+          : AppColors.primaryColor;
+      activeFg = Colors.white;
+      inactiveFg = theme.colorScheme.onSurfaceVariant;
+    }
 
     return Semantics(
       button: true,
@@ -93,7 +123,7 @@ class _TabSegment extends StatelessWidget {
             decoration: BoxDecoration(
               color: isSelected ? activeColor : Colors.transparent,
               borderRadius: BorderRadius.circular(10),
-              boxShadow: isSelected
+              boxShadow: isSelected && !authStyle
                   ? [
                       BoxShadow(
                         color: activeColor.withValues(alpha: 0.28),
@@ -103,15 +133,24 @@ class _TabSegment extends StatelessWidget {
                     ]
                   : null,
             ),
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: isSelected
-                    ? Colors.white
-                    : theme.colorScheme.onSurfaceVariant,
-              ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  icon,
+                  size: 18,
+                  color: isSelected ? activeFg : inactiveFg,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: isSelected ? activeFg : inactiveFg,
+                  ),
+                ),
+              ],
             ),
           ),
         ),

@@ -13,6 +13,7 @@ import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/utils/support_launcher.dart';
 import 'package:hudhud_delivery/core/utils/avatar_util.dart';
 import 'package:hudhud_delivery/core/utils/phone_util.dart';
+import 'package:hudhud_delivery/core/widgets/user_avatar.dart';
 import 'package:hudhud_delivery/features/addresses/presentation/screens/addresses_list_screen.dart';
 import 'package:hudhud_delivery/features/sos/presentation/screens/sos_settings_screen.dart';
 import 'package:hudhud_delivery/features/chat/presentation/screens/conversations_list_screen.dart';
@@ -1044,35 +1045,16 @@ class _ProfileHeaderCard extends StatelessWidget {
   }
 
   Widget _buildAvatar(String? avatarUrl) {
-    if (avatarUrl != null) {
-      return Container(
-        width: 64,
-        height: 64,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: accentRed, width: 2),
-        ),
-        child: ClipOval(
-          child: Image.network(
-            avatarUrl,
-            fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => _fallbackAvatar(),
-          ),
-        ),
-      );
-    }
-    return _fallbackAvatar();
-  }
-
-  Widget _fallbackAvatar() {
     return Container(
-      width: 64,
-      height: 64,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: accentRed,
+        border: Border.all(color: accentRed, width: 2),
       ),
-      child: const Icon(Icons.person, color: Colors.white, size: 34),
+      child: UserAvatar(
+        radius: 32,
+        imageUrl: avatarUrl,
+        backgroundColor: accentRed,
+      ),
     );
   }
 }

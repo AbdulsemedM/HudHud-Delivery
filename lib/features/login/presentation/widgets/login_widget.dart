@@ -1,9 +1,16 @@
+import 'package:country_picker/country_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
-import 'package:hudhud_delivery/l10n/app_localizations.dart';
+import 'package:hudhud_delivery/core/utils/phone_util.dart';
+import 'package:hudhud_delivery/features/forgot_password/presentation/screen/forgot_password_identifier_screen.dart';
 import 'package:hudhud_delivery/features/login/bloc/login_bloc.dart';
-import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
+import 'package:hudhud_delivery/features/login/presentation/widgets/auth_field_decoration.dart';
+import 'package:hudhud_delivery/features/login/presentation/widgets/auth_gradient_button.dart';
+import 'package:hudhud_delivery/features/login/presentation/widgets/auth_phone_number_field.dart';
+import 'package:hudhud_delivery/features/login/presentation/widgets/login_method_tabs.dart';
+import 'package:hudhud_delivery/l10n/app_localizations.dart';
 
 class LogoWidget extends StatelessWidget {
   const LogoWidget({super.key});
@@ -29,23 +36,25 @@ class LoginTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           l10n.welcomeTitle,
-          style: theme.textTheme.titleLarge?.copyWith(
+          style: const TextStyle(
+            fontSize: 28,
             fontWeight: FontWeight.w700,
-            color: theme.colorScheme.onSurface,
+            color: AuthScreenColors.textPrimary,
+            height: 1.2,
           ),
         ),
-        const SizedBox(height: AppColors.spaceSM),
+        const SizedBox(height: 8),
         Text(
           l10n.loginSubtitle,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-            height: 1.4,
+          style: const TextStyle(
+            color: AuthScreenColors.textSecondary,
+            fontSize: 14,
+            height: 1.45,
           ),
         ),
       ],
@@ -61,228 +70,204 @@ class LoginForm extends StatefulWidget {
 }
 
 class _LoginFormState extends State<LoginForm> {
-  final _emailPhoneController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isPasswordVisible = false;
+  LoginMethod _method = LoginMethod.phone;
+  String _dialCode = kDefaultPhoneDialCode;
+  String _countryIso = 'ET';
 
-  String? _validateEmailOrPhone(String? value, AppLocalizations l10n) {
-    if (value == null || value.isEmpty) {
-      return l10n.validationEmailOrPhoneRequired;
+  String? _validateEmail(String? value, AppLocalizations l10n) {
+    if (value == null || value.trim().isEmpty) {
+      return l10n.validationEmailRequired;
     }
-
-    final trimmedValue = value.trim();
     final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-    if (emailRegex.hasMatch(trimmedValue)) {
-      return null;
+    if (!emailRegex.hasMatch(value.trim())) {
+      return l10n.validationEmailInvalid;
     }
-
-    String cleanedPhone = trimmedValue.replaceAll(RegExp(r'[\s\-\(\)\.]'), '');
-
-    if (cleanedPhone.startsWith('+')) {
-      if (RegExp(r'^\+[0-9]{10,15}$').hasMatch(cleanedPhone)) {
-        return null;
-      }
-    } else {
-      if (!RegExp(r'^\d+$').hasMatch(cleanedPhone)) {
-        return l10n.validationEmailOrPhoneInvalid;
-      }
-
-      if (cleanedPhone.startsWith('0') && cleanedPhone.length > 1) {
-        cleanedPhone = cleanedPhone.substring(1);
-      }
-
-      if ((cleanedPhone.startsWith('9') || cleanedPhone.startsWith('7')) &&
-          cleanedPhone.length == 9) {
-        return null;
-      }
-
-      if (cleanedPhone.length >= 10 && cleanedPhone.length <= 15) {
-        return null;
-      }
-    }
-
-    return l10n.validationEmailOrPhoneInvalid;
+    return null;
   }
 
-  InputDecoration _fieldDecoration({
-    required ThemeData theme,
-    required String hint,
-    Widget? suffixIcon,
-  }) {
-    final isDark = theme.brightness == Brightness.dark;
-    return InputDecoration(
-      hintText: hint,
-      hintStyle: TextStyle(
-        color: theme.colorScheme.onSurfaceVariant,
-        fontSize: 14,
-      ),
-      suffixIcon: suffixIcon,
-      filled: true,
-      fillColor: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFF4F4F4),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide.none,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide.none,
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: theme.colorScheme.error, width: 2),
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-    );
+  String? _validatePhone(String? value, AppLocalizations l10n) {
+    if (value == null || value.trim().isEmpty) {
+      return l10n.validationPhoneRequired;
+    }
+    final digits = cleanNationalPhoneDigits(value);
+    if (digits.length < 8 || digits.length > 12) {
+      return l10n.validationPhoneInvalid;
+    }
+    return null;
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Form(
       key: _formKey,
-      child: Builder(
-        builder: (context) {
-          final l10n = context.l10n;
-          final theme = Theme.of(context);
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.labelEmailOrPhone,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          LoginMethodTabs(
+            selected: _method,
+            authStyle: true,
+            onChanged: (method) => setState(() => _method = method),
+          ),
+          const SizedBox(height: 20),
+          if (_method == LoginMethod.phone)
+            AuthPhoneNumberField(
+              countryCode: _dialCode,
+              countryIsoCode: _countryIso,
+              numberController: _phoneController,
+              hintText: l10n.hintPhoneNational,
+              onCountryChanged: (Country country) {
+                setState(() {
+                  _dialCode = '+${country.phoneCode}';
+                  _countryIso = country.countryCode;
+                });
+              },
+              validator: (v) => _validatePhone(v, l10n),
+            )
+          else ...[
+            Text(
+              l10n.labelEmail,
+              style: const TextStyle(
+                fontSize: 13,
+                color: AuthScreenColors.textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 6),
+            TextFormField(
+              controller: _emailController,
+              keyboardType: TextInputType.emailAddress,
+              autofillHints: const [AutofillHints.email],
+              style: const TextStyle(
+                color: AuthScreenColors.textPrimary,
+                fontSize: 15,
+              ),
+              decoration: authFieldDecoration(
+                hint: l10n.hintEmail,
+                prefixIcon: const Icon(
+                  Icons.mail_outline_rounded,
+                  color: AuthScreenColors.textSecondary,
+                  size: 20,
                 ),
               ),
-              const SizedBox(height: AppColors.spaceSM),
-              TextFormField(
-                controller: _emailPhoneController,
-                keyboardType: TextInputType.text,
-                decoration: _fieldDecoration(
-                  theme: theme,
-                  hint: l10n.hintEmailPhone,
-                ),
-                style: TextStyle(
-                  color: theme.colorScheme.onSurface,
-                  fontSize: 14,
-                ),
-                validator: (value) => _validateEmailOrPhone(value, l10n),
+              validator: (v) => _validateEmail(v, l10n),
+            ),
+          ],
+          const SizedBox(height: 16),
+          Text(
+            l10n.labelPassword,
+            style: const TextStyle(
+              fontSize: 13,
+              color: AuthScreenColors.textSecondary,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 6),
+          TextFormField(
+            controller: _passwordController,
+            obscureText: !_isPasswordVisible,
+            style: const TextStyle(
+              color: AuthScreenColors.textPrimary,
+              fontSize: 15,
+            ),
+            decoration: authFieldDecoration(
+              hint: l10n.hintPassword,
+              prefixIcon: const Icon(
+                Icons.lock_outline_rounded,
+                color: AuthScreenColors.textSecondary,
+                size: 20,
               ),
-              const SizedBox(height: AppColors.spaceMD),
-              Text(
-                l10n.labelPassword,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _isPasswordVisible
+                      ? Icons.visibility_rounded
+                      : Icons.visibility_off_rounded,
+                  color: AuthScreenColors.textSecondary,
                 ),
-              ),
-              const SizedBox(height: AppColors.spaceSM),
-              TextFormField(
-                controller: _passwordController,
-                obscureText: !_isPasswordVisible,
-                decoration: _fieldDecoration(
-                  theme: theme,
-                  hint: l10n.hintPassword,
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _isPasswordVisible
-                          ? Icons.visibility_rounded
-                          : Icons.visibility_off_rounded,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _isPasswordVisible = !_isPasswordVisible;
-                      });
-                    },
-                  ),
-                ),
-                style: TextStyle(
-                  color: theme.colorScheme.onSurface,
-                  fontSize: 14,
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return l10n.validationPasswordRequired;
-                  }
-                  if (value.length < 8) {
-                    return l10n.validationPasswordMin;
-                  }
-                  return null;
+                onPressed: () {
+                  setState(() => _isPasswordVisible = !_isPasswordVisible);
                 },
               ),
-              const SizedBox(height: AppColors.spaceLG),
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: BlocBuilder<LoginBloc, LoginState>(
-                  builder: (context, state) {
-                    return DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: AppColors.primaryGradient,
-                        ),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: ElevatedButton(
-                        onPressed: state is LoginLoading ? null : _submitForm,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                        ),
-                        child: state is LoginLoading
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : Text(
-                                l10n.loginTitle,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                      ),
-                    );
-                  },
+            ),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return l10n.validationPasswordRequired;
+              }
+              if (value.length < 8) {
+                return l10n.validationPasswordMin;
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const ForgotPasswordIdentifierScreen(),
+                  ),
+                );
+              },
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.zero,
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Text(
+                l10n.forgotPasswordLink,
+                style: const TextStyle(
+                  color: AuthScreenColors.orange,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-            ],
-          );
-        },
+            ),
+          ),
+          const SizedBox(height: 20),
+          BlocBuilder<LoginBloc, LoginState>(
+            builder: (context, state) {
+              return AuthGradientButton(
+                label: l10n.loginTitle,
+                loading: state is LoginLoading,
+                onPressed: state is LoginLoading ? null : _submitForm,
+              );
+            },
+          ),
+        ],
       ),
     );
   }
 
   void _submitForm() {
-    if (_formKey.currentState!.validate()) {
-      final emailOrPhone = _emailPhoneController.text.trim();
-      final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-      final isEmail = emailRegex.hasMatch(emailOrPhone);
+    if (!_formKey.currentState!.validate()) return;
 
-      context.read<LoginBloc>().add(
-            LoginFormSubmitted(
-              emailOrPhone,
-              _passwordController.text.trim(),
-              isEmail ? 'email' : 'phone',
-            ),
+    final isEmail = _method == LoginMethod.email;
+    final identifier = isEmail
+        ? _emailController.text.trim()
+        : normalizePhoneToBackend(
+            '$_dialCode${cleanNationalPhoneDigits(_phoneController.text)}',
           );
-    }
+
+    context.read<LoginBloc>().add(
+          LoginFormSubmitted(
+            identifier,
+            _passwordController.text.trim(),
+            isEmail ? 'email' : 'phone',
+          ),
+        );
   }
 
   @override
   void dispose() {
-    _emailPhoneController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
     _passwordController.dispose();
     super.dispose();
   }

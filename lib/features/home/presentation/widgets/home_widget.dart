@@ -4,6 +4,7 @@ import 'package:lottie/lottie.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/avatar_util.dart';
+import '../../../../core/widgets/user_avatar.dart';
 import '../../../../models/user_model.dart';
 
 /// Shown when the user lands on the Home tab and email or phone is not verified.
@@ -214,13 +215,9 @@ class _UserProfileHeaderState extends State<UserProfileHeader>
               ),
             ],
           ),
-          child: CircleAvatar(
+          child: UserAvatar(
             radius: 22,
-            backgroundColor: AppColors.primaryColor,
-            backgroundImage: getDisplayAvatarUrl(widget.user) != null
-                ? NetworkImage(getDisplayAvatarUrl(widget.user)!)
-                : const AssetImage('assets/images/profile.png')
-                    as ImageProvider,
+            imageUrl: getDisplayAvatarUrl(widget.user),
           ),
         ),
         const SizedBox(width: AppColors.spaceMD),

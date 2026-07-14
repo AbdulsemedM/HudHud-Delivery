@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/widgets/fallback_network_image.dart';
 import 'package:hudhud_delivery/features/categories/bloc/categories_bloc.dart';
 import 'package:hudhud_delivery/features/categories/data/data_provider/categories_data_provider.dart';
 import 'package:hudhud_delivery/features/categories/data/repository/categories_repository.dart';
@@ -942,17 +943,20 @@ class _VendorSliderCard extends StatelessWidget {
                   ],
                 ),
                 child: ClipOval(
-                  child: avatarUrl.isNotEmpty && avatarUrl.startsWith('http')
-                      ? Image.network(
-                          avatarUrl,
+                  child: avatarUrl.isNotEmpty &&
+                          (avatarUrl.startsWith('http') ||
+                              avatarUrl.contains('/storage/'))
+                      ? FallbackNetworkImage(
+                          url: avatarUrl,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => _avatarPlaceholder(),
+                          errorBuilder: (_) => _avatarPlaceholder(),
                         )
                       : (avatarUrl.isNotEmpty
                             ? Image.asset(
                                 avatarUrl,
                                 fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => _avatarPlaceholder(),
+                                errorBuilder: (_, __, ___) =>
+                                    _avatarPlaceholder(),
                               )
                             : _avatarPlaceholder()),
                 ),

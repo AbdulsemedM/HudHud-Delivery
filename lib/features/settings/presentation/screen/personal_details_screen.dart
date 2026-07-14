@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/utils/avatar_util.dart';
+import 'package:hudhud_delivery/core/widgets/user_avatar.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/models/user_model.dart';
 
@@ -84,52 +85,33 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                   // Profile Picture
                   Stack(
                     children: [
-                      Container(
-                        width: 100,
-                        height: 100,
-                        decoration: const BoxDecoration(
-                          color: AppColors.primaryColor,
-                          shape: BoxShape.circle,
-                        ),
-                        child: ClipOval(
-                          child: getDisplayAvatarUrl(_user) != null
-                              ? Image.network(
-                                  getDisplayAvatarUrl(_user)!,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      _buildDefaultAvatar(),
-                                )
-                              : Image.asset(
-                                  'assets/images/profile.png',
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      _buildDefaultAvatar(),
-                                ),
+                      UserAvatar(
+                        radius: 50,
+                        imageUrl: getDisplayAvatarUrl(_user),
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: colorScheme.surface,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: AppColors.primaryColor,
+                              width: 2,
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.camera_alt,
+                            size: 16,
+                            color: AppColors.primaryColor,
+                          ),
                         ),
                       ),
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: colorScheme.surface,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: AppColors.primaryColor,
-                        width: 2,
-                      ),
-                    ),
-                    child: const Icon(
-                      Icons.camera_alt,
-                      size: 16,
-                      color: AppColors.primaryColor,
-                    ),
+                    ],
                   ),
-                ),
-              ],
-            ),
                   const SizedBox(height: 16),
                   // Name
                   Text(
@@ -194,13 +176,6 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
     );
   }
 
-  Widget _buildDefaultAvatar() {
-    return const Icon(
-      Icons.person,
-      size: 50,
-      color: Colors.white,
-    );
-  }
 }
 
 class _DetailCard extends StatelessWidget {

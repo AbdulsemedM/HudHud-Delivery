@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/utils/avatar_util.dart';
+import 'package:hudhud_delivery/core/widgets/user_avatar.dart';
 import 'package:hudhud_delivery/features/orders/presentation/widgets/orders_widget.dart';
+import 'package:hudhud_delivery/models/user_model.dart';
 
 class SettingsHeader extends StatelessWidget {
-  const SettingsHeader({super.key});
+  final UserModel? user;
+
+  const SettingsHeader({super.key, this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -17,9 +22,9 @@ class SettingsHeader extends StatelessWidget {
             shape: BoxShape.circle,
             border: Border.all(color: AppColors.primaryColor, width: 2),
           ),
-          child: const CircleAvatar(
+          child: UserAvatar(
             radius: 22,
-            backgroundImage: AssetImage('assets/images/profile.png'),
+            imageUrl: getDisplayAvatarUrl(user),
           ),
         ),
         Container(
@@ -44,6 +49,7 @@ class AccountSettingsSection extends StatelessWidget {
   final String name;
   final String phone;
   final String email;
+  final UserModel? user;
 
   const AccountSettingsSection({
     super.key,
@@ -51,6 +57,7 @@ class AccountSettingsSection extends StatelessWidget {
     required this.name,
     required this.phone,
     required this.email,
+    this.user,
   });
 
   @override
@@ -84,10 +91,10 @@ class AccountSettingsSection extends StatelessWidget {
           ),
           child: Row(
             children: [
-              const StoryRing(
-                child: CircleAvatar(
+              StoryRing(
+                child: UserAvatar(
                   radius: 28,
-                  backgroundImage: AssetImage('assets/images/profile.png'),
+                  imageUrl: getDisplayAvatarUrl(user),
                 ),
               ),
               const SizedBox(width: 16),
