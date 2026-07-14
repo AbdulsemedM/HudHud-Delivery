@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
+import 'package:lottie/lottie.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/widgets/status_chip.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
-import 'package:hudhud_delivery/features/chat/utils/chat_navigation.dart';
-import 'package:hudhud_delivery/core/widgets/map_draggable_sheet_scaffold.dart';
-import 'package:hudhud_delivery/features/guest/utils/guest_sign_in_prompt.dart';
-import 'package:hudhud_delivery/features/sos/presentation/widgets/sos_trigger_button.dart';
+import '../../../home/presentation/widgets/home_widget.dart';
 
 class DeliveryTrackingScreen extends StatefulWidget {
   final int? deliveryId;
@@ -133,10 +132,6 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
 
   Future<void> _fetchTrackData() async {
     if (widget.deliveryId == null) return;
-    if (!await requireSignInForBackend(context)) {
-      if (mounted) setState(() => _isLoadingTrack = false);
-      return;
-    }
     try {
       final result =
           await _courierRepository.getDeliveryTrack(widget.deliveryId!);
@@ -161,17 +156,6 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
         });
       }
     }
-  }
-
-  bool get _hasAssignedDriver {
-    final driver = _trackData?['driver'];
-    return driver != null && driver is Map && driver.isNotEmpty;
-  }
-
-  void _openDriverChat() {
-    final deliveryId = widget.deliveryId;
-    if (deliveryId == null || !_hasAssignedDriver) return;
-    openPackageDeliveryChat(context, deliveryId);
   }
 
   String _formatTimestamp(dynamic value) {
@@ -260,50 +244,31 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
     }
 
     final colorScheme = Theme.of(context).colorScheme;
-    final overlayTop = mapOverlayTop(context);
-
-    return MapDraggableSheetScaffold(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final borderColor =
+        isDark ? const Color(0xFF2A2A2A) : const Color(0xFFEEEEEE);
+    final statusText = _trackData?['current_status']?.toString() ??
+        _trackData?['status']?.toString() ??
+        'in_progress';
+    return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      initialChildSize: 0.5,
-      minChildSize: 0.35,
-      maxChildSize: 0.85,
-      onSheetLayoutChanged: (_, __) => _fitBounds(),
-      map: gmaps.GoogleMap(
-        initialCameraPosition: gmaps.CameraPosition(
-          target: _toG(mapCenter),
-          zoom: 13.0,
-        ),
-        markers: markers,
-        polylines: polylines,
-        onMapCreated: (controller) {
-          _mapController = controller;
-          _fitBounds();
-        },
-      ),
-      mapOverlays: [
-        Positioned(
-          top: overlayTop,
-          left: 16,
-          child: Container(
-            decoration: BoxDecoration(
-              color: colorScheme.surface,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: colorScheme.shadow.withOpacity(0.2),
-                  blurRadius: 4,
-                ),
-              ],
+      body: Stack(
+        children: [
+          gmaps.GoogleMap(
+            initialCameraPosition: gmaps.CameraPosition(
+              target: _toG(mapCenter),
+              zoom: 13.0,
             ),
-            child: IconButton(
-              icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
-              onPressed: () => Navigator.pop(context),
-            ),
+            markers: markers,
+            polylines: polylines,
+            onMapCreated: (controller) {
+              _mapController = controller;
+              _fitBounds();
+            },
           ),
-        ),
-        if (widget.deliveryId != null)
+          // Back button
           Positioned(
-            top: overlayTop + 52,
+            top: 40,
             left: 16,
             child: Container(
               decoration: BoxDecoration(
@@ -311,84 +276,83 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: colorScheme.shadow.withOpacity(0.2),
+                    color: colorScheme.shadow.withValues(alpha: 0.2),
                     blurRadius: 4,
                   ),
                 ],
               ),
-              child: SosTriggerButton(
-                compact: true,
-                orderId: widget.deliveryId,
+              child: IconButton(
+                icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
+                onPressed: () => Navigator.pop(context),
               ),
             ),
           ),
-        Positioned(
-          top: overlayTop,
-          right: 16,
-          left: 72,
-          child: Align(
-            alignment: Alignment.centerRight,
+          // Status badge
+          Positioned(
+            top: 40,
+            right: 16,
             child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
               decoration: BoxDecoration(
-                color: AppColors.primaryColor,
-                borderRadius: BorderRadius.circular(20),
+                color: colorScheme.surface,
+                borderRadius: BorderRadius.circular(AppColors.radiusFull),
+                border: Border.all(color: borderColor),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: colorScheme.shadow.withValues(alpha: 0.15),
                     blurRadius: 4,
                   ),
                 ],
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
+              child: StatusChip(status: statusText),
+            ),
+          ),
+          // Bottom Sheet Modal
+          DraggableScrollableSheet(
+            initialChildSize: 0.5,
+            minChildSize: 0.35,
+            maxChildSize: 0.85,
+            builder: (context, scrollController) {
+              return Container(
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(AppColors.radiusLG),
+                    topRight: Radius.circular(AppColors.radiusLG),
                   ),
-                  const SizedBox(width: 6),
-                  Flexible(
-                    child: Text(
-                      _trackData?['current_status']?.toString() ??
-                          _trackData?['status']?.toString() ??
-                          'Delivery in progress',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
+                  border: Border(
+                    top: BorderSide(color: borderColor),
+                    left: BorderSide(color: borderColor),
+                    right: BorderSide(color: borderColor),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    // Drag handle
+                    Container(
+                      margin: const EdgeInsets.only(top: 8),
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: colorScheme.outlineVariant,
+                        borderRadius: BorderRadius.circular(2),
                       ),
-                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-      sheetBuilder: (context, scrollController) {
-        return Container(
-          decoration: BoxDecoration(
-            color: colorScheme.surface,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
-            ),
-          ),
-          child: Column(
-            children: [
-              const MapSheetDragHandle(),
-              // Current Status Banner
+                    // Current Status Banner
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      color: AppColors.primaryColor,
+                      padding: const EdgeInsets.all(AppColors.spaceMD),
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            AppColors.primaryColor,
+                            AppColors.primaryDarkColor,
+                          ],
+                        ),
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(AppColors.radiusLG),
+                        ),
+                      ),
                       child: Row(
                         children: [
                           Expanded(
@@ -427,15 +391,14 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                           ),
                           Container(
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
+                              color: Colors.white.withValues(alpha: 0.2),
                               shape: BoxShape.circle,
                             ),
                             child: IconButton(
                               icon: const Icon(Icons.send, color: Colors.white),
-                              onPressed: _hasAssignedDriver &&
-                                      widget.deliveryId != null
-                                  ? _openDriverChat
-                                  : null,
+                              onPressed: () {
+                                // TODO: Implement send action
+                              },
                             ),
                           ),
                         ],
@@ -444,11 +407,9 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                     // Content
                     Expanded(
                       child: _isLoadingTrack
-                          ? const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(24),
-                                child: CircularProgressIndicator(),
-                              ),
+                          ? const Padding(
+                              padding: EdgeInsets.all(AppColors.spaceMD),
+                              child: ShimmerListView(itemCount: 3),
                             )
                           : _trackError != null
                               ? Center(
@@ -480,10 +441,13 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                                               ?.toString() ??
                                               'Driver')
                                           : _trackData!['driver'].toString(),
+                                      borderColor: borderColor,
                                       onCall: () {
                                         // TODO: Implement call
                                       },
-                                      onMessage: _openDriverChat,
+                                      onMessage: () {
+                                        // TODO: Implement message
+                                      },
                                     ),
                                     const SizedBox(height: 16),
                                   ],
@@ -503,6 +467,7 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                                         widget.deliveryLocation,
                                     createdDate: _formatTimestamp(
                                         _trackData?['last_updated']),
+                                    borderColor: borderColor,
                                   ),
                                   const SizedBox(height: 16),
                                   // Tracking Order (timeline from API)
@@ -515,6 +480,7 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                                                     ? e
                                                     : <String, dynamic>{}))
                                         : null,
+                                    borderColor: borderColor,
                                   ),
                                 ],
                               ),
@@ -523,7 +489,10 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                   ],
                 ),
               );
-      },
+            },
+          ),
+        ],
+      ),
     );
   }
 }
@@ -532,28 +501,24 @@ class _DriverCard extends StatelessWidget {
   final String driverName;
   final VoidCallback onCall;
   final VoidCallback onMessage;
+  final Color borderColor;
 
   const _DriverCard({
     required this.driverName,
     required this.onCall,
     required this.onMessage,
+    required this.borderColor,
   });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppColors.spaceMD),
       decoration: BoxDecoration(
         color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.shadow.withOpacity(0.06),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        border: Border.all(color: borderColor),
       ),
       child: Row(
         children: [
@@ -627,29 +592,25 @@ class _ReviewOrderCard extends StatelessWidget {
   final String from;
   final String to;
   final String createdDate;
+  final Color borderColor;
 
   const _ReviewOrderCard({
     required this.courierNumber,
     required this.from,
     required this.to,
     required this.createdDate,
+    required this.borderColor,
   });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppColors.spaceMD),
       decoration: BoxDecoration(
         color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.shadow.withOpacity(0.06),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        border: Border.all(color: borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -684,8 +645,9 @@ class _ReviewOrderCard extends StatelessWidget {
 
 class _TrackingOrderCard extends StatelessWidget {
   final List<Map<String, dynamic>>? timeline;
+  final Color borderColor;
 
-  const _TrackingOrderCard({this.timeline});
+  const _TrackingOrderCard({this.timeline, required this.borderColor});
 
   String _formatTimestamp(dynamic value) {
     if (value == null) return '—';
@@ -709,37 +671,34 @@ class _TrackingOrderCard extends StatelessWidget {
     final items = timeline ?? [];
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppColors.spaceMD),
       decoration: BoxDecoration(
         color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.shadow.withOpacity(0.06),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        border: Border.all(color: borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Tracking Order',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: colorScheme.onSurface,
-            ),
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
           ),
           const SizedBox(height: 16),
           if (items.isEmpty)
-            Text(
-              'No tracking updates yet',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
-              ),
+            Column(
+              children: [
+                Lottie.asset('assets/animations/browse.json', width: 120),
+                const SizedBox(height: 8),
+                Text(
+                  'No tracking updates yet',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                ),
+              ],
             )
           else
             ...items.asMap().entries.map((entry) {
@@ -780,9 +739,9 @@ class _TrackingItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color dotColor = Colors.grey[400]!;
+    Color dotColor = Theme.of(context).colorScheme.onSurfaceVariant;
     if (isActive) dotColor = AppColors.primaryColor;
-    if (isCompleted) dotColor = Colors.green;
+    if (isCompleted) dotColor = AppColors.delivered;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -802,19 +761,16 @@ class _TrackingItem extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-                  color: const Color(0xFF2C3E50),
-                ),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                    ),
               ),
               const SizedBox(height: 4),
               Text(
                 date,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                ),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
               ),
             ],
           ),
@@ -835,6 +791,7 @@ class _DetailItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -842,20 +799,17 @@ class _DetailItem extends StatelessWidget {
           width: 100,
           child: Text(
             label,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey[600],
-            ),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
           ),
         ),
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: Color(0xFF2C3E50),
-            ),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
           ),
         ),
       ],

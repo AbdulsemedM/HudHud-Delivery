@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:hudhud_delivery/core/widgets/custom_text_field.dart';
-import 'package:hudhud_delivery/core/widgets/user_avatar.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/widgets/status_chip.dart';
 import 'package:hudhud_delivery/features/orders/presentation/widgets/orders_widget.dart';
+import 'package:hudhud_delivery/core/widgets/custom_text_field.dart';
 
 class DeliverySummaryCard extends StatelessWidget {
   final double amount;
@@ -28,16 +29,16 @@ class DeliverySummaryCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Color(0xFFFFA07A),
-            Color(0xFFFFF3E0),
+            AppColors.primaryColor.withValues(alpha: 0.15),
+            AppColors.primaryColor.withValues(alpha: 0.04),
           ],
-          stops: [0.0, 1.0],
         ),
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        border: Border.all(color: AppColors.primaryColor.withValues(alpha: 0.2)),
       ),
       child: Column(
         children: [
@@ -79,22 +80,7 @@ class DeliverySummaryCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              deliveryType.toUpperCase(),
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: Colors.deepOrange,
-                letterSpacing: 0.5,
-              ),
-            ),
-          ),
+          StatusChip(status: deliveryType.toLowerCase().replaceAll(' ', '_')),
         ],
       ),
     );
@@ -218,28 +204,39 @@ class BillingDetailsTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Billing Details',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.all(AppColors.spaceMD),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Billing Details',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: colorScheme.onSurface,
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-        _buildRow('Base fare', baseFare),
-        _buildRow('Distance Charges', distanceCharges),
-        _buildRow('Minutes Charges', minutesCharges),
-        _buildRow('Tip', tip),
-        const SizedBox(height: 8),
-        _buildRow('Total', total, isTotal: true),
-      ],
+          const SizedBox(height: 16),
+          _buildRow('Base fare', baseFare, colorScheme),
+          _buildRow('Distance Charges', distanceCharges, colorScheme),
+          _buildRow('Minutes Charges', minutesCharges, colorScheme),
+          _buildRow('Tip', tip, colorScheme),
+          const SizedBox(height: 8),
+          _buildRow('Total', total, colorScheme, isTotal: true),
+        ],
+      ),
     );
   }
 
-  Widget _buildRow(String label, double amount, {bool isTotal = false}) {
+  Widget _buildRow(String label, double amount, ColorScheme colorScheme,
+      {bool isTotal = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -249,7 +246,7 @@ class BillingDetailsTable extends StatelessWidget {
             label,
             style: TextStyle(
               fontSize: 16,
-              color: isTotal ? Colors.black : Colors.grey[600],
+              color: isTotal ? colorScheme.onSurface : colorScheme.onSurfaceVariant,
               fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
             ),
           ),
@@ -257,7 +254,7 @@ class BillingDetailsTable extends StatelessWidget {
             'ETB ${amount.toStringAsFixed(2)}',
             style: TextStyle(
               fontSize: 16,
-              color: isTotal ? Colors.purple : Colors.grey[600],
+              color: isTotal ? AppColors.primaryColor : colorScheme.onSurfaceVariant,
               fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
             ),
           ),
@@ -281,12 +278,10 @@ class DriverInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        StoryRing(
-          child: UserAvatar(
+        const StoryRing(
+          child: CircleAvatar(
             radius: 20,
-            imageUrl: imageUrl.isNotEmpty && imageUrl.startsWith('http')
-                ? imageUrl
-                : null,
+            backgroundImage: AssetImage('assets/images/profile.png'),
           ),
         ),
         const SizedBox(width: 16),
@@ -343,10 +338,10 @@ class CommentSection extends StatelessWidget {
         ElevatedButton(
           onPressed: onSubmit,
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.deepPurple,
+            backgroundColor: AppColors.primaryColor,
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppColors.radiusLG),
             ),
           ),
           child: const Text(

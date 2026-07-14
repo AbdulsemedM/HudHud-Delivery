@@ -48,8 +48,9 @@ class ServiceTypesRepository {
   String _cleanErrorMessage(String message) {
     if (message.startsWith('Exception: ')) message = message.substring(11);
     if (message.startsWith('ApiException: ')) message = message.substring(14);
-    if (message.startsWith('FormatException: '))
+    if (message.startsWith('FormatException: ')) {
       message = message.substring(17);
+    }
     return message;
   }
 }

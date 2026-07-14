@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
@@ -9,8 +10,6 @@ import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/utils/phone_util.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
-import 'package:hudhud_delivery/features/guest/utils/guest_sign_in_prompt.dart';
-import 'package:hudhud_delivery/core/widgets/map_draggable_sheet_scaffold.dart';
 import 'finding_courier_screen.dart';
 
 class ConfirmDetailsScreen extends StatefulWidget {
@@ -175,10 +174,6 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
   }
 
   Future<void> _fetchEstimate() async {
-    if (!await requireSignInForBackend(context)) {
-      if (mounted) setState(() => _isLoadingEstimate = false);
-      return;
-    }
     if (widget.pickupPosition == null || widget.deliveryPosition == null) {
       setState(() {
         _isLoadingEstimate = false;
@@ -215,8 +210,6 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
   }
 
   Future<void> _createDeliveryRequest() async {
-    if (!await requireSignInForBackend(context)) return;
-
     final user = await AuthService().getStoredUser();
 
     final requestData = <String, dynamic>{
@@ -319,163 +312,212 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
     }
 
     final colorScheme = Theme.of(context).colorScheme;
-    final overlayTop = mapOverlayTop(context);
-
-    return MapDraggableSheetScaffold(
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final borderColor =
+        isDark ? const Color(0xFF2A2A2A) : const Color(0xFFEEEEEE);
+    return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      initialChildSize: 0.5,
-      minChildSize: 0.35,
-      maxChildSize: 0.85,
-      onSheetLayoutChanged: (_, __) => _fitBounds(),
-      map: _buildMapOrFallback(mapCenter),
-      mapOverlays: [
-        Positioned(
-          top: overlayTop,
-          left: 16,
-          child: Container(
-            decoration: BoxDecoration(
-              color: colorScheme.surface,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: colorScheme.shadow.withOpacity(0.2),
-                  blurRadius: 4,
+      body: Stack(
+        children: [
+          _buildMapOrFallback(mapCenter),
+          Positioned(
+            top: 40,
+            left: 16,
+            child: Container(
+              decoration: BoxDecoration(
+                color: colorScheme.surface,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: colorScheme.shadow.withValues(alpha: 0.2),
+                    blurRadius: 4,
+                  ),
+                ],
+              ),
+              child: IconButton(
+                icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 40,
+            right: 16,
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: colorScheme.surface,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: colorScheme.shadow.withValues(alpha: 0.2),
+                    blurRadius: 4,
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.two_wheeler,
+                color: AppColors.primaryColor,
+                size: 24,
+              ),
+            ),
+          ),
+          DraggableScrollableSheet(
+            initialChildSize: 0.5,
+            minChildSize: 0.35,
+            maxChildSize: 0.85,
+            builder: (context, scrollController) {
+              return Container(
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(AppColors.radiusLG),
+                    topRight: Radius.circular(AppColors.radiusLG),
+                  ),
+                  border: Border(
+                    top: BorderSide(color: borderColor),
+                    left: BorderSide(color: borderColor),
+                    right: BorderSide(color: borderColor),
+                  ),
                 ),
-              ],
-            ),
-            child: IconButton(
-              icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ),
-        ),
-        Positioned(
-          top: overlayTop,
-          right: 16,
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: colorScheme.surface,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: colorScheme.shadow.withOpacity(0.2),
-                  blurRadius: 4,
-                ),
-              ],
-            ),
-            child: Icon(
-              Icons.two_wheeler,
-              color: AppColors.primaryColor,
-              size: 24,
-            ),
-          ),
-        ),
-      ],
-      sheetBuilder: (context, scrollController) {
-        return Container(
-          decoration: BoxDecoration(
-            color: colorScheme.surface,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
-            ),
-          ),
-          child: Column(
-            children: [
-              const MapSheetDragHandle(),
-              Expanded(
-                child: SingleChildScrollView(
-                  controller: scrollController,
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                            const Text(
+                child: Column(
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.only(top: 8),
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: colorScheme.outlineVariant,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        controller: scrollController,
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
                               'Confirm Details',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF2C3E50),
+                              style: theme.textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
-                            const SizedBox(height: 24),
-                            _DetailRow(
-                              icon: Icons.location_on,
-                              iconColor: Colors.red,
-                              label: 'Pickup Location',
-                              value: widget.pickupLocation,
-                            ),
-                            const SizedBox(height: 16),
-                            _DetailRow(
-                              icon: Icons.location_on,
-                              iconColor: Colors.green,
-                              label: 'Delivery Location',
-                              value: widget.deliveryLocation,
-                            ),
-                            const SizedBox(height: 24),
-                            _DetailRow(
-                              label: 'What you are sending',
-                              value: widget.itemType,
-                            ),
-                            const SizedBox(height: 12),
-                            _DetailRow(
-                              label: 'Recipient',
-                              value: widget.recipientName,
-                            ),
-                            const SizedBox(height: 12),
-                            _DetailRow(
-                              label: 'Recipient contact number',
-                              value: widget.recipientPhone,
-                            ),
-                            const SizedBox(height: 24),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _DetailRow(
-                                    label: 'Payment',
-                                    value: widget.paymentType,
+                            const SizedBox(height: AppColors.spaceMD),
+                            _DetailCard(
+                              borderColor: borderColor,
+                              child: Column(
+                                children: [
+                                  _DetailRow(
+                                    icon: Icons.location_on,
+                                    iconColor: colorScheme.error,
+                                    label: 'Pickup Location',
+                                    value: widget.pickupLocation,
                                   ),
-                                ),
-                                const SizedBox(width: 16),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    const Text(
-                                      'Estimated fee',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey,
-                                      ),
+                                  const Divider(height: 24),
+                                  _DetailRow(
+                                    icon: Icons.location_on,
+                                    iconColor: AppColors.delivered,
+                                    label: 'Delivery Location',
+                                    value: widget.deliveryLocation,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: AppColors.spaceMD),
+                            _DetailCard(
+                              borderColor: borderColor,
+                              child: Column(
+                                children: [
+                                  _DetailRow(
+                                    label: 'What you are sending',
+                                    value: widget.itemType,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  _DetailRow(
+                                    label: 'Recipient',
+                                    value: widget.recipientName,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  _DetailRow(
+                                    label: 'Recipient contact number',
+                                    value: widget.recipientPhone,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: AppColors.spaceMD),
+                            _DetailCard(
+                              borderColor: borderColor,
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: _DetailRow(
+                                      label: 'Payment',
+                                      value: widget.paymentType,
                                     ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      estimatedFeeText,
-                                      style: TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.primaryColor,
-                                      ),
-                                    ),
-                                    if (_estimateError != null)
-                                      Padding(
-                                        padding: const EdgeInsets.only(top: 4),
-                                        child: Text(
-                                          _estimateError!,
-                                          style: const TextStyle(
-                                            fontSize: 10,
-                                            color: Colors.red,
-                                          ),
+                                  ),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        'Estimated fee',
+                                        style: theme.textTheme.bodySmall
+                                            ?.copyWith(
+                                          color: colorScheme.onSurfaceVariant,
                                         ),
                                       ),
-                                  ],
-                                ),
-                              ],
+                                      const SizedBox(height: 4),
+                                      _isLoadingEstimate
+                                          ? Shimmer.fromColors(
+                                              baseColor: isDark
+                                                  ? const Color(0xFF2A2A2A)
+                                                  : const Color(0xFFE0E0E0),
+                                              highlightColor: isDark
+                                                  ? const Color(0xFF3A3A3A)
+                                                  : const Color(0xFFF5F5F5),
+                                              child: Container(
+                                                width: 80,
+                                                height: 24,
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  borderRadius:
+                                                      BorderRadius.circular(4),
+                                                ),
+                                              ),
+                                            )
+                                          : Text(
+                                              estimatedFeeText,
+                                              style: theme
+                                                  .textTheme.titleLarge
+                                                  ?.copyWith(
+                                                fontWeight: FontWeight.w700,
+                                                color: AppColors.primaryColor,
+                                              ),
+                                            ),
+                                      if (_estimateError != null)
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 4),
+                                          child: Text(
+                                            _estimateError!,
+                                            style: theme.textTheme.bodySmall
+                                                ?.copyWith(
+                                              color: AppColors.errorColor,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
-                            const SizedBox(height: 32),
+                            const SizedBox(height: AppColors.spaceLG),
                             TextButton(
                               onPressed: () => Navigator.pop(context),
-                              child: Text(
+                              child: const Text(
                                 'Edit Details',
                                 style: TextStyle(
                                   color: AppColors.primaryColor,
@@ -484,18 +526,20 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: AppColors.spaceMD),
                             SizedBox(
                               width: double.infinity,
-                              height: 50,
+                              height: AppColors.buttonHeightMD,
                               child: ElevatedButton(
                                 onPressed: _isLoadingRequest
                                     ? null
                                     : _createDeliveryRequest,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: AppColors.primaryColor,
+                                  foregroundColor: Colors.white,
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                                    borderRadius: BorderRadius.circular(
+                                        AppColors.radiusLG),
                                   ),
                                 ),
                                 child: _isLoadingRequest
@@ -510,7 +554,6 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                                     : const Text(
                                         'Look for Courier',
                                         style: TextStyle(
-                                          color: Colors.white,
                                           fontSize: 16,
                                           fontWeight: FontWeight.w600,
                                         ),
@@ -525,7 +568,10 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                   ],
                 ),
               );
-      },
+            },
+          ),
+        ],
+      ),
     );
   }
 
@@ -591,6 +637,28 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
   }
 }
 
+class _DetailCard extends StatelessWidget {
+  final Widget child;
+  final Color borderColor;
+
+  const _DetailCard({required this.child, required this.borderColor});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppColors.spaceMD),
+      decoration: BoxDecoration(
+        color: scheme.surface,
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        border: Border.all(color: borderColor),
+      ),
+      child: child,
+    );
+  }
+}
+
 class _DetailRow extends StatelessWidget {
   final IconData? icon;
   final Color? iconColor;
@@ -606,6 +674,7 @@ class _DetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -619,19 +688,16 @@ class _DetailRow extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                ),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
               ),
               const SizedBox(height: 4),
               Text(
                 value,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF2C3E50),
-                ),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
               ),
             ],
           ),

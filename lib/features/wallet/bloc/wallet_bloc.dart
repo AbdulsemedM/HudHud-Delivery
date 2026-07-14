@@ -76,7 +76,7 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
       if (wallet != null) {
         emit(WalletDetailLoaded(wallet: wallet));
       } else {
-        emit(WalletDetailError(message: 'Wallet not found'));
+        emit(const WalletDetailError(message: 'Wallet not found'));
       }
     } catch (e) {
       emit(WalletDetailError(message: e.toString()));

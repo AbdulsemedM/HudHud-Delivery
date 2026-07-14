@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
-import 'package:hudhud_delivery/features/tips/presentation/widgets/tip_order_card.dart';
-import 'package:hudhud_delivery/features/tips/tips_bloc_provider.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import '../../bloc/orders_bloc.dart';
 import '../../data/models/order_model.dart';
 import '../../data/models/order_tracking_model.dart';
-import 'package:hudhud_delivery/features/chat/utils/chat_navigation.dart';
-
-import '../widgets/order_details_header.dart';
 import '../widgets/order_details_widgets.dart';
 
 class OrderDetailsScreen extends StatefulWidget {
@@ -30,16 +27,15 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return tipsBlocProvider(
-      child: Scaffold(
-        backgroundColor: theme.scaffoldBackgroundColor,
-        body: BlocConsumer<OrdersBloc, OrdersState>(
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: BlocConsumer<OrdersBloc, OrdersState>(
         listener: (context, state) {
           if (state is OrdersError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: Colors.red,
+                backgroundColor: theme.colorScheme.error,
               ),
             );
           }
@@ -47,7 +43,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: Colors.green,
+                backgroundColor: AppColors.successColor,
               ),
             );
             Navigator.of(context).pop();
@@ -56,18 +52,14 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: Colors.green,
+                backgroundColor: AppColors.successColor,
               ),
             );
           }
         },
         builder: (context, state) {
           if (state is OrderDetailsLoading) {
-            return const Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.orange),
-              ),
-            );
+            return _buildLoadingState(context);
           }
 
           if (state is OrderDetailsLoaded) {
@@ -84,7 +76,50 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
           );
         },
       ),
-      ),
+    );
+  }
+
+  Widget _buildLoadingState(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseColor = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0);
+    final highlightColor =
+        isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF5F5F5);
+
+    return CustomScrollView(
+      slivers: [
+        SliverAppBar(
+          pinned: true,
+          backgroundColor: AppColors.primaryColor,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Shimmer.fromColors(
+              baseColor: baseColor,
+              highlightColor: highlightColor,
+              child: Column(
+                children: List.generate(3, (index) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Container(
+                      height: 120,
+                      decoration: BoxDecoration(
+                        color: baseColor,
+                        borderRadius:
+                            BorderRadius.circular(AppColors.radiusLG),
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -92,67 +127,84 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       BuildContext context, OrderModel order, OrderTrackingModel? tracking) {
     return CustomScrollView(
       slivers: [
-        OrderDetailsSliverHeader(
-          order: order,
-          onChat: () => openOrderChat(context, order.id),
-          onCancel: order.canBeCancelled
-              ? () => _showCancelOrderDialog(context, order)
-              : null,
+        SliverAppBar(
+          expandedHeight: 120,
+          floating: false,
+          pinned: true,
+          backgroundColor: AppColors.primaryColor,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          flexibleSpace: FlexibleSpaceBar(
+            title: Text(
+              context.l10n.orderAppBarTitle(order.orderNumber),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            background: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppColors.primaryColor,
+                    AppColors.primaryDarkColor,
+                  ],
+                ),
+              ),
+            ),
+          ),
+          actions: [
+            if (order.canBeCancelled)
+              IconButton(
+                icon: const Icon(Icons.cancel_outlined, color: Colors.white),
+                onPressed: () => _showCancelOrderDialog(context, order),
+              ),
+          ],
         ),
-
-        // Order Content
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(AppColors.spaceMD),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Order Status Card
                 OrderStatusCard(order: order),
-                const SizedBox(height: 16),
-
-                // Order Tracking (when available)
+                const SizedBox(height: AppColors.spaceMD),
                 if (tracking != null) ...[
                   OrderTrackingCard(tracking: tracking),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppColors.spaceMD),
                 ],
-
-                // Order Timeline
                 OrderTimelineCard(order: order),
-                const SizedBox(height: 16),
-
-                // Vendor Information
-                VendorInfoCard(vendor: order.vendor),
-                const SizedBox(height: 16),
-
-                // Order Items
-                OrderItemsCard(items: order.items),
-                const SizedBox(height: 16),
-
-                // Delivery Information
+                const SizedBox(height: AppColors.spaceMD),
+                PackageInfoCard(order: order),
+                const SizedBox(height: AppColors.spaceMD),
                 DeliveryInfoCard(order: order),
-                const SizedBox(height: 16),
-
-                // Payment Information
+                const SizedBox(height: AppColors.spaceMD),
                 PaymentInfoCard(order: order),
-                const SizedBox(height: 16),
-
-                // Order Summary
+                const SizedBox(height: AppColors.spaceMD),
+                VendorInfoCard(vendor: order.vendor),
+                const SizedBox(height: AppColors.spaceMD),
+                OrderItemsCard(items: order.items),
+                const SizedBox(height: AppColors.spaceMD),
                 OrderSummaryCard(order: order),
                 if (order.isDelivered) ...[
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppColors.spaceMD),
                   RateOrderCard(
                     order: order,
                     onRate: (rating, review) {
                       context.read<OrdersBloc>().add(
-                            RateOrderEvent(order.id, rating: rating, review: review),
+                            RateOrderEvent(order.id,
+                                rating: rating, review: review),
                           );
                     },
                   ),
-                  const SizedBox(height: 16),
-                  TipOrderCard(order: order),
                 ],
-                const SizedBox(height: 100), // Bottom padding
+                const SizedBox(height: 100),
               ],
             ),
           ),
@@ -163,36 +215,41 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
 
   Widget _buildErrorState(BuildContext context, String message) {
     final l10n = context.l10n;
+    final colorScheme = Theme.of(context).colorScheme;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
-            Icons.error_outline,
-            size: 64,
-            color: Colors.red,
+          Icon(
+            Icons.wifi_off_rounded,
+            size: 48,
+            color: colorScheme.onSurfaceVariant,
           ),
           const SizedBox(height: 16),
           Text(
             l10n.orderDetailsLoadErrorTitle,
-            style: Theme.of(context).textTheme.headlineSmall,
+            style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
-          Text(
-            message,
-            style: Theme.of(context).textTheme.bodyMedium,
-            textAlign: TextAlign.center,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              message,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+              textAlign: TextAlign.center,
+            ),
           ),
           const SizedBox(height: 24),
-          ElevatedButton(
+          TextButton.icon(
             onPressed: () {
-              context.read<OrdersBloc>().add(FetchOrderDetailsEvent(widget.orderId));
+              context
+                  .read<OrdersBloc>()
+                  .add(FetchOrderDetailsEvent(widget.orderId));
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
-              foregroundColor: Colors.white,
-            ),
-            child: Text(l10n.actionRetry),
+            icon: const Icon(Icons.refresh),
+            label: Text(l10n.actionRetry),
           ),
         ],
       ),
@@ -207,8 +264,8 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
           order: order,
           onCancel: (reason) {
             context.read<OrdersBloc>().add(
-              CancelOrderEvent(order.id, reason: reason),
-            );
+                  CancelOrderEvent(order.id, reason: reason),
+                );
           },
         );
       },

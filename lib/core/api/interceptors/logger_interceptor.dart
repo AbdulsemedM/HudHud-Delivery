@@ -5,18 +5,18 @@ class LoggerInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     if (kDebugMode) {
-      print('\n🚀 REQUEST[${options.method}] => PATH: ${options.path}');
-      print('Headers: ${options.headers}');
-      print('Query Parameters: ${options.queryParameters}');
+      debugPrint('\n🚀 REQUEST[${options.method}] => PATH: ${options.path}');
+      debugPrint('Headers: ${options.headers}');
+      debugPrint('Query Parameters: ${options.queryParameters}');
       if (options.data != null) {
-        print('Body: ${options.data}');
+        debugPrint('Body: ${options.data}');
       }
-      print('Base URL: ${options.baseUrl}');
-      print('Full URL: ${options.uri}');
-      print('Connect Timeout: ${options.connectTimeout}');
-      print('Receive Timeout: ${options.receiveTimeout}');
-      print('Send Timeout: ${options.sendTimeout}');
-      print('═══════════════════════════════════════════════════════════════');
+      debugPrint('Base URL: ${options.baseUrl}');
+      debugPrint('Full URL: ${options.uri}');
+      debugPrint('Connect Timeout: ${options.connectTimeout}');
+      debugPrint('Receive Timeout: ${options.receiveTimeout}');
+      debugPrint('Send Timeout: ${options.sendTimeout}');
+      debugPrint('═══════════════════════════════════════════════════════════════');
     }
     super.onRequest(options, handler);
   }
@@ -24,13 +24,13 @@ class LoggerInterceptor extends Interceptor {
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
     if (kDebugMode) {
-      print('\n✅ RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.path}');
-      print('Headers: ${response.headers}');
-      print('Response Data: ${_formatResponseData(response.data)}');
-      print('Status Message: ${response.statusMessage}');
-      print('Is Redirect: ${response.isRedirect}');
-      print('Real URI: ${response.realUri}');
-      print('═══════════════════════════════════════════════════════════════');
+      debugPrint('\n✅ RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.path}');
+      debugPrint('Headers: ${response.headers}');
+      debugPrint('Response Data: ${_formatResponseData(response.data)}');
+      debugPrint('Status Message: ${response.statusMessage}');
+      debugPrint('Is Redirect: ${response.isRedirect}');
+      debugPrint('Real URI: ${response.realUri}');
+      debugPrint('═══════════════════════════════════════════════════════════════');
     }
     super.onResponse(response, handler);
   }
@@ -38,23 +38,23 @@ class LoggerInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
     if (kDebugMode) {
-      print('\n❌ ERROR[${err.response?.statusCode}] => PATH: ${err.requestOptions.path}');
-      print('Error Type: ${err.type}');
-      print('Error Message: ${err.message}');
+      debugPrint('\n❌ ERROR[${err.response?.statusCode}] => PATH: ${err.requestOptions.path}');
+      debugPrint('Error Type: ${err.type}');
+      debugPrint('Error Message: ${err.message}');
       
       if (err.response != null) {
-        print('Response Headers: ${err.response!.headers}');
-        print('Response Data: ${_formatResponseData(err.response!.data)}');
-        print('Status Code: ${err.response!.statusCode}');
-        print('Status Message: ${err.response!.statusMessage}');
+        debugPrint('Response Headers: ${err.response!.headers}');
+        debugPrint('Response Data: ${_formatResponseData(err.response!.data)}');
+        debugPrint('Status Code: ${err.response!.statusCode}');
+        debugPrint('Status Message: ${err.response!.statusMessage}');
       }
       
       if (err.requestOptions.data != null) {
-        print('Request Data: ${err.requestOptions.data}');
+        debugPrint('Request Data: ${err.requestOptions.data}');
       }
       
-      print('Stack Trace: ${err.stackTrace}');
-      print('═══════════════════════════════════════════════════════════════');
+      debugPrint('Stack Trace: ${err.stackTrace}');
+      debugPrint('═══════════════════════════════════════════════════════════════');
     }
     super.onError(err, handler);
   }

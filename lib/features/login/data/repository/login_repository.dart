@@ -37,7 +37,7 @@ class LoginRepository {
       }
     } catch (e) {
       if (e is String) {
-        throw e; // Re-throw clean string errors
+        rethrow; // Re-throw clean string errors
       }
       // Clean any exception messages
       String errorMessage = _cleanErrorMessage(e.toString());
@@ -115,7 +115,7 @@ class LoginRepository {
       }
     } catch (e) {
       if (e is String) {
-        throw e;
+        rethrow;
       }
       String errorMessage = _cleanErrorMessage(e.toString());
       throw errorMessage;

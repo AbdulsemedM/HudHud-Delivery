@@ -80,7 +80,7 @@ class _PaymentDetailsFormState extends State<PaymentDetailsForm> {
         color: isDark ? AppColors.darkSurfaceVariant : Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isDark ? AppColors.darkBorder : Colors.grey.withOpacity(0.25),
+          color: isDark ? AppColors.darkBorder : Colors.grey.withValues(alpha: 0.25),
         ),
       ),
       child: Column(
@@ -106,7 +106,7 @@ class _PaymentDetailsFormState extends State<PaymentDetailsForm> {
           if (widget.paymentMethodCode == 'ebirr') ...[
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: widget.ebirrProvider,
+              initialValue: widget.ebirrProvider,
               decoration: const InputDecoration(
                 labelText: 'Provider',
                 border: OutlineInputBorder(),

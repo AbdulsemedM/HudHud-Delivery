@@ -199,7 +199,7 @@ class VendorModel extends Equatable {
     final h = int.tryParse(parts[0]) ?? 0;
     final m = parts.length > 1 ? int.tryParse(parts[1]) ?? 0 : 0;
     if (h == 0 && m == 0 && time == '00:00:00') return 'Midnight';
-    if (h == 12) return '${h}:${m.toString().padLeft(2, '0')} PM';
+    if (h == 12) return '$h:${m.toString().padLeft(2, '0')} PM';
     if (h > 12) return '${h - 12}:${m.toString().padLeft(2, '0')} PM';
     return '${h == 0 ? 12 : h}:${m.toString().padLeft(2, '0')} AM';
   }

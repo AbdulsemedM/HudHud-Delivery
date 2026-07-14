@@ -26,6 +26,7 @@ import 'package:hudhud_delivery/features/addresses/data/addresses_data_provider.
 import 'package:hudhud_delivery/features/addresses/data/addresses_repository.dart';
 import 'package:hudhud_delivery/features/guest/utils/guest_sign_in_prompt.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/addresses/presentation/widgets/delivery_address_selector.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -306,11 +307,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         context,
         message: l10n.guestSignInRequiredMessage,
       );
-      if (!authed || !mounted) return;
+      if (!authed) return;
+      if (!context.mounted) return;
       await _loadUserData();
+      if (!context.mounted) return;
     }
-    Navigator.push<void>(
-      context,
+    if (!context.mounted) return;
+    _pushNotificationsScreen();
+  }
+
+  void _pushNotificationsScreen() {
+    Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
         builder: (context) => BlocProvider(
           create: (_) => createNotificationsBloc(),
@@ -359,6 +366,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final l10n = context.l10n;
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
@@ -374,14 +382,28 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 },
               ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 2, 16, 6),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
               child: UserProfileHeader(
+                name: _currentUser?.name ?? l10n.userDefault,
                 location: _currentLocation,
                 isLoadingLocation: _isLoadingLocation,
+                user: _currentUser,
                 onLocationTap: _openLocationSearch,
                 onNotificationsTap: _openNotifications,
               ),
             ),
+            if (_currentUser != null) ...[
+              const SizedBox(height: AppColors.spaceMD),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: VerificationStatusCard(
+                  user: _currentUser!,
+                  onVerifyEmail: _openVerifyEmailFlow,
+                  onVerifyPhone: _openVerifyPhoneFlow,
+                ),
+              ),
+            ],
+            const SizedBox(height: AppColors.spaceSM),
             HomeServiceTabBar(
               selected: _serviceMode,
               onSelected: (mode) {

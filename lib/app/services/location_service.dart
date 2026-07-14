@@ -1,4 +1,5 @@
 // import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter/foundation.dart';
 import 'custom_location_service.dart';
 import 'geocoding_service.dart';
 
@@ -10,7 +11,7 @@ class LocationService {
     try {
       return await CustomLocationService.getCurrentLocation();
     } catch (e) {
-      print('Error getting location: $e');
+      debugPrint('Error getting location: $e');
       return _defaultLocation;
     }
   }
@@ -20,7 +21,7 @@ class LocationService {
     try {
       return await GeocodingService.getCurrentLocationAddress();
     } catch (e) {
-      print('Error getting location address: $e');
+      debugPrint('Error getting location address: $e');
       return _defaultLocation;
     }
   }
@@ -30,7 +31,7 @@ class LocationService {
     try {
       return await GeocodingService.getCurrentStreetName();
     } catch (e) {
-      print('Error getting street name: $e');
+      debugPrint('Error getting street name: $e');
       return _defaultLocation;
     }
   }
@@ -40,7 +41,7 @@ class LocationService {
     try {
       return await CustomLocationService.hasLocationPermission();
     } catch (e) {
-      print('Error checking location permission: $e');
+      debugPrint('Error checking location permission: $e');
       return false;
     }
   }
@@ -50,7 +51,7 @@ class LocationService {
     try {
       return await CustomLocationService.requestLocationPermission();
     } catch (e) {
-      print('Error requesting location permission: $e');
+      debugPrint('Error requesting location permission: $e');
       return false;
     }
   }
@@ -60,7 +61,7 @@ class LocationService {
     try {
       return await CustomLocationService.getCurrentPosition();
     } catch (e) {
-      print('Error getting current position: $e');
+      debugPrint('Error getting current position: $e');
       return null;
     }
   }

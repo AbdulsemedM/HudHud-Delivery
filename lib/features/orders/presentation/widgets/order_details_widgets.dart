@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/widgets/status_chip.dart';
 import '../../data/models/order_model.dart';
 import '../../data/models/order_item_model.dart';
 import '../../data/models/order_tracking_model.dart';
 import '../../data/models/vendor_model.dart';
 
-// Order Status Card
 class OrderStatusCard extends StatelessWidget {
   final OrderModel order;
 
@@ -12,11 +14,11 @@ class OrderStatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppColors.spaceMD),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -24,43 +26,33 @@ class OrderStatusCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Order Status',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  l10n.deliveryDetailsStatus,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: order.statusColor,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    order.statusDisplayName,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+                StatusChip(status: order.statusDisplayName),
               ],
             ),
             const SizedBox(height: 12),
             Text(
-              'Placed on ${order.formattedCreatedAt}',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey[600],
-              ),
+              order.formattedCreatedAt,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
             ),
             if (order.estimatedDeliveryTime != null) ...[
               const SizedBox(height: 8),
               Row(
                 children: [
-                  const Icon(Icons.access_time, size: 16, color: Colors.orange),
+                  const Icon(
+                    Icons.access_time_rounded,
+                    size: 16,
+                    color: AppColors.primaryColor,
+                  ),
                   const SizedBox(width: 4),
                   Text(
-                    'Est. delivery: ${order.formattedEstimatedDelivery}',
+                    order.formattedEstimatedDelivery,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
@@ -73,100 +65,50 @@ class OrderStatusCard extends StatelessWidget {
   }
 }
 
-// Order Tracking Card - shows live tracking when order is opened
 class OrderTrackingCard extends StatelessWidget {
   final OrderTrackingModel tracking;
 
   const OrderTrackingCard({Key? key, required this.tracking}) : super(key: key);
 
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return Colors.orange;
-      case 'accepted':
-      case 'confirmed':
-        return Colors.blue;
-      case 'preparing':
-        return Colors.purple;
-      case 'ready_for_pickup':
-        return Colors.teal;
-      case 'picked_up':
-      case 'out_for_delivery':
-        return Colors.indigo;
-      case 'delivered':
-        return Colors.green;
-      case 'cancelled':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final statusColor = _getStatusColor(tracking.orderStatus);
+    final l10n = context.l10n;
+    final colorScheme = Theme.of(context).colorScheme;
+    final statusColor = StatusChip.colorForStatus(tracking.orderStatus);
+
     return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppColors.spaceMD),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(Icons.location_on, color: statusColor, size: 24),
+                Icon(Icons.location_on_rounded, color: statusColor, size: 24),
                 const SizedBox(width: 8),
                 Text(
-                  'Track Order',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+                  l10n.actionTrackDelivery,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
                       ),
                 ),
               ],
             ),
             const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: statusColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: statusColor.withOpacity(0.3)),
-              ),
-              child: Row(
-                children: [
-                  Text(
-                    'Status: ',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey[700],
-                    ),
-                  ),
-                  Text(
-                    tracking.orderStatus.replaceAll('_', ' ').toUpperCase(),
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: statusColor,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            StatusChip(status: tracking.orderStatus),
             if (tracking.currentLocation != null &&
                 tracking.currentLocation!.isNotEmpty) ...[
               const SizedBox(height: 12),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.place, size: 18, color: Colors.grey[600]),
+                  Icon(Icons.place_outlined,
+                      size: 18, color: colorScheme.onSurfaceVariant),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       tracking.currentLocation!,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[700],
-                      ),
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ),
                 ],
@@ -177,72 +119,15 @@ class OrderTrackingCard extends StatelessWidget {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  Icon(Icons.access_time, size: 18, color: Colors.grey[600]),
+                  Icon(Icons.access_time_rounded,
+                      size: 18, color: colorScheme.onSurfaceVariant),
                   const SizedBox(width: 8),
                   Text(
-                    'Est. arrival: ${tracking.estimatedTime}',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[700],
-                    ),
+                    tracking.estimatedTime!,
+                    style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
               ),
-            ],
-            if (tracking.trackingHistory.isNotEmpty) ...[
-              const SizedBox(height: 16),
-              Text(
-                'Tracking History',
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              const SizedBox(height: 8),
-              ...tracking.trackingHistory.map((item) => Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(Icons.check_circle,
-                            size: 16, color: Colors.green[400]),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (item.status != null)
-                                Text(
-                                  item.status!.replaceAll('_', ' '),
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              if (item.location != null) ...[
-                                const SizedBox(height: 2),
-                                Text(
-                                  item.location!,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                              ],
-                              if (item.timestamp != null) ...[
-                                const SizedBox(height: 2),
-                                Text(
-                                  item.timestamp.toString(),
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    color: Colors.grey[500],
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  )),
             ],
           ],
         ),
@@ -251,117 +136,205 @@ class OrderTrackingCard extends StatelessWidget {
   }
 }
 
-// Order Timeline Card
-class OrderTimelineCard extends StatelessWidget {
+class OrderTimelineCard extends StatefulWidget {
   final OrderModel order;
 
   const OrderTimelineCard({Key? key, required this.order}) : super(key: key);
 
   @override
+  State<OrderTimelineCard> createState() => _OrderTimelineCardState();
+}
+
+class _OrderTimelineCardState extends State<OrderTimelineCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _pulseController;
+  late Animation<double> _pulseAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      duration: const Duration(milliseconds: 900),
+      vsync: this,
+    )..repeat(reverse: true);
+    _pulseAnimation = Tween<double>(begin: 0.95, end: 1.08).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
+
+  List<TimelineStep> _getTimelineSteps(BuildContext context) {
+    final l10n = context.l10n;
+    return [
+      TimelineStep(
+        title: l10n.timelineOrderPlaced,
+        time: widget.order.formattedCreatedAt,
+        isCompleted: true,
+        isActive: false,
+        icon: Icons.shopping_cart_rounded,
+      ),
+      TimelineStep(
+        title: l10n.timelineOrderConfirmed,
+        time: widget.order.confirmedAt != null
+            ? widget.order.formattedConfirmedAt
+            : null,
+        isCompleted: widget.order.isConfirmed,
+        isActive: widget.order.isConfirmed &&
+            !widget.order.isPreparing &&
+            !widget.order.isDelivered,
+        icon: Icons.check_circle_outline_rounded,
+      ),
+      TimelineStep(
+        title: l10n.timelinePreparing,
+        time: widget.order.preparingAt != null
+            ? widget.order.formattedPreparingAt
+            : null,
+        isCompleted: widget.order.isPreparing ||
+            widget.order.isReadyForPickup ||
+            widget.order.isOutForDelivery ||
+            widget.order.isDelivered,
+        isActive: widget.order.isPreparing && !widget.order.isOutForDelivery,
+        icon: Icons.restaurant_rounded,
+      ),
+      TimelineStep(
+        title: l10n.timelineReadyPickup,
+        time: widget.order.readyForPickupAt != null
+            ? widget.order.formattedReadyForPickupAt
+            : null,
+        isCompleted: widget.order.isReadyForPickup ||
+            widget.order.isOutForDelivery ||
+            widget.order.isDelivered,
+        isActive: widget.order.isReadyForPickup &&
+            !widget.order.isOutForDelivery,
+        icon: Icons.inventory_2_outlined,
+      ),
+      TimelineStep(
+        title: l10n.timelineOutDelivery,
+        time: widget.order.outForDeliveryAt != null
+            ? widget.order.formattedOutForDeliveryAt
+            : null,
+        isCompleted:
+            widget.order.isOutForDelivery || widget.order.isDelivered,
+        isActive:
+            widget.order.isOutForDelivery && !widget.order.isDelivered,
+        icon: Icons.delivery_dining_rounded,
+      ),
+      TimelineStep(
+        title: l10n.timelineDelivered,
+        time: widget.order.deliveredAt != null
+            ? widget.order.formattedDeliveredAt
+            : null,
+        isCompleted: widget.order.isDelivered,
+        isActive: widget.order.isDelivered,
+        icon: Icons.done_all_rounded,
+      ),
+    ];
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final timelineSteps = _getTimelineSteps();
-    
+    final l10n = context.l10n;
+    final steps = _getTimelineSteps(context);
+
     return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppColors.spaceMD),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Order Timeline',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              l10n.timeline,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
             const SizedBox(height: 16),
-            ...timelineSteps.map((step) => _buildTimelineStep(context, step)),
+            ...List.generate(steps.length, (index) {
+              final step = steps[index];
+              final isLast = index == steps.length - 1;
+              return _buildTimelineStep(context, step, isLast);
+            }),
           ],
         ),
       ),
     );
   }
 
-  List<TimelineStep> _getTimelineSteps() {
-    return [
-      TimelineStep(
-        title: 'Order Placed',
-        time: order.formattedCreatedAt,
-        isCompleted: true,
-        icon: Icons.shopping_cart,
-      ),
-      TimelineStep(
-        title: 'Order Confirmed',
-        time: order.confirmedAt != null ? order.formattedConfirmedAt : null,
-        isCompleted: order.isConfirmed,
-        icon: Icons.check_circle,
-      ),
-      TimelineStep(
-        title: 'Preparing',
-        time: order.preparingAt != null ? order.formattedPreparingAt : null,
-        isCompleted: order.isPreparing || order.isReadyForPickup || order.isOutForDelivery || order.isDelivered,
-        icon: Icons.restaurant,
-      ),
-      TimelineStep(
-        title: 'Ready for Pickup',
-        time: order.readyForPickupAt != null ? order.formattedReadyForPickupAt : null,
-        isCompleted: order.isReadyForPickup || order.isOutForDelivery || order.isDelivered,
-        icon: Icons.inventory,
-      ),
-      TimelineStep(
-        title: 'Out for Delivery',
-        time: order.outForDeliveryAt != null ? order.formattedOutForDeliveryAt : null,
-        isCompleted: order.isOutForDelivery || order.isDelivered,
-        icon: Icons.delivery_dining,
-      ),
-      TimelineStep(
-        title: 'Delivered',
-        time: order.deliveredAt != null ? order.formattedDeliveredAt : null,
-        isCompleted: order.isDelivered,
-        icon: Icons.done_all,
-      ),
-    ];
-  }
+  Widget _buildTimelineStep(
+      BuildContext context, TimelineStep step, bool isLast) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final circleColor = step.isCompleted
+        ? AppColors.primaryColor
+        : colorScheme.surfaceContainerHighest;
+    final iconColor =
+        step.isCompleted ? Colors.white : colorScheme.onSurfaceVariant;
 
-  Widget _buildTimelineStep(BuildContext context, TimelineStep step) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+    Widget circle = Container(
+      width: 32,
+      height: 32,
+      decoration: BoxDecoration(
+        color: circleColor,
+        shape: BoxShape.circle,
+      ),
+      child: Icon(step.icon, size: 16, color: iconColor),
+    );
+
+    if (step.isActive) {
+      circle = ScaleTransition(scale: _pulseAnimation, child: circle);
+    }
+
+    return IntrinsicHeight(
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: step.isCompleted ? Colors.green : Colors.grey[300],
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              step.icon,
-              size: 16,
-              color: step.isCompleted ? Colors.white : Colors.grey[600],
-            ),
+          Column(
+            children: [
+              circle,
+              if (!isLast)
+                Expanded(
+                  child: CustomPaint(
+                    painter: _DashedLinePainter(
+                      color: step.isCompleted
+                          ? AppColors.primaryColor.withValues(alpha: 0.5)
+                          : colorScheme.outline.withValues(alpha: 0.4),
+                    ),
+                    child: const SizedBox(width: 2),
+                  ),
+                ),
+            ],
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  step.title,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: step.isCompleted ? FontWeight.bold : FontWeight.normal,
-                    color: step.isCompleted ? Colors.black : Colors.grey[600],
-                  ),
-                ),
-                if (step.time != null)
+            child: Padding(
+              padding: EdgeInsets.only(bottom: isLast ? 0 : 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    step.time!,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.grey[600],
-                    ),
+                    step.title,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: step.isCompleted
+                              ? FontWeight.w600
+                              : FontWeight.w400,
+                          color: step.isCompleted
+                              ? colorScheme.onSurface
+                              : colorScheme.onSurfaceVariant,
+                        ),
                   ),
-              ],
+                  if (step.time != null)
+                    Text(
+                      step.time!,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                ],
+              ),
             ),
           ),
         ],
@@ -370,21 +343,123 @@ class OrderTimelineCard extends StatelessWidget {
   }
 }
 
+class _DashedLinePainter extends CustomPainter {
+  final Color color;
+
+  _DashedLinePainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 2
+      ..style = PaintingStyle.stroke;
+
+    const dashHeight = 4.0;
+    const dashSpace = 4.0;
+    double startY = 0;
+
+    while (startY < size.height) {
+      canvas.drawLine(
+        Offset(size.width / 2, startY),
+        Offset(size.width / 2, startY + dashHeight),
+        paint,
+      );
+      startY += dashHeight + dashSpace;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
 class TimelineStep {
   final String title;
   final String? time;
   final bool isCompleted;
+  final bool isActive;
   final IconData icon;
 
   TimelineStep({
     required this.title,
     this.time,
     required this.isCompleted,
+    this.isActive = false,
     required this.icon,
   });
 }
 
-// Vendor Info Card
+class PackageInfoCard extends StatelessWidget {
+  final OrderModel order;
+
+  const PackageInfoCard({Key? key, required this.order}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final itemCount = order.items.length;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(AppColors.spaceMD),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.labelPackage,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+            const SizedBox(height: 12),
+            _infoRow(context, l10n.labelType, order.vendor.name),
+            _infoRow(
+              context,
+              l10n.labelWeight,
+              '$itemCount',
+            ),
+            if (order.items.isNotEmpty)
+              _infoRow(
+                context,
+                l10n.labelDescription,
+                order.items.first.product?.name ?? order.items.first.productName,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _infoRow(BuildContext context, String label, String value) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 100,
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class VendorInfoCard extends StatelessWidget {
   final VendorModel vendor;
 
@@ -393,18 +468,16 @@ class VendorInfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppColors.spaceMD),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Restaurant Details',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              vendor.name,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
             const SizedBox(height: 12),
             Row(
@@ -412,7 +485,8 @@ class VendorInfoCard extends StatelessWidget {
                 CircleAvatar(
                   radius: 24,
                   backgroundImage: NetworkImage(vendor.avatar),
-                  backgroundColor: Colors.grey[300],
+                  backgroundColor:
+                      Theme.of(context).colorScheme.surfaceContainerHighest,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -421,14 +495,21 @@ class VendorInfoCard extends StatelessWidget {
                     children: [
                       Text(
                         vendor.name,
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium
+                            ?.copyWith(fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          const Icon(Icons.phone, size: 14, color: Colors.grey),
+                          Icon(
+                            Icons.phone_outlined,
+                            size: 14,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             vendor.phone,
@@ -440,10 +521,11 @@ class VendorInfoCard extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  onPressed: () {
-                    // TODO: Implement call functionality
-                  },
-                  icon: const Icon(Icons.call, color: Colors.green),
+                  onPressed: () {},
+                  icon: const Icon(
+                    Icons.call_rounded,
+                    color: AppColors.successColor,
+                  ),
                 ),
               ],
             ),
@@ -454,7 +536,6 @@ class VendorInfoCard extends StatelessWidget {
   }
 }
 
-// Order Items Card
 class OrderItemsCard extends StatelessWidget {
   final List<OrderItemModel> items;
 
@@ -462,19 +543,18 @@ class OrderItemsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppColors.spaceMD),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Order Items (${items.length})',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              '${l10n.orders} (${items.length})',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
             const SizedBox(height: 12),
             ...items.map((item) => _buildOrderItem(context, item)),
@@ -485,14 +565,16 @@ class OrderItemsCard extends StatelessWidget {
   }
 
   Widget _buildOrderItem(BuildContext context, OrderItemModel item) {
+    final colorScheme = Theme.of(context).colorScheme;
     final imageUrl = item.product?.imagePath ?? '';
     final name = item.product?.name ?? item.productName;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(10),
             child: imageUrl.isNotEmpty
                 ? Image.network(
                     imageUrl,
@@ -500,20 +582,10 @@ class OrderItemsCard extends StatelessWidget {
                     height: 50,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        width: 50,
-                        height: 50,
-                        color: Colors.grey[300],
-                        child: const Icon(Icons.fastfood, color: Colors.grey),
-                      );
+                      return _itemPlaceholder(colorScheme);
                     },
                   )
-                : Container(
-                    width: 50,
-                    height: 50,
-                    color: Colors.grey[300],
-                    child: const Icon(Icons.fastfood, color: Colors.grey),
-                  ),
+                : _itemPlaceholder(colorScheme),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -523,43 +595,40 @@ class OrderItemsCard extends StatelessWidget {
                 Text(
                   name,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
-                const SizedBox(height: 4),
                 Text(
                   'Qty: ${item.quantity}',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey[600],
-                  ),
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                 ),
-                if (item.specialInstructions?.isNotEmpty == true) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    'Note: ${item.specialInstructions}',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.orange,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                ],
               ],
             ),
           ),
           Text(
             item.formattedPrice,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Colors.green,
-            ),
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primaryColor,
+                ),
           ),
         ],
       ),
     );
   }
+
+  Widget _itemPlaceholder(ColorScheme colorScheme) {
+    return Container(
+      width: 50,
+      height: 50,
+      color: colorScheme.surfaceContainerHighest,
+      child: Icon(Icons.fastfood_rounded, color: colorScheme.onSurfaceVariant),
+    );
+  }
 }
 
-// Delivery Info Card
 class DeliveryInfoCard extends StatelessWidget {
   final OrderModel order;
 
@@ -567,42 +636,71 @@ class DeliveryInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppColors.spaceMD),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Delivery Information',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    l10n.deliveryDetailsPickup,
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primaryColor,
+                        ),
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_rounded,
+                  size: 16,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                Expanded(
+                  child: Text(
+                    l10n.deliveryDetailsDropoff,
+                    textAlign: TextAlign.end,
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primaryColor,
+                        ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.map_outlined,
+                    color: AppColors.primaryColor,
+                    size: 20,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 12),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.location_on, color: Colors.red, size: 20),
+                const Icon(
+                  Icons.location_on_rounded,
+                  color: AppColors.primaryColor,
+                  size: 20,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Delivery Address',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        order.deliveryAddress,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                    ],
+                  child: Text(
+                    order.deliveryAddress,
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ),
               ],
@@ -610,13 +708,12 @@ class DeliveryInfoCard extends StatelessWidget {
             if (order.driver != null) ...[
               const SizedBox(height: 16),
               const Divider(),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               Row(
                 children: [
                   CircleAvatar(
                     radius: 20,
                     backgroundImage: NetworkImage(order.driver!.avatar),
-                    backgroundColor: Colors.grey[300],
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -624,26 +721,27 @@ class DeliveryInfoCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Driver: ${order.driver!.name}',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          order.driver!.name,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(fontWeight: FontWeight.w600),
                         ),
-                        const SizedBox(height: 4),
                         Text(
                           order.driver!.phone,
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey[600],
-                          ),
+                                color: colorScheme.onSurfaceVariant,
+                              ),
                         ),
                       ],
                     ),
                   ),
                   IconButton(
-                    onPressed: () {
-                      // TODO: Implement call driver functionality
-                    },
-                    icon: const Icon(Icons.call, color: Colors.green),
+                    onPressed: () {},
+                    icon: const Icon(
+                      Icons.call_rounded,
+                      color: AppColors.successColor,
+                    ),
                   ),
                 ],
               ),
@@ -655,7 +753,6 @@ class DeliveryInfoCard extends StatelessWidget {
   }
 }
 
-// Payment Info Card
 class PaymentInfoCard extends StatelessWidget {
   final OrderModel order;
 
@@ -663,33 +760,32 @@ class PaymentInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppColors.spaceMD),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Payment Information',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              l10n.paymentAndCost,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
             const SizedBox(height: 12),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                StatusChip(status: order.paymentMethod),
+                const Spacer(),
                 Text(
-                  'Payment Method',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                Text(
-                  order.paymentMethod,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  order.formattedTotal,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primaryColor,
+                      ),
                 ),
               ],
             ),
@@ -698,24 +794,12 @@ class PaymentInfoCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Payment Status',
-                  style: Theme.of(context).textTheme.bodyMedium,
+                  l10n.labelPaymentStatus,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: order.paymentStatusColor,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    order.paymentStatus,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+                StatusChip(status: order.paymentStatus),
               ],
             ),
           ],
@@ -725,7 +809,6 @@ class PaymentInfoCard extends StatelessWidget {
   }
 }
 
-// Order Summary Card
 class OrderSummaryCard extends StatelessWidget {
   final OrderModel order;
 
@@ -733,26 +816,31 @@ class OrderSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppColors.spaceMD),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Order Summary',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              l10n.paymentAndCost,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
             const SizedBox(height: 12),
             _buildSummaryRow(context, 'Subtotal', order.formattedSubtotal),
-            _buildSummaryRow(context, 'Delivery Fee', order.formattedDeliveryFee),
+            _buildSummaryRow(
+                context, 'Delivery', order.formattedDeliveryFee),
             _buildSummaryRow(context, 'Tax', order.formattedTax),
             if (order.discount > 0)
-              _buildSummaryRow(context, 'Discount', '-${order.formattedDiscount}', color: Colors.green),
+              _buildSummaryRow(
+                context,
+                'Discount',
+                '-${order.formattedDiscount}',
+                color: AppColors.successColor,
+              ),
             const Divider(),
             _buildSummaryRow(
               context,
@@ -781,17 +869,16 @@ class OrderSummaryCard extends StatelessWidget {
           Text(
             label,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
-              fontSize: isTotal ? 16 : 14,
-            ),
+                  fontWeight: isTotal ? FontWeight.w700 : FontWeight.w400,
+                ),
           ),
           Text(
             value,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
-              fontSize: isTotal ? 16 : 14,
-              color: color ?? (isTotal ? Colors.green : null),
-            ),
+                  fontWeight: isTotal ? FontWeight.w700 : FontWeight.w500,
+                  color: color ??
+                      (isTotal ? AppColors.primaryColor : null),
+                ),
           ),
         ],
       ),
@@ -799,7 +886,6 @@ class OrderSummaryCard extends StatelessWidget {
   }
 }
 
-// Rate Order Card - shown when order is delivered
 class RateOrderCard extends StatefulWidget {
   final OrderModel order;
   final void Function(int rating, String? review) onRate;
@@ -827,18 +913,17 @@ class _RateOrderCardState extends State<RateOrderCard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppColors.spaceMD),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Rate your order',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+              l10n.addReviewOptional,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
                   ),
             ),
             const SizedBox(height: 12),
@@ -848,29 +933,23 @@ class _RateOrderCardState extends State<RateOrderCard> {
                 final starValue = index + 1;
                 return IconButton(
                   icon: Icon(
-                    _rating >= starValue ? Icons.star : Icons.star_border,
-                    color: Colors.amber,
+                    _rating >= starValue
+                        ? Icons.star_rounded
+                        : Icons.star_border_rounded,
+                    color: AppColors.ratingFilled,
                     size: 36,
                   ),
                   onPressed: _isSubmitting
                       ? null
-                      : () {
-                          setState(() {
-                            _rating = starValue;
-                          });
-                        },
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                      : () => setState(() => _rating = starValue),
                 );
               }),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _reviewController,
-              decoration: const InputDecoration(
-                hintText: 'Add a review (optional)',
-                border: OutlineInputBorder(),
-                contentPadding:
-                    EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              decoration: InputDecoration(
+                hintText: l10n.addReviewOptional,
               ),
               maxLines: 3,
               enabled: !_isSubmitting,
@@ -890,21 +969,13 @@ class _RateOrderCardState extends State<RateOrderCard> {
                               : _reviewController.text.trim(),
                         );
                       },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
                 child: _isSubmitting
                     ? const SizedBox(
                         width: 24,
                         height: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
+                        child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Submit Rating'),
+                    : Text(l10n.actionSave),
               ),
             ),
           ],
@@ -914,7 +985,6 @@ class _RateOrderCardState extends State<RateOrderCard> {
   }
 }
 
-// Cancel Order Dialog
 class CancelOrderDialog extends StatefulWidget {
   final OrderModel order;
   final Function(String?) onCancel;
@@ -943,42 +1013,40 @@ class _CancelOrderDialogState extends State<CancelOrderDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return AlertDialog(
-      title: const Text('Cancel Order'),
+      title: Text(l10n.orderStatusCancelled),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Are you sure you want to cancel order #${widget.order.orderNumber}?',
+            l10n.orderAppBarTitle(widget.order.orderNumber),
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Reason for cancellation:',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
           ..._cancelReasons.map(
-            (reason) => RadioListTile<String>(
-              title: Text(reason),
-              value: reason,
-              groupValue: _selectedReason,
-              onChanged: (value) {
-                setState(() {
-                  _selectedReason = value;
-                });
-              },
-              contentPadding: EdgeInsets.zero,
-            ),
+            (reason) {
+              final selected = _selectedReason == reason;
+              return ListTile(
+                title: Text(reason),
+                contentPadding: EdgeInsets.zero,
+                trailing: selected
+                    ? const Icon(Icons.check_circle, color: AppColors.primaryColor)
+                    : Icon(
+                        Icons.circle_outlined,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                onTap: () => setState(() => _selectedReason = reason),
+              );
+            },
           ),
           if (_selectedReason == 'Other') ...[
             const SizedBox(height: 8),
             TextField(
               controller: _reasonController,
-              decoration: const InputDecoration(
-                hintText: 'Please specify...',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                hintText: l10n.pleaseSpecify,
               ),
               maxLines: 2,
             ),
@@ -988,7 +1056,7 @@ class _CancelOrderDialogState extends State<CancelOrderDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Keep Order'),
+          child: Text(l10n.actionCancel),
         ),
         ElevatedButton(
           onPressed: _selectedReason != null
@@ -1001,10 +1069,10 @@ class _CancelOrderDialogState extends State<CancelOrderDialog> {
                 }
               : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.errorColor,
             foregroundColor: Colors.white,
           ),
-          child: const Text('Cancel Order'),
+          child: Text(l10n.orderStatusCancelled),
         ),
       ],
     );

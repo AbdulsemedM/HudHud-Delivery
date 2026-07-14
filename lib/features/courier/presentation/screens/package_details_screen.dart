@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/payment/data/data_provider/payment_data_provider.dart';
 import 'package:hudhud_delivery/features/payment/data/repository/payment_repository.dart';
-import 'package:hudhud_delivery/features/payment/presentation/widgets/payment_methods_loader.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
 import 'confirm_details_screen.dart';
 
 class PackageDetailsScreen extends StatefulWidget {
@@ -50,6 +49,10 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
   String? _paymentType; // API id (e.g. 'wallet', 'card')
   String? _packageImagePath;
 
+  List<Map<String, dynamic>> _paymentMethods = [];
+  bool _isLoadingPaymentMethods = true;
+  String? _paymentMethodsError;
+
   final List<String> _itemTypes = [
     'Electronics/Gadgets',
     'Documents',
@@ -69,118 +72,33 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
         apiService: ApiService.instance,
       ),
     );
+    _fetchPaymentMethods();
   }
 
-  static const List<Map<String, dynamic>> _guestPaymentMethods = [
-    {'id': 'wallet', 'name': 'Wallet'},
-    {'id': 'cash', 'name': 'Cash'},
-  ];
-
-  Widget _buildPaymentTypeSection(
-    BuildContext context, {
-    required ColorScheme colorScheme,
-    required Color fieldFill,
-    required Color outline,
-  }) {
-    Widget buildSelector(
-      List<Map<String, dynamic>> methods, {
-      required bool isLoading,
-      String? error,
-    }) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Payment type',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: colorScheme.onSurface,
-            ),
-          ),
-          const SizedBox(height: 12),
-          GestureDetector(
-            onTap: isLoading || methods.isEmpty
-                ? null
-                : () {
-                    showModalBottomSheet(
-                      context: context,
-                      builder: (context) => Container(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: methods.map((method) {
-                            final id = method['id'] as String?;
-                            final name =
-                                method['name'] as String? ?? id ?? '';
-                            return ListTile(
-                              title: Text(name),
-                              onTap: () {
-                                setState(() {
-                                  _paymentType = id;
-                                });
-                                Navigator.pop(context);
-                              },
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    );
-                  },
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: fieldFill,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: outline),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: isLoading
-                        ? Text(
-                            'Loading payment methods...',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: colorScheme.outline,
-                            ),
-                          )
-                        : Text(
-                            error ??
-                                _getSelectedPaymentName(methods) ??
-                                'Select payment type',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: _paymentType == null
-                                  ? colorScheme.outline
-                                  : colorScheme.onSurface,
-                            ),
-                          ),
-                  ),
-                  Icon(Icons.keyboard_arrow_down, color: colorScheme.outline),
-                ],
-              ),
-            ),
-          ),
-        ],
-      );
+  Future<void> _fetchPaymentMethods() async {
+    try {
+      final methods = await _paymentRepository.getPaymentMethods();
+      if (mounted) {
+        setState(() {
+          _paymentMethods = methods;
+          _isLoadingPaymentMethods = false;
+          _paymentMethodsError = null;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _paymentMethods = [];
+          _isLoadingPaymentMethods = false;
+          _paymentMethodsError = 'Failed to load payment methods';
+        });
+      }
     }
-
-    if (GuestBrowseService().isGuestBrowseMode) {
-      return buildSelector(_guestPaymentMethods, isLoading: false);
-    }
-
-    return PaymentMethodsLoader(
-      repository: _paymentRepository,
-      builder: (context, methods, isLoading, error, reload) {
-        return buildSelector(methods, isLoading: isLoading, error: error);
-      },
-    );
   }
 
-  String? _getSelectedPaymentName(List<Map<String, dynamic>> methods) {
+  String? _getSelectedPaymentName() {
     if (_paymentType == null) return null;
-    for (final method in methods) {
+    for (final method in _paymentMethods) {
       if (method['id'] == _paymentType) {
         return method['name'] as String?;
       }
@@ -299,23 +217,26 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final borderColor =
+        isDark ? const Color(0xFF2A2A2A) : const Color(0xFFEEEEEE);
     final outline = colorScheme.outlineVariant;
     final fieldFill = colorScheme.surfaceContainerHighest;
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: colorScheme.surface,
         elevation: 0,
+        surfaceTintColor: Colors.transparent,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           'What are you sending',
-          style: TextStyle(
-            color: colorScheme.onSurface,
-            fontSize: 18,
+          style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -368,7 +289,7 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: fieldFill,
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(AppColors.radiusLG),
                           border: Border.all(color: outline),
                         ),
                         child: Row(
@@ -406,16 +327,16 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                         filled: true,
                         fillColor: fieldFill,
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(AppColors.radiusLG),
                           borderSide: BorderSide(color: outline),
                         ),
                         enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(AppColors.radiusLG),
                           borderSide: BorderSide(color: outline),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: AppColors.primaryColor),
+                          borderRadius: BorderRadius.circular(AppColors.radiusLG),
+                          borderSide: const BorderSide(color: AppColors.primaryColor),
                         ),
                       ),
                     ),
@@ -434,16 +355,16 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                         filled: true,
                         fillColor: fieldFill,
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(AppColors.radiusLG),
                           borderSide: BorderSide(color: outline),
                         ),
                         enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(AppColors.radiusLG),
                           borderSide: BorderSide(color: outline),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: AppColors.primaryColor),
+                          borderRadius: BorderRadius.circular(AppColors.radiusLG),
+                          borderSide: const BorderSide(color: AppColors.primaryColor),
                         ),
                       ),
                     ),
@@ -461,16 +382,16 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                         filled: true,
                         fillColor: fieldFill,
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(AppColors.radiusLG),
                           borderSide: BorderSide(color: outline),
                         ),
                         enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(AppColors.radiusLG),
                           borderSide: BorderSide(color: outline),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: AppColors.primaryColor),
+                          borderRadius: BorderRadius.circular(AppColors.radiusLG),
+                          borderSide: const BorderSide(color: AppColors.primaryColor),
                         ),
                       ),
                     ),
@@ -513,11 +434,74 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                       ],
                     ),
                     const SizedBox(height: 24),
-                    _buildPaymentTypeSection(
-                      context,
-                      colorScheme: colorScheme,
-                      fieldFill: fieldFill,
-                      outline: outline,
+                    // Payment type
+                    Text(
+                      'Payment type',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    GestureDetector(
+                      onTap: _isLoadingPaymentMethods
+                          ? null
+                          : () {
+                              showModalBottomSheet(
+                                context: context,
+                                builder: (context) => Container(
+                                  padding: const EdgeInsets.all(20),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: _paymentMethods.map((method) {
+                                      final id = method['id'] as String?;
+                                      final name =
+                                          method['name'] as String? ?? id ?? '';
+                                      return ListTile(
+                                        title: Text(name),
+                                        onTap: () {
+                                          setState(() {
+                                            _paymentType = id;
+                                          });
+                                          Navigator.pop(context);
+                                        },
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
+                              );
+                            },
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: fieldFill,
+                          borderRadius: BorderRadius.circular(AppColors.radiusLG),
+                          border: Border.all(color: outline),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: _isLoadingPaymentMethods
+                                  ? _PaymentMethodShimmer(
+                                      borderColor: borderColor)
+                                  : Text(
+                                      _paymentMethodsError ??
+                                          _getSelectedPaymentName() ??
+                                          'Select payment type',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: _paymentType == null
+                                            ? colorScheme.outline
+                                            : colorScheme.onSurface,
+                                      ),
+                                    ),
+                            ),
+                            Icon(Icons.keyboard_arrow_down,
+                                color: colorScheme.outline),
+                          ],
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 24),
                     // Recipient Information
@@ -542,16 +526,16 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                         filled: true,
                         fillColor: fieldFill,
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(AppColors.radiusLG),
                           borderSide: BorderSide(color: outline),
                         ),
                         enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(AppColors.radiusLG),
                           borderSide: BorderSide(color: outline),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: AppColors.primaryColor),
+                          borderRadius: BorderRadius.circular(AppColors.radiusLG),
+                          borderSide: const BorderSide(color: AppColors.primaryColor),
                         ),
                       ),
                     ),
@@ -569,16 +553,16 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                         filled: true,
                         fillColor: fieldFill,
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(AppColors.radiusLG),
                           borderSide: BorderSide(color: outline),
                         ),
                         enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(AppColors.radiusLG),
                           borderSide: BorderSide(color: outline),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: AppColors.primaryColor),
+                          borderRadius: BorderRadius.circular(AppColors.radiusLG),
+                          borderSide: const BorderSide(color: AppColors.primaryColor),
                         ),
                       ),
                     ),
@@ -591,7 +575,7 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
                           color: fieldFill,
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(AppColors.radiusLG),
                           border: Border.all(
                             color: outline,
                             style: BorderStyle.solid,
@@ -625,16 +609,10 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
             ),
             // Continue Button
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(AppColors.spaceMD),
               decoration: BoxDecoration(
                 color: colorScheme.surface,
-                boxShadow: [
-                  BoxShadow(
-                    color: colorScheme.shadow.withOpacity(0.08),
-                    blurRadius: 10,
-                    offset: const Offset(0, -2),
-                  ),
-                ],
+                border: Border(top: BorderSide(color: borderColor)),
               ),
               child: SizedBox(
                 width: double.infinity,
@@ -643,8 +621,12 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                   onPressed: _navigateToConfirm,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryColor,
+                    foregroundColor: Colors.white,
+                    minimumSize:
+                        const Size(double.infinity, AppColors.buttonHeightMD),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius:
+                          BorderRadius.circular(AppColors.radiusLG),
                     ),
                   ),
                   child: const Text(
@@ -687,9 +669,9 @@ class _RadioOption extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primaryColor.withOpacity(0.1)
+              ? AppColors.primaryColor.withValues(alpha: 0.1)
               : fieldFill,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AppColors.radiusLG),
           border: Border.all(
             color: isSelected ? AppColors.primaryColor : outline,
             width: isSelected ? 2 : 1,
@@ -731,6 +713,31 @@ class _RadioOption extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PaymentMethodShimmer extends StatelessWidget {
+  final Color borderColor;
+
+  const _PaymentMethodShimmer({required this.borderColor});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseColor = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0);
+    final highlightColor =
+        isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF5F5F5);
+    return Shimmer.fromColors(
+      baseColor: baseColor,
+      highlightColor: highlightColor,
+      child: Container(
+        height: 16,
+        decoration: BoxDecoration(
+          color: baseColor,
+          borderRadius: BorderRadius.circular(4),
         ),
       ),
     );

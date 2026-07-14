@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/restaurants/presentation/screens/favorite_restaurants_screen.dart';
 import '../widgets/restaurants_widget.dart';
 
@@ -53,6 +54,7 @@ class ListOfRestaurantsScreen extends StatelessWidget {
     ];
 
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
         child: Column(
           children: [
@@ -62,15 +64,18 @@ class ListOfRestaurantsScreen extends StatelessWidget {
                 children: [
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
-                    child: const Row(
+                    child: Row(
                       children: [
-                        Icon(Icons.arrow_back, size: 24),
-                        SizedBox(width: 8),
+                        Icon(Icons.arrow_back_ios_new_rounded,
+                            size: 20,
+                            color: Theme.of(context).colorScheme.onSurface),
+                        const SizedBox(width: 8),
                         Text(
                           'GO BACK',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                       ],
@@ -93,26 +98,27 @@ class ListOfRestaurantsScreen extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
+                          Text(
                             'All Restaurants',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(fontWeight: FontWeight.bold),
                           ),
                           TextButton(
                             onPressed: () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const FavoriteRestaurantsScreen(),
+                                  builder: (context) =>
+                                      const FavoriteRestaurantsScreen(),
                                 ),
                               );
                             },
                             child: const Text(
                               'See Favorites',
                               style: TextStyle(
-                                color: Colors.orange,
+                                color: AppColors.primaryColor,
                                 fontSize: 16,
                               ),
                             ),

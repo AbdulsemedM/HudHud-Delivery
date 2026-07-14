@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/api/api_service.dart';
@@ -8,7 +9,6 @@ import '../../../checkout/data/repository/checkout_repository.dart';
 import '../../bloc/payment_bloc.dart';
 import '../../data/data_provider/payment_data_provider.dart';
 import '../../data/repository/payment_repository.dart';
-import 'payment_initiate_result_screen.dart';
 import '../widgets/payment_widgets.dart';
 
 class PaymentScreen extends StatefulWidget {
@@ -138,22 +138,12 @@ class _PaymentScreenState extends State<PaymentScreen>
         builder: (blocContext) {
           final l10n = blocContext.l10n;
           return Scaffold(
-          backgroundColor: colorScheme.background,
+          backgroundColor: colorScheme.surface,
           body: BlocListener<PaymentBloc, PaymentState>(
             listener: (context, state) {
               if (state is PaymentSuccess) {
                 Navigator.of(context).pop(); // Close processing dialog
                 _showPaymentSuccessDialog(state.transactionId);
-              } else if (state is PaymentInitiated) {
-                Navigator.of(context).pop(); // Close processing dialog
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => PaymentInitiateResultScreen(
-                      result: state.result,
-                      orderId: state.orderId,
-                    ),
-                  ),
-                );
               } else if (state is PaymentFailure) {
                 Navigator.of(context).pop(); // Close processing dialog
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -188,7 +178,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                           end: Alignment.bottomRight,
                           colors: [
                             AppColors.primaryColor,
-                            AppColors.primaryColor.withOpacity(0.8),
+                            AppColors.primaryColor.withValues(alpha: 0.8),
                           ],
                         ),
                       ),
@@ -229,7 +219,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                               children: [
                                 Row(
                                   children: [
-                                    Icon(
+                                    const Icon(
                                       Icons.payment,
                                       color: AppColors.primaryColor,
                                       size: 24,
@@ -249,7 +239,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                                   l10n.paymentEthiopianOptionsSubtitle,
                                   style: textTheme.bodyMedium?.copyWith(
                                     fontSize: 14,
-                                    color: colorScheme.onSurface.withOpacity(0.72),
+                                    color: colorScheme.onSurface.withValues(alpha: 0.72),
                                   ),
                                 ),
                               ],
@@ -260,12 +250,9 @@ class _PaymentScreenState extends State<PaymentScreen>
                           BlocBuilder<PaymentBloc, PaymentState>(
                             builder: (context, state) {
                               if (state is PaymentLoading) {
-                                return const Center(
-                                  child: CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      AppColors.primaryColor,
-                                    ),
-                                  ),
+                                return const Padding(
+                                  padding: EdgeInsets.all(AppColors.spaceMD),
+                                  child: _PaymentMethodsShimmer(),
                                 );
                               } else if (state is PaymentMethodsLoaded) {
                                 final activeIds = state.paymentMethods
@@ -310,11 +297,11 @@ class _PaymentScreenState extends State<PaymentScreen>
                                   margin: const EdgeInsets.all(16),
                                   padding: const EdgeInsets.all(16),
                                   decoration: BoxDecoration(
-                                    color: AppColors.errorColor.withOpacity(
+                                    color: AppColors.errorColor.withValues(alpha: 
                                         isDark ? 0.16 : 0.08),
                                     borderRadius: BorderRadius.circular(12),
                                     border: Border.all(
-                                      color: AppColors.errorColor.withOpacity(0.4),
+                                      color: AppColors.errorColor.withValues(alpha: 0.4),
                                     ),
                                   ),
                                   child: Column(
@@ -340,7 +327,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                                         style: textTheme.bodyMedium?.copyWith(
                                           fontSize: 14,
                                           color: AppColors.errorColor
-                                              .withOpacity(0.9),
+                                              .withValues(alpha: 0.9),
                                         ),
                                       ),
                                       const SizedBox(height: 16),
@@ -379,7 +366,7 @@ class _PaymentScreenState extends State<PaymentScreen>
               color: colorScheme.surface,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 10,
                   offset: const Offset(0, -5),
                 ),
@@ -447,7 +434,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    color: AppColors.successColor.withOpacity(
+                    color: AppColors.successColor.withValues(alpha: 
                       isDark ? 0.2 : 0.14,
                     ),
                     shape: BoxShape.circle,
@@ -471,7 +458,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                   l10n.paymentTransactionIdLabel(transactionId),
                   style: textTheme.bodyMedium?.copyWith(
                     fontSize: 14,
-                    color: colorScheme.onSurface.withOpacity(0.72),
+                    color: colorScheme.onSurface.withValues(alpha: 0.72),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -510,6 +497,36 @@ class _PaymentScreenState extends State<PaymentScreen>
           ),
         );
       },
+    );
+  }
+}
+
+class _PaymentMethodsShimmer extends StatelessWidget {
+  const _PaymentMethodsShimmer();
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseColor = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0);
+    final highlightColor =
+        isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF5F5F5);
+    return Column(
+      children: List.generate(4, (index) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          child: Shimmer.fromColors(
+            baseColor: baseColor,
+            highlightColor: highlightColor,
+            child: Container(
+              height: 72,
+              decoration: BoxDecoration(
+                color: baseColor,
+                borderRadius: BorderRadius.circular(AppColors.radiusLG),
+              ),
+            ),
+          ),
+        );
+      }),
     );
   }
 }

@@ -59,9 +59,9 @@ class CategoryDetailHeader extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withOpacity(0.15),
-                    Colors.black.withOpacity(0.4),
-                    Colors.black.withOpacity(0.82),
+                    Colors.black.withValues(alpha: 0.15),
+                    Colors.black.withValues(alpha: 0.4),
+                    Colors.black.withValues(alpha: 0.82),
                   ],
                 ),
               ),
@@ -76,7 +76,7 @@ class CategoryDetailHeader extends StatelessWidget {
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
                 child: Material(
-                  color: Colors.white.withOpacity(0.25),
+                  color: Colors.white.withValues(alpha: 0.25),
                   borderRadius: BorderRadius.circular(24),
                   child: InkWell(
                     onTap: onBack,
@@ -113,7 +113,7 @@ class CategoryDetailHeader extends StatelessWidget {
                       border: Border.all(color: Colors.white, width: 2.5),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
+                          color: Colors.black.withValues(alpha: 0.2),
                           blurRadius: 12,
                           offset: const Offset(0, 4),
                         ),
@@ -170,7 +170,7 @@ class CategoryDetailHeader extends StatelessWidget {
                               Icon(
                                 Icons.inventory_2_outlined,
                                 size: 16,
-                                color: Colors.white.withOpacity(0.95),
+                                color: Colors.white.withValues(alpha: 0.95),
                               ),
                               const SizedBox(width: 6),
                               Text(
@@ -178,7 +178,7 @@ class CategoryDetailHeader extends StatelessWidget {
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w500,
-                                  color: Colors.white.withOpacity(0.95),
+                                  color: Colors.white.withValues(alpha: 0.95),
                                 ),
                               ),
                             ],
@@ -190,7 +190,7 @@ class CategoryDetailHeader extends StatelessWidget {
                             description!,
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.white.withOpacity(0.9),
+                              color: Colors.white.withValues(alpha: 0.9),
                               height: 1.35,
                             ),
                             maxLines: 2,
@@ -215,7 +215,7 @@ class CategoryDetailHeader extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              AppColors.primaryColor.withOpacity(0.92),
+              AppColors.primaryColor.withValues(alpha: 0.92),
               AppColors.primaryColor,
               AppColors.primaryDarkColor,
             ],
@@ -224,7 +224,7 @@ class CategoryDetailHeader extends StatelessWidget {
       );
 
   Widget _iconPlaceholder() => Container(
-        color: Colors.white.withOpacity(0.3),
+        color: Colors.white.withValues(alpha: 0.3),
         child: const Icon(
           Icons.category_rounded,
           size: 32,
@@ -315,7 +315,7 @@ class ProductDetailsModal extends StatelessWidget {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, -5),
           ),
@@ -816,7 +816,7 @@ class VegFoodToggle extends StatelessWidget {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: Colors.orange,
+            activeThumbColor: Colors.orange,
           ),
         ],
       ),
@@ -844,10 +844,10 @@ class ProductFilters extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          const Row(
             children: [
               Icon(Icons.tune_rounded, size: 20, color: AppColors.primaryColor),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Text(
                 'Filter',
                 style: TextStyle(
@@ -888,7 +888,7 @@ class ProductFilters extends StatelessWidget {
                     boxShadow: isSelected
                         ? [
                             BoxShadow(
-                              color: AppColors.primaryColor.withOpacity(0.3),
+                              color: AppColors.primaryColor.withValues(alpha: 0.3),
                               spreadRadius: 1,
                               blurRadius: 4,
                               offset: const Offset(0, 2),
@@ -982,7 +982,7 @@ class ProductCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
+              color: Colors.grey.withValues(alpha: 0.1),
               spreadRadius: 1,
               blurRadius: 4,
               offset: const Offset(0, 2),
@@ -1020,7 +1020,7 @@ class ProductCard extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.65),
+                        color: Colors.black.withValues(alpha: 0.65),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: const Text(

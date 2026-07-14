@@ -1,6 +1,5 @@
 import 'core/api/dio_client.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -173,7 +172,7 @@ class _MyAppState extends State<MyApp> {
               locale: localeController.locale,
               localizationsDelegates: AppLocalizations.localizationsDelegates,
               supportedLocales: AppLocalizations.supportedLocales,
-              home: SplashScreen(),
+              home: const SplashScreen(),
               builder: (context, child) {
                 // Update system UI overlay style when theme changes
                 themeController.updateSystemUIOverlayStyle();
@@ -545,6 +544,7 @@ class _SampleHomePageState extends State<SampleHomePage> {
                                     context, 'Loading data...');
                                 // Simulate loading
                                 Future.delayed(const Duration(seconds: 3), () {
+                                  if (!context.mounted) return;
                                   SnackbarUtil.hideSnackbar(context);
                                   SnackbarUtil.showSuccess(
                                       context, 'Data loaded successfully!');
@@ -610,6 +610,7 @@ class _SampleHomePageState extends State<SampleHomePage> {
                               'password123',
                             );
 
+                            if (!context.mounted) return;
                             if (authController.currentUser != null) {
                               SnackbarUtil.showSuccess(
                                 context,
@@ -617,14 +618,17 @@ class _SampleHomePageState extends State<SampleHomePage> {
                               );
                             }
                           } catch (e) {
+                            if (!context.mounted) return;
                             SnackbarUtil.showError(
                               context,
                               'Login failed: ${e.toString()}',
                             );
                           } finally {
-                            setState(() {
-                              _isLoading = false;
-                            });
+                            if (context.mounted) {
+                              setState(() {
+                                _isLoading = false;
+                              });
+                            }
                           }
                         },
                       ),
@@ -637,11 +641,13 @@ class _SampleHomePageState extends State<SampleHomePage> {
                             : () async {
                                 try {
                                   await authController.refreshUserProfile();
+                                  if (!context.mounted) return;
                                   SnackbarUtil.showSuccess(
                                     context,
                                     'Profile refreshed successfully!',
                                   );
                                 } catch (e) {
+                                  if (!context.mounted) return;
                                   SnackbarUtil.showError(
                                     context,
                                     'Failed to refresh profile: ${e.toString()}',
@@ -654,7 +660,7 @@ class _SampleHomePageState extends State<SampleHomePage> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surfaceVariant,
+                            color: Theme.of(context).colorScheme.surfaceContainerHighest,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Column(
@@ -679,6 +685,7 @@ class _SampleHomePageState extends State<SampleHomePage> {
                           icon: Icons.logout,
                           onPressed: () async {
                             await authController.logout();
+                            if (!context.mounted) return;
                             SnackbarUtil.showInfo(
                                 context, 'Logged out successfully!');
                           },

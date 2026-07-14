@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import '../widgets/complete_order_widget.dart';
 
 class CompleteOrderScreen extends StatefulWidget {
@@ -106,10 +107,10 @@ class _CompleteOrderScreenState extends State<CompleteOrderScreen> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF4A148C),
+                  color: AppColors.primaryColor,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 10,
                       offset: const Offset(0, -5),
                     ),
@@ -143,7 +144,7 @@ class _CompleteOrderScreenState extends State<CompleteOrderScreen> {
                       child: const Text(
                         'Complete My Order',
                         style: TextStyle(
-                          color: Color(0xFF4A148C),
+                          color: AppColors.primaryColor,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),

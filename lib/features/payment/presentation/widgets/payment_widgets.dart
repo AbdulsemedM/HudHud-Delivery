@@ -27,20 +27,21 @@ class PaymentMethodCard extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     return Card(
-      elevation: isSelected ? 4 : 1,
+      elevation: 0,
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
         side: BorderSide(
           color: isSelected
               ? AppColors.primaryColor
-              : colorScheme.outline.withOpacity(0.35),
+              : colorScheme.outline.withValues(alpha: 0.35),
           width: isSelected ? 2 : 1,
         ),
       ),
+      color: colorScheme.surface,
       child: InkWell(
         onTap: enabled ? onTap : null,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -50,7 +51,7 @@ class PaymentMethodCard extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: _getPaymentMethodColor(id).withOpacity(0.1),
+                  color: _getPaymentMethodColor(id).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -72,7 +73,7 @@ class PaymentMethodCard extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                         color: enabled
                             ? colorScheme.onSurface
-                            : colorScheme.onSurface.withOpacity(0.5),
+                            : colorScheme.onSurface.withValues(alpha: 0.5),
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -81,8 +82,8 @@ class PaymentMethodCard extends StatelessWidget {
                       style: textTheme.bodyMedium?.copyWith(
                         fontSize: 14,
                         color: enabled
-                            ? colorScheme.onSurface.withOpacity(0.72)
-                            : colorScheme.onSurface.withOpacity(0.45),
+                            ? colorScheme.onSurface.withValues(alpha: 0.72)
+                            : colorScheme.onSurface.withValues(alpha: 0.45),
                       ),
                     ),
                   ],
@@ -140,8 +141,6 @@ class PaymentMethodCard extends StatelessWidget {
         return Icons.account_balance_wallet_rounded;
       case 'amole':
         return Icons.mobile_friendly;
-      case 'qpay':
-        return Icons.qr_code_2;
       default:
         return Icons.payment;
     }
@@ -174,8 +173,6 @@ class PaymentMethodCard extends StatelessWidget {
         return const Color(0xFF00A86B);
       case 'amole':
         return const Color(0xFF9C27B0);
-      case 'qpay':
-        return const Color(0xFF1565C0);
       default:
         return AppColors.primaryColor;
     }
@@ -196,15 +193,19 @@ class PaymentSummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final textTheme = Theme.of(context).textTheme;
-    return Card(
-      elevation: 2,
-      margin: const EdgeInsets.all(16),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+    return Container(
+      margin: const EdgeInsets.all(AppColors.spaceMD),
+      padding: const EdgeInsets.all(AppColors.spaceMD),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        border: Border.all(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? const Color(0xFF2A2A2A)
+              : const Color(0xFFEEEEEE),
+        ),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
+      child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
@@ -225,7 +226,6 @@ class PaymentSummaryCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
     );
   }
 
@@ -250,7 +250,7 @@ class PaymentSummaryCard extends StatelessWidget {
               fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
               color: isTotal
                   ? colorScheme.onSurface
-                  : colorScheme.onSurface.withOpacity(0.72),
+                  : colorScheme.onSurface.withValues(alpha: 0.72),
             ),
           ),
           Text(
@@ -310,7 +310,7 @@ class PaymentProcessingDialog extends StatelessWidget {
               textAlign: TextAlign.center,
               style: textTheme.bodyMedium?.copyWith(
                 fontSize: 14,
-                color: colorScheme.onSurface.withOpacity(0.72),
+                color: colorScheme.onSurface.withValues(alpha: 0.72),
               ),
             ),
           ],

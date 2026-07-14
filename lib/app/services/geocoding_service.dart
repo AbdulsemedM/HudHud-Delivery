@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:geocoding/geocoding.dart';
 import 'custom_location_service.dart';
 
@@ -34,7 +35,7 @@ class GeocodingService {
       
       return _defaultAddress;
     } catch (e) {
-      print('Error getting address from coordinates: $e');
+      debugPrint('Error getting address from coordinates: $e');
       return _defaultAddress;
     }
   }
@@ -50,7 +51,7 @@ class GeocodingService {
       
       return _defaultAddress;
     } catch (e) {
-      print('Error getting current location address: $e');
+      debugPrint('Error getting current location address: $e');
       return _defaultAddress;
     }
   }
@@ -75,7 +76,7 @@ class GeocodingService {
       
       return _defaultAddress;
     } catch (e) {
-      print('Error getting street name from coordinates: $e');
+      debugPrint('Error getting street name from coordinates: $e');
       return _defaultAddress;
     }
   }
@@ -91,7 +92,7 @@ class GeocodingService {
       
       return _defaultAddress;
     } catch (e) {
-      print('Error getting current street name: $e');
+      debugPrint('Error getting current street name: $e');
       return _defaultAddress;
     }
   }

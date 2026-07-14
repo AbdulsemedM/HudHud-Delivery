@@ -1,28 +1,40 @@
+
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
-import 'package:hudhud_delivery/core/widgets/user_avatar.dart';
-import 'package:hudhud_delivery/features/orders/presentation/widgets/orders_widget.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 
 class WalletHeader extends StatelessWidget {
-  const WalletHeader({super.key, this.avatarUrl});
-
-  final String? avatarUrl;
+  const WalletHeader({super.key});
 
   @override
   Widget build(BuildContext context) {
     final onSurface = Theme.of(context).colorScheme.onSurface;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        StoryRing(
-          child: UserAvatar(radius: 20, imageUrl: avatarUrl),
-        ),
-        IconButton(
-          icon: Icon(
-            Icons.notifications_outlined,
-            color: onSurface,
+        Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: AppColors.primaryColor, width: 2),
           ),
-          onPressed: () {},
+          child: const CircleAvatar(
+            radius: 22,
+            backgroundImage: AssetImage('assets/images/profile.png'),
+          ),
+        ),
+        Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFF4F4F4),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: IconButton(
+            icon: Icon(Icons.notifications_outlined, color: onSurface),
+            onPressed: () {},
+          ),
         ),
       ],
     );
@@ -42,25 +54,23 @@ class BalanceCard extends StatelessWidget {
     final l10n = context.l10n;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      height: 180,
+      padding: const EdgeInsets.all(AppColors.spaceLG),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Colors.brown[300]!,
-            Colors.orange[200]!,
-          ],
+          colors: [AppColors.primaryColor, AppColors.primaryDarkColor],
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppColors.radiusXL),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            l10n.walletMyBalanceLabel.toUpperCase(),
-            style: const TextStyle(
-              color: Colors.white,
+            l10n.walletMyBalanceLabel,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.75),
               fontSize: 14,
               fontWeight: FontWeight.w500,
             ),
@@ -70,9 +80,56 @@ class BalanceCard extends StatelessWidget {
             balance,
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
+              fontSize: 36,
+              fontWeight: FontWeight.w700,
+              fontFeatures: [FontFeature.tabularFigures()],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class WalletActionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const WalletActionButton({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        children: [
+          Material(
+            color: Colors.white.withValues(alpha: 0.2),
+            shape: const CircleBorder(),
+            child: InkWell(
+              onTap: onTap,
+              customBorder: const CircleBorder(),
+              child: SizedBox(
+                width: 48,
+                height: 48,
+                child: Icon(icon, color: Colors.white, size: 22),
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.9),
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -83,41 +140,84 @@ class BalanceCard extends StatelessWidget {
 class WalletActions extends StatelessWidget {
   final VoidCallback onAddMoney;
   final VoidCallback onSendMoney;
+  final VoidCallback? onHistory;
 
   const WalletActions({
     super.key,
     required this.onAddMoney,
     required this.onSendMoney,
+    this.onHistory,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colorScheme = Theme.of(context).colorScheme;
-    return Row(
-      children: [
-        Expanded(
-          child: TextButton.icon(
-            onPressed: onAddMoney,
-            icon: const Icon(Icons.add_circle_outline),
-            label: Text(l10n.walletAddMoney),
-            style: TextButton.styleFrom(
-              foregroundColor: colorScheme.primary,
+    return Transform.translate(
+      offset: const Offset(0, -28),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppColors.spaceMD),
+        child: Row(
+          children: [
+            WalletActionButton(
+              icon: Icons.add_rounded,
+              label: l10n.walletAddMoney,
+              onTap: onAddMoney,
             ),
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: TextButton.icon(
-            onPressed: onSendMoney,
-            icon: const Icon(Icons.send_outlined),
-            label: Text(l10n.walletSendMoney),
-            style: TextButton.styleFrom(
-              foregroundColor: colorScheme.onSurface,
+            WalletActionButton(
+              icon: Icons.arrow_upward_rounded,
+              label: l10n.withdrawAction,
+              onTap: onSendMoney,
             ),
-          ),
+            WalletActionButton(
+              icon: Icons.history_rounded,
+              label: l10n.walletRecentTransactions,
+              onTap: onHistory ?? () {},
+            ),
+          ],
         ),
-      ],
+      ),
+    );
+  }
+}
+
+class WalletSelectorChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const WalletSelectorChip({
+    super.key,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: FilterChip(
+        label: Text(label),
+        selected: selected,
+        onSelected: (_) => onTap(),
+        showCheckmark: false,
+        labelStyle: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: selected ? Colors.white : scheme.onSurfaceVariant,
+        ),
+        backgroundColor: scheme.surface,
+        selectedColor: AppColors.primaryColor,
+        side: BorderSide(
+          color: selected
+              ? AppColors.primaryColor
+              : scheme.outline.withValues(alpha: 0.4),
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppColors.radiusFull),
+        ),
+      ),
     );
   }
 }
@@ -125,17 +225,24 @@ class WalletActions extends StatelessWidget {
 class TransactionsList extends StatelessWidget {
   final List<TransactionItem> transactions;
   final VoidCallback? onSeeAll;
+  final bool isLoading;
 
   const TransactionsList({
     super.key,
     required this.transactions,
     this.onSeeAll,
+    this.isLoading = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseColor = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0);
+    final highlightColor =
+        isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF5F5F5);
+
     return Column(
       children: [
         Row(
@@ -143,10 +250,9 @@ class TransactionsList extends StatelessWidget {
           children: [
             Text(
               l10n.walletRecentTransactions,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
             if (onSeeAll != null)
               TextButton(
@@ -155,6 +261,7 @@ class TransactionsList extends StatelessWidget {
                   l10n.walletSeeAll,
                   style: TextStyle(
                     color: colorScheme.primary,
+                    fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -162,27 +269,79 @@ class TransactionsList extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
-        transactions.isEmpty
-            ? Padding(
-                padding: const EdgeInsets.symmetric(vertical: 24),
-                child: Text(
-                  l10n.walletNoTransactionsYet,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: colorScheme.onSurfaceVariant,
+        if (isLoading)
+          Column(
+            children: List.generate(3, (index) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Shimmer.fromColors(
+                  baseColor: baseColor,
+                  highlightColor: highlightColor,
+                  child: Container(
+                    height: 64,
+                    decoration: BoxDecoration(
+                      color: baseColor,
+                      borderRadius: BorderRadius.circular(AppColors.radiusLG),
+                    ),
                   ),
                 ),
-              )
-            : ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: transactions.length,
-                separatorBuilder: (context, index) => const SizedBox(height: 16),
-                itemBuilder: (context, index) {
-                  return TransactionListItem(transaction: transactions[index]);
-                },
+              );
+            }),
+          )
+        else if (transactions.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 24),
+            child: Text(
+              l10n.walletNoTransactionsYet,
+              style: TextStyle(
+                fontSize: 14,
+                color: colorScheme.onSurfaceVariant,
               ),
+            ),
+          )
+        else
+          _GroupedTransactions(transactions: transactions),
       ],
+    );
+  }
+}
+
+class _GroupedTransactions extends StatelessWidget {
+  final List<TransactionItem> transactions;
+
+  const _GroupedTransactions({required this.transactions});
+
+  @override
+  Widget build(BuildContext context) {
+    final grouped = <String, List<TransactionItem>>{};
+    for (final tx in transactions) {
+      grouped.putIfAbsent(tx.date, () => []).add(tx);
+    }
+
+    return Column(
+      children: grouped.entries.map((entry) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Text(
+                entry.key,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+            ),
+            ...entry.value.map(
+              (tx) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: TransactionListItem(transaction: tx),
+              ),
+            ),
+          ],
+        );
+      }).toList(),
     );
   }
 }
@@ -195,59 +354,71 @@ class TransactionListItem extends StatelessWidget {
     required this.transaction,
   });
 
+  bool get _isCredit {
+    final type = transaction.type.toLowerCase();
+    return type.contains('credit') ||
+        type.contains('deposit') ||
+        type.contains('add') ||
+        type.contains('refund');
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final amountColor = _isCredit ? AppColors.delivered : AppColors.cancelled;
+
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppColors.spaceMD),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(12),
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        border: Border.all(
+          color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFEEEEEE),
+        ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Text(
-            transaction.date,
-            style: TextStyle(
-              color: colorScheme.onSurfaceVariant,
-              fontSize: 12,
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: amountColor.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              _isCredit ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded,
+              color: amountColor,
+              size: 20,
             ),
           ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                transaction.formattedAmount,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: colorScheme.onSurface,
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: colorScheme.surface,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: colorScheme.outlineVariant,
-                  ),
-                ),
-                child: Text(
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
                   transaction.type,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: colorScheme.onSurface,
-                  ),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
                 ),
-              ),
-            ],
+                Text(
+                  transaction.date,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                ),
+              ],
+            ),
+          ),
+          Text(
+            transaction.formattedAmount,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: amountColor,
+            ),
           ),
         ],
       ),
@@ -273,5 +444,46 @@ class TransactionItem {
       return '$currency $amount';
     }
     return amount;
+  }
+}
+
+class WalletShimmer extends StatelessWidget {
+  const WalletShimmer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseColor = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0);
+    final highlightColor =
+        isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF5F5F5);
+
+    return Shimmer.fromColors(
+      baseColor: baseColor,
+      highlightColor: highlightColor,
+      child: Column(
+        children: [
+          Container(
+            height: 180,
+            decoration: BoxDecoration(
+              color: baseColor,
+              borderRadius: BorderRadius.circular(AppColors.radiusXL),
+            ),
+          ),
+          const SizedBox(height: 24),
+          ...List.generate(3, (index) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Container(
+                height: 64,
+                decoration: BoxDecoration(
+                  color: baseColor,
+                  borderRadius: BorderRadius.circular(AppColors.radiusLG),
+                ),
+              ),
+            );
+          }),
+        ],
+      ),
+    );
   }
 }

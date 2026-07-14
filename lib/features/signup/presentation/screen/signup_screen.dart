@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import '../../../../core/api/api_service.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../login/presentation/widgets/login_widget.dart';
 import '../widgets/signup_widget.dart';
 import '../../bloc/signup_bloc.dart';
 import '../../data/repository/signup_repository.dart';
 import '../../data/data_provider/signup_data_provider.dart';
 
-// Google Sign In Button Widget
 class _GoogleSignInButton extends StatelessWidget {
+  const _GoogleSignInButton();
+
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final colorScheme = Theme.of(context).colorScheme;
     return SizedBox(
       width: double.infinity,
@@ -20,16 +24,17 @@ class _GoogleSignInButton extends StatelessWidget {
           // TODO: Implement Google Sign In
         },
         style: OutlinedButton.styleFrom(
-          side: BorderSide(color: AppColors.primaryColor, width: 1.5),
+          side: BorderSide(
+            color: colorScheme.outline.withValues(alpha: 0.5),
+          ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
           ),
           backgroundColor: colorScheme.surface,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Google Logo
             Image.asset(
               'assets/images/Google_Favicon_2025.svg.png',
               width: 20,
@@ -45,9 +50,9 @@ class _GoogleSignInButton extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Text(
-              'Continue with Google',
+              l10n.continueWithGoogle,
               style: TextStyle(
-                color: Theme.of(context).textTheme.bodyLarge?.color,
+                color: colorScheme.onSurface,
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),
@@ -59,143 +64,188 @@ class _GoogleSignInButton extends StatelessWidget {
   }
 }
 
-class SignupScreen extends StatelessWidget {
+class SignupScreen extends StatefulWidget {
   final bool resumeAfterAuth;
 
   const SignupScreen({super.key, this.resumeAfterAuth = false});
 
   @override
+  State<SignupScreen> createState() => _SignupScreenState();
+}
+
+class _SignupScreenState extends State<SignupScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _slideController;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _slideController = AnimationController(
+      duration: const Duration(milliseconds: 700),
+      vsync: this,
+    );
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.15),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
+    );
+    _slideController.forward();
+  }
+
+  @override
+  void dispose() {
+    _slideController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => SignupBloc(
-          SignupRepository(
-            SignupDataProvider(apiService: ApiService.instance),
-          ),
+        SignupRepository(
+          SignupDataProvider(apiService: ApiService.instance),
         ),
+      ),
       child: Builder(
         builder: (context) {
+          final l10n = context.l10n;
           final theme = Theme.of(context);
           final colorScheme = theme.colorScheme;
           final isDark = theme.brightness == Brightness.dark;
+          final screenHeight = MediaQuery.of(context).size.height;
+
           return Scaffold(
-            backgroundColor: theme.scaffoldBackgroundColor,
-            body: SafeArea(
-              child: Column(
-                children: [
-                  // Top Navigation Bar
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0, vertical: 8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        // Back Button
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? colorScheme.surfaceContainerHighest
-                                : Colors.grey[100],
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.arrow_back,
-                              color: colorScheme.onSurface.withValues(alpha: 0.8),
-                            ),
-                            onPressed: () => Navigator.pop(context),
-                          ),
-                        ),
-                    // Logo
-                    Image.asset(
-                      'assets/images/logo.png',
-                      width: 100,
-                      fit: BoxFit.contain,
-                    ),
-                  ],
-                ),
-              ),
-              // Content
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Sign Up Header
-                      SignupTitle(),
-                      const SizedBox(height: 20),
-                      // Signup Form
-                      createSignupForm(),
-                      const SizedBox(height: 16),
-                      // Sign Up Button
-                      SignupButton(resumeAfterAuth: resumeAfterAuth),
-                      const SizedBox(height: 16),
-                      // Sign In Link
-                      Center(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              "Already have an account? ",
-                              style: TextStyle(
-                                color: colorScheme.onSurfaceVariant,
-                                fontSize: 14,
-                              ),
-                            ),
-                            GestureDetector(
-                              onTap: () => Navigator.pop(context),
-                              child: Text(
-                                'Sign In',
-                                style: TextStyle(
-                                  color: AppColors.primaryColor,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+            backgroundColor: colorScheme.surface,
+            body: Column(
+              children: [
+                SizedBox(
+                  height: screenHeight * 0.28,
+                  width: double.infinity,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          AppColors.primaryColor,
+                          AppColors.primaryColor.withValues(alpha: 0.0),
+                        ],
                       ),
-                      const SizedBox(height: 16),
-                      // Divider
-                      Row(
+                    ),
+                    child: SafeArea(
+                      bottom: false,
+                      child: Stack(
                         children: [
-                          Expanded(
-                            child: Divider(
-                              color: colorScheme.outline.withValues(alpha: 0.45),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            child: Text(
-                              'or continue with',
-                              style: TextStyle(
-                                color: colorScheme.onSurfaceVariant,
-                                fontSize: 14,
+                          Positioned(
+                            top: 8,
+                            left: 8,
+                            child: IconButton(
+                              icon: const Icon(
+                                Icons.arrow_back_rounded,
+                                color: Colors.white,
                               ),
+                              onPressed: () => Navigator.pop(context),
                             ),
                           ),
-                          Expanded(
-                            child: Divider(
-                              color: colorScheme.outline.withValues(alpha: 0.45),
-                            ),
+                          const Center(child: LogoWidget()),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: SlideTransition(
+                    position: _slideAnimation,
+                    child: Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: colorScheme.surface,
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(32),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: colorScheme.shadow.withValues(alpha: 0.08),
+                            blurRadius: 24,
+                            offset: const Offset(0, -4),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
-                      // Google Sign In Button
-                      _GoogleSignInButton(),
-                      const SizedBox(height: 8),
-                    ],
+                      child: SafeArea(
+                        top: false,
+                        child: SingleChildScrollView(
+                          padding:
+                              const EdgeInsets.fromLTRB(24, 28, 24, 16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SignupTitle(),
+                              const SizedBox(height: AppColors.spaceLG),
+                              createSignupForm(),
+                              const SizedBox(height: AppColors.spaceMD),
+                              SignupButton(resumeAfterAuth: widget.resumeAfterAuth),
+                              const SizedBox(height: AppColors.spaceMD),
+                              Center(
+                                child: GestureDetector(
+                                  onTap: () => Navigator.pop(context),
+                                  child: Text(
+                                    l10n.loginTitle,
+                                    style: const TextStyle(
+                                      color: AppColors.primaryColor,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      decoration: TextDecoration.underline,
+                                      decorationColor: AppColors.primaryColor,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: AppColors.spaceMD),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Divider(
+                                      color: isDark
+                                          ? const Color(0xFF2A2A2A)
+                                          : const Color(0xFFEEEEEE),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                    ),
+                                    child: Text(
+                                      l10n.loginOrContinueWith,
+                                      style: theme.textTheme.bodyMedium
+                                          ?.copyWith(
+                                        color: colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Divider(
+                                      color: isDark
+                                          ? const Color(0xFF2A2A2A)
+                                          : const Color(0xFFEEEEEE),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: AppColors.spaceMD),
+                              const _GoogleSignInButton(),
+                              const SizedBox(height: AppColors.spaceSM),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ),
-      );
+              ],
+            ),
+          );
         },
       ),
     );

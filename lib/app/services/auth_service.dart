@@ -136,8 +136,9 @@ class AuthService {
         },
       );
     } catch (e) {
-      if (kDebugMode)
+      if (kDebugMode) {
         debugPrint('AuthService: sendFcmTokenToBackend failed: $e');
+      }
     }
   }
 

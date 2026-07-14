@@ -14,7 +14,7 @@ Future<bool> launchSupportEmail() {
 
 /// Opens the phone dialer when [SupportConfig.supportPhoneE164] is set.
 Future<bool> launchSupportPhone() {
-  final n = SupportConfig.supportPhoneE164;
+  const n = SupportConfig.supportPhoneE164;
   if (n == null || n.isEmpty) {
     return Future.value(false);
   }

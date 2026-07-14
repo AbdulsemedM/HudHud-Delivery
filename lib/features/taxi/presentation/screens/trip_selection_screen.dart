@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
 import 'package:hudhud_delivery/features/taxi/data/ride_data_provider.dart';
-import 'package:hudhud_delivery/core/widgets/map_draggable_sheet_scaffold.dart';
-import 'package:hudhud_delivery/features/guest/utils/guest_sign_in_prompt.dart';
+import 'package:shimmer/shimmer.dart';
 import 'finding_driver_screen.dart';
 
 class TripSelectionScreen extends StatefulWidget {
@@ -43,7 +43,6 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
   double? _routeDistanceKm;
   bool _isLoadingRoute = false;
   bool? _hasGoogleMapsApiKey;
-  double _mapBottomPadding = 0;
 
   late List<TripOption> _tripOptions;
 
@@ -55,7 +54,8 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
     _loadMapsAvailability();
     _selectedTrip = 'go';
     _tripOptions = _getFallbackOptions();
-    if (widget.initialRoutePolylinePoints != null && widget.initialRouteDistanceKm != null) {
+    if (widget.initialRoutePolylinePoints != null &&
+        widget.initialRouteDistanceKm != null) {
       _routePolylinePoints = widget.initialRoutePolylinePoints;
       _routeDistanceKm = widget.initialRouteDistanceKm;
     } else {
@@ -92,14 +92,6 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
     });
   }
 
-  void _onSheetLayoutChanged(double extent, double bodyHeight) {
-    final padding = extent * bodyHeight;
-    if ((padding - _mapBottomPadding).abs() > 1) {
-      setState(() => _mapBottomPadding = padding);
-    }
-    _fitBounds();
-  }
-
   void _fitBounds() {
     final bounds = gmaps.LatLngBounds(
       southwest: gmaps.LatLng(
@@ -124,7 +116,6 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
     );
   }
 
-  /// Maps trip option id to API vehicle_type and ride_type
   ({String vehicleType, String rideType}) _getApiParams(String tripId) {
     switch (tripId) {
       case 'go':
@@ -139,15 +130,6 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
   }
 
   Future<void> _fetchEstimates() async {
-    if (!await requireSignInForBackend(context)) {
-      if (mounted) {
-        setState(() {
-          _isLoadingEstimates = false;
-          _tripOptions = _getFallbackOptions();
-        });
-      }
-      return;
-    }
     setState(() {
       _isLoadingEstimates = true;
       _estimateError = null;
@@ -160,7 +142,8 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
     ];
 
     final options = <TripOption>[];
-    for (final (id, name, imagePath, hasFasterBadge, isDiscount) in tripConfigs) {
+    for (final (id, name, imagePath, hasFasterBadge, isDiscount)
+        in tripConfigs) {
       var params = _getApiParams(id);
       var result = await _rideDataProvider.getRideEstimate(
         pickupLatitude: widget.pickupLocation.latitude,
@@ -196,7 +179,8 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
           price: fare.round(),
           originalPrice: isDiscount ? (fare * 1.1).round() : null,
           estimatedTime: '$duration min',
-          estimatedArrival: '${eta.hour > 12 ? eta.hour - 12 : eta.hour}:${eta.minute.toString().padLeft(2, '0')}${eta.hour >= 12 ? 'pm' : 'am'}',
+          estimatedArrival:
+              '${eta.hour > 12 ? eta.hour - 12 : eta.hour}:${eta.minute.toString().padLeft(2, '0')}${eta.hour >= 12 ? 'pm' : 'am'}',
           vehicleImagePath: imagePath,
           hasFasterBadge: hasFasterBadge,
           isDiscount: isDiscount,
@@ -275,7 +259,6 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
 
   Future<void> _onSelectTrip(TripOption selectedOption) async {
     if (_isRequestingRide) return;
-    if (!await requireSignInForBackend(context)) return;
 
     setState(() => _isRequestingRide = true);
 
@@ -299,7 +282,9 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
 
     setState(() => _isRequestingRide = false);
 
-    if (result['statusCode'] != null && result['statusCode'] >= 200 && result['statusCode']! < 300) {
+    if (result['statusCode'] != null &&
+        result['statusCode'] >= 200 &&
+        result['statusCode']! < 300) {
       final data = result['data'] as Map<String, dynamic>?;
       final ride = data?['ride'] as Map<String, dynamic>?;
       final rideId = ride?['id'] as int?;
@@ -323,220 +308,339 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(result['errorMessage'] ?? 'Failed to request ride'),
-          backgroundColor: Colors.red,
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     }
   }
 
+  Color _cardBorder(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? AppColors.darkBorder : const Color(0xFFEEEEEE);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final l10n = context.l10n;
+    final borderColor = _cardBorder(context);
     final selectedOption =
         _tripOptions.firstWhere((opt) => opt.id == _selectedTrip);
-    final overlayTop = mapOverlayTop(context);
 
-    return MapDraggableSheetScaffold(
-      initialChildSize: 0.5,
-      minChildSize: 0.35,
-      maxChildSize: 0.85,
-      onSheetLayoutChanged: _onSheetLayoutChanged,
-      map: _buildMapOrFallback(),
-      mapOverlays: [
-        Positioned(
-          top: overlayTop,
-          left: 16,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  blurRadius: 4,
+    final screenHeight = MediaQuery.of(context).size.height;
+    const bottomSheetInitialFraction = 0.52;
+    final mapBottom = screenHeight * bottomSheetInitialFraction;
+
+    return Scaffold(
+      body: Stack(
+        children: [
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: mapBottom,
+            child: _buildMapOrFallback(context),
+          ),
+          Positioned(
+            top: 48,
+            left: AppColors.spaceMD,
+            child: Container(
+              decoration: BoxDecoration(
+                color: colorScheme.surface,
+                shape: BoxShape.circle,
+                border: Border.all(color: borderColor),
+              ),
+              child: IconButton(
+                icon: Icon(Icons.arrow_back_rounded, color: colorScheme.onSurface),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
+          ),
+          DraggableScrollableSheet(
+            initialChildSize: 0.52,
+            minChildSize: 0.38,
+            maxChildSize: 0.88,
+            builder: (context, scrollController) {
+              return Container(
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(AppColors.radiusXL),
+                    topRight: Radius.circular(AppColors.radiusXL),
+                  ),
+                  border: Border(
+                    top: BorderSide(color: borderColor),
+                    left: BorderSide(color: borderColor),
+                    right: BorderSide(color: borderColor),
+                  ),
                 ),
-              ],
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ),
-        ),
-      ],
-      sheetBuilder: (context, scrollController) {
-        return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
-            ),
-          ),
-          child: _isLoadingEstimates
-              ? Column(
+                child: Column(
                   children: [
-                    const MapSheetDragHandle(),
-                    const Expanded(
-                      child: Center(child: CircularProgressIndicator()),
+                    Container(
+                      margin: const EdgeInsets.only(top: AppColors.spaceSM),
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: colorScheme.outlineVariant,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
-                  ],
-                )
-              : ListView(
-                  controller: scrollController,
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-                  children: [
-                    const MapSheetDragHandle(),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppColors.spaceMD),
                     if (_routeDistanceKm != null || _isLoadingRoute)
-                      Row(
-                        children: [
-                          Icon(Icons.straighten,
-                              size: 18, color: AppColors.primaryColor),
-                          const SizedBox(width: 8),
-                          if (_isLoadingRoute)
-                            const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child:
-                                  CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          else if (_routeDistanceKm != null)
-                            Text(
-                              '${_routeDistanceKm!.toStringAsFixed(2)} KM',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.primaryColor,
-                              ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppColors.spaceMD,
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.straighten_rounded,
+                              size: 18,
+                              color: AppColors.primaryColor,
                             ),
-                        ],
+                            const SizedBox(width: AppColors.spaceSM),
+                            if (_isLoadingRoute)
+                              const _InlineShimmer(width: 72, height: 14)
+                            else if (_routeDistanceKm != null)
+                              Text(
+                                l10n.taxiDistanceKm(
+                                  _routeDistanceKm!.toStringAsFixed(2),
+                                ),
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primaryColor,
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
                     if (_routeDistanceKm != null || _isLoadingRoute)
-                      const SizedBox(height: 12),
+                      const SizedBox(height: AppColors.spaceMD),
                     if (!_isLoadingRoute && _routePolylinePoints == null) ...[
-                      Row(
-                        children: [
-                          Icon(Icons.info_outline,
-                              size: 16, color: Colors.orange[800]),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'Road route unavailable. Enable "Directions API" in Google Cloud Console for your API key (see MAPS_SETUP.md).',
-                              style: TextStyle(
-                                  fontSize: 11, color: Colors.orange[800]),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppColors.spaceMD,
+                        ),
+                        child: Container(
+                          padding: const EdgeInsets.all(AppColors.spaceMD),
+                          decoration: BoxDecoration(
+                            color: AppColors.warningColor.withValues(alpha: 0.08),
+                            borderRadius:
+                                BorderRadius.circular(AppColors.radiusLG),
+                            border: Border.all(
+                              color: AppColors.warningColor.withValues(alpha: 0.3),
                             ),
                           ),
-                        ],
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.info_outline_rounded,
+                                size: 18,
+                                color: AppColors.warningDarkColor,
+                              ),
+                              const SizedBox(width: AppColors.spaceSM),
+                              Expanded(
+                                child: Text(
+                                  'Road route unavailable. Enable "Directions API" in Google Cloud Console for your API key (see MAPS_SETUP.md).',
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: AppColors.warningDarkColor,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppColors.spaceMD),
                     ],
-                    const Text(
-                      'Choose a trip',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF2C3E50),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppColors.spaceMD,
+                      ),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Choose a trip',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: colorScheme.onSurface,
+                          ),
+                        ),
                       ),
                     ),
                     if (_estimateError != null) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        _estimateError!,
-                        style:
-                            TextStyle(fontSize: 12, color: Colors.orange[800]),
-                      ),
-                    ],
-                    const SizedBox(height: 12),
-                    ..._tripOptions.map((option) {
-                      final isSelected = _selectedTrip == option.id;
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _TripOptionCard(
-                          option: option,
-                          isSelected: isSelected,
-                          onTap: () {
-                            setState(() => _selectedTrip = option.id);
-                          },
-                        ),
-                      );
-                    }),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Text('Payment: ',
-                            style: TextStyle(
-                                color: Colors.grey[700], fontSize: 14)),
-                        ...['wallet', 'card', 'cash'].map((method) {
-                          final isSelected = _paymentMethod == method;
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: ChoiceChip(
-                              label: Text(method.toUpperCase()),
-                              selected: isSelected,
-                              onSelected: (selected) {
-                                if (selected) {
-                                  setState(() => _paymentMethod = method);
-                                }
-                              },
-                            ),
-                          );
-                        }),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton(
-                        onPressed: _isRequestingRide
-                            ? null
-                            : () => _onSelectTrip(selectedOption),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                      const SizedBox(height: AppColors.spaceSM),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppColors.spaceMD,
                         ),
                         child: Text(
-                          'Select ${selectedOption.name}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
+                          _estimateError!,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: AppColors.warningDarkColor,
                           ),
                         ),
                       ),
+                    ],
+                    const SizedBox(height: AppColors.spaceMD),
+                    Expanded(
+                      child: _isLoadingEstimates
+                          ? _TripOptionsShimmer(borderColor: borderColor)
+                          : ListView.builder(
+                              controller: scrollController,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppColors.spaceMD,
+                              ),
+                              itemCount: _tripOptions.length,
+                              itemBuilder: (context, index) {
+                                final option = _tripOptions[index];
+                                final isSelected = _selectedTrip == option.id;
+
+                                return Padding(
+                                  padding: const EdgeInsets.only(
+                                    bottom: AppColors.spaceMD,
+                                  ),
+                                  child: _TripOptionCard(
+                                    option: option,
+                                    isSelected: isSelected,
+                                    borderColor: borderColor,
+                                    onTap: () {
+                                      setState(() {
+                                        _selectedTrip = option.id;
+                                      });
+                                    },
+                                  ),
+                                );
+                              },
+                            ),
                     ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppColors.spaceMD,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.labelPaymentMethod,
+                            style: theme.textTheme.labelLarge?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: AppColors.spaceSM),
+                          Row(
+                            children: ['wallet', 'card', 'cash'].map((method) {
+                              final isSelected = _paymentMethod == method;
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 8),
+                                child: FilterChip(
+                                  label: Text(method.toUpperCase()),
+                                  selected: isSelected,
+                                  onSelected: (selected) {
+                                    if (selected) {
+                                      setState(() => _paymentMethod = method);
+                                    }
+                                  },
+                                  showCheckmark: false,
+                                  labelStyle: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: isSelected
+                                        ? colorScheme.onPrimary
+                                        : colorScheme.onSurfaceVariant,
+                                  ),
+                                  backgroundColor: colorScheme.surface,
+                                  selectedColor: AppColors.primaryColor,
+                                  side: BorderSide(
+                                    color: isSelected
+                                        ? AppColors.primaryColor
+                                        : borderColor,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                      AppColors.radiusFull,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: AppColors.spaceMD),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppColors.spaceMD,
+                      ),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: AppColors.buttonHeightMD,
+                        child: FilledButton(
+                          onPressed: _isRequestingRide
+                              ? null
+                              : () => _onSelectTrip(selectedOption),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AppColors.primaryColor,
+                            foregroundColor: colorScheme.onPrimary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(AppColors.radiusLG),
+                            ),
+                          ),
+                          child: _isRequestingRide
+                              ? SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: colorScheme.onPrimary,
+                                  ),
+                                )
+                              : Text(
+                                  'Select ${selectedOption.name}',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: AppColors.spaceMD),
                   ],
                 ),
-        );
-      },
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildMapOrFallback() {
+  Widget _buildMapOrFallback(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+
     if (_hasGoogleMapsApiKey == null) {
-      return const Center(child: CircularProgressIndicator());
+      return _MapShimmer();
     }
     if (_hasGoogleMapsApiKey == false) {
-      return const Center(
+      return Center(
         child: Padding(
-          padding: EdgeInsets.all(24),
+          padding: const EdgeInsets.all(AppColors.spaceLG),
           child: Text(
-            'Google Maps is not configured on iOS. Add GOOGLE_MAPS_API_KEY and restart the app.',
+            l10n.taxiGoogleMapsNotConfigured,
             textAlign: TextAlign.center,
+            style: theme.textTheme.bodyMedium,
           ),
         ),
       );
     }
 
     return gmaps.GoogleMap(
-      padding: EdgeInsets.only(
-        bottom: _mapBottomPadding,
-        top: mapOverlayTop(context) + 48,
-        left: 16,
-        right: 16,
-      ),
       initialCameraPosition: gmaps.CameraPosition(
         target: _toG(widget.pickupLocation),
         zoom: 13.0,
@@ -560,14 +664,15 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
       polylines: {
         gmaps.Polyline(
           polylineId: const gmaps.PolylineId('route'),
-          points: _routePolylinePoints != null && _routePolylinePoints!.length >= 2
+          points: _routePolylinePoints != null &&
+                  _routePolylinePoints!.length >= 2
               ? _routePolylinePoints!.map(_toG).toList()
               : [
                   _toG(widget.pickupLocation),
                   _toG(widget.destinationLocation),
                 ],
           color: AppColors.primaryColor,
-          width: 3,
+          width: 4,
         ),
       },
       myLocationEnabled: true,
@@ -615,185 +720,247 @@ class TripOption {
 class _TripOptionCard extends StatelessWidget {
   final TripOption option;
   final bool isSelected;
+  final Color borderColor;
   final VoidCallback onTap;
 
   const _TripOptionCard({
     required this.option,
     required this.isSelected,
+    required this.borderColor,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? AppColors.primaryColor : Colors.grey[300]!,
-            width: isSelected ? 2 : 1,
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Material(
+      color: colorScheme.surface,
+      borderRadius: BorderRadius.circular(AppColors.radiusLG),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        child: Container(
+          padding: const EdgeInsets.all(AppColors.spaceMD),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppColors.radiusLG),
+            border: Border.all(
+              color: isSelected ? AppColors.primaryColor : borderColor,
+              width: isSelected ? 2 : 1,
+            ),
+            color: isSelected
+                ? AppColors.primaryColor.withValues(alpha: 0.04)
+                : colorScheme.surface,
           ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: AppColors.primaryColor.withOpacity(0.2),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
+          child: Row(
+            children: [
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(AppColors.radiusMD),
+                  border: Border.all(color: borderColor),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(AppColors.radiusMD),
+                  child: Image.asset(
+                    option.vehicleImagePath,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Icon(
+                        option.id == 'tuk'
+                            ? Icons.moped_rounded
+                            : Icons.directions_car_rounded,
+                        size: 40,
+                        color: AppColors.primaryColor,
+                      );
+                    },
                   ),
-                ]
-              : [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-        ),
-        child: Row(
-          children: [
-            // Vehicle Image
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: option.id == 'tuk' 
-                    ? Colors.yellow[50] 
-                    : Colors.grey[50],
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.asset(
-                  option.vehicleImagePath,
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) {
-                    // Fallback to icon if image fails to load
-                    return Icon(
-                      option.id == 'tuk' ? Icons.moped : Icons.directions_car,
-                      size: 50,
-                      color: option.id == 'tuk' 
-                          ? Colors.yellow[700] 
-                          : Colors.grey[800],
-                    );
-                  },
                 ),
               ),
-            ),
-            const SizedBox(width: 16),
-            // Trip Details
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          option.name,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: isSelected
-                                ? AppColors.primaryColor
-                                : const Color(0xFF2C3E50),
+              const SizedBox(width: AppColors.spaceMD),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            option.name,
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: isSelected
+                                  ? AppColors.primaryColor
+                                  : colorScheme.onSurface,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                      if (option.hasFasterBadge) ...[
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.blue[100],
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.bolt,
-                                size: 12,
-                                color: Colors.blue[700],
+                        if (option.hasFasterBadge) ...[
+                          const SizedBox(width: AppColors.spaceSM),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.infoColor.withValues(alpha: 0.12),
+                              borderRadius:
+                                  BorderRadius.circular(AppColors.radiusFull),
+                              border: Border.all(
+                                color: AppColors.infoColor.withValues(alpha: 0.3),
                               ),
-                              const SizedBox(width: 4),
-                              Text(
-                                'Faster',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.blue[700],
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.bolt_rounded,
+                                  size: 12,
+                                  color: AppColors.infoColor,
                                 ),
-                              ),
-                            ],
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Faster',
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.infoColor,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
+                        ],
                       ],
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${option.estimatedArrival} • ${option.estimatedTime}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600],
                     ),
-                  ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${option.estimatedArrival} • ${option.estimatedTime}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  if (option.isDiscount && option.originalPrice != null) ...[
+                    Text(
+                      'ETB ${option.originalPrice}',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                        decoration: TextDecoration.lineThrough,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'ETB ${option.price}',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.successColor,
+                      ),
+                    ),
+                  ] else
+                    Text(
+                      'ETB ${option.price}',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: isSelected
+                            ? AppColors.primaryColor
+                            : colorScheme.onSurface,
+                      ),
+                    ),
                 ],
               ),
-            ),
-            // Price
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                if (option.isDiscount && option.originalPrice != null) ...[
-                  Text(
-                    'ETB ${option.originalPrice}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[400],
-                      decoration: TextDecoration.lineThrough,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'ETB ${option.price}',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.green[700],
-                    ),
-                  ),
-                ] else
-                  Text(
-                    'ETB ${option.price}',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: isSelected
-                          ? AppColors.primaryColor
-                          : const Color(0xFF2C3E50),
-                    ),
-                  ),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
+class _TripOptionsShimmer extends StatelessWidget {
+  final Color borderColor;
+
+  const _TripOptionsShimmer({required this.borderColor});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseColor = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0);
+    final highlightColor =
+        isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF5F5F5);
+
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: AppColors.spaceMD),
+      itemCount: 3,
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: AppColors.spaceMD),
+          child: Shimmer.fromColors(
+            baseColor: baseColor,
+            highlightColor: highlightColor,
+            child: Container(
+              height: 96,
+              decoration: BoxDecoration(
+                color: baseColor,
+                borderRadius: BorderRadius.circular(AppColors.radiusLG),
+                border: Border.all(color: borderColor),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _InlineShimmer extends StatelessWidget {
+  final double width;
+  final double height;
+
+  const _InlineShimmer({required this.width, required this.height});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseColor = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0);
+    final highlightColor =
+        isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF5F5F5);
+
+    return Shimmer.fromColors(
+      baseColor: baseColor,
+      highlightColor: highlightColor,
+      child: Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: baseColor,
+          borderRadius: BorderRadius.circular(4),
+        ),
+      ),
+    );
+  }
+}
+
+class _MapShimmer extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseColor = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0);
+    final highlightColor =
+        isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF5F5F5);
+
+    return Shimmer.fromColors(
+      baseColor: baseColor,
+      highlightColor: highlightColor,
+      child: Container(color: baseColor),
+    );
+  }
+}

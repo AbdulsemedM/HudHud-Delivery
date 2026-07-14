@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/restaurants/presentation/screens/complete_order_screen.dart';
 import '../widgets/restaurant_widget.dart';
 
@@ -170,10 +171,10 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF4A148C),
+                  color: AppColors.primaryColor,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 10,
                       offset: const Offset(0, -5),
                     ),
@@ -228,7 +229,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                           child: const Text(
                             'Go to Checkout',
                             style: TextStyle(
-                              color: Color(0xFF4A148C),
+                              color: AppColors.primaryColor,
                               fontWeight: FontWeight.bold,
                             ),
                           ),

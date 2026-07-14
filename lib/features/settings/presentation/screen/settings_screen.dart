@@ -682,7 +682,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   style: OutlinedButton.styleFrom(
                     foregroundColor: _accentIconRed,
                     side: BorderSide(
-                      color: colorScheme.outlineVariant.withOpacity(0.6),
+                      color: colorScheme.outlineVariant.withValues(alpha: 0.6),
                     ),
                     shape: const StadiumBorder(),
                     padding: const EdgeInsets.symmetric(vertical: 14),
@@ -692,7 +692,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.logout, color: _accentIconRed, size: 22),
+                      const Icon(Icons.logout, color: _accentIconRed, size: 22),
                       const SizedBox(width: 10),
                       Text(
                         l10n.actionLogOut,
@@ -725,7 +725,7 @@ Widget _tileDivider(ColorScheme colorScheme) {
     height: 1,
     thickness: 1,
     indent: 52,
-    color: colorScheme.outlineVariant.withOpacity(0.35),
+    color: colorScheme.outlineVariant.withValues(alpha: 0.35),
   );
 }
 
@@ -770,13 +770,13 @@ class _KlikSectionCard extends StatelessWidget {
             ? null
             : [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
+                  color: Colors.black.withValues(alpha: 0.04),
                   blurRadius: 10,
                   offset: const Offset(0, 2),
                 ),
               ],
         border: Border.all(
-          color: colorScheme.outlineVariant.withOpacity(isDark ? 0.35 : 0.2),
+          color: colorScheme.outlineVariant.withValues(alpha: isDark ? 0.35 : 0.2),
         ),
       ),
       clipBehavior: Clip.antiAlias,
@@ -819,9 +819,9 @@ class _KlikTile extends StatelessWidget {
                 height: 40,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: colorScheme.surfaceContainerHighest.withOpacity(0.65),
+                  color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.65),
                   border: Border.all(
-                    color: colorScheme.outlineVariant.withOpacity(0.4),
+                    color: colorScheme.outlineVariant.withValues(alpha: 0.4),
                   ),
                 ),
                 child: Icon(icon, color: iconColor, size: 22),
@@ -889,13 +889,13 @@ class _StatCard extends StatelessWidget {
                 ? null
                 : [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
+                      color: Colors.black.withValues(alpha: 0.04),
                       blurRadius: 10,
                       offset: const Offset(0, 2),
                     ),
                   ],
             border: Border.all(
-              color: colorScheme.outlineVariant.withOpacity(isDark ? 0.35 : 0.2),
+              color: colorScheme.outlineVariant.withValues(alpha: isDark ? 0.35 : 0.2),
             ),
           ),
           child: Column(
@@ -971,13 +971,13 @@ class _ProfileHeaderCard extends StatelessWidget {
             ? null
             : [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 12,
                   offset: const Offset(0, 3),
                 ),
               ],
         border: Border.all(
-          color: colorScheme.outlineVariant.withOpacity(isDark ? 0.35 : 0.2),
+          color: colorScheme.outlineVariant.withValues(alpha: isDark ? 0.35 : 0.2),
         ),
       ),
       child: Row(
@@ -1096,7 +1096,7 @@ class _LoyaltyRibbon extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.orange.withOpacity(0.25),
+            color: Colors.orange.withValues(alpha: 0.25),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -1166,7 +1166,7 @@ class _LegalFooter extends StatelessWidget {
             Text(
               '•',
               style: textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant.withOpacity(0.6),
+                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
               ),
             ),
             TextButton(
@@ -1198,7 +1198,7 @@ class _LegalFooter extends StatelessWidget {
           l10n.profileCopyright(year),
           textAlign: TextAlign.center,
           style: textTheme.bodySmall?.copyWith(
-            color: colorScheme.onSurfaceVariant.withOpacity(0.85),
+            color: colorScheme.onSurfaceVariant.withValues(alpha: 0.85),
             fontSize: 11,
           ),
         ),
@@ -1207,7 +1207,7 @@ class _LegalFooter extends StatelessWidget {
           versionLine,
           textAlign: TextAlign.center,
           style: textTheme.bodySmall?.copyWith(
-            color: colorScheme.onSurfaceVariant.withOpacity(0.75),
+            color: colorScheme.onSurfaceVariant.withValues(alpha: 0.75),
             fontSize: 11,
           ),
         ),
@@ -1339,7 +1339,7 @@ class _DeliveryPreferencesPageState extends State<_DeliveryPreferencesPage> {
               color: colorScheme.surface,
               borderRadius: BorderRadius.circular(18),
               border: Border.all(
-                color: colorScheme.outlineVariant.withOpacity(0.35),
+                color: colorScheme.outlineVariant.withValues(alpha: 0.35),
               ),
             ),
             child: SwitchListTile(
@@ -1347,7 +1347,7 @@ class _DeliveryPreferencesPageState extends State<_DeliveryPreferencesPage> {
                 horizontal: 16,
                 vertical: 4,
               ),
-              secondary: Icon(
+              secondary: const Icon(
                 Icons.sms_outlined,
                 color: AppColors.errorColor,
               ),

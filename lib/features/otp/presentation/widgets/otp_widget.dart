@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'dart:async';
 import '../../../../core/theme/app_colors.dart';
 
@@ -15,7 +16,7 @@ class OtpInputFieldsState extends State<OtpInputFields> {
   final List<TextEditingController> _controllers =
       List.generate(4, (_) => TextEditingController());
   final List<FocusNode> _focusNodes = List.generate(4, (_) => FocusNode());
-  List<String> _otpValues = ['', '', '', ''];
+  final List<String> _otpValues = ['', '', '', ''];
 
   @override
   void dispose() {
@@ -30,7 +31,6 @@ class OtpInputFieldsState extends State<OtpInputFields> {
 
   void _onDigitEntered(String value, int index) {
     if (value.length > 1) {
-      // Handle paste
       value = value.substring(0, 1);
     }
 
@@ -42,7 +42,6 @@ class OtpInputFieldsState extends State<OtpInputFields> {
       _focusNodes[index + 1].requestFocus();
     }
 
-    // Check if all fields are filled
     if (_otpValues.every((v) => v.isNotEmpty)) {
       final otp = _otpValues.join('');
       widget.onCompleted?.call(otp);
@@ -80,21 +79,50 @@ class OtpInputFieldsState extends State<OtpInputFields> {
       }
     }
 
-    // Check if all fields are filled
     if (_otpValues.every((v) => v.isNotEmpty)) {
       final otp = _otpValues.join('');
       widget.onCompleted?.call(otp);
     }
   }
 
+  InputDecoration _otpDecoration(BuildContext context, bool isFocused) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final borderColor =
+        isDark ? const Color(0xFF2A2A2A) : const Color(0xFFEEEEEE);
+
+    return InputDecoration(
+      counterText: '',
+      filled: true,
+      fillColor: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFF4F4F4),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: borderColor),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: borderColor),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(
+          color: isFocused ? AppColors.primaryColor : borderColor,
+          width: isFocused ? 2 : 1,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: List.generate(4, (index) {
-        return Container(
-          width: 60,
-          height: 60,
+        return SizedBox(
+          width: 64,
+          height: 64,
           child: TextField(
             controller: _controllers[index],
             focusNode: _focusNodes[index],
@@ -104,28 +132,14 @@ class OtpInputFieldsState extends State<OtpInputFields> {
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
-              color: Colors.grey[800],
+              color: colorScheme.onSurface,
             ),
-            decoration: InputDecoration(
-              counterText: '',
-              filled: true,
-              fillColor: Colors.grey[50],
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.grey[200]!),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: AppColors.primaryColor, width: 2),
-              ),
+            decoration: _otpDecoration(
+              context,
+              _focusNodes[index].hasFocus,
             ),
             onChanged: (value) => _onDigitEntered(value, index),
             onTap: () {
-              // Clear field when tapped
               if (_otpValues[index].isNotEmpty) {
                 setState(() {
                   _otpValues[index] = '';
@@ -139,10 +153,8 @@ class OtpInputFieldsState extends State<OtpInputFields> {
     );
   }
 
-  // Method to be called from keyboard
   void handleKeyboardInput(String input) {
     if (input == 'backspace') {
-      // Find the last filled field
       int lastFilledIndex = -1;
       for (int i = 3; i >= 0; i--) {
         if (_otpValues[i].isNotEmpty) {
@@ -163,18 +175,19 @@ class OtpInputFieldsState extends State<OtpInputFields> {
     }
   }
 
-  // Get current OTP values for keyboard access
   List<String> get otpValues => _otpValues;
 }
 
 class OtpResendTimer extends StatefulWidget {
+  const OtpResendTimer({super.key});
+
   @override
   State<OtpResendTimer> createState() => _OtpResendTimerState();
 }
 
 class _OtpResendTimerState extends State<OtpResendTimer> {
   Timer? _timer;
-  int _remainingSeconds = 180; // 3 minutes = 180 seconds
+  int _remainingSeconds = 180;
   bool _canResend = false;
 
   @override
@@ -184,7 +197,7 @@ class _OtpResendTimerState extends State<OtpResendTimer> {
   }
 
   void _startTimer() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_remainingSeconds > 0) {
         setState(() {
           _remainingSeconds--;
@@ -199,6 +212,7 @@ class _OtpResendTimerState extends State<OtpResendTimer> {
   }
 
   void _resendCode() {
+    final l10n = context.l10n;
     setState(() {
       _remainingSeconds = 180;
       _canResend = false;
@@ -207,7 +221,7 @@ class _OtpResendTimerState extends State<OtpResendTimer> {
     // TODO: Implement resend OTP logic
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Verification code resent'),
+        content: Text(l10n.codeSentPhoneDefault),
         backgroundColor: AppColors.primaryColor,
       ),
     );
@@ -216,7 +230,7 @@ class _OtpResendTimerState extends State<OtpResendTimer> {
   String _formatTime(int seconds) {
     final minutes = seconds ~/ 60;
     final secs = seconds % 60;
-    return '${minutes}:${secs.toString().padLeft(2, '0')}';
+    return '$minutes:${secs.toString().padLeft(2, '0')}';
   }
 
   @override
@@ -227,20 +241,23 @@ class _OtpResendTimerState extends State<OtpResendTimer> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         if (!_canResend) ...[
           Text(
-            'Resend Code in ',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
+            '${l10n.actionResend} ',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
           Text(
             _formatTime(_remainingSeconds),
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
               color: AppColors.primaryColor,
@@ -250,12 +267,13 @@ class _OtpResendTimerState extends State<OtpResendTimer> {
           GestureDetector(
             onTap: _resendCode,
             child: Text(
-              'Resend Code',
-              style: TextStyle(
+              l10n.actionResend,
+              style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
                 color: AppColors.primaryColor,
                 decoration: TextDecoration.underline,
+                decorationColor: AppColors.primaryColor,
               ),
             ),
           ),
@@ -275,6 +293,7 @@ class OtpNumericKeyboard extends StatelessWidget {
   }) : super(key: key);
 
   void _handleKeyPress(String key, BuildContext context) {
+    final l10n = context.l10n;
     if (key == 'backspace') {
       otpInputFieldsState?.handleKeyboardInput('backspace');
       onKeyPressed?.call('backspace');
@@ -282,7 +301,7 @@ class OtpNumericKeyboard extends StatelessWidget {
       // TODO: Implement submit OTP logic
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Submitting OTP...'),
+          content: Text(l10n.actionSending),
           backgroundColor: AppColors.primaryColor,
         ),
       );
@@ -294,80 +313,166 @@ class OtpNumericKeyboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final keyBg = isDark ? const Color(0xFF1E1E1E) : Colors.white;
+    final keyBorder =
+        isDark ? const Color(0xFF2A2A2A) : const Color(0xFFEEEEEE);
+    final panelBg = isDark ? const Color(0xFF121212) : const Color(0xFFF8F8F8);
+
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: panelBg,
         border: Border(
-          top: BorderSide(color: Colors.grey[200]!, width: 1),
+          top: BorderSide(color: keyBorder, width: 1),
         ),
       ),
       child: Column(
         children: [
-          // Row 1: 1, 2, 3, Special Keys
           Row(
             children: [
               Expanded(
-                  child: _NumberKey('1', () => _handleKeyPress('1', context))),
-              SizedBox(width: 8),
+                child: _NumberKey(
+                  '1',
+                  keyBg: keyBg,
+                  keyBorder: keyBorder,
+                  onPressed: () => _handleKeyPress('1', context),
+                ),
+              ),
+              const SizedBox(width: 8),
               Expanded(
-                  child: _NumberKey('2', () => _handleKeyPress('2', context))),
-              SizedBox(width: 8),
+                child: _NumberKey(
+                  '2',
+                  keyBg: keyBg,
+                  keyBorder: keyBorder,
+                  onPressed: () => _handleKeyPress('2', context),
+                ),
+              ),
+              const SizedBox(width: 8),
               Expanded(
-                  child: _NumberKey('3', () => _handleKeyPress('3', context))),
-              SizedBox(width: 8),
-              _SpecialKey(Icons.remove, Colors.grey[300]!,
-                  () => _handleKeyPress('-', context)),
+                child: _NumberKey(
+                  '3',
+                  keyBg: keyBg,
+                  keyBorder: keyBorder,
+                  onPressed: () => _handleKeyPress('3', context),
+                ),
+              ),
+              const SizedBox(width: 8),
+              _SpecialKey(
+                Icons.remove,
+                color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE8E8E8),
+                onPressed: () => _handleKeyPress('-', context),
+              ),
             ],
           ),
-          SizedBox(height: 8),
-          // Row 2: 4, 5, 6, Special Keys
+          const SizedBox(height: 8),
           Row(
             children: [
               Expanded(
-                  child: _NumberKey('4', () => _handleKeyPress('4', context))),
-              SizedBox(width: 8),
+                child: _NumberKey(
+                  '4',
+                  keyBg: keyBg,
+                  keyBorder: keyBorder,
+                  onPressed: () => _handleKeyPress('4', context),
+                ),
+              ),
+              const SizedBox(width: 8),
               Expanded(
-                  child: _NumberKey('5', () => _handleKeyPress('5', context))),
-              SizedBox(width: 8),
+                child: _NumberKey(
+                  '5',
+                  keyBg: keyBg,
+                  keyBorder: keyBorder,
+                  onPressed: () => _handleKeyPress('5', context),
+                ),
+              ),
+              const SizedBox(width: 8),
               Expanded(
-                  child: _NumberKey('6', () => _handleKeyPress('6', context))),
-              SizedBox(width: 8),
-              _SpecialKey(Icons.code, Colors.grey[300]!,
-                  () => _handleKeyPress(']', context)),
+                child: _NumberKey(
+                  '6',
+                  keyBg: keyBg,
+                  keyBorder: keyBorder,
+                  onPressed: () => _handleKeyPress('6', context),
+                ),
+              ),
+              const SizedBox(width: 8),
+              _SpecialKey(
+                Icons.code,
+                color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE8E8E8),
+                onPressed: () => _handleKeyPress(']', context),
+              ),
             ],
           ),
-          SizedBox(height: 8),
-          // Row 3: 7, 8, 9, Backspace
+          const SizedBox(height: 8),
           Row(
             children: [
               Expanded(
-                  child: _NumberKey('7', () => _handleKeyPress('7', context))),
-              SizedBox(width: 8),
+                child: _NumberKey(
+                  '7',
+                  keyBg: keyBg,
+                  keyBorder: keyBorder,
+                  onPressed: () => _handleKeyPress('7', context),
+                ),
+              ),
+              const SizedBox(width: 8),
               Expanded(
-                  child: _NumberKey('8', () => _handleKeyPress('8', context))),
-              SizedBox(width: 8),
+                child: _NumberKey(
+                  '8',
+                  keyBg: keyBg,
+                  keyBorder: keyBorder,
+                  onPressed: () => _handleKeyPress('8', context),
+                ),
+              ),
+              const SizedBox(width: 8),
               Expanded(
-                  child: _NumberKey('9', () => _handleKeyPress('9', context))),
-              SizedBox(width: 8),
-              _SpecialKey(Icons.backspace_outlined, Colors.grey[400]!,
-                  () => _handleKeyPress('backspace', context)),
+                child: _NumberKey(
+                  '9',
+                  keyBg: keyBg,
+                  keyBorder: keyBorder,
+                  onPressed: () => _handleKeyPress('9', context),
+                ),
+              ),
+              const SizedBox(width: 8),
+              _SpecialKey(
+                Icons.backspace_outlined,
+                color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0),
+                onPressed: () => _handleKeyPress('backspace', context),
+              ),
             ],
           ),
-          SizedBox(height: 8),
-          // Row 4: Comma, 0, Period, Submit
+          const SizedBox(height: 8),
           Row(
             children: [
               Expanded(
-                  child: _NumberKey(',', () => _handleKeyPress(',', context))),
-              SizedBox(width: 8),
+                child: _NumberKey(
+                  ',',
+                  keyBg: keyBg,
+                  keyBorder: keyBorder,
+                  onPressed: () => _handleKeyPress(',', context),
+                ),
+              ),
+              const SizedBox(width: 8),
               Expanded(
-                  child: _NumberKey('0', () => _handleKeyPress('0', context))),
-              SizedBox(width: 8),
+                child: _NumberKey(
+                  '0',
+                  keyBg: keyBg,
+                  keyBorder: keyBorder,
+                  onPressed: () => _handleKeyPress('0', context),
+                ),
+              ),
+              const SizedBox(width: 8),
               Expanded(
-                  child: _NumberKey('.', () => _handleKeyPress('.', context))),
-              SizedBox(width: 8),
-              _SubmitKey(() => _handleKeyPress('submit', context)),
+                child: _NumberKey(
+                  '.',
+                  keyBg: keyBg,
+                  keyBorder: keyBorder,
+                  onPressed: () => _handleKeyPress('.', context),
+                ),
+              ),
+              const SizedBox(width: 8),
+              _SubmitKey(
+                onPressed: () => _handleKeyPress('submit', context),
+              ),
             ],
           ),
         ],
@@ -378,31 +483,40 @@ class OtpNumericKeyboard extends StatelessWidget {
 
 class _NumberKey extends StatelessWidget {
   final String number;
+  final Color keyBg;
+  final Color keyBorder;
   final VoidCallback onPressed;
 
-  const _NumberKey(this.number, this.onPressed);
+  const _NumberKey(
+    this.number, {
+    required this.keyBg,
+    required this.keyBorder,
+    required this.onPressed,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(12),
+      color: keyBg,
+      borderRadius: BorderRadius.circular(14),
       child: InkWell(
         onTap: onPressed,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         child: Container(
           height: 50,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey[200]!, width: 1),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: keyBorder, width: 1),
           ),
           child: Text(
             number,
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w500,
-              color: Colors.grey[800],
+              color: colorScheme.onSurface,
             ),
           ),
         ),
@@ -416,23 +530,27 @@ class _SpecialKey extends StatelessWidget {
   final Color color;
   final VoidCallback onPressed;
 
-  const _SpecialKey(this.icon, this.color, this.onPressed);
+  const _SpecialKey(
+    this.icon, {
+    required this.color,
+    required this.onPressed,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Material(
       color: color,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(14),
       child: InkWell(
         onTap: onPressed,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         child: Container(
           width: 50,
           height: 50,
           alignment: Alignment.center,
           child: Icon(
             icon,
-            color: Colors.grey[700],
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
             size: 20,
           ),
         ),
@@ -444,23 +562,27 @@ class _SpecialKey extends StatelessWidget {
 class _SubmitKey extends StatelessWidget {
   final VoidCallback onPressed;
 
-  const _SubmitKey(this.onPressed);
+  const _SubmitKey({required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.secondaryColor,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(14),
       child: InkWell(
         onTap: onPressed,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
+        borderRadius: BorderRadius.circular(14),
+        child: Ink(
           width: 50,
           height: 50,
-          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: AppColors.primaryGradient,
+            ),
+            borderRadius: BorderRadius.circular(14),
+          ),
           child: Transform.rotate(
-            angle: 3.14159, // 180 degrees rotation to make arrow point left
-            child: Icon(
+            angle: 3.14159,
+            child: const Icon(
               Icons.arrow_forward,
               color: Colors.white,
               size: 20,

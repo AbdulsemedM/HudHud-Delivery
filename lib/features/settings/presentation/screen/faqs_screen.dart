@@ -90,7 +90,7 @@ class _FAQsScreenState extends State<FAQsScreen> {
                 Container(
                   decoration: BoxDecoration(
                     color: isDark ? colorScheme.surfaceContainerHighest : Colors.grey[100],
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(AppColors.radiusLG),
                   ),
                   child: TextField(
                     onChanged: (value) {
@@ -101,11 +101,11 @@ class _FAQsScreenState extends State<FAQsScreen> {
                     decoration: InputDecoration(
                       hintText: 'Search question',
                       hintStyle: TextStyle(
-                        color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+                        color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
                       ),
                       prefixIcon: Icon(
                         Icons.search,
-                        color: theme.iconTheme.color?.withOpacity(0.75),
+                        color: theme.iconTheme.color?.withValues(alpha: 0.75),
                       ),
                       border: InputBorder.none,
                       contentPadding: const EdgeInsets.symmetric(
@@ -185,9 +185,9 @@ class _FAQsScreenState extends State<FAQsScreen> {
                   margin: const EdgeInsets.only(bottom: 12),
                   decoration: BoxDecoration(
                     color: isExpanded
-                        ? AppColors.primaryColor.withOpacity(0.1)
+                        ? AppColors.primaryColor.withValues(alpha: 0.1)
                         : colorScheme.surface,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(AppColors.radiusLG),
                     border: Border.all(
                       color: isDark ? colorScheme.outline : Colors.grey[200]!,
                       width: 1,
@@ -223,7 +223,7 @@ class _FAQsScreenState extends State<FAQsScreen> {
                                     : Icons.keyboard_arrow_down,
                                 color: isExpanded
                                     ? AppColors.primaryColor
-                                    : theme.iconTheme.color?.withOpacity(0.75),
+                                    : theme.iconTheme.color?.withValues(alpha: 0.75),
                               ),
                             ],
                           ),
@@ -236,7 +236,7 @@ class _FAQsScreenState extends State<FAQsScreen> {
                             question['answer'] as String,
                             style: TextStyle(
                               fontSize: 14,
-                              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.85),
+                              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.85),
                               height: 1.5,
                             ),
                           ),

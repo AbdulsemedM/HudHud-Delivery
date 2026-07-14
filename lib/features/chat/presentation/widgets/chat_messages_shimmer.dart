@@ -117,7 +117,7 @@ class ChatRoomLoadingScaffold extends StatelessWidget {
       ),
       body: Column(
         children: [
-          Expanded(child: ChatMessagesShimmer()),
+          const Expanded(child: ChatMessagesShimmer()),
           Shimmer.fromColors(
             baseColor: baseColor,
             highlightColor: highlightColor,

@@ -112,7 +112,7 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
         });
       }
     } catch (e) {
-      print('Error getting current location: $e');
+      debugPrint('Error getting current location: $e');
       if (mounted) {
         setState(() {
           _awaitingFirstLocation = false;
@@ -195,7 +195,7 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
         }
       }
     } catch (e) {
-      print('Error searching places: $e');
+      debugPrint('Error searching places: $e');
     } finally {
       if (mounted) {
         setState(() {
@@ -298,7 +298,7 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: colorScheme.onSurface.withOpacity(0.22),
+                  color: colorScheme.onSurface.withValues(alpha: 0.22),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -309,7 +309,7 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.1),
+                    color: Colors.red.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
@@ -335,7 +335,7 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
                         place.displayName,
                         style: textTheme.bodyMedium?.copyWith(
                           fontSize: 14,
-                          color: colorScheme.onSurface.withOpacity(0.7),
+                          color: colorScheme.onSurface.withValues(alpha: 0.7),
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -398,7 +398,7 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: colorScheme.background,
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
         title: const Text('Select Location'),
         backgroundColor: colorScheme.surface,
@@ -438,7 +438,7 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
                 hintText: 'Search for places...',
                 prefixIcon: Icon(
                   Icons.search,
-                  color: colorScheme.onSurface.withOpacity(0.65),
+                  color: colorScheme.onSurface.withValues(alpha: 0.65),
                 ),
                 suffixIcon: _isSearching
                     ? const SizedBox(
@@ -453,7 +453,7 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
                         ? IconButton(
                             icon: Icon(
                               Icons.clear,
-                              color: colorScheme.onSurface.withOpacity(0.65),
+                              color: colorScheme.onSurface.withValues(alpha: 0.65),
                             ),
                             onPressed: () {
                               _searchController.clear();
@@ -465,7 +465,7 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
-                    color: colorScheme.outline.withOpacity(0.35),
+                    color: colorScheme.outline.withValues(alpha: 0.35),
                   ),
                 ),
                 focusedBorder: OutlineInputBorder(
@@ -473,7 +473,7 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
                   borderSide: const BorderSide(color: Colors.orange),
                 ),
                 filled: true,
-                fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.4),
+                fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
               ),
               onChanged: (value) {
                 Future.delayed(const Duration(milliseconds: 500), () {
@@ -505,7 +505,7 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
           child: Text(
             'Google Maps is not configured on iOS yet. Add a Google Maps API key in iOS settings to use map selection.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: colorScheme.onSurface.withOpacity(0.75)),
+            style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.75)),
           ),
         ),
       );
@@ -523,7 +523,7 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
               Text(
                 'Getting your location…',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: colorScheme.onSurface.withOpacity(0.85)),
+                style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.85)),
               ),
             ],
           ),
@@ -542,14 +542,14 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
               Icon(
                 Icons.location_off_outlined,
                 size: 48,
-                color: colorScheme.onSurface.withOpacity(0.45),
+                color: colorScheme.onSurface.withValues(alpha: 0.45),
               ),
               const SizedBox(height: 16),
               Text(
                 _locationErrorMessage ??
                     'Turn on Location and allow access to show where you are on the map.',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: colorScheme.onSurface.withOpacity(0.85)),
+                style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.85)),
               ),
               const SizedBox(height: 20),
               FilledButton.icon(

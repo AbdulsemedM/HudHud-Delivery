@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'store_detail_screen.dart';
 
 class CategoryStoresScreen extends StatelessWidget {
@@ -13,98 +14,84 @@ class CategoryStoresScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: colorScheme.surface,
       body: SafeArea(
         child: Column(
           children: [
-            // Header
             _CategoryHeader(
               categoryName: categoryName,
               location: 'London Hall',
               time: 'Now',
-              onLocationTap: () {
-                // TODO: Show location picker
-              },
-              onTimeTap: () {
-                // TODO: Show time picker
-              },
-              onFilterTap: () {
-                // TODO: Show filter options
-              },
+              onLocationTap: () {},
+              onTimeTap: () {},
+              onFilterTap: () {},
             ),
-            // Content
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Featured Stores
                     Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      padding: const EdgeInsets.all(AppColors.spaceMD),
+                      child: Row(
                         children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _FeaturedStoreCard(
-                                  name: 'Gopuff',
-                                  logoText: 'gopuff',
-                                  logoColor: Colors.blue,
-                                  openingTime: 'Opens at 10:00 AM',
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => StoreDetailScreen(
-                                          storeName: 'Gopuff',
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: _FeaturedStoreCard(
-                                  name: '7Eleven',
-                                  logoText: '7ELEVEN',
-                                  logoColor: Colors.red,
-                                  openingTime: 'Opens at 10:00 AM',
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => StoreDetailScreen(
-                                          storeName: '7 Eleven Store',
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ],
+                          Expanded(
+                            child: _FeaturedStoreCard(
+                              name: 'Gopuff',
+                              logoText: 'gopuff',
+                              logoColor: AppColors.infoColor,
+                              openingTime: 'Opens at 10:00 AM',
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const StoreDetailScreen(
+                                      storeName: 'Gopuff',
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _FeaturedStoreCard(
+                              name: '7Eleven',
+                              logoText: '7ELEVEN',
+                              logoColor: AppColors.errorColor,
+                              openingTime: 'Opens at 10:00 AM',
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const StoreDetailScreen(
+                                      storeName: '7 Eleven Store',
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
                           ),
                         ],
                       ),
                     ),
-                    // Popular Stores Section
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppColors.spaceMD,
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'Popular Stores',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: colorScheme.onSurface,
+                                ),
                           ),
-                          const SizedBox(height: 16),
-                          // Store List
+                          const SizedBox(height: AppColors.spaceMD),
                           _StoreListItem(
                             name: 'Begs & Megs',
                             openingTime: 'Opens at 08:00',
@@ -114,7 +101,7 @@ class CategoryStoresScreen extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => StoreDetailScreen(
+                                  builder: (context) => const StoreDetailScreen(
                                     storeName: 'Begs & Megs',
                                   ),
                                 ),
@@ -130,7 +117,7 @@ class CategoryStoresScreen extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => StoreDetailScreen(
+                                  builder: (context) => const StoreDetailScreen(
                                     storeName: 'Pick \'n\' Save',
                                   ),
                                 ),
@@ -146,7 +133,7 @@ class CategoryStoresScreen extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => StoreDetailScreen(
+                                  builder: (context) => const StoreDetailScreen(
                                     storeName: 'Orange Inn',
                                   ),
                                 ),
@@ -163,7 +150,7 @@ class CategoryStoresScreen extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => StoreDetailScreen(
+                                  builder: (context) => const StoreDetailScreen(
                                     storeName: 'Vintage Berkeley',
                                   ),
                                 ),
@@ -205,67 +192,70 @@ class _CategoryHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppColors.spaceMD,
+        vertical: 12,
+      ),
       decoration: BoxDecoration(
         color: colorScheme.surface,
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.shadow.withOpacity(0.06),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border(
+          bottom: BorderSide(color: colorScheme.outline.withValues(alpha: 0.2)),
+        ),
       ),
       child: Column(
         children: [
           Row(
             children: [
               IconButton(
-                icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
+                icon: Icon(Icons.arrow_back_ios_new_rounded,
+                    color: colorScheme.onSurface, size: 20),
                 onPressed: () => Navigator.pop(context),
               ),
               Expanded(
                 child: Text(
                   categoryName,
-                  style: TextStyle(
-                    fontSize: 18,
+                  style: textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                     color: colorScheme.onSurface,
                   ),
                 ),
               ),
               IconButton(
-                icon: Icon(Icons.tune, color: colorScheme.onSurface),
+                icon: Icon(Icons.tune_rounded, color: colorScheme.onSurface),
                 onPressed: onFilterTap,
               ),
             ],
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              GestureDetector(
-                onTap: onTimeTap,
+          Material(
+            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(AppColors.radiusFull),
+            child: InkWell(
+              onTap: onTimeTap,
+              borderRadius: BorderRadius.circular(AppColors.radiusFull),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    const Icon(Icons.schedule_rounded,
+                        size: 16, color: AppColors.primaryColor),
+                    const SizedBox(width: 6),
                     Text(
                       '$time • $location',
-                      style: TextStyle(
-                        fontSize: 14,
+                      style: textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurface,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                    const SizedBox(width: 4),
-                    Icon(
-                      Icons.keyboard_arrow_down,
-                      size: 20,
-                      color: colorScheme.onSurface,
-                    ),
+                    Icon(Icons.keyboard_arrow_down_rounded,
+                        size: 18, color: colorScheme.onSurface),
                   ],
                 ),
               ),
-            ],
+            ),
           ),
         ],
       ),
@@ -291,49 +281,56 @@ class _FeaturedStoreCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 140,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: colorScheme.outlineVariant,
-            width: 1,
+    final textTheme = Theme.of(context).textTheme;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        child: Ink(
+          height: 140,
+          padding: const EdgeInsets.all(AppColors.spaceMD),
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: BorderRadius.circular(AppColors.radiusLG),
+            border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
           ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              logoText,
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: logoColor,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                logoText,
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: logoColor,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              name,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: colorScheme.onSurface,
+              const SizedBox(height: 8),
+              Text(
+                name,
+                style: textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: colorScheme.onSurface,
+                ),
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              openingTime,
-              style: TextStyle(
-                fontSize: 12,
-                color: colorScheme.onSurfaceVariant,
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Icon(Icons.schedule_rounded,
+                      size: 14, color: colorScheme.onSurfaceVariant),
+                  const SizedBox(width: 4),
+                  Text(
+                    openingTime,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -358,85 +355,95 @@ class _StoreListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: colorScheme.surface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: colorScheme.outlineVariant,
-            width: 1,
+    final textTheme = Theme.of(context).textTheme;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        child: Ink(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: BorderRadius.circular(AppColors.radiusLG),
+            border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
           ),
-        ),
-        child: Row(
-          children: [
-            // Store Image
-            Container(
-              width: 70,
-              height: 70,
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest,
-                shape: BoxShape.circle,
-              ),
-              child: ClipOval(
-                child: Image.asset(
-                  imageUrl,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: colorScheme.surfaceContainerHigh,
-                      child: Icon(
-                        Icons.store,
-                        size: 35,
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    );
-                  },
+          child: Row(
+            children: [
+              Container(
+                width: 70,
+                height: 70,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: colorScheme.outline.withValues(alpha: 0.15),
+                  ),
+                ),
+                child: ClipOval(
+                  child: Image.asset(
+                    imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      color: colorScheme.surfaceContainerHighest,
+                      child: Icon(Icons.store_rounded,
+                          size: 35, color: colorScheme.onSurfaceVariant),
+                    ),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 16),
-            // Store Details
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    name,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: colorScheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    openingTime,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  if (promoText != null) ...[
-                    const SizedBox(height: 4),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Text(
-                      promoText!,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.green,
+                      name,
+                      style: textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: colorScheme.onSurface,
                       ),
                     ),
+                    const SizedBox(height: 6),
+                    Text(
+                      openingTime,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    if (promoText != null) ...[
+                      const SizedBox(height: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.successColor.withValues(alpha: 0.12),
+                          borderRadius:
+                              BorderRadius.circular(AppColors.radiusFull),
+                          border: Border.all(
+                            color: AppColors.successColor.withValues(alpha: 0.35),
+                          ),
+                        ),
+                        child: Text(
+                          promoText!,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.successColor,
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-          ],
+              Icon(Icons.chevron_right_rounded,
+                  color: colorScheme.onSurfaceVariant),
+            ],
+          ),
         ),
       ),
     );
   }
 }
-

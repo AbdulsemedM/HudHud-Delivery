@@ -1,4 +1,4 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
+// ignore_for_file: public_member_api_docs, sort_constructors_first, non_constant_identifier_names
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -214,9 +214,9 @@ class CategoriesProductsModel {
       category_id: map['category_id'] != null ? (map['category_id'] is String ? int.tryParse(map['category_id']) : map['category_id'] as int) : null,
       name: map['name'] != null ? map['name'] as String : null,
       description: map['description'] != null ? map['description'] as String : null,
-      price: map['price'] != null ? map['price'].toString() : null,
-      discount_price: map['discount_price'] != null ? map['discount_price'].toString() : null,
-      cost_price: map['cost_price'] != null ? map['cost_price'].toString() : null,
+      price: map['price']?.toString(),
+      discount_price: map['discount_price']?.toString(),
+      cost_price: map['cost_price']?.toString(),
       quantity: map['quantity'] != null ? (map['quantity'] is String ? int.tryParse(map['quantity']) : map['quantity'] as int) : null,
       sku: map['sku'] != null ? map['sku'] as String : null,
       barcode: map['barcode'] != null ? map['barcode'] as String : null,

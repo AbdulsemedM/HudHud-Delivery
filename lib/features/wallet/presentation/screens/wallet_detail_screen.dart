@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
@@ -15,6 +16,10 @@ class WalletDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return BlocProvider(
       create: (_) => WalletBloc(
         walletRepository: WalletRepository(
@@ -24,44 +29,47 @@ class WalletDetailScreen extends StatelessWidget {
         ),
       )..add(FetchWalletEvent(walletId: walletId)),
       child: Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
-          title: Text(context.l10n.walletDetailScreenTitle),
-          backgroundColor: AppColors.primaryColor,
-          foregroundColor: Colors.white,
+          title: Text(l10n.walletDetailScreenTitle),
+          backgroundColor: colorScheme.surface,
+          foregroundColor: colorScheme.onSurface,
+          elevation: 0,
+          surfaceTintColor: Colors.transparent,
         ),
         body: BlocBuilder<WalletBloc, WalletState>(
           builder: (context, state) {
             if (state is WalletDetailLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return const Padding(
+                padding: EdgeInsets.all(AppColors.spaceMD),
+                child: _WalletDetailShimmer(),
+              );
             }
             if (state is WalletDetailError) {
               return Center(
                 child: Padding(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(AppColors.spaceLG),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.error_outline,
-                          size: 48, color: Colors.red[400]),
-                      const SizedBox(height: 16),
+                      Icon(
+                        Icons.wifi_off_rounded,
+                        size: 48,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                      const SizedBox(height: AppColors.spaceMD),
                       Text(
                         state.message,
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.color
-                              ?.withValues(alpha: 0.85),
-                        ),
+                        style: theme.textTheme.bodyMedium,
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: AppColors.spaceLG),
                       TextButton.icon(
                         onPressed: () => context
                             .read<WalletBloc>()
                             .add(FetchWalletEvent(walletId: walletId)),
                         icon: const Icon(Icons.refresh),
-                        label: Text(context.l10n.actionRetry),
+                        label: Text(l10n.actionRetry),
                       ),
                     ],
                   ),
@@ -79,6 +87,45 @@ class WalletDetailScreen extends StatelessWidget {
   }
 }
 
+class _WalletDetailShimmer extends StatelessWidget {
+  const _WalletDetailShimmer();
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseColor = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0);
+    final highlightColor =
+        isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF5F5F5);
+    return Column(
+      children: [
+        Shimmer.fromColors(
+          baseColor: baseColor,
+          highlightColor: highlightColor,
+          child: Container(
+            height: 140,
+            decoration: BoxDecoration(
+              color: baseColor,
+              borderRadius: BorderRadius.circular(AppColors.radiusLG),
+            ),
+          ),
+        ),
+        const SizedBox(height: AppColors.spaceLG),
+        Shimmer.fromColors(
+          baseColor: baseColor,
+          highlightColor: highlightColor,
+          child: Container(
+            height: 200,
+            decoration: BoxDecoration(
+              color: baseColor,
+              borderRadius: BorderRadius.circular(AppColors.radiusLG),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _WalletDetailContent extends StatelessWidget {
   final WalletModel wallet;
 
@@ -87,33 +134,34 @@ class _WalletDetailContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final borderColor =
+        isDark ? const Color(0xFF2A2A2A) : const Color(0xFFEEEEEE);
+
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppColors.spaceMD),
       child: Column(
         children: [
-          // Balance card
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(AppColors.spaceLG),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
+              gradient: const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  Colors.brown[300]!,
-                  Colors.orange[200]!,
-                ],
+                colors: [AppColors.primaryColor, AppColors.primaryDarkColor],
               ),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(AppColors.radiusLG),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   wallet.name,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.85),
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
@@ -130,27 +178,25 @@ class _WalletDetailContent extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 24),
-          // Details card
+          const SizedBox(height: AppColors.spaceLG),
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(AppColors.spaceMD),
             decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: colorScheme.outlineVariant),
+              color: colorScheme.surface,
+              borderRadius: BorderRadius.circular(AppColors.radiusLG),
+              border: Border.all(color: borderColor),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   l10n.walletInformation,
-                  style: const TextStyle(
-                    fontSize: 16,
+                  style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppColors.spaceMD),
                 _DetailRow(label: l10n.walletDetailName, value: wallet.name),
                 _DetailRow(label: l10n.walletDetailType, value: wallet.type),
                 _DetailRow(
@@ -188,18 +234,15 @@ class _DetailRow extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(
-              fontSize: 14,
-              color: colorScheme.onSurfaceVariant,
-            ),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
           ),
           Text(
             value,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: colorScheme.onSurface,
-            ),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
           ),
         ],
       ),

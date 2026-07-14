@@ -21,8 +21,8 @@ class DeliveryFeedScreen extends StatefulWidget {
 }
 
 class _DeliveryFeedScreenState extends State<DeliveryFeedScreen> {
-  String _selectedLocation = 'London Hall';
-  String _selectedTime = 'Now';
+  final String _selectedLocation = 'London Hall';
+  final String _selectedTime = 'Now';
 
   List<VendorModel> _vendors = [];
   List<CategoriesProductsModel> _featuredProducts = [];
@@ -147,7 +147,7 @@ class _DeliveryFeedScreenState extends State<DeliveryFeedScreen> {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                            CategoryStoresScreen(
+                                            const CategoryStoresScreen(
                                           categoryName: 'Grocery',
                                           categoryIcon: Icons.shopping_basket,
                                         ),
@@ -167,7 +167,7 @@ class _DeliveryFeedScreenState extends State<DeliveryFeedScreen> {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                            CategoryStoresScreen(
+                                            const CategoryStoresScreen(
                                           categoryName: 'American',
                                           categoryIcon: Icons.fastfood,
                                         ),
@@ -192,7 +192,7 @@ class _DeliveryFeedScreenState extends State<DeliveryFeedScreen> {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                            CategoryStoresScreen(
+                                            const CategoryStoresScreen(
                                           categoryName: 'Convenience stores',
                                           categoryIcon: Icons.shopping_bag,
                                         ),
@@ -465,7 +465,7 @@ class _DeliveryHeader extends StatelessWidget {
         color: colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: colorScheme.shadow.withOpacity(0.06),
+            color: colorScheme.shadow.withValues(alpha: 0.06),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -625,7 +625,7 @@ class _PopularProductListTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: colorScheme.shadow.withOpacity(0.06),
+              color: colorScheme.shadow.withValues(alpha: 0.06),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -712,7 +712,7 @@ class _PopularProductListTile extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     'ETB ${item.displayPrice}',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                       color: AppColors.primaryColor,

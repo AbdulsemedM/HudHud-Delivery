@@ -29,7 +29,7 @@ class SignupDataProvider {
     String email,
     String phone,
     String password,
-    String password_confirmation,
+    String passwordConfirmation,
     {String? referralCode}
   ) async {
     try {
@@ -38,7 +38,7 @@ class SignupDataProvider {
         'email': email,
         'phone': normalizePhoneToBackend(phone),
         'password': password,
-        'password_confirmation': password_confirmation,
+        'password_confirmation': passwordConfirmation,
         'device_token': await getDeviceId(),
         'type': 'customer',
       };
