@@ -299,7 +299,7 @@ class _LoadingState extends StatelessWidget {
                 crossAxisCount: 4,
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
-                childAspectRatio: 0.85,
+                childAspectRatio: 0.72,
               ),
               delegate: SliverChildBuilderDelegate(
                 (context, index) => _CategorySkeleton(),
@@ -695,7 +695,8 @@ class _CategoriesGrid extends StatelessWidget {
               crossAxisCount: 4,
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
-              childAspectRatio: 0.85,
+              // Taller cells so product PNGs show full height with contain.
+              childAspectRatio: 0.72,
             ),
             delegate: SliverChildBuilderDelegate(
               (context, index) {
@@ -1314,31 +1315,25 @@ class _CategoryCard extends StatelessWidget {
             ],
           ),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 12, left: 8, right: 8),
-                  child: Center(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: imageUrl != null && imageUrl.isNotEmpty
-                          ? Image.network(
-                              imageUrl,
-                              width: double.infinity,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => _IconPlaceholder(
-                                icon: icon,
-                                embedded: embedded,
-                              ),
-                            )
-                          : _IconPlaceholder(icon: icon, embedded: embedded),
-                    ),
-                  ),
+                  padding: const EdgeInsets.fromLTRB(6, 10, 6, 0),
+                  child: imageUrl != null && imageUrl.isNotEmpty
+                      ? Image.network(
+                          imageUrl,
+                          fit: BoxFit.contain,
+                          alignment: Alignment.center,
+                          errorBuilder: (_, __, ___) => _IconPlaceholder(
+                            icon: icon,
+                            embedded: embedded,
+                          ),
+                        )
+                      : _IconPlaceholder(icon: icon, embedded: embedded),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(6, 6, 6, 12),
+                padding: const EdgeInsets.fromLTRB(6, 6, 6, 10),
                 child: Text(
                   category.name,
                   style: textTheme.bodySmall?.copyWith(
