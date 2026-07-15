@@ -14,14 +14,14 @@ abstract final class ServiceTabPalette {
   /// Food & groceries — existing HudHud orange.
   static const Color foodGroceries = AppColors.primaryColor;
 
-  /// Courier — purple.
-  static const Color courier = Color(0xFF7B61FF);
+  /// Courier — violet (matches home/splash mock).
+  static const Color courier = Color(0xFF9D86F7);
 
-  /// Taxi — yellow (accent).
+  /// Taxi — gold.
   static const Color taxi = Color(0xFFFFD600);
 
-  /// Handyman — blue.
-  static const Color handyman = Color(0xFF1E88E5);
+  /// Handyman — sky blue.
+  static const Color handyman = Color(0xFF42A5F5);
 
   static Color seedFor(HomeServiceMode mode) {
     switch (mode) {

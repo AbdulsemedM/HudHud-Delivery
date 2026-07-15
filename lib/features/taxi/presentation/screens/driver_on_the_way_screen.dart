@@ -136,18 +136,10 @@ class _DriverOnTheWayScreenState extends State<DriverOnTheWayScreen> {
     final l10n = context.l10n;
     final borderColor = _cardBorder(context);
 
-    final screenHeight = MediaQuery.of(context).size.height;
-    const bottomSheetInitialFraction = 0.48;
-    final mapBottom = screenHeight * bottomSheetInitialFraction;
-
     return Scaffold(
       body: Stack(
         children: [
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: mapBottom,
+          Positioned.fill(
             child: _buildMapOrFallback(context),
           ),
           Positioned(

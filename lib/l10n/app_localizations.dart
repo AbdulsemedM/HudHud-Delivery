@@ -1172,6 +1172,36 @@ abstract class AppLocalizations {
   /// **'Getting things moving…'**
   String get splashStatus;
 
+  /// No description provided for @homeTabFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Food'**
+  String get homeTabFood;
+
+  /// No description provided for @homeTabCourier.
+  ///
+  /// In en, this message translates to:
+  /// **'Courier'**
+  String get homeTabCourier;
+
+  /// No description provided for @homeTabTaxi.
+  ///
+  /// In en, this message translates to:
+  /// **'Taxi'**
+  String get homeTabTaxi;
+
+  /// No description provided for @homeTabHandyman.
+  ///
+  /// In en, this message translates to:
+  /// **'Handyman'**
+  String get homeTabHandyman;
+
+  /// No description provided for @homeSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search products everywhere'**
+  String get homeSearchHint;
+
   /// No description provided for @loginContinueAsGuest.
   ///
   /// In en, this message translates to:

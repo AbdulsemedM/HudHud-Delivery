@@ -9,8 +9,9 @@ double mapOverlayTop(
 }) =>
     (includeStatusBarInset ? MediaQuery.paddingOf(context).top : 0) + 8;
 
-/// Map area above a [DraggableScrollableSheet], with the map clipped to the
-/// visible region as the sheet is dragged.
+/// Full-bleed map with a [DraggableScrollableSheet] floating on top.
+/// The map fills the body; use [onSheetLayoutChanged] / [sheetBottomInset]
+/// for [GoogleMap.padding] so content isn't hidden under the sheet.
 class MapDraggableSheetScaffold extends StatefulWidget {
   const MapDraggableSheetScaffold({
     super.key,
@@ -93,25 +94,17 @@ class _MapDraggableSheetScaffoldState extends State<MapDraggableSheetScaffold> {
               if (mounted) _notifyLayout();
             });
           }
-          final mapBottom = _sheetExtent * bodyHeight;
-
           return NotificationListener<DraggableScrollableNotification>(
             onNotification: _onSheetNotification,
             child: Stack(
               children: [
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: mapBottom,
-                  child: ClipRect(
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        widget.map,
-                        ...widget.mapOverlays,
-                      ],
-                    ),
+                Positioned.fill(
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      widget.map,
+                      ...widget.mapOverlays,
+                    ],
                   ),
                 ),
                 DraggableScrollableSheet(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/widgets/fallback_network_image.dart';
 import 'package:hudhud_delivery/features/categories/bloc/categories_bloc.dart';
@@ -11,6 +12,7 @@ import 'package:hudhud_delivery/features/categories/model/category_tree_model.da
 import 'package:hudhud_delivery/features/categories/presentation/screens/categories_screen.dart';
 import 'package:hudhud_delivery/features/delivery/presentation/screens/product_detail_screen.dart';
 import 'package:hudhud_delivery/features/delivery/presentation/screens/store_detail_screen.dart';
+import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/features/orders/data/models/vendor_model.dart';
 import 'package:hudhud_delivery/features/products/data/products_data_provider.dart';
 import 'package:hudhud_delivery/features/products/data/products_repository.dart';
@@ -132,6 +134,10 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
+    final embedded = widget.embedded;
+    final searchHint = embedded
+        ? context.l10n.homeSearchHint
+        : 'Search products everywhere';
 
     final gridBody = BlocBuilder<CategoriesBloc, CategoriesState>(
       buildWhen: (prev, curr) =>
@@ -166,6 +172,7 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
             onShowMore: () => setState(() => _showAllCategories = true),
             usePullToRefresh: true,
             onPullToRefresh: _onPullToRefresh,
+            embedded: embedded,
           );
         }
         return const SizedBox.shrink();
@@ -177,8 +184,10 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
       children: [
         const SizedBox(height: 8),
         ProductSearchField(
-          hint: 'Search products everywhere',
+          hint: searchHint,
           readOnly: true,
+          fillColor: embedded ? HomeColors.surfaceElevated : null,
+          hintColor: embedded ? HomeColors.textMuted : null,
           onTap: () {
             Navigator.push(
               context,
@@ -194,11 +203,15 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
       ],
     );
 
-    if (widget.embedded) {
-      return ColoredBox(
-        color: colorScheme.surface,
-        child: body,
+    if (embedded) {
+      final themed = Theme(
+        data: HomeColors.darkTheme(theme),
+        child: ColoredBox(
+          color: HomeColors.background,
+          child: body,
+        ),
       );
+      return themed;
     }
 
     return Scaffold(
@@ -628,6 +641,7 @@ class _CategoriesGrid extends StatelessWidget {
   final VoidCallback onShowMore;
   final bool usePullToRefresh;
   final Future<void> Function() onPullToRefresh;
+  final bool embedded;
 
   const _CategoriesGrid({
     required this.categories,
@@ -641,6 +655,7 @@ class _CategoriesGrid extends StatelessWidget {
     required this.onShowMore,
     this.usePullToRefresh = false,
     required this.onPullToRefresh,
+    this.embedded = false,
   });
 
   @override
@@ -649,6 +664,15 @@ class _CategoriesGrid extends StatelessWidget {
     final textTheme = theme.textTheme;
     final displayCategories = showAll ? categories : categories.take(3).toList();
     final hasMore = categories.length > 3 && !showAll;
+    final titleColor = embedded ? HomeColors.textPrimary : null;
+    final accentColor = embedded ? HomeColors.orange : AppColors.primaryColor;
+
+    TextStyle? sectionTitle(TextStyle? base, {double? fontSize}) =>
+        base?.copyWith(
+          fontSize: fontSize,
+          fontWeight: FontWeight.bold,
+          color: titleColor,
+        );
 
     final view = CustomScrollView(
       physics: usePullToRefresh
@@ -660,10 +684,7 @@ class _CategoriesGrid extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
             child: Text(
               showAll ? 'All categories' : 'Categories',
-              style: textTheme.titleLarge?.copyWith(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+              style: sectionTitle(textTheme.titleLarge, fontSize: 20),
             ),
           ),
         ),
@@ -679,12 +700,13 @@ class _CategoriesGrid extends StatelessWidget {
             delegate: SliverChildBuilderDelegate(
               (context, index) {
                 if (hasMore && index == 3) {
-                  return _MoreButton(onTap: onShowMore);
+                  return _MoreButton(onTap: onShowMore, embedded: embedded);
                 }
                 final category = displayCategories[index];
                 return _CategoryCard(
                   category: category,
                   onTap: () => onCategoryTap(category),
+                  embedded: embedded,
                 );
               },
               childCount: hasMore ? 4 : displayCategories.length,
@@ -692,17 +714,13 @@ class _CategoriesGrid extends StatelessWidget {
           ),
         ),
         const SliverToBoxAdapter(child: SizedBox(height: 8)),
-        // Vendors slider (one row) - "Browse by store"
         if (vendorsLoading) ...[
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
               child: Text(
                 'Browse by store',
-                style: textTheme.titleMedium?.copyWith(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: sectionTitle(textTheme.titleMedium, fontSize: 18),
               ),
             ),
           ),
@@ -713,17 +731,28 @@ class _CategoriesGrid extends StatelessWidget {
             ),
           ),
         ] else if (vendorsError != null || vendors.isEmpty) ...[
-          // Hide or minimal message - skip section for cleaner UI
+          // Hide section for cleaner UI
         ] else ...[
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-              child: Text(
-                'Browse by store',
-                style: textTheme.titleMedium?.copyWith(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Browse by store',
+                      style: sectionTitle(textTheme.titleMedium, fontSize: 18),
+                    ),
+                  ),
+                  if (embedded)
+                    Text(
+                      'View all',
+                      style: textTheme.labelLarge?.copyWith(
+                        color: accentColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                ],
               ),
             ),
           ),
@@ -741,13 +770,15 @@ class _CategoriesGrid extends StatelessWidget {
                     child: _VendorSliderCard(
                       name: vendor.name,
                       avatarUrl: vendor.avatar,
+                      embedded: embedded,
                       onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => StoreDetailScreen(
                               storeName: vendor.name,
-                              storeImage: vendor.avatar.isNotEmpty ? vendor.avatar : null,
+                              storeImage:
+                                  vendor.avatar.isNotEmpty ? vendor.avatar : null,
                               vendorId: vendor.id,
                               vendor: vendor,
                             ),
@@ -768,10 +799,7 @@ class _CategoriesGrid extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
               child: Text(
                 'Most Popular',
-                style: textTheme.titleLarge?.copyWith(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: sectionTitle(textTheme.titleLarge, fontSize: 20),
               ),
             ),
           ),
@@ -791,12 +819,23 @@ class _CategoriesGrid extends StatelessWidget {
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-              child: Text(
-                'Most Popular',
-                style: textTheme.titleLarge?.copyWith(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Most Popular',
+                      style: sectionTitle(textTheme.titleLarge, fontSize: 20),
+                    ),
+                  ),
+                  if (embedded)
+                    Text(
+                      'View all',
+                      style: textTheme.labelLarge?.copyWith(
+                        color: accentColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                ],
               ),
             ),
           ),
@@ -810,6 +849,7 @@ class _CategoriesGrid extends StatelessWidget {
                     padding: const EdgeInsets.only(bottom: 16),
                     child: _PopularProductCard(
                       item: item,
+                      embedded: embedded,
                       onTap: () {
                         final productId = item.product.id;
                         if (productId == null) return;
@@ -849,6 +889,7 @@ class _CategoriesGrid extends StatelessWidget {
     );
     if (usePullToRefresh) {
       return RefreshIndicator(
+        color: embedded ? HomeColors.orange : AppColors.primaryColor,
         onRefresh: onPullToRefresh,
         child: view,
       );
@@ -907,11 +948,13 @@ class _VendorSliderCard extends StatelessWidget {
   final String name;
   final String avatarUrl;
   final VoidCallback onTap;
+  final bool embedded;
 
   const _VendorSliderCard({
     required this.name,
     required this.avatarUrl,
     required this.onTap,
+    this.embedded = false,
   });
 
   @override
@@ -934,9 +977,12 @@ class _VendorSliderCard extends StatelessWidget {
                 height: 72,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
+                  border: embedded
+                      ? Border.all(color: HomeColors.border)
+                      : null,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
+                      color: Colors.black.withValues(alpha: embedded ? 0.35 : 0.1),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -967,6 +1013,7 @@ class _VendorSliderCard extends StatelessWidget {
                 style: textTheme.bodySmall?.copyWith(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
+                  color: embedded ? HomeColors.textPrimary : null,
                 ),
                 maxLines: 2,
                 textAlign: TextAlign.center,
@@ -981,8 +1028,12 @@ class _VendorSliderCard extends StatelessWidget {
 
   Widget _avatarPlaceholder() {
     return Container(
-      color: Colors.grey[200],
-      child: const Icon(Icons.store_rounded, size: 36, color: Colors.grey),
+      color: embedded ? HomeColors.surfaceElevated : Colors.grey[200],
+      child: Icon(
+        Icons.store_rounded,
+        size: 36,
+        color: embedded ? HomeColors.textMuted : Colors.grey,
+      ),
     );
   }
 }
@@ -991,11 +1042,13 @@ class _PopularProductCard extends StatelessWidget {
   final PopularProductModel item;
   final VoidCallback onTap;
   final VoidCallback? onShopTap;
+  final bool embedded;
 
   const _PopularProductCard({
     required this.item,
     required this.onTap,
     this.onShopTap,
+    this.embedded = false,
   });
 
   @override
@@ -1007,6 +1060,11 @@ class _PopularProductCard extends StatelessWidget {
     final rating = item.shopRating;
     final deliveryFee = item.deliveryFee;
     final promoText = item.promoLabel;
+    final accent = embedded ? HomeColors.orange : AppColors.primaryColor;
+    final cardBg = embedded ? HomeColors.surface : colorScheme.surface;
+    final titleColor = embedded ? HomeColors.textPrimary : null;
+    final mutedColor =
+        embedded ? HomeColors.textMuted : colorScheme.onSurface.withValues(alpha: 0.72);
 
     return Material(
       color: Colors.transparent,
@@ -1015,11 +1073,12 @@ class _PopularProductCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         child: Container(
           decoration: BoxDecoration(
-            color: colorScheme.surface,
+            color: cardBg,
             borderRadius: BorderRadius.circular(12),
+            border: embedded ? Border.all(color: HomeColors.border) : null,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
+                color: Colors.black.withValues(alpha: embedded ? 0.35 : 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -1081,6 +1140,7 @@ class _PopularProductCard extends StatelessWidget {
                       style: textTheme.titleSmall?.copyWith(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
+                        color: titleColor,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -1091,7 +1151,7 @@ class _PopularProductCard extends StatelessWidget {
                       style: textTheme.titleSmall?.copyWith(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.primaryColor,
+                        color: accent,
                       ),
                     ),
                     if (shopName != null && shopName.isNotEmpty) ...[
@@ -1102,7 +1162,7 @@ class _PopularProductCard extends StatelessWidget {
                           shopName,
                           style: textTheme.bodySmall?.copyWith(
                             fontSize: 13,
-                            color: colorScheme.primary,
+                            color: accent,
                             fontWeight: FontWeight.w500,
                           ),
                           maxLines: 1,
@@ -1125,6 +1185,7 @@ class _PopularProductCard extends StatelessWidget {
                             style: textTheme.bodyMedium?.copyWith(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
+                              color: titleColor,
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -1135,7 +1196,7 @@ class _PopularProductCard extends StatelessWidget {
                               'ETB $deliveryFee delivery',
                               style: textTheme.bodySmall?.copyWith(
                                 fontSize: 12,
-                                color: colorScheme.onSurface.withValues(alpha: 0.72),
+                                color: mutedColor,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -1157,11 +1218,11 @@ class _PopularProductCard extends StatelessWidget {
     return Container(
       height: 160,
       width: double.infinity,
-      color: Colors.grey[200],
-      child: const Icon(
+      color: embedded ? HomeColors.surfaceElevated : Colors.grey[200],
+      child: Icon(
         Icons.shopping_bag_outlined,
         size: 48,
-        color: Colors.grey,
+        color: embedded ? HomeColors.textMuted : Colors.grey,
       ),
     );
   }
@@ -1169,11 +1230,13 @@ class _PopularProductCard extends StatelessWidget {
 
 class _MoreButton extends StatelessWidget {
   final VoidCallback onTap;
+  final bool embedded;
 
-  const _MoreButton({required this.onTap});
+  const _MoreButton({required this.onTap, this.embedded = false});
 
   @override
   Widget build(BuildContext context) {
+    final accent = embedded ? HomeColors.orange : AppColors.primaryColor;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -1181,28 +1244,28 @@ class _MoreButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         child: Container(
           decoration: BoxDecoration(
-            color: AppColors.primaryColor.withValues(alpha: 0.12),
+            color: accent.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: AppColors.primaryColor.withValues(alpha: 0.4),
+              color: accent.withValues(alpha: 0.4),
               width: 1.5,
             ),
           ),
-          child: const Column(
+          child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
                 Icons.grid_view_rounded,
                 size: 36,
-                color: AppColors.primaryColor,
+                color: accent,
               ),
-              SizedBox(height: 6),
+              const SizedBox(height: 6),
               Text(
                 'More',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.primaryColor,
+                  color: accent,
                 ),
               ),
             ],
@@ -1216,10 +1279,12 @@ class _MoreButton extends StatelessWidget {
 class _CategoryCard extends StatelessWidget {
   final CategoryTreeModel category;
   final VoidCallback onTap;
+  final bool embedded;
 
   const _CategoryCard({
     required this.category,
     required this.onTap,
+    this.embedded = false,
   });
 
   @override
@@ -1228,6 +1293,7 @@ class _CategoryCard extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final icon = _iconFromMeta(category.meta);
     final imageUrl = category.displayImageUrl;
+    final cardBg = embedded ? HomeColors.surfaceElevated : colorScheme.surface;
 
     return Material(
       color: Colors.transparent,
@@ -1236,11 +1302,12 @@ class _CategoryCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         child: Container(
           decoration: BoxDecoration(
-            color: colorScheme.surface,
+            color: cardBg,
             borderRadius: BorderRadius.circular(12),
+            border: embedded ? Border.all(color: HomeColors.border) : null,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
+                color: Colors.black.withValues(alpha: embedded ? 0.35 : 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -1262,9 +1329,10 @@ class _CategoryCard extends StatelessWidget {
                               fit: BoxFit.cover,
                               errorBuilder: (_, __, ___) => _IconPlaceholder(
                                 icon: icon,
+                                embedded: embedded,
                               ),
                             )
-                          : _IconPlaceholder(icon: icon),
+                          : _IconPlaceholder(icon: icon, embedded: embedded),
                     ),
                   ),
                 ),
@@ -1276,6 +1344,7 @@ class _CategoryCard extends StatelessWidget {
                   style: textTheme.bodySmall?.copyWith(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
+                    color: embedded ? HomeColors.textPrimary : null,
                   ),
                   maxLines: 2,
                   textAlign: TextAlign.center,
@@ -1323,11 +1392,13 @@ class _CategoryCard extends StatelessWidget {
 
 class _IconPlaceholder extends StatelessWidget {
   final IconData icon;
+  final bool embedded;
 
-  const _IconPlaceholder({required this.icon});
+  const _IconPlaceholder({required this.icon, this.embedded = false});
 
   @override
   Widget build(BuildContext context) {
+    final accent = embedded ? HomeColors.orange : AppColors.primaryColor;
     return Container(
       width: 64,
       height: 64,
@@ -1336,8 +1407,9 @@ class _IconPlaceholder extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppColors.primaryColor.withValues(alpha: 0.15),
-            AppColors.primaryLightColor.withValues(alpha: 0.08),
+            accent.withValues(alpha: 0.15),
+            (embedded ? HomeColors.orange : AppColors.primaryLightColor)
+                .withValues(alpha: 0.08),
           ],
         ),
         borderRadius: BorderRadius.circular(12),
@@ -1345,7 +1417,7 @@ class _IconPlaceholder extends StatelessWidget {
       child: Icon(
         icon,
         size: 32,
-        color: AppColors.primaryColor,
+        color: accent,
       ),
     );
   }

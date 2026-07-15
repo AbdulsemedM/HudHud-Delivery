@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:lottie/lottie.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
+import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/avatar_util.dart';
 import '../../../../core/widgets/user_avatar.dart';
@@ -78,19 +79,19 @@ class VerificationStatusCard extends StatelessWidget {
   final UserModel user;
   final VoidCallback onVerifyEmail;
   final VoidCallback onVerifyPhone;
+  final VoidCallback? onDismiss;
 
   const VerificationStatusCard({
     super.key,
     required this.user,
     required this.onVerifyEmail,
     required this.onVerifyPhone,
+    this.onDismiss,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
     final emailVerified = user.isEmailVerified;
     final phoneVerified = user.isPhoneVerified;
 
@@ -98,55 +99,67 @@ class VerificationStatusCard extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
+    final needEmail = !emailVerified;
+    final message = needEmail
+        ? l10n.accountVerificationEmailSubtitle
+        : l10n.accountVerificationPhoneSubtitle;
+    final onVerify = needEmail ? onVerifyEmail : onVerifyPhone;
+    final cta = needEmail ? l10n.verifyEmail : l10n.verifyPhone;
+
     return Container(
-      padding: const EdgeInsets.all(AppColors.spaceMD),
+      padding: const EdgeInsets.fromLTRB(14, 12, 8, 12),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        color: HomeColors.surface,
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: colorScheme.outline.withValues(alpha: 0.2),
+          color: const Color(0xFFFFD600).withValues(alpha: 0.35),
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Text(
-            l10n.verificationStatus,
-            style: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+          const Icon(
+            Icons.verified_user_outlined,
+            color: Color(0xFFFFD600),
+            size: 22,
           ),
-          const SizedBox(height: AppColors.spaceMD),
-          Row(
-            children: [
-              if (!emailVerified)
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed: onVerifyEmail,
-                    icon: const Icon(Icons.mark_email_read_outlined, size: 18),
-                    label: Text(l10n.verifyEmail),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.primaryColor,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 10),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  message,
+                  style: const TextStyle(
+                    color: HomeColors.textSecondary,
+                    fontSize: 13,
+                    height: 1.3,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                GestureDetector(
+                  onTap: onVerify,
+                  child: Text(
+                    cta,
+                    style: const TextStyle(
+                      color: HomeColors.orange,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
                     ),
                   ),
                 ),
-              if (!emailVerified && !phoneVerified)
-                const SizedBox(width: AppColors.spaceMD),
-              if (!phoneVerified)
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed: onVerifyPhone,
-                    icon: const Icon(Icons.phone_android_outlined, size: 18),
-                    label: Text(l10n.verifyPhone),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.primaryColor,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                    ),
-                  ),
-                ),
-            ],
+              ],
+            ),
           ),
+          if (onDismiss != null)
+            IconButton(
+              onPressed: onDismiss,
+              visualDensity: VisualDensity.compact,
+              icon: const Icon(
+                Icons.close,
+                size: 18,
+                color: HomeColors.textMuted,
+              ),
+            ),
         ],
       ),
     );
@@ -160,6 +173,8 @@ class UserProfileHeader extends StatefulWidget {
   final VoidCallback onLocationTap;
   final VoidCallback onNotificationsTap;
   final UserModel? user;
+  final bool isGuest;
+  final VoidCallback? onGuestSignIn;
 
   const UserProfileHeader({
     super.key,
@@ -169,6 +184,8 @@ class UserProfileHeader extends StatefulWidget {
     required this.onLocationTap,
     required this.onNotificationsTap,
     this.user,
+    this.isGuest = false,
+    this.onGuestSignIn,
   });
 
   @override
@@ -194,95 +211,130 @@ class _UserProfileHeaderState extends State<UserProfileHeader>
     super.dispose();
   }
 
+  String get _initial {
+    final name = widget.name.trim();
+    if (name.isEmpty) return '?';
+    return name[0].toUpperCase();
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final avatarUrl = getDisplayAvatarUrl(widget.user);
 
     return Row(
       children: [
         Container(
+          width: 48,
+          height: 48,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: Colors.white, width: 2.5),
-            boxShadow: [
-              BoxShadow(
-                color: colorScheme.shadow.withValues(alpha: 0.12),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            border: Border.all(
+              color: HomeColors.violet.withValues(alpha: 0.75),
+              width: 2,
+            ),
           ),
-          child: UserAvatar(
-            radius: 22,
-            imageUrl: getDisplayAvatarUrl(widget.user),
+          child: ClipOval(
+            child: avatarUrl != null && avatarUrl.isNotEmpty
+                ? UserAvatar(
+                    radius: 22,
+                    imageUrl: avatarUrl,
+                    backgroundColor: HomeColors.surfaceElevated,
+                  )
+                : Container(
+                    color: HomeColors.surfaceElevated,
+                    alignment: Alignment.center,
+                    child: Text(
+                      widget.isGuest ? '?' : _initial,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: HomeColors.textPrimary,
+                      ),
+                    ),
+                  ),
           ),
         ),
-        const SizedBox(width: AppColors.spaceMD),
+        const SizedBox(width: 12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                widget.name,
-                style: textTheme.titleSmall?.copyWith(
+                widget.isGuest ? 'Guest' : widget.name,
+                style: const TextStyle(
                   fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                  color: HomeColors.textPrimary,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(height: 2),
-              GestureDetector(
-                onTap: () {
-                  _chevronController.forward(from: 0).then((_) {
-                    _chevronController.reverse();
-                  });
-                  widget.onLocationTap();
-                },
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.location_on_rounded,
-                      color: AppColors.primaryColor,
-                      size: 16,
+              const SizedBox(height: 4),
+              if (widget.isGuest)
+                GestureDetector(
+                  onTap: widget.onGuestSignIn,
+                  child: const Text(
+                    'Sign in to save your addresses',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: HomeColors.textMuted,
                     ),
-                    const SizedBox(width: 4),
-                    Flexible(
-                      child: widget.isLoadingLocation
-                          ? const SizedBox(
-                              width: 12,
-                              height: 12,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: AppColors.primaryColor,
-                              ),
-                            )
-                          : Text(
-                              widget.location.isEmpty
-                                  ? l10n.yourLocation
-                                  : widget.location,
-                              style: textTheme.bodySmall?.copyWith(
-                                color: AppColors.primaryColor,
-                                fontWeight: FontWeight.w600,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            ),
-                    ),
-                    RotationTransition(
-                      turns: Tween<double>(begin: 0, end: 0.5)
-                          .animate(_chevronController),
-                      child: const Icon(
-                        Icons.chevron_right_rounded,
-                        color: AppColors.primaryColor,
-                        size: 18,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                )
+              else
+                GestureDetector(
+                  onTap: () {
+                    _chevronController.forward(from: 0).then((_) {
+                      _chevronController.reverse();
+                    });
+                    widget.onLocationTap();
+                  },
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.location_on_rounded,
+                        color: HomeColors.orange,
+                        size: 16,
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: widget.isLoadingLocation
+                            ? const SizedBox(
+                                width: 12,
+                                height: 12,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: HomeColors.orange,
+                                ),
+                              )
+                            : Text(
+                                widget.location.isEmpty
+                                    ? l10n.yourLocation
+                                    : widget.location,
+                                style: const TextStyle(
+                                  color: HomeColors.orange,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                      ),
+                      RotationTransition(
+                        turns: Tween<double>(begin: 0, end: 0.5)
+                            .animate(_chevronController),
+                        child: const Icon(
+                          Icons.chevron_right_rounded,
+                          color: HomeColors.orange,
+                          size: 18,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
             ],
           ),
         ),
@@ -290,16 +342,17 @@ class _UserProfileHeaderState extends State<UserProfileHeader>
           width: 44,
           height: 44,
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFF4F4F4),
-            borderRadius: BorderRadius.circular(12),
+            color: HomeColors.surface,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: HomeColors.surfaceElevated),
           ),
           child: Stack(
             alignment: Alignment.center,
             children: [
               IconButton(
-                icon: Icon(
+                icon: const Icon(
                   Icons.notifications_outlined,
-                  color: colorScheme.onSurface,
+                  color: HomeColors.textPrimary,
                   size: 22,
                 ),
                 onPressed: widget.onNotificationsTap,
@@ -311,7 +364,7 @@ class _UserProfileHeaderState extends State<UserProfileHeader>
                   width: 8,
                   height: 8,
                   decoration: const BoxDecoration(
-                    color: AppColors.primaryColor,
+                    color: HomeColors.orange,
                     shape: BoxShape.circle,
                   ),
                 ),

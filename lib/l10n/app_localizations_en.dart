@@ -576,6 +576,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get splashStatus => 'Getting things moving…';
 
   @override
+  String get homeTabFood => 'Food';
+
+  @override
+  String get homeTabCourier => 'Courier';
+
+  @override
+  String get homeTabTaxi => 'Taxi';
+
+  @override
+  String get homeTabHandyman => 'Handyman';
+
+  @override
+  String get homeSearchHint => 'Search products everywhere';
+
+  @override
   String get loginContinueAsGuest => 'Continue as guest';
 
   @override

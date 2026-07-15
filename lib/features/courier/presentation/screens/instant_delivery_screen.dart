@@ -188,19 +188,13 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final topPad = MediaQuery.paddingOf(context).top;
-    final screenHeight = MediaQuery.of(context).size.height;
     const initialSheetSize = 0.5;
-    final mapHeight = screenHeight * (1 - initialSheetSize);
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
       body: Stack(
         children: [
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            height: mapHeight,
+          Positioned.fill(
             child: _buildMapOrFallback(context),
           ),
           // Back button
@@ -253,7 +247,7 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
           ),
           // Bottom Sheet Modal
           DraggableScrollableSheet(
-            initialChildSize: 0.5,
+            initialChildSize: initialSheetSize,
             minChildSize: 0.3,
             maxChildSize: 0.85,
             builder: (context, scrollController) {

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/theme/service_tab_palette.dart';
 import 'package:hudhud_delivery/app/services/location_service.dart';
 import 'package:hudhud_delivery/core/widgets/location_search_field.dart';
 import 'package:hudhud_delivery/app/services/google_places_service.dart';
@@ -12,12 +13,16 @@ import 'package:hudhud_delivery/app/models/place_result.dart';
 import 'package:hudhud_delivery/features/taxi/data/ride_data_provider.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/widgets/status_chip.dart';
+import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:shimmer/shimmer.dart';
 import 'finding_driver_screen.dart';
 import 'driver_on_the_way_screen.dart';
 import 'trip_selection_screen.dart';
 
 enum _TaxiTimeChoice { now, scheduleLater }
+
+/// Gold accent for taxi chrome under the always-dark Home hub.
+const Color _taxiGold = ServiceTabPalette.taxi;
 
 class TaxiScreen extends StatefulWidget {
   const TaxiScreen({super.key});
@@ -444,7 +449,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.access_time, color: AppColors.primaryColor),
+              leading: const Icon(Icons.access_time, color: _taxiGold),
               title: Text(l10n.taxiTimeNow),
               onTap: () {
                 setState(() {
@@ -454,7 +459,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.schedule, color: AppColors.primaryColor),
+              leading: const Icon(Icons.schedule, color: _taxiGold),
               title: Text(l10n.taxiScheduleForLater),
               onTap: () {
                 setState(() {
@@ -485,8 +490,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
   }
 
   Color _cardBorder(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return isDark ? AppColors.darkBorder : const Color(0xFFEEEEEE);
+    return HomeColors.border;
   }
 
   Widget _buildActiveRideSheet(BuildContext context) {
@@ -501,7 +505,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
 
     return Container(
       decoration: BoxDecoration(
-        color: colorScheme.surface,
+        color: HomeColors.surface,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(AppColors.radiusXL),
           topRight: Radius.circular(AppColors.radiusXL),
@@ -527,14 +531,14 @@ class _TaxiScreenState extends State<TaxiScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.local_taxi, color: AppColors.primaryColor, size: 24),
+              const Icon(Icons.local_taxi, color: _taxiGold, size: 24),
               const SizedBox(width: 8),
               Text(
                 l10n.taxiActiveRide,
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.primaryColor,
+                  color: _taxiGold,
                 ),
               ),
             ],
@@ -586,7 +590,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
                         ),
                         style: theme.textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: AppColors.primaryColor,
+                          color: _taxiGold,
                         ),
                       ),
                     ],
@@ -604,7 +608,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
               child: FilledButton(
                 onPressed: _onTrackActiveRide,
                 style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.primaryColor,
+                  backgroundColor: _taxiGold,
                   foregroundColor: colorScheme.onPrimary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppColors.radiusLG),
@@ -634,12 +638,12 @@ class _TaxiScreenState extends State<TaxiScreen> {
                     height: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: AppColors.primaryColor,
+                      color: _taxiGold,
                     ),
                   )
                 : Text(
                     l10n.taxiRefreshStatus,
-                    style: const TextStyle(color: AppColors.primaryColor, fontSize: 14),
+                    style: const TextStyle(color: _taxiGold, fontSize: 14),
                   ),
           ),
           const SizedBox(height: 16),
@@ -760,7 +764,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
         gmaps.Polyline(
           polylineId: const gmaps.PolylineId('route'),
           points: points,
-          color: AppColors.primaryColor,
+          color: _taxiGold,
           width: 3,
         ),
       );
@@ -770,7 +774,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
         gmaps.Polyline(
           polylineId: const gmaps.PolylineId('active_route'),
           points: [_toG(activePickup), _toG(activeDropoff)],
-          color: AppColors.primaryColor,
+          color: _taxiGold,
           width: 3,
         ),
       );
@@ -789,138 +793,146 @@ class _TaxiScreenState extends State<TaxiScreen> {
 
     final borderColor = _cardBorder(context);
 
-    final screenHeight = MediaQuery.of(context).size.height;
-    final bottomSheetInitialFraction = hasActiveRide ? 0.45 : 0.35;
-    final mapBottom = screenHeight * bottomSheetInitialFraction;
-
     return Scaffold(
-      body: Stack(
-        children: [
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: mapBottom,
-            child: _buildMapOrFallback(
-              context,
-              hasActiveRide,
-              activePickup,
-              activeDropoff,
-            ),
-          ),
-          // Available cars info chip - hide when active ride
-          if (!hasActiveRide && _totalAvailable != null && _totalAvailable! > 0)
-            Positioned(
-              top: 95,
-              left: 16,
-              right: 16,
-              child: Center(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppColors.spaceMD,
-                    vertical: AppColors.spaceSM,
-                  ),
-                  decoration: BoxDecoration(
-                    color: colorScheme.surface,
-                    borderRadius: BorderRadius.circular(AppColors.radiusFull),
-                    border: Border.all(color: borderColor),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.local_taxi, color: AppColors.primaryColor, size: 20),
-                      const SizedBox(width: 8),
-                      Text(
-                        l10n.taxiCarsNearby(_totalAvailable!),
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                          color: colorScheme.onSurface,
-                        ),
+      backgroundColor: HomeColors.background,
+      // Nested under Home — no AppBar (avoids double chrome).
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          // Use this body's height (not full screen) so the sheet/map
+          // leave no black gap when Taxi is embedded under Home.
+          final sheetInitial = hasActiveRide ? 0.45 : 0.38;
+          return Stack(
+            children: [
+              // Full-bleed map; sheet floats on top (covers bottom).
+              Positioned.fill(
+                child: _buildMapOrFallback(
+                  context,
+                  hasActiveRide,
+                  activePickup,
+                  activeDropoff,
+                ),
+              ),
+              // Available cars info chip - hide when active ride
+              if (!hasActiveRide &&
+                  _totalAvailable != null &&
+                  _totalAvailable! > 0)
+                Positioned(
+                  top: 12,
+                  left: 16,
+                  right: 56,
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppColors.spaceMD,
+                        vertical: AppColors.spaceSM,
                       ),
-                      if (_estimatedWaitTime != null && _estimatedWaitTime! > 0) ...[
-                        const SizedBox(width: 12),
-                        Icon(
-                          Icons.access_time,
-                          size: 16,
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          l10n.taxiMinutesWait(_estimatedWaitTime!),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                                fontSize: 13,
-                                color: colorScheme.onSurfaceVariant,
-                              ) ??
-                              TextStyle(
-                                fontSize: 13,
-                                color: colorScheme.onSurfaceVariant,
-                              ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          // Current location button
-          Positioned(
-            right: 16,
-            top: 100,
-            child: FloatingActionButton(
-              heroTag: 'current_location',
-              mini: true,
-              elevation: 0,
-              backgroundColor: colorScheme.surface,
-              shape: CircleBorder(
-                side: BorderSide(color: borderColor),
-              ),
-              onPressed: () async {
-                await _getCurrentLocation();
-                _fetchAvailableVehicles();
-              },
-              child: Icon(
-                Icons.my_location,
-                color: _isLoadingLocation
-                    ? colorScheme.onSurfaceVariant
-                    : colorScheme.primary,
-              ),
-            ),
-          ),
-          // Bottom Sheet Modal
-          DraggableScrollableSheet(
-            initialChildSize: hasActiveRide ? 0.45 : 0.35,
-            minChildSize: 0.25,
-            maxChildSize: 0.75,
-            builder: (context, scrollController) {
-              if (hasActiveRide) {
-                return _buildActiveRideSheet(context);
-              }
-              return Container(
-                decoration: BoxDecoration(
-                  color: colorScheme.surface,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(AppColors.radiusXL),
-                    topRight: Radius.circular(AppColors.radiusXL),
-                  ),
-                  border: Border(
-                    top: BorderSide(color: borderColor),
-                    left: BorderSide(color: borderColor),
-                    right: BorderSide(color: borderColor),
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    // Drag handle
-                    Container(
-                      margin: const EdgeInsets.only(top: 8),
-                      width: 40,
-                      height: 4,
                       decoration: BoxDecoration(
-                        color: colorScheme.outlineVariant,
-                        borderRadius: BorderRadius.circular(2),
+                        color: HomeColors.surfaceElevated,
+                        borderRadius:
+                            BorderRadius.circular(AppColors.radiusFull),
+                        border: Border.all(color: borderColor),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.local_taxi,
+                              color: _taxiGold, size: 20),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Text(
+                              l10n.taxiCarsNearby(_totalAvailable!),
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                                color: colorScheme.onSurface,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (_estimatedWaitTime != null &&
+                              _estimatedWaitTime! > 0) ...[
+                            const SizedBox(width: 12),
+                            Icon(
+                              Icons.access_time,
+                              size: 16,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              l10n.taxiMinutesWait(_estimatedWaitTime!),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                    fontSize: 13,
+                                    color: colorScheme.onSurfaceVariant,
+                                  ) ??
+                                  TextStyle(
+                                    fontSize: 13,
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
+                  ),
+                ),
+              // Current location button
+              Positioned(
+                right: 16,
+                top: 8,
+                child: FloatingActionButton(
+                  heroTag: 'current_location',
+                  mini: true,
+                  elevation: 0,
+                  backgroundColor: HomeColors.surfaceElevated,
+                  shape: CircleBorder(
+                    side: BorderSide(color: borderColor),
+                  ),
+                  onPressed: () async {
+                    await _getCurrentLocation();
+                    _fetchAvailableVehicles();
+                  },
+                  child: Icon(
+                    Icons.my_location,
+                    color: _isLoadingLocation
+                        ? colorScheme.onSurfaceVariant
+                        : _taxiGold,
+                  ),
+                ),
+              ),
+              // Bottom Sheet Modal
+              DraggableScrollableSheet(
+                initialChildSize: sheetInitial,
+                minChildSize: 0.28,
+                maxChildSize: 0.85,
+                builder: (context, scrollController) {
+                  if (hasActiveRide) {
+                    return _buildActiveRideSheet(context);
+                  }
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: HomeColors.surface,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(AppColors.radiusXL),
+                        topRight: Radius.circular(AppColors.radiusXL),
+                      ),
+                      border: Border(
+                        top: BorderSide(color: borderColor),
+                        left: BorderSide(color: borderColor),
+                        right: BorderSide(color: borderColor),
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        // Drag handle
+                        Container(
+                          margin: const EdgeInsets.only(top: 8),
+                          width: 40,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: colorScheme.outlineVariant,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
                     // Logo
                     Padding(
                       padding: const EdgeInsets.only(top: 16, bottom: 12),
@@ -932,7 +944,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
                             style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
-                              color: AppColors.primaryColor,
+                              color: _taxiGold,
                             ),
                           ),
                           Text(
@@ -955,7 +967,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
                         child: Row(
                           children: [
                             const Icon(Icons.straighten,
-                                size: 18, color: AppColors.primaryColor),
+                                size: 18, color: _taxiGold),
                             const SizedBox(width: 8),
                             if (_isLoadingRoute)
                               const _TaxiInlineShimmer(width: 72, height: 14)
@@ -967,7 +979,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
                                 style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
-                                  color: AppColors.primaryColor,
+                                  color: _taxiGold,
                                 ),
                               ),
                           ],
@@ -986,7 +998,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
                           Expanded(
                             child: Container(
                               decoration: BoxDecoration(
-                                color: colorScheme.surface,
+                                color: HomeColors.surfaceElevated,
                                 borderRadius:
                                     BorderRadius.circular(AppColors.radiusLG),
                                 border: Border.all(color: borderColor),
@@ -1001,7 +1013,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
                                   ),
                                   prefixIcon: const Icon(
                                     Icons.search,
-                                    color: AppColors.primaryColor,
+                                    color: _taxiGold,
                                   ),
                                   border: InputBorder.none,
                                   contentPadding: const EdgeInsets.symmetric(
@@ -1058,7 +1070,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
                                 vertical: 12,
                               ),
                               decoration: BoxDecoration(
-                                color: colorScheme.surface,
+                                color: HomeColors.surfaceElevated,
                                 borderRadius:
                                     BorderRadius.circular(AppColors.radiusLG),
                                 border: Border.all(color: borderColor),
@@ -1068,7 +1080,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
                                 children: [
                                   const Icon(
                                     Icons.access_time,
-                                    color: AppColors.primaryColor,
+                                    color: _taxiGold,
                                     size: 20,
                                   ),
                                   const SizedBox(width: 6),
@@ -1077,14 +1089,14 @@ class _TaxiScreenState extends State<TaxiScreen> {
                                         ? l10n.taxiTimeNow
                                         : l10n.taxiScheduleForLater,
                                     style: const TextStyle(
-                                      color: AppColors.primaryColor,
+                                      color: _taxiGold,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                   const SizedBox(width: 4),
                                   const Icon(
                                     Icons.keyboard_arrow_down,
-                                    color: AppColors.primaryColor,
+                                    color: _taxiGold,
                                     size: 20,
                                   ),
                                 ],
@@ -1117,6 +1129,8 @@ class _TaxiScreenState extends State<TaxiScreen> {
             },
           ),
         ],
+          );
+        },
       ),
     );
   }
@@ -1203,12 +1217,12 @@ class _SuggestedLocationItem extends StatelessWidget {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: AppColors.primaryColor.withValues(alpha: 0.12),
+                    color: _taxiGold.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(AppColors.radiusMD),
                   ),
                   child: const Icon(
                     Icons.history_rounded,
-                    color: AppColors.primaryColor,
+                    color: _taxiGold,
                     size: 18,
                   ),
                 ),

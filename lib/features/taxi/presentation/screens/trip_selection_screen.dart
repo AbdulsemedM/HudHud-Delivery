@@ -328,18 +328,10 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
     final selectedOption =
         _tripOptions.firstWhere((opt) => opt.id == _selectedTrip);
 
-    final screenHeight = MediaQuery.of(context).size.height;
-    const bottomSheetInitialFraction = 0.52;
-    final mapBottom = screenHeight * bottomSheetInitialFraction;
-
     return Scaffold(
       body: Stack(
         children: [
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: mapBottom,
+          Positioned.fill(
             child: _buildMapOrFallback(context),
           ),
           Positioned(

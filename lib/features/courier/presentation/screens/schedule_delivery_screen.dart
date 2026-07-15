@@ -357,19 +357,13 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final topPad = MediaQuery.paddingOf(context).top;
-    final screenHeight = MediaQuery.of(context).size.height;
     const initialSheetSize = 0.55;
-    final mapHeight = screenHeight * (1 - initialSheetSize);
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
       body: Stack(
         children: [
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            height: mapHeight,
+          Positioned.fill(
             child: _buildMapOrFallback(context),
           ),
           Positioned(

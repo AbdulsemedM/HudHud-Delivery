@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/features/settings/presentation/screen/notifications_screen.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
@@ -26,8 +27,8 @@ import 'package:hudhud_delivery/features/addresses/data/addresses_data_provider.
 import 'package:hudhud_delivery/features/addresses/data/addresses_repository.dart';
 import 'package:hudhud_delivery/features/guest/utils/guest_sign_in_prompt.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
-import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/addresses/presentation/widgets/delivery_address_selector.dart';
+import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 
 class HomeScreen extends StatefulWidget {
   /// Incremented whenever the user selects the Home tab (including first open).
@@ -71,6 +72,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   HomeServiceMode _serviceMode = HomeServiceMode.foodGroceries;
 
   bool _verificationPromptOpen = false;
+  bool _verifyBannerDismissed = false;
 
   @override
   void initState() {
@@ -364,99 +366,80 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final l10n = context.l10n;
+    final isGuest = GuestBrowseService().isGuestBrowseMode;
+    final showVerify = _currentUser != null &&
+        !_verifyBannerDismissed &&
+        (!_currentUser!.isEmailVerified || !_currentUser!.isPhoneVerified);
 
-    return Scaffold(
-      backgroundColor: colorScheme.surface,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (GuestBrowseService().isGuestBrowseMode)
-              _GuestBrowseBanner(
-                onSignIn: () async {
-                  final authed = await showGuestSignInRequiredDialog(context);
-                  if (authed && mounted) await _loadUserData();
-                },
-              ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-              child: UserProfileHeader(
-                name: _currentUser?.name ?? l10n.userDefault,
-                location: _currentLocation,
-                isLoadingLocation: _isLoadingLocation,
-                user: _currentUser,
-                onLocationTap: _openLocationSearch,
-                onNotificationsTap: _openNotifications,
-              ),
-            ),
-            if (_currentUser != null) ...[
-              const SizedBox(height: AppColors.spaceMD),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: VerificationStatusCard(
-                  user: _currentUser!,
-                  onVerifyEmail: _openVerifyEmailFlow,
-                  onVerifyPhone: _openVerifyPhoneFlow,
-                ),
-              ),
-            ],
-            const SizedBox(height: AppColors.spaceSM),
-            HomeServiceTabBar(
-              selected: _serviceMode,
-              onSelected: (mode) {
-                setState(() => _serviceMode = mode);
-                context.read<ServiceAccentController>().updateHomeServiceMode(mode);
-              },
-            ),
-            Expanded(
-              child: IndexedStack(
-                index: _serviceMode.index,
-                children: const [
-                  AllCategoriesScreen(embedded: true),
-                  CourierScreen(),
-                  TaxiScreen(),
-                  HandymanScreen(embedded: true),
-                ],
-              ),
-            ),
-          ],
+    return Theme(
+      data: HomeColors.darkTheme(Theme.of(context)),
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+          statusBarBrightness: Brightness.dark,
         ),
-      ),
-    );
-  }
-}
-
-class _GuestBrowseBanner extends StatelessWidget {
-  final VoidCallback onSignIn;
-
-  const _GuestBrowseBanner({required this.onSignIn});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final colorScheme = Theme.of(context).colorScheme;
-    return Material(
-      color: colorScheme.primaryContainer.withValues(alpha: 0.5),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                l10n.guestBrowseBanner,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onPrimaryContainer,
+        child: Scaffold(
+          backgroundColor: HomeColors.background,
+          body: SafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+                  child: UserProfileHeader(
+                    name: _currentUser?.name ?? l10n.userDefault,
+                    location: _currentLocation,
+                    isLoadingLocation: _isLoadingLocation,
+                    user: _currentUser,
+                    isGuest: isGuest,
+                    onGuestSignIn: () async {
+                      final authed =
+                          await showGuestSignInRequiredDialog(context);
+                      if (authed && mounted) await _loadUserData();
+                    },
+                    onLocationTap: _openLocationSearch,
+                    onNotificationsTap: _openNotifications,
+                  ),
+                ),
+                if (showVerify) ...[
+                  const SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: VerificationStatusCard(
+                      user: _currentUser!,
+                      onVerifyEmail: _openVerifyEmailFlow,
+                      onVerifyPhone: _openVerifyPhoneFlow,
+                      onDismiss: () =>
+                          setState(() => _verifyBannerDismissed = true),
                     ),
-              ),
+                  ),
+                ],
+                const SizedBox(height: 10),
+                HomeServiceTabBar(
+                  selected: _serviceMode,
+                  onSelected: (mode) {
+                    setState(() => _serviceMode = mode);
+                    context
+                        .read<ServiceAccentController>()
+                        .updateHomeServiceMode(mode);
+                  },
+                ),
+                Expanded(
+                  child: IndexedStack(
+                    index: _serviceMode.index,
+                    children: const [
+                      AllCategoriesScreen(embedded: true),
+                      CourierScreen(),
+                      TaxiScreen(),
+                      HandymanScreen(embedded: true),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            TextButton(
-              onPressed: onSignIn,
-              child: Text(l10n.guestBrowseSignIn),
-            ),
-          ],
+          ),
         ),
       ),
     );

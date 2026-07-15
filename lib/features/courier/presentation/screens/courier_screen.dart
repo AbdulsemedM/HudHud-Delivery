@@ -6,6 +6,7 @@ import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
+import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../home/presentation/widgets/home_widget.dart';
 import 'delivery_details_screen.dart';
@@ -184,11 +185,10 @@ class _CourierScreenState extends State<CourierScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
-    final borderColor = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFEEEEEE);
+    const borderColor = HomeColors.border;
 
     return Scaffold(
+      backgroundColor: HomeColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppColors.spaceMD),
@@ -199,6 +199,7 @@ class _CourierScreenState extends State<CourierScreen> {
                 l10n.courierWhatToDo,
                 style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w600,
+                  color: HomeColors.textPrimary,
                 ),
               ),
               const SizedBox(height: AppColors.spaceMD),
@@ -244,10 +245,28 @@ class _CourierScreenState extends State<CourierScreen> {
                 ),
               ],
               const SizedBox(height: AppColors.spaceLG),
-              SectionHeader(
-                title: l10n.history,
-                actionLabel: l10n.actionViewAll,
-                onAction: () {},
+              Row(
+                children: [
+                  Text(
+                    l10n.history,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: HomeColors.textPrimary,
+                    ),
+                  ),
+                  const Spacer(),
+                  TextButton(
+                    onPressed: () {},
+                    style: TextButton.styleFrom(
+                      foregroundColor: HomeColors.violet,
+                      textStyle: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    child: Text(l10n.actionViewAll),
+                  ),
+                ],
               ),
               const SizedBox(height: AppColors.spaceMD),
               SingleChildScrollView(
@@ -288,16 +307,18 @@ class _CourierScreenState extends State<CourierScreen> {
               else if (_deliveriesError != null)
                 Column(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.wifi_off_rounded,
                       size: 48,
-                      color: scheme.onSurfaceVariant,
+                      color: HomeColors.textMuted,
                     ),
                     const SizedBox(height: AppColors.spaceMD),
                     Text(
                       _deliveriesError!,
                       textAlign: TextAlign.center,
-                      style: theme.textTheme.bodyMedium,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: HomeColors.textSecondary,
+                      ),
                     ),
                     TextButton.icon(
                       onPressed: () {
@@ -306,6 +327,9 @@ class _CourierScreenState extends State<CourierScreen> {
                       },
                       icon: const Icon(Icons.refresh),
                       label: Text(l10n.actionRetry),
+                      style: TextButton.styleFrom(
+                        foregroundColor: HomeColors.violet,
+                      ),
                     ),
                   ],
                 )
@@ -322,12 +346,12 @@ class _CourierScreenState extends State<CourierScreen> {
                         height: 112,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: AppColors.primaryColor.withValues(alpha: 0.1),
+                          color: HomeColors.violet.withValues(alpha: 0.12),
                         ),
                         child: Icon(
                           Icons.local_shipping_outlined,
                           size: 56,
-                          color: AppColors.primaryColor.withValues(alpha: 0.85),
+                          color: HomeColors.violet.withValues(alpha: 0.9),
                         ),
                       ),
                       const SizedBox(height: AppColors.spaceLG),
@@ -336,6 +360,7 @@ class _CourierScreenState extends State<CourierScreen> {
                         textAlign: TextAlign.center,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
+                          color: HomeColors.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -343,7 +368,7 @@ class _CourierScreenState extends State<CourierScreen> {
                         l10n.courierHistoryEmptySubtitle,
                         textAlign: TextAlign.center,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: scheme.onSurfaceVariant,
+                          color: HomeColors.textMuted,
                         ),
                       ),
                     ],
@@ -400,7 +425,6 @@ class _FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return FilterChip(
       label: Text(label),
       selected: selected,
@@ -409,12 +433,12 @@ class _FilterChip extends StatelessWidget {
       labelStyle: TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.w600,
-        color: selected ? Colors.white : scheme.onSurfaceVariant,
+        color: selected ? Colors.white : HomeColors.textMuted,
       ),
-      backgroundColor: scheme.surface,
-      selectedColor: AppColors.primaryColor,
+      backgroundColor: HomeColors.surface,
+      selectedColor: HomeColors.violet,
       side: BorderSide(
-        color: selected ? AppColors.primaryColor : scheme.outline.withValues(alpha: 0.4),
+        color: selected ? HomeColors.violet : HomeColors.border,
       ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppColors.radiusFull),
@@ -440,11 +464,7 @@ class _InstantDeliveryCard extends StatelessWidget {
           height: 120,
           padding: const EdgeInsets.all(AppColors.spaceMD),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [AppColors.primaryColor, AppColors.primaryDarkColor],
-            ),
+            color: HomeColors.violet,
             borderRadius: BorderRadius.circular(AppColors.radiusLG),
           ),
           child: Stack(
@@ -498,9 +518,6 @@ class _ScheduleDeliveryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -510,11 +527,9 @@ class _ScheduleDeliveryCard extends StatelessWidget {
           height: 120,
           padding: const EdgeInsets.all(AppColors.spaceMD),
           decoration: BoxDecoration(
-            color: scheme.surface,
+            color: HomeColors.surface,
             borderRadius: BorderRadius.circular(AppColors.radiusLG),
-            border: Border.all(
-              color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFEEEEEE),
-            ),
+            border: Border.all(color: HomeColors.border),
           ),
           child: Stack(
             children: [
@@ -523,7 +538,7 @@ class _ScheduleDeliveryCard extends StatelessWidget {
                 right: 0,
                 child: Icon(
                   Icons.schedule_rounded,
-                  color: AppColors.primaryColor.withValues(alpha: 0.5),
+                  color: HomeColors.violet.withValues(alpha: 0.55),
                   size: 32,
                 ),
               ),
@@ -533,8 +548,8 @@ class _ScheduleDeliveryCard extends StatelessWidget {
                 children: [
                   Text(
                     l10n.courierScheduleTitle,
-                    style: TextStyle(
-                      color: scheme.onSurface,
+                    style: const TextStyle(
+                      color: HomeColors.textPrimary,
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                     ),
@@ -542,8 +557,8 @@ class _ScheduleDeliveryCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     l10n.courierScheduleSubtitle,
-                    style: TextStyle(
-                      color: scheme.onSurfaceVariant,
+                    style: const TextStyle(
+                      color: HomeColors.textMuted,
                       fontSize: 11,
                     ),
                     maxLines: 2,
@@ -572,8 +587,6 @@ class _ActiveDeliveryBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final id = delivery['id'];
     final orderId = id != null ? 'DEL-$id' : '—';
     final status =
@@ -584,11 +597,9 @@ class _ActiveDeliveryBanner extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: scheme.surface,
+          color: HomeColors.surface,
           borderRadius: BorderRadius.circular(AppColors.radiusLG),
-          border: Border.all(
-            color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFEEEEEE),
-          ),
+          border: Border.all(color: HomeColors.border),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -596,20 +607,15 @@ class _ActiveDeliveryBanner extends StatelessWidget {
             Container(
               height: 160,
               width: double.infinity,
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.vertical(
+              decoration: const BoxDecoration(
+                borderRadius: BorderRadius.vertical(
                   top: Radius.circular(AppColors.radiusLG),
                 ),
-                gradient: LinearGradient(
-                  colors: [
-                    scheme.surfaceContainerHighest,
-                    scheme.surfaceContainerHigh,
-                  ],
-                ),
+                color: HomeColors.surfaceElevated,
               ),
               child: const Icon(
                 Icons.location_on_rounded,
-                color: AppColors.primaryColor,
+                color: HomeColors.violet,
                 size: 48,
               ),
             ),
@@ -626,7 +632,10 @@ class _ActiveDeliveryBanner extends StatelessWidget {
                           style: Theme.of(context)
                               .textTheme
                               .titleSmall
-                              ?.copyWith(fontWeight: FontWeight.w700),
+                              ?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: HomeColors.textPrimary,
+                              ),
                         ),
                       ),
                       StatusChip(status: status),
@@ -643,8 +652,8 @@ class _ActiveDeliveryBanner extends StatelessWidget {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: index <= 1
-                              ? AppColors.primaryColor
-                              : scheme.onSurfaceVariant.withValues(alpha: 0.3),
+                              ? HomeColors.violet
+                              : HomeColors.textMuted.withValues(alpha: 0.35),
                         ),
                       );
                     }),
@@ -680,13 +689,12 @@ class _DeliveryHistoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     final statusColor = StatusChip.colorForStatus(status);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Material(
-        color: scheme.surface,
+        color: HomeColors.surface,
         borderRadius: BorderRadius.circular(AppColors.radiusLG),
         child: InkWell(
           onTap: onTap,
@@ -721,18 +729,21 @@ class _DeliveryHistoryCard extends StatelessWidget {
                         style: Theme.of(context)
                             .textTheme
                             .labelMedium
-                            ?.copyWith(fontWeight: FontWeight.w600),
+                            ?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: HomeColors.textPrimary,
+                            ),
                       ),
                       Text(
                         recipient,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: scheme.onSurfaceVariant,
+                              color: HomeColors.textMuted,
                             ),
                       ),
                       Text(
                         dateTime,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: scheme.onSurfaceVariant,
+                              color: HomeColors.textMuted,
                             ),
                       ),
                     ],
