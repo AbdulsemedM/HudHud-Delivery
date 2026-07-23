@@ -33,6 +33,7 @@ class CategoriesProductsModel {
   final int? discount_percentage;
   final bool? is_available;
   final String? status;
+  final bool? is_featured;
   CategoriesProductsModel({
     this.id,
     this.vendor_id,
@@ -63,6 +64,7 @@ class CategoriesProductsModel {
     this.discount_percentage,
     this.is_available,
     this.status,
+    this.is_featured,
   });
 
   /// Whether the product can be added to cart (API: is_available + active status).
@@ -109,6 +111,7 @@ class CategoriesProductsModel {
     int? discount_percentage,
     bool? is_available,
     String? status,
+    bool? is_featured,
   }) {
     return CategoriesProductsModel(
       id: id ?? this.id,
@@ -140,6 +143,7 @@ class CategoriesProductsModel {
       discount_percentage: discount_percentage ?? this.discount_percentage,
       is_available: is_available ?? this.is_available,
       status: status ?? this.status,
+      is_featured: is_featured ?? this.is_featured,
     );
   }
 
@@ -174,6 +178,7 @@ class CategoriesProductsModel {
       'discount_percentage': discount_percentage,
       'is_available': is_available,
       'status': status,
+      'is_featured': is_featured,
     };
   }
 
@@ -218,8 +223,8 @@ class CategoriesProductsModel {
       discount_price: map['discount_price']?.toString(),
       cost_price: map['cost_price']?.toString(),
       quantity: map['quantity'] != null ? (map['quantity'] is String ? int.tryParse(map['quantity']) : map['quantity'] as int) : null,
-      sku: map['sku'] != null ? map['sku'] as String : null,
-      barcode: map['barcode'] != null ? map['barcode'] as String : null,
+      sku: map['sku']?.toString(),
+      barcode: map['barcode']?.toString(),
       image_path: (map['image_path'] ?? (map['main_image'] is Map ? (map['main_image'] as Map)['medium'] : null))?.toString(),
       gallery_images: _parseGalleryImages(map['gallery_images']),
       ingredients: _parseStringList(map['ingredients']),
@@ -238,6 +243,7 @@ class CategoriesProductsModel {
       discount_percentage: map['discount_percentage'] != null ? (map['discount_percentage'] is String ? int.tryParse(map['discount_percentage']) : map['discount_percentage'] as int) : null,
       is_available: _parseBool(map['is_available'], fallback: true),
       status: map['status']?.toString(),
+      is_featured: _parseBool(map['is_featured'], fallback: false),
     );
   }
 
@@ -283,7 +289,8 @@ class CategoriesProductsModel {
       other.is_on_discount == is_on_discount &&
       other.discount_percentage == discount_percentage &&
       other.is_available == is_available &&
-      other.status == status;
+      other.status == status &&
+      other.is_featured == is_featured;
   }
 
   @override
@@ -316,6 +323,7 @@ class CategoriesProductsModel {
       is_on_discount.hashCode ^
       discount_percentage.hashCode ^
       is_available.hashCode ^
-      status.hashCode;
+      status.hashCode ^
+      is_featured.hashCode;
   }
 }

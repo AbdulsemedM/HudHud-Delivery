@@ -46,7 +46,6 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
   List<CategoriesProductsModel> _featuredProducts = [];
   List<BranchModel> _branches = [];
   bool _productsLoading = false;
-  bool _featuredLoading = false;
   bool _productsLoadingMore = false;
   String? _productsError;
   late final ProductsRepository _productsRepository;
@@ -71,25 +70,14 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
     _branchesRepository = BranchesRepository();
     if (widget.vendorId != null) {
       _loadVendorProducts();
-      _loadFeaturedProducts();
       _loadBranches();
     }
   }
 
-  Future<void> _loadFeaturedProducts() async {
-    setState(() => _featuredLoading = true);
-    try {
-      final all = await _productsRepository.getFeaturedProducts(limit: 20);
-      final vendorId = widget.vendorId;
-      setState(() {
-        _featuredProducts = vendorId == null
-            ? all
-            : all.where((p) => p.vendor_id == vendorId).toList();
-        _featuredLoading = false;
-      });
-    } catch (_) {
-      if (mounted) setState(() => _featuredLoading = false);
-    }
+  void _syncFeaturedFromVendorProducts() {
+    final featured = _products.where((p) => p.is_featured == true).toList();
+    // Store Featured tab: prefer flagged items; otherwise show the vendor catalog.
+    _featuredProducts = featured.isNotEmpty ? featured : List.of(_products);
   }
 
   Future<void> _loadBranches() async {
@@ -107,7 +95,6 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
   }
 
   bool get _isLoadingActiveProducts {
-    if (_selectedTab == 'Featured') return _featuredLoading;
     return _productsLoading;
   }
 
@@ -132,6 +119,7 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
           maxPrice: _maxPrice,
         ),
       );
+      if (!mounted) return;
       setState(() {
         if (loadMore && page > 1) {
           _products = [..._products, ...result.items];
@@ -142,8 +130,10 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
         _hasMore = result.hasMore;
         _productsLoading = false;
         _productsLoadingMore = false;
+        _syncFeaturedFromVendorProducts();
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _productsError = e.toString();
         _productsLoading = false;
@@ -359,7 +349,7 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                       ? const Center(child: Text('No orders yet'))
                       : _isLoadingActiveProducts
                       ? const Center(child: CircularProgressIndicator())
-                      : _productsError != null && _selectedTab != 'Featured'
+                      : _productsError != null
                           ? Center(
                               child: Padding(
                                 padding: const EdgeInsets.all(24),
