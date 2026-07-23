@@ -53,10 +53,12 @@ class WalletHeader extends StatelessWidget {
 
 class BalanceCard extends StatelessWidget {
   final String balance;
+  final Widget? bottomActions;
 
   const BalanceCard({
     super.key,
     required this.balance,
+    this.bottomActions,
   });
 
   @override
@@ -64,7 +66,6 @@ class BalanceCard extends StatelessWidget {
     final l10n = context.l10n;
     return Container(
       width: double.infinity,
-      height: 180,
       padding: const EdgeInsets.all(AppColors.spaceLG),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
@@ -95,6 +96,10 @@ class BalanceCard extends StatelessWidget {
               fontFeatures: [FontFeature.tabularFigures()],
             ),
           ),
+          if (bottomActions != null) ...[
+            const SizedBox(height: AppColors.spaceLG),
+            bottomActions!,
+          ],
         ],
       ),
     );
@@ -162,30 +167,24 @@ class WalletActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return Transform.translate(
-      offset: const Offset(0, -28),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppColors.spaceMD),
-        child: Row(
-          children: [
-            WalletActionButton(
-              icon: Icons.add_rounded,
-              label: l10n.walletAddMoney,
-              onTap: onAddMoney,
-            ),
-            WalletActionButton(
-              icon: Icons.arrow_upward_rounded,
-              label: l10n.withdrawAction,
-              onTap: onSendMoney,
-            ),
-            WalletActionButton(
-              icon: Icons.history_rounded,
-              label: l10n.walletRecentTransactions,
-              onTap: onHistory ?? () {},
-            ),
-          ],
+    return Row(
+      children: [
+        WalletActionButton(
+          icon: Icons.add_rounded,
+          label: l10n.walletAddMoney,
+          onTap: onAddMoney,
         ),
-      ),
+        WalletActionButton(
+          icon: Icons.arrow_upward_rounded,
+          label: l10n.withdrawAction,
+          onTap: onSendMoney,
+        ),
+        WalletActionButton(
+          icon: Icons.history_rounded,
+          label: l10n.walletRecentTransactions,
+          onTap: onHistory ?? () {},
+        ),
+      ],
     );
   }
 }

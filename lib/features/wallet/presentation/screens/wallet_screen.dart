@@ -115,6 +115,7 @@ class _WalletContent extends StatefulWidget {
 
 class _WalletContentState extends State<_WalletContent> {
   int _selectedWalletIndex = 0;
+  final _transactionsKey = GlobalKey();
 
   static List<TransactionItem> _toTransactionItems(
     AppLocalizations l10n,
@@ -163,34 +164,44 @@ class _WalletContentState extends State<_WalletContent> {
         children: [
           BalanceCard(
             balance: '${l10n.currencyEtb} ${displayBalance.toStringAsFixed(2)}',
-          ),
-          WalletActions(
-            onAddMoney: () async {
-              final result = await Navigator.of(context).push<bool>(
-                MaterialPageRoute(
-                  builder: (_) => AddFundsScreen(
-                    wallets: widget.wallets,
-                    defaultCurrency: primaryCurrency,
+            bottomActions: WalletActions(
+              onAddMoney: () async {
+                final result = await Navigator.of(context).push<bool>(
+                  MaterialPageRoute(
+                    builder: (_) => AddFundsScreen(
+                      wallets: widget.wallets,
+                      defaultCurrency: primaryCurrency,
+                    ),
                   ),
-                ),
-              );
-              if (result == true && context.mounted) {
-                context.read<WalletBloc>().add(const FetchWalletsEvent());
-              }
-            },
-            onSendMoney: () async {
-              final result = await Navigator.of(context).push<bool>(
-                MaterialPageRoute(
-                  builder: (_) => WithdrawFundsScreen(
-                    wallets: widget.wallets,
-                    defaultCurrency: primaryCurrency,
+                );
+                if (result == true && context.mounted) {
+                  context.read<WalletBloc>().add(const FetchWalletsEvent());
+                }
+              },
+              onSendMoney: () async {
+                final result = await Navigator.of(context).push<bool>(
+                  MaterialPageRoute(
+                    builder: (_) => WithdrawFundsScreen(
+                      wallets: widget.wallets,
+                      defaultCurrency: primaryCurrency,
+                    ),
                   ),
-                ),
-              );
-              if (result == true && context.mounted) {
-                context.read<WalletBloc>().add(const FetchWalletsEvent());
-              }
-            },
+                );
+                if (result == true && context.mounted) {
+                  context.read<WalletBloc>().add(const FetchWalletsEvent());
+                }
+              },
+              onHistory: () {
+                final target = _transactionsKey.currentContext;
+                if (target != null) {
+                  Scrollable.ensureVisible(
+                    target,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                }
+              },
+            ),
           ),
           if (widget.wallets.length > 1) ...[
             const SizedBox(height: AppColors.spaceMD),
@@ -212,6 +223,7 @@ class _WalletContentState extends State<_WalletContent> {
           ],
           const SizedBox(height: AppColors.spaceLG),
           TransactionsList(
+            key: _transactionsKey,
             transactions: _toTransactionItems(
               l10n,
               widget.transactions,

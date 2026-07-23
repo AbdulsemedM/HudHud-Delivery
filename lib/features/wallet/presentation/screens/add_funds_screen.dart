@@ -41,6 +41,7 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
 
   late final WalletRepository _walletRepository;
   late final PaymentRepository _paymentRepository;
+  late final WalletBloc _walletBloc;
 
   @override
   void initState() {
@@ -51,6 +52,7 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
     _paymentRepository = PaymentRepository(
       paymentDataProvider: PaymentDataProvider(apiService: ApiService.instance),
     );
+    _walletBloc = WalletBloc(walletRepository: _walletRepository);
     _fetchPaymentMethods();
     if (widget.wallets.isNotEmpty && _selectedWallet == null) {
       _selectedWallet = widget.wallets.first;
@@ -82,6 +84,7 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
 
   @override
   void dispose() {
+    _walletBloc.close();
     _amountController.dispose();
     _transactionIdController.dispose();
     _cardLastFourController.dispose();
@@ -126,10 +129,8 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
     final borderColor =
         isDark ? const Color(0xFF2A2A2A) : const Color(0xFFEEEEEE);
 
-    return BlocProvider(
-      create: (_) => WalletBloc(
-        walletRepository: _walletRepository,
-      ),
+    return BlocProvider.value(
+      value: _walletBloc,
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
@@ -220,12 +221,29 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
                     const SizedBox(height: AppColors.spaceMD),
                     if (widget.wallets.isNotEmpty) ...[
                       DropdownButtonFormField<WalletModel>(
+                        isExpanded: true,
                         initialValue: _selectedWallet,
                         decoration: _fieldDecoration(context, l10n.wallet),
+                        selectedItemBuilder: (context) => widget.wallets
+                            .map(
+                              (w) => Align(
+                                alignment: AlignmentDirectional.centerStart,
+                                child: Text(
+                                  w.dropdownLabel,
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                              ),
+                            )
+                            .toList(),
                         items: widget.wallets
                             .map((w) => DropdownMenuItem(
                                   value: w,
-                                  child: Text('${w.name} (${w.currency})'),
+                                  child: Text(
+                                    w.dropdownLabel,
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                  ),
                                 ))
                             .toList(),
                         onChanged: (w) => setState(() => _selectedWallet = w),
@@ -250,13 +268,29 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
                       )
                     else ...[
                       DropdownButtonFormField<String>(
+                        isExpanded: true,
                         initialValue: _selectedMethodId,
                         decoration:
                             _fieldDecoration(context, l10n.paymentMethod),
+                        selectedItemBuilder: (context) => _paymentMethods
+                            .map(
+                              (m) => Align(
+                                alignment: AlignmentDirectional.centerStart,
+                                child: Text(
+                                  m['name'] as String? ?? '',
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                              ),
+                            )
+                            .toList(),
                         items: _paymentMethods
                             .map((m) => DropdownMenuItem(
                                   value: m['id'] as String?,
-                                  child: Text(m['name'] as String? ?? ''),
+                                  child: Text(
+                                    m['name'] as String? ?? '',
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ))
                             .toList(),
                         onChanged: (id) => setState(() {
@@ -345,7 +379,7 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
     } catch (_) {}
 
     if (!mounted) return;
-    context.read<WalletBloc>().add(
+    _walletBloc.add(
           AddFundsEvent(
             amount: amount,
             method: method,

@@ -15,7 +15,7 @@ import 'package:hudhud_delivery/models/user_model.dart';
 import '../../bloc/orders_bloc.dart';
 import '../widgets/orders_widget.dart';
 import '../../data/repositories/orders_repository.dart';
-import 'order_details_screen.dart';
+import 'package:hudhud_delivery/app/navigation/fcm_order_navigation.dart';
 
 class OrdersScreen extends StatefulWidget {
   const OrdersScreen({super.key});
@@ -311,13 +311,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
                             child: OrderItemCard(
                               order: order,
                               onTap: () {
-                                Navigator.push(
+                                pushOrderDetailsById(
                                   context,
-                                  MaterialPageRoute(
-                                    builder: (context) => OrderDetailsScreen(
-                                      orderId: order.id,
-                                    ),
-                                  ),
+                                  orderId: order.id,
                                 );
                               },
                             ),
