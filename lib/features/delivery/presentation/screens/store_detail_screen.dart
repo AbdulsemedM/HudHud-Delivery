@@ -1,13 +1,14 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/app/navigation/cart_navigation.dart';
+import 'package:hudhud_delivery/app/services/cart_service.dart';
 import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/widgets/fallback_network_image.dart';
 import 'package:hudhud_delivery/features/categories/model/categories_products_model.dart';
 import 'package:hudhud_delivery/features/categories/presentation/widgets/categories_widget.dart';
-import 'package:hudhud_delivery/features/checkout/presentation/screen/checkout_screen.dart';
 import 'package:hudhud_delivery/features/delivery/presentation/screens/product_detail_screen.dart';
 import 'package:hudhud_delivery/features/guest/data/branches_repository.dart';
 import 'package:hudhud_delivery/features/guest/model/branch_model.dart';
@@ -57,12 +58,13 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
   int _currentPage = 1;
   bool _hasMore = false;
 
-  /// Cart: productId -> quantity (same pattern as categories screen).
-  final Map<String, int> _cartItems = {};
+  /// Shared cart used by store lists and product detail screen.
+  final CartService _cart = CartService();
 
   @override
   void initState() {
     super.initState();
+    _cart.addListener(_onCartChanged);
     _productsRepository = ProductsRepository(
       productsDataProvider:
           ProductsDataProvider(apiService: ApiService.instance),
@@ -72,6 +74,16 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
       _loadVendorProducts();
       _loadBranches();
     }
+  }
+
+  @override
+  void dispose() {
+    _cart.removeListener(_onCartChanged);
+    super.dispose();
+  }
+
+  void _onCartChanged() {
+    if (mounted) setState(() {});
   }
 
   void _syncFeaturedFromVendorProducts() {
@@ -176,34 +188,27 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
 
   void _addToCart(String productId) {
     final product = _productById(productId);
-    if (product != null && !product.canOrder) return;
-    setState(() {
-      _cartItems[productId] = (_cartItems[productId] ?? 0) + 1;
-    });
+    if (product != null && product.canOrder) {
+      _cart.addProduct(product);
+    }
   }
 
   void _removeFromCart(String productId) {
-    setState(() {
-      _cartItems.remove(productId);
-    });
+    _cart.removeProduct(productId);
   }
 
   void _incrementQuantity(String productId) {
     final product = _productById(productId);
     if (product != null && !product.canOrder) return;
-    setState(() {
-      _cartItems[productId] = (_cartItems[productId] ?? 0) + 1;
-    });
+    if (_cart.quantityFor(int.tryParse(productId)) == 0 && product != null) {
+      _cart.addProduct(product);
+      return;
+    }
+    _cart.increment(productId);
   }
 
   void _decrementQuantity(String productId) {
-    setState(() {
-      if (_cartItems[productId] == 1) {
-        _cartItems.remove(productId);
-      } else {
-        _cartItems[productId] = _cartItems[productId]! - 1;
-      }
-    });
+    _cart.decrement(productId);
   }
 
   void _showProductDetails(CategoriesProductsModel product) {
@@ -224,21 +229,9 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
     );
   }
 
-  int get _totalItems =>
-      _cartItems.values.fold(0, (sum, quantity) => sum + quantity);
+  int get _totalItems => _cart.totalItems;
 
-  double get _totalPrice {
-    double total = 0;
-    _cartItems.forEach((productId, quantity) {
-      final product = _productById(productId);
-      if (product == null) return;
-      final price = product.discount_price?.isNotEmpty == true
-          ? double.tryParse(product.discount_price!) ?? 0
-          : double.tryParse(product.price ?? '0') ?? 0;
-      total += price * quantity;
-    });
-    return total;
-  }
+  double get _totalPrice => _cart.subtotal;
 
   String get _displayName => widget.vendor?.name ?? widget.storeName;
 
@@ -514,7 +507,7 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                   child: _ProductSectionFromModel(
                     title: title,
                     products: e.value,
-                    cartItems: _cartItems,
+                    cartItems: _cart.quantities,
                     onAddToCart: _addToCart,
                     onRemoveFromCart: _removeFromCart,
                     onIncrementQuantity: _incrementQuantity,
@@ -622,45 +615,8 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
     );
   }
 
-  void _goToCart() async {
-    if (GuestBrowseService().isGuestBrowseMode) {
-      final l10n = AppLocalizations.of(context)!;
-      await showGuestSignInRequiredDialog(
-        context,
-        message: l10n.guestSignInRequiredCheckout,
-      );
-      return;
-    }
-    final List<Map<String, dynamic>> cartItems = _cartItems.entries.map((entry) {
-      final productId = entry.key;
-      final quantity = entry.value;
-      final product = _productById(productId);
-      if (product == null) {
-        throw StateError('Product not found');
-      }
-      final price = product.discount_price?.isNotEmpty == true
-          ? double.tryParse(product.discount_price!) ?? 0.0
-          : double.tryParse(product.price ?? '0') ?? 0.0;
-      return {
-        'id': product.id,
-        'productId': product.id,
-        'product_id': product.id,
-        'vendor_id': product.vendor_id ?? widget.vendorId,
-        'name': product.name,
-        'image': product.image_path,
-        'price': price,
-        'quantity': quantity,
-      };
-    }).toList();
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => CheckoutScreen(
-          cartItems: cartItems,
-          subtotal: _totalPrice,
-        ),
-      ),
-    );
+  void _goToCart() {
+    openCheckoutFromCart(context, fallbackVendorId: widget.vendorId);
   }
 }
 

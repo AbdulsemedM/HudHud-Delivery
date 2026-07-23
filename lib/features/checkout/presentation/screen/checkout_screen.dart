@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../app/services/cart_service.dart';
 import '../../../../app/services/location_service.dart';
 import '../../../../app/services/saved_location_service.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -213,61 +214,20 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     showDialog(
       context: ctx,
       barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        contentPadding: const EdgeInsets.all(24),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 72,
-              height: 72,
-              decoration: BoxDecoration(
-                color: AppColors.primaryColor.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.check_circle,
-                color: AppColors.primaryColor,
-                size: 44,
-              ),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'Order Placed!',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Order #$orderId has been placed successfully.',
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 14, color: Colors.grey),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryColor,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                onPressed: () {
-                  Navigator.of(ctx).pop(); // close dialog
-                  Navigator.of(ctx).pop(); // leave checkout
-                },
-                child: const Text(
-                  'Done',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-          ],
-        ),
+      builder: (_) => CheckoutSuccessDialog(
+        orderId: orderId,
+        onDone: () {
+          Navigator.of(ctx).pop();
+          Navigator.of(ctx).pop();
+        },
       ),
+    );
+  }
+
+  int get _itemCount {
+    return widget.cartItems.fold<int>(
+      0,
+      (sum, item) => sum + ((item['quantity'] as num?)?.toInt() ?? 1),
     );
   }
 
@@ -283,118 +243,146 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       ),
       child: Builder(
         builder: (blocContext) => Scaffold(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.surface,
-          elevation: 0,
-          surfaceTintColor: Colors.transparent,
-          leading: IconButton(
-            icon: Icon(
-              Icons.arrow_back,
-              color: Theme.of(context).colorScheme.onSurface,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          extendBodyBehindAppBar: true,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            surfaceTintColor: Colors.transparent,
+            leading: Padding(
+              padding: const EdgeInsets.only(left: 4),
+              child: IconButton(
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.white.withValues(alpha: 0.2),
+                ),
+                icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                    color: Colors.white, size: 18),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
             ),
-            onPressed: () => Navigator.of(context).pop(),
+            title: const Text(
+              'Checkout',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            centerTitle: true,
           ),
-          title: Text(
-            'Checkout',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
-          centerTitle: true,
-        ),
-        body: BlocListener<CheckoutBloc, CheckoutState>(
-          listener: (context, state) {
-            if (state is OrderCreatedSuccess) {
-              _showOrderSuccessDialog(context, state.orderData);
-            } else if (state is CheckoutError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: Colors.red,
-                ),
+          bottomNavigationBar: BlocBuilder<CheckoutBloc, CheckoutState>(
+            builder: (context, state) {
+              return CheckoutBottomBar(
+                total: _total,
+                isLoading: state is CheckoutLoading,
+                onConfirm: () => _onConfirmOrder(blocContext),
               );
-            }
-          },
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Products Section
-                Text(
-                  'Products',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? AppColors.darkOnSurface
-                        : AppColors.lightTextPrimary,
+            },
+          ),
+          body: BlocListener<CheckoutBloc, CheckoutState>(
+            listener: (context, state) {
+              if (state is OrderCreatedSuccess) {
+                CartService().clear();
+                _showOrderSuccessDialog(context, state.orderData);
+              } else if (state is CheckoutError) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            child: CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(
+                  child: CheckoutHeroHeader(
+                    itemCount: _itemCount,
+                    subtotal: widget.subtotal,
                   ),
                 ),
-                const SizedBox(height: 12),
-                ...widget.cartItems.map((item) {
-                  return CheckoutProductCard(
-                    productName: item['name'] ?? 'Unknown Product',
-                    productImage: item['image'] ?? '',
-                    quantity: item['quantity'] ?? 1,
-                    price: (item['price'] ?? 0.0).toDouble(),
-                  );
-                }).toList(),
-
-                // Delivery Address Section
-                DeliveryAddressSection(
-                  currentAddress: _deliveryAddress,
-                  onChangeAddress: _onChangeAddress,
-                ),
-
-                // Notes Section
-                NotesSection(
-                  notesController: _notesController,
-                ),
-
-                // Tip Section
-                TipSection(
-                  currentTip: _tipAmount,
-                  onTipChanged: (value) {
-                    setState(() {
-                      _tipAmount = value;
-                    });
-                  },
-                ),
-
-                // Promo Code Section
-                PromoCodeSection(
-                  onPromoCodeApplied: _onPromoCodeApplied,
-                ),
-
-                // Payment Method Grid
-                PaymentMethodGridSection(
-                  selectedId: _selectedPaymentMethod,
-                  onSelected: (id) => setState(() => _selectedPaymentMethod = id),
-                ),
-
-                // Order Summary Section
-                OrderSummarySection(
-                  subtotal: widget.subtotal,
-                  tipAmount: _tipAmount,
-                  total: _total,
-                ),
-
-                // Confirm Order Button
-                BlocBuilder<CheckoutBloc, CheckoutState>(
-                  builder: (context, state) {
-                    return ConfirmOrderButton(
-                      onPressed: () => _onConfirmOrder(blocContext),
-                      isLoading: state is CheckoutLoading,
-                    );
-                  },
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+                  sliver: SliverList(
+                    delegate: SliverChildListDelegate([
+                      CheckoutSectionCard(
+                        icon: Icons.shopping_basket_outlined,
+                        title: 'Your items',
+                        subtitle:
+                            '${widget.cartItems.length} product${widget.cartItems.length == 1 ? '' : 's'} in cart',
+                        child: Column(
+                          children: widget.cartItems.map((item) {
+                            return CheckoutProductCard(
+                              productName:
+                                  item['name'] ?? 'Unknown Product',
+                              productImage: item['image'] ?? '',
+                              quantity: item['quantity'] ?? 1,
+                              price: (item['price'] ?? 0.0).toDouble(),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                      CheckoutSectionCard(
+                        icon: Icons.location_on_outlined,
+                        title: 'Delivery',
+                        subtitle: 'Where should we bring your order?',
+                        child: DeliveryAddressSection(
+                          currentAddress: _deliveryAddress,
+                          onChangeAddress: _onChangeAddress,
+                        ),
+                      ),
+                      CheckoutSectionCard(
+                        icon: Icons.edit_note_outlined,
+                        title: 'Order notes',
+                        subtitle: 'Optional — help us find you faster',
+                        child: NotesSection(
+                          notesController: _notesController,
+                        ),
+                      ),
+                      CheckoutSectionCard(
+                        icon: Icons.volunteer_activism_outlined,
+                        title: 'Tip your rider',
+                        subtitle: 'Show appreciation for great service',
+                        accentColor: AppColors.secondaryColor,
+                        child: TipSection(
+                          currentTip: _tipAmount,
+                          onTipChanged: (value) {
+                            setState(() => _tipAmount = value);
+                          },
+                        ),
+                      ),
+                      CheckoutSectionCard(
+                        icon: Icons.local_offer_outlined,
+                        title: 'Promo code',
+                        child: PromoCodeSection(
+                          onPromoCodeApplied: _onPromoCodeApplied,
+                        ),
+                      ),
+                      CheckoutSectionCard(
+                        icon: Icons.account_balance_wallet_outlined,
+                        title: 'Payment method',
+                        subtitle: 'Choose how you want to pay',
+                        child: PaymentMethodGridSection(
+                          selectedId: _selectedPaymentMethod,
+                          onSelected: (id) =>
+                              setState(() => _selectedPaymentMethod = id),
+                        ),
+                      ),
+                      CheckoutSectionCard(
+                        icon: Icons.receipt_outlined,
+                        title: 'Order summary',
+                        child: OrderSummarySection(
+                          subtotal: widget.subtotal,
+                          tipAmount: _tipAmount,
+                          total: _total,
+                        ),
+                      ),
+                    ]),
+                  ),
                 ),
               ],
             ),
           ),
         ),
-      ),
       ),
     );
   }
