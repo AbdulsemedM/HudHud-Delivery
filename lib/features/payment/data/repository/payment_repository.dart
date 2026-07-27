@@ -91,25 +91,4 @@ class PaymentRepository {
       throw Exception('Payment validation failed: $e');
     }
   }
-
-  // Mock payment processing for demo purposes
-  Future<Map<String, dynamic>> mockProcessPayment({
-    required String paymentMethod,
-    required double amount,
-    required String orderId,
-  }) async {
-    // Simulate network delay
-    await Future.delayed(const Duration(seconds: 2));
-
-    // Mock successful payment
-    return {
-      'transaction_id': 'TXN_${DateTime.now().millisecondsSinceEpoch}',
-      'status': 'success',
-      'message': 'Payment processed successfully via $paymentMethod',
-      'amount': amount,
-      'order_id': orderId,
-      'payment_method': paymentMethod,
-      'timestamp': DateTime.now().toIso8601String(),
-    };
-  }
 }

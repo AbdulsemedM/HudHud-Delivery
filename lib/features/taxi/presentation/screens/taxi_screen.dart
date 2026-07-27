@@ -282,25 +282,11 @@ class _TaxiScreenState extends State<TaxiScreen> {
         });
       }
     } catch (e) {
-      // Fallback to hardcoded suggestions
-      setState(() {
-        _suggestedLocations = [
-          PlaceResult(
-            displayName: 'Saket Disctrict Center, District Center, Sector 6, Pushp Vihar, New Delhi, Delhi 110017',
-            coordinates: const LatLng(28.5355, 77.2190),
-            street: 'Select Citywalk Mall',
-            city: 'New Delhi',
-            country: 'India',
-          ),
-          PlaceResult(
-            displayName: 'New Manglapuri, Manglapuri Village, Sultanpur, New Delhi, Delhi',
-            coordinates: const LatLng(28.5000, 77.2000),
-            street: '5, Kullar Farms Rd',
-            city: 'New Delhi',
-            country: 'India',
-          ),
-        ];
-      });
+      if (mounted) {
+        setState(() {
+          _suggestedLocations = [];
+        });
+      }
     }
   }
 

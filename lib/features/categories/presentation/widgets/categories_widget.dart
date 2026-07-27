@@ -1001,16 +1001,26 @@ class ProductCard extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius:
                     const BorderRadius.vertical(top: Radius.circular(12)),
-                image: DecorationImage(
-                  image: product.image_path != null &&
-                          product.image_path!.isNotEmpty
-                      ? (product.image_path!.startsWith('http')
-                          ? NetworkImage(product.image_path!) as ImageProvider
-                          : AssetImage(product.image_path!))
-                      : const AssetImage('assets/images/cook_nature.jpg'),
-                  fit: BoxFit.cover,
-                ),
+                color: Colors.grey[200],
+                image: product.image_path != null &&
+                        product.image_path!.isNotEmpty
+                    ? DecorationImage(
+                        image: product.image_path!.startsWith('http')
+                            ? NetworkImage(product.image_path!) as ImageProvider
+                            : AssetImage(product.image_path!),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
               ),
+              child: product.image_path == null || product.image_path!.isEmpty
+                  ? const Center(
+                      child: Icon(
+                        Icons.shopping_bag_outlined,
+                        size: 40,
+                        color: Colors.grey,
+                      ),
+                    )
+                  : null,
             ),
                 if (!canOrder)
                   Positioned(

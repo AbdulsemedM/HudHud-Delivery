@@ -42,11 +42,6 @@ class ApiConstants {
       'send-phone-verification-code';
   static const String verifyPhone = 'verify-phone';
 
-  // Restaurant endpoints
-  static const String restaurants = '/restaurants';
-  static const String restaurantDetails = '$restaurants/{id}';
-  static const String restaurantMenu = '$restaurants/{id}/menu';
-
   // Order endpoints (GET /api/orders fetches all orders)
   static const String orders = 'orders';
   static const String orderDetails = '$orders/{id}';

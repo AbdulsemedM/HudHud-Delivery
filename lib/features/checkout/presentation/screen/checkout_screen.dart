@@ -27,6 +27,8 @@ class CheckoutScreen extends StatefulWidget {
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
   final TextEditingController _notesController = TextEditingController();
+  final CartService _cart = CartService();
+  late List<Map<String, dynamic>> _cartItems;
   double _tipAmount = 0.0;
   String _deliveryAddress = 'Loading address...';
   double? _deliveryLatitude;
@@ -36,7 +38,72 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   @override
   void initState() {
     super.initState();
+    _cartItems = widget.cartItems
+        .map((item) => Map<String, dynamic>.from(item))
+        .toList();
     _loadDeliveryAddress();
+  }
+
+  String _productId(Map<String, dynamic> item) {
+    final id = item['productId'] ?? item['product_id'] ?? item['id'];
+    return id?.toString() ?? '';
+  }
+
+  int _quantityOf(Map<String, dynamic> item) {
+    final quantity = item['quantity'];
+    if (quantity is int) return quantity;
+    return int.tryParse(quantity?.toString() ?? '') ?? 1;
+  }
+
+  double get _subtotal {
+    return _cartItems.fold<double>(0, (sum, item) {
+      final price = (item['price'] ?? 0.0).toDouble();
+      return sum + price * _quantityOf(item);
+    });
+  }
+
+  void _syncSharedCart(String productId, int quantity) {
+    if (_cart.productFor(productId) != null) {
+      _cart.setQuantity(productId, quantity);
+    }
+  }
+
+  void _incrementItem(String productId) {
+    final index = _cartItems.indexWhere((item) => _productId(item) == productId);
+    if (index < 0) return;
+    setState(() {
+      final next = _quantityOf(_cartItems[index]) + 1;
+      _cartItems[index]['quantity'] = next;
+      _syncSharedCart(productId, next);
+    });
+  }
+
+  void _decrementItem(String productId) {
+    final index = _cartItems.indexWhere((item) => _productId(item) == productId);
+    if (index < 0) return;
+    final current = _quantityOf(_cartItems[index]);
+    if (current <= 1) {
+      _removeItem(productId);
+      return;
+    }
+    setState(() {
+      final next = current - 1;
+      _cartItems[index]['quantity'] = next;
+      _syncSharedCart(productId, next);
+    });
+  }
+
+  void _removeItem(String productId) {
+    setState(() {
+      _cartItems.removeWhere((item) => _productId(item) == productId);
+      _syncSharedCart(productId, 0);
+    });
+    if (_cartItems.isEmpty && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Your cart is empty')),
+      );
+      Navigator.of(context).pop();
+    }
   }
 
   Future<void> _loadDeliveryAddress() async {
@@ -76,18 +143,18 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
   }
 
-  /// Vendor ID from first cart item's product (all items in a category are typically from same vendor)
-  int get _vendorId {
-    final first = widget.cartItems.isNotEmpty ? widget.cartItems.first : null;
-    if (first == null) return 7;
+  /// Vendor ID from first cart item (required for order placement).
+  int? get _vendorId {
+    if (_cartItems.isEmpty) return null;
+    final first = _cartItems.first;
     final vid = first['vendor_id'];
     if (vid is int) return vid;
-    if (vid != null) return int.tryParse(vid.toString()) ?? 7;
-    return 7;
+    if (vid != null) return int.tryParse(vid.toString());
+    return null;
   }
 
   double get _total {
-    return widget.subtotal + _tipAmount;
+    return _subtotal + _tipAmount;
   }
 
   void _onPromoCodeApplied(String promoCode) {
@@ -145,7 +212,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   void _onConfirmOrder(BuildContext blocContext) {
-    final List<Map<String, dynamic>> orderItems = widget.cartItems
+    final List<Map<String, dynamic>> orderItems = _cartItems
         .map((item) {
           final productId =
               item['productId'] ?? item['product_id'] ?? item['id'];
@@ -191,9 +258,20 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       return;
     }
 
+    final vendorId = _vendorId;
+    if (vendorId == null || vendorId <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Unable to determine store for this order'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     blocContext.read<CheckoutBloc>().add(
           CreateOrderEvent(
-            vendorId: _vendorId,
+            vendorId: vendorId,
             items: orderItems,
             taxAmount: 0.0,
             discountAmount: 0.0,
@@ -225,9 +303,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   int get _itemCount {
-    return widget.cartItems.fold<int>(
+    return _cartItems.fold<int>(
       0,
-      (sum, item) => sum + ((item['quantity'] as num?)?.toInt() ?? 1),
+      (sum, item) => sum + _quantityOf(item),
     );
   }
 
@@ -297,7 +375,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 SliverToBoxAdapter(
                   child: CheckoutHeroHeader(
                     itemCount: _itemCount,
-                    subtotal: widget.subtotal,
+                    subtotal: _subtotal,
                   ),
                 ),
                 SliverPadding(
@@ -308,15 +386,20 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         icon: Icons.shopping_basket_outlined,
                         title: 'Your items',
                         subtitle:
-                            '${widget.cartItems.length} product${widget.cartItems.length == 1 ? '' : 's'} in cart',
+                            '${_cartItems.length} product${_cartItems.length == 1 ? '' : 's'} in cart',
                         child: Column(
-                          children: widget.cartItems.map((item) {
+                          children: _cartItems.map((item) {
+                            final productId = _productId(item);
                             return CheckoutProductCard(
+                              productId: productId,
                               productName:
                                   item['name'] ?? 'Unknown Product',
                               productImage: item['image'] ?? '',
-                              quantity: item['quantity'] ?? 1,
+                              quantity: _quantityOf(item),
                               price: (item['price'] ?? 0.0).toDouble(),
+                              onIncrement: () => _incrementItem(productId),
+                              onDecrement: () => _decrementItem(productId),
+                              onRemove: () => _removeItem(productId),
                             );
                           }).toList(),
                         ),
@@ -371,7 +454,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         icon: Icons.receipt_outlined,
                         title: 'Order summary',
                         child: OrderSummarySection(
-                          subtotal: widget.subtotal,
+                          subtotal: _subtotal,
                           tipAmount: _tipAmount,
                           total: _total,
                         ),

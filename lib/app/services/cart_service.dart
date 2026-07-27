@@ -58,6 +58,16 @@ class CartService extends ChangeNotifier {
     }
   }
 
+  void setQuantity(String productId, int quantity) {
+    if (!_products.containsKey(productId)) return;
+    if (quantity <= 0) {
+      removeProduct(productId);
+      return;
+    }
+    _quantities[productId] = quantity;
+    notifyListeners();
+  }
+
   double unitPrice(CategoriesProductsModel product) {
     if (product.discount_price?.isNotEmpty == true) {
       return double.tryParse(product.discount_price!) ?? 0;

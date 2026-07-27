@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
+import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
 import 'package:hudhud_delivery/app/services/startup_location_service.dart';
 import 'package:hudhud_delivery/features/dashboard/presentation/screen/dashboard_screen.dart';
-import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
 import 'package:hudhud_delivery/features/splash/presentation/theme/splash_colors.dart';
 import '../widgets/splash_widget.dart';
 
@@ -68,29 +68,26 @@ class _SplashScreenState extends State<SplashScreen>
       ]);
 
       await Future.delayed(const Duration(seconds: 3));
-
-      final isAuthenticated = await _authService.isAuthenticated();
-
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) =>
-                isAuthenticated ? const DashboardScreen() : const LoginScreen(),
-          ),
-        );
-      }
+      await _goToHome();
     } catch (e) {
       await Future.delayed(const Duration(seconds: 3));
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const LoginScreen(),
-          ),
-        );
-      }
+      await _goToHome();
     }
+  }
+
+  /// Always open home. Use stored token when present; otherwise browse as guest.
+  Future<void> _goToHome() async {
+    final isAuthenticated = await _authService.isAuthenticated();
+    await GuestBrowseService().configureBrowseSession(
+      isAuthenticated: isAuthenticated,
+    );
+    if (!mounted) return;
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const DashboardScreen(),
+      ),
+    );
   }
 
   @override
