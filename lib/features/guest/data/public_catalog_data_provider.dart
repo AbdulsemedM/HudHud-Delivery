@@ -134,7 +134,8 @@ class PublicCatalogDataProvider {
   }) {
     final params = <String, dynamic>{
       'period': period,
-      'exclude_out_of_stock': excludeOutOfStock,
+      // API expects 1/0 — boolean "true"/"false" can 500 on popular routes.
+      'exclude_out_of_stock': excludeOutOfStock ? 1 : 0,
     };
     if (vendorId != null) params['vendor_id'] = vendorId;
     if (categoryId != null) params['category_id'] = categoryId;

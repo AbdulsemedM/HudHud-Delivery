@@ -38,11 +38,12 @@ class ProductsDataProvider {
     bool excludeOutOfStock = true,
   }) async {
     try {
+      // API expects 1/0 — boolean "true"/"false" triggers HTTP 500 on this route.
       final queryParameters = <String, dynamic>{
         if (period != null && period.isNotEmpty) 'period': period,
         if (vendorId != null) 'vendor_id': vendorId,
         if (categoryId != null) 'category_id': categoryId,
-        'exclude_out_of_stock': excludeOutOfStock,
+        'exclude_out_of_stock': excludeOutOfStock ? 1 : 0,
       };
 
       final response = await apiService.get(

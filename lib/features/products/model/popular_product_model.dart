@@ -49,7 +49,10 @@ class PopularProductModel {
   }
 
   factory PopularProductModel.fromMap(Map<String, dynamic> map) {
+    // Auth popular payload nests shop under vendor_shop; public often omits it
+    // and only includes vendor (user) — fall back so guest UI still shows a name.
     final vendorShop = map['vendor_shop'];
+    final vendor = map['vendor'];
     String? shopName;
     int? shopId;
     String? shopLogo;
@@ -75,6 +78,23 @@ class PopularProductModel {
       }
       deliveryFee =
           double.tryParse(shop['delivery_fee']?.toString() ?? '')?.round() ?? 0;
+    } else if (vendor is Map) {
+      final v = Map<String, dynamic>.from(vendor);
+      shopName = v['name']?.toString();
+      shopId = int.tryParse(v['id']?.toString() ?? '');
+      final resolvedLogo = resolveVendorMediaUrl(
+        path: v['avatar']?.toString() ?? v['avatar_url']?.toString(),
+        urls: v['avatar_urls'] is Map
+            ? Map<dynamic, dynamic>.from(v['avatar_urls'] as Map)
+            : null,
+      );
+      shopLogo = resolvedLogo.isEmpty ? null : resolvedLogo;
+      final ratingRaw = v['average_rating'];
+      if (ratingRaw is num) {
+        shopRating = ratingRaw.toDouble();
+      } else {
+        shopRating = double.tryParse(ratingRaw?.toString() ?? '') ?? 0;
+      }
     }
 
     return PopularProductModel(

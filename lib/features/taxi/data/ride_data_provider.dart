@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:hudhud_delivery/core/api/api_constants.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 
@@ -144,12 +145,26 @@ class RideDataProvider {
   }
 
   /// GET /api/user/rides/active
-  /// Returns the user's active ride (if any)
+  /// Returns the user's active ride (if any).
+  /// A 404 ("No active ride found") is treated as a normal empty result,
+  /// not a Dio error, so debug logs stay quiet for that expected case.
   Future<Map<String, dynamic>> getActiveRide() async {
     try {
       final response = await apiService.get(
         '${ApiConstants.baseUrl}${ApiConstants.userRidesActive}',
+        options: Options(
+          validateStatus: (status) =>
+              status != null && (status < 300 || status == 404),
+        ),
       );
+
+      if (response.statusCode == 404) {
+        return {
+          'statusCode': 404,
+          'data': null,
+          'errorMessage': null,
+        };
+      }
 
       return {
         'statusCode': response.statusCode,

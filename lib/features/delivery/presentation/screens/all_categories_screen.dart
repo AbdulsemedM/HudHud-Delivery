@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer/shimmer.dart';
@@ -116,11 +117,17 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
     try {
       final list = await _productsRepository.getPopularProducts();
       if (!mounted) return;
+      if (kDebugMode) {
+        debugPrint('Popular products loaded: ${list.length}');
+      }
       setState(() {
         _popularProducts = list;
         _popularLoading = false;
       });
-    } catch (_) {
+    } catch (e, st) {
+      if (kDebugMode) {
+        debugPrint('Popular products failed: $e\n$st');
+      }
       if (!mounted) return;
       setState(() {
         _popularProducts = [];
@@ -149,6 +156,27 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
           return const _LoadingState();
         }
         if (state is FetchCategoriesListFailure) {
+          // Still show popular products when categories fail — don't hide the section.
+          if (_popularLoading || _popularProducts.isNotEmpty) {
+            return _CategoriesGrid(
+              categories: const [],
+              showAll: true,
+              vendors: _vendors,
+              vendorsLoading: _vendorsLoading,
+              vendorsError: _vendorsError,
+              popularProducts: _popularProducts,
+              popularLoading: _popularLoading,
+              onCategoryTap: (category) => _onCategoryTap(context, category),
+              onShowMore: () => setState(() => _showAllCategories = true),
+              usePullToRefresh: true,
+              onPullToRefresh: _onPullToRefresh,
+              embedded: embedded,
+              categoriesError: state.errorMessage,
+              onCategoriesRetry: () => context
+                  .read<CategoriesBloc>()
+                  .add(FetchCategoriesListEvent()),
+            );
+          }
           return _ErrorState(
             message: state.errorMessage,
             onRetry: () =>
@@ -157,12 +185,31 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
         }
         if (state is FetchCategoriesListSuccess) {
           final categories = state.result.items;
-          if (categories.isEmpty) {
+          if (categories.isEmpty &&
+              !_popularLoading &&
+              _popularProducts.isEmpty) {
             return const _EmptyState();
           }
           return _CategoriesGrid(
             categories: categories,
             showAll: _showAllCategories,
+            vendors: _vendors,
+            vendorsLoading: _vendorsLoading,
+            vendorsError: _vendorsError,
+            popularProducts: _popularProducts,
+            popularLoading: _popularLoading,
+            onCategoryTap: (category) => _onCategoryTap(context, category),
+            onShowMore: () => setState(() => _showAllCategories = true),
+            usePullToRefresh: true,
+            onPullToRefresh: _onPullToRefresh,
+            embedded: embedded,
+          );
+        }
+        // Initial / other states: still surface popular if already loaded.
+        if (_popularLoading || _popularProducts.isNotEmpty) {
+          return _CategoriesGrid(
+            categories: const [],
+            showAll: true,
             vendors: _vendors,
             vendorsLoading: _vendorsLoading,
             vendorsError: _vendorsError,
@@ -642,6 +689,8 @@ class _CategoriesGrid extends StatelessWidget {
   final bool usePullToRefresh;
   final Future<void> Function() onPullToRefresh;
   final bool embedded;
+  final String? categoriesError;
+  final VoidCallback? onCategoriesRetry;
 
   const _CategoriesGrid({
     required this.categories,
@@ -656,6 +705,8 @@ class _CategoriesGrid extends StatelessWidget {
     this.usePullToRefresh = false,
     required this.onPullToRefresh,
     this.embedded = false,
+    this.categoriesError,
+    this.onCategoriesRetry,
   });
 
   @override
@@ -674,46 +725,171 @@ class _CategoriesGrid extends StatelessWidget {
           color: titleColor,
         );
 
-    final view = CustomScrollView(
-      physics: usePullToRefresh
-          ? const AlwaysScrollableScrollPhysics()
-          : null,
-      slivers: [
+    final popularSlivers = <Widget>[
+      if (popularLoading) ...[
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
             child: Text(
-              showAll ? 'All categories' : 'Categories',
+              'Most Popular',
               style: sectionTitle(textTheme.titleLarge, fontSize: 20),
             ),
           ),
         ),
         SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          sliver: SliverGrid(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              // Taller cells so product PNGs show full height with contain.
-              childAspectRatio: 0.72,
-            ),
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          sliver: SliverList(
             delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                if (hasMore && index == 3) {
-                  return _MoreButton(onTap: onShowMore, embedded: embedded);
-                }
-                final category = displayCategories[index];
-                return _CategoryCard(
-                  category: category,
-                  onTap: () => onCategoryTap(category),
-                  embedded: embedded,
-                );
-              },
-              childCount: hasMore ? 4 : displayCategories.length,
+              (_, __) => Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: _PopularOrderSkeleton(),
+              ),
+              childCount: 2,
             ),
           ),
         ),
+      ] else if (popularProducts.isNotEmpty) ...[
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Most Popular',
+                    style: sectionTitle(textTheme.titleLarge, fontSize: 20),
+                  ),
+                ),
+                if (embedded)
+                  Text(
+                    'View all',
+                    style: textTheme.labelLarge?.copyWith(
+                      color: accentColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final item = popularProducts[index];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: _PopularProductCard(
+                    item: item,
+                    embedded: embedded,
+                    onTap: () {
+                      final productId = item.product.id;
+                      if (productId == null) return;
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ProductDetailScreen(
+                            productId: productId,
+                          ),
+                        ),
+                      );
+                    },
+                    onShopTap: item.shopId != null
+                        ? () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => StoreDetailScreen(
+                                  storeName: item.shopName ?? 'Store',
+                                  storeImage: item.shopLogoUrl,
+                                  vendorId: item.shopId,
+                                ),
+                              ),
+                            );
+                          }
+                        : null,
+                  ),
+                );
+              },
+              childCount: popularProducts.length,
+            ),
+          ),
+        ),
+      ],
+    ];
+
+    final view = CustomScrollView(
+      physics: usePullToRefresh
+          ? const AlwaysScrollableScrollPhysics()
+          : null,
+      slivers: [
+        if (categoriesError != null) ...[
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Could not load categories',
+                    style: sectionTitle(textTheme.titleMedium, fontSize: 16),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    categoriesError!,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: embedded ? HomeColors.textMuted : null,
+                    ),
+                  ),
+                  if (onCategoriesRetry != null) ...[
+                    const SizedBox(height: 8),
+                    TextButton(
+                      onPressed: onCategoriesRetry,
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ] else if (categories.isNotEmpty) ...[
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
+              child: Text(
+                showAll ? 'All categories' : 'Categories',
+                style: sectionTitle(textTheme.titleLarge, fontSize: 20),
+              ),
+            ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            sliver: SliverGrid(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 4,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                // Taller cells so product PNGs show full height with contain.
+                childAspectRatio: 0.72,
+              ),
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  if (hasMore && index == 3) {
+                    return _MoreButton(onTap: onShowMore, embedded: embedded);
+                  }
+                  final category = displayCategories[index];
+                  return _CategoryCard(
+                    category: category,
+                    onTap: () => onCategoryTap(category),
+                    embedded: embedded,
+                  );
+                },
+                childCount: hasMore ? 4 : displayCategories.length,
+              ),
+            ),
+          ),
+        ],
         const SliverToBoxAdapter(child: SizedBox(height: 8)),
         if (vendorsLoading) ...[
           SliverToBoxAdapter(
@@ -794,97 +970,7 @@ class _CategoriesGrid extends StatelessWidget {
           ),
         ],
         const SliverToBoxAdapter(child: SizedBox(height: 16)),
-        if (popularLoading) ...[
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-              child: Text(
-                'Most Popular',
-                style: sectionTitle(textTheme.titleLarge, fontSize: 20),
-              ),
-            ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (_, __) => Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: _PopularOrderSkeleton(),
-                ),
-                childCount: 2,
-              ),
-            ),
-          ),
-        ] else if (popularProducts.isNotEmpty) ...[
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Most Popular',
-                      style: sectionTitle(textTheme.titleLarge, fontSize: 20),
-                    ),
-                  ),
-                  if (embedded)
-                    Text(
-                      'View all',
-                      style: textTheme.labelLarge?.copyWith(
-                        color: accentColor,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final item = popularProducts[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: _PopularProductCard(
-                      item: item,
-                      embedded: embedded,
-                      onTap: () {
-                        final productId = item.product.id;
-                        if (productId == null) return;
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ProductDetailScreen(
-                              productId: productId,
-                            ),
-                          ),
-                        );
-                      },
-                      onShopTap: item.shopId != null
-                          ? () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => StoreDetailScreen(
-                                    storeName: item.shopName ?? 'Store',
-                                    storeImage: item.shopLogoUrl,
-                                    vendorId: item.shopId,
-                                  ),
-                                ),
-                              );
-                            }
-                          : null,
-                    ),
-                  );
-                },
-                childCount: popularProducts.length,
-              ),
-            ),
-          ),
-        ],
+        ...popularSlivers,
         const SliverToBoxAdapter(child: SizedBox(height: 24)),
       ],
     );
