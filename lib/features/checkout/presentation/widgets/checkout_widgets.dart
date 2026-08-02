@@ -931,7 +931,7 @@ class PaymentMethodGridSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 108,
+      height: 112,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: _kCheckoutPaymentMethods.length,
@@ -951,7 +951,7 @@ class PaymentMethodGridSection extends StatelessWidget {
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeOutCubic,
               width: 92,
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
               decoration: BoxDecoration(
                 gradient: isSelected
                     ? LinearGradient(
@@ -990,17 +990,37 @@ class PaymentMethodGridSection extends StatelessWidget {
                 opacity: enabled ? 1 : 0.45,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(
+                    SizedBox(
                       width: 40,
                       height: 40,
-                      decoration: BoxDecoration(
-                        color: color.withValues(alpha: 0.15),
-                        shape: BoxShape.circle,
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: color.withValues(alpha: 0.15),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(icon, color: color, size: 22),
+                          ),
+                          if (isSelected)
+                            Positioned(
+                              right: -2,
+                              bottom: -2,
+                              child: Icon(
+                                Icons.check_circle,
+                                color: color,
+                                size: 14,
+                              ),
+                            ),
+                        ],
                       ),
-                      child: Icon(icon, color: color, size: 22),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
                     Text(
                       name,
                       textAlign: TextAlign.center,
@@ -1008,6 +1028,7 @@ class PaymentMethodGridSection extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: 11,
+                        height: 1.2,
                         fontWeight:
                             isSelected ? FontWeight.w700 : FontWeight.w500,
                         color: isSelected
@@ -1015,10 +1036,6 @@ class PaymentMethodGridSection extends StatelessWidget {
                             : Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
-                    if (isSelected) ...[
-                      const SizedBox(height: 4),
-                      Icon(Icons.check_circle, color: color, size: 14),
-                    ],
                   ],
                 ),
               ),

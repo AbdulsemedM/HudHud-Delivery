@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/widgets/status_chip.dart';
+import 'package:hudhud_delivery/features/taxi/data/ride_data_provider.dart';
 import 'package:lottie/lottie.dart';
 import 'driver_on_the_way_screen.dart';
 
@@ -33,41 +36,140 @@ class FindingDriverScreen extends StatefulWidget {
 }
 
 class _FindingDriverScreenState extends State<FindingDriverScreen> {
-  final bool _isLoading = true;
+  final RideDataProvider _rideDataProvider = RideDataProvider();
+  Timer? _pollTimer;
+  bool _isCancelling = false;
+  bool _hasNavigated = false;
 
   @override
   void initState() {
     super.initState();
-    _simulateDriverSearch();
+    _pollActiveRide();
+    _pollTimer = Timer.periodic(
+      const Duration(seconds: 4),
+      (_) => _pollActiveRide(),
+    );
   }
 
-  Future<void> _simulateDriverSearch() async {
-    await Future.delayed(const Duration(seconds: 3));
+  @override
+  void dispose() {
+    _pollTimer?.cancel();
+    super.dispose();
+  }
 
-    if (mounted && _isLoading) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => DriverOnTheWayScreen(
-            pickupLocation: widget.pickupLocation,
-            destinationLocation: widget.destinationLocation,
-            pickupAddress: widget.pickupAddress,
-            destinationAddress: widget.destinationAddress,
-            tripType: widget.tripType,
-            price: widget.price,
-            paymentMethod: widget.paymentMethod,
-          ),
-        ),
+  LatLng? _parseDriverLocation(Map<String, dynamic> ride) {
+    LatLng? fromCoords(dynamic lat, dynamic lng) {
+      final latitude = double.tryParse(lat?.toString() ?? '');
+      final longitude = double.tryParse(lng?.toString() ?? '');
+      if (latitude == null || longitude == null) return null;
+      return LatLng(latitude, longitude);
+    }
+
+    final direct = fromCoords(
+      ride['current_latitude'] ?? ride['driver_latitude'],
+      ride['current_longitude'] ?? ride['driver_longitude'],
+    );
+    if (direct != null) return direct;
+
+    final driverLocation = ride['driver_location'];
+    if (driverLocation is Map) {
+      final nested = fromCoords(
+        driverLocation['latitude'] ?? driverLocation['lat'],
+        driverLocation['longitude'] ?? driverLocation['lng'],
+      );
+      if (nested != null) return nested;
+    }
+
+    final driver = ride['driver'];
+    if (driver is Map) {
+      return fromCoords(
+        driver['latitude'] ?? driver['lat'] ?? driver['current_latitude'],
+        driver['longitude'] ?? driver['lng'] ?? driver['current_longitude'],
       );
     }
+    return null;
   }
 
-  void _cancelTrip() {
+  String _driverName(Map<String, dynamic> ride) {
+    final nested = ride['driver'];
+    if (nested is Map) {
+      final name = nested['name']?.toString();
+      if (name != null && name.isNotEmpty) return name;
+    }
+    final flat = ride['driver_name']?.toString();
+    if (flat != null && flat.isNotEmpty) return flat;
+    return 'Driver';
+  }
+
+  String? _driverPhone(Map<String, dynamic> ride) {
+    final nested = ride['driver'];
+    if (nested is Map) {
+      final phone = nested['phone']?.toString();
+      if (phone != null && phone.isNotEmpty) return phone;
+    }
+    final flat = ride['driver_phone']?.toString();
+    if (flat != null && flat.isNotEmpty) return flat;
+    return null;
+  }
+
+  int? _rideIdFrom(Map<String, dynamic> ride) {
+    final id = ride['id'];
+    if (id is int) return id;
+    return int.tryParse(id?.toString() ?? '');
+  }
+
+  Future<void> _pollActiveRide() async {
+    if (_hasNavigated || _isCancelling || !mounted) return;
+
+    final result = await _rideDataProvider.getActiveRide();
+    if (!mounted || _hasNavigated || _isCancelling) return;
+
+    if (result['statusCode'] != 200 || result['data'] == null) return;
+
+    final ride = result['data'] as Map<String, dynamic>;
+    final status = (ride['status'] as String? ?? 'searching').toLowerCase();
+    final hasDriver = ride['driver_id'] != null || ride['driver'] != null;
+
+    if (status == 'searching' || !hasDriver) return;
+
+    _hasNavigated = true;
+    _pollTimer?.cancel();
+
+    final estimatedFare =
+        (double.tryParse(ride['estimated_fare']?.toString() ?? '') ??
+                widget.price.toDouble())
+            .round();
+    final paymentMethod =
+        ride['payment_method'] as String? ?? widget.paymentMethod;
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DriverOnTheWayScreen(
+          pickupLocation: widget.pickupLocation,
+          destinationLocation: widget.destinationLocation,
+          pickupAddress: widget.pickupAddress,
+          destinationAddress: widget.destinationAddress,
+          tripType: widget.tripType,
+          price: estimatedFare,
+          paymentMethod: paymentMethod,
+          rideId: widget.rideId ?? _rideIdFrom(ride),
+          driverName: _driverName(ride),
+          driverPhone: _driverPhone(ride),
+          driverPosition: _parseDriverLocation(ride),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _cancelTrip() async {
+    if (_isCancelling) return;
+
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    showDialog(
+    final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: colorScheme.surface,
@@ -78,20 +180,60 @@ class _FindingDriverScreenState extends State<FindingDriverScreen> {
         content: const Text('Are you sure you want to cancel this trip?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: () => Navigator.pop(ctx, false),
             child: Text(l10n.actionNo),
           ),
           TextButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              Navigator.pop(context);
-            },
+            onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: AppColors.errorColor),
             child: Text(l10n.actionYesCancel),
           ),
         ],
       ),
     );
+
+    if (confirm != true || !mounted) return;
+
+    final rideId = widget.rideId;
+    if (rideId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Unable to cancel ride. Missing ride ID.'),
+          backgroundColor: AppColors.errorColor,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isCancelling = true);
+    final result = await _rideDataProvider.cancelRide(rideId: rideId);
+    if (!mounted) return;
+    setState(() => _isCancelling = false);
+
+    final statusCode = result['statusCode'] as int?;
+    final success = statusCode != null && statusCode >= 200 && statusCode < 300;
+    if (success) {
+      _pollTimer?.cancel();
+      final message = (result['data'] is Map)
+          ? (result['data'] as Map)['message']?.toString()
+          : null;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message ?? 'Ride cancelled successfully.'),
+          backgroundColor: AppColors.successColor,
+        ),
+      );
+      Navigator.pop(context);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            result['errorMessage']?.toString() ?? 'Failed to cancel ride',
+          ),
+          backgroundColor: AppColors.errorColor,
+        ),
+      );
+    }
   }
 
   Color _cardBorder(BuildContext context) {
@@ -113,7 +255,7 @@ class _FindingDriverScreenState extends State<FindingDriverScreen> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.close_rounded, color: colorScheme.onSurface),
-          onPressed: _cancelTrip,
+          onPressed: _isCancelling ? null : _cancelTrip,
         ),
         title: Text(
           l10n.taxiStatusFindingDriver,
@@ -177,7 +319,8 @@ class _FindingDriverScreenState extends State<FindingDriverScreen> {
               ),
               const SizedBox(height: AppColors.spaceSM),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppColors.spaceLG),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: AppColors.spaceLG),
                 child: Text(
                   'We are searching for the best driver near you',
                   textAlign: TextAlign.center,
@@ -254,7 +397,7 @@ class _FindingDriverScreenState extends State<FindingDriverScreen> {
                 width: double.infinity,
                 height: AppColors.buttonHeightMD,
                 child: OutlinedButton(
-                  onPressed: _cancelTrip,
+                  onPressed: _isCancelling ? null : _cancelTrip,
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.errorColor,
                     side: BorderSide(
@@ -264,13 +407,22 @@ class _FindingDriverScreenState extends State<FindingDriverScreen> {
                       borderRadius: BorderRadius.circular(AppColors.radiusLG),
                     ),
                   ),
-                  child: Text(
-                    l10n.actionCancel,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  child: _isCancelling
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.errorColor,
+                          ),
+                        )
+                      : Text(
+                          l10n.actionCancel,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                 ),
               ),
             ],

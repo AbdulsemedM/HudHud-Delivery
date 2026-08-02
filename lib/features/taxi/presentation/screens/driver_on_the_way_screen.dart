@@ -1,11 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/widgets/status_chip.dart';
 import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
+import 'package:hudhud_delivery/features/chat/utils/chat_navigation.dart';
+import 'package:hudhud_delivery/features/taxi/data/ride_data_provider.dart';
 import 'package:shimmer/shimmer.dart';
 
 class DriverOnTheWayScreen extends StatefulWidget {
@@ -16,6 +21,10 @@ class DriverOnTheWayScreen extends StatefulWidget {
   final String tripType;
   final int price;
   final String paymentMethod;
+  final int? rideId;
+  final String driverName;
+  final String? driverPhone;
+  final LatLng? driverPosition;
 
   const DriverOnTheWayScreen({
     super.key,
@@ -26,6 +35,10 @@ class DriverOnTheWayScreen extends StatefulWidget {
     required this.tripType,
     required this.price,
     required this.paymentMethod,
+    this.rideId,
+    this.driverName = 'Driver',
+    this.driverPhone,
+    this.driverPosition,
   });
 
   @override
@@ -33,8 +46,12 @@ class DriverOnTheWayScreen extends StatefulWidget {
 }
 
 class _DriverOnTheWayScreenState extends State<DriverOnTheWayScreen> {
+  final RideDataProvider _rideDataProvider = RideDataProvider();
   gmaps.GoogleMapController? _mapController;
   LatLng? _driverPosition;
+  String _driverName = 'Driver';
+  String? _driverPhone;
+  Timer? _pollTimer;
   List<LatLng>? _routePolylinePoints;
   double? _routeDistanceKm;
   bool _isLoadingRoute = true;
@@ -45,19 +62,94 @@ class _DriverOnTheWayScreenState extends State<DriverOnTheWayScreen> {
   @override
   void initState() {
     super.initState();
+    _driverName = widget.driverName;
+    _driverPhone = widget.driverPhone;
+    _driverPosition = widget.driverPosition;
     _loadMapsAvailability();
-
-    _driverPosition = LatLng(
-      widget.pickupLocation.latitude +
-          (widget.destinationLocation.latitude -
-                  widget.pickupLocation.latitude) *
-              0.3,
-      widget.pickupLocation.longitude +
-          (widget.destinationLocation.longitude -
-                  widget.pickupLocation.longitude) *
-              0.3,
-    );
     _fetchRouteDirections();
+    _pollTimer = Timer.periodic(
+      const Duration(seconds: 8),
+      (_) => _refreshActiveRide(),
+    );
+  }
+
+  @override
+  void dispose() {
+    _pollTimer?.cancel();
+    super.dispose();
+  }
+
+  LatLng? _parseDriverLocation(Map<String, dynamic> ride) {
+    LatLng? fromCoords(dynamic lat, dynamic lng) {
+      final latitude = double.tryParse(lat?.toString() ?? '');
+      final longitude = double.tryParse(lng?.toString() ?? '');
+      if (latitude == null || longitude == null) return null;
+      return LatLng(latitude, longitude);
+    }
+
+    final direct = fromCoords(
+      ride['current_latitude'] ?? ride['driver_latitude'],
+      ride['current_longitude'] ?? ride['driver_longitude'],
+    );
+    if (direct != null) return direct;
+
+    final driverLocation = ride['driver_location'];
+    if (driverLocation is Map) {
+      final nested = fromCoords(
+        driverLocation['latitude'] ?? driverLocation['lat'],
+        driverLocation['longitude'] ?? driverLocation['lng'],
+      );
+      if (nested != null) return nested;
+    }
+
+    final driver = ride['driver'];
+    if (driver is Map) {
+      return fromCoords(
+        driver['latitude'] ?? driver['lat'] ?? driver['current_latitude'],
+        driver['longitude'] ?? driver['lng'] ?? driver['current_longitude'],
+      );
+    }
+    return null;
+  }
+
+  Future<void> _refreshActiveRide() async {
+    final result = await _rideDataProvider.getActiveRide();
+    if (!mounted) return;
+    if (result['statusCode'] != 200 || result['data'] == null) return;
+
+    final ride = result['data'] as Map<String, dynamic>;
+    final nested = ride['driver'];
+    final name = nested is Map
+        ? nested['name']?.toString()
+        : ride['driver_name']?.toString();
+    final phone = nested is Map
+        ? nested['phone']?.toString()
+        : ride['driver_phone']?.toString();
+
+    setState(() {
+      if (name != null && name.isNotEmpty) _driverName = name;
+      if (phone != null && phone.isNotEmpty) _driverPhone = phone;
+      final loc = _parseDriverLocation(ride);
+      if (loc != null) _driverPosition = loc;
+    });
+  }
+
+  Future<void> _callDriver() async {
+    final phone = _driverPhone;
+    if (phone == null || phone.isEmpty) return;
+    final uri = Uri(scheme: 'tel', path: phone);
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  Future<void> _messageDriver() async {
+    final rideId = widget.rideId;
+    if (rideId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Unable to open chat. Missing ride ID.')),
+      );
+      return;
+    }
+    await openRideChat(context, rideId);
   }
 
   Future<void> _loadMapsAvailability() async {
@@ -239,7 +331,7 @@ class _DriverOnTheWayScreenState extends State<DriverOnTheWayScreen> {
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
-                                          'Ann Wanjiru',
+                                          _driverName,
                                           style: theme.textTheme.titleMedium
                                               ?.copyWith(
                                             fontWeight: FontWeight.bold,
@@ -261,14 +353,19 @@ class _DriverOnTheWayScreenState extends State<DriverOnTheWayScreen> {
                                   _ContactButton(
                                     icon: Icons.message_rounded,
                                     borderColor: borderColor,
-                                    onPressed: () {},
+                                    onPressed: widget.rideId != null
+                                        ? _messageDriver
+                                        : null,
                                   ),
-                                  const SizedBox(width: AppColors.spaceSM),
-                                  _ContactButton(
-                                    icon: Icons.phone_rounded,
-                                    borderColor: borderColor,
-                                    onPressed: () {},
-                                  ),
+                                  if (_driverPhone != null &&
+                                      _driverPhone!.isNotEmpty) ...[
+                                    const SizedBox(width: AppColors.spaceSM),
+                                    _ContactButton(
+                                      icon: Icons.phone_rounded,
+                                      borderColor: borderColor,
+                                      onPressed: _callDriver,
+                                    ),
+                                  ],
                                 ],
                               ),
                             ),
@@ -481,7 +578,7 @@ class _DriverOnTheWayScreenState extends State<DriverOnTheWayScreen> {
 class _ContactButton extends StatelessWidget {
   final IconData icon;
   final Color borderColor;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   const _ContactButton({
     required this.icon,
@@ -491,15 +588,20 @@ class _ContactButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final enabled = onPressed != null;
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
-          color: AppColors.primaryColor.withValues(alpha: 0.35),
+          color: AppColors.primaryColor.withValues(alpha: enabled ? 0.35 : 0.15),
         ),
       ),
       child: IconButton(
-        icon: Icon(icon, color: AppColors.primaryColor, size: 20),
+        icon: Icon(
+          icon,
+          color: AppColors.primaryColor.withValues(alpha: enabled ? 1 : 0.4),
+          size: 20,
+        ),
         onPressed: onPressed,
       ),
     );

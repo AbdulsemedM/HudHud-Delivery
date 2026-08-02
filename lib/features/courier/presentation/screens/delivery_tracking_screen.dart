@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
@@ -49,6 +51,7 @@ class DeliveryTrackingScreen extends StatefulWidget {
 class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
   gmaps.GoogleMapController? _mapController;
   LatLng? _vehiclePosition;
+  Timer? _pollTimer;
 
   Map<String, dynamic>? _trackData;
   bool _isLoadingTrack = true;
@@ -66,26 +69,60 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
       ),
     );
 
-    // Calculate vehicle position (somewhere along the route)
     if (widget.pickupPosition != null && widget.deliveryPosition != null) {
-      _vehiclePosition = LatLng(
-        widget.pickupPosition!.latitude +
-            (widget.deliveryPosition!.latitude -
-                    widget.pickupPosition!.latitude) *
-                0.3,
-        widget.pickupPosition!.longitude +
-            (widget.deliveryPosition!.longitude -
-                    widget.pickupPosition!.longitude) *
-                0.3,
-      );
       _fetchRouteDirections();
     }
 
     if (widget.deliveryId != null) {
       _fetchTrackData();
+      _pollTimer = Timer.periodic(
+        const Duration(seconds: 8),
+        (_) => _fetchTrackData(),
+      );
     } else {
       _isLoadingTrack = false;
     }
+  }
+
+  @override
+  void dispose() {
+    _pollTimer?.cancel();
+    super.dispose();
+  }
+
+  LatLng? _parseDriverLocation(Map<String, dynamic>? data) {
+    if (data == null) return null;
+
+    LatLng? fromCoords(dynamic lat, dynamic lng) {
+      final latitude = double.tryParse(lat?.toString() ?? '');
+      final longitude = double.tryParse(lng?.toString() ?? '');
+      if (latitude == null || longitude == null) return null;
+      return LatLng(latitude, longitude);
+    }
+
+    final direct = fromCoords(
+      data['current_latitude'] ?? data['driver_latitude'] ?? data['latitude'],
+      data['current_longitude'] ?? data['driver_longitude'] ?? data['longitude'],
+    );
+    if (direct != null) return direct;
+
+    final driverLocation = data['driver_location'];
+    if (driverLocation is Map) {
+      final nested = fromCoords(
+        driverLocation['latitude'] ?? driverLocation['lat'],
+        driverLocation['longitude'] ?? driverLocation['lng'],
+      );
+      if (nested != null) return nested;
+    }
+
+    final driver = data['driver'];
+    if (driver is Map) {
+      return fromCoords(
+        driver['latitude'] ?? driver['lat'] ?? driver['current_latitude'],
+        driver['longitude'] ?? driver['lng'] ?? driver['current_longitude'],
+      );
+    }
+    return null;
   }
 
   Future<void> _fetchRouteDirections() async {
@@ -140,6 +177,7 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
           _isLoadingTrack = false;
           if (result['success'] == true) {
             _trackData = result['data'] as Map<String, dynamic>?;
+            _vehiclePosition = _parseDriverLocation(_trackData);
             _trackError = null;
           } else {
             _trackData = null;
@@ -182,7 +220,7 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
   @override
   Widget build(BuildContext context) {
     // Calculate center point for map
-    LatLng mapCenter = const LatLng(37.7749, -122.4194); // Default
+    LatLng mapCenter = const LatLng(9.0222, 38.7468);
     if (widget.pickupPosition != null && widget.deliveryPosition != null) {
       mapCenter = LatLng(
         (widget.pickupPosition!.latitude + widget.deliveryPosition!.latitude) / 2,

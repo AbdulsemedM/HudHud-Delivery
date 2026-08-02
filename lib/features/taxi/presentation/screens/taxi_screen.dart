@@ -59,6 +59,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
   int? _estimatedWaitTime;
   Map<String, dynamic>? _activeRide;
   bool _isCheckingActiveRide = true;
+  bool _isCancellingRide = false;
   List<LatLng>? _routePolylinePoints;
   double? _routeDistanceKm;
   bool _isLoadingRoute = false;
@@ -170,6 +171,79 @@ class _TaxiScreenState extends State<TaxiScreen> {
     }
   }
 
+  int? _activeRideId() {
+    final id = _activeRide?['id'];
+    if (id is int) return id;
+    return int.tryParse(id?.toString() ?? '');
+  }
+
+  bool get _canCancelActiveRide {
+    if (_activeRide == null) return false;
+    final status = _activeRide!['status'] as String? ?? 'searching';
+    final hasDriver = _activeRide!['driver_id'] != null;
+    return status == 'searching' || !hasDriver;
+  }
+
+  Future<void> _cancelActiveRide() async {
+    final l10n = context.l10n;
+    final rideId = _activeRideId();
+    if (rideId == null || _isCancellingRide) return;
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        ),
+        title: const Text('Cancel Trip'),
+        content: const Text('Are you sure you want to cancel this trip?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.actionNo),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.errorColor),
+            child: Text(l10n.actionYesCancel),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true || !mounted) return;
+
+    setState(() => _isCancellingRide = true);
+    final result = await _rideDataProvider.cancelRide(rideId: rideId);
+    if (!mounted) return;
+    setState(() => _isCancellingRide = false);
+
+    final statusCode = result['statusCode'] as int?;
+    final success = statusCode != null && statusCode >= 200 && statusCode < 300;
+    if (success) {
+      setState(() => _activeRide = null);
+      final message = (result['data'] is Map)
+          ? (result['data'] as Map)['message']?.toString()
+          : null;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message ?? 'Ride cancelled successfully.'),
+          backgroundColor: AppColors.successColor,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            result['errorMessage']?.toString() ?? 'Failed to cancel ride',
+          ),
+          backgroundColor: AppColors.errorColor,
+        ),
+      );
+    }
+  }
+
   void _onTrackActiveRide() {
     if (_activeRide == null) return;
 
@@ -206,11 +280,38 @@ class _TaxiScreenState extends State<TaxiScreen> {
             tripType: tripName,
             price: estimatedFare,
             paymentMethod: paymentMethod,
-            rideId: _activeRide!['id'] as int?,
+            rideId: _activeRideId(),
           ),
         ),
       ).then((_) => _checkActiveRide());
     } else {
+      final driver = _activeRide!['driver'];
+      final driverName = driver is Map
+          ? (driver['name']?.toString() ?? 'Driver')
+          : (_activeRide!['driver_name']?.toString() ?? 'Driver');
+      final driverPhone = driver is Map
+          ? driver['phone']?.toString()
+          : _activeRide!['driver_phone']?.toString();
+
+      LatLng? driverPosition;
+      LatLng? fromCoords(dynamic lat, dynamic lng) {
+        final latitude = double.tryParse(lat?.toString() ?? '');
+        final longitude = double.tryParse(lng?.toString() ?? '');
+        if (latitude == null || longitude == null) return null;
+        return LatLng(latitude, longitude);
+      }
+
+      driverPosition = fromCoords(
+        _activeRide!['current_latitude'] ?? _activeRide!['driver_latitude'],
+        _activeRide!['current_longitude'] ?? _activeRide!['driver_longitude'],
+      );
+      if (driverPosition == null && driver is Map) {
+        driverPosition = fromCoords(
+          driver['latitude'] ?? driver['lat'] ?? driver['current_latitude'],
+          driver['longitude'] ?? driver['lng'] ?? driver['current_longitude'],
+        );
+      }
+
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -222,6 +323,10 @@ class _TaxiScreenState extends State<TaxiScreen> {
             tripType: tripName,
             price: estimatedFare,
             paymentMethod: paymentMethod,
+            rideId: _activeRideId(),
+            driverName: driverName,
+            driverPhone: driverPhone,
+            driverPosition: driverPosition,
           ),
         ),
       ).then((_) => _checkActiveRide());
@@ -592,7 +697,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
               width: double.infinity,
               height: AppColors.buttonHeightMD,
               child: FilledButton(
-                onPressed: _onTrackActiveRide,
+                onPressed: _isCancellingRide ? null : _onTrackActiveRide,
                 style: FilledButton.styleFrom(
                   backgroundColor: _taxiGold,
                   foregroundColor: colorScheme.onPrimary,
@@ -610,9 +715,47 @@ class _TaxiScreenState extends State<TaxiScreen> {
               ),
             ),
           ),
+          if (_canCancelActiveRide) ...[
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppColors.spaceMD),
+              child: SizedBox(
+                width: double.infinity,
+                height: AppColors.buttonHeightMD,
+                child: OutlinedButton(
+                  onPressed: _isCancellingRide ? null : _cancelActiveRide,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.errorColor,
+                    side: BorderSide(
+                      color: AppColors.errorColor.withValues(alpha: 0.5),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppColors.radiusLG),
+                    ),
+                  ),
+                  child: _isCancellingRide
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.errorColor,
+                          ),
+                        )
+                      : Text(
+                          l10n.actionCancel,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 12),
           TextButton(
-            onPressed: _isCheckingActiveRide
+            onPressed: (_isCheckingActiveRide || _isCancellingRide)
                 ? null
                 : () {
                     setState(() => _isCheckingActiveRide = true);

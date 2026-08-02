@@ -44,7 +44,7 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
   bool _isLoadingRoute = false;
   bool? _hasGoogleMapsApiKey;
 
-  late List<TripOption> _tripOptions;
+  List<TripOption> _tripOptions = [];
 
   static gmaps.LatLng _toG(LatLng p) => gmaps.LatLng(p.latitude, p.longitude);
 
@@ -53,7 +53,6 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
     super.initState();
     _loadMapsAvailability();
     _selectedTrip = 'go';
-    _tripOptions = _getFallbackOptions();
     if (widget.initialRoutePolylinePoints != null &&
         widget.initialRouteDistanceKm != null) {
       _routePolylinePoints = widget.initialRoutePolylinePoints;
@@ -170,6 +169,7 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
       if (mounted && result['data'] != null) {
         final data = result['data'] as Map<String, dynamic>;
         final fare = (data['estimated_fare'] as num?)?.toDouble() ?? 0;
+        if (fare <= 0) continue;
         final duration = (data['estimated_duration'] as int?) ?? 0;
         final eta = DateTime.now().add(Duration(minutes: duration));
         final dist = (data['estimated_distance'] as num?)?.toDouble();
@@ -189,76 +189,30 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
           vehicleType: params.vehicleType,
           rideType: params.rideType,
         ));
-      } else {
-        options.add(TripOption(
-          id: id,
-          name: name,
-          price: 0,
-          originalPrice: isDiscount ? 0 : null,
-          estimatedTime: '--',
-          estimatedArrival: '--',
-          vehicleImagePath: imagePath,
-          hasFasterBadge: hasFasterBadge,
-          isDiscount: isDiscount,
-          estimatedDistance: null,
-          estimatedDuration: null,
-          vehicleType: params.vehicleType,
-          rideType: params.rideType,
-        ));
       }
     }
 
     if (mounted) {
       setState(() {
-        _tripOptions = options.isEmpty ? _getFallbackOptions() : options;
+        _tripOptions = options;
         _isLoadingEstimates = false;
-        if (options.every((o) => o.price == 0)) {
-          _estimateError = 'Could not fetch estimates. Using default prices.';
+        if (options.isEmpty) {
+          _estimateError =
+              'Could not fetch ride estimates. Please try again.';
+          _selectedTrip = null;
+        } else {
+          _estimateError = null;
+          if (_selectedTrip == null ||
+              !options.any((o) => o.id == _selectedTrip)) {
+            _selectedTrip = options.first.id;
+          }
         }
       });
     }
   }
 
-  List<TripOption> _getFallbackOptions() {
-    return [
-      TripOption(
-        id: 'go',
-        name: 'Hudhud Go',
-        price: 550,
-        estimatedTime: '4 min away',
-        estimatedArrival: '8:46pm',
-        vehicleImagePath: 'assets/images/car.png',
-        hasFasterBadge: true,
-        vehicleType: 'car',
-        rideType: 'standard',
-      ),
-      TripOption(
-        id: 'tuk',
-        name: 'Hudhud Tuk',
-        price: 170,
-        originalPrice: 188,
-        estimatedTime: '4 min away',
-        estimatedArrival: '8:46pm',
-        vehicleImagePath: 'assets/images/tuk.png',
-        isDiscount: true,
-        vehicleType: 'car',
-        rideType: 'standard',
-      ),
-      TripOption(
-        id: 'premier',
-        name: 'HudHud Premier',
-        price: 223,
-        estimatedTime: '5 min away',
-        estimatedArrival: '8:46pm',
-        vehicleImagePath: 'assets/images/car.png',
-        vehicleType: 'car',
-        rideType: 'premium',
-      ),
-    ];
-  }
-
   Future<void> _onSelectTrip(TripOption selectedOption) async {
-    if (_isRequestingRide) return;
+    if (_isRequestingRide || selectedOption.price <= 0) return;
 
     setState(() => _isRequestingRide = true);
 
@@ -325,8 +279,18 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
     final colorScheme = theme.colorScheme;
     final l10n = context.l10n;
     final borderColor = _cardBorder(context);
-    final selectedOption =
-        _tripOptions.firstWhere((opt) => opt.id == _selectedTrip);
+    TripOption? selectedOption;
+    for (final opt in _tripOptions) {
+      if (opt.id == _selectedTrip) {
+        selectedOption = opt;
+        break;
+      }
+    }
+    selectedOption ??= _tripOptions.isNotEmpty ? _tripOptions.first : null;
+    final canConfirm = !_isLoadingEstimates &&
+        !_isRequestingRide &&
+        selectedOption != null &&
+        selectedOption.price > 0;
 
     return Scaffold(
       body: Stack(
@@ -571,9 +535,9 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
                         width: double.infinity,
                         height: AppColors.buttonHeightMD,
                         child: FilledButton(
-                          onPressed: _isRequestingRide
-                              ? null
-                              : () => _onSelectTrip(selectedOption),
+                          onPressed: canConfirm
+                              ? () => _onSelectTrip(selectedOption!)
+                              : null,
                           style: FilledButton.styleFrom(
                             backgroundColor: AppColors.primaryColor,
                             foregroundColor: colorScheme.onPrimary,
@@ -592,7 +556,9 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
                                   ),
                                 )
                               : Text(
-                                  'Select ${selectedOption.name}',
+                                  selectedOption != null
+                                      ? 'Select ${selectedOption.name}'
+                                      : 'Select trip',
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,

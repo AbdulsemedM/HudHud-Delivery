@@ -14,34 +14,29 @@ class TermsConditionsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _ClauseSection(
-              clauseNumber: 1,
+            _LegalSection(
+              title: 'Terms of Service',
               content:
-                  'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Viverra condimentum eget purus in. Consectetur eget id morbi amet amet, in. Ipsum viverra pretium tellus neque. Ullamcorper suspendisse aenean leo pharetra in sit semper et. Amet quam placerat sem.',
+                  'By using HudHud Delivery you agree to follow our service rules, '
+                  'pay for completed orders and rides, and provide accurate account '
+                  'and delivery information. Misuse of the platform may result in '
+                  'account suspension.',
             ),
             SizedBox(height: 24),
-            _ClauseSection(
-              clauseNumber: 2,
+            _LegalSection(
+              title: 'Privacy Policy',
               content:
-                  'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Viverra condimentum eget purus in. Consectetur eget id morbi amet amet, in. Ipsum viverra pretium tellus neque. Ullamcorper suspendisse aenean leo pharetra in sit semper et. Amet quam placerat sem.',
+                  'We collect account, location, and order information needed to '
+                  'provide delivery and taxi services. Contact details and trip data '
+                  'are shared with assigned drivers or couriers only as needed to '
+                  'complete your request.',
             ),
             SizedBox(height: 24),
-            _ClauseSection(
-              clauseNumber: 3,
+            _LegalSection(
+              title: 'Contact',
               content:
-                  'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Viverra condimentum eget purus in. Consectetur eget id morbi amet amet, in. Ipsum viverra pretium tellus neque. Ullamcorper suspendisse aenean leo pharetra in sit semper et. Amet quam placerat sem.',
-            ),
-            SizedBox(height: 24),
-            _ClauseSection(
-              clauseNumber: 4,
-              content:
-                  'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Viverra condimentum eget purus in. Consectetur eget id morbi amet amet, in. Ipsum viverra pretium tellus neque. Ullamcorper suspendisse aenean leo pharetra in sit semper et. Amet quam placerat sem.',
-            ),
-            SizedBox(height: 24),
-            _ClauseSection(
-              clauseNumber: 5,
-              content:
-                  'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Viverra condimentum eget purus in. Consectetur eget id morbi amet amet, in. Ipsum viverra pretium tellus neque. Ullamcorper suspendisse aenean leo pharetra in sit semper et. Amet quam placerat sem.',
+                  'For the full legal terms or privacy questions, contact HudHud '
+                  'Delivery support through the app Help & Support section.',
             ),
             SizedBox(height: 24),
           ],
@@ -51,12 +46,12 @@ class TermsConditionsScreen extends StatelessWidget {
   }
 }
 
-class _ClauseSection extends StatelessWidget {
-  final int clauseNumber;
+class _LegalSection extends StatelessWidget {
+  final String title;
   final String content;
 
-  const _ClauseSection({
-    required this.clauseNumber,
+  const _LegalSection({
+    required this.title,
     required this.content,
   });
 
@@ -74,7 +69,7 @@ class _ClauseSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Clause $clauseNumber',
+            title,
             style: const TextStyle(
               fontWeight: FontWeight.w700,
               color: AuthScreenColors.orange,

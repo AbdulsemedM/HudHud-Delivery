@@ -323,7 +323,14 @@ class OrderModel extends Equatable {
   // Additional missing getters
   DateTime? get confirmedAt => acceptedAt; // Using acceptedAt as placeholder
   DateTime? get readyForPickupAt => readyAt; // Using readyAt field
-  String? get estimatedDeliveryTime => '30-45 mins'; // Placeholder
+
+  /// ETA from order preparation time when available.
+  String? get estimatedDeliveryTime {
+    if (preparationTime != null && preparationTime! > 0) {
+      return '$preparationTime mins';
+    }
+    return null;
+  }
   
   String get formattedCreatedAt {
     return '${createdAt.day}/${createdAt.month}/${createdAt.year} ${createdAt.hour.toString().padLeft(2, '0')}:${createdAt.minute.toString().padLeft(2, '0')}';
@@ -383,9 +390,7 @@ class OrderModel extends Equatable {
   
   bool get isConfirmed => status == 'confirmed' || isPreparing || isReadyForPickup || isOutForDelivery || isDelivered;
   
-  String get formattedEstimatedDelivery {
-    return estimatedDeliveryTime ?? '30-45 mins';
-  }
+  String? get formattedEstimatedDelivery => estimatedDeliveryTime;
 
   @override
   List<Object?> get props => [

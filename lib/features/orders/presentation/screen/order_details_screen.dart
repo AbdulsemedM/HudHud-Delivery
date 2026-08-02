@@ -173,7 +173,10 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                OrderStatusCard(order: order),
+                OrderStatusCard(
+                  order: order,
+                  trackingEstimatedTime: tracking?.estimatedTime,
+                ),
                 const SizedBox(height: AppColors.spaceMD),
                 if (tracking != null) ...[
                   OrderTrackingCard(tracking: tracking),

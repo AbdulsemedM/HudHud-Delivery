@@ -1,10 +1,18 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/features/checkout/data/data_provider/checkout_data_provider.dart';
+import 'package:hudhud_delivery/features/checkout/data/repository/checkout_repository.dart';
+import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
+import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:lottie/lottie.dart';
 import 'delivery_tracking_screen.dart';
 
 class FindingCourierScreen extends StatefulWidget {
+  final int? deliveryId;
   final String pickupLocation;
   final String deliveryLocation;
   final LatLng? pickupPosition;
@@ -20,6 +28,7 @@ class FindingCourierScreen extends StatefulWidget {
 
   const FindingCourierScreen({
     super.key,
+    this.deliveryId,
     required this.pickupLocation,
     required this.deliveryLocation,
     this.pickupPosition,
@@ -39,58 +48,125 @@ class FindingCourierScreen extends StatefulWidget {
 }
 
 class _FindingCourierScreenState extends State<FindingCourierScreen> {
-  final bool _isLoading = true;
+  late final CourierRepository _courierRepository;
+  late final CheckoutRepository _checkoutRepository;
+  Timer? _pollTimer;
+  bool _isCancelling = false;
+  bool _hasNavigated = false;
+
+  static const _searchingStatuses = {
+    'searching',
+    'pending',
+    'requested',
+    'looking_for_driver',
+    'looking_for_courier',
+    'created',
+  };
 
   @override
   void initState() {
     super.initState();
-    _simulateCourierSearch();
+    _courierRepository = CourierRepository(
+      courierDataProvider: CourierDataProvider(
+        apiService: ApiService.instance,
+      ),
+    );
+    _checkoutRepository = CheckoutRepository(
+      checkoutDataProvider: CheckoutDataProvider(
+        apiService: ApiService.instance,
+      ),
+    );
+    _pollAssignment();
+    _pollTimer = Timer.periodic(
+      const Duration(seconds: 4),
+      (_) => _pollAssignment(),
+    );
   }
 
-  Future<void> _simulateCourierSearch() async {
-    // Simulate searching for a courier
-    await Future.delayed(const Duration(seconds: 3));
-    
-    if (mounted && _isLoading) {
-      // Navigate to tracking screen
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => DeliveryTrackingScreen(
-            pickupLocation: widget.pickupLocation,
-            deliveryLocation: widget.deliveryLocation,
-            pickupPosition: widget.pickupPosition,
-            deliveryPosition: widget.deliveryPosition,
-            selectedVehicle: widget.selectedVehicle,
-            itemType: widget.itemType,
-            quantity: widget.quantity,
-            whoPays: widget.whoPays,
-            paymentType: widget.paymentType,
-            recipientName: widget.recipientName,
-            recipientPhone: widget.recipientPhone,
-            packageImagePath: widget.packageImagePath,
-          ),
-        ),
-      );
+  @override
+  void dispose() {
+    _pollTimer?.cancel();
+    super.dispose();
+  }
+
+  bool _isAssigned(Map<String, dynamic>? data) {
+    if (data == null) return false;
+    if (data['driver'] != null || data['driver_id'] != null) return true;
+    final status =
+        (data['current_status'] ?? data['status'] ?? '').toString().toLowerCase();
+    if (status.isEmpty) return false;
+    if (_searchingStatuses.contains(status)) return false;
+    if (status.contains('cancel')) return false;
+    return true;
+  }
+
+  Future<void> _pollAssignment() async {
+    if (_hasNavigated || _isCancelling || !mounted) return;
+
+    Map<String, dynamic>? data;
+
+    if (widget.deliveryId != null) {
+      final track = await _courierRepository.getDeliveryTrack(widget.deliveryId!);
+      if (track['success'] == true) {
+        data = track['data'] as Map<String, dynamic>?;
+      }
     }
+
+    if (!_isAssigned(data)) {
+      final active = await _courierRepository.getUserActiveDelivery();
+      if (active['success'] == true) {
+        data = active['delivery'] as Map<String, dynamic>?;
+      }
+    }
+
+    if (!mounted || _hasNavigated) return;
+    if (!_isAssigned(data)) return;
+
+    final deliveryId = widget.deliveryId ??
+        (data?['id'] is int
+            ? data!['id'] as int
+            : int.tryParse(data?['id']?.toString() ?? ''));
+
+    _hasNavigated = true;
+    _pollTimer?.cancel();
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DeliveryTrackingScreen(
+          deliveryId: deliveryId,
+          pickupLocation: widget.pickupLocation,
+          deliveryLocation: widget.deliveryLocation,
+          pickupPosition: widget.pickupPosition,
+          deliveryPosition: widget.deliveryPosition,
+          selectedVehicle: widget.selectedVehicle,
+          itemType: widget.itemType,
+          quantity: widget.quantity,
+          whoPays: widget.whoPays,
+          paymentType: widget.paymentType,
+          recipientName: widget.recipientName,
+          recipientPhone: widget.recipientPhone,
+          packageImagePath: widget.packageImagePath,
+        ),
+      ),
+    );
   }
 
-  void _cancelOrder() {
-    showDialog(
+  Future<void> _cancelOrder() async {
+    if (_isCancelling) return;
+
+    final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Cancel Order'),
         content: const Text('Are you sure you want to cancel this order?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(context, false),
             child: const Text('No'),
           ),
           TextButton(
-            onPressed: () {
-              Navigator.pop(context); // Close dialog
-              Navigator.pop(context); // Go back to previous screen
-            },
+            onPressed: () => Navigator.pop(context, true),
             child: Text(
               'Yes, Cancel',
               style: TextStyle(color: Colors.red[700]),
@@ -99,6 +175,41 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
         ],
       ),
     );
+
+    if (confirmed != true || !mounted) return;
+
+    final deliveryId = widget.deliveryId;
+    if (deliveryId == null) {
+      Navigator.pop(context);
+      return;
+    }
+
+    setState(() => _isCancelling = true);
+    final result = await _checkoutRepository.cancelOrder(deliveryId);
+    if (!mounted) return;
+    setState(() => _isCancelling = false);
+
+    if (result['success'] == true) {
+      _pollTimer?.cancel();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            result['message']?.toString() ?? 'Order cancelled successfully',
+          ),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Navigator.pop(context);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            result['message']?.toString() ?? "You can't cancel this order",
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override
@@ -179,22 +290,33 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
                 width: double.infinity,
                 height: AppColors.buttonHeightMD,
                 child: OutlinedButton(
-                  onPressed: _cancelOrder,
+                  onPressed: _isCancelling ? null : _cancelOrder,
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppColors.errorColor, width: 1.5),
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppColors.radiusLG),
-                    ),
-                  ),
-                  child: const Text(
-                    'Cancel Order',
-                    style: TextStyle(
+                    side: const BorderSide(
                       color: AppColors.errorColor,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
+                      width: 1.5,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppColors.radiusLG),
                     ),
                   ),
+                  child: _isCancelling
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.errorColor,
+                          ),
+                        )
+                      : const Text(
+                          'Cancel Order',
+                          style: TextStyle(
+                            color: AppColors.errorColor,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                 ),
               ),
             ),
@@ -240,7 +362,7 @@ class _LoadingDotsState extends State<_LoadingDots>
             final delay = index * 0.2;
             final value = ((_controller.value + delay) % 1.0);
             final opacity = (value < 0.5) ? value * 2 : (1 - value) * 2;
-            
+
             return Container(
               margin: const EdgeInsets.symmetric(horizontal: 4),
               width: 10,
@@ -256,4 +378,3 @@ class _LoadingDotsState extends State<_LoadingDots>
     );
   }
 }
-

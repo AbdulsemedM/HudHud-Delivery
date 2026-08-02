@@ -116,6 +116,7 @@ class ApiConstants {
   static const String rideAvailableVehicles =
       'services/ride/available-vehicles';
   static const String userRidesActive = 'user/rides/active';
+  static const String rideCancel = 'driver/services/ride/cancel';
   static const String deliveryTrack = 'services/delivery/track/{id}';
   static const String userDeliveries = 'user/deliveries';
   static const String userDeliveryDetails = 'user/deliveries/{id}';

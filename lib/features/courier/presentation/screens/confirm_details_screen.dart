@@ -218,8 +218,6 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
           ? widget.packageDescription
           : widget.itemType,
       'package_weight': widget.packageWeight,
-      'package_dimensions': '30x20x5 cm',
-      'estimated_value': 0,
       'pickup_location': widget.pickupLocation,
       'pickup_latitude': widget.pickupPosition?.latitude ?? 0,
       'pickup_longitude': widget.pickupPosition?.longitude ?? 0,
@@ -254,10 +252,12 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
     setState(() => _isLoadingRequest = false);
 
     if (result['success'] == true) {
+      final orderId = result['orderId'] as int?;
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => FindingCourierScreen(
+            deliveryId: orderId,
             pickupLocation: widget.pickupLocation,
             deliveryLocation: widget.deliveryLocation,
             pickupPosition: widget.pickupPosition,
@@ -286,7 +286,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    LatLng mapCenter = const LatLng(37.7749, -122.4194);
+    LatLng mapCenter = const LatLng(9.0222, 38.7468);
     if (widget.pickupPosition != null && widget.deliveryPosition != null) {
       mapCenter = LatLng(
         (widget.pickupPosition!.latitude + widget.deliveryPosition!.latitude) /

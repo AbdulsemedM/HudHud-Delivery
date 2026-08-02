@@ -9,13 +9,23 @@ import '../../data/models/vendor_model.dart';
 
 class OrderStatusCard extends StatelessWidget {
   final OrderModel order;
+  final String? trackingEstimatedTime;
 
-  const OrderStatusCard({Key? key, required this.order}) : super(key: key);
+  const OrderStatusCard({
+    Key? key,
+    required this.order,
+    this.trackingEstimatedTime,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final colorScheme = Theme.of(context).colorScheme;
+    final eta = (trackingEstimatedTime != null &&
+            trackingEstimatedTime!.trim().isNotEmpty)
+        ? trackingEstimatedTime
+        : order.formattedEstimatedDelivery;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(AppColors.spaceMD),
@@ -41,7 +51,7 @@ class OrderStatusCard extends StatelessWidget {
                     color: colorScheme.onSurfaceVariant,
                   ),
             ),
-            if (order.estimatedDeliveryTime != null) ...[
+            if (eta != null && eta.isNotEmpty) ...[
               const SizedBox(height: 8),
               Row(
                 children: [
@@ -52,7 +62,7 @@ class OrderStatusCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    order.formattedEstimatedDelivery,
+                    eta,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],

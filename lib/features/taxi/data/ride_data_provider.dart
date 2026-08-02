@@ -144,6 +144,38 @@ class RideDataProvider {
     }
   }
 
+  /// POST /api/driver/services/ride/cancel
+  /// Cancels a ride request (customer side uses cancelled_by: "user").
+  Future<Map<String, dynamic>> cancelRide({
+    required int rideId,
+    String cancellationReason = 'Changed my mind',
+  }) async {
+    try {
+      final response = await apiService.post(
+        '${ApiConstants.baseUrl}${ApiConstants.rideCancel}',
+        data: {
+          'ride_id': rideId,
+          'cancellation_reason': cancellationReason,
+          'cancelled_by': 'user',
+        },
+      );
+
+      return {
+        'statusCode': response.statusCode,
+        'data': response.data,
+        'errorMessage': null,
+      };
+    } on ApiException catch (apiException) {
+      return {
+        'statusCode': apiException.statusCode,
+        'data': null,
+        'errorMessage': apiException.message,
+      };
+    } on Exception catch (e) {
+      return {'statusCode': 500, 'data': null, 'errorMessage': e.toString()};
+    }
+  }
+
   /// GET /api/user/rides/active
   /// Returns the user's active ride (if any).
   /// A 404 ("No active ride found") is treated as a normal empty result,
