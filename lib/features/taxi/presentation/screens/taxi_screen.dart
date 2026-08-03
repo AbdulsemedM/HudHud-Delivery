@@ -138,12 +138,47 @@ class _TaxiScreenState extends State<TaxiScreen> {
         _activeRide = result['data'] as Map<String, dynamic>;
       } else {
         _activeRide = null;
+        _routePolylinePoints = null;
+        _routeDistanceKm = null;
       }
     });
 
     if (_activeRide != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _centerMapOnActiveRide());
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _centerMapOnActiveRide();
+        _fetchActiveRideRouteDirections();
+      });
     }
+  }
+
+  /// Road-following polyline for the active ride (pickup → dropoff).
+  Future<void> _fetchActiveRideRouteDirections() async {
+    final pickup = _activePickup;
+    final dropoff = _activeDropoff;
+    if (pickup == null || dropoff == null) return;
+
+    // Skip if we already have a road route for roughly the same endpoints.
+    if (_routePolylinePoints != null && _routePolylinePoints!.length >= 2) {
+      final first = _routePolylinePoints!.first;
+      final last = _routePolylinePoints!.last;
+      final sameStart = _calculateDistance(first, pickup) < 80; // meters
+      final sameEnd = _calculateDistance(last, dropoff) < 80;
+      if (sameStart && sameEnd) return;
+    }
+
+    final result = await GoogleDirectionsService.getDirections(
+      originLat: pickup.latitude,
+      originLng: pickup.longitude,
+      destLat: dropoff.latitude,
+      destLng: dropoff.longitude,
+    );
+    if (!mounted || _activeRide == null) return;
+    setState(() {
+      if (result != null) {
+        _routePolylinePoints = result.polylinePoints;
+        _routeDistanceKm = result.distanceKm;
+      }
+    });
   }
 
   void _centerMapOnActiveRide() {
@@ -222,7 +257,11 @@ class _TaxiScreenState extends State<TaxiScreen> {
     final statusCode = result['statusCode'] as int?;
     final success = statusCode != null && statusCode >= 200 && statusCode < 300;
     if (success) {
-      setState(() => _activeRide = null);
+      setState(() {
+        _activeRide = null;
+        _routePolylinePoints = null;
+        _routeDistanceKm = null;
+      });
       final message = (result['data'] is Map)
           ? (result['data'] as Map)['message']?.toString()
           : null;
@@ -584,7 +623,10 @@ class _TaxiScreenState extends State<TaxiScreen> {
     return HomeColors.border;
   }
 
-  Widget _buildActiveRideSheet(BuildContext context) {
+  Widget _buildActiveRideSheet(
+    BuildContext context,
+    ScrollController scrollController,
+  ) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final l10n = context.l10n;
@@ -607,15 +649,19 @@ class _TaxiScreenState extends State<TaxiScreen> {
           right: BorderSide(color: borderColor),
         ),
       ),
-      child: Column(
+      child: ListView(
+        controller: scrollController,
+        padding: EdgeInsets.zero,
         children: [
-          Container(
-            margin: const EdgeInsets.only(top: 8),
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: colorScheme.outlineVariant,
-              borderRadius: BorderRadius.circular(2),
+          Center(
+            child: Container(
+              margin: const EdgeInsets.only(top: 8),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: colorScheme.outlineVariant,
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
           ),
           const SizedBox(height: 16),
@@ -635,7 +681,11 @@ class _TaxiScreenState extends State<TaxiScreen> {
             ],
           ),
           const SizedBox(height: AppColors.spaceSM),
-          StatusChip(status: _activeRide?['status'] as String? ?? 'active'),
+          Center(
+            child: StatusChip(
+              status: _activeRide?['status'] as String? ?? 'active',
+            ),
+          ),
           const SizedBox(height: AppColors.spaceMD),
           Container(
             margin: const EdgeInsets.symmetric(horizontal: AppColors.spaceMD),
@@ -754,26 +804,28 @@ class _TaxiScreenState extends State<TaxiScreen> {
             ),
           ],
           const SizedBox(height: 12),
-          TextButton(
-            onPressed: (_isCheckingActiveRide || _isCancellingRide)
-                ? null
-                : () {
-                    setState(() => _isCheckingActiveRide = true);
-                    _checkActiveRide();
-                  },
-            child: _isCheckingActiveRide
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: _taxiGold,
+          Center(
+            child: TextButton(
+              onPressed: (_isCheckingActiveRide || _isCancellingRide)
+                  ? null
+                  : () {
+                      setState(() => _isCheckingActiveRide = true);
+                      _checkActiveRide();
+                    },
+              child: _isCheckingActiveRide
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: _taxiGold,
+                      ),
+                    )
+                  : Text(
+                      l10n.taxiRefreshStatus,
+                      style: const TextStyle(color: _taxiGold, fontSize: 14),
                     ),
-                  )
-                : Text(
-                    l10n.taxiRefreshStatus,
-                    style: const TextStyle(color: _taxiGold, fontSize: 14),
-                  ),
+            ),
           ),
           const SizedBox(height: 16),
         ],
@@ -899,10 +951,14 @@ class _TaxiScreenState extends State<TaxiScreen> {
       );
     }
     if (hasActiveRide && activePickup != null && activeDropoff != null) {
+      final points =
+          _routePolylinePoints != null && _routePolylinePoints!.length >= 2
+              ? _routePolylinePoints!.map(_toG).toList()
+              : [_toG(activePickup), _toG(activeDropoff)];
       polylines.add(
         gmaps.Polyline(
           polylineId: const gmaps.PolylineId('active_route'),
-          points: [_toG(activePickup), _toG(activeDropoff)],
+          points: points,
           color: _taxiGold,
           width: 3,
         ),
@@ -1035,7 +1091,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
                 maxChildSize: 0.85,
                 builder: (context, scrollController) {
                   if (hasActiveRide) {
-                    return _buildActiveRideSheet(context);
+                    return _buildActiveRideSheet(context, scrollController);
                   }
                   return Container(
                     decoration: BoxDecoration(
