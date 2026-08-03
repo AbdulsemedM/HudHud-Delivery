@@ -1,0 +1,83 @@
+# Creates a Shorebird release (store binary). Requires SHOREBIRD_TOKEN secret.
+# Trigger: push tag v* (e.g. v1.0.0+12) or manual workflow_dispatch.
+#
+# Android runs on ubuntu. iOS requires macos and signing setup.
+# Upload the produced artifact to Play / App Store Connect as usual.
+#
+# Signing: ensure android/key.properties (or CI secrets that generate it)
+# is available on the runner before release.
+
+name: Shorebird Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: Platform to release
+        required: true
+        default: android
+        type: choice
+        options:
+          - android
+          - ios
+          - both
+
+env:
+  SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+
+jobs:
+  release-android:
+    if: >
+      github.event_name == 'push' ||
+      inputs.platform == 'android' ||
+      inputs.platform == 'both'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Shorebird
+        uses: shorebirdtech/setup-shorebird@v1
+        with:
+          cache: true
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Shorebird release Android
+        uses: shorebirdtech/shorebird-release@v1
+        with:
+          platform: android
+          args: --no-confirm
+
+  release-ios:
+    if: >
+      (github.event_name == 'workflow_dispatch' &&
+        (inputs.platform == 'ios' || inputs.platform == 'both'))
+    runs-on: macos-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Shorebird
+        uses: shorebirdtech/setup-shorebird@v1
+        with:
+          cache: true
+
+      - name: Shorebird release iOS
+        uses: shorebirdtech/shorebird-release@v1
+        with:
+          platform: ios
+          args: --no-confirm

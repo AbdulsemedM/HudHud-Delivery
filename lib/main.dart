@@ -25,6 +25,7 @@ import 'controllers/service_accent_controller.dart';
 import 'app/services/fcm_service.dart';
 import 'app/services/auth_service.dart';
 import 'app/services/guest_browse_service.dart';
+import 'app/services/remote_config_service.dart';
 import 'app/navigation/fcm_order_navigation.dart';
 
 // Orders feature
@@ -33,6 +34,7 @@ import 'features/orders/data/repositories/orders_repository.dart';
 
 // Widgets
 import 'app/widgets/app_connectivity_banner.dart';
+import 'app/widgets/ota_lifecycle_binder.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -61,6 +63,16 @@ void main() async {
   } catch (e, st) {
     if (kDebugMode) {
       debugPrint('FCM/Firebase init failed (app will run without push): $e');
+      debugPrint('$st');
+    }
+  }
+
+  // Remote Config (force-update + Shorebird kill switch). Fail-open.
+  try {
+    await RemoteConfigService.instance.initialize();
+  } catch (e, st) {
+    if (kDebugMode) {
+      debugPrint('Remote Config init failed: $e');
       debugPrint('$st');
     }
   }
@@ -170,8 +182,10 @@ class _MyAppState extends State<MyApp> {
               builder: (context, child) {
                 // Update system UI overlay style when theme changes
                 themeController.updateSystemUIOverlayStyle();
-                return AppConnectivityBanner(
-                  child: child ?? const SizedBox.shrink(),
+                return OtaLifecycleBinder(
+                  child: AppConnectivityBanner(
+                    child: child ?? const SizedBox.shrink(),
+                  ),
                 );
               },
             );

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
+import 'package:hudhud_delivery/app/services/force_update_service.dart';
 import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
+import 'package:hudhud_delivery/app/services/remote_config_service.dart';
 import 'package:hudhud_delivery/app/services/startup_location_service.dart';
 import 'package:hudhud_delivery/features/dashboard/presentation/screen/dashboard_screen.dart';
+import 'package:hudhud_delivery/features/force_update/presentation/screen/force_update_screen.dart';
 import 'package:hudhud_delivery/features/splash/presentation/theme/splash_colors.dart';
 import '../widgets/splash_widget.dart';
 
@@ -17,6 +20,7 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
   final AuthService _authService = AuthService();
+  final ForceUpdateService _forceUpdateService = ForceUpdateService();
 
   late final AnimationController _introController;
   late final AnimationController _haloController;
@@ -65,14 +69,36 @@ class _SplashScreenState extends State<SplashScreen>
       await Future.wait([
         _authService.initialize(),
         StartupLocationService.fetchFreshOnAppLaunch(),
+        RemoteConfigService.instance.initialize(),
       ]);
-
-      await Future.delayed(const Duration(seconds: 3));
-      await _goToHome();
-    } catch (e) {
-      await Future.delayed(const Duration(seconds: 3));
-      await _goToHome();
+    } catch (_) {
+      // Continue even if auth/location/remote-config init fails.
     }
+
+    await Future.delayed(const Duration(seconds: 3));
+    if (!mounted) return;
+
+    try {
+      final force = await _forceUpdateService.check();
+      if (!mounted) return;
+      if (force.required) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ForceUpdateScreen(
+              currentVersion: force.currentVersion,
+              minimumSupportedVersion: force.minimumSupportedVersion,
+              latestStoreVersion: force.latestStoreVersion,
+            ),
+          ),
+        );
+        return;
+      }
+    } catch (_) {
+      // Fail open: never block the app if the force-update check errors.
+    }
+
+    await _goToHome();
   }
 
   /// Always open home. Use stored token when present; otherwise browse as guest.
