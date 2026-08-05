@@ -1,3 +1,5 @@
+import 'package:dio/dio.dart';
+
 import '../../../../core/api/api_constants.dart';
 import '../../../../core/api/api_service.dart';
 import '../../utils/payment_methods_parser.dart';
@@ -54,9 +56,14 @@ class PaymentDataProvider {
       }
       if (isSandbox != null) body['is_sandbox'] = isSandbox;
 
+      // Provider gateways (eBirr/Waafi) often exceed the default 30s receive timeout.
       final response = await apiService.post(
         '${ApiConstants.baseUrl}${ApiConstants.paymentsInitiate}',
         data: body,
+        options: Options(
+          receiveTimeout: const Duration(seconds: 90),
+          sendTimeout: const Duration(seconds: 60),
+        ),
       );
       final data = response.data;
       if (data is Map) {

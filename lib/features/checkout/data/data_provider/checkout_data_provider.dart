@@ -6,7 +6,7 @@ class CheckoutDataProvider {
   CheckoutDataProvider({required this.apiService});
 
   /// POST /api/customer/orders
-  /// Sends nested delivery_address plus legacy flat lat/lng fields for compatibility.
+  /// Nested delivery_address (docs) plus flat delivery_* fields (live API validation).
   Future<Map<String, dynamic>> createOrder({
     required int vendorId,
     required List<Map<String, dynamic>> items,
@@ -23,24 +23,36 @@ class CheckoutDataProvider {
   }) async {
     try {
       final Map<String, dynamic> orderData = {
-        'vendor_id': vendorId,
-        'items': items,
-        'tax_amount': taxAmount,
-        'discount_amount': discountAmount,
+        'items': items
+            .map((item) {
+              final mapped = <String, dynamic>{
+                'product_id': item['product_id'],
+                'quantity': item['quantity'],
+              };
+              final variantId = item['variant_id'];
+              if (variantId != null) {
+                final parsed = variantId is int
+                    ? variantId
+                    : int.tryParse(variantId.toString());
+                if (parsed != null && parsed > 0) {
+                  mapped['variant_id'] = parsed;
+                }
+              }
+              return mapped;
+            })
+            .toList(),
         'delivery_address': {
           'latitude': deliveryLatitude,
           'longitude': deliveryLongitude,
           'address': deliveryAddress,
         },
-        // Legacy flat fields for backends that still expect them.
-        'delivery_location': deliveryLocation,
+        // Live API still requires these flat fields (422 if omitted).
+        'delivery_location': deliveryLocation.isNotEmpty
+            ? deliveryLocation
+            : deliveryAddress,
         'delivery_latitude': deliveryLatitude,
         'delivery_longitude': deliveryLongitude,
         'payment_method': paymentMethod,
-        'service_type': serviceType,
-        if (notes != null && notes.isNotEmpty) 'notes': notes,
-        if (couponCode != null && couponCode.trim().isNotEmpty)
-          'coupon_code': couponCode.trim(),
       };
 
       final response = await apiService.post(

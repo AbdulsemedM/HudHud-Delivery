@@ -171,27 +171,35 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
         orderId: created.orderId,
       );
 
-      final raw = await paymentRepository.initiatePayment(
-        paymentMethodCode: event.paymentMethod,
-        type: 'order',
-        orderId: created.orderId,
-        amount: amount,
-        currency: currency,
-        paymentDetails: initiateDetails,
-      );
+      try {
+        final raw = await paymentRepository.initiatePayment(
+          paymentMethodCode: event.paymentMethod,
+          type: 'order',
+          orderId: created.orderId,
+          amount: amount,
+          currency: currency,
+          paymentDetails: initiateDetails,
+        );
 
-      final result = PaymentInitiateResult.fromJson(raw);
-      if (!result.isSuccess) {
-        emit(PaymentFailure(
-          error: result.message ?? 'Payment initiation failed',
+        final result = PaymentInitiateResult.fromJson(raw);
+        if (!result.isSuccess) {
+          emit(PaymentFailure(
+            error:
+                '${result.message ?? 'Payment initiation failed'} (order #${created.orderId} was created)',
+          ));
+          return;
+        }
+
+        emit(PaymentInitiated(
+          result: result,
+          orderId: created.orderId.toString(),
         ));
-        return;
+      } catch (e) {
+        emit(PaymentFailure(
+          error:
+              '${userFacingApiError(e)} Order #${created.orderId} was already created — avoid checking out again (duplicate order).',
+        ));
       }
-
-      emit(PaymentInitiated(
-        result: result,
-        orderId: created.orderId.toString(),
-      ));
     } catch (e) {
       emit(PaymentFailure(error: userFacingApiError(e)));
     }
