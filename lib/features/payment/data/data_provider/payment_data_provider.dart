@@ -87,6 +87,26 @@ class PaymentDataProvider {
     }
   }
 
+  /// POST /api/payments/service/{wallet|waafipay|edahab|sahay|ebirr}
+  Future<Map<String, dynamic>> processServicePayment({
+    required String path,
+    required Map<String, dynamic> body,
+  }) async {
+    try {
+      final response = await apiService.post(
+        '${ApiConstants.baseUrl}$path',
+        data: body,
+      );
+      final data = response.data;
+      if (data is Map) {
+        return Map<String, dynamic>.from(data);
+      }
+      return {'success': false, 'message': 'Invalid service payment response'};
+    } catch (e) {
+      throw Exception('Failed to process service payment: $e');
+    }
+  }
+
   Future<Map<String, dynamic>> processPayment({
     required String paymentMethod,
     required double amount,

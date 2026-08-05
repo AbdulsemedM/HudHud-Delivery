@@ -69,6 +69,13 @@ class ApiConstants {
   /// GET /api/payments/{id}/status
   static const String paymentsStatus = 'payments/{id}/status';
 
+  // Service convenience payment endpoints
+  static const String paymentsServiceWallet = 'payments/service/wallet';
+  static const String paymentsServiceWaafipay = 'payments/service/waafipay';
+  static const String paymentsServiceEdahab = 'payments/service/edahab';
+  static const String paymentsServiceSahay = 'payments/service/sahay';
+  static const String paymentsServiceEbirr = 'payments/service/ebirr';
+
   // Wallet endpoints
   static const String wallets = 'wallets';
   static const String walletDetails = '$wallets/{id}';

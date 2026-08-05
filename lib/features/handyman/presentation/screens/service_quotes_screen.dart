@@ -8,6 +8,7 @@ import 'package:hudhud_delivery/features/handyman/data/repository/handyman_repos
 import 'package:hudhud_delivery/features/home/presentation/widgets/home_widget.dart';
 import 'package:lottie/lottie.dart';
 import 'handyman_details_screen.dart';
+import 'service_payment_screen.dart';
 
 class ServiceQuotesScreen extends StatefulWidget {
   final int requestId;
@@ -100,6 +101,34 @@ class _ServiceQuotesScreenState extends State<ServiceQuotesScreen> {
           backgroundColor: AppColors.successColor,
         ),
       );
+
+      final amount = double.tryParse(
+            quote.amount.replaceAll(RegExp(r'[^0-9.]'), ''),
+          ) ??
+          0;
+      if (amount <= 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Invalid quote amount for payment'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        Navigator.pop(context, true);
+        return;
+      }
+
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ServicePaymentScreen(
+            serviceRequestId: widget.requestId,
+            amount: amount,
+            currency: 'ETB',
+          ),
+        ),
+      );
+
+      if (!mounted) return;
       Navigator.pop(context, true);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(

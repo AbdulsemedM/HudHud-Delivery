@@ -1,6 +1,7 @@
 import '../data_provider/payment_data_provider.dart';
 import '../../model/payment_initiate_result.dart';
 import '../../model/payment_status_result.dart';
+import '../../utils/service_payment_mapping.dart';
 
 class PaymentRepository {
   final PaymentDataProvider paymentDataProvider;
@@ -42,6 +43,36 @@ class PaymentRepository {
       return filterAllowedPaymentMethods(enabled.toList());
     } catch (e) {
       throw Exception('Failed to get payment methods: $e');
+    }
+  }
+
+  /// Service convenience payment (POST /api/payments/service/...).
+  Future<Map<String, dynamic>> processServicePayment({
+    required String methodCode,
+    required int serviceRequestId,
+    Map<String, dynamic>? paymentDetails,
+  }) async {
+    try {
+      if (!kServicePaymentMethodCodes.contains(methodCode)) {
+        throw Exception('Unsupported service payment method: $methodCode');
+      }
+      if (serviceRequestId <= 0) {
+        throw Exception('Invalid service request id: $serviceRequestId');
+      }
+
+      final path = servicePaymentPathForMethod(methodCode);
+      final body = buildServicePaymentBody(
+        methodCode: methodCode,
+        serviceRequestId: serviceRequestId,
+        paymentDetails: paymentDetails,
+      );
+
+      return await paymentDataProvider.processServicePayment(
+        path: path,
+        body: body,
+      );
+    } catch (e) {
+      throw Exception('Service payment failed: $e');
     }
   }
 
