@@ -5,6 +5,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/widgets/status_chip.dart';
+import 'package:hudhud_delivery/features/taxi/data/models/ride_request_result.dart';
 import 'package:hudhud_delivery/features/taxi/data/ride_data_provider.dart';
 import 'package:lottie/lottie.dart';
 import 'driver_on_the_way_screen.dart';
@@ -18,6 +19,8 @@ class FindingDriverScreen extends StatefulWidget {
   final int price;
   final String paymentMethod;
   final int? rideId;
+  final String currency;
+  final Map<String, dynamic>? paymentDetails;
 
   const FindingDriverScreen({
     super.key,
@@ -29,6 +32,8 @@ class FindingDriverScreen extends StatefulWidget {
     required this.price,
     required this.paymentMethod,
     this.rideId,
+    this.currency = 'KES',
+    this.paymentDetails,
   });
 
   @override
@@ -157,6 +162,8 @@ class _FindingDriverScreenState extends State<FindingDriverScreen> {
           driverName: _driverName(ride),
           driverPhone: _driverPhone(ride),
           driverPosition: _parseDriverLocation(ride),
+          currency: ride['currency']?.toString() ?? widget.currency,
+          paymentDetails: widget.paymentDetails,
         ),
       ),
     );
@@ -214,12 +221,10 @@ class _FindingDriverScreenState extends State<FindingDriverScreen> {
     final success = statusCode != null && statusCode >= 200 && statusCode < 300;
     if (success) {
       _pollTimer?.cancel();
-      final message = (result['data'] is Map)
-          ? (result['data'] as Map)['message']?.toString()
-          : null;
+      final refund = parseRideCancelRefundResponse(result['data']);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(message ?? 'Ride cancelled successfully.'),
+          content: Text(formatRideCancelRefundMessage(refund)),
           backgroundColor: AppColors.successColor,
         ),
       );

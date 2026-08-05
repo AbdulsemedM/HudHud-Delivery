@@ -118,7 +118,10 @@ class ApiConstants {
   static const String rideAvailableVehicles =
       'services/ride/available-vehicles';
   static const String userRidesActive = 'user/rides/active';
+  /// Legacy driver cancel path (kept for compatibility).
   static const String rideCancel = 'driver/services/ride/cancel';
+  /// Customer cancel: POST /api/services/ride/{id}/cancel
+  static const String rideCancelById = 'services/ride/{id}/cancel';
   static const String deliveryTrack = 'services/delivery/track/{id}';
   static const String userDeliveries = 'user/deliveries';
   static const String userDeliveryDetails = 'user/deliveries/{id}';

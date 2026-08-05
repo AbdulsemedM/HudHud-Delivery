@@ -4,13 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/widgets/status_chip.dart';
 import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
 import 'package:hudhud_delivery/features/chat/utils/chat_navigation.dart';
+import 'package:hudhud_delivery/features/payment/data/data_provider/payment_data_provider.dart';
+import 'package:hudhud_delivery/features/payment/data/repository/payment_repository.dart';
+import 'package:hudhud_delivery/features/payment/presentation/screen/payment_initiate_result_screen.dart';
+import 'package:hudhud_delivery/features/taxi/data/models/ride_request_result.dart';
 import 'package:hudhud_delivery/features/taxi/data/ride_data_provider.dart';
+import 'package:hudhud_delivery/features/taxi/utils/ride_payment_helper.dart';
 import 'package:shimmer/shimmer.dart';
 
 class DriverOnTheWayScreen extends StatefulWidget {
@@ -25,6 +31,8 @@ class DriverOnTheWayScreen extends StatefulWidget {
   final String driverName;
   final String? driverPhone;
   final LatLng? driverPosition;
+  final String currency;
+  final Map<String, dynamic>? paymentDetails;
 
   const DriverOnTheWayScreen({
     super.key,
@@ -39,6 +47,8 @@ class DriverOnTheWayScreen extends StatefulWidget {
     this.driverName = 'Driver',
     this.driverPhone,
     this.driverPosition,
+    this.currency = 'KES',
+    this.paymentDetails,
   });
 
   @override
@@ -47,6 +57,7 @@ class DriverOnTheWayScreen extends StatefulWidget {
 
 class _DriverOnTheWayScreenState extends State<DriverOnTheWayScreen> {
   final RideDataProvider _rideDataProvider = RideDataProvider();
+  late final PaymentRepository _paymentRepository;
   gmaps.GoogleMapController? _mapController;
   LatLng? _driverPosition;
   String _driverName = 'Driver';
@@ -56,12 +67,19 @@ class _DriverOnTheWayScreenState extends State<DriverOnTheWayScreen> {
   double? _routeDistanceKm;
   bool _isLoadingRoute = true;
   bool? _hasGoogleMapsApiKey;
+  bool _paymentInitiated = false;
+  bool _isInitiatingPayment = false;
 
   static gmaps.LatLng _toG(LatLng p) => gmaps.LatLng(p.latitude, p.longitude);
 
   @override
   void initState() {
     super.initState();
+    _paymentRepository = PaymentRepository(
+      paymentDataProvider: PaymentDataProvider(
+        apiService: ApiService.instance,
+      ),
+    );
     _driverName = widget.driverName;
     _driverPhone = widget.driverPhone;
     _driverPosition = widget.driverPosition;
@@ -71,6 +89,9 @@ class _DriverOnTheWayScreenState extends State<DriverOnTheWayScreen> {
       const Duration(seconds: 8),
       (_) => _refreshActiveRide(),
     );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _refreshActiveRide();
+    });
   }
 
   @override
@@ -115,9 +136,16 @@ class _DriverOnTheWayScreenState extends State<DriverOnTheWayScreen> {
   Future<void> _refreshActiveRide() async {
     final result = await _rideDataProvider.getActiveRide();
     if (!mounted) return;
-    if (result['statusCode'] != 200 || result['data'] == null) return;
 
-    final ride = result['data'] as Map<String, dynamic>;
+    final ride = _unwrapRidePayload(result['data']);
+    if (ride == null) return;
+
+    final status = (ride['status']?.toString() ?? '').toLowerCase();
+    if (status == 'completed') {
+      await _onRideCompleted(ride);
+      return;
+    }
+
     final nested = ride['driver'];
     final name = nested is Map
         ? nested['name']?.toString()
@@ -132,6 +160,77 @@ class _DriverOnTheWayScreenState extends State<DriverOnTheWayScreen> {
       final loc = _parseDriverLocation(ride);
       if (loc != null) _driverPosition = loc;
     });
+  }
+
+  Map<String, dynamic>? _unwrapRidePayload(dynamic data) {
+    if (data is! Map) return null;
+    final map = Map<String, dynamic>.from(data);
+    final nestedData = map['data'];
+    if (nestedData is Map) {
+      final inner = Map<String, dynamic>.from(nestedData);
+      if (inner['ride'] is Map) {
+        return Map<String, dynamic>.from(inner['ride'] as Map);
+      }
+      if (inner['id'] != null || inner['status'] != null) return inner;
+    }
+    if (map['ride'] is Map) {
+      return Map<String, dynamic>.from(map['ride'] as Map);
+    }
+    if (map['id'] != null || map['status'] != null) return map;
+    return null;
+  }
+
+  Future<void> _onRideCompleted(Map<String, dynamic> ride) async {
+    if (_paymentInitiated || _isInitiatingPayment) return;
+    final rideId = widget.rideId ??
+        int.tryParse(ride['id']?.toString() ?? '') ??
+        int.tryParse(ride['ride_id']?.toString() ?? '');
+    if (rideId == null || rideId <= 0) return;
+
+    setState(() {
+      _paymentInitiated = true;
+      _isInitiatingPayment = true;
+    });
+    _pollTimer?.cancel();
+
+    final amount =
+        parseRideFare(ride) ?? widget.price.toDouble();
+    final currency = parseRideCurrency(ride, fallback: widget.currency);
+    final method =
+        ride['payment_method']?.toString() ?? widget.paymentMethod;
+
+    try {
+      final result = await initiateRidePayment(
+        repo: _paymentRepository,
+        rideId: rideId,
+        paymentMethodCode: method,
+        amount: amount > 0 ? amount : widget.price.toDouble(),
+        currency: currency,
+        paymentDetails: widget.paymentDetails,
+      );
+      if (!mounted) return;
+      setState(() => _isInitiatingPayment = false);
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => PaymentInitiateResultScreen(
+            result: result,
+            orderId: rideId.toString(),
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isInitiatingPayment = false;
+        _paymentInitiated = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Payment failed: $e'),
+          backgroundColor: AppColors.errorColor,
+        ),
+      );
+    }
   }
 
   Future<void> _callDriver() async {

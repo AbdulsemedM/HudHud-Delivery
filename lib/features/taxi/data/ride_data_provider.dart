@@ -49,7 +49,7 @@ class RideDataProvider {
   }
 
   /// POST /api/services/ride/request
-  /// Creates a ride request
+  /// Creates a ride request with nested pickup/dropoff locations.
   Future<Map<String, dynamic>> requestRide({
     required String pickupLocation,
     required double pickupLatitude,
@@ -70,10 +70,19 @@ class RideDataProvider {
   }) async {
     try {
       final Map<String, dynamic> requestData = {
-        'pickup_location': pickupLocation,
+        'pickup_location': {
+          'latitude': pickupLatitude,
+          'longitude': pickupLongitude,
+          'address': pickupLocation,
+        },
+        'dropoff_location': {
+          'latitude': dropoffLatitude,
+          'longitude': dropoffLongitude,
+          'address': dropoffLocation,
+        },
+        // Legacy flat fields for backends that still expect them.
         'pickup_latitude': pickupLatitude,
         'pickup_longitude': pickupLongitude,
-        'dropoff_location': dropoffLocation,
         'dropoff_latitude': dropoffLatitude,
         'dropoff_longitude': dropoffLongitude,
         'vehicle_type': vehicleType,
@@ -144,17 +153,20 @@ class RideDataProvider {
     }
   }
 
-  /// POST /api/driver/services/ride/cancel
-  /// Cancels a ride request (customer side uses cancelled_by: "user").
+  /// POST /api/services/ride/{id}/cancel
+  /// Cancels a ride request (customer side).
   Future<Map<String, dynamic>> cancelRide({
     required int rideId,
     String cancellationReason = 'Changed my mind',
   }) async {
     try {
+      final path = ApiConstants.rideCancelById.replaceAll(
+        '{id}',
+        rideId.toString(),
+      );
       final response = await apiService.post(
-        '${ApiConstants.baseUrl}${ApiConstants.rideCancel}',
+        '${ApiConstants.baseUrl}$path',
         data: {
-          'ride_id': rideId,
           'cancellation_reason': cancellationReason,
           'cancelled_by': 'user',
         },

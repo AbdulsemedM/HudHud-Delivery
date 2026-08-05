@@ -10,6 +10,7 @@ import 'package:hudhud_delivery/app/services/google_places_service.dart';
 import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
 import 'package:hudhud_delivery/app/models/place_result.dart';
+import 'package:hudhud_delivery/features/taxi/data/models/ride_request_result.dart';
 import 'package:hudhud_delivery/features/taxi/data/ride_data_provider.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/widgets/status_chip.dart';
@@ -262,12 +263,10 @@ class _TaxiScreenState extends State<TaxiScreen> {
         _routePolylinePoints = null;
         _routeDistanceKm = null;
       });
-      final message = (result['data'] is Map)
-          ? (result['data'] as Map)['message']?.toString()
-          : null;
+      final refund = parseRideCancelRefundResponse(result['data']);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(message ?? 'Ride cancelled successfully.'),
+          content: Text(formatRideCancelRefundMessage(refund)),
           backgroundColor: AppColors.successColor,
         ),
       );
@@ -307,6 +306,27 @@ class _TaxiScreenState extends State<TaxiScreen> {
         '${vehicleType[0].toUpperCase()}${vehicleType.substring(1)} ($rideType)';
 
     final hasDriver = _activeRide!['driver_id'] != null;
+    final currency = _activeRide!['currency']?.toString() ?? 'KES';
+    if (status == 'completed') {
+      // Resume payment flow if ride finished while user was away.
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DriverOnTheWayScreen(
+            pickupLocation: pickup,
+            destinationLocation: dropoff,
+            pickupAddress: pickupLocation,
+            destinationAddress: dropoffLocation,
+            tripType: tripName,
+            price: estimatedFare,
+            paymentMethod: paymentMethod,
+            rideId: _activeRideId(),
+            currency: currency,
+          ),
+        ),
+      ).then((_) => _checkActiveRide());
+      return;
+    }
     if (status == 'searching' || !hasDriver) {
       Navigator.push(
         context,
@@ -320,6 +340,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
             price: estimatedFare,
             paymentMethod: paymentMethod,
             rideId: _activeRideId(),
+            currency: currency,
           ),
         ),
       ).then((_) => _checkActiveRide());
@@ -366,6 +387,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
             driverName: driverName,
             driverPhone: driverPhone,
             driverPosition: driverPosition,
+            currency: currency,
           ),
         ),
       ).then((_) => _checkActiveRide());

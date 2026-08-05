@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
+import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
+import 'package:hudhud_delivery/features/payment/data/data_provider/payment_data_provider.dart';
+import 'package:hudhud_delivery/features/payment/data/repository/payment_repository.dart';
+import 'package:hudhud_delivery/features/payment/model/payment_initiate_result.dart';
+import 'package:hudhud_delivery/features/payment/presentation/widgets/payment_details_form.dart';
+import 'package:hudhud_delivery/features/taxi/data/models/ride_request_result.dart';
 import 'package:hudhud_delivery/features/taxi/data/ride_data_provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'finding_driver_screen.dart';
@@ -35,10 +41,17 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
   gmaps.GoogleMapController? _mapController;
   String? _selectedTrip;
   String _paymentMethod = 'wallet';
+  List<Map<String, dynamic>> _paymentMethods =
+      List.from(kDefaultAllowedPaymentMethods);
+  bool _loadingPaymentMethods = true;
+  Map<String, dynamic> _paymentDetails = {};
+  String _ebirrProvider = 'kaafi';
+  bool _useHpp = false;
   bool _isLoadingEstimates = true;
   bool _isRequestingRide = false;
   String? _estimateError;
   final RideDataProvider _rideDataProvider = RideDataProvider();
+  late final PaymentRepository _paymentRepository;
   List<LatLng>? _routePolylinePoints;
   double? _routeDistanceKm;
   bool _isLoadingRoute = false;
@@ -51,7 +64,13 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
   @override
   void initState() {
     super.initState();
+    _paymentRepository = PaymentRepository(
+      paymentDataProvider: PaymentDataProvider(
+        apiService: ApiService.instance,
+      ),
+    );
     _loadMapsAvailability();
+    _loadPaymentMethods();
     _selectedTrip = 'go';
     if (widget.initialRoutePolylinePoints != null &&
         widget.initialRouteDistanceKm != null) {
@@ -63,6 +82,29 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchEstimates();
     });
+  }
+
+  Future<void> _loadPaymentMethods() async {
+    try {
+      final methods = await _paymentRepository.getPaymentMethods();
+      if (!mounted) return;
+      setState(() {
+        _paymentMethods = methods.isNotEmpty
+            ? methods
+            : List.from(kDefaultAllowedPaymentMethods);
+        _loadingPaymentMethods = false;
+        if (!_paymentMethods.any((m) => m['id'] == _paymentMethod)) {
+          _paymentMethod = _paymentMethods.first['id'] as String? ?? 'wallet';
+          _paymentDetails = {};
+        }
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _paymentMethods = List.from(kDefaultAllowedPaymentMethods);
+        _loadingPaymentMethods = false;
+      });
+    }
   }
 
   Future<void> _loadMapsAvailability() async {
@@ -214,6 +256,22 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
   Future<void> _onSelectTrip(TripOption selectedOption) async {
     if (_isRequestingRide || selectedOption.price <= 0) return;
 
+    if (paymentMethodNeedsDetailsForm(_paymentMethod)) {
+      final phoneError = validatePaymentPhone(
+        _paymentDetails['phone']?.toString(),
+        _paymentMethod,
+      );
+      if (phoneError != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(phoneError),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+        return;
+      }
+    }
+
     setState(() => _isRequestingRide = true);
 
     final result = await _rideDataProvider.requestRide(
@@ -239,9 +297,10 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
     if (result['statusCode'] != null &&
         result['statusCode'] >= 200 &&
         result['statusCode']! < 300) {
-      final data = result['data'] as Map<String, dynamic>?;
-      final ride = data?['ride'] as Map<String, dynamic>?;
-      final rideId = ride?['id'] as int?;
+      final parsed = parseRideRequestResponse(result['data']);
+      final rideId = parsed.isValid ? parsed.rideId : null;
+      final price = (parsed.estimatedFare ?? selectedOption.price.toDouble())
+          .round();
 
       Navigator.push(
         context,
@@ -252,9 +311,11 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
             pickupAddress: widget.pickupAddress,
             destinationAddress: widget.destinationAddress,
             tripType: selectedOption.name,
-            price: selectedOption.price,
+            price: price,
             paymentMethod: _paymentMethod,
             rideId: rideId,
+            currency: parsed.currency ?? 'KES',
+            paymentDetails: Map<String, dynamic>.from(_paymentDetails),
           ),
         ),
       );
@@ -486,17 +547,39 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
                             ),
                           ),
                           const SizedBox(height: AppColors.spaceSM),
-                          Row(
-                            children: ['wallet', 'card', 'cash'].map((method) {
-                              final isSelected = _paymentMethod == method;
-                              return Padding(
-                                padding: const EdgeInsets.only(right: 8),
-                                child: FilterChip(
-                                  label: Text(method.toUpperCase()),
+                          if (_loadingPaymentMethods)
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 8),
+                              child: Center(
+                                child: SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                ),
+                              ),
+                            )
+                          else
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: _paymentMethods.map((method) {
+                                final id = method['id'] as String? ?? '';
+                                final name =
+                                    method['name'] as String? ?? id;
+                                final isSelected = _paymentMethod == id;
+                                return FilterChip(
+                                  label: Text(name),
                                   selected: isSelected,
                                   onSelected: (selected) {
                                     if (selected) {
-                                      setState(() => _paymentMethod = method);
+                                      setState(() {
+                                        _paymentMethod = id;
+                                        _paymentDetails = {};
+                                        _useHpp = false;
+                                        _ebirrProvider = 'kaafi';
+                                      });
                                     }
                                   },
                                   showCheckmark: false,
@@ -519,9 +602,21 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
                                       AppColors.radiusFull,
                                     ),
                                   ),
-                                ),
-                              );
-                            }).toList(),
+                                );
+                              }).toList(),
+                            ),
+                          PaymentDetailsForm(
+                            key: ValueKey(_paymentMethod),
+                            paymentMethodCode: _paymentMethod,
+                            ebirrProvider: _ebirrProvider,
+                            useHpp: _useHpp,
+                            onEbirrProviderChanged: (v) =>
+                                setState(() => _ebirrProvider = v),
+                            onUseHppChanged: (v) =>
+                                setState(() => _useHpp = v),
+                            onChanged: (details) {
+                              _paymentDetails = details;
+                            },
                           ),
                         ],
                       ),
