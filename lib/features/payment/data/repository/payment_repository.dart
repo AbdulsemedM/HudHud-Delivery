@@ -1,4 +1,5 @@
 import '../data_provider/payment_data_provider.dart';
+import '../../model/payment_initiate_result.dart';
 
 class PaymentRepository {
   final PaymentDataProvider paymentDataProvider;
@@ -16,12 +17,10 @@ class PaymentRepository {
         throw Exception('Payment method is required');
       }
 
-      // Validate amount
       if (amount <= 0) {
         throw Exception('Invalid payment amount: $amount');
       }
 
-      // Process payment through data provider
       final result = await paymentDataProvider.processPayment(
         paymentMethod: paymentMethod,
         amount: amount,
@@ -38,9 +37,8 @@ class PaymentRepository {
   Future<List<Map<String, dynamic>>> getPaymentMethods() async {
     try {
       final methods = await paymentDataProvider.getPaymentMethods();
-
-      // Filter enabled payment methods
-      return methods.where((method) => method['enabled'] == true).toList();
+      final enabled = methods.where((method) => method['enabled'] == true);
+      return filterAllowedPaymentMethods(enabled.toList());
     } catch (e) {
       throw Exception('Failed to get payment methods: $e');
     }
@@ -48,30 +46,55 @@ class PaymentRepository {
 
   Future<Map<String, dynamic>> initiatePayment({
     required String paymentMethodCode,
-    required int orderId,
     required double amount,
-    required String currency,
     String type = 'order',
+    String? currency,
+    int? orderId,
+    int? rideId,
+    int? serviceRequestId,
+    int? packageDeliveryId,
     Map<String, dynamic>? paymentDetails,
+    bool? isSandbox,
   }) async {
     try {
       if (paymentMethodCode.isEmpty) {
         throw Exception('Payment method is required');
       }
-      if (orderId <= 0) {
-        throw Exception('Invalid order id: $orderId');
-      }
       if (amount <= 0) {
         throw Exception('Invalid payment amount: $amount');
       }
 
+      switch (type) {
+        case 'order':
+          if (orderId == null || orderId <= 0) {
+            throw Exception('Invalid order id: $orderId');
+          }
+        case 'ride':
+          if (rideId == null || rideId <= 0) {
+            throw Exception('Invalid ride id: $rideId');
+          }
+        case 'service':
+          if (serviceRequestId == null || serviceRequestId <= 0) {
+            throw Exception('Invalid service request id: $serviceRequestId');
+          }
+        case 'delivery':
+          if (packageDeliveryId == null || packageDeliveryId <= 0) {
+            throw Exception(
+                'Invalid package delivery id: $packageDeliveryId');
+          }
+      }
+
       return await paymentDataProvider.initiatePayment(
         paymentMethodCode: paymentMethodCode,
-        orderId: orderId,
+        type: type,
         amount: amount,
         currency: currency,
-        type: type,
+        orderId: orderId,
+        rideId: rideId,
+        serviceRequestId: serviceRequestId,
+        packageDeliveryId: packageDeliveryId,
         paymentDetails: paymentDetails,
+        isSandbox: isSandbox,
       );
     } catch (e) {
       throw Exception('Payment initiation failed: $e');

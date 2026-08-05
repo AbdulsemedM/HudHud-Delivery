@@ -907,40 +907,51 @@ class _SummaryRow extends StatelessWidget {
   }
 }
 
-const List<Map<String, dynamic>> _kCheckoutPaymentMethods = [
-  {'id': 'cash_on_delivery', 'name': 'Cash', 'enabled': true},
-  {'id': 'telebirr', 'name': 'TeleBirr', 'enabled': true},
-  {'id': 'cbe', 'name': 'CBE Birr', 'enabled': true},
-  {'id': 'chapa', 'name': 'Chapa', 'enabled': true},
-  {'id': 'amole', 'name': 'Amole', 'enabled': true},
-  {'id': 'wallet', 'name': 'Wallet', 'enabled': true},
-  {'id': 'card', 'name': 'Card', 'enabled': true},
-  {'id': 'ebirr', 'name': 'eBirr', 'enabled': true},
-];
-
 class PaymentMethodGridSection extends StatelessWidget {
   final String? selectedId;
   final ValueChanged<String> onSelected;
+  final List<Map<String, dynamic>> methods;
+  final bool isLoading;
 
   const PaymentMethodGridSection({
     super.key,
     required this.selectedId,
     required this.onSelected,
+    this.methods = const [],
+    this.isLoading = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const SizedBox(
+        height: 112,
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    final list = methods.isNotEmpty
+        ? methods
+        : const [
+            {'id': 'wallet', 'name': 'Wallet', 'enabled': true},
+            {'id': 'cash_on_delivery', 'name': 'Cash on Delivery', 'enabled': true},
+            {'id': 'waafi', 'name': 'Waafi Pay', 'enabled': true},
+            {'id': 'edahab', 'name': 'eDahab', 'enabled': true},
+            {'id': 'sahay', 'name': 'Sahay', 'enabled': true},
+            {'id': 'ebirr', 'name': 'eBirr', 'enabled': true},
+          ];
+
     return SizedBox(
       height: 112,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        itemCount: _kCheckoutPaymentMethods.length,
+        itemCount: list.length,
         separatorBuilder: (_, __) => const SizedBox(width: 10),
         itemBuilder: (context, index) {
-          final method = _kCheckoutPaymentMethods[index];
+          final method = list[index];
           final id = method['id'] as String;
-          final name = method['name'] as String;
-          final enabled = method['enabled'] as bool;
+          final name = method['name'] as String? ?? id;
+          final enabled = method['enabled'] != false;
           final isSelected = selectedId == id;
           final color = PaymentMethodCard.colorForId(id);
           final icon = PaymentMethodCard.iconForId(id);

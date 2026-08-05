@@ -24,23 +24,39 @@ class PaymentDataProvider {
 
   Future<Map<String, dynamic>> initiatePayment({
     required String paymentMethodCode,
-    required int orderId,
+    required String type,
     required double amount,
-    required String currency,
-    String type = 'order',
+    String? currency,
+    int? orderId,
+    int? rideId,
+    int? serviceRequestId,
+    int? packageDeliveryId,
     Map<String, dynamic>? paymentDetails,
+    bool? isSandbox,
   }) async {
     try {
+      final body = <String, dynamic>{
+        'payment_method_code': paymentMethodCode,
+        'type': type,
+        'amount': amount,
+        'payment_details': paymentDetails ?? {},
+      };
+      if (currency != null && currency.isNotEmpty) {
+        body['currency'] = currency;
+      }
+      if (orderId != null) body['order_id'] = orderId;
+      if (rideId != null) body['ride_id'] = rideId;
+      if (serviceRequestId != null) {
+        body['service_request_id'] = serviceRequestId;
+      }
+      if (packageDeliveryId != null) {
+        body['package_delivery_id'] = packageDeliveryId;
+      }
+      if (isSandbox != null) body['is_sandbox'] = isSandbox;
+
       final response = await apiService.post(
         '${ApiConstants.baseUrl}${ApiConstants.paymentsInitiate}',
-        data: {
-          'payment_method_code': paymentMethodCode,
-          'order_id': orderId,
-          'amount': amount,
-          'type': type,
-          'currency': currency,
-          'payment_details': paymentDetails ?? {},
-        },
+        data: body,
       );
       final data = response.data;
       if (data is Map) {

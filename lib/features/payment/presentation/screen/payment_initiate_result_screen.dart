@@ -4,8 +4,9 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../model/payment_initiate_result.dart';
+import 'payment_hpp_screen.dart';
 
-class PaymentInitiateResultScreen extends StatelessWidget {
+class PaymentInitiateResultScreen extends StatefulWidget {
   final PaymentInitiateResult result;
   final String orderId;
 
@@ -14,6 +15,37 @@ class PaymentInitiateResultScreen extends StatelessWidget {
     required this.result,
     required this.orderId,
   });
+
+  @override
+  State<PaymentInitiateResultScreen> createState() =>
+      _PaymentInitiateResultScreenState();
+}
+
+class _PaymentInitiateResultScreenState
+    extends State<PaymentInitiateResultScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final result = widget.result;
+      if (result.isSuccess &&
+          result.uiMode == PaymentInitiateUiMode.redirectToHpp &&
+          result.redirectUrl != null &&
+          result.redirectUrl!.isNotEmpty) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => PaymentHppScreen(
+              redirectUrl: result.redirectUrl!,
+            ),
+          ),
+        );
+      }
+    });
+  }
+
+  PaymentInitiateResult get result => widget.result;
+  String get orderId => widget.orderId;
 
   @override
   Widget build(BuildContext context) {
@@ -72,12 +104,14 @@ class PaymentInitiateResultScreen extends StatelessWidget {
 
     switch (result.uiMode) {
       case PaymentInitiateUiMode.ussdPending:
+      case PaymentInitiateUiMode.userActionRequired:
         return _StatusContent(
           icon: Icons.phone_android,
           iconColor: AppColors.primaryColor,
           title: 'Complete on your phone',
-          message: result.message ??
-              'USSD push sent. Please approve the payment on your phone.',
+          message: result.customerMessage ??
+              result.message ??
+              'Please check your phone and enter your PIN to complete the payment.',
           children: [
             if (result.referenceNumber != null)
               _InfoRow(label: 'Reference', value: result.referenceNumber!),
@@ -86,25 +120,76 @@ class PaymentInitiateResultScreen extends StatelessWidget {
             if (result.amount != null)
               _InfoRow(
                 label: 'Amount',
-                value: '${result.amount} ${result.currency ?? 'ETB'}',
+                value: '${result.amount} ${result.currency ?? ''}'.trim(),
               ),
             _InfoRow(label: 'Order', value: '#$orderId'),
           ],
         );
       case PaymentInitiateUiMode.qrCode:
         return _QrContent(result: result, orderId: orderId);
-      case PaymentInitiateUiMode.success:
-      case PaymentInitiateUiMode.failure:
+      case PaymentInitiateUiMode.redirectToHpp:
         return _StatusContent(
-          icon: Icons.check_circle,
+          icon: Icons.open_in_browser,
           iconColor: AppColors.primaryColor,
-          title: 'Payment initiated',
-          message: result.message ?? 'Please complete your payment.',
+          title: 'Hosted payment',
+          message: result.customerMessage ??
+              result.message ??
+              'Complete payment on the hosted page.',
+          children: [
+            _InfoRow(label: 'Order', value: '#$orderId'),
+            const SizedBox(height: 16),
+            if (result.redirectUrl != null && result.redirectUrl!.isNotEmpty)
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => PaymentHppScreen(
+                          redirectUrl: result.redirectUrl!,
+                        ),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.open_in_browser),
+                  label: const Text('Open payment page'),
+                ),
+              ),
+          ],
+        );
+      case PaymentInitiateUiMode.success:
+        final isCompleted = result.status == 'completed';
+        final isCod = result.method == 'cash_on_delivery';
+        return _StatusContent(
+          icon: isCompleted ? Icons.check_circle : Icons.receipt_long,
+          iconColor: AppColors.primaryColor,
+          title: isCompleted
+              ? 'Payment successful'
+              : (isCod ? 'Order confirmed' : 'Payment initiated'),
+          message: result.customerMessage ??
+              result.message ??
+              (isCompleted
+                  ? 'Payment completed successfully.'
+                  : 'Please complete your payment.'),
           children: [
             if (result.transactionId != null)
               _InfoRow(label: 'Transaction', value: result.transactionId!),
+            if (result.orderStatus != null)
+              _InfoRow(label: 'Order status', value: result.orderStatus!),
+            if (result.amount != null)
+              _InfoRow(
+                label: 'Amount',
+                value: '${result.amount} ${result.currency ?? ''}'.trim(),
+              ),
             _InfoRow(label: 'Order', value: '#$orderId'),
           ],
+        );
+      case PaymentInitiateUiMode.failure:
+        return _StatusContent(
+          icon: Icons.error_outline,
+          iconColor: Colors.red,
+          title: 'Payment failed',
+          message: result.message ?? 'Could not initiate payment.',
         );
     }
   }
@@ -184,7 +269,9 @@ class _QrContent extends StatelessWidget {
         children: [
           const SizedBox(height: 16),
           Text(
-            result.message ?? 'Scan the QR code to complete payment.',
+            result.customerMessage ??
+                result.message ??
+                'Scan the QR code to complete payment.',
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 15),
           ),
@@ -205,8 +292,11 @@ class _QrContent extends StatelessWidget {
           if (result.amount != null)
             _InfoRow(
               label: 'Amount',
-              value: '${result.amount} ${result.currency ?? 'ETB'}',
+              value: '${result.amount} ${result.currency ?? ''}'.trim(),
             ),
+          if (result.expiresAt != null)
+            _InfoRow(label: 'Expires', value: result.expiresAt!),
+          if (result.qrId != null) _InfoRow(label: 'QR ID', value: result.qrId!),
           _InfoRow(label: 'Order', value: '#$orderId'),
         ],
       ),

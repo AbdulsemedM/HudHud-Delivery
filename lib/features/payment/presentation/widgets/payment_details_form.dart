@@ -1,8 +1,97 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/utils/phone_util.dart';
 import '../../model/payment_initiate_result.dart';
+
+/// Phone hint / format guide per payment method.
+String paymentPhoneHint(String methodCode) {
+  switch (methodCode) {
+    case 'waafi':
+      return '254712345678';
+    case 'edahab':
+      return '656013956';
+    case 'sahay':
+    case 'ebirr':
+      return '911234567';
+    default:
+      return 'Phone number';
+  }
+}
+
+String paymentPhoneLabel(String methodCode) {
+  switch (methodCode) {
+    case 'waafi':
+      return 'Phone (254XXXXXXXXX)';
+    case 'edahab':
+      return 'Phone (65XXXXXXXXX)';
+    case 'sahay':
+    case 'ebirr':
+      return 'Phone (9XXXXXXXX)';
+    default:
+      return 'Phone number';
+  }
+}
+
+/// Normalizes phone to the backend format expected by each method.
+String normalizePaymentPhone(String? phone, String methodCode) {
+  final digits = (phone ?? '').replaceAll(RegExp(r'\D'), '');
+  if (digits.isEmpty) return '';
+
+  switch (methodCode) {
+    case 'waafi':
+      if (digits.startsWith('254') && digits.length >= 12) {
+        return digits.substring(0, 12);
+      }
+      if (digits.startsWith('0') && digits.length >= 10) {
+        return '254${digits.substring(1, 10)}';
+      }
+      if (digits.length == 9) return '254$digits';
+      return digits;
+    case 'edahab':
+      if (digits.startsWith('65')) return digits;
+      if (digits.startsWith('0')) return '65${digits.substring(1)}';
+      return digits.startsWith('65') ? digits : digits;
+    case 'sahay':
+    case 'ebirr':
+      var national = digits;
+      if (national.startsWith('251') && national.length > 3) {
+        national = national.substring(3);
+      }
+      if (national.startsWith('0') && national.length > 1) {
+        national = national.substring(1);
+      }
+      if (national.length > 9) {
+        national = national.substring(national.length - 9);
+      }
+      return national;
+    default:
+      return digits;
+  }
+}
+
+/// Returns an error message if phone is invalid for [methodCode], else null.
+String? validatePaymentPhone(String? phone, String methodCode) {
+  final normalized = normalizePaymentPhone(phone, methodCode);
+  if (normalized.isEmpty) {
+    return 'Phone number is required';
+  }
+  switch (methodCode) {
+    case 'waafi':
+      if (!RegExp(r'^254\d{9}$').hasMatch(normalized)) {
+        return 'Enter a valid Waafi number (254XXXXXXXXX)';
+      }
+    case 'edahab':
+      if (!RegExp(r'^65\d{7,9}$').hasMatch(normalized)) {
+        return 'Enter a valid eDahab number (65XXXXXXXXX)';
+      }
+    case 'sahay':
+    case 'ebirr':
+      if (!RegExp(r'^9\d{8}$').hasMatch(normalized)) {
+        return 'Enter a valid phone number (9XXXXXXXX)';
+      }
+  }
+  return null;
+}
 
 class PaymentDetailsForm extends StatefulWidget {
   final String paymentMethodCode;
@@ -10,14 +99,18 @@ class PaymentDetailsForm extends StatefulWidget {
   final ValueChanged<Map<String, dynamic>> onChanged;
   final String ebirrProvider;
   final ValueChanged<String>? onEbirrProviderChanged;
+  final bool useHpp;
+  final ValueChanged<bool>? onUseHppChanged;
 
   const PaymentDetailsForm({
     super.key,
     required this.paymentMethodCode,
     this.initialPhone,
     required this.onChanged,
-    this.ebirrProvider = 'ebirr',
+    this.ebirrProvider = 'kaafi',
     this.onEbirrProviderChanged,
+    this.useHpp = false,
+    this.onUseHppChanged,
   });
 
   @override
@@ -30,8 +123,9 @@ class _PaymentDetailsFormState extends State<PaymentDetailsForm> {
   @override
   void initState() {
     super.initState();
-    final parts = splitPhoneForDisplay(widget.initialPhone);
-    _phoneController = TextEditingController(text: parts.nationalNumber);
+    final initial = widget.initialPhone ?? '';
+    final display = initial.replaceAll(RegExp(r'\D'), '');
+    _phoneController = TextEditingController(text: display);
     _emitDetails();
   }
 
@@ -39,17 +133,24 @@ class _PaymentDetailsFormState extends State<PaymentDetailsForm> {
   void didUpdateWidget(covariant PaymentDetailsForm oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.paymentMethodCode != widget.paymentMethodCode ||
-        oldWidget.ebirrProvider != widget.ebirrProvider) {
+        oldWidget.ebirrProvider != widget.ebirrProvider ||
+        oldWidget.useHpp != widget.useHpp) {
       _emitDetails();
     }
   }
 
-  void _emitDetails({String? ebirrProvider}) {
+  void _emitDetails({String? ebirrProvider, bool? useHpp}) {
     final details = <String, dynamic>{};
     if (paymentMethodNeedsDetailsForm(widget.paymentMethodCode)) {
-      final phone = normalizePhoneToBackend(_phoneController.text);
+      final phone = normalizePaymentPhone(
+        _phoneController.text,
+        widget.paymentMethodCode,
+      );
       if (phone.isNotEmpty) {
         details['phone'] = phone;
+      }
+      if (widget.paymentMethodCode == 'waafi') {
+        details['use_hpp'] = useHpp ?? widget.useHpp;
       }
       if (widget.paymentMethodCode == 'ebirr') {
         details['provider'] = ebirrProvider ?? widget.ebirrProvider;
@@ -72,6 +173,7 @@ class _PaymentDetailsFormState extends State<PaymentDetailsForm> {
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textTheme = Theme.of(context).textTheme;
+    final code = widget.paymentMethodCode;
 
     return Container(
       margin: const EdgeInsets.only(top: 8, bottom: 8),
@@ -95,25 +197,39 @@ class _PaymentDetailsFormState extends State<PaymentDetailsForm> {
             controller: _phoneController,
             keyboardType: TextInputType.phone,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            decoration: const InputDecoration(
-              labelText: 'Phone number',
-              hintText: '9XXXXXXXX',
-              prefixText: '+251 ',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: paymentPhoneLabel(code),
+              hintText: paymentPhoneHint(code),
+              border: const OutlineInputBorder(),
             ),
             onChanged: (_) => _emitDetails(),
           ),
-          if (widget.paymentMethodCode == 'ebirr') ...[
+          if (code == 'waafi') ...[
+            const SizedBox(height: 8),
+            SwitchListTile.adaptive(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Use hosted payment page'),
+              subtitle: const Text('Open Waafi Pay in a secure browser page'),
+              value: widget.useHpp,
+              activeThumbColor: AppColors.primaryColor,
+              onChanged: (value) {
+                widget.onUseHppChanged?.call(value);
+                _emitDetails(useHpp: value);
+              },
+            ),
+          ],
+          if (code == 'ebirr') ...[
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              initialValue: widget.ebirrProvider,
+              initialValue:
+                  widget.ebirrProvider == 'chibuk' ? 'chibuk' : 'kaafi',
               decoration: const InputDecoration(
                 labelText: 'Provider',
                 border: OutlineInputBorder(),
               ),
               items: const [
-                DropdownMenuItem(value: 'ebirr', child: Text('eBirr')),
-                DropdownMenuItem(value: 'coop', child: Text('Coop')),
+                DropdownMenuItem(value: 'kaafi', child: Text('Kaafi')),
+                DropdownMenuItem(value: 'chibuk', child: Text('Chibuk')),
               ],
               onChanged: (value) {
                 if (value != null) {
@@ -134,10 +250,28 @@ Map<String, dynamic> buildInitiatePaymentDetails({
   required Map<String, dynamic> collectedDetails,
   required int orderId,
 }) {
-  final details = Map<String, dynamic>.from(collectedDetails);
-  if (paymentMethodCode == 'qpay') {
-    details['awb'] =
-        'ORD_${orderId}_${DateTime.now().millisecondsSinceEpoch ~/ 1000}';
+  final details = <String, dynamic>{};
+
+  if (paymentMethodNeedsDetailsForm(paymentMethodCode)) {
+    final phoneRaw = collectedDetails['phone']?.toString();
+    final phone = normalizePaymentPhone(phoneRaw, paymentMethodCode);
+    if (phone.isNotEmpty) {
+      details['phone'] = phone;
+    }
   }
+
+  if (paymentMethodCode == 'waafi') {
+    details['use_hpp'] = collectedDetails['use_hpp'] == true;
+  }
+
+  if (paymentMethodCode == 'ebirr') {
+    final provider = collectedDetails['provider']?.toString();
+    if (provider == 'kaafi' || provider == 'chibuk') {
+      details['provider'] = provider;
+    } else {
+      details['provider'] = 'kaafi';
+    }
+  }
+
   return details;
 }

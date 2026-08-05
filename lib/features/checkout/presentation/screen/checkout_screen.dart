@@ -5,11 +5,16 @@ import '../../../../app/services/location_service.dart';
 import '../../../../app/services/saved_location_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/api/api_service.dart';
-import '../../bloc/checkout_bloc.dart';
+import '../../../home/presentation/screen/map_location_screen.dart';
+import '../../../payment/bloc/payment_bloc.dart';
+import '../../../payment/data/data_provider/payment_data_provider.dart';
+import '../../../payment/data/repository/payment_repository.dart';
+import '../../../payment/model/payment_initiate_result.dart';
+import '../../../payment/presentation/screen/payment_initiate_result_screen.dart';
+import '../../../payment/presentation/widgets/payment_details_form.dart';
 import '../../data/data_provider/checkout_data_provider.dart';
 import '../../data/repository/checkout_repository.dart';
 import '../widgets/checkout_widgets.dart';
-import '../../../home/presentation/screen/map_location_screen.dart';
 
 class CheckoutScreen extends StatefulWidget {
   final List<Map<String, dynamic>> cartItems;
@@ -34,6 +39,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   double? _deliveryLatitude;
   double? _deliveryLongitude;
   String? _selectedPaymentMethod;
+  List<Map<String, dynamic>> _paymentMethods = List.from(
+    kDefaultAllowedPaymentMethods,
+  );
+  bool _loadingMethods = true;
+  Map<String, dynamic> _paymentDetails = {};
+  String _ebirrProvider = 'kaafi';
+  bool _useHpp = false;
 
   @override
   void initState() {
@@ -107,7 +119,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   Future<void> _loadDeliveryAddress() async {
-    // 1. Try saved address
     final saved = await SavedLocationService.getSavedLocationData();
     final savedAddress = saved?['address'] as String?;
     if (savedAddress != null && savedAddress.isNotEmpty) {
@@ -120,7 +131,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       }
       return;
     }
-    // 2. Fallback to current GPS location
     try {
       final position = await LocationService.getCurrentPosition();
       final current = await LocationService.getCurrentLocationAddress();
@@ -143,7 +153,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
   }
 
-  /// Vendor ID from first cart item (required for order placement).
   int? get _vendorId {
     if (_cartItems.isEmpty) return null;
     final first = _cartItems.first;
@@ -153,12 +162,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return null;
   }
 
-  double get _total {
-    return _subtotal + _tipAmount;
-  }
+  double get _total => _subtotal + _tipAmount;
 
   void _onPromoCodeApplied(String promoCode) {
-    // Handle promo code logic here
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Promo code "$promoCode" applied'),
@@ -168,8 +174,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   void _onChangeAddress() async {
-    // Navigate to map location screen
-    final Map<String, dynamic>? result = await Navigator.push<Map<String, dynamic>>(
+    final Map<String, dynamic>? result =
+        await Navigator.push<Map<String, dynamic>>(
       context,
       MaterialPageRoute(
         builder: (context) => MapLocationScreen(
@@ -178,7 +184,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       ),
     );
 
-    // Update address if user selected a new one
     final newAddress = result?['address'] as String?;
     final latitude = (result?['latitude'] as num?)?.toDouble();
     final longitude = (result?['longitude'] as num?)?.toDouble();
@@ -258,6 +263,41 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       return;
     }
 
+    if (!isAllowedPaymentMethodCode(_selectedPaymentMethod)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Selected payment method is not available'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (paymentMethodNeedsDetailsForm(_selectedPaymentMethod)) {
+      final phoneError = validatePaymentPhone(
+        _paymentDetails['phone']?.toString(),
+        _selectedPaymentMethod!,
+      );
+      if (phoneError != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(phoneError), backgroundColor: Colors.red),
+        );
+        return;
+      }
+      if (_selectedPaymentMethod == 'ebirr') {
+        final provider = _paymentDetails['provider']?.toString();
+        if (provider != 'kaafi' && provider != 'chibuk') {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Please select an eBirr provider'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
+      }
+    }
+
     final vendorId = _vendorId;
     if (vendorId == null || vendorId <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -269,37 +309,37 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       return;
     }
 
-    blocContext.read<CheckoutBloc>().add(
-          CreateOrderEvent(
-            vendorId: vendorId,
-            items: orderItems,
-            taxAmount: 0.0,
-            discountAmount: 0.0,
-            deliveryAddress: _deliveryAddress,
-            deliveryLocation: _deliveryAddress,
-            deliveryLatitude: _deliveryLatitude!,
-            deliveryLongitude: _deliveryLongitude!,
+    final initiateDetails = buildInitiatePaymentDetails(
+      paymentMethodCode: _selectedPaymentMethod!,
+      collectedDetails: _paymentDetails,
+      orderId: 0,
+    );
+
+    blocContext.read<PaymentBloc>().add(
+          ProcessPaymentEvent(
             paymentMethod: _selectedPaymentMethod!,
-            notes: _notesController.text.trim().isEmpty
-                ? null
-                : _notesController.text.trim(),
+            amount: _total,
+            orderId: '0',
+            paymentDetails: {
+              ...initiateDetails,
+              'order_details': {
+                'vendor_id': vendorId,
+                'items': orderItems,
+                'tax_amount': 0.0,
+                'discount_amount': 0.0,
+                'delivery_address': _deliveryAddress,
+                'delivery_location': _deliveryAddress,
+                'delivery_latitude': _deliveryLatitude!,
+                'delivery_longitude': _deliveryLongitude!,
+                'service_type': 'delivery',
+                'notes': _notesController.text.trim().isEmpty
+                    ? null
+                    : _notesController.text.trim(),
+                'subtotal': _subtotal,
+              },
+            },
           ),
         );
-  }
-
-  void _showOrderSuccessDialog(BuildContext ctx, Map<String, dynamic> orderData) {
-    final orderId = orderData['id']?.toString() ?? '—';
-    showDialog(
-      context: ctx,
-      barrierDismissible: false,
-      builder: (_) => CheckoutSuccessDialog(
-        orderId: orderId,
-        onDone: () {
-          Navigator.of(ctx).pop();
-          Navigator.of(ctx).pop();
-        },
-      ),
-    );
   }
 
   int get _itemCount {
@@ -312,13 +352,18 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => CheckoutBloc(
+      create: (context) => PaymentBloc(
+        paymentRepository: PaymentRepository(
+          paymentDataProvider: PaymentDataProvider(
+            apiService: ApiService.instance,
+          ),
+        ),
         checkoutRepository: CheckoutRepository(
           checkoutDataProvider: CheckoutDataProvider(
             apiService: ApiService.instance,
           ),
         ),
-      ),
+      )..add(const GetPaymentMethodsEvent()),
       child: Builder(
         builder: (blocContext) => Scaffold(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -347,27 +392,72 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
             centerTitle: true,
           ),
-          bottomNavigationBar: BlocBuilder<CheckoutBloc, CheckoutState>(
+          bottomNavigationBar: BlocBuilder<PaymentBloc, PaymentState>(
             builder: (context, state) {
               return CheckoutBottomBar(
                 total: _total,
-                isLoading: state is CheckoutLoading,
+                isLoading: state is PaymentLoading,
                 onConfirm: () => _onConfirmOrder(blocContext),
               );
             },
           ),
-          body: BlocListener<CheckoutBloc, CheckoutState>(
+          body: BlocListener<PaymentBloc, PaymentState>(
             listener: (context, state) {
-              if (state is OrderCreatedSuccess) {
+              if (state is PaymentMethodsLoaded) {
+                setState(() {
+                  _paymentMethods = state.paymentMethods.isNotEmpty
+                      ? state.paymentMethods
+                      : List.from(kDefaultAllowedPaymentMethods);
+                  _loadingMethods = false;
+                  if (_selectedPaymentMethod != null &&
+                      !_paymentMethods.any(
+                        (m) => m['id'] == _selectedPaymentMethod,
+                      )) {
+                    _selectedPaymentMethod = null;
+                    _paymentDetails = {};
+                  }
+                });
+              } else if (state is PaymentInitiated) {
                 CartService().clear();
-                _showOrderSuccessDialog(context, state.orderData);
-              } else if (state is CheckoutError) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(state.message),
-                    backgroundColor: Colors.red,
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (_) => PaymentInitiateResultScreen(
+                      result: state.result,
+                      orderId: state.orderId,
+                    ),
                   ),
                 );
+              } else if (state is PaymentSuccess) {
+                CartService().clear();
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (_) => PaymentInitiateResultScreen(
+                      result: PaymentInitiateResult(
+                        isSuccess: true,
+                        uiMode: PaymentInitiateUiMode.success,
+                        status: 'completed',
+                        message: state.message,
+                        transactionId: state.transactionId,
+                      ),
+                      orderId: state.transactionId,
+                    ),
+                  ),
+                );
+              } else if (state is PaymentFailure) {
+                if (_loadingMethods) {
+                  setState(() {
+                    _loadingMethods = false;
+                    _paymentMethods =
+                        List.from(kDefaultAllowedPaymentMethods);
+                  });
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(state.error),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
               }
             },
             child: CustomScrollView(
@@ -444,10 +534,35 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         icon: Icons.account_balance_wallet_outlined,
                         title: 'Payment method',
                         subtitle: 'Choose how you want to pay',
-                        child: PaymentMethodGridSection(
-                          selectedId: _selectedPaymentMethod,
-                          onSelected: (id) =>
-                              setState(() => _selectedPaymentMethod = id),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            PaymentMethodGridSection(
+                              selectedId: _selectedPaymentMethod,
+                              methods: _paymentMethods,
+                              isLoading: _loadingMethods,
+                              onSelected: (id) => setState(() {
+                                _selectedPaymentMethod = id;
+                                _paymentDetails = {};
+                                _useHpp = false;
+                                _ebirrProvider = 'kaafi';
+                              }),
+                            ),
+                            if (_selectedPaymentMethod != null)
+                              PaymentDetailsForm(
+                                key: ValueKey(_selectedPaymentMethod),
+                                paymentMethodCode: _selectedPaymentMethod!,
+                                ebirrProvider: _ebirrProvider,
+                                useHpp: _useHpp,
+                                onEbirrProviderChanged: (v) =>
+                                    setState(() => _ebirrProvider = v),
+                                onUseHppChanged: (v) =>
+                                    setState(() => _useHpp = v),
+                                onChanged: (details) {
+                                  _paymentDetails = details;
+                                },
+                              ),
+                          ],
                         ),
                       ),
                       CheckoutSectionCard(

@@ -2,7 +2,7 @@ name: hudhud_delivery
 description: "A new Flutter project."
 publish_to: "none"
 
-version: 1.0.0+12
+version: 1.0.0+13
 
 environment:
   sdk: ">=3.1.0 <4.0.0"
@@ -28,6 +28,8 @@ dependencies:
 
   # URLs (support mailto / tel)
   url_launcher: ^6.3.1
+  # Hosted payment page (Waafi HPP)
+  webview_flutter: ^4.10.0
   # Share sheet / platform share
   share_plus: ^10.1.4
   # Network reachability

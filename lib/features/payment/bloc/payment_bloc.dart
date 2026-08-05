@@ -155,11 +155,8 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
       final createdOrderId =
           int.tryParse(orderPayload['id']?.toString() ?? event.orderId) ?? 0;
 
-      if (paymentMethodSkipsInitiate(event.paymentMethod)) {
-        emit(PaymentSuccess(
-          transactionId: createdOrderId.toString(),
-          message: orderResult['message'] ?? 'Order placed successfully',
-        ));
+      if (createdOrderId <= 0) {
+        emit(const PaymentFailure(error: 'Invalid order id from create order'));
         return;
       }
 
@@ -175,6 +172,7 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
 
       final raw = await paymentRepository.initiatePayment(
         paymentMethodCode: event.paymentMethod,
+        type: 'order',
         orderId: createdOrderId,
         amount: event.amount,
         currency: currency,
