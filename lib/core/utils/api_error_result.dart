@@ -1,0 +1,266 @@
+/// Known API / payment error codes from the payment error contract.
+const Set<String> kKnownApiErrorCodes = {
+  'validation_error',
+  'insufficient_balance',
+  'payment_failed',
+  'invalid_phone',
+  'invalid_provider',
+  'payment_method_unavailable',
+  'order_not_found',
+  'ride_not_found',
+  'service_not_found',
+  'delivery_not_found',
+};
+
+/// Structured parse of Laravel-style / payment API error envelopes.
+class ApiErrorResult {
+  const ApiErrorResult({
+    required this.message,
+    this.code,
+    this.statusCode,
+    this.fieldErrors = const {},
+    this.balance,
+    this.requiredAmount,
+    this.gatewayError,
+    this.gatewayErrorCode,
+  });
+
+  final String message;
+  final String? code;
+  final int? statusCode;
+  final Map<String, List<String>> fieldErrors;
+  final double? balance;
+  final double? requiredAmount;
+  final String? gatewayError;
+  final String? gatewayErrorCode;
+
+  bool get isInsufficientBalance =>
+      code == 'insufficient_balance' ||
+      (balance != null && requiredAmount != null);
+
+  bool get isGatewayError =>
+      code == 'payment_failed' ||
+      (gatewayError != null && gatewayError!.isNotEmpty);
+
+  bool get isValidation =>
+      code == 'validation_error' || fieldErrors.isNotEmpty;
+
+  /// Primary user-facing text, with balance/gateway enrichment when present.
+  String get displayMessage {
+    final parts = <String>[message];
+
+    if (isInsufficientBalance &&
+        balance != null &&
+        requiredAmount != null) {
+      parts.add(
+        'Balance: ${_formatAmount(balance!)} · Required: ${_formatAmount(requiredAmount!)}',
+      );
+    }
+
+    if (gatewayError != null && gatewayError!.isNotEmpty) {
+      final codePart = (gatewayErrorCode != null && gatewayErrorCode!.isNotEmpty)
+          ? ' ($gatewayErrorCode)'
+          : '';
+      parts.add('$gatewayError$codePart');
+    }
+
+    return parts.join('\n');
+  }
+
+  static String _formatAmount(double value) {
+    if (value == value.roundToDouble()) {
+      return value.toStringAsFixed(0);
+    }
+    return value.toStringAsFixed(2);
+  }
+}
+
+/// Parses documented payment / API error payloads.
+ApiErrorResult parseApiErrorResult(
+  dynamic data, {
+  int? statusCode,
+  String fallback = 'An error occurred',
+}) {
+  if (data is String && data.trim().isNotEmpty) {
+    return ApiErrorResult(
+      message: data.trim(),
+      statusCode: statusCode,
+      code: _inferCodeFromStatus(statusCode),
+    );
+  }
+
+  if (data is! Map) {
+    return ApiErrorResult(
+      message: fallback,
+      statusCode: statusCode,
+      code: _inferCodeFromStatus(statusCode),
+    );
+  }
+
+  final root = Map<String, dynamic>.from(data);
+  final nestedData = _asMap(root['data']);
+  final fieldErrors = _parseFieldErrors(root['errors']);
+
+  final topMessage = _stringMessage(root['message']);
+  final fieldMessage = _joinedFieldMessages(fieldErrors);
+  final primaryMessage = (topMessage != null && topMessage.isNotEmpty)
+      ? topMessage
+      : (fieldMessage ?? fallback);
+
+  final balance = _parseDouble(nestedData['balance'] ?? root['balance']);
+  final requiredAmount =
+      _parseDouble(nestedData['required'] ?? root['required']);
+  final gatewayError = _firstNonEmptyString([
+    nestedData['gateway_error'],
+    root['gateway_error'],
+  ]);
+  final gatewayErrorCode = _firstNonEmptyString([
+    nestedData['error_code'],
+    root['error_code'],
+  ]);
+
+  var code = _firstNonEmptyString([
+    root['error'],
+    root['code'],
+    nestedData['error'],
+    nestedData['code'],
+  ]);
+
+  if (code != null && !kKnownApiErrorCodes.contains(code)) {
+    // Keep unknown codes if they look like snake_case identifiers.
+    if (!RegExp(r'^[a-z][a-z0-9_]*$').hasMatch(code)) {
+      code = null;
+    }
+  }
+
+  code ??= _inferCode(
+    statusCode: statusCode,
+    message: primaryMessage,
+    fieldErrors: fieldErrors,
+    balance: balance,
+    requiredAmount: requiredAmount,
+    gatewayError: gatewayError,
+    gatewayErrorCode: gatewayErrorCode,
+  );
+
+  return ApiErrorResult(
+    message: primaryMessage,
+    code: code,
+    statusCode: statusCode,
+    fieldErrors: fieldErrors,
+    balance: balance,
+    requiredAmount: requiredAmount,
+    gatewayError: gatewayError,
+    gatewayErrorCode: gatewayErrorCode,
+  );
+}
+
+String? _inferCode({
+  int? statusCode,
+  required String message,
+  required Map<String, List<String>> fieldErrors,
+  double? balance,
+  double? requiredAmount,
+  String? gatewayError,
+  String? gatewayErrorCode,
+}) {
+  final lower = message.toLowerCase();
+
+  if (balance != null && requiredAmount != null) {
+    return 'insufficient_balance';
+  }
+  if (lower.contains('insufficient') && lower.contains('balance')) {
+    return 'insufficient_balance';
+  }
+  if (gatewayError != null ||
+      (gatewayErrorCode != null && gatewayErrorCode.isNotEmpty)) {
+    return 'payment_failed';
+  }
+  if (lower.contains('invalid phone') || lower.contains('phone number format')) {
+    return 'invalid_phone';
+  }
+  if (lower.contains('provider') && lower.contains('invalid')) {
+    return 'invalid_provider';
+  }
+  if (lower.contains('unavailable') && lower.contains('payment method')) {
+    return 'payment_method_unavailable';
+  }
+  if (fieldErrors.isNotEmpty || statusCode == 422) {
+    return 'validation_error';
+  }
+  if (statusCode == 404) {
+    if (lower.contains('ride')) return 'ride_not_found';
+    if (lower.contains('service')) return 'service_not_found';
+    if (lower.contains('delivery')) return 'delivery_not_found';
+    if (lower.contains('order')) return 'order_not_found';
+  }
+  return _inferCodeFromStatus(statusCode);
+}
+
+String? _inferCodeFromStatus(int? statusCode) {
+  switch (statusCode) {
+    case 422:
+      return 'validation_error';
+    default:
+      return null;
+  }
+}
+
+Map<String, List<String>> _parseFieldErrors(dynamic errors) {
+  if (errors is! Map) return const {};
+  final result = <String, List<String>>{};
+  errors.forEach((key, value) {
+    final field = key.toString();
+    if (value is List) {
+      final msgs = value
+          .map((e) => e?.toString() ?? '')
+          .where((s) => s.isNotEmpty)
+          .toList();
+      if (msgs.isNotEmpty) result[field] = msgs;
+    } else if (value != null) {
+      final text = value.toString();
+      if (text.isNotEmpty) result[field] = [text];
+    }
+  });
+  return result;
+}
+
+String? _joinedFieldMessages(Map<String, List<String>> fieldErrors) {
+  if (fieldErrors.isEmpty) return null;
+  final parts = <String>[];
+  for (final entry in fieldErrors.entries) {
+    for (final msg in entry.value) {
+      parts.add(msg);
+    }
+  }
+  if (parts.isEmpty) return null;
+  return parts.join(' ');
+}
+
+String? _stringMessage(dynamic message) {
+  if (message is String && message.isNotEmpty) return message;
+  if (message is Map) {
+    return _joinedFieldMessages(_parseFieldErrors(message));
+  }
+  return null;
+}
+
+Map<String, dynamic> _asMap(dynamic value) {
+  if (value is Map<String, dynamic>) return value;
+  if (value is Map) return Map<String, dynamic>.from(value);
+  return const {};
+}
+
+double? _parseDouble(dynamic value) {
+  if (value == null) return null;
+  if (value is num) return value.toDouble();
+  return double.tryParse(value.toString());
+}
+
+String? _firstNonEmptyString(List<dynamic> candidates) {
+  for (final c in candidates) {
+    final s = c?.toString();
+    if (s != null && s.isNotEmpty) return s;
+  }
+  return null;
+}

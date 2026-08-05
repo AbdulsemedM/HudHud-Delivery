@@ -226,7 +226,7 @@ class _DriverOnTheWayScreenState extends State<DriverOnTheWayScreen> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Payment failed: $e'),
+          content: Text(userFacingApiError(e)),
           backgroundColor: AppColors.errorColor,
         ),
       );

@@ -3,6 +3,9 @@ import 'package:hudhud_delivery/core/utils/api_error_message.dart';
 // import 'package:flutter/foundation.dart';
 import 'dio_client.dart';
 
+export 'package:hudhud_delivery/core/utils/api_error_message.dart'
+    show extractApiErrorMessage, parseApiErrorResult, ApiErrorResult;
+
 class ApiService {
   static ApiService? _instance;
   late Dio _dio;
@@ -175,46 +178,49 @@ class ApiService {
     final statusCode = error.response?.statusCode;
     final data = error.response?.data;
 
-    final message = data is String
-        ? data
-        : extractApiErrorMessage(data);
-
     Map<String, dynamic>? payload;
     if (data is Map) {
       payload = Map<String, dynamic>.from(data);
     }
 
+    final parsed = data is String
+        ? parseApiErrorResult(data, statusCode: statusCode)
+        : parseApiErrorResult(data, statusCode: statusCode);
+    final message = parsed.displayMessage;
+    final code = parsed.code;
+
     switch (statusCode) {
       case 400:
-        return ApiException('Bad request: $message',
-            statusCode: statusCode, data: payload);
+      case 404:
+      case 422:
+        // Prefer clean structured messages for payment-style client errors.
+        return ApiException(
+          message,
+          statusCode: statusCode,
+          data: payload,
+          code: code,
+        );
       case 401:
         return ApiException('Unauthorized: Please login again',
-            statusCode: statusCode, data: payload);
+            statusCode: statusCode, data: payload, code: code);
       case 403:
         return ApiException('Forbidden: You don\'t have permission',
-            statusCode: statusCode, data: payload);
-      case 404:
-        return ApiException('Not found: $message',
-            statusCode: statusCode, data: payload);
-      case 422:
-        return ApiException(message,
-            statusCode: statusCode, data: payload);
+            statusCode: statusCode, data: payload, code: code);
       case 429:
-        return ApiException('HTTP $statusCode: $message',
-            statusCode: statusCode, data: payload);
+        return ApiException(message,
+            statusCode: statusCode, data: payload, code: code);
       case 500:
         return ApiException('Server error: Please try again later',
-            statusCode: statusCode, data: payload);
+            statusCode: statusCode, data: payload, code: code);
       case 502:
         return ApiException('Bad gateway: Server is temporarily unavailable',
-            statusCode: statusCode, data: payload);
+            statusCode: statusCode, data: payload, code: code);
       case 503:
         return ApiException('Service unavailable: Please try again later',
-            statusCode: statusCode, data: payload);
+            statusCode: statusCode, data: payload, code: code);
       default:
-        return ApiException('HTTP $statusCode: $message',
-            statusCode: statusCode, data: payload);
+        return ApiException(message,
+            statusCode: statusCode, data: payload, code: code);
     }
   }
 }
@@ -224,11 +230,42 @@ class ApiException implements Exception {
   final String message;
   final int? statusCode;
   final dynamic data;
+  final String? code;
 
-  ApiException(this.message, {this.statusCode, this.data});
+  ApiException(this.message, {this.statusCode, this.data, this.code});
 
   @override
   String toString() {
     return 'ApiException: $message${statusCode != null ? ' (Status: $statusCode)' : ''}';
   }
+}
+
+/// Strips Exception/ApiException prefixes for snackbars and bloc error states.
+String userFacingApiError(Object error, {String fallback = 'An error occurred'}) {
+  if (error is ApiException) {
+    return error.message.isNotEmpty ? error.message : fallback;
+  }
+
+  var text = error.toString();
+  const prefixes = [
+    'ApiException: ',
+    'Exception: ',
+    'FormatException: ',
+  ];
+  for (final p in prefixes) {
+    if (text.startsWith(p)) {
+      text = text.substring(p.length);
+    }
+  }
+  text = text.replaceFirst(RegExp(r'\s*\(Status:\s*\d+\)\s*$'), '');
+  // Nested wraps like "Failed to initiate payment: ApiException: ..."
+  for (final p in prefixes) {
+    final idx = text.indexOf(p);
+    if (idx >= 0) {
+      text = text.substring(idx + p.length);
+    }
+  }
+  text = text.replaceFirst(RegExp(r'\s*\(Status:\s*\d+\)\s*$'), '');
+  text = text.trim();
+  return text.isNotEmpty ? text : fallback;
 }

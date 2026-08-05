@@ -1,5 +1,6 @@
 import 'package:hudhud_delivery/core/api/api_constants.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
+import 'package:hudhud_delivery/core/utils/api_error_result.dart';
 import '../models/wallet_balance_model.dart';
 import '../models/wallet_transaction_model.dart';
 import '../../utils/wallet_funding_methods.dart';
@@ -96,10 +97,15 @@ class WalletMutationResponse {
     }
     final map = Map<String, dynamic>.from(data);
     final success = map['success'] == true;
-    final message = map['message']?.toString() ?? '';
     if (!success) {
-      throw Exception(message.isNotEmpty ? message : fallbackError);
+      final parsed = parseApiErrorResult(map);
+      throw Exception(
+        parsed.displayMessage.isNotEmpty
+            ? parsed.displayMessage
+            : fallbackError,
+      );
     }
+    final message = map['message']?.toString() ?? '';
 
     final inner = map['data'];
     Map<String, dynamic>? payment;

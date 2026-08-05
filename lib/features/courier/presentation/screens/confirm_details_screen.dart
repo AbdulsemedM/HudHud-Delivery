@@ -369,7 +369,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
       setState(() => _isLoadingRequest = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Payment failed: $e'),
+          content: Text(userFacingApiError(e)),
           backgroundColor: Colors.red,
         ),
       );

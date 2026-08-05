@@ -2,6 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
+import '../../../core/api/api_service.dart';
 import '../data/models/wallet_balance_model.dart';
 import '../data/models/wallet_transaction_model.dart';
 import '../data/repositories/wallet_repository.dart';
@@ -29,7 +30,7 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
       emit(BalanceLoaded(balance: balance));
       add(const FetchTransactionsEvent());
     } catch (e) {
-      emit(WalletError(message: e.toString()));
+      emit(WalletError(message: userFacingApiError(e)));
     }
   }
 
@@ -52,7 +53,6 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
         transactionsTotal: response.total,
       ));
     } catch (_) {
-      // Keep balance visible even if transactions fail.
       emit(currentState.copyWith(transactions: currentState.transactions));
     }
   }
@@ -74,7 +74,7 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
         payment: response.payment,
       ));
     } catch (e) {
-      emit(AddFundsError(message: e.toString()));
+      emit(AddFundsError(message: userFacingApiError(e)));
     }
   }
 
@@ -94,7 +94,7 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
         payment: response.payment,
       ));
     } catch (e) {
-      emit(WithdrawFundsError(message: e.toString()));
+      emit(WithdrawFundsError(message: userFacingApiError(e)));
     }
   }
 }

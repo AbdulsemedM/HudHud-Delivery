@@ -1,3 +1,5 @@
+import '../../../../core/utils/api_error_result.dart';
+
 enum PaymentInitiateUiMode {
   success,
   qrCode,
@@ -109,13 +111,11 @@ class PaymentInitiateResult {
     final success = json['success'] == true || ebirrSuccess;
 
     if (!success) {
-      final errorMessage = json['message']?.toString() ??
-          _firstErrorMessage(json['errors']) ??
-          'Payment initiation failed';
+      final parsed = parseApiErrorResult(json);
       return PaymentInitiateResult(
         isSuccess: false,
         uiMode: PaymentInitiateUiMode.failure,
-        message: errorMessage,
+        message: parsed.displayMessage,
         raw: json,
       );
     }
@@ -179,17 +179,6 @@ class PaymentInitiateResult {
       return value.substring(comma + 1);
     }
     return value;
-  }
-
-  static String? _firstErrorMessage(dynamic errors) {
-    if (errors is! Map) return null;
-    for (final value in errors.values) {
-      if (value is List && value.isNotEmpty) {
-        return value.first?.toString();
-      }
-      if (value != null) return value.toString();
-    }
-    return null;
   }
 }
 

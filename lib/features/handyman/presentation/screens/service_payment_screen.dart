@@ -127,7 +127,7 @@ class _ServicePaymentScreenState extends State<ServicePaymentScreen> {
       setState(() => _isPaying = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Payment failed: $e'),
+          content: Text(userFacingApiError(e)),
           backgroundColor: Colors.red,
         ),
       );
