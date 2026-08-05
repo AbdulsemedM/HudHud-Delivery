@@ -61,8 +61,8 @@ class PaymentDataProvider {
         '${ApiConstants.baseUrl}${ApiConstants.paymentsInitiate}',
         data: body,
         options: Options(
-          receiveTimeout: const Duration(seconds: 90),
-          sendTimeout: const Duration(seconds: 60),
+          receiveTimeout: const Duration(minutes: 3),
+          sendTimeout: const Duration(minutes: 3),
         ),
       );
       final data = response.data;
