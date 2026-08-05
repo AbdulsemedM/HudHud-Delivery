@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/api/api_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../checkout/data/models/create_order_result.dart';
+import '../../../courier/data/models/create_delivery_result.dart';
 import '../../data/data_provider/payment_data_provider.dart';
 import '../../data/repository/payment_repository.dart';
 import '../../model/payment_initiate_result.dart';
@@ -17,11 +18,24 @@ class PaymentInitiateResultScreen extends StatefulWidget {
   final String orderId;
   final PaymentRepository? paymentRepository;
 
+  /// When set, labels use Delivery/Tracking instead of Order.
+  final String? trackingNumber;
+
+  /// Called instead of popping to root when payment succeeds.
+  /// Receives the result screen [BuildContext] for navigation.
+  final void Function(BuildContext context)? onTerminalSuccess;
+
+  /// Primary button label on success (default: Done).
+  final String? successActionLabel;
+
   const PaymentInitiateResultScreen({
     super.key,
     required this.result,
     required this.orderId,
     this.paymentRepository,
+    this.trackingNumber,
+    this.onTerminalSuccess,
+    this.successActionLabel,
   });
 
   @override
@@ -78,6 +92,26 @@ class _PaymentInitiateResultScreenState
 
   PaymentInitiateResult get result => widget.result;
   String get orderId => widget.orderId;
+  bool get _isDeliveryContext => widget.trackingNumber != null;
+
+  String get _entityLabel => _isDeliveryContext ? 'Delivery' : 'Order';
+  String get _statusLabel =>
+      _isDeliveryContext ? 'Delivery status' : 'Order status';
+
+  String _expectedStatus(String? method) => _isDeliveryContext
+      ? expectedDeliveryStatusAfterPayment(method)
+      : expectedOrderStatusAfterPayment(method);
+
+  bool get _isTerminalSuccess {
+    final polled = _polledStatus;
+    if (polled != null && polled.isSuccess && polled.isCompleted) return true;
+    if (!result.isSuccess) return false;
+    if (result.uiMode != PaymentInitiateUiMode.success) return false;
+    return result.status == 'completed' ||
+        result.method == 'wallet' ||
+        result.method == 'cash_on_delivery' ||
+        result.nextAction == null;
+  }
 
   bool get _shouldPoll => shouldPollPaymentStatus(
         isSuccess: result.isSuccess,
@@ -218,13 +252,27 @@ class _PaymentInitiateResultScreenState
                     ),
                   ),
                   onPressed: () {
+                    final success = result.isSuccess ||
+                        (_polledStatus?.isCompleted ?? false);
+                    if (success &&
+                        _isTerminalSuccess &&
+                        widget.onTerminalSuccess != null) {
+                      widget.onTerminalSuccess!(context);
+                      return;
+                    }
                     Navigator.of(context).popUntil((route) => route.isFirst);
                   },
                   child: Text(
-                    result.isSuccess ||
-                            (_polledStatus?.isCompleted ?? false)
-                        ? 'Done'
-                        : 'Go back',
+                    () {
+                      final success = result.isSuccess ||
+                          (_polledStatus?.isCompleted ?? false);
+                      if (!success) return 'Go back';
+                      if (_isTerminalSuccess &&
+                          widget.successActionLabel != null) {
+                        return widget.successActionLabel!;
+                      }
+                      return 'Done';
+                    }(),
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -241,6 +289,17 @@ class _PaymentInitiateResultScreenState
 
   Widget _buildBody(BuildContext context) {
     final polled = _polledStatus;
+    final tracking = widget.trackingNumber;
+
+    List<Widget> entityRows({String? relatedId}) => [
+          if (tracking != null && tracking.isNotEmpty)
+            _InfoRow(label: 'Tracking', value: tracking),
+          _InfoRow(
+            label: _entityLabel,
+            value: '#${relatedId ?? orderId}',
+          ),
+        ];
+
     if (polled != null && polled.isSuccess && polled.isTerminal) {
       if (polled.isCompleted) {
         return _StatusContent(
@@ -250,7 +309,7 @@ class _PaymentInitiateResultScreenState
           message: 'Your payment was confirmed.',
           children: [
             if (polled.relatedOrderStatus != null)
-              _InfoRow(label: 'Order status', value: polled.relatedOrderStatus!),
+              _InfoRow(label: _statusLabel, value: polled.relatedOrderStatus!),
             if (polled.transactionId != null)
               _InfoRow(label: 'Transaction', value: polled.transactionId!),
             if (polled.reference != null)
@@ -260,9 +319,8 @@ class _PaymentInitiateResultScreenState
                 label: 'Amount',
                 value: '${polled.amount} ${polled.currency ?? ''}'.trim(),
               ),
-            _InfoRow(
-              label: 'Order',
-              value: '#${polled.relatedOrderId ?? orderId}',
+            ...entityRows(
+              relatedId: polled.relatedOrderId?.toString(),
             ),
           ],
         );
@@ -275,8 +333,8 @@ class _PaymentInitiateResultScreenState
             'Payment was not completed. Please try again.',
         children: [
           if (polled.relatedOrderStatus != null)
-            _InfoRow(label: 'Order status', value: polled.relatedOrderStatus!),
-          _InfoRow(label: 'Order', value: '#$orderId'),
+            _InfoRow(label: _statusLabel, value: polled.relatedOrderStatus!),
+          ...entityRows(),
         ],
       );
     }
@@ -345,8 +403,8 @@ class _PaymentInitiateResultScreenState
           children: [
             ...waitingChildren,
             _InfoRow(
-              label: 'Order status',
-              value: expectedOrderStatusAfterPayment(result.method),
+              label: _statusLabel,
+              value: _expectedStatus(result.method),
             ),
             if (result.referenceNumber != null)
               _InfoRow(label: 'Reference', value: result.referenceNumber!),
@@ -357,13 +415,17 @@ class _PaymentInitiateResultScreenState
                 label: 'Amount',
                 value: '${result.amount} ${result.currency ?? ''}'.trim(),
               ),
-            _InfoRow(label: 'Order', value: '#$orderId'),
+            ...entityRows(),
           ],
         );
       case PaymentInitiateUiMode.qrCode:
         return _QrContent(
           result: result,
           orderId: orderId,
+          entityLabel: _entityLabel,
+          statusLabel: _statusLabel,
+          expectedStatus: _expectedStatus(result.method),
+          trackingNumber: tracking,
           extraChildren: waitingChildren,
         );
       case PaymentInitiateUiMode.redirectToHpp:
@@ -377,10 +439,10 @@ class _PaymentInitiateResultScreenState
           children: [
             ...waitingChildren,
             _InfoRow(
-              label: 'Order status',
-              value: expectedOrderStatusAfterPayment(result.method),
+              label: _statusLabel,
+              value: _expectedStatus(result.method),
             ),
-            _InfoRow(label: 'Order', value: '#$orderId'),
+            ...entityRows(),
             const SizedBox(height: 16),
             if (result.redirectUrl != null && result.redirectUrl!.isNotEmpty)
               SizedBox(
@@ -405,24 +467,33 @@ class _PaymentInitiateResultScreenState
         final isCompleted =
             result.status == 'completed' || result.method == 'wallet';
         final isCod = result.method == 'cash_on_delivery';
-        final orderStatus = result.orderStatus ??
-            expectedOrderStatusAfterPayment(result.method);
+        final orderStatus =
+            result.orderStatus ?? _expectedStatus(result.method);
+        final successMessage = _isDeliveryContext
+            ? (isCompleted
+                ? 'Your delivery is paid.'
+                : (isCod
+                    ? 'Pay upon delivery. Your delivery is confirmed.'
+                    : 'Your delivery is processing while payment confirms.'))
+            : (isCompleted
+                ? 'Your order is paid.'
+                : (isCod
+                    ? 'Pay upon delivery. Your order is confirmed.'
+                    : 'Your order is processing while payment confirms.'));
         return _StatusContent(
           icon: isCompleted ? Icons.check_circle : Icons.receipt_long,
           iconColor: AppColors.primaryColor,
           title: isCompleted
               ? 'Payment successful'
-              : (isCod ? 'Order confirmed' : 'Payment initiated'),
-          message: result.customerMessage ??
-              result.message ??
-              (isCompleted
-                  ? 'Your order is paid.'
-                  : (isCod
-                      ? 'Pay upon delivery. Your order is confirmed.'
-                      : 'Your order is processing while payment confirms.')),
+              : (isCod
+                  ? (_isDeliveryContext
+                      ? 'Delivery confirmed'
+                      : 'Order confirmed')
+                  : 'Payment initiated'),
+          message: result.customerMessage ?? result.message ?? successMessage,
           children: [
             if (_shouldPoll) ...waitingChildren,
-            _InfoRow(label: 'Order status', value: orderStatus),
+            _InfoRow(label: _statusLabel, value: orderStatus),
             if (result.transactionId != null)
               _InfoRow(label: 'Transaction', value: result.transactionId!),
             if (result.amount != null)
@@ -430,7 +501,7 @@ class _PaymentInitiateResultScreenState
                 label: 'Amount',
                 value: '${result.amount} ${result.currency ?? ''}'.trim(),
               ),
-            _InfoRow(label: 'Order', value: '#$orderId'),
+            ...entityRows(),
           ],
         );
       case PaymentInitiateUiMode.failure:
@@ -503,11 +574,19 @@ class _StatusContent extends StatelessWidget {
 class _QrContent extends StatelessWidget {
   final PaymentInitiateResult result;
   final String orderId;
+  final String entityLabel;
+  final String statusLabel;
+  final String expectedStatus;
+  final String? trackingNumber;
   final List<Widget> extraChildren;
 
   const _QrContent({
     required this.result,
     required this.orderId,
+    required this.entityLabel,
+    required this.statusLabel,
+    required this.expectedStatus,
+    this.trackingNumber,
     this.extraChildren = const [],
   });
 
@@ -548,10 +627,7 @@ class _QrContent extends StatelessWidget {
                 size: 120, color: AppColors.primaryColor),
           const SizedBox(height: 20),
           ...extraChildren,
-          _InfoRow(
-            label: 'Order status',
-            value: expectedOrderStatusAfterPayment(result.method),
-          ),
+          _InfoRow(label: statusLabel, value: expectedStatus),
           if (result.amount != null)
             _InfoRow(
               label: 'Amount',
@@ -560,7 +636,9 @@ class _QrContent extends StatelessWidget {
           if (result.expiresAt != null)
             _InfoRow(label: 'Expires', value: result.expiresAt!),
           if (result.qrId != null) _InfoRow(label: 'QR ID', value: result.qrId!),
-          _InfoRow(label: 'Order', value: '#$orderId'),
+          if (trackingNumber != null && trackingNumber!.isNotEmpty)
+            _InfoRow(label: 'Tracking', value: trackingNumber!),
+          _InfoRow(label: entityLabel, value: '#$orderId'),
         ],
       ),
     );

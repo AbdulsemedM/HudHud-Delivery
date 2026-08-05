@@ -4,6 +4,8 @@ import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/payment/data/data_provider/payment_data_provider.dart';
 import 'package:hudhud_delivery/features/payment/data/repository/payment_repository.dart';
+import 'package:hudhud_delivery/features/payment/model/payment_initiate_result.dart';
+import 'package:hudhud_delivery/features/payment/presentation/widgets/payment_details_form.dart';
 import 'package:latlong2/latlong.dart';
 import 'confirm_details_screen.dart';
 
@@ -46,10 +48,14 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
       TextEditingController();
 
   String _whoPays = 'me'; // 'me' or 'recipient'
-  String? _paymentType; // API id (e.g. 'wallet', 'card')
+  String? _paymentType; // API id (e.g. 'wallet', 'waafi')
   String? _packageImagePath;
+  Map<String, dynamic> _paymentDetails = {};
+  String _ebirrProvider = 'kaafi';
+  bool _useHpp = false;
 
-  List<Map<String, dynamic>> _paymentMethods = [];
+  List<Map<String, dynamic>> _paymentMethods =
+      List.from(kDefaultAllowedPaymentMethods);
   bool _isLoadingPaymentMethods = true;
   String? _paymentMethodsError;
 
@@ -80,15 +86,22 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
       final methods = await _paymentRepository.getPaymentMethods();
       if (mounted) {
         setState(() {
-          _paymentMethods = methods;
+          _paymentMethods = methods.isNotEmpty
+              ? methods
+              : List.from(kDefaultAllowedPaymentMethods);
           _isLoadingPaymentMethods = false;
           _paymentMethodsError = null;
+          if (_paymentType != null &&
+              !_paymentMethods.any((m) => m['id'] == _paymentType)) {
+            _paymentType = null;
+            _paymentDetails = {};
+          }
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _paymentMethods = [];
+          _paymentMethods = List.from(kDefaultAllowedPaymentMethods);
           _isLoadingPaymentMethods = false;
           _paymentMethodsError = 'Failed to load payment methods';
         });
@@ -169,6 +182,22 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
       return;
     }
 
+    if (paymentMethodNeedsDetailsForm(_paymentType)) {
+      final phoneError = validatePaymentPhone(
+        _paymentDetails['phone']?.toString(),
+        _paymentType!,
+      );
+      if (phoneError != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(phoneError),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+    }
+
     if (_recipientNameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -210,6 +239,7 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
           recipientName: _recipientNameController.text,
           recipientPhone: _recipientPhoneController.text,
           packageImagePath: _packageImagePath,
+          paymentDetails: Map<String, dynamic>.from(_paymentDetails),
         ),
       ),
     );
@@ -463,6 +493,9 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                                         onTap: () {
                                           setState(() {
                                             _paymentType = id;
+                                            _paymentDetails = {};
+                                            _useHpp = false;
+                                            _ebirrProvider = 'kaafi';
                                           });
                                           Navigator.pop(context);
                                         },
@@ -503,6 +536,30 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                         ),
                       ),
                     ),
+                    if (_paymentType != null &&
+                        paymentMethodNeedsDetailsForm(_paymentType)) ...[
+                      const SizedBox(height: 12),
+                      PaymentDetailsForm(
+                        paymentMethodCode: _paymentType!,
+                        ebirrProvider: _ebirrProvider,
+                        useHpp: _useHpp,
+                        onChanged: (details) {
+                          setState(() {
+                            _paymentDetails = details;
+                          });
+                        },
+                        onEbirrProviderChanged: (provider) {
+                          setState(() {
+                            _ebirrProvider = provider;
+                          });
+                        },
+                        onUseHppChanged: (value) {
+                          setState(() {
+                            _useHpp = value;
+                          });
+                        },
+                      ),
+                    ],
                     const SizedBox(height: 24),
                     // Recipient Information
                     Text(

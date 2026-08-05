@@ -1,4 +1,5 @@
 import '../data_provider/courier_data_provider.dart';
+import '../models/create_delivery_result.dart';
 
 class CourierRepository {
   final CourierDataProvider courierDataProvider;
@@ -81,10 +82,12 @@ class CourierRepository {
 
       if (response['statusCode'] == 200 || response['statusCode'] == 201) {
         final data = response['data'];
+        final created = parseCreateDeliveryResponse(data);
         return {
           'success': true,
           'data': data,
-          'orderId': _extractOrderId(data),
+          'orderId': created.isValid ? created.deliveryId : _extractOrderId(data),
+          'created': created,
           'message': 'Delivery request created successfully',
         };
       } else {
@@ -95,6 +98,7 @@ class CourierRepository {
           'success': false,
           'data': null,
           'orderId': null,
+          'created': null,
           'message': errorMessage
         };
       }
@@ -105,6 +109,7 @@ class CourierRepository {
         'success': false,
         'data': null,
         'orderId': null,
+        'created': null,
         'message': errorMessage
       };
     }

@@ -9,7 +9,12 @@ import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/utils/phone_util.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
+import 'package:hudhud_delivery/features/courier/data/models/create_delivery_result.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
+import 'package:hudhud_delivery/features/courier/utils/delivery_payment_helper.dart';
+import 'package:hudhud_delivery/features/payment/data/data_provider/payment_data_provider.dart';
+import 'package:hudhud_delivery/features/payment/data/repository/payment_repository.dart';
+import 'package:hudhud_delivery/features/payment/presentation/screen/payment_initiate_result_screen.dart';
 import 'finding_courier_screen.dart';
 
 class ConfirmDetailsScreen extends StatefulWidget {
@@ -30,6 +35,7 @@ class ConfirmDetailsScreen extends StatefulWidget {
   final String recipientName;
   final String recipientPhone;
   final String? packageImagePath;
+  final Map<String, dynamic>? paymentDetails;
 
   const ConfirmDetailsScreen({
     super.key,
@@ -50,6 +56,7 @@ class ConfirmDetailsScreen extends StatefulWidget {
     required this.recipientName,
     required this.recipientPhone,
     this.packageImagePath,
+    this.paymentDetails,
   });
 
   @override
@@ -58,6 +65,7 @@ class ConfirmDetailsScreen extends StatefulWidget {
 
 class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
   late final CourierRepository _courierRepository;
+  late final PaymentRepository _paymentRepository;
   gmaps.GoogleMapController? _mapController;
 
   bool _isLoadingEstimate = true;
@@ -75,6 +83,11 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
     super.initState();
     _courierRepository = CourierRepository(
       courierDataProvider: CourierDataProvider(
+        apiService: ApiService.instance,
+      ),
+    );
+    _paymentRepository = PaymentRepository(
+      paymentDataProvider: PaymentDataProvider(
         apiService: ApiService.instance,
       ),
     );
@@ -225,7 +238,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
       'dropoff_latitude': widget.deliveryPosition?.latitude ?? 0,
       'dropoff_longitude': widget.deliveryPosition?.longitude ?? 0,
       'vehicle_type': _mapVehicleType(widget.selectedVehicle),
-      'service_type': widget.isInstantDelivery ? 'express' : 'standard',
+      'service_type': widget.isInstantDelivery ? 'same_day' : 'standard',
       'scheduled_pickup': _formatScheduledDateTime(widget.scheduledPickup),
       'scheduled_delivery': _formatScheduledDateTime(widget.scheduledDelivery),
       'estimated_distance': _estimatedDistance ?? 0,
@@ -239,6 +252,23 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
       'sender_phone': normalizePhoneToBackend(user?.phone ?? ''),
       'receiver_name': widget.recipientName,
       'receiver_phone': normalizePhoneToBackend(widget.recipientPhone),
+      'package_details': {
+        'name': widget.itemType,
+        'weight': widget.packageWeight,
+        'description': widget.packageDescription.isNotEmpty
+            ? widget.packageDescription
+            : widget.itemType,
+      },
+      'pickup_address': {
+        'latitude': widget.pickupPosition?.latitude ?? 0,
+        'longitude': widget.pickupPosition?.longitude ?? 0,
+        'address': widget.pickupLocation,
+      },
+      'delivery_address': {
+        'latitude': widget.deliveryPosition?.latitude ?? 0,
+        'longitude': widget.deliveryPosition?.longitude ?? 0,
+        'address': widget.deliveryLocation,
+      },
     };
 
     setState(() => _isLoadingRequest = true);
@@ -249,35 +279,97 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
 
     if (!mounted) return;
 
-    setState(() => _isLoadingRequest = false);
-
-    if (result['success'] == true) {
-      final orderId = result['orderId'] as int?;
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => FindingCourierScreen(
-            deliveryId: orderId,
-            pickupLocation: widget.pickupLocation,
-            deliveryLocation: widget.deliveryLocation,
-            pickupPosition: widget.pickupPosition,
-            deliveryPosition: widget.deliveryPosition,
-            selectedVehicle: widget.selectedVehicle,
-            itemType: widget.itemType,
-            quantity: widget.quantity,
-            whoPays: widget.whoPays,
-            paymentType: widget.paymentType,
-            recipientName: widget.recipientName,
-            recipientPhone: widget.recipientPhone,
-            packageImagePath: widget.packageImagePath,
-          ),
-        ),
-      );
-    } else {
+    if (result['success'] != true) {
+      setState(() => _isLoadingRequest = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(result['message']?.toString() ??
               'Failed to create delivery request'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final created = result['created'] as CreateDeliveryResult? ??
+        parseCreateDeliveryResponse(result['data']);
+
+    if (!created.isValid) {
+      setState(() => _isLoadingRequest = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Invalid delivery id from create delivery'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final amount = created.totalAmount ?? _estimatedCost ?? 0;
+    if (amount <= 0) {
+      setState(() => _isLoadingRequest = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Invalid payment amount for delivery'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final currency = created.currency ?? _estimatedCurrency;
+
+    try {
+      final paymentResult = await initiateDeliveryPayment(
+        repo: _paymentRepository,
+        packageDeliveryId: created.deliveryId,
+        paymentMethodCode: widget.paymentType,
+        amount: amount,
+        currency: currency,
+        paymentDetails: widget.paymentDetails,
+      );
+
+      if (!mounted) return;
+      setState(() => _isLoadingRequest = false);
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PaymentInitiateResultScreen(
+            result: paymentResult,
+            orderId: created.deliveryId.toString(),
+            trackingNumber: created.trackingNumber ?? '',
+            successActionLabel: 'Find courier',
+            onTerminalSuccess: (resultContext) {
+              Navigator.of(resultContext).pushReplacement(
+                MaterialPageRoute(
+                  builder: (_) => FindingCourierScreen(
+                    deliveryId: created.deliveryId,
+                    pickupLocation: widget.pickupLocation,
+                    deliveryLocation: widget.deliveryLocation,
+                    pickupPosition: widget.pickupPosition,
+                    deliveryPosition: widget.deliveryPosition,
+                    selectedVehicle: widget.selectedVehicle,
+                    itemType: widget.itemType,
+                    quantity: widget.quantity,
+                    whoPays: widget.whoPays,
+                    paymentType: widget.paymentType,
+                    recipientName: widget.recipientName,
+                    recipientPhone: widget.recipientPhone,
+                    packageImagePath: widget.packageImagePath,
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoadingRequest = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Payment failed: $e'),
           backgroundColor: Colors.red,
         ),
       );
