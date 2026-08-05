@@ -874,45 +874,59 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 
                       child: Row(
 
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
                         children: [
 
-                          Row(
+                          Expanded(
 
-                            children: [
+                            child: Row(
 
-                              const Icon(
+                              children: [
 
-                                Icons.shopping_bag_outlined,
+                                const Icon(
 
-                                color: Colors.white,
-
-                              ),
-
-                              const SizedBox(width: 12),
-
-                              Text(
-
-                                'TOTAL ITEMS: $_totalItems',
-
-                                style: const TextStyle(
+                                  Icons.shopping_bag_outlined,
 
                                   color: Colors.white,
 
-                                  fontSize: 14,
+                                ),
 
-                                  fontWeight: FontWeight.w500,
+                                const SizedBox(width: 8),
+
+                                Flexible(
+
+                                  child: Text(
+
+                                    'TOTAL ITEMS: $_totalItems',
+
+                                    maxLines: 1,
+
+                                    overflow: TextOverflow.ellipsis,
+
+                                    style: const TextStyle(
+
+                                      color: Colors.white,
+
+                                      fontSize: 14,
+
+                                      fontWeight: FontWeight.w500,
+
+                                    ),
+
+                                  ),
 
                                 ),
 
-                              ),
+                              ],
 
-                            ],
+                            ),
 
                           ),
 
+                          const SizedBox(width: 8),
+
                           Row(
+
+                            mainAxisSize: MainAxisSize.min,
 
                             children: [
 
@@ -932,7 +946,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 
                               ),
 
-                              const SizedBox(width: 16),
+                              const SizedBox(width: 8),
 
                               TextButton(
 
