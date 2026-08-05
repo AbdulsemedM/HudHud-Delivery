@@ -1,25 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lottie/lottie.dart';
-import 'package:shimmer/shimmer.dart';
-import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
-import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/payment/data/data_provider/payment_data_provider.dart';
 import 'package:hudhud_delivery/features/payment/data/repository/payment_repository.dart';
+import 'package:hudhud_delivery/features/payment/model/payment_initiate_result.dart';
+import 'package:hudhud_delivery/features/payment/presentation/screen/payment_initiate_result_screen.dart';
+import 'package:hudhud_delivery/features/payment/presentation/widgets/payment_details_form.dart';
 import 'package:hudhud_delivery/features/wallet/bloc/wallet_bloc.dart';
-import 'package:hudhud_delivery/features/wallet/data/models/wallet_model.dart';
 import 'package:hudhud_delivery/features/wallet/data/providers/wallet_data_provider.dart';
 import 'package:hudhud_delivery/features/wallet/data/repositories/wallet_repository.dart';
+import 'package:hudhud_delivery/features/wallet/utils/wallet_funding_methods.dart';
 
 class WithdrawFundsScreen extends StatefulWidget {
-  final List<WalletModel> wallets;
   final String defaultCurrency;
 
   const WithdrawFundsScreen({
     super.key,
-    required this.wallets,
     this.defaultCurrency = 'ETB',
   });
 
@@ -31,14 +29,13 @@ class _WithdrawFundsScreenState extends State<WithdrawFundsScreen> {
   final _amountController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  List<Map<String, dynamic>> _paymentMethods = [];
+  List<Map<String, dynamic>> _paymentMethods =
+      List.from(kDefaultWalletFundingMethods);
   bool _isLoadingPaymentMethods = true;
-  WalletModel? _selectedWallet;
   String? _selectedMethodId;
-  bool _showCardDetails = false;
-  final _transactionIdController = TextEditingController();
-  final _cardLastFourController = TextEditingController();
-  final _cardBrandController = TextEditingController();
+  Map<String, dynamic> _paymentDetails = {};
+  String _ebirrProvider = 'kaafi';
+  bool _useHpp = false;
 
   late final WalletRepository _walletRepository;
   late final PaymentRepository _paymentRepository;
@@ -55,31 +52,25 @@ class _WithdrawFundsScreenState extends State<WithdrawFundsScreen> {
     );
     _walletBloc = WalletBloc(walletRepository: _walletRepository);
     _fetchPaymentMethods();
-    if (widget.wallets.isNotEmpty && _selectedWallet == null) {
-      _selectedWallet = widget.wallets.first;
-    }
   }
 
   Future<void> _fetchPaymentMethods() async {
     try {
       final methods = await _paymentRepository.getPaymentMethods();
-      if (mounted) {
-        setState(() {
-          _paymentMethods = methods;
-          _isLoadingPaymentMethods = false;
-          if (methods.isNotEmpty && _selectedMethodId == null) {
-            _selectedMethodId = methods.first['id'] as String?;
-            _showCardDetails = _selectedMethodId == 'card';
-          }
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _paymentMethods = filterWalletFundingMethods(methods);
+        _isLoadingPaymentMethods = false;
+        if (_selectedMethodId == null && _paymentMethods.isNotEmpty) {
+          _selectedMethodId = _paymentMethods.first['id'] as String?;
+        }
+      });
     } catch (_) {
-      if (mounted) {
-        setState(() {
-          _paymentMethods = [];
-          _isLoadingPaymentMethods = false;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _paymentMethods = List.from(kDefaultWalletFundingMethods);
+        _isLoadingPaymentMethods = false;
+      });
     }
   }
 
@@ -87,36 +78,64 @@ class _WithdrawFundsScreenState extends State<WithdrawFundsScreen> {
   void dispose() {
     _walletBloc.close();
     _amountController.dispose();
-    _transactionIdController.dispose();
-    _cardLastFourController.dispose();
-    _cardBrandController.dispose();
     super.dispose();
   }
 
-  String get _currency => 'ETB';
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+    final method = _selectedMethodId;
+    if (method == null || method.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.selectWithdrawalMethodPrompt),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
 
-  InputDecoration _fieldDecoration(BuildContext context, String label,
-      {String? hint}) {
-    final scheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final borderColor =
-        isDark ? const Color(0xFF2A2A2A) : const Color(0xFFEEEEEE);
-    return InputDecoration(
-      labelText: label,
-      hintText: hint,
-      filled: true,
-      fillColor: scheme.surfaceContainerHighest,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppColors.radiusLG),
-        borderSide: BorderSide(color: borderColor),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppColors.radiusLG),
-        borderSide: BorderSide(color: borderColor),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppColors.radiusLG),
-        borderSide: const BorderSide(color: AppColors.primaryColor, width: 2),
+    if (paymentMethodNeedsDetailsForm(method)) {
+      final phoneError = validatePaymentPhone(
+        _paymentDetails['phone']?.toString(),
+        method,
+      );
+      if (phoneError != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(phoneError), backgroundColor: Colors.red),
+        );
+        return;
+      }
+    }
+
+    final amount = double.tryParse(_amountController.text.trim()) ?? 0;
+    final details = buildInitiatePaymentDetails(
+      paymentMethodCode: method,
+      collectedDetails: _paymentDetails,
+      orderId: 0,
+    );
+
+    _walletBloc.add(WithdrawFundsEvent(
+      amount: amount,
+      paymentMethodCode: method,
+      paymentDetails: details,
+    ));
+  }
+
+  Future<void> _handlePaymentResult(Map<String, dynamic>? payment) async {
+    if (payment == null) return;
+    final result = PaymentInitiateResult.fromJson(payment);
+    if (!result.isSuccess &&
+        result.uiMode == PaymentInitiateUiMode.failure &&
+        result.paymentId == null) {
+      return;
+    }
+    if (!mounted) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => PaymentInitiateResultScreen(
+          result: result,
+          orderId: 'wallet-withdraw',
+        ),
       ),
     );
   }
@@ -130,38 +149,6 @@ class _WithdrawFundsScreenState extends State<WithdrawFundsScreen> {
     final borderColor =
         isDark ? const Color(0xFF2A2A2A) : const Color(0xFFEEEEEE);
 
-    if (widget.wallets.isEmpty) {
-      return Scaffold(
-        backgroundColor: theme.scaffoldBackgroundColor,
-        appBar: AppBar(
-          title: Text(l10n.withdrawFundsTitle),
-          backgroundColor: colorScheme.surface,
-          foregroundColor: colorScheme.onSurface,
-          elevation: 0,
-          surfaceTintColor: Colors.transparent,
-        ),
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(AppColors.spaceLG),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Lottie.asset('assets/animations/browse.json', width: 160),
-                const SizedBox(height: AppColors.spaceMD),
-                Text(
-                  l10n.walletNoWalletsForWithdraw,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-
     return BlocProvider.value(
       value: _walletBloc,
       child: Scaffold(
@@ -174,7 +161,7 @@ class _WithdrawFundsScreenState extends State<WithdrawFundsScreen> {
           surfaceTintColor: Colors.transparent,
         ),
         body: BlocConsumer<WalletBloc, WalletState>(
-          listener: (context, state) {
+          listener: (context, state) async {
             if (state is WithdrawFundsSuccess) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -182,7 +169,8 @@ class _WithdrawFundsScreenState extends State<WithdrawFundsScreen> {
                   backgroundColor: AppColors.successColor,
                 ),
               );
-              Navigator.of(context).pop(true);
+              await _handlePaymentResult(state.payment);
+              if (context.mounted) Navigator.of(context).pop(true);
             } else if (state is WithdrawFundsError) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -194,170 +182,141 @@ class _WithdrawFundsScreenState extends State<WithdrawFundsScreen> {
           },
           builder: (context, state) {
             final isLoading = state is WithdrawFundsLoading;
-
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(AppColors.spaceMD),
+            return SafeArea(
               child: Form(
                 key: _formKey,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                      DropdownButtonFormField<WalletModel>(
-                      isExpanded: true,
-                      initialValue: _selectedWallet,
-                      decoration: _fieldDecoration(context, l10n.fromWallet),
-                      selectedItemBuilder: (context) => widget.wallets
-                          .map(
-                            (w) => Align(
-                              alignment: AlignmentDirectional.centerStart,
-                              child: Text(
-                                w.dropdownLabelWithBalance,
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.all(AppColors.spaceMD),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            TextFormField(
+                              controller: _amountController,
+                              keyboardType: const TextInputType.numberWithOptions(
+                                decimal: true,
+                              ),
+                              decoration: InputDecoration(
+                                labelText: l10n.amount,
+                                hintText: l10n.enterWithdrawAmount,
+                                suffixText: widget.defaultCurrency,
+                                border: const OutlineInputBorder(),
+                              ),
+                              validator: (v) {
+                                if (v == null || v.isEmpty) {
+                                  return l10n.enterAmount;
+                                }
+                                final amount = double.tryParse(v);
+                                if (amount == null || amount <= 0) {
+                                  return l10n.validationEnterValidAmount;
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 24),
+                            Text(
+                              l10n.withdrawalMethod,
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
-                          )
-                          .toList(),
-                      items: widget.wallets
-                          .map((w) => DropdownMenuItem(
-                                value: w,
-                                child: Text(
-                                  w.dropdownLabelWithBalance,
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                ),
-                              ))
-                          .toList(),
-                      onChanged: (w) => setState(() => _selectedWallet = w),
-                    ),
-                    const SizedBox(height: AppColors.spaceMD),
-                    TextFormField(
-                      controller: _amountController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      decoration: _fieldDecoration(
-                        context,
-                        l10n.amount,
-                        hint: l10n.enterWithdrawAmount,
-                      ),
-                      validator: (v) {
-                        if (v == null || v.isEmpty) return l10n.enterAmount;
-                        final amount = double.tryParse(v);
-                        if (amount == null || amount <= 0) {
-                          return l10n.validationEnterValidAmount;
-                        }
-                        if (_selectedWallet != null &&
-                            amount > _selectedWallet!.balanceAmount) {
-                          return l10n.validationAmountExceedsWalletBalance;
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: AppColors.spaceMD),
-                    if (_isLoadingPaymentMethods)
-                      _WithdrawShimmer(borderColor: borderColor)
-                    else if (_paymentMethods.isEmpty)
-                      Container(
-                        padding: const EdgeInsets.all(AppColors.spaceMD),
-                        decoration: BoxDecoration(
-                          color: colorScheme.surface,
-                          borderRadius:
-                              BorderRadius.circular(AppColors.radiusLG),
-                          border: Border.all(color: borderColor),
-                        ),
-                        child: Text(
-                          l10n.walletNoPaymentMethods,
-                          style: TextStyle(color: colorScheme.onSurfaceVariant),
-                        ),
-                      )
-                    else ...[
-                      DropdownButtonFormField<String>(
-                        isExpanded: true,
-                        initialValue: _selectedMethodId,
-                        decoration:
-                            _fieldDecoration(context, l10n.withdrawalMethod),
-                        selectedItemBuilder: (context) => _paymentMethods
-                            .map(
-                              (m) => Align(
-                                alignment: AlignmentDirectional.centerStart,
-                                child: Text(
-                                  m['name'] as String? ?? '',
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                ),
-                              ),
-                            )
-                            .toList(),
-                        items: _paymentMethods
-                            .map((m) => DropdownMenuItem(
-                                  value: m['id'] as String?,
-                                  child: Text(
-                                    m['name'] as String? ?? '',
-                                    overflow: TextOverflow.ellipsis,
+                            const SizedBox(height: 12),
+                            if (_isLoadingPaymentMethods)
+                              const Center(
+                                child: Padding(
+                                  padding: EdgeInsets.all(16),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
                                   ),
-                                ))
-                            .toList(),
-                        onChanged: (id) => setState(() {
-                          _selectedMethodId = id;
-                          _showCardDetails = id == 'card';
-                        }),
-                      ),
-                      if (_showCardDetails) ...[
-                        const SizedBox(height: AppColors.spaceMD),
-                        TextFormField(
-                          controller: _transactionIdController,
-                          decoration: _fieldDecoration(
-                            context,
-                            l10n.transactionId,
-                            hint: l10n.transactionIdHint,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: _cardLastFourController,
-                          decoration: _fieldDecoration(
-                            context,
-                            l10n.cardLast4,
-                            hint: l10n.cardLast4Hint,
-                          ),
-                          keyboardType: TextInputType.number,
-                          maxLength: 4,
-                        ),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: _cardBrandController,
-                          decoration: _fieldDecoration(
-                            context,
-                            l10n.cardBrand,
-                            hint: l10n.cardBrandHint,
-                          ),
-                        ),
-                      ],
-                    ],
-                    const SizedBox(height: AppColors.spaceXL),
-                    SizedBox(
-                      height: AppColors.buttonHeightMD,
-                      child: ElevatedButton(
-                        onPressed: isLoading ? null : _submit,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryColor,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(AppColors.radiusLG),
-                          ),
-                        ),
-                        child: isLoading
-                            ? const SizedBox(
-                                height: 24,
-                                width: 24,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
                                 ),
                               )
-                            : Text(l10n.withdrawAction),
+                            else if (_paymentMethods.isEmpty)
+                              Text(
+                                l10n.walletNoPaymentMethods,
+                                style: TextStyle(
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              )
+                            else
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: _paymentMethods.map((method) {
+                                  final id = method['id'] as String? ?? '';
+                                  final name =
+                                      method['name'] as String? ?? id;
+                                  final selected = _selectedMethodId == id;
+                                  return FilterChip(
+                                    label: Text(name),
+                                    selected: selected,
+                                    onSelected: (v) {
+                                      if (!v) return;
+                                      setState(() {
+                                        _selectedMethodId = id;
+                                        _paymentDetails = {};
+                                        _useHpp = false;
+                                        _ebirrProvider = 'kaafi';
+                                      });
+                                    },
+                                    showCheckmark: false,
+                                    selectedColor: AppColors.primaryColor,
+                                    labelStyle: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: selected
+                                          ? colorScheme.onPrimary
+                                          : colorScheme.onSurfaceVariant,
+                                    ),
+                                    side: BorderSide(
+                                      color: selected
+                                          ? AppColors.primaryColor
+                                          : borderColor,
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            if (_selectedMethodId != null)
+                              PaymentDetailsForm(
+                                key: ValueKey(_selectedMethodId),
+                                paymentMethodCode: _selectedMethodId!,
+                                ebirrProvider: _ebirrProvider,
+                                useHpp: _useHpp,
+                                onEbirrProviderChanged: (v) =>
+                                    setState(() => _ebirrProvider = v),
+                                onUseHppChanged: (v) =>
+                                    setState(() => _useHpp = v),
+                                onChanged: (details) {
+                                  _paymentDetails = details;
+                                },
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(AppColors.spaceMD),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: AppColors.buttonHeightMD,
+                        child: ElevatedButton(
+                          onPressed: isLoading ? null : _submit,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryColor,
+                            foregroundColor: Colors.white,
+                          ),
+                          child: isLoading
+                              ? const SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : Text(l10n.withdrawAction),
+                        ),
                       ),
                     ),
                   ],
@@ -365,111 +324,6 @@ class _WithdrawFundsScreenState extends State<WithdrawFundsScreen> {
               ),
             );
           },
-        ),
-      ),
-    );
-  }
-
-  Future<void> _submitWithdraw({
-    required double amount,
-    required String method,
-    required String currency,
-    required int walletId,
-    Map<String, dynamic>? paymentDetails,
-  }) async {
-    int? payerId;
-    try {
-      final user = await AuthService().getUserProfile();
-      payerId = user?.id;
-    } catch (_) {}
-
-    if (!mounted) return;
-    _walletBloc.add(
-          WithdrawFundsEvent(
-            amount: amount,
-            method: method,
-            currency: currency,
-            walletId: walletId,
-            payerId: payerId,
-            paymentDetails:
-                paymentDetails != null && paymentDetails.isNotEmpty
-                    ? paymentDetails
-                    : null,
-          ),
-        );
-  }
-
-  void _submit() {
-    if (!_formKey.currentState!.validate()) return;
-    final colorScheme = Theme.of(context).colorScheme;
-    if (_selectedWallet == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.selectWalletPrompt),
-          backgroundColor: colorScheme.error,
-        ),
-      );
-      return;
-    }
-    if (_selectedMethodId == null || _selectedMethodId!.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.selectWithdrawalMethodPrompt),
-          backgroundColor: colorScheme.error,
-        ),
-      );
-      return;
-    }
-
-    final amount = double.tryParse(_amountController.text) ?? 0;
-    if (amount <= 0) return;
-
-    Map<String, dynamic>? paymentDetails;
-    if (_showCardDetails &&
-        (_transactionIdController.text.isNotEmpty ||
-            _cardLastFourController.text.isNotEmpty)) {
-      paymentDetails = {};
-      if (_transactionIdController.text.isNotEmpty) {
-        paymentDetails['transaction_id'] = _transactionIdController.text;
-      }
-      if (_cardLastFourController.text.isNotEmpty) {
-        paymentDetails['card_last_four'] = _cardLastFourController.text;
-      }
-      if (_cardBrandController.text.isNotEmpty) {
-        paymentDetails['card_brand'] = _cardBrandController.text;
-      }
-    }
-
-    _submitWithdraw(
-      amount: amount,
-      method: _selectedMethodId!,
-      currency: _currency,
-      walletId: _selectedWallet!.id,
-      paymentDetails: paymentDetails,
-    );
-  }
-}
-
-class _WithdrawShimmer extends StatelessWidget {
-  final Color borderColor;
-
-  const _WithdrawShimmer({required this.borderColor});
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final baseColor = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0);
-    final highlightColor =
-        isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF5F5F5);
-    return Shimmer.fromColors(
-      baseColor: baseColor,
-      highlightColor: highlightColor,
-      child: Container(
-        height: 56,
-        decoration: BoxDecoration(
-          color: baseColor,
-          borderRadius: BorderRadius.circular(AppColors.radiusLG),
-          border: Border.all(color: borderColor),
         ),
       ),
     );

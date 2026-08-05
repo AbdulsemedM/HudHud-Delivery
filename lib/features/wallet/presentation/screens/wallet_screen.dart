@@ -7,13 +7,12 @@ import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
 import 'package:hudhud_delivery/features/settings/presentation/widgets/profile_dark_page.dart';
 import 'package:hudhud_delivery/features/wallet/bloc/wallet_bloc.dart';
-import 'package:hudhud_delivery/features/wallet/data/models/wallet_model.dart';
+import 'package:hudhud_delivery/features/wallet/data/models/wallet_balance_model.dart';
 import 'package:hudhud_delivery/features/wallet/data/models/wallet_transaction_model.dart';
 import 'package:intl/intl.dart';
 import 'package:hudhud_delivery/features/wallet/data/providers/wallet_data_provider.dart';
 import 'package:hudhud_delivery/features/wallet/data/repositories/wallet_repository.dart';
 import 'add_funds_screen.dart';
-import 'wallet_detail_screen.dart';
 import 'withdraw_funds_screen.dart';
 import '../widgets/wallet_widget.dart';
 
@@ -29,7 +28,7 @@ class WalletScreen extends StatelessWidget {
             apiService: ApiService.instance,
           ),
         ),
-      )..add(const FetchWalletsEvent()),
+      )..add(const FetchBalanceEvent()),
       child: const _WalletScreenContent(),
     );
   }
@@ -45,7 +44,7 @@ class _WalletScreenContent extends StatelessWidget {
       title: l10n.profileWallet,
       body: BlocBuilder<WalletBloc, WalletState>(
         builder: (context, state) {
-          if (state is WalletLoading) {
+          if (state is WalletLoading || state is WalletInitial) {
             return const Padding(
               padding: EdgeInsets.all(AppColors.spaceMD),
               child: WalletShimmer(),
@@ -78,7 +77,7 @@ class _WalletScreenContent extends StatelessWidget {
                       ),
                       onPressed: () => context
                           .read<WalletBloc>()
-                          .add(const FetchWalletsEvent()),
+                          .add(const FetchBalanceEvent()),
                       icon: const Icon(Icons.refresh),
                       label: Text(l10n.actionRetry),
                     ),
@@ -87,9 +86,9 @@ class _WalletScreenContent extends StatelessWidget {
               ),
             );
           }
-          if (state is WalletsLoaded) {
+          if (state is BalanceLoaded) {
             return _WalletContent(
-              wallets: state.wallets,
+              balance: state.balance,
               transactions: state.transactions,
             );
           }
@@ -101,12 +100,12 @@ class _WalletScreenContent extends StatelessWidget {
 }
 
 class _WalletContent extends StatefulWidget {
-  final List<WalletModel> wallets;
-  final List<WalletTransactionModel>? transactions;
+  final WalletBalance balance;
+  final List<WalletTransactionModel> transactions;
 
   const _WalletContent({
-    required this.wallets,
-    this.transactions,
+    required this.balance,
+    required this.transactions,
   });
 
   @override
@@ -114,15 +113,14 @@ class _WalletContent extends StatefulWidget {
 }
 
 class _WalletContentState extends State<_WalletContent> {
-  int _selectedWalletIndex = 0;
   final _transactionsKey = GlobalKey();
 
   static List<TransactionItem> _toTransactionItems(
     AppLocalizations l10n,
-    List<WalletTransactionModel>? transactions,
+    List<WalletTransactionModel> transactions,
     String defaultCurrency,
   ) {
-    if (transactions == null || transactions.isEmpty) return [];
+    if (transactions.isEmpty) return [];
     return transactions.map((t) {
       final date = t.createdAt != null
           ? DateFormat('dd MMM yyyy').format(
@@ -140,56 +138,43 @@ class _WalletContentState extends State<_WalletContent> {
     }).toList();
   }
 
+  Future<void> _refreshAfterMutation() async {
+    if (!mounted) return;
+    context.read<WalletBloc>().add(const FetchBalanceEvent());
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    const primaryCurrency = 'ETB';
-
-    final selectedWallet = widget.wallets.isNotEmpty
-        ? widget.wallets[_selectedWalletIndex.clamp(0, widget.wallets.length - 1)]
-        : null;
-
-    final totalBalance = widget.wallets.fold<double>(
-      0,
-      (sum, w) => sum + w.balanceAmount,
-    );
-
-    final displayBalance = selectedWallet != null && widget.wallets.length > 1
-        ? selectedWallet.balanceAmount
-        : totalBalance;
+    final currency = widget.balance.currency;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppColors.spaceMD),
       child: Column(
         children: [
           BalanceCard(
-            balance: '${l10n.currencyEtb} ${displayBalance.toStringAsFixed(2)}',
+            balance:
+                '$currency ${widget.balance.balance.toStringAsFixed(2)}',
             bottomActions: WalletActions(
               onAddMoney: () async {
                 final result = await Navigator.of(context).push<bool>(
                   MaterialPageRoute(
                     builder: (_) => AddFundsScreen(
-                      wallets: widget.wallets,
-                      defaultCurrency: primaryCurrency,
+                      defaultCurrency: currency,
                     ),
                   ),
                 );
-                if (result == true && context.mounted) {
-                  context.read<WalletBloc>().add(const FetchWalletsEvent());
-                }
+                if (result == true) await _refreshAfterMutation();
               },
               onSendMoney: () async {
                 final result = await Navigator.of(context).push<bool>(
                   MaterialPageRoute(
                     builder: (_) => WithdrawFundsScreen(
-                      wallets: widget.wallets,
-                      defaultCurrency: primaryCurrency,
+                      defaultCurrency: currency,
                     ),
                   ),
                 );
-                if (result == true && context.mounted) {
-                  context.read<WalletBloc>().add(const FetchWalletsEvent());
-                }
+                if (result == true) await _refreshAfterMutation();
               },
               onHistory: () {
                 final target = _transactionsKey.currentContext;
@@ -203,43 +188,15 @@ class _WalletContentState extends State<_WalletContent> {
               },
             ),
           ),
-          if (widget.wallets.length > 1) ...[
-            const SizedBox(height: AppColors.spaceMD),
-            SizedBox(
-              height: 40,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: widget.wallets.length,
-                itemBuilder: (context, index) {
-                  final wallet = widget.wallets[index];
-                  return WalletSelectorChip(
-                    label: wallet.name,
-                    selected: _selectedWalletIndex == index,
-                    onTap: () => setState(() => _selectedWalletIndex = index),
-                  );
-                },
-              ),
-            ),
-          ],
           const SizedBox(height: AppColors.spaceLG),
           TransactionsList(
             key: _transactionsKey,
             transactions: _toTransactionItems(
               l10n,
               widget.transactions,
-              primaryCurrency,
+              currency,
             ),
-            onSeeAll: widget.wallets.isNotEmpty
-                ? () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => WalletDetailScreen(
-                          walletId: widget.wallets[_selectedWalletIndex].id,
-                        ),
-                      ),
-                    );
-                  }
-                : null,
+            onSeeAll: null,
           ),
           const SizedBox(height: 80),
         ],

@@ -82,6 +82,7 @@ class ApiConstants {
   static const String wallet = 'wallet';
   static const String walletBalance = '$wallet/balance';
   static const String walletTransactions = '$wallet/transactions';
+  static const String walletTopup = '$wallet/topup';
   static const String walletAddFunds = '$wallet/add-funds';
   static const String walletWithdraw = '$wallet/withdraw';
 

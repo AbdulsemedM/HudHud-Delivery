@@ -244,13 +244,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       final repo = WalletRepository(
         walletDataProvider: WalletDataProvider(apiService: ApiService.instance),
       );
-      final res = await repo.getWallets(perPage: 50);
-      double total = 0;
-      for (final w in res.wallets) {
-        total += w.balanceAmount;
-      }
+      final balance = await repo.getBalance();
       if (mounted) {
-        setState(() => _walletTotal = total);
+        setState(() => _walletTotal = balance.balance);
       }
     } catch (_) {
       if (mounted) {
