@@ -1,20 +1,27 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import '../../../../core/api/api_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../checkout/data/models/create_order_result.dart';
+import '../../data/data_provider/payment_data_provider.dart';
+import '../../data/repository/payment_repository.dart';
 import '../../model/payment_initiate_result.dart';
+import '../../model/payment_status_result.dart';
 import 'payment_hpp_screen.dart';
 
 class PaymentInitiateResultScreen extends StatefulWidget {
   final PaymentInitiateResult result;
   final String orderId;
+  final PaymentRepository? paymentRepository;
 
   const PaymentInitiateResultScreen({
     super.key,
     required this.result,
     required this.orderId,
+    this.paymentRepository,
   });
 
   @override
@@ -24,9 +31,26 @@ class PaymentInitiateResultScreen extends StatefulWidget {
 
 class _PaymentInitiateResultScreenState
     extends State<PaymentInitiateResultScreen> {
+  static const _pollInterval = Duration(seconds: 3);
+  static const _defaultTimeout = Duration(minutes: 5);
+
+  late final PaymentRepository _paymentRepository;
+  Timer? _pollTimer;
+  PaymentStatusResult? _polledStatus;
+  var _checking = false;
+  var _timedOut = false;
+  DateTime? _pollDeadline;
+
   @override
   void initState() {
     super.initState();
+    _paymentRepository = widget.paymentRepository ??
+        PaymentRepository(
+          paymentDataProvider: PaymentDataProvider(
+            apiService: ApiService.instance,
+          ),
+        );
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final result = widget.result;
@@ -42,11 +66,110 @@ class _PaymentInitiateResultScreenState
           ),
         );
       }
+      _maybeStartPolling();
     });
+  }
+
+  @override
+  void dispose() {
+    _stopPolling();
+    super.dispose();
   }
 
   PaymentInitiateResult get result => widget.result;
   String get orderId => widget.orderId;
+
+  bool get _shouldPoll => shouldPollPaymentStatus(
+        isSuccess: result.isSuccess,
+        nextAction: result.nextAction,
+        status: result.status,
+        method: result.method,
+      );
+
+  bool get _isPollingActive =>
+      _shouldPoll &&
+      (_polledStatus == null || !_polledStatus!.isTerminal);
+
+  void _maybeStartPolling() {
+    if (!_shouldPoll || result.paymentId == null) return;
+    _pollDeadline = _resolveDeadline();
+    _checkStatus(manual: false);
+    _pollTimer?.cancel();
+    _pollTimer = Timer.periodic(_pollInterval, (_) {
+      if (!mounted) return;
+      _checkStatus(manual: false);
+    });
+  }
+
+  DateTime _resolveDeadline() {
+    final now = DateTime.now();
+    final defaultEnd = now.add(_defaultTimeout);
+    final expiresRaw = result.expiresAt;
+    if (expiresRaw == null || expiresRaw.isEmpty) return defaultEnd;
+    final expires = DateTime.tryParse(expiresRaw);
+    if (expires == null) return defaultEnd;
+    return expires.isBefore(defaultEnd) ? expires : defaultEnd;
+  }
+
+  void _stopPolling() {
+    _pollTimer?.cancel();
+    _pollTimer = null;
+  }
+
+  Future<void> _checkStatus({required bool manual}) async {
+    final paymentId = result.paymentId;
+    if (paymentId == null || paymentId <= 0) return;
+    if (_polledStatus?.isTerminal == true) return;
+
+    if (!manual &&
+        _pollDeadline != null &&
+        DateTime.now().isAfter(_pollDeadline!)) {
+      _stopPolling();
+      if (mounted) {
+        setState(() {
+          _timedOut = true;
+          _checking = false;
+        });
+      }
+      return;
+    }
+
+    if (manual && _timedOut) {
+      _timedOut = false;
+      _pollDeadline = DateTime.now().add(_defaultTimeout);
+      _pollTimer?.cancel();
+      _pollTimer = Timer.periodic(_pollInterval, (_) {
+        if (!mounted) return;
+        _checkStatus(manual: false);
+      });
+    }
+
+    if (_checking) return;
+    if (mounted) setState(() => _checking = true);
+
+    try {
+      final status = await _paymentRepository.getPaymentStatus(paymentId);
+      if (!mounted) return;
+      setState(() {
+        _polledStatus = status;
+        _checking = false;
+      });
+      if (status.isTerminal) {
+        _stopPolling();
+      }
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _checking = false);
+      if (manual) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Could not refresh payment status'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,6 +186,26 @@ class _PaymentInitiateResultScreenState
           child: Column(
             children: [
               Expanded(child: _buildBody(context)),
+              if (_isPollingActive) ...[
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: _checking
+                        ? null
+                        : () => _checkStatus(manual: true),
+                    icon: _checking
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.refresh),
+                    label: Text(_checking ? 'Checking…' : 'Check status'),
+                  ),
+                ),
+                const SizedBox(height: 8),
+              ],
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -78,7 +221,10 @@ class _PaymentInitiateResultScreenState
                     Navigator.of(context).popUntil((route) => route.isFirst);
                   },
                   child: Text(
-                    result.isSuccess ? 'Done' : 'Go back',
+                    result.isSuccess ||
+                            (_polledStatus?.isCompleted ?? false)
+                        ? 'Done'
+                        : 'Go back',
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -94,6 +240,47 @@ class _PaymentInitiateResultScreenState
   }
 
   Widget _buildBody(BuildContext context) {
+    final polled = _polledStatus;
+    if (polled != null && polled.isSuccess && polled.isTerminal) {
+      if (polled.isCompleted) {
+        return _StatusContent(
+          icon: Icons.check_circle,
+          iconColor: AppColors.primaryColor,
+          title: 'Payment successful',
+          message: 'Your payment was confirmed.',
+          children: [
+            if (polled.relatedOrderStatus != null)
+              _InfoRow(label: 'Order status', value: polled.relatedOrderStatus!),
+            if (polled.transactionId != null)
+              _InfoRow(label: 'Transaction', value: polled.transactionId!),
+            if (polled.reference != null)
+              _InfoRow(label: 'Reference', value: polled.reference!),
+            if (polled.amount != null)
+              _InfoRow(
+                label: 'Amount',
+                value: '${polled.amount} ${polled.currency ?? ''}'.trim(),
+              ),
+            _InfoRow(
+              label: 'Order',
+              value: '#${polled.relatedOrderId ?? orderId}',
+            ),
+          ],
+        );
+      }
+      return _StatusContent(
+        icon: Icons.error_outline,
+        iconColor: Colors.red,
+        title: 'Payment ${polled.status ?? 'failed'}',
+        message: polled.message ??
+            'Payment was not completed. Please try again.',
+        children: [
+          if (polled.relatedOrderStatus != null)
+            _InfoRow(label: 'Order status', value: polled.relatedOrderStatus!),
+          _InfoRow(label: 'Order', value: '#$orderId'),
+        ],
+      );
+    }
+
     if (!result.isSuccess) {
       return _StatusContent(
         icon: Icons.error_outline,
@@ -102,6 +289,48 @@ class _PaymentInitiateResultScreenState
         message: result.message ?? 'Could not initiate payment.',
       );
     }
+
+    final waitingChildren = <Widget>[
+      if (_isPollingActive) ...[
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (_checking)
+              const SizedBox(
+                width: 14,
+                height: 14,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            else
+              Icon(
+                Icons.hourglass_top,
+                size: 16,
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.6),
+              ),
+            const SizedBox(width: 8),
+            Text(
+              _timedOut
+                  ? 'Status check timed out. Tap Check status to retry.'
+                  : 'Waiting for payment confirmation…',
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.65),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+      ],
+      if (polled?.status != null)
+        _InfoRow(label: 'Payment status', value: polled!.status!),
+    ];
 
     switch (result.uiMode) {
       case PaymentInitiateUiMode.ussdPending:
@@ -114,6 +343,7 @@ class _PaymentInitiateResultScreenState
               result.message ??
               'Please check your phone and enter your PIN to complete the payment.',
           children: [
+            ...waitingChildren,
             _InfoRow(
               label: 'Order status',
               value: expectedOrderStatusAfterPayment(result.method),
@@ -131,7 +361,11 @@ class _PaymentInitiateResultScreenState
           ],
         );
       case PaymentInitiateUiMode.qrCode:
-        return _QrContent(result: result, orderId: orderId);
+        return _QrContent(
+          result: result,
+          orderId: orderId,
+          extraChildren: waitingChildren,
+        );
       case PaymentInitiateUiMode.redirectToHpp:
         return _StatusContent(
           icon: Icons.open_in_browser,
@@ -141,6 +375,7 @@ class _PaymentInitiateResultScreenState
               result.message ??
               'Complete payment on the hosted page.',
           children: [
+            ...waitingChildren,
             _InfoRow(
               label: 'Order status',
               value: expectedOrderStatusAfterPayment(result.method),
@@ -167,8 +402,8 @@ class _PaymentInitiateResultScreenState
           ],
         );
       case PaymentInitiateUiMode.success:
-        final isCompleted = result.status == 'completed' ||
-            result.method == 'wallet';
+        final isCompleted =
+            result.status == 'completed' || result.method == 'wallet';
         final isCod = result.method == 'cash_on_delivery';
         final orderStatus = result.orderStatus ??
             expectedOrderStatusAfterPayment(result.method);
@@ -186,6 +421,7 @@ class _PaymentInitiateResultScreenState
                       ? 'Pay upon delivery. Your order is confirmed.'
                       : 'Your order is processing while payment confirms.')),
           children: [
+            if (_shouldPoll) ...waitingChildren,
             _InfoRow(label: 'Order status', value: orderStatus),
             if (result.transactionId != null)
               _InfoRow(label: 'Transaction', value: result.transactionId!),
@@ -250,7 +486,10 @@ class _StatusContent extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+              color: Theme.of(context)
+                  .colorScheme
+                  .onSurface
+                  .withValues(alpha: 0.7),
             ),
           ),
           const SizedBox(height: 24),
@@ -264,8 +503,13 @@ class _StatusContent extends StatelessWidget {
 class _QrContent extends StatelessWidget {
   final PaymentInitiateResult result;
   final String orderId;
+  final List<Widget> extraChildren;
 
-  const _QrContent({required this.result, required this.orderId});
+  const _QrContent({
+    required this.result,
+    required this.orderId,
+    this.extraChildren = const [],
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -300,8 +544,10 @@ class _QrContent extends StatelessWidget {
               child: Image.memory(imageBytes, width: 260, height: 260),
             )
           else
-            const Icon(Icons.qr_code_2, size: 120, color: AppColors.primaryColor),
+            const Icon(Icons.qr_code_2,
+                size: 120, color: AppColors.primaryColor),
           const SizedBox(height: 20),
+          ...extraChildren,
           _InfoRow(
             label: 'Order status',
             value: expectedOrderStatusAfterPayment(result.method),
@@ -337,7 +583,10 @@ class _InfoRow extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+              color: Theme.of(context)
+                  .colorScheme
+                  .onSurface
+                  .withValues(alpha: 0.6),
             ),
           ),
           Flexible(

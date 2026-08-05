@@ -68,6 +68,25 @@ class PaymentDataProvider {
     }
   }
 
+  Future<Map<String, dynamic>> getPaymentStatus(int paymentId) async {
+    try {
+      final path = ApiConstants.paymentsStatus.replaceAll(
+        '{id}',
+        paymentId.toString(),
+      );
+      final response = await apiService.get(
+        '${ApiConstants.baseUrl}$path',
+      );
+      final data = response.data;
+      if (data is Map) {
+        return Map<String, dynamic>.from(data);
+      }
+      return {'success': false, 'message': 'Invalid payment status response'};
+    } catch (e) {
+      throw Exception('Failed to fetch payment status: $e');
+    }
+  }
+
   Future<Map<String, dynamic>> processPayment({
     required String paymentMethod,
     required double amount,

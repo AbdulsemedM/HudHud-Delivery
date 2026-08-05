@@ -66,6 +66,8 @@ class ApiConstants {
   static const String paymentMethods = 'payment-methods';
   static const String processPayment = '$payments/process';
   static const String paymentsInitiate = 'payments/initiate';
+  /// GET /api/payments/{id}/status
+  static const String paymentsStatus = 'payments/{id}/status';
 
   // Wallet endpoints
   static const String wallets = 'wallets';

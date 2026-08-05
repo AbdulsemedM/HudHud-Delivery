@@ -1,5 +1,6 @@
 import '../data_provider/payment_data_provider.dart';
 import '../../model/payment_initiate_result.dart';
+import '../../model/payment_status_result.dart';
 
 class PaymentRepository {
   final PaymentDataProvider paymentDataProvider;
@@ -98,6 +99,18 @@ class PaymentRepository {
       );
     } catch (e) {
       throw Exception('Payment initiation failed: $e');
+    }
+  }
+
+  Future<PaymentStatusResult> getPaymentStatus(int paymentId) async {
+    try {
+      if (paymentId <= 0) {
+        throw Exception('Invalid payment id: $paymentId');
+      }
+      final raw = await paymentDataProvider.getPaymentStatus(paymentId);
+      return PaymentStatusResult.fromJson(raw);
+    } catch (e) {
+      throw Exception('Payment status fetch failed: $e');
     }
   }
 
