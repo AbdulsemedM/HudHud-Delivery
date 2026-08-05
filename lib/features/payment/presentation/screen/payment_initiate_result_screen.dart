@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../checkout/data/models/create_order_result.dart';
 import '../../model/payment_initiate_result.dart';
 import 'payment_hpp_screen.dart';
 
@@ -113,6 +114,10 @@ class _PaymentInitiateResultScreenState
               result.message ??
               'Please check your phone and enter your PIN to complete the payment.',
           children: [
+            _InfoRow(
+              label: 'Order status',
+              value: expectedOrderStatusAfterPayment(result.method),
+            ),
             if (result.referenceNumber != null)
               _InfoRow(label: 'Reference', value: result.referenceNumber!),
             if (result.phone != null)
@@ -136,6 +141,10 @@ class _PaymentInitiateResultScreenState
               result.message ??
               'Complete payment on the hosted page.',
           children: [
+            _InfoRow(
+              label: 'Order status',
+              value: expectedOrderStatusAfterPayment(result.method),
+            ),
             _InfoRow(label: 'Order', value: '#$orderId'),
             const SizedBox(height: 16),
             if (result.redirectUrl != null && result.redirectUrl!.isNotEmpty)
@@ -158,8 +167,11 @@ class _PaymentInitiateResultScreenState
           ],
         );
       case PaymentInitiateUiMode.success:
-        final isCompleted = result.status == 'completed';
+        final isCompleted = result.status == 'completed' ||
+            result.method == 'wallet';
         final isCod = result.method == 'cash_on_delivery';
+        final orderStatus = result.orderStatus ??
+            expectedOrderStatusAfterPayment(result.method);
         return _StatusContent(
           icon: isCompleted ? Icons.check_circle : Icons.receipt_long,
           iconColor: AppColors.primaryColor,
@@ -169,13 +181,14 @@ class _PaymentInitiateResultScreenState
           message: result.customerMessage ??
               result.message ??
               (isCompleted
-                  ? 'Payment completed successfully.'
-                  : 'Please complete your payment.'),
+                  ? 'Your order is paid.'
+                  : (isCod
+                      ? 'Pay upon delivery. Your order is confirmed.'
+                      : 'Your order is processing while payment confirms.')),
           children: [
+            _InfoRow(label: 'Order status', value: orderStatus),
             if (result.transactionId != null)
               _InfoRow(label: 'Transaction', value: result.transactionId!),
-            if (result.orderStatus != null)
-              _InfoRow(label: 'Order status', value: result.orderStatus!),
             if (result.amount != null)
               _InfoRow(
                 label: 'Amount',
@@ -289,6 +302,10 @@ class _QrContent extends StatelessWidget {
           else
             const Icon(Icons.qr_code_2, size: 120, color: AppColors.primaryColor),
           const SizedBox(height: 20),
+          _InfoRow(
+            label: 'Order status',
+            value: expectedOrderStatusAfterPayment(result.method),
+          ),
           if (result.amount != null)
             _InfoRow(
               label: 'Amount',

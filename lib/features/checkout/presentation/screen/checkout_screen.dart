@@ -228,7 +228,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           final qty = quantity is int
               ? quantity
               : int.tryParse(quantity.toString()) ?? 1;
-          return {'product_id': pid, 'quantity': qty};
+          final variantRaw =
+              item['variant_id'] ?? item['variantId'] ?? item['variant'];
+          final variantId = variantRaw is int
+              ? variantRaw
+              : int.tryParse(variantRaw?.toString() ?? '');
+          return {
+            'product_id': pid,
+            'quantity': qty,
+            if (variantId != null && variantId > 0) 'variant_id': variantId,
+          };
         })
         .where((e) => (e['product_id'] as int) > 0)
         .toList();

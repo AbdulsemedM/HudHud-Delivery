@@ -6,9 +6,7 @@ class CheckoutDataProvider {
   CheckoutDataProvider({required this.apiService});
 
   /// POST /api/customer/orders
-  /// Payload: vendor_id, items [{product_id, quantity}], tax_amount, discount_amount,
-  /// delivery_address, delivery_location, delivery_latitude, delivery_longitude,
-  /// payment_method, service_type, notes
+  /// Sends nested delivery_address plus legacy flat lat/lng fields for compatibility.
   Future<Map<String, dynamic>> createOrder({
     required int vendorId,
     required List<Map<String, dynamic>> items,
@@ -29,7 +27,12 @@ class CheckoutDataProvider {
         'items': items,
         'tax_amount': taxAmount,
         'discount_amount': discountAmount,
-        'delivery_address': deliveryAddress,
+        'delivery_address': {
+          'latitude': deliveryLatitude,
+          'longitude': deliveryLongitude,
+          'address': deliveryAddress,
+        },
+        // Legacy flat fields for backends that still expect them.
         'delivery_location': deliveryLocation,
         'delivery_latitude': deliveryLatitude,
         'delivery_longitude': deliveryLongitude,

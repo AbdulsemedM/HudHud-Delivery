@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import '../../checkout/data/models/create_order_result.dart';
 import '../../checkout/data/repository/checkout_repository.dart';
 import '../data/repository/payment_repository.dart';
 import '../model/payment_initiate_result.dart';
@@ -146,35 +147,34 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
         return;
       }
 
-      final orderData = orderResult['data'] is Map
-          ? Map<String, dynamic>.from(orderResult['data'] as Map)
-          : <String, dynamic>{};
-      final orderPayload = orderData['order'] is Map
-          ? Map<String, dynamic>.from(orderData['order'] as Map)
-          : orderData;
-      final createdOrderId =
-          int.tryParse(orderPayload['id']?.toString() ?? event.orderId) ?? 0;
+      final fallbackId = int.tryParse(event.orderId) ?? 0;
+      final created = parseCreateOrderResponse(
+        orderResult['data'],
+        fallbackOrderId: fallbackId,
+      );
 
-      if (createdOrderId <= 0) {
+      if (!created.isValid) {
         emit(const PaymentFailure(error: 'Invalid order id from create order'));
         return;
       }
 
-      final currency = orderPayload['currency']?.toString() ?? 'ETB';
+      final currency = created.currency ?? 'ETB';
+      final amount = created.totalAmount ?? event.amount;
+
       final collectedDetails = Map<String, dynamic>.from(
         (event.paymentDetails ?? {})..remove('order_details'),
       );
       final initiateDetails = buildInitiatePaymentDetails(
         paymentMethodCode: event.paymentMethod,
         collectedDetails: collectedDetails,
-        orderId: createdOrderId,
+        orderId: created.orderId,
       );
 
       final raw = await paymentRepository.initiatePayment(
         paymentMethodCode: event.paymentMethod,
         type: 'order',
-        orderId: createdOrderId,
-        amount: event.amount,
+        orderId: created.orderId,
+        amount: amount,
         currency: currency,
         paymentDetails: initiateDetails,
       );
@@ -189,7 +189,7 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
 
       emit(PaymentInitiated(
         result: result,
-        orderId: createdOrderId.toString(),
+        orderId: created.orderId.toString(),
       ));
     } catch (e) {
       emit(PaymentFailure(error: e.toString()));
