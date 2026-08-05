@@ -286,7 +286,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       }
       if (_selectedPaymentMethod == 'ebirr') {
         final provider = _paymentDetails['provider']?.toString();
-        if (provider != 'kaafi' && provider != 'chibuk') {
+        if (provider != 'kaafi' && provider != 'coop') {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Please select an eBirr provider'),

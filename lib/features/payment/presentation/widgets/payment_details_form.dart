@@ -11,8 +11,9 @@ String paymentPhoneHint(String methodCode) {
     case 'edahab':
       return '656013956';
     case 'sahay':
+      return '251911679409';
     case 'ebirr':
-      return '911234567';
+      return '251915741199';
     default:
       return 'Phone number';
   }
@@ -26,7 +27,7 @@ String paymentPhoneLabel(String methodCode) {
       return 'Phone (65XXXXXXXXX)';
     case 'sahay':
     case 'ebirr':
-      return 'Phone (9XXXXXXXX)';
+      return 'Phone (251XXXXXXXXX)';
     default:
       return 'Phone number';
   }
@@ -50,20 +51,20 @@ String normalizePaymentPhone(String? phone, String methodCode) {
     case 'edahab':
       if (digits.startsWith('65')) return digits;
       if (digits.startsWith('0')) return '65${digits.substring(1)}';
-      return digits.startsWith('65') ? digits : digits;
+      return digits;
     case 'sahay':
     case 'ebirr':
-      var national = digits;
-      if (national.startsWith('251') && national.length > 3) {
-        national = national.substring(3);
+      if (digits.startsWith('251') && digits.length >= 12) {
+        return digits.substring(0, 12);
       }
-      if (national.startsWith('0') && national.length > 1) {
-        national = national.substring(1);
+      if (digits.startsWith('0') && digits.length >= 10) {
+        return '251${digits.substring(1, 10)}';
       }
-      if (national.length > 9) {
-        national = national.substring(national.length - 9);
+      if (digits.length == 9) return '251$digits';
+      if (digits.length > 9) {
+        return '251${digits.substring(digits.length - 9)}';
       }
-      return national;
+      return '251${digits.padLeft(9, '0')}';
     default:
       return digits;
   }
@@ -86,8 +87,8 @@ String? validatePaymentPhone(String? phone, String methodCode) {
       }
     case 'sahay':
     case 'ebirr':
-      if (!RegExp(r'^9\d{8}$').hasMatch(normalized)) {
-        return 'Enter a valid phone number (9XXXXXXXX)';
+      if (!RegExp(r'^2519\d{8}$').hasMatch(normalized)) {
+        return 'Enter a valid phone number (251XXXXXXXXX)';
       }
   }
   return null;
@@ -222,14 +223,14 @@ class _PaymentDetailsFormState extends State<PaymentDetailsForm> {
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               initialValue:
-                  widget.ebirrProvider == 'chibuk' ? 'chibuk' : 'kaafi',
+                  widget.ebirrProvider == 'coop' ? 'coop' : 'kaafi',
               decoration: const InputDecoration(
                 labelText: 'Provider',
                 border: OutlineInputBorder(),
               ),
               items: const [
                 DropdownMenuItem(value: 'kaafi', child: Text('Kaafi')),
-                DropdownMenuItem(value: 'chibuk', child: Text('Chibuk')),
+                DropdownMenuItem(value: 'coop', child: Text('Coop')),
               ],
               onChanged: (value) {
                 if (value != null) {
@@ -266,7 +267,7 @@ Map<String, dynamic> buildInitiatePaymentDetails({
 
   if (paymentMethodCode == 'ebirr') {
     final provider = collectedDetails['provider']?.toString();
-    if (provider == 'kaafi' || provider == 'chibuk') {
+    if (provider == 'kaafi' || provider == 'coop') {
       details['provider'] = provider;
     } else {
       details['provider'] = 'kaafi';

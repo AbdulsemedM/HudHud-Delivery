@@ -260,15 +260,15 @@ void main() {
   group('payment phone + details builder', () {
     test('normalizes phones per method', () {
       expect(normalizePaymentPhone('0712345678', 'waafi'), '254712345678');
-      expect(normalizePaymentPhone('0911234567', 'sahay'), '911234567');
-      expect(normalizePaymentPhone('251911234567', 'ebirr'), '911234567');
+      expect(normalizePaymentPhone('0911679409', 'sahay'), '251911679409');
+      expect(normalizePaymentPhone('251915741199', 'ebirr'), '251915741199');
       expect(normalizePaymentPhone('656013956', 'edahab'), '656013956');
     });
 
     test('validates phones per method', () {
       expect(validatePaymentPhone('254712345678', 'waafi'), isNull);
       expect(validatePaymentPhone('12345', 'waafi'), isNotNull);
-      expect(validatePaymentPhone('911234567', 'sahay'), isNull);
+      expect(validatePaymentPhone('251911679409', 'sahay'), isNull);
       expect(validatePaymentPhone('811234567', 'ebirr'), isNotNull);
     });
 
@@ -283,10 +283,11 @@ void main() {
 
       final ebirr = buildInitiatePaymentDetails(
         paymentMethodCode: 'ebirr',
-        collectedDetails: {'phone': '911234567', 'provider': 'chibuk'},
+        collectedDetails: {'phone': '251915741199', 'provider': 'coop'},
         orderId: 1,
       );
-      expect(ebirr['provider'], 'chibuk');
+      expect(ebirr['provider'], 'coop');
+      expect(ebirr['phone'], '251915741199');
       expect(ebirr.containsKey('use_hpp'), isFalse);
     });
   });
