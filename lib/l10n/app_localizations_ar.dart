@@ -2591,4 +2591,94 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get tipsStatusAll => 'All';
+
+  @override
+  String get onboardingWelcomeTitle => 'مرحباً بك في هدهد!';
+
+  @override
+  String get onboardingWelcomeSubtitle =>
+      'مدينتك بين يديك — طعام، مشاوير، طرود، وخدمات منزلية في مكان واحد.';
+
+  @override
+  String get onboardingFoodTitle => 'طعام وبقالة';
+
+  @override
+  String get onboardingFoodDescription =>
+      'اطلب وجبات وبقالة من المتاجر المحلية خلال دقائق.';
+
+  @override
+  String get onboardingCourierTitle => 'بريد سريع';
+
+  @override
+  String get onboardingCourierDescription =>
+      'أرسل الطرود عبر المدينة بتوصيل سريع وموثوق.';
+
+  @override
+  String get onboardingTaxiTitle => 'تاكسي';
+
+  @override
+  String get onboardingTaxiDescription =>
+      'احجز مشواراً في أي مكان بالمدينة بلمسة واحدة.';
+
+  @override
+  String get onboardingHandymanTitle => 'فني منزلي';
+
+  @override
+  String get onboardingHandymanDescription =>
+      'احجز محترفين موثوقين للإصلاحات والخدمات المنزلية.';
+
+  @override
+  String get onboardingGetStarted => 'ابدأ الآن';
+
+  @override
+  String get onboardingSpotlightLocationTitle => 'موقع التوصيل';
+
+  @override
+  String get onboardingSpotlightLocationDescription =>
+      'اضغط هنا لتعيين أو تغيير مكان توصيل الطلبات.';
+
+  @override
+  String get onboardingSpotlightNotificationsTitle => 'ابقَ على اطلاع';
+
+  @override
+  String get onboardingSpotlightNotificationsDescription =>
+      'اطلع على تحديثات الطلبات والعروض والتنبيهات المهمة هنا.';
+
+  @override
+  String get onboardingSpotlightFoodTitle => 'طعام وبقالة';
+
+  @override
+  String get onboardingSpotlightFoodDescription =>
+      'تصفح المطاعم والمتاجر لطلب الطعام والاحتياجات.';
+
+  @override
+  String get onboardingSpotlightCourierTitle => 'بريد سريع';
+
+  @override
+  String get onboardingSpotlightCourierDescription =>
+      'أرسل الطرود والمستندات مع استلام فوري.';
+
+  @override
+  String get onboardingSpotlightTaxiTitle => 'تاكسي';
+
+  @override
+  String get onboardingSpotlightTaxiDescription =>
+      'اطلب مشواراً وتتبع السائق في الوقت الفعلي.';
+
+  @override
+  String get onboardingSpotlightHandymanTitle => 'فني منزلي';
+
+  @override
+  String get onboardingSpotlightHandymanDescription =>
+      'اعثر على مساعدة مهرة لإصلاحات وصيانة المنزل.';
+
+  @override
+  String get onboardingSpotlightDoneTitle => 'أنت جاهز!';
+
+  @override
+  String get onboardingSpotlightDoneDescription =>
+      'بدّل بين الخدمات في أي وقت عبر التبويبات أعلاه. استمتع بهدهد!';
+
+  @override
+  String get onboardingDebugReplayTour => 'إعادة جولة الصفحة الرئيسية (تصحيح)';
 }

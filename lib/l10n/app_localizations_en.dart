@@ -2596,4 +2596,94 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tipsStatusAll => 'All';
+
+  @override
+  String get onboardingWelcomeTitle => 'Welcome to HudHud!';
+
+  @override
+  String get onboardingWelcomeSubtitle =>
+      'Your city, delivered — food, rides, parcels, and home services in one place.';
+
+  @override
+  String get onboardingFoodTitle => 'Food & Groceries';
+
+  @override
+  String get onboardingFoodDescription =>
+      'Order meals and groceries from local shops in minutes.';
+
+  @override
+  String get onboardingCourierTitle => 'Courier';
+
+  @override
+  String get onboardingCourierDescription =>
+      'Send packages across town with fast, reliable delivery.';
+
+  @override
+  String get onboardingTaxiTitle => 'Taxi';
+
+  @override
+  String get onboardingTaxiDescription =>
+      'Book a ride anywhere in the city with a tap.';
+
+  @override
+  String get onboardingHandymanTitle => 'Handyman';
+
+  @override
+  String get onboardingHandymanDescription =>
+      'Book trusted pros for repairs and home services.';
+
+  @override
+  String get onboardingGetStarted => 'Get Started';
+
+  @override
+  String get onboardingSpotlightLocationTitle => 'Your delivery location';
+
+  @override
+  String get onboardingSpotlightLocationDescription =>
+      'Tap here to set or change where orders should be delivered.';
+
+  @override
+  String get onboardingSpotlightNotificationsTitle => 'Stay in the loop';
+
+  @override
+  String get onboardingSpotlightNotificationsDescription =>
+      'Check order updates, offers, and important alerts here.';
+
+  @override
+  String get onboardingSpotlightFoodTitle => 'Food & Groceries';
+
+  @override
+  String get onboardingSpotlightFoodDescription =>
+      'Browse restaurants and shops to order food and essentials.';
+
+  @override
+  String get onboardingSpotlightCourierTitle => 'Courier';
+
+  @override
+  String get onboardingSpotlightCourierDescription =>
+      'Send parcels and documents with on-demand pickup.';
+
+  @override
+  String get onboardingSpotlightTaxiTitle => 'Taxi';
+
+  @override
+  String get onboardingSpotlightTaxiDescription =>
+      'Request a ride and track your driver in real time.';
+
+  @override
+  String get onboardingSpotlightHandymanTitle => 'Handyman';
+
+  @override
+  String get onboardingSpotlightHandymanDescription =>
+      'Find skilled help for home repairs and maintenance.';
+
+  @override
+  String get onboardingSpotlightDoneTitle => 'You\'re all set!';
+
+  @override
+  String get onboardingSpotlightDoneDescription =>
+      'Switch between services anytime using the tabs above. Enjoy HudHud!';
+
+  @override
+  String get onboardingDebugReplayTour => 'Replay home tour (debug)';
 }

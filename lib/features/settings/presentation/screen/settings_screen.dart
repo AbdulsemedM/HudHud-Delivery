@@ -22,6 +22,7 @@ import 'package:hudhud_delivery/features/chat/presentation/screens/conversations
 import 'package:hudhud_delivery/features/chat/presentation/screens/support_chat_start_screen.dart';
 import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
 import 'package:hudhud_delivery/features/dashboard/presentation/screen/dashboard_screen.dart';
+import 'package:hudhud_delivery/features/onboarding_tour/presentation/onboarding_tour_controller.dart';
 import 'package:hudhud_delivery/features/wallet/data/providers/wallet_data_provider.dart';
 import 'package:hudhud_delivery/features/wallet/data/repositories/wallet_repository.dart';
 import 'package:hudhud_delivery/features/wallet/presentation/screens/wallet_screen.dart';
@@ -533,6 +534,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ],
                   ),
+                  if (kDebugMode) ...[
+                    const SizedBox(height: 20),
+                    const _ProfileSectionLabel(title: 'Developer'),
+                    _ProfileGroupCard(
+                      children: [
+                        _ProfileMenuTile(
+                          icon: Icons.tour_outlined,
+                          title: l10n.onboardingDebugReplayTour,
+                          onTap: () async {
+                            await OnboardingTourController.resetForTesting();
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(l10n.onboardingDebugReplayTour),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
                   const SizedBox(height: 20),
                   _ProfileSectionLabel(title: l10n.settingsAppSettings),
                   _ProfileGroupCard(

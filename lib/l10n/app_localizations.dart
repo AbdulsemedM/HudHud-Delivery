@@ -4969,6 +4969,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'All'**
   String get tipsStatusAll;
+
+  /// No description provided for @onboardingWelcomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to HudHud!'**
+  String get onboardingWelcomeTitle;
+
+  /// No description provided for @onboardingWelcomeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your city, delivered — food, rides, parcels, and home services in one place.'**
+  String get onboardingWelcomeSubtitle;
+
+  /// No description provided for @onboardingFoodTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Food & Groceries'**
+  String get onboardingFoodTitle;
+
+  /// No description provided for @onboardingFoodDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Order meals and groceries from local shops in minutes.'**
+  String get onboardingFoodDescription;
+
+  /// No description provided for @onboardingCourierTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Courier'**
+  String get onboardingCourierTitle;
+
+  /// No description provided for @onboardingCourierDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Send packages across town with fast, reliable delivery.'**
+  String get onboardingCourierDescription;
+
+  /// No description provided for @onboardingTaxiTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Taxi'**
+  String get onboardingTaxiTitle;
+
+  /// No description provided for @onboardingTaxiDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Book a ride anywhere in the city with a tap.'**
+  String get onboardingTaxiDescription;
+
+  /// No description provided for @onboardingHandymanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Handyman'**
+  String get onboardingHandymanTitle;
+
+  /// No description provided for @onboardingHandymanDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Book trusted pros for repairs and home services.'**
+  String get onboardingHandymanDescription;
+
+  /// No description provided for @onboardingGetStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Get Started'**
+  String get onboardingGetStarted;
+
+  /// No description provided for @onboardingSpotlightLocationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your delivery location'**
+  String get onboardingSpotlightLocationTitle;
+
+  /// No description provided for @onboardingSpotlightLocationDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap here to set or change where orders should be delivered.'**
+  String get onboardingSpotlightLocationDescription;
+
+  /// No description provided for @onboardingSpotlightNotificationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay in the loop'**
+  String get onboardingSpotlightNotificationsTitle;
+
+  /// No description provided for @onboardingSpotlightNotificationsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Check order updates, offers, and important alerts here.'**
+  String get onboardingSpotlightNotificationsDescription;
+
+  /// No description provided for @onboardingSpotlightFoodTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Food & Groceries'**
+  String get onboardingSpotlightFoodTitle;
+
+  /// No description provided for @onboardingSpotlightFoodDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse restaurants and shops to order food and essentials.'**
+  String get onboardingSpotlightFoodDescription;
+
+  /// No description provided for @onboardingSpotlightCourierTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Courier'**
+  String get onboardingSpotlightCourierTitle;
+
+  /// No description provided for @onboardingSpotlightCourierDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Send parcels and documents with on-demand pickup.'**
+  String get onboardingSpotlightCourierDescription;
+
+  /// No description provided for @onboardingSpotlightTaxiTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Taxi'**
+  String get onboardingSpotlightTaxiTitle;
+
+  /// No description provided for @onboardingSpotlightTaxiDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Request a ride and track your driver in real time.'**
+  String get onboardingSpotlightTaxiDescription;
+
+  /// No description provided for @onboardingSpotlightHandymanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Handyman'**
+  String get onboardingSpotlightHandymanTitle;
+
+  /// No description provided for @onboardingSpotlightHandymanDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Find skilled help for home repairs and maintenance.'**
+  String get onboardingSpotlightHandymanDescription;
+
+  /// No description provided for @onboardingSpotlightDoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re all set!'**
+  String get onboardingSpotlightDoneTitle;
+
+  /// No description provided for @onboardingSpotlightDoneDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch between services anytime using the tabs above. Enjoy HudHud!'**
+  String get onboardingSpotlightDoneDescription;
+
+  /// No description provided for @onboardingDebugReplayTour.
+  ///
+  /// In en, this message translates to:
+  /// **'Replay home tour (debug)'**
+  String get onboardingDebugReplayTour;
 }
 
 class _AppLocalizationsDelegate

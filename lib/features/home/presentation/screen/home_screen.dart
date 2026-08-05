@@ -29,6 +29,8 @@ import 'package:hudhud_delivery/features/guest/utils/guest_sign_in_prompt.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import 'package:hudhud_delivery/features/addresses/presentation/widgets/delivery_address_selector.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
+import 'package:hudhud_delivery/features/onboarding_tour/presentation/onboarding_tour_controller.dart';
+import 'package:hudhud_delivery/features/onboarding_tour/presentation/onboarding_tour_keys.dart';
 
 class HomeScreen extends StatefulWidget {
   /// Incremented whenever the user selects the Home tab (including first open).
@@ -74,13 +76,30 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   bool _verificationPromptOpen = false;
   bool _verifyBannerDismissed = false;
 
+  final OnboardingTourKeys _tourKeys = OnboardingTourKeys();
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     widget.homeTabActivation.addListener(_onHomeTabActivation);
+    OnboardingTourController.replaySignal.addListener(_onReplayTourRequested);
     _loadUserData();
     _requestLocationAndUpdate(resumeRefresh: false);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeStartOnboardingTour());
+  }
+
+  void _maybeStartOnboardingTour() {
+    if (!mounted) return;
+    OnboardingTourController.maybeStart(
+      context: context,
+      keys: _tourKeys,
+    );
+  }
+
+  void _onReplayTourRequested() {
+    if (!mounted) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeStartOnboardingTour());
   }
 
   void _onHomeTabActivation() {
@@ -102,6 +121,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   void dispose() {
     widget.homeTabActivation.removeListener(_onHomeTabActivation);
+    OnboardingTourController.replaySignal.removeListener(_onReplayTourRequested);
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -394,6 +414,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     isLoadingLocation: _isLoadingLocation,
                     user: _currentUser,
                     isGuest: isGuest,
+                    locationKey: _tourKeys.locationKey,
+                    notificationsKey: _tourKeys.notificationsKey,
                     onGuestSignIn: () async {
                       final authed =
                           await showGuestSignInRequiredDialog(context);
@@ -419,6 +441,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 const SizedBox(height: 10),
                 HomeServiceTabBar(
                   selected: _serviceMode,
+                  tourKeys: _tourKeys,
                   onSelected: (mode) {
                     setState(() => _serviceMode = mode);
                     context

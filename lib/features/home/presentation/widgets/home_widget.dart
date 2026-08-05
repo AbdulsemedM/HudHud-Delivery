@@ -175,6 +175,8 @@ class UserProfileHeader extends StatefulWidget {
   final UserModel? user;
   final bool isGuest;
   final VoidCallback? onGuestSignIn;
+  final GlobalKey? locationKey;
+  final GlobalKey? notificationsKey;
 
   const UserProfileHeader({
     super.key,
@@ -186,6 +188,8 @@ class UserProfileHeader extends StatefulWidget {
     this.user,
     this.isGuest = false,
     this.onGuestSignIn,
+    this.locationKey,
+    this.notificationsKey,
   });
 
   @override
@@ -286,6 +290,7 @@ class _UserProfileHeaderState extends State<UserProfileHeader>
                 )
               else
                 GestureDetector(
+                  key: widget.locationKey,
                   onTap: () {
                     _chevronController.forward(from: 0).then((_) {
                       _chevronController.reverse();
@@ -339,6 +344,7 @@ class _UserProfileHeaderState extends State<UserProfileHeader>
           ),
         ),
         Container(
+          key: widget.notificationsKey,
           width: 44,
           height: 44,
           decoration: BoxDecoration(

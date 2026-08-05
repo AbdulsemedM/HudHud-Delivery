@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/service_tab_palette.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
+import 'package:hudhud_delivery/features/onboarding_tour/presentation/onboarding_tour_keys.dart';
 
 export 'package:hudhud_delivery/core/theme/service_tab_palette.dart'
     show HomeServiceMode;
@@ -12,10 +13,12 @@ class HomeServiceTabBar extends StatelessWidget {
     super.key,
     required this.selected,
     required this.onSelected,
+    this.tourKeys,
   });
 
   final HomeServiceMode selected;
   final ValueChanged<HomeServiceMode> onSelected;
+  final OnboardingTourKeys? tourKeys;
 
   static const String _foodPng =
       'assets/images/home_service_tabs/food_groceries.png';
@@ -71,6 +74,7 @@ class HomeServiceTabBar extends StatelessWidget {
             if (i > 0) const SizedBox(width: 10),
             Expanded(
               child: _ServiceTile(
+                key: _tourKeyFor(items[i].mode),
                 spec: items[i],
                 selected: items[i].mode == selected,
                 onTap: () => onSelected(items[i].mode),
@@ -80,6 +84,21 @@ class HomeServiceTabBar extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  GlobalKey? _tourKeyFor(HomeServiceMode mode) {
+    final keys = tourKeys;
+    if (keys == null) return null;
+    switch (mode) {
+      case HomeServiceMode.foodGroceries:
+        return keys.foodTabKey;
+      case HomeServiceMode.courier:
+        return keys.courierTabKey;
+      case HomeServiceMode.taxi:
+        return keys.taxiTabKey;
+      case HomeServiceMode.handyman:
+        return keys.handymanTabKey;
+    }
   }
 }
 
@@ -103,6 +122,7 @@ class _TabSpec {
 
 class _ServiceTile extends StatelessWidget {
   const _ServiceTile({
+    super.key,
     required this.spec,
     required this.selected,
     required this.onTap,

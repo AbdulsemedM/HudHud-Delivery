@@ -76,6 +76,7 @@ dependencies:
   flutter_linkify: ^6.0.0
   shorebird_code_push: ^2.0.7
   firebase_remote_config: ^5.5.0
+  tutorial_coach_mark: ^1.3.3
 
 dev_dependencies:
   flutter_test:
