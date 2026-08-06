@@ -66,22 +66,25 @@ class HomeServiceTabBar extends StatelessWidget {
       ),
     ];
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
-      child: Row(
-        children: [
-          for (var i = 0; i < items.length; i++) ...[
-            if (i > 0) const SizedBox(width: 10),
-            Expanded(
-              child: _ServiceTile(
-                key: _tourKeyFor(items[i].mode),
-                spec: items[i],
-                selected: items[i].mode == selected,
-                onTap: () => onSelected(items[i].mode),
+    return KeyedSubtree(
+      key: tourKeys?.serviceTabsKey,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
+        child: Row(
+          children: [
+            for (var i = 0; i < items.length; i++) ...[
+              if (i > 0) const SizedBox(width: 10),
+              Expanded(
+                child: _ServiceTile(
+                  key: _tourKeyFor(items[i].mode),
+                  spec: items[i],
+                  selected: items[i].mode == selected,
+                  onTap: () => onSelected(items[i].mode),
+                ),
               ),
-            ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

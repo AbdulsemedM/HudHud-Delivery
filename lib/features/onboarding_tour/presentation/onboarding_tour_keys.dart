@@ -8,4 +8,5 @@ class OnboardingTourKeys {
   final GlobalKey courierTabKey = GlobalKey();
   final GlobalKey taxiTabKey = GlobalKey();
   final GlobalKey handymanTabKey = GlobalKey();
+  final GlobalKey serviceTabsKey = GlobalKey();
 }

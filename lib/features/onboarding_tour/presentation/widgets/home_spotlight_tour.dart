@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/service_tab_palette.dart';
@@ -17,99 +18,90 @@ class HomeSpotlightTour {
     required VoidCallback onSkip,
   }) async {
     final l10n = context.l10n;
-    final media = MediaQuery.of(context);
-    final center = Offset(
-      media.size.width / 2,
-      media.size.height * 0.45,
-    );
 
-    final targets = <TargetFocus>[
-      _buildTarget(
-        identify: 'location',
-        key: keys.locationKey,
-        color: HomeColors.orange,
-        title: l10n.onboardingSpotlightLocationTitle,
-        description: l10n.onboardingSpotlightLocationDescription,
-        actionLabel: l10n.actionNext,
-        isLast: false,
-      ),
-      _buildTarget(
-        identify: 'notifications',
-        key: keys.notificationsKey,
-        color: HomeColors.violet,
-        title: l10n.onboardingSpotlightNotificationsTitle,
-        description: l10n.onboardingSpotlightNotificationsDescription,
-        actionLabel: l10n.actionNext,
-        isLast: false,
-        shape: ShapeLightFocus.Circle,
-      ),
-      _buildTarget(
-        identify: 'food',
-        key: keys.foodTabKey,
-        color: ServiceTabPalette.foodGroceries,
-        title: l10n.onboardingSpotlightFoodTitle,
-        description: l10n.onboardingSpotlightFoodDescription,
-        actionLabel: l10n.actionNext,
-        isLast: false,
-      ),
-      _buildTarget(
-        identify: 'courier',
-        key: keys.courierTabKey,
-        color: ServiceTabPalette.courier,
-        title: l10n.onboardingSpotlightCourierTitle,
-        description: l10n.onboardingSpotlightCourierDescription,
-        actionLabel: l10n.actionNext,
-        isLast: false,
-      ),
-      _buildTarget(
-        identify: 'taxi',
-        key: keys.taxiTabKey,
-        color: ServiceTabPalette.taxi,
-        title: l10n.onboardingSpotlightTaxiTitle,
-        description: l10n.onboardingSpotlightTaxiDescription,
-        actionLabel: l10n.actionNext,
-        isLast: false,
-      ),
-      _buildTarget(
-        identify: 'handyman',
-        key: keys.handymanTabKey,
-        color: ServiceTabPalette.handyman,
-        title: l10n.onboardingSpotlightHandymanTitle,
-        description: l10n.onboardingSpotlightHandymanDescription,
-        actionLabel: l10n.actionNext,
-        isLast: false,
-      ),
-      TargetFocus(
-        identify: 'done',
-        targetPosition: TargetPosition(
-          const Size(220, 120),
-          Offset(center.dx - 110, center.dy - 60),
+    // tutorial_coach_mark ends the whole tour if the first target has no
+    // RenderObject — only include keys that are currently mounted.
+    final candidates = <TargetFocus>[
+      if (_isKeyMounted(keys.locationKey))
+        _buildTarget(
+          identify: 'location',
+          key: keys.locationKey,
+          color: HomeColors.orange,
+          title: l10n.onboardingSpotlightLocationTitle,
+          description: l10n.onboardingSpotlightLocationDescription,
+          actionLabel: l10n.actionNext,
         ),
-        shape: ShapeLightFocus.RRect,
-        radius: 20,
-        enableTargetTab: true,
-        contents: [
-          TargetContent(
-            align: ContentAlign.bottom,
-            builder: (context, controller) {
-              return _SpotlightBubble(
-                accent: HomeColors.orange,
-                title: l10n.onboardingSpotlightDoneTitle,
-                description: l10n.onboardingSpotlightDoneDescription,
-                actionLabel: l10n.actionDone,
-                isLast: true,
-                onAction: controller.next,
-              );
-            },
-          ),
-        ],
-      ),
+      if (_isKeyMounted(keys.notificationsKey))
+        _buildTarget(
+          identify: 'notifications',
+          key: keys.notificationsKey,
+          color: HomeColors.violet,
+          title: l10n.onboardingSpotlightNotificationsTitle,
+          description: l10n.onboardingSpotlightNotificationsDescription,
+          actionLabel: l10n.actionNext,
+          shape: ShapeLightFocus.Circle,
+        ),
+      if (_isKeyMounted(keys.foodTabKey))
+        _buildTarget(
+          identify: 'food',
+          key: keys.foodTabKey,
+          color: ServiceTabPalette.foodGroceries,
+          title: l10n.onboardingSpotlightFoodTitle,
+          description: l10n.onboardingSpotlightFoodDescription,
+          actionLabel: l10n.actionNext,
+        ),
+      if (_isKeyMounted(keys.courierTabKey))
+        _buildTarget(
+          identify: 'courier',
+          key: keys.courierTabKey,
+          color: ServiceTabPalette.courier,
+          title: l10n.onboardingSpotlightCourierTitle,
+          description: l10n.onboardingSpotlightCourierDescription,
+          actionLabel: l10n.actionNext,
+        ),
+      if (_isKeyMounted(keys.taxiTabKey))
+        _buildTarget(
+          identify: 'taxi',
+          key: keys.taxiTabKey,
+          color: ServiceTabPalette.taxi,
+          title: l10n.onboardingSpotlightTaxiTitle,
+          description: l10n.onboardingSpotlightTaxiDescription,
+          actionLabel: l10n.actionNext,
+        ),
+      if (_isKeyMounted(keys.handymanTabKey))
+        _buildTarget(
+          identify: 'handyman',
+          key: keys.handymanTabKey,
+          color: ServiceTabPalette.handyman,
+          title: l10n.onboardingSpotlightHandymanTitle,
+          description: l10n.onboardingSpotlightHandymanDescription,
+          actionLabel: l10n.actionNext,
+        ),
+      if (_isKeyMounted(keys.serviceTabsKey))
+        _buildTarget(
+          identify: 'done',
+          key: keys.serviceTabsKey,
+          color: HomeColors.orange,
+          title: l10n.onboardingSpotlightDoneTitle,
+          description: l10n.onboardingSpotlightDoneDescription,
+          actionLabel: l10n.actionDone,
+        ),
     ];
+
+    if (candidates.isEmpty) {
+      if (kDebugMode) {
+        debugPrint(
+          'HomeSpotlightTour: no mounted targets — skipping spotlight.',
+        );
+      }
+      onComplete();
+      return;
+    }
 
     final completer = Completer<void>();
 
     TutorialCoachMark(
-      targets: targets,
+      targets: candidates,
       colorShadow: Colors.black,
       opacityShadow: 0.82,
       paddingFocus: 8,
@@ -127,9 +119,16 @@ class HomeSpotlightTour {
         if (!completer.isCompleted) completer.complete();
         return true;
       },
-    ).show(context: context);
+    ).show(context: context, rootOverlay: true);
 
     return completer.future;
+  }
+
+  static bool _isKeyMounted(GlobalKey key) {
+    final ctx = key.currentContext;
+    if (ctx == null) return false;
+    final renderObject = ctx.findRenderObject();
+    return renderObject is RenderBox && renderObject.hasSize;
   }
 
   static TargetFocus _buildTarget({
@@ -139,7 +138,6 @@ class HomeSpotlightTour {
     required String title,
     required String description,
     required String actionLabel,
-    required bool isLast,
     ShapeLightFocus shape = ShapeLightFocus.RRect,
   }) {
     return TargetFocus(
@@ -159,7 +157,6 @@ class HomeSpotlightTour {
               title: title,
               description: description,
               actionLabel: actionLabel,
-              isLast: isLast,
               onAction: controller.next,
             );
           },
@@ -175,7 +172,6 @@ class _SpotlightBubble extends StatefulWidget {
     required this.title,
     required this.description,
     required this.actionLabel,
-    required this.isLast,
     required this.onAction,
   });
 
@@ -183,7 +179,6 @@ class _SpotlightBubble extends StatefulWidget {
   final String title;
   final String description;
   final String actionLabel;
-  final bool isLast;
   final VoidCallback onAction;
 
   @override

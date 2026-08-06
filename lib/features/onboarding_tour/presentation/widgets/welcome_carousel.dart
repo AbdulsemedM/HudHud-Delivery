@@ -47,35 +47,34 @@ class _WelcomeCarouselState extends State<WelcomeCarousel> {
         description: l10n.onboardingWelcomeSubtitle,
         color: HomeColors.orange,
         icon: Icons.waving_hand_rounded,
-        secondaryIcon: Icons.local_shipping_rounded,
       ),
       _CarouselSlide(
         title: l10n.onboardingFoodTitle,
         description: l10n.onboardingFoodDescription,
         color: ServiceTabPalette.foodGroceries,
         icon: Icons.restaurant_rounded,
-        secondaryIcon: Icons.shopping_basket_rounded,
+        assetPath: 'assets/images/home_service_tabs/food_groceries.png',
       ),
       _CarouselSlide(
         title: l10n.onboardingCourierTitle,
         description: l10n.onboardingCourierDescription,
         color: ServiceTabPalette.courier,
         icon: Icons.inventory_2_rounded,
-        secondaryIcon: Icons.local_shipping_outlined,
+        assetPath: 'assets/images/home_service_tabs/courier.png',
       ),
       _CarouselSlide(
         title: l10n.onboardingTaxiTitle,
         description: l10n.onboardingTaxiDescription,
         color: ServiceTabPalette.taxi,
         icon: Icons.local_taxi_rounded,
-        secondaryIcon: Icons.route_rounded,
+        assetPath: 'assets/images/home_service_tabs/taxi.png',
       ),
       _CarouselSlide(
         title: l10n.onboardingHandymanTitle,
         description: l10n.onboardingHandymanDescription,
         color: ServiceTabPalette.handyman,
         icon: Icons.handyman_rounded,
-        secondaryIcon: Icons.build_circle_outlined,
+        assetPath: 'assets/images/home_service_tabs/handyman.png',
       ),
     ];
 
@@ -156,14 +155,14 @@ class _CarouselSlide {
     required this.description,
     required this.color,
     required this.icon,
-    required this.secondaryIcon,
+    this.assetPath,
   });
 
   final String title;
   final String description;
   final Color color;
   final IconData icon;
-  final IconData secondaryIcon;
+  final String? assetPath;
 }
 
 class _AnimatedSlideContent extends StatefulWidget {
@@ -231,8 +230,8 @@ class _AnimatedSlideContentState extends State<_AnimatedSlideContent>
             children: [
               _Illustration(
                 color: slide.color,
-                primaryIcon: slide.icon,
-                secondaryIcon: slide.secondaryIcon,
+                icon: slide.icon,
+                assetPath: slide.assetPath,
               ),
               const SizedBox(height: 36),
               Text(
@@ -266,13 +265,13 @@ class _AnimatedSlideContentState extends State<_AnimatedSlideContent>
 class _Illustration extends StatefulWidget {
   const _Illustration({
     required this.color,
-    required this.primaryIcon,
-    required this.secondaryIcon,
+    required this.icon,
+    this.assetPath,
   });
 
   final Color color;
-  final IconData primaryIcon;
-  final IconData secondaryIcon;
+  final IconData icon;
+  final String? assetPath;
 
   @override
   State<_Illustration> createState() => _IllustrationState();
@@ -282,6 +281,13 @@ class _IllustrationState extends State<_Illustration>
     with SingleTickerProviderStateMixin {
   late final AnimationController _pulseController;
   late final Animation<double> _scale;
+
+  static const _welcomeAssets = [
+    'assets/images/home_service_tabs/food_groceries.png',
+    'assets/images/home_service_tabs/courier.png',
+    'assets/images/home_service_tabs/taxi.png',
+    'assets/images/home_service_tabs/handyman.png',
+  ];
 
   @override
   void initState() {
@@ -303,6 +309,8 @@ class _IllustrationState extends State<_Illustration>
 
   @override
   Widget build(BuildContext context) {
+    final assetPath = widget.assetPath;
+
     return ScaleTransition(
       scale: _scale,
       child: SizedBox(
@@ -324,48 +332,72 @@ class _IllustrationState extends State<_Illustration>
                 ),
               ),
             ),
-            Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                color: widget.color.withValues(alpha: 0.18),
-                borderRadius: BorderRadius.circular(32),
-                border: Border.all(
-                  color: widget.color.withValues(alpha: 0.45),
-                  width: 1.5,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: widget.color.withValues(alpha: 0.25),
-                    blurRadius: 24,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: Icon(
-                widget.primaryIcon,
-                size: 56,
-                color: widget.color,
-              ),
-            ),
-            Positioned(
-              right: 18,
-              bottom: 18,
-              child: Container(
-                width: 44,
-                height: 44,
+            if (assetPath != null)
+              Container(
+                width: 128,
+                height: 128,
                 decoration: BoxDecoration(
-                  color: HomeColors.surfaceElevated,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: widget.color.withValues(alpha: 0.5)),
+                  color: widget.color.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(32),
+                  border: Border.all(
+                    color: widget.color.withValues(alpha: 0.45),
+                    width: 1.5,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: widget.color.withValues(alpha: 0.25),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
                 ),
-                child: Icon(
-                  widget.secondaryIcon,
-                  size: 22,
-                  color: widget.color,
+                padding: const EdgeInsets.all(22),
+                child: Image.asset(
+                  assetPath,
+                  fit: BoxFit.contain,
+                  gaplessPlayback: true,
+                  errorBuilder: (_, __, ___) => Icon(
+                    widget.icon,
+                    size: 56,
+                    color: widget.color,
+                  ),
+                ),
+              )
+            else
+              // Welcome slide: show all four service tab images.
+              SizedBox(
+                width: 148,
+                height: 148,
+                child: GridView.count(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 10,
+                  crossAxisSpacing: 10,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: [
+                    for (final path in _welcomeAssets)
+                      Container(
+                        decoration: BoxDecoration(
+                          color: HomeColors.surfaceElevated,
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(
+                            color: widget.color.withValues(alpha: 0.35),
+                          ),
+                        ),
+                        padding: const EdgeInsets.all(12),
+                        child: Image.asset(
+                          path,
+                          fit: BoxFit.contain,
+                          gaplessPlayback: true,
+                          errorBuilder: (_, __, ___) => Icon(
+                            widget.icon,
+                            size: 28,
+                            color: widget.color,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
-            ),
           ],
         ),
       ),

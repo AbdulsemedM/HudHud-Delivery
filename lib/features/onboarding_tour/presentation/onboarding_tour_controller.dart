@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/features/onboarding_tour/data/onboarding_tour_prefs.dart';
 import 'package:hudhud_delivery/features/onboarding_tour/presentation/onboarding_tour_keys.dart';
@@ -43,7 +45,15 @@ class OnboardingTourController {
 
       if (!context.mounted) return;
 
-      await Future<void>.delayed(const Duration(milliseconds: 200));
+      // Wait until home widgets (and GlobalKeys) are laid out again.
+      await Future<void>.delayed(const Duration(milliseconds: 350));
+      if (!context.mounted) return;
+
+      final frame = Completer<void>();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!frame.isCompleted) frame.complete();
+      });
+      await frame.future;
       if (!context.mounted) return;
 
       await HomeSpotlightTour.show(
