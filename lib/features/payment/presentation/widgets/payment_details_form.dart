@@ -157,7 +157,11 @@ class _PaymentDetailsFormState extends State<PaymentDetailsForm> {
         details['provider'] = ebirrProvider ?? widget.ebirrProvider;
       }
     }
-    widget.onChanged(details);
+    // Defer — initState/didUpdateWidget can run while the parent is building.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      widget.onChanged(details);
+    });
   }
 
   @override

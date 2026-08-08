@@ -5,6 +5,8 @@ import 'package:latlong2/latlong.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/theme/service_tab_palette.dart';
 import 'package:hudhud_delivery/app/services/location_service.dart';
+import 'package:hudhud_delivery/app/services/geocoding_service.dart';
+import 'package:hudhud_delivery/app/services/startup_location_service.dart';
 import 'package:hudhud_delivery/core/widgets/location_search_field.dart';
 import 'package:hudhud_delivery/app/services/google_places_service.dart';
 import 'package:hudhud_delivery/app/services/google_directions_service.dart';
@@ -15,6 +17,7 @@ import 'package:hudhud_delivery/features/taxi/data/ride_data_provider.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/widgets/status_chip.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
+import 'package:hudhud_delivery/features/home/presentation/screen/location_search_screen.dart';
 import 'package:shimmer/shimmer.dart';
 import 'finding_driver_screen.dart';
 import 'driver_on_the_way_screen.dart';
@@ -51,6 +54,9 @@ class _TaxiScreenState extends State<TaxiScreen> {
   final TextEditingController _destinationController = TextEditingController();
   final RideDataProvider _rideDataProvider = RideDataProvider();
   LatLng _currentPosition = const LatLng(9.0222, 38.7468); // Default to Addis Ababa (same as location search)
+  LatLng? _pickupPosition;
+  String _pickupAddress = '';
+  bool _pickupResolveFailed = false;
   LatLng? _destinationPosition;
   bool _isLoadingLocation = true;
   List<PlaceResult> _suggestedLocations = [];
@@ -91,19 +97,30 @@ class _TaxiScreenState extends State<TaxiScreen> {
     super.dispose();
   }
 
+  LatLng get _effectivePickup => _pickupPosition ?? _currentPosition;
+
   Future<void> _getCurrentLocation() async {
     setState(() {
       _isLoadingLocation = true;
     });
 
     try {
-      final position = await LocationService.getCurrentPosition();
+      final position = StartupLocationService.cached ??
+          await LocationService.getCurrentPosition();
       if (position != null) {
+        StartupLocationService.updateCache(position);
         final latLng = LatLng(position.latitude, position.longitude);
+        final address = await GeocodingService.getAddressFromLatLng(
+          position.latitude,
+          position.longitude,
+        );
 
         if (mounted) {
           setState(() {
             _currentPosition = latLng;
+            _pickupPosition = latLng;
+            _pickupAddress = address;
+            _pickupResolveFailed = false;
             _isLoadingLocation = false;
           });
 
@@ -115,6 +132,8 @@ class _TaxiScreenState extends State<TaxiScreen> {
       } else {
         if (mounted) {
           setState(() {
+            _pickupResolveFailed = true;
+            _pickupAddress = '';
             _isLoadingLocation = false;
           });
         }
@@ -122,10 +141,72 @@ class _TaxiScreenState extends State<TaxiScreen> {
     } catch (e) {
       if (mounted) {
         setState(() {
+          _pickupResolveFailed = true;
+          _pickupAddress = '';
           _isLoadingLocation = false;
         });
       }
     }
+  }
+
+  Future<void> _selectPickupLocation() async {
+    final result = await Navigator.push<Map<String, dynamic>>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LocationSearchScreen(
+          currentLocation: _pickupAddress.isNotEmpty
+              ? _pickupAddress
+              : context.l10n.taxiCurrentLocation,
+        ),
+      ),
+    );
+
+    if (result != null && mounted) {
+      final address = result['address'] as String?;
+      final coordinates = result['coordinates'] as LatLng?;
+
+      if (address != null && coordinates != null) {
+        setState(() {
+          _pickupAddress = address;
+          _pickupResolveFailed = false;
+          _pickupPosition = coordinates;
+          _routePolylinePoints = null;
+          _routeDistanceKm = null;
+        });
+
+        if (_destinationPosition != null) {
+          setState(() => _isLoadingRoute = true);
+          await _fetchRouteDirections();
+          _fitPickupAndDestination();
+        } else {
+          _mapController?.moveCamera(
+            gmaps.CameraUpdate.newLatLngZoom(_toG(coordinates), 15.0),
+          );
+        }
+        _fetchAvailableVehicles();
+      }
+    }
+  }
+
+  void _fitPickupAndDestination() {
+    final pickup = _effectivePickup;
+    final dest = _destinationPosition;
+    if (dest == null || _mapController == null) return;
+
+    final sw = gmaps.LatLng(
+      pickup.latitude < dest.latitude ? pickup.latitude : dest.latitude,
+      pickup.longitude < dest.longitude ? pickup.longitude : dest.longitude,
+    );
+    final ne = gmaps.LatLng(
+      pickup.latitude > dest.latitude ? pickup.latitude : dest.latitude,
+      pickup.longitude > dest.longitude ? pickup.longitude : dest.longitude,
+    );
+    _mapController!.animateCamera(
+      gmaps.CameraUpdate.newLatLngBounds(
+        gmaps.LatLngBounds(southwest: sw, northeast: ne),
+        80,
+      ),
+    );
   }
 
   Future<void> _checkActiveRide() async {
@@ -395,9 +476,10 @@ class _TaxiScreenState extends State<TaxiScreen> {
   }
 
   Future<void> _fetchAvailableVehicles() async {
+    final pickup = _effectivePickup;
     final result = await _rideDataProvider.getAvailableVehicles(
-      latitude: _currentPosition.latitude,
-      longitude: _currentPosition.longitude,
+      latitude: pickup.latitude,
+      longitude: pickup.longitude,
       vehicleType: 'car',
     );
 
@@ -470,13 +552,17 @@ class _TaxiScreenState extends State<TaxiScreen> {
   Future<void> _fetchRouteAndNavigate(String destinationAddress) async {
     await _fetchRouteDirections();
     if (!mounted || _destinationPosition == null) return;
+    final pickup = _effectivePickup;
+    final pickupAddress = _pickupAddress.isNotEmpty
+        ? _pickupAddress
+        : context.l10n.taxiCurrentLocation;
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => TripSelectionScreen(
-          pickupLocation: _currentPosition,
+          pickupLocation: pickup,
           destinationLocation: _destinationPosition!,
-          pickupAddress: context.l10n.taxiCurrentLocation,
+          pickupAddress: pickupAddress,
           destinationAddress: destinationAddress,
           initialRouteDistanceKm: _routeDistanceKm,
           initialRoutePolylinePoints: _routePolylinePoints,
@@ -487,9 +573,10 @@ class _TaxiScreenState extends State<TaxiScreen> {
 
   Future<void> _fetchRouteDirections() async {
     if (_destinationPosition == null) return;
+    final pickup = _effectivePickup;
     final result = await GoogleDirectionsService.getDirections(
-      originLat: _currentPosition.latitude,
-      originLng: _currentPosition.longitude,
+      originLat: pickup.latitude,
+      originLng: pickup.longitude,
       destLat: _destinationPosition!.latitude,
       destLng: _destinationPosition!.longitude,
     );
@@ -509,8 +596,8 @@ class _TaxiScreenState extends State<TaxiScreen> {
 
   Future<void> _handleMapTap(gmaps.LatLng point) async {
     final latLng = LatLng(point.latitude, point.longitude);
-    // Don't set destination if user tapped on their current location
-    final distance = _calculateDistance(_currentPosition, latLng);
+    // Don't set destination if user tapped on their pickup location
+    final distance = _calculateDistance(_effectivePickup, latLng);
     if (distance < 0.001) {
       // Less than 100 meters, probably the same location
       return;
@@ -893,10 +980,11 @@ class _TaxiScreenState extends State<TaxiScreen> {
   ) {
     final Set<gmaps.Marker> markers = {};
     if (!hasActiveRide) {
+      final pickup = _effectivePickup;
       markers.add(
         gmaps.Marker(
           markerId: const gmaps.MarkerId('current'),
-          position: _toG(_currentPosition),
+          position: _toG(pickup),
           icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
             gmaps.BitmapDescriptor.hueAzure,
           ),
@@ -962,7 +1050,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
     if (_destinationPosition != null && !hasActiveRide) {
       final points = _routePolylinePoints != null && _routePolylinePoints!.length >= 2
           ? _routePolylinePoints!.map(_toG).toList()
-          : [_toG(_currentPosition), _toG(_destinationPosition!)];
+          : [_toG(_effectivePickup), _toG(_destinationPosition!)];
       polylines.add(
         gmaps.Polyline(
           polylineId: const gmaps.PolylineId('route'),
@@ -1196,6 +1284,79 @@ class _TaxiScreenState extends State<TaxiScreen> {
                         _destinationPosition != null &&
                         (_routeDistanceKm != null || _isLoadingRoute))
                       const SizedBox(height: 12),
+                    // Pickup (From) — defaults to current GPS location
+                    if (!hasActiveRide)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+                        child: InkWell(
+                          onTap: _isLoadingLocation ? null : _selectPickupLocation,
+                          borderRadius:
+                              BorderRadius.circular(AppColors.radiusLG),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              color: HomeColors.surfaceElevated,
+                              borderRadius:
+                                  BorderRadius.circular(AppColors.radiusLG),
+                              border: Border.all(color: borderColor),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.trip_origin,
+                                  color: _taxiGold,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        l10n.pickupLocationLabel,
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                          color: colorScheme.onSurfaceVariant,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      if (_isLoadingLocation)
+                                        const _TaxiInlineShimmer(
+                                          width: 160,
+                                          height: 14,
+                                        )
+                                      else
+                                        Text(
+                                          _pickupResolveFailed
+                                              ? l10n.locationUnable
+                                              : (_pickupAddress.isEmpty
+                                                  ? l10n.taxiCurrentLocation
+                                                  : _pickupAddress),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                            color: colorScheme.onSurface,
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.chevron_right_rounded,
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
                     // Search Bar and Now Button
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),

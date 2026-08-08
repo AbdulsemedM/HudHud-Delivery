@@ -1,0 +1,306 @@
+================================================================================
+HudHud Delivery — API Failures Summary (Manual QA)
+App: Flutter customer app
+API base: https://api.hudhuddelivery.com/api/
+Date collected: 2026-08-06
+Source: Flutter debug logs / docs/api_failure_log.md
+================================================================================
+
+OVERVIEW (unique issues)
+------------------------
+1. POST /payments/initiate              → 422  (eBirr upstream timeout)
+2. POST /services/ride/{id}/cancel      → 405  (method not allowed)
+3. POST /services/delivery/request      → 500  (server error; seen twice)
+4. GET  /addresses-default              → 404  (no default address)
+
+
+================================================================================
+1) PAYMENTS — eBirr initiate fails
+================================================================================
+When:     2026-08-06 10:59:34 UTC
+Endpoint: POST https://api.hudhuddelivery.com/api/payments/initiate
+Status:   422 Unprocessable Entity
+Feature:  Food/order payment (eBirr)
+Call site: PaymentDataProvider.initiatePayment → PaymentBloc._onProcessPayment
+
+REQUEST
+-------
+Headers:
+  Content-Type: application/json
+  Accept: application/json
+
+Body:
+  payment_method_code: ebirr
+  type: order
+  amount: 3352.29
+  payment_details: { phone: 251946514836, provider: coop }
+  currency: ETB
+  order_id: 29
+
+Timeouts (client):
+  Connect: 30s
+  Receive: 3m
+  Send: 3m
+
+RESPONSE
+--------
+Status: 422 Unprocessable Entity
+Error type: DioExceptionType.badResponse
+
+Response body:
+  message: eBirr service unavailable: cURL error 28: Connection timeout
+           after 10001 ms for https://payments.ebirr.com/asm
+  errors:
+    payment: [
+      eBirr service unavailable: cURL error 28: Connection timeout
+      after 10001 ms for https://payments.ebirr.com/asm
+    ]
+
+ANALYSIS
+--------
+- App reached HudHud API successfully; HudHud returned 422.
+- Failure is on backend → eBirr (payments.ebirr.com/asm) ~10s connection timeout.
+- Same class of failure seen earlier for orders 22/24.
+- Raising client timeouts does NOT fix this; backend/eBirr connectivity must be fixed.
+
+
+================================================================================
+2) TAXI — Ride cancel fails (wrong HTTP method)
+================================================================================
+When:     2026-08-06 14:00:39 (local ~EAT)
+Endpoint: POST https://api.hudhuddelivery.com/api/services/ride/10/cancel
+Status:   405 Method Not Allowed
+Feature:  Taxi / ride cancel
+Ride id:  10
+
+REQUEST
+-------
+Headers:
+  Content-Type: application/json
+  Accept: application/json
+
+Body:
+  cancellation_reason: Changed my mind
+  cancelled_by: user
+
+Timeouts (client):
+  Connect / Receive / Send: 30s each
+
+RESPONSE
+--------
+Status: 405 Method Not Allowed
+Allow header: GET, HEAD
+Error type: DioExceptionType.badResponse
+
+Response body:
+  message: The POST method is not supported for route
+           api/services/ride/10/cancel.
+           Supported methods: GET, HEAD.
+
+ANALYSIS
+--------
+- App sends POST (expected for cancel with a body).
+- Server only allows GET/HEAD on this route — API contract mismatch.
+- Needs backend route fix (accept POST/DELETE/PATCH as designed) OR
+  app must be updated to the correct method/path if docs differ.
+
+
+================================================================================
+3) COURIER — Delivery request fails (500) — FIRST attempt
+================================================================================
+When:     2026-08-06 14:03:04 (local ~EAT)
+Endpoint: POST https://api.hudhuddelivery.com/api/services/delivery/request
+Status:   500 Internal Server Error
+Feature:  Instant/same-day courier delivery
+CF-Ray:   a26d8d8489245459-JIB
+
+REQUEST
+-------
+Headers:
+  Content-Type: application/json
+  Accept: application/json
+
+Body (flattened):
+  package_type: document
+  package_description: Documents
+  package_weight: 1.0
+  pickup_location: XQRJ+MH, Addis Ababa, Addis Ababa
+  pickup_latitude: 8.99152469
+  pickup_longitude: 38.78122025
+  dropoff_location: Urael, Addis Ababa
+  dropoff_latitude: 8.99152939
+  dropoff_longitude: 38.78121918
+  vehicle_type: motorbike
+  service_type: same_day
+  scheduled_pickup: null
+  scheduled_delivery: null
+  estimated_distance: 0.0
+  estimated_duration: 0
+  estimated_cost: 9.61
+  payment_method: ebirr
+  requires_signature: false
+  insurance_required: false
+  special_instructions: (empty)
+  sender_name: Abdulsemed Mussema
+  sender_phone: (EMPTY)
+  receiver_name: abdusemed
+  receiver_phone: 251946514836
+  package_details:
+    name: Documents
+    weight: 1.0
+    description: Documents
+  pickup_address:
+    latitude: 8.99152469
+    longitude: 38.78122025
+    address: XQRJ+MH, Addis Ababa, Addis Ababa
+  delivery_address:
+    latitude: 8.99152939
+    longitude: 38.78121918
+    address: Urael, Addis Ababa
+
+Timeouts (client): Connect / Receive / Send: 30s each
+
+RESPONSE
+--------
+Status: 500 Internal Server Error
+Error type: DioExceptionType.badResponse
+Response body:
+  message: Failed to request delivery service.
+
+CLIENT BUG (THIS ATTEMPT ONLY)
+------------------------------
+- Pickup and dropoff coordinates were nearly identical (~0.5 m apart).
+- Labels differed (XQRJ+MH vs Urael) but coords did not.
+- estimated_distance: 0.0 / estimated_duration: 0
+- Root cause: LocationSearchScreen confirmed pin coords (_currentPosition)
+  but did not update them when the map pin moved — only the address label
+  changed via reverse geocode.
+- FIXED in app (location_search_screen.dart): pan/tap/search now sync pin
+  coords with the confirmed address.
+
+
+================================================================================
+4) ADDRESSES — Default address not found
+================================================================================
+When:     2026-08-06 14:06:20 (local ~EAT)
+Endpoint: GET https://api.hudhuddelivery.com/api/addresses-default
+Status:   404 Not Found
+Feature:  Sync default address (addresses list)
+Call site: AddressesDataProvider.getDefaultAddress
+           → AddressesRepository.getDefaultAddress
+           → syncDefaultAddressFromApi (addresses_list_screen.dart)
+CF-Ray:   a26d92213b915456-JIB
+User id (from nearby FCM success): 39
+
+REQUEST
+-------
+Method: GET
+(no body)
+
+RESPONSE
+--------
+Status: 404 Not Found
+Error type: DioExceptionType.badResponse
+Response body:
+  success: false
+  message: No default address found
+
+ANALYSIS
+--------
+- Expected when the account has no default address set.
+- App currently treats this as an error (Dio throws on non-2xx).
+- Low severity for QA; may want client to treat 404 as empty/null
+  instead of a hard failure.
+
+
+================================================================================
+5) COURIER — Delivery request fails (500) — AFTER coord fix
+================================================================================
+When:     2026-08-06 14:13:33 (local ~EAT)
+Endpoint: POST https://api.hudhuddelivery.com/api/services/delivery/request
+Status:   500 Internal Server Error
+Feature:  Instant/same-day courier delivery
+CF-Ray:   a26d9cdee8a05452-JIB
+
+REQUEST
+-------
+Headers:
+  Content-Type: application/json
+  Accept: application/json
+
+Body (flattened):
+  package_type: document
+  package_description: Documents
+  package_weight: 1.0
+  pickup_location: XQRJ+MH, Addis Ababa, Addis Ababa
+  pickup_latitude: 8.99153258
+  pickup_longitude: 38.78125755
+  dropoff_location: Urael, Addis Ababa
+  dropoff_latitude: 9.003318053143381
+  dropoff_longitude: 38.7803740426898
+  vehicle_type: motorbike
+  service_type: same_day
+  scheduled_pickup: null
+  scheduled_delivery: null
+  estimated_distance: 1.31
+  estimated_duration: 3
+  estimated_cost: 9.61
+  payment_method: ebirr
+  requires_signature: false
+  insurance_required: false
+  special_instructions: (empty)
+  sender_name: Abdulsemed Mussema
+  sender_phone: (EMPTY)
+  receiver_name: adfg
+  receiver_phone: 251946514836
+  package_details:
+    name: Documents
+    weight: 1.0
+    description: Documents
+  pickup_address:
+    latitude: 8.99153258
+    longitude: 38.78125755
+    address: XQRJ+MH, Addis Ababa, Addis Ababa
+  delivery_address:
+    latitude: 9.003318053143381
+    longitude: 38.7803740426898
+    address: Urael, Addis Ababa
+
+Timeouts (client): Connect / Receive / Send: 30s each
+
+RESPONSE
+--------
+Status: 500 Internal Server Error
+Error type: DioExceptionType.badResponse
+Response body:
+  message: Failed to request delivery service.
+
+ANALYSIS
+--------
+- Pickup and dropoff are clearly distinct after the client coord fix.
+- estimated_distance: 1.31 km, estimated_duration: 3 min — looks valid.
+- Still returns generic 500 from server → remaining issue is backend.
+- Notable: sender_phone is still empty in both delivery attempts.
+  Backend should check if empty sender_phone (or payment_method ebirr,
+  or other fields) triggers the failure.
+
+
+================================================================================
+ACTION NEEDED (by owner)
+================================================================================
+BACKEND
+  [ ] eBirr: fix connectivity/timeout to https://payments.ebirr.com/asm
+  [ ] Ride cancel: allow POST (or document correct method/path); currently GET/HEAD only
+  [ ] Delivery request: investigate 500 "Failed to request delivery service"
+      with valid distinct coords (see attempt #5 payload); check empty sender_phone
+  [ ] (Optional) addresses-default: confirm 404 is intentional when none set
+
+APP (already done / optional)
+  [x] LocationSearchScreen: pin coords sync with address (fixed)
+  [ ] Ride cancel: align HTTP method once backend contract is confirmed
+  [ ] Delivery: ensure sender_phone is populated before submit
+  [ ] addresses-default: treat 404 as "no default" instead of hard error (optional)
+
+================================================================================
+END OF FILE
+================================================================================

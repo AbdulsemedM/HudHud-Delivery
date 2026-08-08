@@ -118,34 +118,51 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
     setState(() {
       _routePolylinePoints = result?.polylinePoints;
     });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _fitBounds();
+    });
   }
 
   static gmaps.LatLng _toG(LatLng p) => gmaps.LatLng(p.latitude, p.longitude);
 
   void _fitBounds() {
-    if (widget.pickupPosition != null && widget.deliveryPosition != null) {
-      final bounds = gmaps.LatLngBounds(
-        southwest: gmaps.LatLng(
-          widget.pickupPosition!.latitude < widget.deliveryPosition!.latitude
-              ? widget.pickupPosition!.latitude
-              : widget.deliveryPosition!.latitude,
-          widget.pickupPosition!.longitude < widget.deliveryPosition!.longitude
-              ? widget.pickupPosition!.longitude
-              : widget.deliveryPosition!.longitude,
-        ),
-        northeast: gmaps.LatLng(
-          widget.pickupPosition!.latitude > widget.deliveryPosition!.latitude
-              ? widget.pickupPosition!.latitude
-              : widget.deliveryPosition!.latitude,
-          widget.pickupPosition!.longitude > widget.deliveryPosition!.longitude
-              ? widget.pickupPosition!.longitude
-              : widget.deliveryPosition!.longitude,
-        ),
-      );
-      _mapController?.moveCamera(
-        gmaps.CameraUpdate.newLatLngBounds(bounds, 50),
-      );
+    if (widget.pickupPosition == null || widget.deliveryPosition == null) {
+      return;
     }
+    final pickup = widget.pickupPosition!;
+    final delivery = widget.deliveryPosition!;
+
+    // Identical points crash LatLngBounds — zoom to a single point instead.
+    if ((pickup.latitude - delivery.latitude).abs() < 1e-6 &&
+        (pickup.longitude - delivery.longitude).abs() < 1e-6) {
+      _mapController?.animateCamera(
+        gmaps.CameraUpdate.newLatLngZoom(_toG(pickup), 15),
+      );
+      return;
+    }
+
+    final bounds = gmaps.LatLngBounds(
+      southwest: gmaps.LatLng(
+        pickup.latitude < delivery.latitude
+            ? pickup.latitude
+            : delivery.latitude,
+        pickup.longitude < delivery.longitude
+            ? pickup.longitude
+            : delivery.longitude,
+      ),
+      northeast: gmaps.LatLng(
+        pickup.latitude > delivery.latitude
+            ? pickup.latitude
+            : delivery.latitude,
+        pickup.longitude > delivery.longitude
+            ? pickup.longitude
+            : delivery.longitude,
+      ),
+    );
+    // Extra padding so both pins stay above the bottom sheet.
+    _mapController?.animateCamera(
+      gmaps.CameraUpdate.newLatLngBounds(bounds, 72),
+    );
   }
 
   String _mapPackageType(String itemType) {
@@ -410,12 +427,20 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
         isDark ? const Color(0xFF2A2A2A) : const Color(0xFFEEEEEE);
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: Stack(
-        children: [
-          _buildMapOrFallback(mapCenter),
-          Positioned(
-            top: 40,
-            left: 16,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final mapBottomPadding = constraints.maxHeight * 0.48;
+          return Stack(
+            children: [
+              Positioned.fill(
+                child: _buildMapOrFallback(
+                  mapCenter,
+                  bottomPadding: mapBottomPadding,
+                ),
+              ),
+              Positioned(
+                top: 40,
+                left: 16,
             child: Container(
               decoration: BoxDecoration(
                 color: colorScheme.surface,
@@ -662,22 +687,33 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
               );
             },
           ),
-        ],
+            ],
+          );
+        },
       ),
     );
   }
 
-  Widget _buildMapOrFallback(LatLng mapCenter) {
+  Widget _buildMapOrFallback(
+    LatLng mapCenter, {
+    double bottomPadding = 0,
+  }) {
     if (_hasGoogleMapsApiKey == null) {
-      return const Center(child: CircularProgressIndicator());
+      return const ColoredBox(
+        color: Color(0xFFE8E8E8),
+        child: Center(child: CircularProgressIndicator()),
+      );
     }
     if (_hasGoogleMapsApiKey == false) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(24),
-          child: Text(
-            'Google Maps is not configured on iOS. Add GOOGLE_MAPS_API_KEY and restart the app.',
-            textAlign: TextAlign.center,
+      return const ColoredBox(
+        color: Color(0xFFE8E8E8),
+        child: Center(
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: Text(
+              'Google Maps is not configured on iOS. Add GOOGLE_MAPS_API_KEY and restart the app.',
+              textAlign: TextAlign.center,
+            ),
           ),
         ),
       );
@@ -688,11 +724,19 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
         target: _toG(mapCenter),
         zoom: 13.0,
       ),
+      padding: EdgeInsets.only(bottom: bottomPadding),
+      myLocationButtonEnabled: false,
+      zoomControlsEnabled: false,
+      mapToolbarEnabled: false,
       markers: {
         if (widget.pickupPosition != null)
           gmaps.Marker(
             markerId: const gmaps.MarkerId('pickup'),
             position: _toG(widget.pickupPosition!),
+            infoWindow: gmaps.InfoWindow(
+              title: 'Pickup',
+              snippet: widget.pickupLocation,
+            ),
             icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
               gmaps.BitmapDescriptor.hueRed,
             ),
@@ -701,29 +745,37 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
           gmaps.Marker(
             markerId: const gmaps.MarkerId('delivery'),
             position: _toG(widget.deliveryPosition!),
+            infoWindow: gmaps.InfoWindow(
+              title: 'Delivery',
+              snippet: widget.deliveryLocation,
+            ),
             icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
               gmaps.BitmapDescriptor.hueGreen,
             ),
           ),
       },
-      polylines: widget.pickupPosition != null && widget.deliveryPosition != null
-          ? {
-              gmaps.Polyline(
-                polylineId: const gmaps.PolylineId('route'),
-                points: _routePolylinePoints != null && _routePolylinePoints!.length >= 2
-                    ? _routePolylinePoints!.map(_toG).toList()
-                    : [
-                        _toG(widget.pickupPosition!),
-                        _toG(widget.deliveryPosition!),
-                      ],
-                color: AppColors.primaryColor,
-                width: 3,
-              ),
-            }
-          : {},
+      polylines:
+          widget.pickupPosition != null && widget.deliveryPosition != null
+              ? {
+                  gmaps.Polyline(
+                    polylineId: const gmaps.PolylineId('route'),
+                    points: _routePolylinePoints != null &&
+                            _routePolylinePoints!.length >= 2
+                        ? _routePolylinePoints!.map(_toG).toList()
+                        : [
+                            _toG(widget.pickupPosition!),
+                            _toG(widget.deliveryPosition!),
+                          ],
+                    color: AppColors.primaryColor,
+                    width: 4,
+                  ),
+                }
+              : {},
       onMapCreated: (controller) {
         _mapController = controller;
-        _fitBounds();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _fitBounds();
+        });
       },
     );
   }
