@@ -14,9 +14,9 @@ String paymentPhoneHint(String methodCode) {
     case 'edahab':
       return '656013956';
     case 'sahay':
-      return '251911679409';
+      return '0911679409';
     default:
-      if (_usesEbirrPhoneFormat(methodCode)) return '251915741199';
+      if (_usesEbirrPhoneFormat(methodCode)) return '0915741199';
       return 'Phone number';
   }
 }
@@ -28,10 +28,10 @@ String paymentPhoneLabel(String methodCode) {
     case 'edahab':
       return 'Phone (65XXXXXXXXX)';
     case 'sahay':
-      return 'Phone (251XXXXXXXXX)';
+      return 'Phone (09xxxxxxxx)';
     default:
       if (_usesEbirrPhoneFormat(methodCode)) {
-        return 'Phone (251XXXXXXXXX)';
+        return 'Phone (09xxxxxxxx)';
       }
       return 'Phone number';
   }
@@ -103,12 +103,12 @@ String? validatePaymentPhone(String? phone, String methodCode) {
       }
     case 'sahay':
       if (!RegExp(r'^2519\d{8}$').hasMatch(normalized)) {
-        return 'Enter a valid phone number (251XXXXXXXXX)';
+        return 'Enter a valid phone number (09xxxxxxxx)';
       }
     default:
       if (_usesEbirrPhoneFormat(methodCode)) {
         if (!RegExp(r'^2519\d{8}$').hasMatch(normalized)) {
-          return 'Enter a valid phone number (251XXXXXXXXX)';
+          return 'Enter a valid phone number (09xxxxxxxx)';
         }
       }
   }
@@ -191,42 +191,73 @@ class _PaymentDetailsFormState extends State<PaymentDetailsForm> {
     super.dispose();
   }
 
+  InputDecoration _fieldDecoration(
+    BuildContext context, {
+    required String label,
+    String? hint,
+  }) {
+    final scheme = Theme.of(context).colorScheme;
+    final outline = scheme.outline.withValues(alpha: 0.55);
+    final radius = BorderRadius.circular(AppColors.radiusLG);
+    return InputDecoration(
+      labelText: label,
+      hintText: hint,
+      filled: true,
+      fillColor: scheme.surfaceContainerHighest,
+      labelStyle: TextStyle(
+        fontSize: 14,
+        color: scheme.onSurface,
+      ),
+      hintStyle: TextStyle(
+        color: scheme.onSurfaceVariant,
+      ),
+      border: OutlineInputBorder(
+        borderRadius: radius,
+        borderSide: BorderSide(color: outline),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: radius,
+        borderSide: BorderSide(color: outline),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: radius,
+        borderSide: BorderSide(color: scheme.primary),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!paymentMethodNeedsDetailsForm(widget.paymentMethodCode)) {
       return const SizedBox.shrink();
     }
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final code = widget.paymentMethodCode;
 
-    return Container(
-      margin: const EdgeInsets.only(top: 8, bottom: 8),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurfaceVariant : Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isDark ? AppColors.darkBorder : Colors.grey.withValues(alpha: 0.25),
-        ),
-      ),
+    return Padding(
+      padding: const EdgeInsets.only(top: 8, bottom: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Payment details',
-            style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+            style: textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: scheme.onSurface,
+            ),
           ),
           const SizedBox(height: 12),
           TextFormField(
             controller: _phoneController,
             keyboardType: TextInputType.phone,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            decoration: InputDecoration(
-              labelText: paymentPhoneLabel(code),
-              hintText: paymentPhoneHint(code),
-              border: const OutlineInputBorder(),
+            style: TextStyle(color: scheme.onSurface),
+            decoration: _fieldDecoration(
+              context,
+              label: paymentPhoneLabel(code),
+              hint: paymentPhoneHint(code),
             ),
             onChanged: (_) => _emitDetails(),
           ),
@@ -234,8 +265,14 @@ class _PaymentDetailsFormState extends State<PaymentDetailsForm> {
             const SizedBox(height: 8),
             SwitchListTile.adaptive(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Use hosted payment page'),
-              subtitle: const Text('Open Waafi Pay in a secure browser page'),
+              title: Text(
+                'Use hosted payment page',
+                style: TextStyle(color: scheme.onSurface),
+              ),
+              subtitle: Text(
+                'Open Waafi Pay in a secure browser page',
+                style: TextStyle(color: scheme.onSurfaceVariant),
+              ),
               value: widget.useHpp,
               activeThumbColor: AppColors.primaryColor,
               onChanged: (value) {
@@ -249,9 +286,11 @@ class _PaymentDetailsFormState extends State<PaymentDetailsForm> {
             DropdownButtonFormField<String>(
               initialValue:
                   widget.ebirrProvider == 'coop' ? 'coop' : 'kaafi',
-              decoration: const InputDecoration(
-                labelText: 'Provider',
-                border: OutlineInputBorder(),
+              style: TextStyle(color: scheme.onSurface),
+              dropdownColor: scheme.surface,
+              decoration: _fieldDecoration(
+                context,
+                label: 'Provider',
               ),
               items: const [
                 DropdownMenuItem(value: 'kaafi', child: Text('Kaafi')),
