@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/features/chat/bloc/conversations_bloc.dart';
 import 'package:hudhud_delivery/features/chat/chat_bloc_provider.dart';
 import 'package:hudhud_delivery/features/chat/presentation/widgets/chat_unread_badge.dart';
+import 'package:hudhud_delivery/features/chat/utils/chat_polling_config.dart';
 import 'package:hudhud_delivery/features/chat/model/chat_conversation_detail_result.dart';
 import 'package:hudhud_delivery/features/chat/model/chat_open_conversation_result.dart';
 import 'package:hudhud_delivery/features/chat/presentation/screens/chat_room_screen.dart';
@@ -33,14 +36,57 @@ class _ConversationsListBody extends StatefulWidget {
   State<_ConversationsListBody> createState() => _ConversationsListBodyState();
 }
 
-class _ConversationsListBodyState extends State<_ConversationsListBody> {
+class _ConversationsListBodyState extends State<_ConversationsListBody>
+    with WidgetsBindingObserver {
   final _searchController = TextEditingController();
   bool _showSearch = false;
+  Timer? _pollTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _startListPolling();
+    });
+  }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _pollTimer?.cancel();
     _searchController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.paused:
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.hidden:
+        _stopListPolling();
+      case AppLifecycleState.resumed:
+        _startListPolling(immediate: true);
+      case AppLifecycleState.detached:
+        break;
+    }
+  }
+
+  void _startListPolling({bool immediate = false}) {
+    _pollTimer?.cancel();
+    _pollTimer = Timer.periodic(ChatPollingConfig.conversationListInterval, (_) {
+      if (!mounted) return;
+      context.read<ConversationsBloc>().add(const RefreshConversationsEvent());
+    });
+    if (immediate && mounted) {
+      context.read<ConversationsBloc>().add(const RefreshConversationsEvent());
+    }
+  }
+
+  void _stopListPolling() {
+    _pollTimer?.cancel();
+    _pollTimer = null;
   }
 
   void _openRoom(

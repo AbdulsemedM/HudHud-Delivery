@@ -11,6 +11,8 @@ import 'package:hudhud_delivery/core/widgets/status_chip.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
+import 'package:hudhud_delivery/features/courier/presentation/widgets/driver_contact_card.dart';
+import 'package:hudhud_delivery/features/chat/utils/chat_navigation.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import '../../../home/presentation/widgets/home_widget.dart';
 
@@ -125,6 +127,19 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
       );
     }
     return null;
+  }
+
+  Future<void> _messageDriver() async {
+    final deliveryId = widget.deliveryId;
+    if (deliveryId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Unable to open chat. Missing delivery ID.'),
+        ),
+      );
+      return;
+    }
+    await openPackageDeliveryChat(context, deliveryId);
   }
 
   Future<void> _fetchRouteDirections() async {
@@ -482,7 +497,7 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                                             // Driver Information (only when driver assigned)
                                             if (_trackData?['driver'] !=
                                                 null) ...[
-                                              _DriverCard(
+                                              DriverContactCard(
                                                 driverName: _trackData![
                                                             'driver']
                                                         is Map<String,
@@ -498,12 +513,7 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                                                     : _trackData!['driver']
                                                         .toString(),
                                                 borderColor: borderColor,
-                                                onCall: () {
-                                                  // TODO: Implement call
-                                                },
-                                                onMessage: () {
-                                                  // TODO: Implement message
-                                                },
+                                                onMessage: _messageDriver,
                                               ),
                                               const SizedBox(height: 16),
                                             ],
@@ -562,97 +572,6 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
             ),
           );
         },
-      ),
-    );
-  }
-}
-
-class _DriverCard extends StatelessWidget {
-  final String driverName;
-  final VoidCallback onCall;
-  final VoidCallback onMessage;
-  final Color borderColor;
-
-  const _DriverCard({
-    required this.driverName,
-    required this.onCall,
-    required this.onMessage,
-    required this.borderColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppColors.spaceMD),
-      decoration: BoxDecoration(
-        color: HomeColors.surfaceElevated,
-        borderRadius: BorderRadius.circular(AppColors.radiusLG),
-        border: Border.all(color: borderColor),
-      ),
-      child: Row(
-        children: [
-          // Profile Picture
-          const CircleAvatar(
-            radius: 30,
-            backgroundColor: HomeColors.surface,
-            child: Icon(
-              Icons.person,
-              size: 30,
-              color: HomeColors.textMuted,
-            ),
-          ),
-          const SizedBox(width: 16),
-          // Driver Info
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  driverName,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: HomeColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  'Driver',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: HomeColors.textMuted,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Action Buttons
-          IconButton(
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: const BoxDecoration(
-                color: HomeColors.surface,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.chat_bubble_outline,
-                  size: 20, color: HomeColors.textPrimary),
-            ),
-            onPressed: onMessage,
-          ),
-          const SizedBox(width: 8),
-          IconButton(
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: const BoxDecoration(
-                color: HomeColors.surface,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.phone,
-                  size: 20, color: HomeColors.textPrimary),
-            ),
-            onPressed: onCall,
-          ),
-        ],
       ),
     );
   }

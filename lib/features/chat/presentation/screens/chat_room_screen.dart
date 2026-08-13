@@ -58,7 +58,8 @@ class _ChatRoomView extends StatefulWidget {
   State<_ChatRoomView> createState() => _ChatRoomViewState();
 }
 
-class _ChatRoomViewState extends State<_ChatRoomView> {
+class _ChatRoomViewState extends State<_ChatRoomView>
+    with WidgetsBindingObserver {
   final _textController = TextEditingController();
   final _scrollController = ScrollController();
   final _auth = AuthService();
@@ -68,14 +69,32 @@ class _ChatRoomViewState extends State<_ChatRoomView> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _textController.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (!mounted) return;
+    final bloc = context.read<ChatRoomBloc>();
+    switch (state) {
+      case AppLifecycleState.paused:
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.hidden:
+        bloc.add(const PauseChatPollingEvent());
+      case AppLifecycleState.resumed:
+        bloc.add(const ResumeChatPollingEvent());
+      case AppLifecycleState.detached:
+        break;
+    }
   }
 
   void _onScroll() {

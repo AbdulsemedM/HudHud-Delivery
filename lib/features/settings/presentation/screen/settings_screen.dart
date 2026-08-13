@@ -1,4 +1,6 @@
-﻿import 'package:flutter/foundation.dart';
+﻿import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/app/services/biometric_credential_service.dart';
@@ -20,6 +22,9 @@ import 'package:hudhud_delivery/features/addresses/presentation/screens/addresse
 import 'package:hudhud_delivery/features/sos/presentation/screens/sos_settings_screen.dart';
 import 'package:hudhud_delivery/features/chat/presentation/screens/conversations_list_screen.dart';
 import 'package:hudhud_delivery/features/chat/presentation/screens/support_chat_start_screen.dart';
+import 'package:hudhud_delivery/features/chat/chat_bloc_provider.dart';
+import 'package:hudhud_delivery/features/chat/presentation/widgets/chat_unread_badge.dart';
+import 'package:hudhud_delivery/features/chat/utils/chat_polling_config.dart';
 import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
 import 'package:hudhud_delivery/features/dashboard/presentation/screen/dashboard_screen.dart';
 import 'package:hudhud_delivery/features/onboarding_tour/presentation/onboarding_tour_controller.dart';
@@ -57,7 +62,8 @@ class SettingsScreen extends StatefulWidget {
   State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class _SettingsScreenState extends State<SettingsScreen>
+    with WidgetsBindingObserver {
   UserModel? _user;
   final AuthService _authService = AuthService();
   bool _smsNotificationsEnabled = true;
@@ -67,13 +73,60 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _biometricAvailable = false;
   bool _biometricBusy = false;
   bool _useFaceBiometricIcon = false;
+  int _chatUnreadCount = 0;
+  Timer? _chatUnreadTimer;
   final BiometricCredentialService _biometricService =
       BiometricCredentialService();
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadAll();
+    _startChatUnreadPolling();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _chatUnreadTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.paused:
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.hidden:
+        _stopChatUnreadPolling();
+      case AppLifecycleState.resumed:
+        _startChatUnreadPolling(immediate: true);
+      case AppLifecycleState.detached:
+        break;
+    }
+  }
+
+  void _startChatUnreadPolling({bool immediate = false}) {
+    _chatUnreadTimer?.cancel();
+    if (immediate) unawaited(_fetchChatUnreadCount());
+    _chatUnreadTimer = Timer.periodic(
+      ChatPollingConfig.unreadBadgeInterval,
+      (_) => _fetchChatUnreadCount(),
+    );
+  }
+
+  void _stopChatUnreadPolling() {
+    _chatUnreadTimer?.cancel();
+    _chatUnreadTimer = null;
+  }
+
+  Future<void> _fetchChatUnreadCount() async {
+    if (GuestBrowseService().isGuestBrowseMode) return;
+    try {
+      final count = await createChatRepository().getUnreadCount();
+      if (mounted) setState(() => _chatUnreadCount = count);
+    } catch (_) {}
   }
 
   Future<void> _loadAll() async {
@@ -457,14 +510,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       _ProfileMenuTile(
                         icon: Icons.chat_bubble_outline,
                         title: l10n.profileMenuMessages,
-                        onTap: () {
-                          Navigator.push(
+                        trailing: ChatUnreadBadge(count: _chatUnreadCount),
+                        onTap: () async {
+                          await Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
                                   const ConversationsListScreen(),
                             ),
                           );
+                          if (mounted) _fetchChatUnreadCount();
                         },
                       ),
                     ],

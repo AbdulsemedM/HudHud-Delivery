@@ -107,3 +107,11 @@ class RetrySendMessageEvent extends ChatRoomEvent {
 
   const RetrySendMessageEvent(this.tempMessageId);
 }
+
+class PauseChatPollingEvent extends ChatRoomEvent {
+  const PauseChatPollingEvent();
+}
+
+class ResumeChatPollingEvent extends ChatRoomEvent {
+  const ResumeChatPollingEvent();
+}

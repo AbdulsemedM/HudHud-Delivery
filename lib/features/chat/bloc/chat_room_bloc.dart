@@ -8,6 +8,7 @@ import 'package:hudhud_delivery/features/chat/model/chat_conversation_model.dart
 import 'package:hudhud_delivery/features/chat/model/chat_message_model.dart';
 import 'package:hudhud_delivery/features/chat/model/chat_participant_model.dart';
 import 'package:hudhud_delivery/features/chat/model/send_chat_message_request.dart';
+import 'package:hudhud_delivery/features/chat/utils/chat_polling_config.dart';
 
 part 'chat_room_event.dart';
 part 'chat_room_state.dart';
@@ -18,6 +19,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
   final int? packageDeliveryId;
 
   Timer? _pollTimer;
+  int? _pollConversationId;
   bool _pollInFlight = false;
   bool _sendInFlight = false;
   int _tempIdCounter = -1;
@@ -41,21 +43,48 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
     on<StartEditMessageEvent>(_onStartEdit);
     on<CancelEditMessageEvent>(_onCancelEdit);
     on<RetrySendMessageEvent>(_onRetry);
+    on<PauseChatPollingEvent>(_onPausePolling);
+    on<ResumeChatPollingEvent>(_onResumePolling);
   }
 
   @override
   Future<void> close() {
-    _pollTimer?.cancel();
+    _stopPolling();
     return super.close();
   }
 
   void _startPolling(int conversationId) {
+    _pollConversationId = conversationId;
     _pollTimer?.cancel();
-    _pollTimer = Timer.periodic(const Duration(seconds: 8), (_) {
+    _pollTimer = Timer.periodic(ChatPollingConfig.openConversationInterval, (_) {
       if (!isClosed && !_pollInFlight && !_sendInFlight) {
         add(const PollChatMessagesEvent());
       }
     });
+  }
+
+  void _stopPolling() {
+    _pollTimer?.cancel();
+    _pollTimer = null;
+  }
+
+  void _onPausePolling(
+    PauseChatPollingEvent event,
+    Emitter<ChatRoomState> emit,
+  ) {
+    _stopPolling();
+  }
+
+  void _onResumePolling(
+    ResumeChatPollingEvent event,
+    Emitter<ChatRoomState> emit,
+  ) {
+    final conversationId = _pollConversationId;
+    if (conversationId == null || state is! ChatRoomLoaded) return;
+    _startPolling(conversationId);
+    if (!_pollInFlight && !_sendInFlight) {
+      add(const PollChatMessagesEvent());
+    }
   }
 
   Future<void> _onOpen(

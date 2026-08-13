@@ -163,17 +163,19 @@ class ApiConstants {
   static const String chatRide = 'chat/ride/{rideId}';
   static const String chatMessage = 'chat/messages/{id}';
 
-  // Package delivery chat endpoints
+  // Package delivery chat endpoints (preferred /chat/ prefix)
   static const String packageDeliveryUnreadCount =
-      'package-delivery/unread-count';
+      'chat/package-delivery/unread-count';
   static const String packageDeliveryConversations =
-      'package-delivery/conversations';
+      'chat/package-delivery/conversations';
   static const String packageDeliveryConversation =
-      'package-delivery/{deliveryId}/conversation';
+      'chat/package-delivery/{deliveryId}/conversation';
   static const String packageDeliveryRead =
-      'package-delivery/{deliveryId}/read';
+      'chat/package-delivery/{deliveryId}/mark-read';
   static const String packageDeliveryMessage =
-      'package-delivery/{deliveryId}/message';
+      'chat/package-delivery/{deliveryId}/messages';
+  static const String packageDeliveryRejoin =
+      'chat/package-delivery/{deliveryId}/rejoin';
 
   // SOS endpoints
   static const String sosTrigger = 'sos/trigger';
