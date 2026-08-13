@@ -40,19 +40,34 @@ class AuthService {
   UserModel? _currentUser;
   String? _currentToken;
   DateTime? _tokenExpiry;
+  bool _initialized = false;
+  Future<void>? _initializeFuture;
+  String? _lastRegisteredFcmKey;
 
   // Getters for current user and authentication state
   UserModel? get currentUser => _currentUser;
   bool get isLoggedIn => _currentUser != null && _currentToken != null;
   bool get hasValidToken => _currentToken != null && !_isTokenExpired();
 
-  // Initialize service - load cached data
+  // Initialize service - load cached data (idempotent).
   Future<void> initialize() async {
-    await _loadCachedData();
-    // Fire-and-forget: send FCM token and subscribe to topics when restoring session
-    if (_currentUser != null && hasValidToken) {
-      _sendFcmTokenToBackend();
-      FcmTopicService().subscribeForCurrentUser();
+    if (_initialized) return;
+    _initializeFuture ??= _performInitialize();
+    await _initializeFuture;
+  }
+
+  Future<void> _performInitialize() async {
+    try {
+      await _loadCachedData();
+      // Fire-and-forget: send FCM token and subscribe to topics when restoring session
+      if (_currentUser != null && hasValidToken) {
+        _sendFcmTokenToBackend();
+        FcmTopicService().subscribeForCurrentUser();
+      }
+      _initialized = true;
+    } catch (e) {
+      _initializeFuture = null;
+      rethrow;
     }
   }
 
@@ -88,6 +103,9 @@ class AuthService {
 
   // Clear current session
   Future<void> _clearSession() async {
+    _initialized = false;
+    _initializeFuture = null;
+    _lastRegisteredFcmKey = null;
     _currentUser = null;
     _currentToken = null;
     _tokenExpiry = null;
@@ -128,6 +146,9 @@ class AuthService {
           Platform.isAndroid ? 'android' : (Platform.isIOS ? 'ios' : 'unknown');
       if (deviceType == 'unknown') return;
 
+      final registrationKey = '$userId:$deviceId:$fcmToken';
+      if (_lastRegisteredFcmKey == registrationKey) return;
+
       await _apiService.post(
         ApiConstants.fcmToken,
         data: {
@@ -137,6 +158,7 @@ class AuthService {
           'device_id': deviceId,
         },
       );
+      _lastRegisteredFcmKey = registrationKey;
     } catch (e) {
       if (kDebugMode) {
         debugPrint('AuthService: sendFcmTokenToBackend failed: $e');
@@ -395,6 +417,7 @@ class AuthService {
   }
 
   Future<void> _cleanupFcmOnLogout() async {
+    _lastRegisteredFcmKey = null;
     await FcmTopicService().unsubscribeAll();
     await _removeFcmTokenFromBackend();
     try {

@@ -21,10 +21,10 @@ class FcmTopicService {
   /// Subscribe to customer topics after login or session restore.
   Future<void> subscribeForCurrentUser({bool marketingEnabled = false}) async {
     try {
-      final auth = AuthService();
-      await auth.initialize();
-      final userId = auth.currentUser?.id;
+      final userId = AuthService().currentUser?.id;
       if (userId == null) return;
+
+      await _loadPersistedTopics();
 
       final topics = <String>{
         'customer_$userId',
