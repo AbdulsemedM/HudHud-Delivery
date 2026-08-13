@@ -8,6 +8,8 @@ import 'package:hudhud_delivery/features/checkout/data/data_provider/checkout_da
 import 'package:hudhud_delivery/features/checkout/data/repository/checkout_repository.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
+import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
+import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:lottie/lottie.dart';
 import 'delivery_tracking_screen.dart';
 
@@ -214,114 +216,122 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
-    final borderColor =
-        isDark ? const Color(0xFF2A2A2A) : const Color(0xFFEEEEEE);
+    return CourierTheme.wrap(
+      context,
+      child: Builder(
+        builder: (context) {
+          final theme = Theme.of(context);
+          const borderColor = HomeColors.border;
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      body: SafeArea(
-        child: Column(
-          children: [
-            const Spacer(),
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: AppColors.spaceMD),
-              padding: const EdgeInsets.all(AppColors.spaceLG),
-              decoration: BoxDecoration(
-                color: scheme.surface,
-                borderRadius: BorderRadius.circular(AppColors.radiusLG),
-                border: Border.all(color: borderColor),
-              ),
+          return Scaffold(
+            backgroundColor: HomeColors.background,
+            body: SafeArea(
               child: Column(
                 children: [
-                  SizedBox(
-                    width: 180,
-                    height: 180,
-                    child: Lottie.asset(
-                      'assets/animations/loading.json',
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                AppColors.primaryColor,
+                  const Spacer(),
+                  Container(
+                    margin: const EdgeInsets.symmetric(
+                        horizontal: AppColors.spaceMD),
+                    padding: const EdgeInsets.all(AppColors.spaceLG),
+                    decoration: BoxDecoration(
+                      color: HomeColors.surface,
+                      borderRadius: BorderRadius.circular(AppColors.radiusLG),
+                      border: Border.all(color: borderColor),
+                    ),
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          width: 180,
+                          height: 180,
+                          child: Lottie.asset(
+                            'assets/animations/loading.json',
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      HomeColors.violet,
+                                    ),
+                                    strokeWidth: 3,
+                                  ),
+                                  const SizedBox(height: AppColors.spaceMD),
+                                  Text(
+                                    'Looking for courier...',
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      color: HomeColors.textPrimary,
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(height: AppColors.spaceMD),
+                        Text(
+                          'Finding a Courier',
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: HomeColors.violet,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'We are searching for the best courier near you',
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: HomeColors.textMuted,
+                          ),
+                        ),
+                        const SizedBox(height: AppColors.spaceLG),
+                        _LoadingDots(),
+                      ],
+                    ),
+                  ),
+                  const Spacer(),
+                  Padding(
+                    padding: const EdgeInsets.all(AppColors.spaceMD),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: AppColors.buttonHeightMD,
+                      child: OutlinedButton(
+                        onPressed: _isCancelling ? null : _cancelOrder,
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(
+                            color: AppColors.errorColor,
+                            width: 1.5,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.circular(AppColors.radiusLG),
+                          ),
+                        ),
+                        child: _isCancelling
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: AppColors.errorColor,
+                                ),
+                              )
+                            : const Text(
+                                'Cancel Order',
+                                style: TextStyle(
+                                  color: AppColors.errorColor,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
-                              strokeWidth: 3,
-                            ),
-                            const SizedBox(height: AppColors.spaceMD),
-                            Text(
-                              'Looking for courier...',
-                              style: theme.textTheme.bodyMedium,
-                            ),
-                          ],
-                        );
-                      },
+                      ),
                     ),
                   ),
-                  const SizedBox(height: AppColors.spaceMD),
-                  Text(
-                    'Finding a Courier',
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.primaryColor,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'We are searching for the best courier near you',
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: AppColors.spaceLG),
-                  _LoadingDots(),
                 ],
               ),
             ),
-            const Spacer(),
-            Padding(
-              padding: const EdgeInsets.all(AppColors.spaceMD),
-              child: SizedBox(
-                width: double.infinity,
-                height: AppColors.buttonHeightMD,
-                child: OutlinedButton(
-                  onPressed: _isCancelling ? null : _cancelOrder,
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(
-                      color: AppColors.errorColor,
-                      width: 1.5,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppColors.radiusLG),
-                    ),
-                  ),
-                  child: _isCancelling
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: AppColors.errorColor,
-                          ),
-                        )
-                      : const Text(
-                          'Cancel Order',
-                          style: TextStyle(
-                            color: AppColors.errorColor,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                ),
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -368,7 +378,7 @@ class _LoadingDotsState extends State<_LoadingDots>
               width: 10,
               height: 10,
               decoration: BoxDecoration(
-                color: AppColors.primaryColor.withValues(alpha: opacity),
+                color: HomeColors.violet.withValues(alpha: opacity),
                 shape: BoxShape.circle,
               ),
             );

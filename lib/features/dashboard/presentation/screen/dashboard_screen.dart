@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/app/navigation/app_navigator.dart';
+import 'package:hudhud_delivery/app/navigation/fcm_notification_router.dart';
 import 'package:hudhud_delivery/app/navigation/fcm_order_navigation.dart';
+import 'package:hudhud_delivery/app/services/fcm_service.dart';
 import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
 import 'package:hudhud_delivery/controllers/service_accent_controller.dart';
 import 'package:hudhud_delivery/features/guest/utils/guest_sign_in_prompt.dart';
@@ -38,11 +41,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _homeTabActivation.value = _homeTabActivation.value + 1;
       if (!GuestBrowseService().isGuestBrowseMode) {
-        _openPendingFcmOrderIfAny();
-        _openPendingFcmChatIfAny();
+        _handleFcmLaunchNavigation();
         syncDefaultAddressFromApi();
       }
     });
+  }
+
+  Future<void> _handleFcmLaunchNavigation() async {
+    final navKey = AppNavigator.navigatorKey;
+    if (navKey != null) {
+      final initialMessage = await FcmService().getInitialMessage();
+      if (initialMessage != null) {
+        await openNotificationFromFcm(navKey, message: initialMessage);
+      }
+      await flushPendingFcmNavigation(navKey);
+      _openPendingFcmOrderIfAny();
+      _openPendingFcmChatIfAny();
+    } else {
+      _openPendingFcmOrderIfAny();
+      _openPendingFcmChatIfAny();
+    }
+    _applyPendingDashboardTab();
+  }
+
+  void _applyPendingDashboardTab() {
+    final tabIndex = PendingFcmDashboardTab.takePending();
+    if (tabIndex == null) return;
+    if (!mounted) return;
+    setState(() => _selectedIndex = tabIndex.clamp(0, _screens.length - 1));
   }
 
   void _openPendingFcmOrderIfAny() {

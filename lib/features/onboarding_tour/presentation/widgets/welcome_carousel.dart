@@ -49,18 +49,18 @@ class _WelcomeCarouselState extends State<WelcomeCarousel> {
         icon: Icons.waving_hand_rounded,
       ),
       _CarouselSlide(
-        title: l10n.onboardingFoodTitle,
-        description: l10n.onboardingFoodDescription,
-        color: ServiceTabPalette.foodGroceries,
-        icon: Icons.restaurant_rounded,
-        assetPath: 'assets/images/home_service_tabs/food_groceries.png',
-      ),
-      _CarouselSlide(
         title: l10n.onboardingCourierTitle,
         description: l10n.onboardingCourierDescription,
         color: ServiceTabPalette.courier,
         icon: Icons.inventory_2_rounded,
         assetPath: 'assets/images/home_service_tabs/courier.png',
+      ),
+      _CarouselSlide(
+        title: l10n.onboardingFoodTitle,
+        description: l10n.onboardingFoodDescription,
+        color: ServiceTabPalette.foodGroceries,
+        icon: Icons.restaurant_rounded,
+        assetPath: 'assets/images/home_service_tabs/food_groceries.png',
       ),
       _CarouselSlide(
         title: l10n.onboardingTaxiTitle,

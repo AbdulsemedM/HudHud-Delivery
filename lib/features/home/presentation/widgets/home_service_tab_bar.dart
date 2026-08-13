@@ -33,20 +33,20 @@ class HomeServiceTabBar extends StatelessWidget {
 
     final items = <_TabSpec>[
       _TabSpec(
-        mode: HomeServiceMode.foodGroceries,
-        label: l10n.homeTabFood,
-        assetPath: _foodPng,
-        fallbackIcon: Icons.restaurant_rounded,
-        brand: ServiceTabPalette.foodGroceries,
-        unselectedWell: const Color(0xFF3A2418),
-      ),
-      _TabSpec(
         mode: HomeServiceMode.courier,
         label: l10n.homeTabCourier,
         assetPath: _courierPng,
         fallbackIcon: Icons.inventory_2_rounded,
         brand: ServiceTabPalette.courier,
         unselectedWell: const Color(0xFF2A2040),
+      ),
+      _TabSpec(
+        mode: HomeServiceMode.foodGroceries,
+        label: l10n.homeTabFood,
+        assetPath: _foodPng,
+        fallbackIcon: Icons.restaurant_rounded,
+        brand: ServiceTabPalette.foodGroceries,
+        unselectedWell: const Color(0xFF3A2418),
       ),
       _TabSpec(
         mode: HomeServiceMode.taxi,
@@ -93,10 +93,10 @@ class HomeServiceTabBar extends StatelessWidget {
     final keys = tourKeys;
     if (keys == null) return null;
     switch (mode) {
-      case HomeServiceMode.foodGroceries:
-        return keys.foodTabKey;
       case HomeServiceMode.courier:
         return keys.courierTabKey;
+      case HomeServiceMode.foodGroceries:
+        return keys.foodTabKey;
       case HomeServiceMode.taxi:
         return keys.taxiTabKey;
       case HomeServiceMode.handyman:

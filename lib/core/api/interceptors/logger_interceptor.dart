@@ -61,14 +61,9 @@ class LoggerInterceptor extends Interceptor {
 
   String _formatResponseData(dynamic data) {
     if (data == null) return 'null';
-    
+
     try {
-      // If data is too large, truncate it
-      String dataString = data.toString();
-      if (dataString.length > 1000) {
-        return '${dataString.substring(0, 1000)}... (truncated)';
-      }
-      return dataString;
+      return data.toString();
     } catch (e) {
       return 'Error formatting response data: $e';
     }

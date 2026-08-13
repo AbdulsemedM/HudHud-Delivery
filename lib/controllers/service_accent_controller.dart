@@ -4,7 +4,7 @@ import 'package:hudhud_delivery/core/theme/service_tab_palette.dart';
 /// Drives app [ThemeData] primary/accent while the user is on the Home dashboard tab
 /// and a service strip mode is active. Order History / Profile use the default theme.
 class ServiceAccentController extends ChangeNotifier {
-  HomeServiceMode _homeServiceMode = HomeServiceMode.foodGroceries;
+  HomeServiceMode _homeServiceMode = HomeServiceMode.courier;
   int _dashboardIndex = 0;
 
   HomeServiceMode get homeServiceMode => _homeServiceMode;

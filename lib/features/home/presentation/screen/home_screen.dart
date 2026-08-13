@@ -71,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   String _currentLocation = '';
   bool _isLoadingLocation = true;
 
-  HomeServiceMode _serviceMode = HomeServiceMode.foodGroceries;
+  HomeServiceMode _serviceMode = HomeServiceMode.courier;
 
   bool _verificationPromptOpen = false;
   bool _verifyBannerDismissed = false;
@@ -453,8 +453,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   child: IndexedStack(
                     index: _serviceMode.index,
                     children: const [
-                      AllCategoriesScreen(embedded: true),
                       CourierScreen(),
+                      AllCategoriesScreen(embedded: true),
                       TaxiScreen(),
                       HandymanScreen(embedded: true),
                     ],

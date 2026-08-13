@@ -2,8 +2,11 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
+import 'package:hudhud_delivery/core/api/api_service.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/theme/service_tab_palette.dart';
+import 'package:hudhud_delivery/core/utils/snackbar_util.dart';
 import 'package:hudhud_delivery/app/services/location_service.dart';
 import 'package:hudhud_delivery/app/services/geocoding_service.dart';
 import 'package:hudhud_delivery/app/services/startup_location_service.dart';
@@ -14,7 +17,6 @@ import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
 import 'package:hudhud_delivery/app/models/place_result.dart';
 import 'package:hudhud_delivery/features/taxi/data/models/ride_request_result.dart';
 import 'package:hudhud_delivery/features/taxi/data/ride_data_provider.dart';
-import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/widgets/status_chip.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/features/home/presentation/screen/location_search_screen.dart';
@@ -350,6 +352,11 @@ class _TaxiScreenState extends State<TaxiScreen> {
           content: Text(formatRideCancelRefundMessage(refund)),
           backgroundColor: AppColors.successColor,
         ),
+      );
+    } else if (isServiceComingSoonResult(result)) {
+      SnackbarUtil.showComingSoon(
+        context,
+        result['errorMessage']?.toString() ?? 'Ride hailing is coming soon.',
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(

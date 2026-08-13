@@ -9,6 +9,7 @@ import '../../core/api/api_constants.dart';
 import '../../core/utils/phone_util.dart';
 import '../../models/user_model.dart';
 import 'fcm_service.dart';
+import 'fcm_topic_service.dart';
 import 'guest_browse_service.dart';
 
 class AuthService {
@@ -48,9 +49,10 @@ class AuthService {
   // Initialize service - load cached data
   Future<void> initialize() async {
     await _loadCachedData();
-    // Fire-and-forget: send FCM token when restoring session
+    // Fire-and-forget: send FCM token and subscribe to topics when restoring session
     if (_currentUser != null && hasValidToken) {
       _sendFcmTokenToBackend();
+      FcmTopicService().subscribeForCurrentUser();
     }
   }
 
@@ -242,8 +244,9 @@ class AuthService {
 
       await GuestBrowseService().clearGuestBrowseMode();
 
-      // Fire-and-forget: send FCM token to backend
+      // Fire-and-forget: send FCM token to backend and subscribe to topics
       _sendFcmTokenToBackend();
+      FcmTopicService().subscribeForCurrentUser();
     } catch (e) {
       // If storage fails, clear everything to maintain consistency
       await _clearSession();
@@ -290,6 +293,7 @@ class AuthService {
       _currentUser = user;
       await _storeUser(user);
       _sendFcmTokenToBackend();
+      FcmTopicService().subscribeForCurrentUser();
       return user;
     } on ApiException catch (e) {
       if (e.statusCode == 401) {
@@ -369,9 +373,44 @@ class AuthService {
     }
   }
 
+  /// Removes the FCM token from the backend. Fail-open; never throws.
+  Future<void> _removeFcmTokenFromBackend() async {
+    try {
+      final fcmToken = await FcmService().getToken();
+      if (fcmToken == null || fcmToken.isEmpty) return;
+
+      final deviceId = await _getDeviceId();
+      await _apiService.delete(
+        ApiConstants.fcmTokenDelete,
+        data: {
+          'token': fcmToken,
+          if (deviceId != null && deviceId.isNotEmpty) 'device_id': deviceId,
+        },
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('AuthService: removeFcmTokenFromBackend failed: $e');
+      }
+    }
+  }
+
+  Future<void> _cleanupFcmOnLogout() async {
+    await FcmTopicService().unsubscribeAll();
+    await _removeFcmTokenFromBackend();
+    try {
+      await FcmService().deleteToken();
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('AuthService: FCM deleteToken failed: $e');
+      }
+    }
+  }
+
   // Logout user
   Future<Map<String, dynamic>> logout() async {
     try {
+      await _cleanupFcmOnLogout();
+
       // Call logout endpoint if we have a valid token
       if (_currentToken != null) {
         await _apiService.post(ApiConstants.logout);

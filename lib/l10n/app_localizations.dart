@@ -4979,7 +4979,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingWelcomeSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Your city, delivered — food, rides, parcels, and home services in one place.'**
+  /// **'Send parcels across town today — food, rides, and home services are coming soon.'**
   String get onboardingWelcomeSubtitle;
 
   /// No description provided for @onboardingFoodTitle.
@@ -4991,7 +4991,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingFoodDescription.
   ///
   /// In en, this message translates to:
-  /// **'Order meals and groceries from local shops in minutes.'**
+  /// **'Coming soon — order meals and groceries from local shops in minutes.'**
   String get onboardingFoodDescription;
 
   /// No description provided for @onboardingCourierTitle.
@@ -5015,7 +5015,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingTaxiDescription.
   ///
   /// In en, this message translates to:
-  /// **'Book a ride anywhere in the city with a tap.'**
+  /// **'Coming soon — book a ride anywhere in the city with a tap.'**
   String get onboardingTaxiDescription;
 
   /// No description provided for @onboardingHandymanTitle.
@@ -5027,7 +5027,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingHandymanDescription.
   ///
   /// In en, this message translates to:
-  /// **'Book trusted pros for repairs and home services.'**
+  /// **'Coming soon — book trusted pros for repairs and home services.'**
   String get onboardingHandymanDescription;
 
   /// No description provided for @onboardingGetStarted.
@@ -5069,7 +5069,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingSpotlightFoodDescription.
   ///
   /// In en, this message translates to:
-  /// **'Browse restaurants and shops to order food and essentials.'**
+  /// **'Coming soon — browse restaurants and shops to order food and essentials.'**
   String get onboardingSpotlightFoodDescription;
 
   /// No description provided for @onboardingSpotlightCourierTitle.
@@ -5081,7 +5081,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingSpotlightCourierDescription.
   ///
   /// In en, this message translates to:
-  /// **'Send parcels and documents with on-demand pickup.'**
+  /// **'Send parcels and documents with on-demand pickup — available now.'**
   String get onboardingSpotlightCourierDescription;
 
   /// No description provided for @onboardingSpotlightTaxiTitle.
@@ -5093,7 +5093,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingSpotlightTaxiDescription.
   ///
   /// In en, this message translates to:
-  /// **'Request a ride and track your driver in real time.'**
+  /// **'Coming soon — request a ride and track your driver in real time.'**
   String get onboardingSpotlightTaxiDescription;
 
   /// No description provided for @onboardingSpotlightHandymanTitle.
@@ -5105,7 +5105,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingSpotlightHandymanDescription.
   ///
   /// In en, this message translates to:
-  /// **'Find skilled help for home repairs and maintenance.'**
+  /// **'Coming soon — find skilled help for home repairs and maintenance.'**
   String get onboardingSpotlightHandymanDescription;
 
   /// No description provided for @onboardingSpotlightDoneTitle.
@@ -5117,7 +5117,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingSpotlightDoneDescription.
   ///
   /// In en, this message translates to:
-  /// **'Switch between services anytime using the tabs above. Enjoy HudHud!'**
+  /// **'Courier is ready now. Food, Taxi, and Handyman are coming soon — switch tabs anytime. Enjoy HudHud!'**
   String get onboardingSpotlightDoneDescription;
 
   /// No description provided for @onboardingDebugReplayTour.

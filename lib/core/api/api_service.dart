@@ -216,6 +216,14 @@ class ApiService {
         return ApiException('Bad gateway: Server is temporarily unavailable',
             statusCode: statusCode, data: payload, code: code);
       case 503:
+        if (code == ApiException.serviceComingSoonCode) {
+          return ApiException(
+            message.isNotEmpty ? message : 'Coming soon',
+            statusCode: statusCode,
+            data: payload,
+            code: code,
+          );
+        }
         return ApiException('Service unavailable: Please try again later',
             statusCode: statusCode, data: payload, code: code);
       default:
@@ -227,6 +235,8 @@ class ApiService {
 
 // Custom API Exception class
 class ApiException implements Exception {
+  static const String serviceComingSoonCode = 'SERVICE_COMING_SOON';
+
   final String message;
   final int? statusCode;
   final dynamic data;
@@ -234,10 +244,19 @@ class ApiException implements Exception {
 
   ApiException(this.message, {this.statusCode, this.data, this.code});
 
+  bool get isServiceComingSoon =>
+      statusCode == 503 && code == serviceComingSoonCode;
+
   @override
   String toString() {
     return 'ApiException: $message${statusCode != null ? ' (Status: $statusCode)' : ''}';
   }
+}
+
+/// True when a data-provider style result map is a gated "coming soon" service.
+bool isServiceComingSoonResult(Map<String, dynamic> result) {
+  return result['statusCode'] == 503 &&
+      result['code'] == ApiException.serviceComingSoonCode;
 }
 
 /// Strips Exception/ApiException prefixes for snackbars and bloc error states.

@@ -10,6 +10,8 @@ import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/widgets/status_chip.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
+import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
+import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import '../../../home/presentation/widgets/home_widget.dart';
 
 class DeliveryTrackingScreen extends StatefulWidget {
@@ -275,261 +277,291 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
           points: _routePolylinePoints != null && _routePolylinePoints!.length >= 2
               ? _routePolylinePoints!.map(_toG).toList()
               : [_toG(widget.pickupPosition!), _toG(widget.deliveryPosition!)],
-          color: AppColors.primaryColor,
+          color: HomeColors.violet,
           width: 4,
         ),
       );
     }
 
-    final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final borderColor =
-        isDark ? const Color(0xFF2A2A2A) : const Color(0xFFEEEEEE);
     final statusText = _trackData?['current_status']?.toString() ??
         _trackData?['status']?.toString() ??
         'in_progress';
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: Stack(
-        children: [
-          gmaps.GoogleMap(
-            initialCameraPosition: gmaps.CameraPosition(
-              target: _toG(mapCenter),
-              zoom: 13.0,
-            ),
-            markers: markers,
-            polylines: polylines,
-            onMapCreated: (controller) {
-              _mapController = controller;
-              _fitBounds();
-            },
-          ),
-          // Back button
-          Positioned(
-            top: 40,
-            left: 16,
-            child: Container(
-              decoration: BoxDecoration(
-                color: colorScheme.surface,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: colorScheme.shadow.withValues(alpha: 0.2),
-                    blurRadius: 4,
+    return CourierTheme.wrap(
+      context,
+      child: Builder(
+        builder: (context) {
+          const borderColor = HomeColors.border;
+          return Scaffold(
+            backgroundColor: HomeColors.background,
+            body: Stack(
+              children: [
+                gmaps.GoogleMap(
+                  initialCameraPosition: gmaps.CameraPosition(
+                    target: _toG(mapCenter),
+                    zoom: 13.0,
                   ),
-                ],
-              ),
-              child: IconButton(
-                icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ),
-          ),
-          // Status badge
-          Positioned(
-            top: 40,
-            right: 16,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-              decoration: BoxDecoration(
-                color: colorScheme.surface,
-                borderRadius: BorderRadius.circular(AppColors.radiusFull),
-                border: Border.all(color: borderColor),
-                boxShadow: [
-                  BoxShadow(
-                    color: colorScheme.shadow.withValues(alpha: 0.15),
-                    blurRadius: 4,
-                  ),
-                ],
-              ),
-              child: StatusChip(status: statusText),
-            ),
-          ),
-          // Bottom Sheet Modal
-          DraggableScrollableSheet(
-            initialChildSize: 0.5,
-            minChildSize: 0.35,
-            maxChildSize: 0.85,
-            builder: (context, scrollController) {
-              return Container(
-                decoration: BoxDecoration(
-                  color: colorScheme.surface,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(AppColors.radiusLG),
-                    topRight: Radius.circular(AppColors.radiusLG),
-                  ),
-                  border: Border(
-                    top: BorderSide(color: borderColor),
-                    left: BorderSide(color: borderColor),
-                    right: BorderSide(color: borderColor),
+                  markers: markers,
+                  polylines: polylines,
+                  onMapCreated: (controller) {
+                    _mapController = controller;
+                    _fitBounds();
+                  },
+                ),
+                // Back button
+                Positioned(
+                  top: 40,
+                  left: 16,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: HomeColors.surfaceElevated,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.25),
+                          blurRadius: 4,
+                        ),
+                      ],
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back,
+                          color: HomeColors.textPrimary),
+                      onPressed: () => Navigator.pop(context),
+                    ),
                   ),
                 ),
-                child: Column(
-                  children: [
-                    // Drag handle
-                    Container(
-                      margin: const EdgeInsets.only(top: 8),
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: colorScheme.outlineVariant,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
+                // Status badge
+                Positioned(
+                  top: 40,
+                  right: 16,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: HomeColors.surfaceElevated,
+                      borderRadius: BorderRadius.circular(AppColors.radiusFull),
+                      border: Border.all(color: borderColor),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.15),
+                          blurRadius: 4,
+                        ),
+                      ],
                     ),
-                    // Current Status Banner
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(AppColors.spaceMD),
+                    child: StatusChip(status: statusText),
+                  ),
+                ),
+                // Bottom Sheet Modal
+                DraggableScrollableSheet(
+                  initialChildSize: 0.5,
+                  minChildSize: 0.35,
+                  maxChildSize: 0.85,
+                  builder: (context, scrollController) {
+                    return Container(
                       decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            AppColors.primaryColor,
-                            AppColors.primaryDarkColor,
-                          ],
+                        color: HomeColors.surface,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(AppColors.radiusLG),
+                          topRight: Radius.circular(AppColors.radiusLG),
                         ),
-                        borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(AppColors.radiusLG),
+                        border: Border(
+                          top: BorderSide(color: borderColor),
+                          left: BorderSide(color: borderColor),
+                          right: BorderSide(color: borderColor),
                         ),
                       ),
-                      child: Row(
+                      child: Column(
                         children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                          // Drag handle
+                          Container(
+                            margin: const EdgeInsets.only(top: 8),
+                            width: 40,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: HomeColors.border,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                          // Current Status Banner
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(AppColors.spaceMD),
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  HomeColors.violet,
+                                  Color(0xFF6F56E8),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(AppColors.radiusLG),
+                              ),
+                            ),
+                            child: Row(
                               children: [
-                                Text(
-                                  (_trackData?['pickup_location']
-                                              ?.toString() ??
-                                          widget.pickupLocation)
-                                      .length >
-                                      30
-                                      ? '${(_trackData?['pickup_location']?.toString() ?? widget.pickupLocation).substring(0, 30)}...'
-                                      : (_trackData?['pickup_location']
-                                              ?.toString() ??
-                                          widget.pickupLocation),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        (_trackData?['pickup_location']
+                                                        ?.toString() ??
+                                                    widget.pickupLocation)
+                                                .length >
+                                            30
+                                            ? '${(_trackData?['pickup_location']?.toString() ?? widget.pickupLocation).substring(0, 30)}...'
+                                            : (_trackData?['pickup_location']
+                                                    ?.toString() ??
+                                                widget.pickupLocation),
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        _trackData?['current_status']
+                                                ?.toString() ??
+                                            _trackData?[
+                                                    'estimated_delivery_time']
+                                                ?.toString() ??
+                                            'Delivery in progress',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  _trackData?['current_status']?.toString() ??
-                                      _trackData?['estimated_delivery_time']
-                                          ?.toString() ??
-                                      'Delivery in progress',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color:
+                                        Colors.white.withValues(alpha: 0.2),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: IconButton(
+                                    icon: const Icon(Icons.send,
+                                        color: Colors.white),
+                                    onPressed: () {
+                                      // TODO: Implement send action
+                                    },
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.2),
-                              shape: BoxShape.circle,
-                            ),
-                            child: IconButton(
-                              icon: const Icon(Icons.send, color: Colors.white),
-                              onPressed: () {
-                                // TODO: Implement send action
-                              },
-                            ),
+                          // Content
+                          Expanded(
+                            child: _isLoadingTrack
+                                ? const Padding(
+                                    padding:
+                                        EdgeInsets.all(AppColors.spaceMD),
+                                    child: ShimmerListView(itemCount: 3),
+                                  )
+                                : _trackError != null
+                                    ? Center(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(24),
+                                          child: Text(
+                                            _trackError!,
+                                            style: const TextStyle(
+                                              color: HomeColors.textMuted,
+                                              fontSize: 14,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                      )
+                                    : SingleChildScrollView(
+                                        controller: scrollController,
+                                        padding: const EdgeInsets.all(20),
+                                        child: Column(
+                                          children: [
+                                            // Driver Information (only when driver assigned)
+                                            if (_trackData?['driver'] !=
+                                                null) ...[
+                                              _DriverCard(
+                                                driverName: _trackData![
+                                                            'driver']
+                                                        is Map<String,
+                                                            dynamic>
+                                                    ? ((_trackData![
+                                                                    'driver']
+                                                                as Map<
+                                                                    String,
+                                                                    dynamic>)[
+                                                            'name']
+                                                        ?.toString() ??
+                                                        'Driver')
+                                                    : _trackData!['driver']
+                                                        .toString(),
+                                                borderColor: borderColor,
+                                                onCall: () {
+                                                  // TODO: Implement call
+                                                },
+                                                onMessage: () {
+                                                  // TODO: Implement message
+                                                },
+                                              ),
+                                              const SizedBox(height: 16),
+                                            ],
+                                            // Review Order
+                                            _ReviewOrderCard(
+                                              courierNumber: _trackData?[
+                                                          'tracking_number']
+                                                      ?.toString() ??
+                                                  (widget.deliveryId != null
+                                                      ? '#DEL-${widget.deliveryId}'
+                                                      : '—'),
+                                              from: _trackData?[
+                                                          'pickup_location']
+                                                      ?.toString() ??
+                                                  widget.pickupLocation,
+                                              to: _trackData?[
+                                                          'dropoff_location']
+                                                      ?.toString() ??
+                                                  widget.deliveryLocation,
+                                              createdDate: _formatTimestamp(
+                                                  _trackData?[
+                                                      'last_updated']),
+                                              borderColor: borderColor,
+                                            ),
+                                            const SizedBox(height: 16),
+                                            // Tracking Order (timeline from API)
+                                            _TrackingOrderCard(
+                                              timeline: _trackData?[
+                                                          'timeline'] !=
+                                                      null
+                                                  ? List<
+                                                      Map<String,
+                                                          dynamic>>.from(
+                                                      (_trackData![
+                                                                  'timeline']
+                                                              as List)
+                                                          .map((e) => e is Map<
+                                                                  String,
+                                                                  dynamic>
+                                                              ? e
+                                                              : <String,
+                                                                  dynamic>{}))
+                                                  : null,
+                                              borderColor: borderColor,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                           ),
                         ],
                       ),
-                    ),
-                    // Content
-                    Expanded(
-                      child: _isLoadingTrack
-                          ? const Padding(
-                              padding: EdgeInsets.all(AppColors.spaceMD),
-                              child: ShimmerListView(itemCount: 3),
-                            )
-                          : _trackError != null
-                              ? Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(24),
-                                    child: Text(
-                                      _trackError!,
-                                      style: TextStyle(
-                                        color: colorScheme.onSurfaceVariant,
-                                        fontSize: 14,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-                                )
-                              : SingleChildScrollView(
-                              controller: scrollController,
-                              padding: const EdgeInsets.all(20),
-                              child: Column(
-                                children: [
-                                  // Driver Information (only when driver assigned)
-                                  if (_trackData?['driver'] != null) ...[
-                                    _DriverCard(
-                                      driverName: _trackData!['driver']
-                                              is Map<String, dynamic>
-                                          ? ((_trackData!['driver']
-                                                      as Map<String, dynamic>)[
-                                                  'name']
-                                              ?.toString() ??
-                                              'Driver')
-                                          : _trackData!['driver'].toString(),
-                                      borderColor: borderColor,
-                                      onCall: () {
-                                        // TODO: Implement call
-                                      },
-                                      onMessage: () {
-                                        // TODO: Implement message
-                                      },
-                                    ),
-                                    const SizedBox(height: 16),
-                                  ],
-                                  // Review Order
-                                  _ReviewOrderCard(
-                                    courierNumber: _trackData?[
-                                                'tracking_number']
-                                            ?.toString() ??
-                                        (widget.deliveryId != null
-                                            ? '#DEL-${widget.deliveryId}'
-                                            : '—'),
-                                    from: _trackData?['pickup_location']
-                                            ?.toString() ??
-                                        widget.pickupLocation,
-                                    to: _trackData?['dropoff_location']
-                                            ?.toString() ??
-                                        widget.deliveryLocation,
-                                    createdDate: _formatTimestamp(
-                                        _trackData?['last_updated']),
-                                    borderColor: borderColor,
-                                  ),
-                                  const SizedBox(height: 16),
-                                  // Tracking Order (timeline from API)
-                                  _TrackingOrderCard(
-                                    timeline: _trackData?['timeline'] != null
-                                        ? List<Map<String, dynamic>>.from(
-                                            (_trackData!['timeline'] as List)
-                                                .map((e) => e
-                                                    is Map<String, dynamic>
-                                                    ? e
-                                                    : <String, dynamic>{}))
-                                        : null,
-                                    borderColor: borderColor,
-                                  ),
-                                ],
-                              ),
-                            ),
-                    ),
-                  ],
+                    );
+                  },
                 ),
-              );
-            },
-          ),
-        ],
+              ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -550,24 +582,23 @@ class _DriverCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(AppColors.spaceMD),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
+        color: HomeColors.surfaceElevated,
         borderRadius: BorderRadius.circular(AppColors.radiusLG),
         border: Border.all(color: borderColor),
       ),
       child: Row(
         children: [
           // Profile Picture
-          CircleAvatar(
+          const CircleAvatar(
             radius: 30,
-            backgroundColor: colorScheme.surfaceContainerHighest,
+            backgroundColor: HomeColors.surface,
             child: Icon(
               Icons.person,
               size: 30,
-              color: colorScheme.onSurfaceVariant,
+              color: HomeColors.textMuted,
             ),
           ),
           const SizedBox(width: 16),
@@ -578,18 +609,18 @@ class _DriverCard extends StatelessWidget {
               children: [
                 Text(
                   driverName,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: colorScheme.onSurface,
+                    color: HomeColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
+                const Text(
                   'Driver',
                   style: TextStyle(
                     fontSize: 14,
-                    color: colorScheme.onSurfaceVariant,
+                    color: HomeColors.textMuted,
                   ),
                 ),
               ],
@@ -599,11 +630,12 @@ class _DriverCard extends StatelessWidget {
           IconButton(
             icon: Container(
               padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest,
+              decoration: const BoxDecoration(
+                color: HomeColors.surface,
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.chat_bubble_outline, size: 20, color: colorScheme.onSurface),
+              child: const Icon(Icons.chat_bubble_outline,
+                  size: 20, color: HomeColors.textPrimary),
             ),
             onPressed: onMessage,
           ),
@@ -611,11 +643,12 @@ class _DriverCard extends StatelessWidget {
           IconButton(
             icon: Container(
               padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest,
+              decoration: const BoxDecoration(
+                color: HomeColors.surface,
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.phone, size: 20, color: colorScheme.onSurface),
+              child: const Icon(Icons.phone,
+                  size: 20, color: HomeColors.textPrimary),
             ),
             onPressed: onCall,
           ),
@@ -642,23 +675,22 @@ class _ReviewOrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(AppColors.spaceMD),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
+        color: HomeColors.surfaceElevated,
         borderRadius: BorderRadius.circular(AppColors.radiusLG),
         border: Border.all(color: borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Review Order',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: colorScheme.onSurface,
+              color: HomeColors.textPrimary,
             ),
           ),
           const SizedBox(height: 16),
@@ -707,11 +739,10 @@ class _TrackingOrderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = timeline ?? [];
-    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(AppColors.spaceMD),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
+        color: HomeColors.surfaceElevated,
         borderRadius: BorderRadius.circular(AppColors.radiusLG),
         border: Border.all(color: borderColor),
       ),
@@ -722,6 +753,7 @@ class _TrackingOrderCard extends StatelessWidget {
             'Tracking Order',
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w600,
+                  color: HomeColors.textPrimary,
                 ),
           ),
           const SizedBox(height: 16),
@@ -733,7 +765,7 @@ class _TrackingOrderCard extends StatelessWidget {
                 Text(
                   'No tracking updates yet',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
+                        color: HomeColors.textMuted,
                       ),
                 ),
               ],
@@ -777,8 +809,8 @@ class _TrackingItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color dotColor = Theme.of(context).colorScheme.onSurfaceVariant;
-    if (isActive) dotColor = AppColors.primaryColor;
+    Color dotColor = HomeColors.textMuted;
+    if (isActive) dotColor = HomeColors.violet;
     if (isCompleted) dotColor = AppColors.delivered;
 
     return Row(
@@ -801,13 +833,14 @@ class _TrackingItem extends StatelessWidget {
                 title,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                      color: HomeColors.textPrimary,
                     ),
               ),
               const SizedBox(height: 4),
               Text(
                 date,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      color: HomeColors.textMuted,
                     ),
               ),
             ],
@@ -829,7 +862,6 @@ class _DetailItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -838,7 +870,7 @@ class _DetailItem extends StatelessWidget {
           child: Text(
             label,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: scheme.onSurfaceVariant,
+                  color: HomeColors.textMuted,
                 ),
           ),
         ),
@@ -847,6 +879,7 @@ class _DetailItem extends StatelessWidget {
             value,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w500,
+                  color: HomeColors.textPrimary,
                 ),
           ),
         ),

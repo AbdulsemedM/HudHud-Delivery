@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/utils/snackbar_util.dart';
 import 'package:hudhud_delivery/core/widgets/status_chip.dart';
 import 'package:hudhud_delivery/features/taxi/data/models/ride_request_result.dart';
 import 'package:hudhud_delivery/features/taxi/data/ride_data_provider.dart';
@@ -229,6 +231,11 @@ class _FindingDriverScreenState extends State<FindingDriverScreen> {
         ),
       );
       Navigator.pop(context);
+    } else if (isServiceComingSoonResult(result)) {
+      SnackbarUtil.showComingSoon(
+        context,
+        result['errorMessage']?.toString() ?? 'Ride hailing is coming soon.',
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

@@ -27,6 +27,8 @@ class ApiConstants {
 
   // FCM endpoints
   static const String fcmToken = 'fcm/token';
+  /// DELETE body: `token`, optional `device_id`.
+  static const String fcmTokenDelete = 'fcm/token';
 
   // User endpoints
   static const String users = '/users';
@@ -128,8 +130,8 @@ class ApiConstants {
   static const String userRidesActive = 'user/rides/active';
   /// Legacy driver cancel path (kept for compatibility).
   static const String rideCancel = 'driver/services/ride/cancel';
-  /// Customer cancel: POST /api/services/ride/{id}/cancel
-  static const String rideCancelById = 'services/ride/{id}/cancel';
+  /// Customer cancel: POST /api/services/ride/cancel (ride_id in body)
+  static const String rideCancelById = 'services/ride/cancel';
   static const String deliveryTrack = 'services/delivery/track/{id}';
   static const String userDeliveries = 'user/deliveries';
   static const String userDeliveryDetails = 'user/deliveries/{id}';

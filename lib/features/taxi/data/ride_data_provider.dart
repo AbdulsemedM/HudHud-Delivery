@@ -5,6 +5,15 @@ import 'package:hudhud_delivery/core/api/api_service.dart';
 class RideDataProvider {
   final ApiService apiService = ApiService.instance;
 
+  Map<String, dynamic> _errorResult(ApiException apiException) {
+    return {
+      'statusCode': apiException.statusCode,
+      'data': apiException.data,
+      'errorMessage': apiException.message,
+      'code': apiException.code,
+    };
+  }
+
   /// POST /api/services/ride/estimate
   /// Returns estimated distance, duration, and fare for a ride
   Future<Map<String, dynamic>> getRideEstimate({
@@ -36,15 +45,17 @@ class RideDataProvider {
         'statusCode': response.statusCode,
         'data': response.data,
         'errorMessage': null,
+        'code': null,
       };
     } on ApiException catch (apiException) {
-      return {
-        'statusCode': apiException.statusCode,
-        'data': null,
-        'errorMessage': apiException.message,
-      };
+      return _errorResult(apiException);
     } on Exception catch (e) {
-      return {'statusCode': 500, 'data': null, 'errorMessage': e.toString()};
+      return {
+        'statusCode': 500,
+        'data': null,
+        'errorMessage': e.toString(),
+        'code': null,
+      };
     }
   }
 
@@ -106,15 +117,17 @@ class RideDataProvider {
         'statusCode': response.statusCode,
         'data': response.data,
         'errorMessage': null,
+        'code': null,
       };
     } on ApiException catch (apiException) {
-      return {
-        'statusCode': apiException.statusCode,
-        'data': null,
-        'errorMessage': apiException.message,
-      };
+      return _errorResult(apiException);
     } on Exception catch (e) {
-      return {'statusCode': 500, 'data': null, 'errorMessage': e.toString()};
+      return {
+        'statusCode': 500,
+        'data': null,
+        'errorMessage': e.toString(),
+        'code': null,
+      };
     }
   }
 
@@ -141,32 +154,31 @@ class RideDataProvider {
         'statusCode': response.statusCode,
         'data': response.data,
         'errorMessage': null,
+        'code': null,
       };
     } on ApiException catch (apiException) {
-      return {
-        'statusCode': apiException.statusCode,
-        'data': null,
-        'errorMessage': apiException.message,
-      };
+      return _errorResult(apiException);
     } on Exception catch (e) {
-      return {'statusCode': 500, 'data': null, 'errorMessage': e.toString()};
+      return {
+        'statusCode': 500,
+        'data': null,
+        'errorMessage': e.toString(),
+        'code': null,
+      };
     }
   }
 
-  /// POST /api/services/ride/{id}/cancel
-  /// Cancels a ride request (customer side).
+  /// POST /api/services/ride/cancel
+  /// Cancels a ride request (customer side). Send ride_id in the body.
   Future<Map<String, dynamic>> cancelRide({
     required int rideId,
     String cancellationReason = 'Changed my mind',
   }) async {
     try {
-      final path = ApiConstants.rideCancelById.replaceAll(
-        '{id}',
-        rideId.toString(),
-      );
       final response = await apiService.post(
-        '${ApiConstants.baseUrl}$path',
+        '${ApiConstants.baseUrl}${ApiConstants.rideCancelById}',
         data: {
+          'ride_id': rideId,
           'cancellation_reason': cancellationReason,
           'cancelled_by': 'user',
         },
@@ -176,15 +188,17 @@ class RideDataProvider {
         'statusCode': response.statusCode,
         'data': response.data,
         'errorMessage': null,
+        'code': null,
       };
     } on ApiException catch (apiException) {
-      return {
-        'statusCode': apiException.statusCode,
-        'data': null,
-        'errorMessage': apiException.message,
-      };
+      return _errorResult(apiException);
     } on Exception catch (e) {
-      return {'statusCode': 500, 'data': null, 'errorMessage': e.toString()};
+      return {
+        'statusCode': 500,
+        'data': null,
+        'errorMessage': e.toString(),
+        'code': null,
+      };
     }
   }
 
@@ -207,6 +221,7 @@ class RideDataProvider {
           'statusCode': 404,
           'data': null,
           'errorMessage': null,
+          'code': null,
         };
       }
 
@@ -214,15 +229,17 @@ class RideDataProvider {
         'statusCode': response.statusCode,
         'data': response.data,
         'errorMessage': null,
+        'code': null,
       };
     } on ApiException catch (apiException) {
-      return {
-        'statusCode': apiException.statusCode,
-        'data': null,
-        'errorMessage': apiException.message,
-      };
+      return _errorResult(apiException);
     } on Exception catch (e) {
-      return {'statusCode': 500, 'data': null, 'errorMessage': e.toString()};
+      return {
+        'statusCode': 500,
+        'data': null,
+        'errorMessage': e.toString(),
+        'code': null,
+      };
     }
   }
 }

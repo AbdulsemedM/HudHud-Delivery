@@ -10,6 +10,7 @@ const Set<String> kKnownApiErrorCodes = {
   'ride_not_found',
   'service_not_found',
   'delivery_not_found',
+  'SERVICE_COMING_SOON',
 };
 
 /// Structured parse of Laravel-style / payment API error envelopes.

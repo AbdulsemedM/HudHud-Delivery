@@ -7,6 +7,8 @@ import 'package:hudhud_delivery/app/services/location_service.dart';
 import 'package:hudhud_delivery/app/services/geocoding_service.dart';
 import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
+import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
+import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import '../../../home/presentation/screen/location_search_screen.dart';
 import 'package_details_screen.dart';
 
@@ -124,8 +126,11 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
     final result = await Navigator.push<Map<String, dynamic>>(
       context,
       MaterialPageRoute(
-        builder: (context) => LocationSearchScreen(
-          currentLocation: _pickupLocation,
+        builder: (context) => CourierTheme.wrap(
+          context,
+          child: LocationSearchScreen(
+            currentLocation: _pickupLocation,
+          ),
         ),
       ),
     );
@@ -158,8 +163,11 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
     final result = await Navigator.push<Map<String, dynamic>>(
       context,
       MaterialPageRoute(
-        builder: (context) => LocationSearchScreen(
-          currentLocation: _pickupLocation,
+        builder: (context) => CourierTheme.wrap(
+          context,
+          child: LocationSearchScreen(
+            currentLocation: _pickupLocation,
+          ),
         ),
       ),
     );
@@ -353,468 +361,511 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final topPad = MediaQuery.paddingOf(context).top;
-    const initialSheetSize = 0.55;
+    return CourierTheme.wrap(
+      context,
+      child: Builder(
+        builder: (context) {
+          final l10n = context.l10n;
+          final theme = Theme.of(context);
+          final colorScheme = theme.colorScheme;
+          final topPad = MediaQuery.paddingOf(context).top;
+          const initialSheetSize = 0.55;
 
-    return Scaffold(
-      backgroundColor: colorScheme.surface,
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: _buildMapOrFallback(context),
-          ),
-          Positioned(
-            top: topPad + 8,
-            left: 16,
-            child: Container(
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHigh,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: colorScheme.shadow.withValues(alpha: 0.15),
-                    blurRadius: 4,
-                  ),
-                ],
-              ),
-              child: IconButton(
-                icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ),
-          ),
-          Positioned(
-            top: topPad + 8,
-            right: 16,
-            child: FloatingActionButton(
-              heroTag: 'schedule_delivery_my_location',
-              mini: true,
-              backgroundColor: colorScheme.surfaceContainerHigh,
-              onPressed: () async {
-                await _getCurrentLocation();
-                if (_pickupPosition != null && mounted) {
-                  _mapController?.moveCamera(
-                    gmaps.CameraUpdate.newLatLngZoom(
-                      _toG(_pickupPosition!),
-                      15,
+          return Scaffold(
+            backgroundColor: HomeColors.background,
+            body: Stack(
+              children: [
+                Positioned.fill(
+                  child: _buildMapOrFallback(context),
+                ),
+                Positioned(
+                  top: topPad + 8,
+                  left: 16,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: HomeColors.surfaceElevated,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.25),
+                          blurRadius: 4,
+                        ),
+                      ],
                     ),
-                  );
-                }
-              },
-              child: Icon(
-                Icons.my_location,
-                color: _isLoadingLocation
-                    ? colorScheme.onSurfaceVariant
-                    : colorScheme.primary,
-              ),
-            ),
-          ),
-          DraggableScrollableSheet(
-            initialChildSize: initialSheetSize,
-            minChildSize: 0.35,
-            maxChildSize: 0.9,
-            builder: (context, scrollController) {
-              return Container(
-                decoration: BoxDecoration(
-                  color: colorScheme.surface,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(AppColors.radiusLG),
-                    topRight: Radius.circular(AppColors.radiusLG),
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back,
+                          color: HomeColors.textPrimary),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
                   ),
                 ),
-                child: Column(
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.only(top: 8),
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: colorScheme.outlineVariant,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
+                Positioned(
+                  top: topPad + 8,
+                  right: 16,
+                  child: FloatingActionButton(
+                    heroTag: 'schedule_delivery_my_location',
+                    mini: true,
+                    backgroundColor: HomeColors.surfaceElevated,
+                    onPressed: () async {
+                      await _getCurrentLocation();
+                      if (_pickupPosition != null && mounted) {
+                        _mapController?.moveCamera(
+                          gmaps.CameraUpdate.newLatLngZoom(
+                            _toG(_pickupPosition!),
+                            15,
+                          ),
+                        );
+                      }
+                    },
+                    child: Icon(
+                      Icons.my_location,
+                      color: _isLoadingLocation
+                          ? HomeColors.textMuted
+                          : HomeColors.violet,
                     ),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        controller: scrollController,
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              l10n.courierScheduleTitle,
-                              style: theme.textTheme.headlineSmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: colorScheme.onSurface,
-                                  ) ??
-                                  TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                    color: colorScheme.onSurface,
-                                  ),
+                  ),
+                ),
+                DraggableScrollableSheet(
+                  initialChildSize: initialSheetSize,
+                  minChildSize: 0.35,
+                  maxChildSize: 0.9,
+                  builder: (context, scrollController) {
+                    return Container(
+                      decoration: const BoxDecoration(
+                        color: HomeColors.surface,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(AppColors.radiusLG),
+                          topRight: Radius.circular(AppColors.radiusLG),
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          Container(
+                            margin: const EdgeInsets.only(top: 8),
+                            width: 40,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: HomeColors.border,
+                              borderRadius: BorderRadius.circular(2),
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              l10n.courierScheduleSubtitle,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-                            _LocationField(
-                              label: l10n.pickupLocationLabel,
-                              value: _isLoadingLocation
-                                  ? l10n.locationGetting
-                                  : (_pickupResolveFailed
-                                      ? l10n.locationUnable
-                                      : (_pickupLocation.isEmpty
-                                          ? l10n.tapToSelectPickup
-                                          : _pickupLocation)),
-                              icon: Icons.location_on,
-                              iconColor: colorScheme.error,
-                              isReadOnly: false,
-                              onTap: _selectPickupLocation,
-                            ),
-                            const SizedBox(height: 16),
-                            _LocationField(
-                              label: l10n.deliveryLocationLabel,
-                              value: _deliveryLocation.isEmpty
-                                  ? l10n.tapToSelectDelivery
-                                  : _deliveryLocation,
-                              icon: Icons.location_on,
-                              iconColor: colorScheme.primary,
-                              isReadOnly: false,
-                              onTap: _selectDeliveryLocation,
-                            ),
-                            const SizedBox(height: 16),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        l10n.labelDate,
-                                        style: theme.textTheme.labelLarge
+                          ),
+                          Expanded(
+                            child: SingleChildScrollView(
+                              controller: scrollController,
+                              padding: const EdgeInsets.all(20),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    l10n.courierScheduleTitle,
+                                    style: theme.textTheme.headlineSmall
                                             ?.copyWith(
-                                          color: colorScheme.onSurface,
+                                          fontWeight: FontWeight.bold,
+                                          color: HomeColors.textPrimary,
+                                        ) ??
+                                        const TextStyle(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold,
+                                          color: HomeColors.textPrimary,
                                         ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      GestureDetector(
-                                        onTap: _selectDate,
-                                        child: Container(
-                                          padding: const EdgeInsets.all(16),
-                                          decoration: BoxDecoration(
-                                            color: colorScheme
-                                                .surfaceContainerHighest,
-                                            borderRadius:
-                                                BorderRadius.circular(12),
-                                            border: Border.all(
-                                              color: colorScheme.outlineVariant,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    l10n.courierScheduleSubtitle,
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      color: HomeColors.textMuted,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 24),
+                                  _LocationField(
+                                    label: l10n.pickupLocationLabel,
+                                    value: _isLoadingLocation
+                                        ? l10n.locationGetting
+                                        : (_pickupResolveFailed
+                                            ? l10n.locationUnable
+                                            : (_pickupLocation.isEmpty
+                                                ? l10n.tapToSelectPickup
+                                                : _pickupLocation)),
+                                    icon: Icons.location_on,
+                                    iconColor: colorScheme.error,
+                                    isReadOnly: false,
+                                    onTap: _selectPickupLocation,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  _LocationField(
+                                    label: l10n.deliveryLocationLabel,
+                                    value: _deliveryLocation.isEmpty
+                                        ? l10n.tapToSelectDelivery
+                                        : _deliveryLocation,
+                                    icon: Icons.location_on,
+                                    iconColor: HomeColors.violet,
+                                    isReadOnly: false,
+                                    onTap: _selectDeliveryLocation,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              l10n.labelDate,
+                                              style: theme.textTheme.labelLarge
+                                                  ?.copyWith(
+                                                color: HomeColors.textPrimary,
+                                              ),
                                             ),
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              Expanded(
-                                                child: Text(
-                                                  _dateController.text.isEmpty
-                                                      ? l10n.hintDateFormat
-                                                      : _dateController.text,
-                                                  style: TextStyle(
-                                                    fontSize: 14,
-                                                    color: _dateController
-                                                            .text.isEmpty
-                                                        ? colorScheme
-                                                            .onSurfaceVariant
-                                                        : colorScheme
-                                                            .onSurface,
-                                                  ),
-                                                ),
-                                              ),
-                                              Icon(
-                                                Icons.calendar_today,
-                                                size: 20,
-                                                color: colorScheme
-                                                    .onSurfaceVariant,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        l10n.labelTime,
-                                        style: theme.textTheme.labelLarge
-                                            ?.copyWith(
-                                          color: colorScheme.onSurface,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: GestureDetector(
-                                              onTap: _selectTime,
+                                            const SizedBox(height: 8),
+                                            GestureDetector(
+                                              onTap: _selectDate,
                                               child: Container(
                                                 padding:
                                                     const EdgeInsets.all(16),
                                                 decoration: BoxDecoration(
-                                                  color: colorScheme
-                                                      .surfaceContainerHighest,
+                                                  color: HomeColors
+                                                      .surfaceElevated,
                                                   borderRadius:
                                                       BorderRadius.circular(12),
                                                   border: Border.all(
-                                                    color: colorScheme
-                                                        .outlineVariant,
+                                                    color: HomeColors.border,
                                                   ),
                                                 ),
-                                                child: Text(
-                                                  _timeController.text.isEmpty
-                                                      ? l10n.hintTimeFormat
-                                                      : _timeController.text,
-                                                  style: TextStyle(
-                                                    fontSize: 14,
-                                                    color: _timeController
-                                                            .text.isEmpty
-                                                        ? colorScheme
-                                                            .onSurfaceVariant
-                                                        : colorScheme
-                                                            .onSurface,
-                                                  ),
+                                                child: Row(
+                                                  children: [
+                                                    Expanded(
+                                                      child: Text(
+                                                        _dateController
+                                                                .text.isEmpty
+                                                            ? l10n
+                                                                .hintDateFormat
+                                                            : _dateController
+                                                                .text,
+                                                        style: TextStyle(
+                                                          fontSize: 14,
+                                                          color: _dateController
+                                                                  .text.isEmpty
+                                                              ? HomeColors
+                                                                  .textMuted
+                                                              : HomeColors
+                                                                  .textPrimary,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    const Icon(
+                                                      Icons.calendar_today,
+                                                      size: 20,
+                                                      color:
+                                                          HomeColors.textMuted,
+                                                    ),
+                                                  ],
                                                 ),
                                               ),
                                             ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 8, vertical: 4),
-                                            decoration: BoxDecoration(
-                                              color: colorScheme
-                                                  .surfaceContainerHighest,
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                              border: Border.all(
-                                                color:
-                                                    colorScheme.outlineVariant,
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              l10n.labelTime,
+                                              style: theme.textTheme.labelLarge
+                                                  ?.copyWith(
+                                                color: HomeColors.textPrimary,
                                               ),
                                             ),
-                                            child: DropdownButtonHideUnderline(
-                                              child: DropdownButton<String>(
-                                                value: _timePeriod,
-                                                dropdownColor: colorScheme
-                                                    .surfaceContainerHigh,
-                                                style: TextStyle(
-                                                  color: colorScheme.onSurface,
-                                                  fontSize: 14,
+                                            const SizedBox(height: 8),
+                                            Row(
+                                              children: [
+                                                Expanded(
+                                                  child: GestureDetector(
+                                                    onTap: _selectTime,
+                                                    child: Container(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              16),
+                                                      decoration: BoxDecoration(
+                                                        color: HomeColors
+                                                            .surfaceElevated,
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(12),
+                                                        border: Border.all(
+                                                          color: HomeColors
+                                                              .border,
+                                                        ),
+                                                      ),
+                                                      child: Text(
+                                                        _timeController
+                                                                .text.isEmpty
+                                                            ? l10n
+                                                                .hintTimeFormat
+                                                            : _timeController
+                                                                .text,
+                                                        style: TextStyle(
+                                                          fontSize: 14,
+                                                          color: _timeController
+                                                                  .text.isEmpty
+                                                              ? HomeColors
+                                                                  .textMuted
+                                                              : HomeColors
+                                                                  .textPrimary,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
                                                 ),
-                                                items: [
-                                                  DropdownMenuItem(
-                                                    value: 'am',
+                                                const SizedBox(width: 8),
+                                                Container(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 8,
+                                                      vertical: 4),
+                                                  decoration: BoxDecoration(
+                                                    color: HomeColors
+                                                        .surfaceElevated,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            12),
+                                                    border: Border.all(
+                                                      color: HomeColors.border,
+                                                    ),
+                                                  ),
+                                                  child:
+                                                      DropdownButtonHideUnderline(
                                                     child:
-                                                        Text(l10n.meridiemAm),
+                                                        DropdownButton<String>(
+                                                      value: _timePeriod,
+                                                      dropdownColor: HomeColors
+                                                          .surfaceElevated,
+                                                      style: const TextStyle(
+                                                        color: HomeColors
+                                                            .textPrimary,
+                                                        fontSize: 14,
+                                                      ),
+                                                      items: [
+                                                        DropdownMenuItem(
+                                                          value: 'am',
+                                                          child: Text(
+                                                              l10n.meridiemAm),
+                                                        ),
+                                                        DropdownMenuItem(
+                                                          value: 'pm',
+                                                          child: Text(
+                                                              l10n.meridiemPm),
+                                                        ),
+                                                      ],
+                                                      onChanged: (value) {
+                                                        if (value == null) {
+                                                          return;
+                                                        }
+                                                        setState(() {
+                                                          _timePeriod = value;
+                                                        });
+                                                      },
+                                                    ),
                                                   ),
-                                                  DropdownMenuItem(
-                                                    value: 'pm',
-                                                    child:
-                                                        Text(l10n.meridiemPm),
-                                                  ),
-                                                ],
-                                                onChanged: (value) {
-                                                  if (value == null) return;
-                                                  setState(() {
-                                                    _timePeriod = value;
-                                                  });
-                                                },
-                                              ),
+                                                ),
+                                              ],
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
                                     ],
                                   ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 24),
-                            Text(
-                              l10n.vehicleType,
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: colorScheme.onSurface,
-                                  ) ??
-                                  TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: colorScheme.onSurface,
+                                  const SizedBox(height: 24),
+                                  Text(
+                                    l10n.vehicleType,
+                                    style: theme.textTheme.titleMedium
+                                            ?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          color: HomeColors.textPrimary,
+                                        ) ??
+                                        const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                          color: HomeColors.textPrimary,
+                                        ),
                                   ),
-                            ),
-                            const SizedBox(height: 12),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _VehicleTypeOption(
-                                    icon: Icons.two_wheeler,
-                                    label: l10n.vehicleMotorcycle,
-                                    isSelected:
-                                        _selectedVehicle == 'motorcycle',
-                                    onTap: () {
-                                      setState(() {
-                                        _selectedVehicle = 'motorcycle';
-                                      });
-                                    },
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: _VehicleTypeOption(
-                                    icon: Icons.directions_car,
-                                    label: l10n.vehicleCar,
-                                    isSelected: _selectedVehicle == 'car',
-                                    onTap: () {
-                                      setState(() {
-                                        _selectedVehicle = 'car';
-                                      });
-                                    },
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: _VehicleTypeOption(
-                                    icon: Icons.airport_shuttle,
-                                    label: l10n.vehicleVan,
-                                    isSelected: _selectedVehicle == 'van',
-                                    onTap: () {
-                                      setState(() {
-                                        _selectedVehicle = 'van';
-                                      });
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 32),
-                            SizedBox(
-                              width: double.infinity,
-                              height: 50,
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  if (_pickupLocation.isEmpty ||
-                                      _deliveryLocation.isEmpty) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                            l10n.selectPickupAndDelivery),
-                                        backgroundColor: colorScheme.error,
+                                  const SizedBox(height: 12),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: _VehicleTypeOption(
+                                          icon: Icons.two_wheeler,
+                                          label: l10n.vehicleMotorcycle,
+                                          isSelected: _selectedVehicle ==
+                                              'motorcycle',
+                                          onTap: () {
+                                            setState(() {
+                                              _selectedVehicle = 'motorcycle';
+                                            });
+                                          },
+                                        ),
                                       ),
-                                    );
-                                    return;
-                                  }
-                                  if (_dateController.text.isEmpty ||
-                                      _timeController.text.isEmpty) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                            l10n.scheduleSelectDateTime),
-                                        backgroundColor: colorScheme.error,
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: _VehicleTypeOption(
+                                          icon: Icons.directions_car,
+                                          label: l10n.vehicleCar,
+                                          isSelected:
+                                              _selectedVehicle == 'car',
+                                          onTap: () {
+                                            setState(() {
+                                              _selectedVehicle = 'car';
+                                            });
+                                          },
+                                        ),
                                       ),
-                                    );
-                                    return;
-                                  }
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: _VehicleTypeOption(
+                                          icon: Icons.airport_shuttle,
+                                          label: l10n.vehicleVan,
+                                          isSelected:
+                                              _selectedVehicle == 'van',
+                                          onTap: () {
+                                            setState(() {
+                                              _selectedVehicle = 'van';
+                                            });
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 32),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    height: 50,
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        if (_pickupLocation.isEmpty ||
+                                            _deliveryLocation.isEmpty) {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                              content: Text(l10n
+                                                  .selectPickupAndDelivery),
+                                              backgroundColor:
+                                                  colorScheme.error,
+                                            ),
+                                          );
+                                          return;
+                                        }
+                                        if (_dateController.text.isEmpty ||
+                                            _timeController.text.isEmpty) {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                              content: Text(l10n
+                                                  .scheduleSelectDateTime),
+                                              backgroundColor:
+                                                  colorScheme.error,
+                                            ),
+                                          );
+                                          return;
+                                        }
 
-                                  final scheduledDateTime =
-                                      _parseScheduledDateTime();
-                                  if (scheduledDateTime == null) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content:
-                                            Text(l10n.scheduleInvalidDateTime),
-                                        backgroundColor: colorScheme.error,
-                                      ),
-                                    );
-                                    return;
-                                  }
+                                        final scheduledDateTime =
+                                            _parseScheduledDateTime();
+                                        if (scheduledDateTime == null) {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                              content: Text(l10n
+                                                  .scheduleInvalidDateTime),
+                                              backgroundColor:
+                                                  colorScheme.error,
+                                            ),
+                                          );
+                                          return;
+                                        }
 
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          PackageDetailsScreen(
-                                        pickupLocation: _pickupLocation,
-                                        deliveryLocation: _deliveryLocation,
-                                        pickupPosition: _pickupPosition,
-                                        deliveryPosition: _deliveryPosition,
-                                        selectedVehicle: _selectedVehicle,
-                                        isInstantDelivery: false,
-                                        scheduledPickup: scheduledDateTime,
-                                        scheduledDelivery: scheduledDateTime,
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                PackageDetailsScreen(
+                                              pickupLocation: _pickupLocation,
+                                              deliveryLocation:
+                                                  _deliveryLocation,
+                                              pickupPosition: _pickupPosition,
+                                              deliveryPosition:
+                                                  _deliveryPosition,
+                                              selectedVehicle:
+                                                  _selectedVehicle,
+                                              isInstantDelivery: false,
+                                              scheduledPickup:
+                                                  scheduledDateTime,
+                                              scheduledDelivery:
+                                                  scheduledDateTime,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: HomeColors.violet,
+                                        foregroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                              AppColors.radiusLG),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        l10n.actionContinue,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                       ),
                                     ),
-                                  );
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primaryColor,
-                                  foregroundColor: colorScheme.onPrimary,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(AppColors.radiusLG),
                                   ),
-                                ),
-                                child: Text(
-                                  l10n.actionContinue,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
+                                  const SizedBox(height: 20),
+                                ],
                               ),
                             ),
-                            const SizedBox(height: 20),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
+                    );
+                  },
                 ),
-              );
-            },
-          ),
-        ],
+              ],
+            ),
+          );
+        },
       ),
     );
   }
 
   Widget _buildMapOrFallback(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final l10n = context.l10n;
     if (_hasGoogleMapsApiKey == null) {
-      return Center(
-        child: CircularProgressIndicator(
-          color: colorScheme.primary,
+      return const ColoredBox(
+        color: HomeColors.background,
+        child: Center(
+          child: CircularProgressIndicator(color: HomeColors.violet),
         ),
       );
     }
     if (_hasGoogleMapsApiKey == false) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Text(
-            l10n.taxiGoogleMapsNotConfigured,
-            textAlign: TextAlign.center,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurface,
+      return ColoredBox(
+        color: HomeColors.background,
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(
+              l10n.taxiGoogleMapsNotConfigured,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: HomeColors.textPrimary,
+              ),
             ),
           ),
         ),
@@ -855,7 +906,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                         _routePolylinePoints!.length >= 2
                     ? _routePolylinePoints!.map(_toG).toList()
                     : [_toG(_pickupPosition!), _toG(_deliveryPosition!)],
-                color: AppColors.primaryColor,
+                color: HomeColors.violet,
                 width: 3,
               ),
             }
@@ -894,15 +945,14 @@ class _LocationField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerHighest,
+          color: HomeColors.surfaceElevated,
           borderRadius: BorderRadius.circular(AppColors.radiusLG),
-          border: Border.all(color: colorScheme.outlineVariant),
+          border: Border.all(color: HomeColors.border),
         ),
         child: Row(
           children: [
@@ -914,25 +964,25 @@ class _LocationField extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 12,
-                      color: colorScheme.onSurfaceVariant,
+                      color: HomeColors.textMuted,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     value,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: colorScheme.onSurface,
+                      color: HomeColors.textPrimary,
                     ),
                   ),
                 ],
               ),
             ),
             if (!isReadOnly)
-              Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant),
+              const Icon(Icons.chevron_right, color: HomeColors.textMuted),
           ],
         ),
       ),
@@ -955,19 +1005,17 @@ class _VehicleTypeOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primaryColor.withValues(alpha: 0.12)
-              : colorScheme.surfaceContainerHighest,
+              ? HomeColors.violet.withValues(alpha: 0.12)
+              : HomeColors.surfaceElevated,
           borderRadius: BorderRadius.circular(AppColors.radiusLG),
           border: Border.all(
-            color:
-                isSelected ? AppColors.primaryColor : colorScheme.outlineVariant,
+            color: isSelected ? HomeColors.violet : HomeColors.border,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -976,9 +1024,7 @@ class _VehicleTypeOption extends StatelessWidget {
             Icon(
               icon,
               size: 32,
-              color: isSelected
-                  ? AppColors.primaryColor
-                  : colorScheme.onSurfaceVariant,
+              color: isSelected ? HomeColors.violet : HomeColors.textMuted,
             ),
             const SizedBox(height: 8),
             Text(
@@ -986,9 +1032,7 @@ class _VehicleTypeOption extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                color: isSelected
-                    ? AppColors.primaryColor
-                    : colorScheme.onSurfaceVariant,
+                color: isSelected ? HomeColors.violet : HomeColors.textMuted,
               ),
               textAlign: TextAlign.center,
             ),

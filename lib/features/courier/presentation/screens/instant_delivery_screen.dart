@@ -7,6 +7,8 @@ import 'package:hudhud_delivery/app/services/location_service.dart';
 import 'package:hudhud_delivery/app/services/geocoding_service.dart';
 import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
+import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
+import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import '../../../home/presentation/screen/location_search_screen.dart';
 import 'package_details_screen.dart';
 
@@ -117,8 +119,11 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
     final result = await Navigator.push<Map<String, dynamic>>(
       context,
       MaterialPageRoute(
-        builder: (context) => LocationSearchScreen(
-          currentLocation: _pickupLocation,
+        builder: (context) => CourierTheme.wrap(
+          context,
+          child: LocationSearchScreen(
+            currentLocation: _pickupLocation,
+          ),
         ),
       ),
     );
@@ -152,8 +157,11 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
     final result = await Navigator.push<Map<String, dynamic>>(
       context,
       MaterialPageRoute(
-        builder: (context) => LocationSearchScreen(
-          currentLocation: _pickupLocation,
+        builder: (context) => CourierTheme.wrap(
+          context,
+          child: LocationSearchScreen(
+            currentLocation: _pickupLocation,
+          ),
         ),
       ),
     );
@@ -184,154 +192,161 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final topPad = MediaQuery.paddingOf(context).top;
-    const initialSheetSize = 0.5;
+    return CourierTheme.wrap(
+      context,
+      child: Builder(
+        builder: (context) {
+          final l10n = context.l10n;
+          final theme = Theme.of(context);
+          final colorScheme = theme.colorScheme;
+          final topPad = MediaQuery.paddingOf(context).top;
+          const initialSheetSize = 0.5;
 
-    return Scaffold(
-      backgroundColor: colorScheme.surface,
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: _buildMapOrFallback(context),
-          ),
-          // Back button
-          Positioned(
-            top: topPad + 8,
-            left: 16,
-            child: Container(
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHigh,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: colorScheme.shadow.withValues(alpha: 0.15),
-                    blurRadius: 4,
-                  ),
-                ],
-              ),
-              child: IconButton(
-                icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ),
-          ),
-          // Recenter on current GPS — matches taxi / delivery map UX
-          Positioned(
-            top: topPad + 8,
-            right: 16,
-            child: FloatingActionButton(
-              heroTag: 'instant_delivery_my_location',
-              mini: true,
-              backgroundColor: colorScheme.surfaceContainerHigh,
-              onPressed: () async {
-                await _getCurrentLocation();
-                if (_pickupPosition != null && mounted) {
-                  _mapController?.moveCamera(
-                    gmaps.CameraUpdate.newLatLngZoom(
-                      _toG(_pickupPosition!),
-                      15,
+          return Scaffold(
+            backgroundColor: HomeColors.background,
+            body: Stack(
+              children: [
+                Positioned.fill(
+                  child: _buildMapOrFallback(context),
+                ),
+                // Back button
+                Positioned(
+                  top: topPad + 8,
+                  left: 16,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: HomeColors.surfaceElevated,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.25),
+                          blurRadius: 4,
+                        ),
+                      ],
                     ),
-                  );
-                }
-              },
-              child: Icon(
-                Icons.my_location,
-                color: _isLoadingLocation
-                    ? colorScheme.onSurfaceVariant
-                    : colorScheme.primary,
-              ),
-            ),
-          ),
-          // Bottom Sheet Modal
-          DraggableScrollableSheet(
-            initialChildSize: initialSheetSize,
-            minChildSize: 0.3,
-            maxChildSize: 0.85,
-            builder: (context, scrollController) {
-              return Container(
-                decoration: BoxDecoration(
-                  color: colorScheme.surface,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(AppColors.radiusLG),
-                    topRight: Radius.circular(AppColors.radiusLG),
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back,
+                          color: HomeColors.textPrimary),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
                   ),
                 ),
-                child: Column(
-                  children: [
-                    // Drag handle
-                    Container(
-                      margin: const EdgeInsets.only(top: 8),
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: colorScheme.outlineVariant,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
+                // Recenter on current GPS — matches taxi / delivery map UX
+                Positioned(
+                  top: topPad + 8,
+                  right: 16,
+                  child: FloatingActionButton(
+                    heroTag: 'instant_delivery_my_location',
+                    mini: true,
+                    backgroundColor: HomeColors.surfaceElevated,
+                    onPressed: () async {
+                      await _getCurrentLocation();
+                      if (_pickupPosition != null && mounted) {
+                        _mapController?.moveCamera(
+                          gmaps.CameraUpdate.newLatLngZoom(
+                            _toG(_pickupPosition!),
+                            15,
+                          ),
+                        );
+                      }
+                    },
+                    child: Icon(
+                      Icons.my_location,
+                      color: _isLoadingLocation
+                          ? HomeColors.textMuted
+                          : HomeColors.violet,
                     ),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        controller: scrollController,
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              l10n.courierInstantTitle,
-                              style: theme.textTheme.headlineSmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: colorScheme.onSurface,
-                                  ) ??
-                                  TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                    color: colorScheme.onSurface,
+                  ),
+                ),
+                // Bottom Sheet Modal
+                DraggableScrollableSheet(
+                  initialChildSize: initialSheetSize,
+                  minChildSize: 0.3,
+                  maxChildSize: 0.85,
+                  builder: (context, scrollController) {
+                    return Container(
+                      decoration: const BoxDecoration(
+                        color: HomeColors.surface,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(AppColors.radiusLG),
+                          topRight: Radius.circular(AppColors.radiusLG),
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          // Drag handle
+                          Container(
+                            margin: const EdgeInsets.only(top: 8),
+                            width: 40,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: HomeColors.border,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                          Expanded(
+                            child: SingleChildScrollView(
+                              controller: scrollController,
+                              padding: const EdgeInsets.all(20),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    l10n.courierInstantTitle,
+                                    style: theme.textTheme.headlineSmall
+                                            ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: HomeColors.textPrimary,
+                                        ) ??
+                                        const TextStyle(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold,
+                                          color: HomeColors.textPrimary,
+                                        ),
                                   ),
-                            ),
-                            const SizedBox(height: 24),
-                            // Pickup Location (user can select)
-                            _LocationField(
-                              label: l10n.pickupLocationLabel,
-                              value: _isLoadingLocation
-                                  ? l10n.locationGetting
-                                  : (_pickupResolveFailed
-                                      ? l10n.locationUnable
-                                      : (_pickupLocation.isEmpty
-                                          ? l10n.tapToSelectPickup
-                                          : _pickupLocation)),
-                              icon: Icons.location_on,
-                              iconColor: colorScheme.error,
-                              isReadOnly: false,
-                              onTap: _selectPickupLocation,
-                            ),
-                            const SizedBox(height: 16),
-                            // Delivery Location (user can select)
-                            _LocationField(
-                              label: l10n.deliveryLocationLabel,
-                              value: _deliveryLocation.isEmpty
-                                  ? l10n.tapToSelectDelivery
-                                  : _deliveryLocation,
-                              icon: Icons.location_on,
-                              iconColor: colorScheme.primary,
-                              isReadOnly: false,
-                              onTap: _selectDeliveryLocation,
-                            ),
-                            const SizedBox(height: 24),
-                            // Vehicle Type
-                            Text(
-                              l10n.vehicleType,
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: colorScheme.onSurface,
-                                  ) ??
-                                  TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: colorScheme.onSurface,
+                                  const SizedBox(height: 24),
+                                  // Pickup Location (user can select)
+                                  _LocationField(
+                                    label: l10n.pickupLocationLabel,
+                                    value: _isLoadingLocation
+                                        ? l10n.locationGetting
+                                        : (_pickupResolveFailed
+                                            ? l10n.locationUnable
+                                            : (_pickupLocation.isEmpty
+                                                ? l10n.tapToSelectPickup
+                                                : _pickupLocation)),
+                                    icon: Icons.location_on,
+                                    iconColor: colorScheme.error,
+                                    isReadOnly: false,
+                                    onTap: _selectPickupLocation,
                                   ),
-                            ),
+                                  const SizedBox(height: 16),
+                                  // Delivery Location (user can select)
+                                  _LocationField(
+                                    label: l10n.deliveryLocationLabel,
+                                    value: _deliveryLocation.isEmpty
+                                        ? l10n.tapToSelectDelivery
+                                        : _deliveryLocation,
+                                    icon: Icons.location_on,
+                                    iconColor: HomeColors.violet,
+                                    isReadOnly: false,
+                                    onTap: _selectDeliveryLocation,
+                                  ),
+                                  const SizedBox(height: 24),
+                                  // Vehicle Type
+                                  Text(
+                                    l10n.vehicleType,
+                                    style: theme.textTheme.titleMedium
+                                            ?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          color: HomeColors.textPrimary,
+                                        ) ??
+                                        const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                          color: HomeColors.textPrimary,
+                                        ),
+                                  ),
                             const SizedBox(height: 12),
                             Row(
                               children: [
@@ -414,8 +429,8 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                                   );
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primaryColor,
-                                  foregroundColor: colorScheme.onPrimary,
+                                  backgroundColor: HomeColors.violet,
+                                  foregroundColor: Colors.white,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(AppColors.radiusLG),
                                   ),
@@ -440,6 +455,9 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
             },
           ),
         ],
+      ),
+          );
+        },
       ),
     );
   }
@@ -560,17 +578,25 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
   Widget _buildMapOrFallback(BuildContext context) {
     final theme = Theme.of(context);
     if (_hasGoogleMapsApiKey == null) {
-      return const Center(child: CircularProgressIndicator());
+      return const ColoredBox(
+        color: HomeColors.background,
+        child: Center(
+          child: CircularProgressIndicator(color: HomeColors.violet),
+        ),
+      );
     }
     if (_hasGoogleMapsApiKey == false) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Text(
-            context.l10n.taxiGoogleMapsNotConfigured,
-            textAlign: TextAlign.center,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurface,
+      return ColoredBox(
+        color: HomeColors.background,
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(
+              context.l10n.taxiGoogleMapsNotConfigured,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: HomeColors.textPrimary,
+              ),
             ),
           ),
         ),
@@ -610,7 +636,7 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                 points: _routePolylinePoints != null && _routePolylinePoints!.length >= 2
                     ? _routePolylinePoints!.map(_toG).toList()
                     : [_toG(_pickupPosition!), _toG(_deliveryPosition!)],
-                color: AppColors.primaryColor,
+                color: HomeColors.violet,
                 width: 3,
               ),
             }
@@ -649,15 +675,14 @@ class _LocationField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerHighest,
+          color: HomeColors.surfaceElevated,
           borderRadius: BorderRadius.circular(AppColors.radiusLG),
-          border: Border.all(color: colorScheme.outlineVariant),
+          border: Border.all(color: HomeColors.border),
         ),
         child: Row(
           children: [
@@ -669,25 +694,25 @@ class _LocationField extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 12,
-                      color: colorScheme.onSurfaceVariant,
+                      color: HomeColors.textMuted,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     value,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: colorScheme.onSurface,
+                      color: HomeColors.textPrimary,
                     ),
                   ),
                 ],
               ),
             ),
             if (!isReadOnly)
-              Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant),
+              const Icon(Icons.chevron_right, color: HomeColors.textMuted),
           ],
         ),
       ),
@@ -710,18 +735,17 @@ class _VehicleTypeOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primaryColor.withValues(alpha: 0.12)
-              : colorScheme.surfaceContainerHighest,
+              ? HomeColors.violet.withValues(alpha: 0.12)
+              : HomeColors.surfaceElevated,
           borderRadius: BorderRadius.circular(AppColors.radiusLG),
           border: Border.all(
-            color: isSelected ? AppColors.primaryColor : colorScheme.outlineVariant,
+            color: isSelected ? HomeColors.violet : HomeColors.border,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -731,8 +755,8 @@ class _VehicleTypeOption extends StatelessWidget {
               icon,
               size: 32,
               color: isSelected
-                  ? AppColors.primaryColor
-                  : colorScheme.onSurfaceVariant,
+                  ? HomeColors.violet
+                  : HomeColors.textMuted,
             ),
             const SizedBox(height: 8),
             Text(
@@ -741,8 +765,8 @@ class _VehicleTypeOption extends StatelessWidget {
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 color: isSelected
-                    ? AppColors.primaryColor
-                    : colorScheme.onSurfaceVariant,
+                    ? HomeColors.violet
+                    : HomeColors.textMuted,
               ),
             ),
           ],

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
+import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/features/payment/data/data_provider/payment_data_provider.dart';
 import 'package:hudhud_delivery/features/payment/data/repository/payment_repository.dart';
 import 'package:hudhud_delivery/features/payment/model/payment_initiate_result.dart';
@@ -247,255 +249,73 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
-    final borderColor =
-        isDark ? const Color(0xFF2A2A2A) : const Color(0xFFEEEEEE);
-    final outline = colorScheme.outlineVariant;
-    final fieldFill = colorScheme.surfaceContainerHighest;
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: colorScheme.surface,
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          'What are you sending',
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // What are you sending section
-                    Text(
-                      'What are you sending',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // Item Type
-                    GestureDetector(
-                      onTap: () {
-                        showModalBottomSheet(
-                          context: context,
-                          builder: (context) => Container(
-                            padding: const EdgeInsets.all(20),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: _itemTypes.map((type) {
-                                return ListTile(
-                                  title: Text(type),
-                                  onTap: () {
-                                    setState(() {
-                                      _itemTypeController.text = type;
-                                    });
-                                    Navigator.pop(context);
-                                  },
-                                );
-                              }).toList(),
+    return CourierTheme.wrap(
+      context,
+      child: Builder(
+        builder: (context) {
+          final theme = Theme.of(context);
+          const borderColor = HomeColors.border;
+          const outline = HomeColors.border;
+          const fieldFill = HomeColors.surfaceElevated;
+          return Scaffold(
+            backgroundColor: HomeColors.background,
+            appBar: AppBar(
+              backgroundColor: HomeColors.surface,
+              elevation: 0,
+              surfaceTintColor: Colors.transparent,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back, color: HomeColors.textPrimary),
+                onPressed: () => Navigator.pop(context),
+              ),
+              title: Text(
+                'What are you sending',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: HomeColors.textPrimary,
+                ),
+              ),
+              centerTitle: true,
+            ),
+            body: SafeArea(
+              child: Column(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // What are you sending section
+                          const Text(
+                            'What are you sending',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: HomeColors.textPrimary,
                             ),
                           ),
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: fieldFill,
-                          borderRadius: BorderRadius.circular(AppColors.radiusLG),
-                          border: Border.all(color: outline),
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                _itemTypeController.text.isEmpty
-                                    ? 'Select type of item (e.g. gadget, document)'
-                                    : _itemTypeController.text,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: _itemTypeController.text.isEmpty
-                                      ? colorScheme.outline
-                                      : colorScheme.onSurface,
-                                ),
-                              ),
-                            ),
-                            Icon(Icons.keyboard_arrow_down,
-                                color: colorScheme.outline),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // Quantity
-                    TextFormField(
-                      controller: _quantityController,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: 'Quantity',
-                        labelStyle: TextStyle(
-                          fontSize: 14,
-                          color: colorScheme.onSurface,
-                        ),
-                        filled: true,
-                        fillColor: fieldFill,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppColors.radiusLG),
-                          borderSide: BorderSide(color: outline),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppColors.radiusLG),
-                          borderSide: BorderSide(color: outline),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppColors.radiusLG),
-                          borderSide: const BorderSide(color: AppColors.primaryColor),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // Package Weight (kg)
-                    TextFormField(
-                      controller: _packageWeightController,
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
-                      decoration: InputDecoration(
-                        labelText: 'Package Weight (kg)',
-                        labelStyle: TextStyle(
-                          fontSize: 14,
-                          color: colorScheme.onSurface,
-                        ),
-                        filled: true,
-                        fillColor: fieldFill,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppColors.radiusLG),
-                          borderSide: BorderSide(color: outline),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppColors.radiusLG),
-                          borderSide: BorderSide(color: outline),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppColors.radiusLG),
-                          borderSide: const BorderSide(color: AppColors.primaryColor),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // Package Description (optional)
-                    TextFormField(
-                      controller: _packageDescriptionController,
-                      maxLines: 2,
-                      decoration: InputDecoration(
-                        labelText: 'Package Description (optional)',
-                        labelStyle: TextStyle(
-                          fontSize: 14,
-                          color: colorScheme.onSurface,
-                        ),
-                        filled: true,
-                        fillColor: fieldFill,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppColors.radiusLG),
-                          borderSide: BorderSide(color: outline),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppColors.radiusLG),
-                          borderSide: BorderSide(color: outline),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppColors.radiusLG),
-                          borderSide: const BorderSide(color: AppColors.primaryColor),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    // Select who pays
-                    Text(
-                      'Select who pays',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _RadioOption(
-                            label: 'Me',
-                            isSelected: _whoPays == 'me',
+                          const SizedBox(height: 16),
+                          // Item Type
+                          GestureDetector(
                             onTap: () {
-                              setState(() {
-                                _whoPays = 'me';
-                              });
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _RadioOption(
-                            label: 'Recipient',
-                            isSelected: _whoPays == 'recipient',
-                            onTap: () {
-                              setState(() {
-                                _whoPays = 'recipient';
-                              });
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    // Payment type
-                    Text(
-                      'Payment type',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    GestureDetector(
-                      onTap: _isLoadingPaymentMethods
-                          ? null
-                          : () {
                               showModalBottomSheet(
                                 context: context,
+                                backgroundColor: HomeColors.surface,
                                 builder: (context) => Container(
                                   padding: const EdgeInsets.all(20),
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
-                                    children: _paymentMethods.map((method) {
-                                      final id = method['id'] as String?;
-                                      final name =
-                                          method['name'] as String? ?? id ?? '';
+                                    children: _itemTypes.map((type) {
                                       return ListTile(
-                                        title: Text(name),
+                                        title: Text(
+                                          type,
+                                          style: const TextStyle(
+                                            color: HomeColors.textPrimary,
+                                          ),
+                                        ),
                                         onTap: () {
                                           setState(() {
-                                            _paymentType = id;
-                                            _paymentDetails = {};
-                                            _useHpp = false;
-                                            _ebirrProvider = 'kaafi';
+                                            _itemTypeController.text = type;
                                           });
                                           Navigator.pop(context);
                                         },
@@ -505,200 +325,430 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                                 ),
                               );
                             },
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: fieldFill,
-                          borderRadius: BorderRadius.circular(AppColors.radiusLG),
-                          border: Border.all(color: outline),
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: _isLoadingPaymentMethods
-                                  ? _PaymentMethodShimmer(
-                                      borderColor: borderColor)
-                                  : Text(
-                                      _paymentMethodsError ??
-                                          _getSelectedPaymentName() ??
-                                          'Select payment type',
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: fieldFill,
+                                borderRadius:
+                                    BorderRadius.circular(AppColors.radiusLG),
+                                border: Border.all(color: outline),
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      _itemTypeController.text.isEmpty
+                                          ? 'Select type of item (e.g. gadget, document)'
+                                          : _itemTypeController.text,
                                       style: TextStyle(
                                         fontSize: 14,
-                                        color: _paymentType == null
-                                            ? colorScheme.outline
-                                            : colorScheme.onSurface,
+                                        color: _itemTypeController.text.isEmpty
+                                            ? HomeColors.textMuted
+                                            : HomeColors.textPrimary,
                                       ),
                                     ),
-                            ),
-                            Icon(Icons.keyboard_arrow_down,
-                                color: colorScheme.outline),
-                          ],
-                        ),
-                      ),
-                    ),
-                    if (_paymentType != null &&
-                        paymentMethodNeedsDetailsForm(_paymentType)) ...[
-                      const SizedBox(height: 12),
-                      PaymentDetailsForm(
-                        paymentMethodCode: _paymentType!,
-                        ebirrProvider: _ebirrProvider,
-                        useHpp: _useHpp,
-                        onChanged: (details) {
-                          setState(() {
-                            _paymentDetails = details;
-                          });
-                        },
-                        onEbirrProviderChanged: (provider) {
-                          setState(() {
-                            _ebirrProvider = provider;
-                          });
-                        },
-                        onUseHppChanged: (value) {
-                          setState(() {
-                            _useHpp = value;
-                          });
-                        },
-                      ),
-                    ],
-                    const SizedBox(height: 24),
-                    // Recipient Information
-                    Text(
-                      'Recipient Information',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // Recipient Name
-                    TextFormField(
-                      controller: _recipientNameController,
-                      decoration: InputDecoration(
-                        labelText: 'Recipient Names',
-                        labelStyle: TextStyle(
-                          fontSize: 14,
-                          color: colorScheme.onSurface,
-                        ),
-                        filled: true,
-                        fillColor: fieldFill,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppColors.radiusLG),
-                          borderSide: BorderSide(color: outline),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppColors.radiusLG),
-                          borderSide: BorderSide(color: outline),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppColors.radiusLG),
-                          borderSide: const BorderSide(color: AppColors.primaryColor),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // Recipient Phone
-                    TextFormField(
-                      controller: _recipientPhoneController,
-                      keyboardType: TextInputType.phone,
-                      decoration: InputDecoration(
-                        labelText: 'Recipient contact number',
-                        labelStyle: TextStyle(
-                          fontSize: 14,
-                          color: colorScheme.onSurface,
-                        ),
-                        filled: true,
-                        fillColor: fieldFill,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppColors.radiusLG),
-                          borderSide: BorderSide(color: outline),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppColors.radiusLG),
-                          borderSide: BorderSide(color: outline),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppColors.radiusLG),
-                          borderSide: const BorderSide(color: AppColors.primaryColor),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    // Take a picture of the package
-                    GestureDetector(
-                      onTap: _takePicture,
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: fieldFill,
-                          borderRadius: BorderRadius.circular(AppColors.radiusLG),
-                          border: Border.all(
-                            color: outline,
-                            style: BorderStyle.solid,
-                            width: 2,
-                          ),
-                        ),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.camera_alt,
-                              size: 48,
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              'Take a picture of the package',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: colorScheme.onSurfaceVariant,
-                                fontWeight: FontWeight.w500,
+                                  ),
+                                  const Icon(Icons.keyboard_arrow_down,
+                                      color: HomeColors.textMuted),
+                                ],
                               ),
                             ),
+                          ),
+                          const SizedBox(height: 16),
+                          // Quantity
+                          TextFormField(
+                            controller: _quantityController,
+                            keyboardType: TextInputType.number,
+                            style: const TextStyle(color: HomeColors.textPrimary),
+                            decoration: InputDecoration(
+                              labelText: 'Quantity',
+                              labelStyle: const TextStyle(
+                                fontSize: 14,
+                                color: HomeColors.textPrimary,
+                              ),
+                              filled: true,
+                              fillColor: fieldFill,
+                              border: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.circular(AppColors.radiusLG),
+                                borderSide: const BorderSide(color: outline),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.circular(AppColors.radiusLG),
+                                borderSide: const BorderSide(color: outline),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.circular(AppColors.radiusLG),
+                                borderSide:
+                                    const BorderSide(color: HomeColors.violet),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          // Package Weight (kg)
+                          TextFormField(
+                            controller: _packageWeightController,
+                            keyboardType: const TextInputType.numberWithOptions(
+                                decimal: true),
+                            style: const TextStyle(color: HomeColors.textPrimary),
+                            decoration: InputDecoration(
+                              labelText: 'Package Weight (kg)',
+                              labelStyle: const TextStyle(
+                                fontSize: 14,
+                                color: HomeColors.textPrimary,
+                              ),
+                              filled: true,
+                              fillColor: fieldFill,
+                              border: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.circular(AppColors.radiusLG),
+                                borderSide: const BorderSide(color: outline),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.circular(AppColors.radiusLG),
+                                borderSide: const BorderSide(color: outline),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.circular(AppColors.radiusLG),
+                                borderSide:
+                                    const BorderSide(color: HomeColors.violet),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          // Package Description (optional)
+                          TextFormField(
+                            controller: _packageDescriptionController,
+                            maxLines: 2,
+                            style: const TextStyle(color: HomeColors.textPrimary),
+                            decoration: InputDecoration(
+                              labelText: 'Package Description (optional)',
+                              labelStyle: const TextStyle(
+                                fontSize: 14,
+                                color: HomeColors.textPrimary,
+                              ),
+                              filled: true,
+                              fillColor: fieldFill,
+                              border: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.circular(AppColors.radiusLG),
+                                borderSide: const BorderSide(color: outline),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.circular(AppColors.radiusLG),
+                                borderSide: const BorderSide(color: outline),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.circular(AppColors.radiusLG),
+                                borderSide:
+                                    const BorderSide(color: HomeColors.violet),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          // Select who pays
+                          const Text(
+                            'Select who pays',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: HomeColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _RadioOption(
+                                  label: 'Me',
+                                  isSelected: _whoPays == 'me',
+                                  onTap: () {
+                                    setState(() {
+                                      _whoPays = 'me';
+                                    });
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _RadioOption(
+                                  label: 'Recipient',
+                                  isSelected: _whoPays == 'recipient',
+                                  onTap: () {
+                                    setState(() {
+                                      _whoPays = 'recipient';
+                                    });
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+                          // Payment type
+                          const Text(
+                            'Payment type',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: HomeColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          GestureDetector(
+                            onTap: _isLoadingPaymentMethods
+                                ? null
+                                : () {
+                                    showModalBottomSheet(
+                                      context: context,
+                                      backgroundColor: HomeColors.surface,
+                                      builder: (context) => Container(
+                                        padding: const EdgeInsets.all(20),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children:
+                                              _paymentMethods.map((method) {
+                                            final id = method['id'] as String?;
+                                            final name = method['name']
+                                                    as String? ??
+                                                id ??
+                                                '';
+                                            return ListTile(
+                                              title: Text(
+                                                name,
+                                                style: const TextStyle(
+                                                  color: HomeColors.textPrimary,
+                                                ),
+                                              ),
+                                              onTap: () {
+                                                setState(() {
+                                                  _paymentType = id;
+                                                  _paymentDetails = {};
+                                                  _useHpp = false;
+                                                  _ebirrProvider = 'kaafi';
+                                                });
+                                                Navigator.pop(context);
+                                              },
+                                            );
+                                          }).toList(),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: fieldFill,
+                                borderRadius:
+                                    BorderRadius.circular(AppColors.radiusLG),
+                                border: Border.all(color: outline),
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: _isLoadingPaymentMethods
+                                        ? const _PaymentMethodShimmer(
+                                            borderColor: borderColor)
+                                        : Text(
+                                            _paymentMethodsError ??
+                                                _getSelectedPaymentName() ??
+                                                'Select payment type',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: _paymentType == null
+                                                  ? HomeColors.textMuted
+                                                  : HomeColors.textPrimary,
+                                            ),
+                                          ),
+                                  ),
+                                  const Icon(Icons.keyboard_arrow_down,
+                                      color: HomeColors.textMuted),
+                                ],
+                              ),
+                            ),
+                          ),
+                          if (_paymentType != null &&
+                              paymentMethodNeedsDetailsForm(_paymentType)) ...[
+                            const SizedBox(height: 12),
+                            PaymentDetailsForm(
+                              paymentMethodCode: _paymentType!,
+                              ebirrProvider: _ebirrProvider,
+                              useHpp: _useHpp,
+                              onChanged: (details) {
+                                setState(() {
+                                  _paymentDetails = details;
+                                });
+                              },
+                              onEbirrProviderChanged: (provider) {
+                                setState(() {
+                                  _ebirrProvider = provider;
+                                });
+                              },
+                              onUseHppChanged: (value) {
+                                setState(() {
+                                  _useHpp = value;
+                                });
+                              },
+                            ),
                           ],
+                          const SizedBox(height: 24),
+                          // Recipient Information
+                          const Text(
+                            'Recipient Information',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: HomeColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          // Recipient Name
+                          TextFormField(
+                            controller: _recipientNameController,
+                            style: const TextStyle(color: HomeColors.textPrimary),
+                            decoration: InputDecoration(
+                              labelText: 'Recipient Names',
+                              labelStyle: const TextStyle(
+                                fontSize: 14,
+                                color: HomeColors.textPrimary,
+                              ),
+                              filled: true,
+                              fillColor: fieldFill,
+                              border: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.circular(AppColors.radiusLG),
+                                borderSide: const BorderSide(color: outline),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.circular(AppColors.radiusLG),
+                                borderSide: const BorderSide(color: outline),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.circular(AppColors.radiusLG),
+                                borderSide:
+                                    const BorderSide(color: HomeColors.violet),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          // Recipient Phone
+                          TextFormField(
+                            controller: _recipientPhoneController,
+                            keyboardType: TextInputType.phone,
+                            style: const TextStyle(color: HomeColors.textPrimary),
+                            decoration: InputDecoration(
+                              labelText: 'Recipient contact number',
+                              labelStyle: const TextStyle(
+                                fontSize: 14,
+                                color: HomeColors.textPrimary,
+                              ),
+                              filled: true,
+                              fillColor: fieldFill,
+                              border: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.circular(AppColors.radiusLG),
+                                borderSide: const BorderSide(color: outline),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.circular(AppColors.radiusLG),
+                                borderSide: const BorderSide(color: outline),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.circular(AppColors.radiusLG),
+                                borderSide:
+                                    const BorderSide(color: HomeColors.violet),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          // Take a picture of the package
+                          GestureDetector(
+                            onTap: _takePicture,
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                color: fieldFill,
+                                borderRadius:
+                                    BorderRadius.circular(AppColors.radiusLG),
+                                border: Border.all(
+                                  color: outline,
+                                  style: BorderStyle.solid,
+                                  width: 2,
+                                ),
+                              ),
+                              child: const Column(
+                                children: [
+                                  Icon(
+                                    Icons.camera_alt,
+                                    size: 48,
+                                    color: HomeColors.textMuted,
+                                  ),
+                                  SizedBox(height: 12),
+                                  Text(
+                                    'Take a picture of the package',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: HomeColors.textMuted,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 100), // Space for bottom button
+                        ],
+                      ),
+                    ),
+                  ),
+                  // Continue Button
+                  Container(
+                    padding: const EdgeInsets.all(AppColors.spaceMD),
+                    decoration: const BoxDecoration(
+                      color: HomeColors.surface,
+                      border: Border(top: BorderSide(color: borderColor)),
+                    ),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: _navigateToConfirm,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: HomeColors.violet,
+                          foregroundColor: Colors.white,
+                          minimumSize: const Size(
+                              double.infinity, AppColors.buttonHeightMD),
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.circular(AppColors.radiusLG),
+                          ),
+                        ),
+                        child: const Text(
+                          'Continue',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 100), // Space for bottom button
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-            // Continue Button
-            Container(
-              padding: const EdgeInsets.all(AppColors.spaceMD),
-              decoration: BoxDecoration(
-                color: colorScheme.surface,
-                border: Border(top: BorderSide(color: borderColor)),
-              ),
-              child: SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: _navigateToConfirm,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryColor,
-                    foregroundColor: Colors.white,
-                    minimumSize:
-                        const Size(double.infinity, AppColors.buttonHeightMD),
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppColors.radiusLG),
-                    ),
-                  ),
-                  child: const Text(
-                    'Continue',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -717,20 +767,17 @@ class _RadioOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final outline = colorScheme.outlineVariant;
-    final fieldFill = colorScheme.surfaceContainerHighest;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primaryColor.withValues(alpha: 0.1)
-              : fieldFill,
+              ? HomeColors.violet.withValues(alpha: 0.1)
+              : HomeColors.surfaceElevated,
           borderRadius: BorderRadius.circular(AppColors.radiusLG),
           border: Border.all(
-            color: isSelected ? AppColors.primaryColor : outline,
+            color: isSelected ? HomeColors.violet : HomeColors.border,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -742,11 +789,10 @@ class _RadioOption extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color:
-                      isSelected ? AppColors.primaryColor : colorScheme.outline,
+                  color: isSelected ? HomeColors.violet : HomeColors.textMuted,
                   width: 2,
                 ),
-                color: isSelected ? AppColors.primaryColor : Colors.transparent,
+                color: isSelected ? HomeColors.violet : Colors.transparent,
               ),
               child: isSelected
                   ? const Center(
@@ -765,8 +811,8 @@ class _RadioOption extends StatelessWidget {
                 fontSize: 14,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 color: isSelected
-                    ? AppColors.primaryColor
-                    : colorScheme.onSurface,
+                    ? HomeColors.violet
+                    : HomeColors.textPrimary,
               ),
             ),
           ],
@@ -783,10 +829,8 @@ class _PaymentMethodShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final baseColor = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0);
-    final highlightColor =
-        isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF5F5F5);
+    const baseColor = HomeColors.surfaceElevated;
+    final highlightColor = HomeColors.surfaceElevated.withValues(alpha: 0.6);
     return Shimmer.fromColors(
       baseColor: baseColor,
       highlightColor: highlightColor,

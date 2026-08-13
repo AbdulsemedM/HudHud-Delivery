@@ -2597,14 +2597,14 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get onboardingWelcomeSubtitle =>
-      'مدينتك بين يديك — طعام، مشاوير، طرود، وخدمات منزلية في مكان واحد.';
+      'أرسل الطرود عبر المدينة اليوم — الطعام والمشاوير والخدمات المنزلية قادمة قريباً.';
 
   @override
   String get onboardingFoodTitle => 'طعام وبقالة';
 
   @override
   String get onboardingFoodDescription =>
-      'اطلب وجبات وبقالة من المتاجر المحلية خلال دقائق.';
+      'قريباً — اطلب وجبات وبقالة من المتاجر المحلية خلال دقائق.';
 
   @override
   String get onboardingCourierTitle => 'بريد سريع';
@@ -2618,14 +2618,14 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get onboardingTaxiDescription =>
-      'احجز مشواراً في أي مكان بالمدينة بلمسة واحدة.';
+      'قريباً — احجز مشواراً في أي مكان بالمدينة بلمسة واحدة.';
 
   @override
   String get onboardingHandymanTitle => 'فني منزلي';
 
   @override
   String get onboardingHandymanDescription =>
-      'احجز محترفين موثوقين للإصلاحات والخدمات المنزلية.';
+      'قريباً — احجز محترفين موثوقين للإصلاحات والخدمات المنزلية.';
 
   @override
   String get onboardingGetStarted => 'ابدأ الآن';
@@ -2649,35 +2649,35 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get onboardingSpotlightFoodDescription =>
-      'تصفح المطاعم والمتاجر لطلب الطعام والاحتياجات.';
+      'قريباً — تصفح المطاعم والمتاجر لطلب الطعام والاحتياجات.';
 
   @override
   String get onboardingSpotlightCourierTitle => 'بريد سريع';
 
   @override
   String get onboardingSpotlightCourierDescription =>
-      'أرسل الطرود والمستندات مع استلام فوري.';
+      'أرسل الطرود والمستندات مع استلام فوري — متاح الآن.';
 
   @override
   String get onboardingSpotlightTaxiTitle => 'تاكسي';
 
   @override
   String get onboardingSpotlightTaxiDescription =>
-      'اطلب مشواراً وتتبع السائق في الوقت الفعلي.';
+      'قريباً — اطلب مشواراً وتتبع السائق في الوقت الفعلي.';
 
   @override
   String get onboardingSpotlightHandymanTitle => 'فني منزلي';
 
   @override
   String get onboardingSpotlightHandymanDescription =>
-      'اعثر على مساعدة مهرة لإصلاحات وصيانة المنزل.';
+      'قريباً — اعثر على مساعدة مهرة لإصلاحات وصيانة المنزل.';
 
   @override
   String get onboardingSpotlightDoneTitle => 'أنت جاهز!';
 
   @override
   String get onboardingSpotlightDoneDescription =>
-      'بدّل بين الخدمات في أي وقت عبر التبويبات أعلاه. استمتع بهدهد!';
+      'البريد السريع جاهز الآن. الطعام والتاكسي والفني المنزلي قادمة قريباً — بدّل التبويبات في أي وقت. استمتع بهدهد!';
 
   @override
   String get onboardingDebugReplayTour => 'إعادة جولة الصفحة الرئيسية (تصحيح)';

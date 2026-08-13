@@ -41,15 +41,6 @@ class HomeSpotlightTour {
           actionLabel: l10n.actionNext,
           shape: ShapeLightFocus.Circle,
         ),
-      if (_isKeyMounted(keys.foodTabKey))
-        _buildTarget(
-          identify: 'food',
-          key: keys.foodTabKey,
-          color: ServiceTabPalette.foodGroceries,
-          title: l10n.onboardingSpotlightFoodTitle,
-          description: l10n.onboardingSpotlightFoodDescription,
-          actionLabel: l10n.actionNext,
-        ),
       if (_isKeyMounted(keys.courierTabKey))
         _buildTarget(
           identify: 'courier',
@@ -57,6 +48,15 @@ class HomeSpotlightTour {
           color: ServiceTabPalette.courier,
           title: l10n.onboardingSpotlightCourierTitle,
           description: l10n.onboardingSpotlightCourierDescription,
+          actionLabel: l10n.actionNext,
+        ),
+      if (_isKeyMounted(keys.foodTabKey))
+        _buildTarget(
+          identify: 'food',
+          key: keys.foodTabKey,
+          color: ServiceTabPalette.foodGroceries,
+          title: l10n.onboardingSpotlightFoodTitle,
+          description: l10n.onboardingSpotlightFoodDescription,
           actionLabel: l10n.actionNext,
         ),
       if (_isKeyMounted(keys.taxiTabKey))

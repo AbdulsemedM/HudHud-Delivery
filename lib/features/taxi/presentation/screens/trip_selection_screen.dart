@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/utils/snackbar_util.dart';
 import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
 import 'package:hudhud_delivery/features/payment/data/data_provider/payment_data_provider.dart';
@@ -183,6 +184,7 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
     ];
 
     final options = <TripOption>[];
+    String? comingSoonMessage;
     for (final (id, name, imagePath, hasFasterBadge, isDiscount)
         in tripConfigs) {
       var params = _getApiParams(id);
@@ -195,6 +197,11 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
         rideType: params.rideType,
         passengerCount: 1,
       );
+      if (isServiceComingSoonResult(result)) {
+        comingSoonMessage =
+            result['errorMessage']?.toString() ?? 'Ride hailing is coming soon.';
+        break;
+      }
       if (result['data'] == null && params.vehicleType == 'auto') {
         params = (vehicleType: 'car', rideType: 'standard');
         result = await _rideDataProvider.getRideEstimate(
@@ -206,6 +213,11 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
           rideType: params.rideType,
           passengerCount: 1,
         );
+        if (isServiceComingSoonResult(result)) {
+          comingSoonMessage = result['errorMessage']?.toString() ??
+              'Ride hailing is coming soon.';
+          break;
+        }
       }
 
       if (mounted && result['data'] != null) {
@@ -238,7 +250,10 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
       setState(() {
         _tripOptions = options;
         _isLoadingEstimates = false;
-        if (options.isEmpty) {
+        if (comingSoonMessage != null) {
+          _estimateError = comingSoonMessage;
+          _selectedTrip = null;
+        } else if (options.isEmpty) {
           _estimateError =
               'Could not fetch ride estimates. Please try again.';
           _selectedTrip = null;
@@ -318,6 +333,11 @@ class _TripSelectionScreenState extends State<TripSelectionScreen> {
             paymentDetails: Map<String, dynamic>.from(_paymentDetails),
           ),
         ),
+      );
+    } else if (isServiceComingSoonResult(result)) {
+      SnackbarUtil.showComingSoon(
+        context,
+        result['errorMessage']?.toString() ?? 'Ride hailing is coming soon.',
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(

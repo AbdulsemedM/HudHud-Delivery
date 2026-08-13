@@ -305,33 +305,39 @@ class _CourierScreenState extends State<CourierScreen> {
               if (_isLoadingDeliveries)
                 const ShimmerListView(itemCount: 3)
               else if (_deliveriesError != null)
-                Column(
-                  children: [
-                    const Icon(
-                      Icons.wifi_off_rounded,
-                      size: 48,
-                      color: HomeColors.textMuted,
-                    ),
-                    const SizedBox(height: AppColors.spaceMD),
-                    Text(
-                      _deliveriesError!,
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: HomeColors.textSecondary,
+                SizedBox(
+                  width: double.infinity,
+                  height: MediaQuery.sizeOf(context).height * 0.35,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.wifi_off_rounded,
+                        size: 48,
+                        color: HomeColors.textMuted,
                       ),
-                    ),
-                    TextButton.icon(
-                      onPressed: () {
-                        setState(() => _isLoadingDeliveries = true);
-                        _fetchDeliveries();
-                      },
-                      icon: const Icon(Icons.refresh),
-                      label: Text(l10n.actionRetry),
-                      style: TextButton.styleFrom(
-                        foregroundColor: HomeColors.violet,
+                      const SizedBox(height: AppColors.spaceMD),
+                      Text(
+                        _deliveriesError!,
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: HomeColors.textSecondary,
+                        ),
                       ),
-                    ),
-                  ],
+                      TextButton.icon(
+                        onPressed: () {
+                          setState(() => _isLoadingDeliveries = true);
+                          _fetchDeliveries();
+                        },
+                        icon: const Icon(Icons.refresh),
+                        label: Text(l10n.actionRetry),
+                        style: TextButton.styleFrom(
+                          foregroundColor: HomeColors.violet,
+                        ),
+                      ),
+                    ],
+                  ),
                 )
               else if (_filteredDeliveries.isEmpty)
                 SizedBox(

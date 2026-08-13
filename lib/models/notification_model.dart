@@ -6,6 +6,8 @@ class NotificationModel {
   final bool isRead;
   final DateTime createdAt;
   final DateTime updatedAt;
+  /// Raw routing metadata from the server payload (event, screen, order_id, etc.).
+  final Map<String, String> routingData;
 
   NotificationModel({
     required this.id,
@@ -15,6 +17,7 @@ class NotificationModel {
     required this.isRead,
     required this.createdAt,
     required this.updatedAt,
+    this.routingData = const {},
   });
 
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
@@ -28,6 +31,12 @@ class NotificationModel {
 
     final readAt = json['read_at'];
 
+    final routingData = <String, String>{};
+    payloadMap.forEach((key, value) {
+      if (value == null) return;
+      routingData[key.toString()] = value.toString();
+    });
+
     return NotificationModel(
       id: _asInt(json['id']),
       userId: _asInt(json['user_id'] ?? json['notifiable_id']),
@@ -38,6 +47,7 @@ class NotificationModel {
           DateTime.now(),
       updatedAt: DateTime.tryParse(json['updated_at'] as String? ?? '') ??
           DateTime.now(),
+      routingData: routingData,
     );
   }
 
@@ -57,6 +67,7 @@ class NotificationModel {
       'is_read': isRead ? 1 : 0,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
+      'data': routingData,
     };
   }
 
@@ -68,6 +79,7 @@ class NotificationModel {
     bool? isRead,
     DateTime? createdAt,
     DateTime? updatedAt,
+    Map<String, String>? routingData,
   }) {
     return NotificationModel(
       id: id ?? this.id,
@@ -77,6 +89,7 @@ class NotificationModel {
       isRead: isRead ?? this.isRead,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      routingData: routingData ?? this.routingData,
     );
   }
 }

@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class OnboardingTourPrefs {
   OnboardingTourPrefs._();
 
-  static const String seenKey = 'has_seen_home_tour_v1';
+  static const String seenKey = 'has_seen_home_tour_v2';
 
   static Future<bool> hasSeenTour() async {
     final prefs = await SharedPreferences.getInstance();

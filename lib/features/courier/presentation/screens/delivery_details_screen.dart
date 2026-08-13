@@ -10,6 +10,8 @@ import 'package:hudhud_delivery/features/checkout/data/data_provider/checkout_da
 import 'package:hudhud_delivery/features/checkout/data/repository/checkout_repository.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
+import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
+import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'delivery_tracking_screen.dart';
 
 class DeliveryDetailsScreen extends StatefulWidget {
@@ -187,310 +189,344 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
-    final borderColor =
-        isDark ? const Color(0xFF2A2A2A) : const Color(0xFFEEEEEE);
+    return CourierTheme.wrap(
+      context,
+      child: Builder(
+        builder: (context) {
+          final l10n = context.l10n;
+          final theme = Theme.of(context);
+          const borderColor = HomeColors.border;
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: colorScheme.surface,
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          'Delivery #${widget.deliveryId}',
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: _isLoading
-          ? const Padding(
-              padding: EdgeInsets.all(AppColors.spaceMD),
-              child: ShimmerListView(itemCount: 4),
-            )
-          : _error != null
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(AppColors.spaceLG),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.wifi_off_rounded,
-                          size: 48,
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(height: AppColors.spaceMD),
-                        Text(
-                          _error!,
-                          style: theme.textTheme.bodyMedium,
-                          textAlign: TextAlign.center,
-                        ),
-                        TextButton.icon(
-                          onPressed: () {
-                            setState(() => _isLoading = true);
-                            _fetchDetails();
-                          },
-                          icon: const Icon(Icons.refresh),
-                          label: Text(l10n.actionRetry),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              : _delivery == null
-                  ? Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Lottie.asset('assets/animations/browse.json',
-                            width: 180),
-                        const SizedBox(height: AppColors.spaceMD),
-                        Text(
-                          'Delivery not found',
-                          style: theme.textTheme.titleMedium,
-                        ),
-                      ],
-                    )
-                  : SingleChildScrollView(
-                      padding: const EdgeInsets.all(AppColors.spaceMD),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _DetailCard(
-                            title: l10n.deliveryDetailsStatus,
-                            borderColor: borderColor,
-                            child: StatusChip(
-                              status: (_delivery!['current_status'] ??
-                                          _delivery!['status'])
-                                      ?.toString() ??
-                                  '—',
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          _DetailCard(
-                            title: l10n.deliveryDetailsPickup,
-                            borderColor: borderColor,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _DetailRow(
-                                  label: 'Location',
-                                  value:
-                                      _delivery!['pickup_location']?.toString(),
+          return Scaffold(
+            backgroundColor: HomeColors.background,
+            appBar: AppBar(
+              backgroundColor: HomeColors.surface,
+              elevation: 0,
+              surfaceTintColor: Colors.transparent,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back, color: HomeColors.textPrimary),
+                onPressed: () => Navigator.pop(context),
+              ),
+              title: Text(
+                'Delivery #${widget.deliveryId}',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: HomeColors.textPrimary,
+                ),
+              ),
+              centerTitle: true,
+            ),
+            body: _isLoading
+                ? const Padding(
+                    padding: EdgeInsets.all(AppColors.spaceMD),
+                    child: ShimmerListView(itemCount: 4),
+                  )
+                : _error != null
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(AppColors.spaceLG),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.wifi_off_rounded,
+                                size: 48,
+                                color: HomeColors.textMuted,
+                              ),
+                              const SizedBox(height: AppColors.spaceMD),
+                              Text(
+                                _error!,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: HomeColors.textPrimary,
                                 ),
-                                if (_delivery!['pickup_instructions'] != null &&
-                                    _delivery!['pickup_instructions']
-                                        .toString()
-                                        .isNotEmpty)
-                                  _DetailRow(
-                                    label: 'Instructions',
-                                    value: _delivery!['pickup_instructions']
-                                        ?.toString(),
-                                  ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          _DetailCard(
-                            title: l10n.deliveryDetailsDropoff,
-                            borderColor: borderColor,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _DetailRow(
-                                  label: 'Location',
-                                  value: _delivery!['dropoff_location']
-                                      ?.toString(),
-                                ),
-                                _DetailRow(
-                                  label: 'Receiver',
-                                  value:
-                                      _delivery!['receiver_name']?.toString(),
-                                ),
-                                _DetailRow(
-                                  label: 'Phone',
-                                  value:
-                                      _delivery!['receiver_phone']?.toString(),
-                                ),
-                                if (_delivery!['delivery_instructions'] !=
-                                        null &&
-                                    _delivery!['delivery_instructions']
-                                        .toString()
-                                        .isNotEmpty)
-                                  _DetailRow(
-                                    label: 'Instructions',
-                                    value: _delivery!['delivery_instructions']
-                                        ?.toString(),
-                                  ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          _DetailCard(
-                            title: 'Package',
-                            borderColor: borderColor,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _DetailRow(
-                                  label: 'Type',
-                                  value: _delivery!['package_type']?.toString(),
-                                ),
-                                if (_delivery!['package_description'] != null &&
-                                    _delivery!['package_description']
-                                        .toString()
-                                        .isNotEmpty)
-                                  _DetailRow(
-                                    label: 'Description',
-                                    value: _delivery!['package_description']
-                                        ?.toString(),
-                                  ),
-                                _DetailRow(
-                                  label: 'Weight',
-                                  value:
-                                      _delivery!['package_weight']?.toString(),
-                                ),
-                                if (_delivery!['special_instructions'] !=
-                                        null &&
-                                    _delivery!['special_instructions']
-                                        .toString()
-                                        .isNotEmpty)
-                                  _DetailRow(
-                                    label: 'Special instructions',
-                                    value: _delivery!['special_instructions']
-                                        ?.toString(),
-                                  ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          _DetailCard(
-                            title: 'Payment & Cost',
-                            borderColor: borderColor,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _DetailRow(
-                                  label: 'Payment method',
-                                  value:
-                                      _delivery!['payment_method']?.toString(),
-                                ),
-                                _DetailRow(
-                                  label: 'Estimated cost',
-                                  value:
-                                      _delivery!['estimated_cost']?.toString(),
-                                ),
-                                _DetailRow(
-                                  label: 'Payment status',
-                                  value:
-                                      _delivery!['payment_status']?.toString(),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          _DetailCard(
-                            title: 'Timeline',
-                            borderColor: borderColor,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _DetailRow(
-                                  label: 'Created',
-                                  value: _formatDate(_delivery!['created_at']),
-                                ),
-                                if (_delivery!['scheduled_pickup'] != null)
-                                  _DetailRow(
-                                    label: 'Scheduled pickup',
-                                    value: _formatDate(
-                                        _delivery!['scheduled_pickup']),
-                                  ),
-                                if (_delivery!['scheduled_delivery'] != null)
-                                  _DetailRow(
-                                    label: 'Scheduled delivery',
-                                    value: _formatDate(
-                                        _delivery!['scheduled_delivery']),
-                                  ),
-                                if (_delivery!['delivered_at'] != null)
-                                  _DetailRow(
-                                    label: 'Delivered',
-                                    value:
-                                        _formatDate(_delivery!['delivered_at']),
-                                  ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          SizedBox(
-                            width: double.infinity,
-                            height: AppColors.buttonHeightMD,
-                            child: ElevatedButton(
-                              onPressed:
-                                  _isCancelling ? null : _navigateToTracking,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primaryColor,
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                      AppColors.radiusLG),
+                                textAlign: TextAlign.center,
+                              ),
+                              TextButton.icon(
+                                onPressed: () {
+                                  setState(() => _isLoading = true);
+                                  _fetchDetails();
+                                },
+                                icon: const Icon(Icons.refresh,
+                                    color: HomeColors.violet),
+                                label: Text(
+                                  l10n.actionRetry,
+                                  style: const TextStyle(color: HomeColors.violet),
                                 ),
                               ),
-                              child: const Text(
-                                'Track Delivery',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
+                            ],
                           ),
-                          const SizedBox(height: 12),
-                          SizedBox(
-                            width: double.infinity,
-                            height: AppColors.buttonHeightMD,
-                            child: OutlinedButton(
-                              onPressed: _isCancelling ? null : _cancelOrder,
-                              style: OutlinedButton.styleFrom(
-                                side: const BorderSide(
-                                  color: AppColors.errorColor,
-                                  width: 1.5,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                      AppColors.radiusLG),
+                        ),
+                      )
+                    : _delivery == null
+                        ? Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Lottie.asset('assets/animations/browse.json',
+                                  width: 180),
+                              const SizedBox(height: AppColors.spaceMD),
+                              Text(
+                                'Delivery not found',
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  color: HomeColors.textPrimary,
                                 ),
                               ),
-                              child: _isCancelling
-                                  ? const SizedBox(
-                                      width: 24,
-                                      height: 24,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: AppColors.errorColor,
+                            ],
+                          )
+                        : SingleChildScrollView(
+                            padding: const EdgeInsets.all(AppColors.spaceMD),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _DetailCard(
+                                  title: l10n.deliveryDetailsStatus,
+                                  borderColor: borderColor,
+                                  child: StatusChip(
+                                    status: (_delivery!['current_status'] ??
+                                                _delivery!['status'])
+                                            ?.toString() ??
+                                        '—',
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                _DetailCard(
+                                  title: l10n.deliveryDetailsPickup,
+                                  borderColor: borderColor,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      _DetailRow(
+                                        label: 'Location',
+                                        value: _delivery!['pickup_location']
+                                            ?.toString(),
                                       ),
-                                    )
-                                  : const Text(
-                                      'Cancel Order',
+                                      if (_delivery![
+                                                  'pickup_instructions'] !=
+                                              null &&
+                                          _delivery!['pickup_instructions']
+                                              .toString()
+                                              .isNotEmpty)
+                                        _DetailRow(
+                                          label: 'Instructions',
+                                          value: _delivery![
+                                                  'pickup_instructions']
+                                              ?.toString(),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                _DetailCard(
+                                  title: l10n.deliveryDetailsDropoff,
+                                  borderColor: borderColor,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      _DetailRow(
+                                        label: 'Location',
+                                        value: _delivery!['dropoff_location']
+                                            ?.toString(),
+                                      ),
+                                      _DetailRow(
+                                        label: 'Receiver',
+                                        value: _delivery!['receiver_name']
+                                            ?.toString(),
+                                      ),
+                                      _DetailRow(
+                                        label: 'Phone',
+                                        value: _delivery!['receiver_phone']
+                                            ?.toString(),
+                                      ),
+                                      if (_delivery![
+                                                  'delivery_instructions'] !=
+                                              null &&
+                                          _delivery!['delivery_instructions']
+                                              .toString()
+                                              .isNotEmpty)
+                                        _DetailRow(
+                                          label: 'Instructions',
+                                          value: _delivery![
+                                                  'delivery_instructions']
+                                              ?.toString(),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                _DetailCard(
+                                  title: 'Package',
+                                  borderColor: borderColor,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      _DetailRow(
+                                        label: 'Type',
+                                        value: _delivery!['package_type']
+                                            ?.toString(),
+                                      ),
+                                      if (_delivery![
+                                                  'package_description'] !=
+                                              null &&
+                                          _delivery!['package_description']
+                                              .toString()
+                                              .isNotEmpty)
+                                        _DetailRow(
+                                          label: 'Description',
+                                          value: _delivery![
+                                                  'package_description']
+                                              ?.toString(),
+                                        ),
+                                      _DetailRow(
+                                        label: 'Weight',
+                                        value: _delivery!['package_weight']
+                                            ?.toString(),
+                                      ),
+                                      if (_delivery![
+                                                  'special_instructions'] !=
+                                              null &&
+                                          _delivery!['special_instructions']
+                                              .toString()
+                                              .isNotEmpty)
+                                        _DetailRow(
+                                          label: 'Special instructions',
+                                          value: _delivery![
+                                                  'special_instructions']
+                                              ?.toString(),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                _DetailCard(
+                                  title: 'Payment & Cost',
+                                  borderColor: borderColor,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      _DetailRow(
+                                        label: 'Payment method',
+                                        value: _delivery!['payment_method']
+                                            ?.toString(),
+                                      ),
+                                      _DetailRow(
+                                        label: 'Estimated cost',
+                                        value: _delivery!['estimated_cost']
+                                            ?.toString(),
+                                      ),
+                                      _DetailRow(
+                                        label: 'Payment status',
+                                        value: _delivery!['payment_status']
+                                            ?.toString(),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                _DetailCard(
+                                  title: 'Timeline',
+                                  borderColor: borderColor,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      _DetailRow(
+                                        label: 'Created',
+                                        value: _formatDate(
+                                            _delivery!['created_at']),
+                                      ),
+                                      if (_delivery!['scheduled_pickup'] !=
+                                          null)
+                                        _DetailRow(
+                                          label: 'Scheduled pickup',
+                                          value: _formatDate(_delivery![
+                                              'scheduled_pickup']),
+                                        ),
+                                      if (_delivery!['scheduled_delivery'] !=
+                                          null)
+                                        _DetailRow(
+                                          label: 'Scheduled delivery',
+                                          value: _formatDate(_delivery![
+                                              'scheduled_delivery']),
+                                        ),
+                                      if (_delivery!['delivered_at'] != null)
+                                        _DetailRow(
+                                          label: 'Delivered',
+                                          value: _formatDate(
+                                              _delivery!['delivered_at']),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: AppColors.buttonHeightMD,
+                                  child: ElevatedButton(
+                                    onPressed: _isCancelling
+                                        ? null
+                                        : _navigateToTracking,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: HomeColors.violet,
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                            AppColors.radiusLG),
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      'Track Delivery',
                                       style: TextStyle(
-                                        color: AppColors.errorColor,
                                         fontSize: 16,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: AppColors.buttonHeightMD,
+                                  child: OutlinedButton(
+                                    onPressed:
+                                        _isCancelling ? null : _cancelOrder,
+                                    style: OutlinedButton.styleFrom(
+                                      side: const BorderSide(
+                                        color: AppColors.errorColor,
+                                        width: 1.5,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                            AppColors.radiusLG),
+                                      ),
+                                    ),
+                                    child: _isCancelling
+                                        ? const SizedBox(
+                                            width: 24,
+                                            height: 24,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              color: AppColors.errorColor,
+                                            ),
+                                          )
+                                        : const Text(
+                                            'Cancel Order',
+                                            style: TextStyle(
+                                              color: AppColors.errorColor,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
+          );
+        },
+      ),
     );
   }
 }
@@ -508,12 +544,11 @@ class _DetailCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppColors.spaceMD),
       decoration: BoxDecoration(
-        color: scheme.surface,
+        color: HomeColors.surface,
         borderRadius: BorderRadius.circular(AppColors.radiusLG),
         border: Border.all(color: borderColor),
       ),
@@ -524,6 +559,7 @@ class _DetailCard extends StatelessWidget {
             title,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w600,
+                  color: HomeColors.textPrimary,
                 ),
           ),
           const SizedBox(height: 12),
@@ -542,7 +578,6 @@ class _DetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     final v = value?.trim();
     if (v == null || v.isEmpty || v == 'null') return const SizedBox.shrink();
     return Padding(
@@ -555,7 +590,7 @@ class _DetailRow extends StatelessWidget {
             child: Text(
               label,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: scheme.onSurfaceVariant,
+                    color: HomeColors.textMuted,
                   ),
             ),
           ),
@@ -564,6 +599,7 @@ class _DetailRow extends StatelessWidget {
               v,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w500,
+                    color: HomeColors.textPrimary,
                   ),
             ),
           ),

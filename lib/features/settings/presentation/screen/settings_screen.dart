@@ -279,7 +279,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
       if (shouldLogout == true) {
         final authService = AuthService();
-        await authService.clearAllData();
+        await authService.logout();
         await GuestBrowseService().enterGuestBrowseMode();
 
         if (context.mounted) {

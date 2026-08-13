@@ -3,8 +3,8 @@ import 'app_colors.dart';
 
 /// Upper home service tabs; also drives global accent while Home dashboard tab is active.
 enum HomeServiceMode {
-  foodGroceries,
   courier,
+  foodGroceries,
   taxi,
   handyman,
 }
@@ -25,10 +25,10 @@ abstract final class ServiceTabPalette {
 
   static Color seedFor(HomeServiceMode mode) {
     switch (mode) {
-      case HomeServiceMode.foodGroceries:
-        return foodGroceries;
       case HomeServiceMode.courier:
         return courier;
+      case HomeServiceMode.foodGroceries:
+        return foodGroceries;
       case HomeServiceMode.taxi:
         return taxi;
       case HomeServiceMode.handyman:

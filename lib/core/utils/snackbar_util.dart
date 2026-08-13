@@ -67,6 +67,14 @@ class SnackbarUtil {
     );
   }
 
+  static void showComingSoon(
+    BuildContext context,
+    String message, {
+    Duration duration = const Duration(seconds: 3),
+  }) {
+    AuthSnackBar.comingSoon(context, message);
+  }
+
   static void showCustom(
     BuildContext context,
     String message, {

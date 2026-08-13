@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:hudhud_delivery/app/navigation/app_navigator.dart';
+import 'package:hudhud_delivery/app/navigation/fcm_notification_router.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/models/notification_model.dart';
@@ -204,7 +206,14 @@ class _NotificationItem extends StatelessWidget {
         ? AuthScreenColors.textMuted
         : AuthScreenColors.orange;
     final timeAgo = _formatTimeAgo(notification.createdAt);
-    return Container(
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: notification.routingData.isEmpty
+            ? null
+            : () => _onTap(context),
+        child: Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -262,6 +271,17 @@ class _NotificationItem extends StatelessWidget {
           ),
         ],
       ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onTap(BuildContext context) async {
+    final navKey = AppNavigator.navigatorKey;
+    if (navKey == null) return;
+    await openNotificationFromPayloadMap(
+      navKey,
+      notification.routingData,
     );
   }
 

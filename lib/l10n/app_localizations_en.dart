@@ -2602,14 +2602,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingWelcomeSubtitle =>
-      'Your city, delivered — food, rides, parcels, and home services in one place.';
+      'Send parcels across town today — food, rides, and home services are coming soon.';
 
   @override
   String get onboardingFoodTitle => 'Food & Groceries';
 
   @override
   String get onboardingFoodDescription =>
-      'Order meals and groceries from local shops in minutes.';
+      'Coming soon — order meals and groceries from local shops in minutes.';
 
   @override
   String get onboardingCourierTitle => 'Courier';
@@ -2623,14 +2623,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingTaxiDescription =>
-      'Book a ride anywhere in the city with a tap.';
+      'Coming soon — book a ride anywhere in the city with a tap.';
 
   @override
   String get onboardingHandymanTitle => 'Handyman';
 
   @override
   String get onboardingHandymanDescription =>
-      'Book trusted pros for repairs and home services.';
+      'Coming soon — book trusted pros for repairs and home services.';
 
   @override
   String get onboardingGetStarted => 'Get Started';
@@ -2654,35 +2654,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingSpotlightFoodDescription =>
-      'Browse restaurants and shops to order food and essentials.';
+      'Coming soon — browse restaurants and shops to order food and essentials.';
 
   @override
   String get onboardingSpotlightCourierTitle => 'Courier';
 
   @override
   String get onboardingSpotlightCourierDescription =>
-      'Send parcels and documents with on-demand pickup.';
+      'Send parcels and documents with on-demand pickup — available now.';
 
   @override
   String get onboardingSpotlightTaxiTitle => 'Taxi';
 
   @override
   String get onboardingSpotlightTaxiDescription =>
-      'Request a ride and track your driver in real time.';
+      'Coming soon — request a ride and track your driver in real time.';
 
   @override
   String get onboardingSpotlightHandymanTitle => 'Handyman';
 
   @override
   String get onboardingSpotlightHandymanDescription =>
-      'Find skilled help for home repairs and maintenance.';
+      'Coming soon — find skilled help for home repairs and maintenance.';
 
   @override
   String get onboardingSpotlightDoneTitle => 'You\'re all set!';
 
   @override
   String get onboardingSpotlightDoneDescription =>
-      'Switch between services anytime using the tabs above. Enjoy HudHud!';
+      'Courier is ready now. Food, Taxi, and Handyman are coming soon — switch tabs anytime. Enjoy HudHud!';
 
   @override
   String get onboardingDebugReplayTour => 'Replay home tour (debug)';

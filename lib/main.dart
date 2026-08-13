@@ -26,7 +26,8 @@ import 'app/services/fcm_service.dart';
 import 'app/services/auth_service.dart';
 import 'app/services/guest_browse_service.dart';
 import 'app/services/remote_config_service.dart';
-import 'app/navigation/fcm_order_navigation.dart';
+import 'app/navigation/app_navigator.dart';
+import 'app/navigation/fcm_notification_router.dart';
 
 // Orders feature
 import 'features/orders/data/providers/orders_data_provider.dart';
@@ -41,6 +42,7 @@ void main() async {
 
   // Must exist before FCM tap handlers so they can push routes.
   final navigatorKey = GlobalKey<NavigatorState>();
+  AppNavigator.key = navigatorKey;
 
   // Initialize FCM (non-blocking: app starts even if Firebase/FCM fails)
   FcmService? fcmService;
@@ -48,7 +50,7 @@ void main() async {
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
     fcmService = await FcmService.initialize();
     fcmService.onNotificationTap = (message, {localPayload}) {
-      openOrderDetailsFromFcm(
+      openNotificationFromFcm(
         navigatorKey,
         message: message,
         localPayload: localPayload,
