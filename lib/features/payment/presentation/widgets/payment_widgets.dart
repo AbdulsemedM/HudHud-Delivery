@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../model/payment_initiate_result.dart';
 
 class PaymentMethodCard extends StatelessWidget {
   final String id;
@@ -116,6 +117,9 @@ class PaymentMethodCard extends StatelessWidget {
 
   /// Shared icon lookup — also used by [PaymentMethodGridSection].
   static IconData iconForId(String id) {
+    if (isEbirrPaymentMethodCode(id)) {
+      return Icons.wallet;
+    }
     switch (id) {
       case 'wallet':
         return Icons.account_balance_wallet_rounded;
@@ -131,8 +135,6 @@ class PaymentMethodCard extends StatelessWidget {
         return Icons.payment;
       case 'cbe':
         return Icons.account_balance;
-      case 'ebirr':
-        return Icons.wallet;
       case 'edahab':
         return Icons.phone_android_rounded;
       case 'sahay':
@@ -148,6 +150,9 @@ class PaymentMethodCard extends StatelessWidget {
 
   /// Shared color lookup — also used by [PaymentMethodGridSection].
   static Color colorForId(String id) {
+    if (isEbirrPaymentMethodCode(id)) {
+      return const Color(0xFFFF9800);
+    }
     switch (id) {
       case 'wallet':
         return const Color(0xFF2196F3);
@@ -163,8 +168,6 @@ class PaymentMethodCard extends StatelessWidget {
         return const Color(0xFF4CAF50);
       case 'cbe':
         return const Color(0xFF2196F3);
-      case 'ebirr':
-        return const Color(0xFFFF9800);
       case 'edahab':
         return const Color(0xFF1E88E5);
       case 'sahay':

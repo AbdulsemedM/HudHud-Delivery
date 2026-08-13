@@ -3,6 +3,9 @@ import 'package:flutter/services.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../model/payment_initiate_result.dart';
 
+bool _usesEbirrPhoneFormat(String methodCode) =>
+    isEbirrPaymentMethodCode(methodCode);
+
 /// Phone hint / format guide per payment method.
 String paymentPhoneHint(String methodCode) {
   switch (methodCode) {
@@ -12,9 +15,8 @@ String paymentPhoneHint(String methodCode) {
       return '656013956';
     case 'sahay':
       return '251911679409';
-    case 'ebirr':
-      return '251915741199';
     default:
+      if (_usesEbirrPhoneFormat(methodCode)) return '251915741199';
       return 'Phone number';
   }
 }
@@ -26,9 +28,11 @@ String paymentPhoneLabel(String methodCode) {
     case 'edahab':
       return 'Phone (65XXXXXXXXX)';
     case 'sahay':
-    case 'ebirr':
       return 'Phone (251XXXXXXXXX)';
     default:
+      if (_usesEbirrPhoneFormat(methodCode)) {
+        return 'Phone (251XXXXXXXXX)';
+      }
       return 'Phone number';
   }
 }
@@ -53,7 +57,6 @@ String normalizePaymentPhone(String? phone, String methodCode) {
       if (digits.startsWith('0')) return '65${digits.substring(1)}';
       return digits;
     case 'sahay':
-    case 'ebirr':
       if (digits.startsWith('251') && digits.length >= 12) {
         return digits.substring(0, 12);
       }
@@ -66,6 +69,19 @@ String normalizePaymentPhone(String? phone, String methodCode) {
       }
       return '251${digits.padLeft(9, '0')}';
     default:
+      if (_usesEbirrPhoneFormat(methodCode)) {
+        if (digits.startsWith('251') && digits.length >= 12) {
+          return digits.substring(0, 12);
+        }
+        if (digits.startsWith('0') && digits.length >= 10) {
+          return '251${digits.substring(1, 10)}';
+        }
+        if (digits.length == 9) return '251$digits';
+        if (digits.length > 9) {
+          return '251${digits.substring(digits.length - 9)}';
+        }
+        return '251${digits.padLeft(9, '0')}';
+      }
       return digits;
   }
 }
@@ -86,9 +102,14 @@ String? validatePaymentPhone(String? phone, String methodCode) {
         return 'Enter a valid eDahab number (65XXXXXXXXX)';
       }
     case 'sahay':
-    case 'ebirr':
       if (!RegExp(r'^2519\d{8}$').hasMatch(normalized)) {
         return 'Enter a valid phone number (251XXXXXXXXX)';
+      }
+    default:
+      if (_usesEbirrPhoneFormat(methodCode)) {
+        if (!RegExp(r'^2519\d{8}$').hasMatch(normalized)) {
+          return 'Enter a valid phone number (251XXXXXXXXX)';
+        }
       }
   }
   return null;
@@ -277,6 +298,7 @@ Map<String, dynamic> buildInitiatePaymentDetails({
       details['provider'] = 'kaafi';
     }
   }
+  // ebirr_kaafi / ebirr_coop: provider is encoded in payment_method_code.
 
   return details;
 }

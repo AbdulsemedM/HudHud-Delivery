@@ -241,6 +241,8 @@ void main() {
     test('needs details form for mobile money methods', () {
       expect(paymentMethodNeedsDetailsForm('sahay'), isTrue);
       expect(paymentMethodNeedsDetailsForm('ebirr'), isTrue);
+      expect(paymentMethodNeedsDetailsForm('ebirr_kaafi'), isTrue);
+      expect(paymentMethodNeedsDetailsForm('ebirr_coop'), isTrue);
       expect(paymentMethodNeedsDetailsForm('waafi'), isTrue);
       expect(paymentMethodNeedsDetailsForm('edahab'), isTrue);
       expect(paymentMethodNeedsDetailsForm('wallet'), isFalse);
@@ -251,9 +253,17 @@ void main() {
         {'id': 'wallet', 'enabled': true},
         {'id': 'telebirr', 'enabled': true},
         {'id': 'qpay', 'enabled': true},
-        {'id': 'ebirr', 'enabled': true},
+        {'id': 'ebirr_kaafi', 'enabled': true},
+        {'id': 'ebirr_coop', 'enabled': true},
       ]);
-      expect(filtered.map((m) => m['id']), ['wallet', 'ebirr']);
+      expect(filtered.map((m) => m['id']), ['wallet', 'ebirr_kaafi', 'ebirr_coop']);
+    });
+
+    test('isEbirrPaymentMethodCode recognizes ebirr variants', () {
+      expect(isEbirrPaymentMethodCode('ebirr'), isTrue);
+      expect(isEbirrPaymentMethodCode('ebirr_kaafi'), isTrue);
+      expect(isEbirrPaymentMethodCode('ebirr_coop'), isTrue);
+      expect(isEbirrPaymentMethodCode('waafi'), isFalse);
     });
   });
 
@@ -261,7 +271,7 @@ void main() {
     test('normalizes phones per method', () {
       expect(normalizePaymentPhone('0712345678', 'waafi'), '254712345678');
       expect(normalizePaymentPhone('0911679409', 'sahay'), '251911679409');
-      expect(normalizePaymentPhone('251915741199', 'ebirr'), '251915741199');
+      expect(normalizePaymentPhone('251915741199', 'ebirr_kaafi'), '251915741199');
       expect(normalizePaymentPhone('656013956', 'edahab'), '656013956');
     });
 
@@ -269,7 +279,7 @@ void main() {
       expect(validatePaymentPhone('254712345678', 'waafi'), isNull);
       expect(validatePaymentPhone('12345', 'waafi'), isNotNull);
       expect(validatePaymentPhone('251911679409', 'sahay'), isNull);
-      expect(validatePaymentPhone('811234567', 'ebirr'), isNotNull);
+      expect(validatePaymentPhone('811234567', 'ebirr_coop'), isNotNull);
     });
 
     test('buildInitiatePaymentDetails includes use_hpp and provider', () {

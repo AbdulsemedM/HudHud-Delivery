@@ -18,8 +18,10 @@ void main() {
 
     test('falls back to default funding methods', () {
       final filtered = filterWalletFundingMethods([]);
-      expect(filtered.map((m) => m['id']).toSet(),
-          equals(kWalletFundingMethodCodes));
+      expect(
+        filtered.map((m) => m['id']).toSet(),
+        equals(kDefaultWalletFundingMethods.map((m) => m['id']).toSet()),
+      );
     });
   });
 

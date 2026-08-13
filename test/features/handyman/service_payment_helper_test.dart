@@ -21,7 +21,10 @@ void main() {
     test('falls back to default list without COD when empty', () {
       final filtered = filterServicePaymentMethods([]);
       final ids = filtered.map((m) => m['id']).toSet();
-      expect(ids, equals(kServicePaymentMethodCodes));
+      expect(
+        ids,
+        equals(kDefaultServicePaymentMethods.map((m) => m['id']).toSet()),
+      );
       expect(ids, isNot(contains('cash_on_delivery')));
     });
   });
@@ -46,6 +49,14 @@ void main() {
       );
       expect(
         servicePaymentPathForMethod('ebirr'),
+        ApiConstants.paymentsServiceEbirr,
+      );
+      expect(
+        servicePaymentPathForMethod('ebirr_kaafi'),
+        ApiConstants.paymentsServiceEbirr,
+      );
+      expect(
+        servicePaymentPathForMethod('ebirr_coop'),
         ApiConstants.paymentsServiceEbirr,
       );
     });
@@ -108,6 +119,22 @@ void main() {
       expect(body['service_request_id'], 42);
       expect(body['phone'], '251915741199');
       expect(body['provider'], 'ebirr');
+    });
+
+    test('ebirr provider-specific codes map provider from method code', () {
+      final kaafi = buildServicePaymentBody(
+        methodCode: 'ebirr_kaafi',
+        serviceRequestId: 42,
+        paymentDetails: {'phone': '251915741199'},
+      );
+      expect(kaafi['provider'], 'kaafi');
+
+      final coop = buildServicePaymentBody(
+        methodCode: 'ebirr_coop',
+        serviceRequestId: 42,
+        paymentDetails: {'phone': '251915741199'},
+      );
+      expect(coop['provider'], 'coop');
     });
   });
 }

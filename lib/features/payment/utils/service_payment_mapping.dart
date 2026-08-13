@@ -8,6 +8,8 @@ const Set<String> kServicePaymentMethodCodes = {
   'edahab',
   'sahay',
   'ebirr',
+  'ebirr_kaafi',
+  'ebirr_coop',
 };
 
 /// Fallback list when API methods are unavailable (excludes COD).
@@ -16,7 +18,8 @@ const List<Map<String, dynamic>> kDefaultServicePaymentMethods = [
   {'id': 'waafi', 'name': 'Waafi Pay', 'enabled': true},
   {'id': 'edahab', 'name': 'eDahab', 'enabled': true},
   {'id': 'sahay', 'name': 'Sahay', 'enabled': true},
-  {'id': 'ebirr', 'name': 'eBirr', 'enabled': true},
+  {'id': 'ebirr_kaafi', 'name': 'eBirr (Kaafi)', 'enabled': true},
+  {'id': 'ebirr_coop', 'name': 'eBirr (Coop)', 'enabled': true},
 ];
 
 /// Filters API payment methods to service convenience allowlist.
@@ -44,6 +47,8 @@ String servicePaymentPathForMethod(String methodCode) {
     case 'sahay':
       return ApiConstants.paymentsServiceSahay;
     case 'ebirr':
+    case 'ebirr_kaafi':
+    case 'ebirr_coop':
       return ApiConstants.paymentsServiceEbirr;
     default:
       throw ArgumentError('Unsupported service payment method: $methodCode');
@@ -77,7 +82,11 @@ Map<String, dynamic> buildServicePaymentBody({
     body['use_hpp'] = details['use_hpp'] == true;
   }
 
-  if (methodCode == 'ebirr') {
+  if (methodCode == 'ebirr_kaafi') {
+    body['provider'] = 'kaafi';
+  } else if (methodCode == 'ebirr_coop') {
+    body['provider'] = 'coop';
+  } else if (methodCode == 'ebirr') {
     body['provider'] = 'ebirr';
   }
 

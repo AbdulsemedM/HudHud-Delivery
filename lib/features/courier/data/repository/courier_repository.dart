@@ -1,3 +1,4 @@
+import '../../utils/delivery_estimate.dart';
 import '../data_provider/courier_data_provider.dart';
 import '../models/create_delivery_result.dart';
 
@@ -31,17 +32,17 @@ class CourierRepository {
 
       if (response['statusCode'] == 200 || response['statusCode'] == 201) {
         final rawData = response['data'];
-        // Handle both direct response and wrapped in "data" key
-        final data = _extractEstimateData(rawData);
+        final estimate = parseDeliveryEstimate(rawData);
         return {
           'success': true,
-          'estimatedDistance': _parseDouble(data['estimated_distance']),
-          'estimatedDuration': _parseInt(data['estimated_duration']),
-          'estimatedCost': _parseDouble(data['estimated_cost']),
-          'currency': data['currency'] as String? ?? 'ETB',
-          'baseFare': _parseDouble(data['base_fare']),
-          'perKmRate': _parseDouble(data['per_km_rate']),
-          'weightCharge': _parseDouble(data['weight_charge']),
+          'estimatedDistance': estimate.estimatedDistance,
+          'estimatedDuration': estimate.estimatedDuration,
+          'estimatedCost': estimate.estimatedCost,
+          'currency': estimate.currency,
+          'baseDeliveryFee': estimate.baseDeliveryFee,
+          'distanceRate': estimate.distanceRate,
+          'freeDistance': estimate.freeDistance,
+          'weightCharge': estimate.weightCharge,
           'data': rawData,
           'message': 'Estimate retrieved successfully',
         };
@@ -233,35 +234,6 @@ class CourierRepository {
       errorMessage = _cleanErrorMessage(errorMessage);
       return {'success': false, 'delivery': null, 'message': errorMessage};
     }
-  }
-
-  /// Extracts estimate data - handles both direct response and wrapped in "data" key
-  Map<String, dynamic> _extractEstimateData(dynamic rawData) {
-    if (rawData is Map<String, dynamic>) {
-      if (rawData.containsKey('estimated_distance')) {
-        return rawData;
-      }
-      final nested = rawData['data'];
-      if (nested is Map<String, dynamic>) {
-        return nested;
-      }
-    }
-    return {};
-  }
-
-  double? _parseDouble(dynamic value) {
-    if (value == null) return null;
-    if (value is num) return value.toDouble();
-    if (value is String) return double.tryParse(value);
-    return null;
-  }
-
-  int? _parseInt(dynamic value) {
-    if (value == null) return null;
-    if (value is int) return value;
-    if (value is num) return value.toInt();
-    if (value is String) return int.tryParse(value);
-    return null;
   }
 
   dynamic _extractOrderId(dynamic data) {

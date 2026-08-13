@@ -19,6 +19,8 @@ const Set<String> kAllowedPaymentMethodCodes = {
   'edahab',
   'sahay',
   'ebirr',
+  'ebirr_kaafi',
+  'ebirr_coop',
 };
 
 /// Fallback display list when API methods are unavailable.
@@ -28,8 +30,15 @@ const List<Map<String, dynamic>> kDefaultAllowedPaymentMethods = [
   {'id': 'waafi', 'name': 'Waafi Pay', 'enabled': true},
   {'id': 'edahab', 'name': 'eDahab', 'enabled': true},
   {'id': 'sahay', 'name': 'Sahay', 'enabled': true},
-  {'id': 'ebirr', 'name': 'eBirr', 'enabled': true},
+  {'id': 'ebirr_kaafi', 'name': 'eBirr (Kaafi)', 'enabled': true},
+  {'id': 'ebirr_coop', 'name': 'eBirr (Coop)', 'enabled': true},
 ];
+
+/// True for legacy `ebirr` and provider-specific API codes.
+bool isEbirrPaymentMethodCode(String? code) {
+  if (code == null || code.isEmpty) return false;
+  return code == 'ebirr' || code == 'ebirr_kaafi' || code == 'ebirr_coop';
+}
 
 /// Parses POST /api/payments/initiate responses (and Ebirr RCS_SUCCESS quirk).
 class PaymentInitiateResult {
@@ -191,7 +200,7 @@ bool paymentMethodNeedsDetailsForm(String? code) {
   return code == 'sahay' ||
       code == 'edahab' ||
       code == 'waafi' ||
-      code == 'ebirr';
+      isEbirrPaymentMethodCode(code);
 }
 
 bool isAllowedPaymentMethodCode(String? code) {

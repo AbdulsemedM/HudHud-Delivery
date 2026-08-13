@@ -938,7 +938,8 @@ class PaymentMethodGridSection extends StatelessWidget {
             {'id': 'waafi', 'name': 'Waafi Pay', 'enabled': true},
             {'id': 'edahab', 'name': 'eDahab', 'enabled': true},
             {'id': 'sahay', 'name': 'Sahay', 'enabled': true},
-            {'id': 'ebirr', 'name': 'eBirr', 'enabled': true},
+            {'id': 'ebirr_kaafi', 'name': 'eBirr (Kaafi)', 'enabled': true},
+            {'id': 'ebirr_coop', 'name': 'eBirr (Coop)', 'enabled': true},
           ];
 
     return SizedBox(

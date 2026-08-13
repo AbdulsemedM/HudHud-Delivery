@@ -4,13 +4,16 @@ const Set<String> kWalletFundingMethodCodes = {
   'edahab',
   'sahay',
   'ebirr',
+  'ebirr_kaafi',
+  'ebirr_coop',
 };
 
 const List<Map<String, dynamic>> kDefaultWalletFundingMethods = [
   {'id': 'waafi', 'name': 'Waafi Pay', 'enabled': true},
   {'id': 'edahab', 'name': 'eDahab', 'enabled': true},
   {'id': 'sahay', 'name': 'Sahay', 'enabled': true},
-  {'id': 'ebirr', 'name': 'eBirr', 'enabled': true},
+  {'id': 'ebirr_kaafi', 'name': 'eBirr (Kaafi)', 'enabled': true},
+  {'id': 'ebirr_coop', 'name': 'eBirr (Coop)', 'enabled': true},
 ];
 
 List<Map<String, dynamic>> filterWalletFundingMethods(

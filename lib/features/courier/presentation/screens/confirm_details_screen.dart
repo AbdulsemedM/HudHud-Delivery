@@ -12,6 +12,7 @@ import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data
 import 'package:hudhud_delivery/features/courier/data/models/create_delivery_result.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
+import 'package:hudhud_delivery/features/courier/utils/delivery_estimate.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_payment_helper.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/features/payment/data/data_provider/payment_data_provider.dart';
@@ -76,6 +77,8 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
   double? _estimatedDistance;
   int? _estimatedDuration;
   String _estimatedCurrency = 'ETB';
+  double? _baseDeliveryFee;
+  double? _weightCharge;
   String? _estimateError;
   List<LatLng>? _routePolylinePoints;
   bool? _hasGoogleMapsApiKey;
@@ -167,6 +170,9 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
     );
   }
 
+  bool get _hasServerEstimate =>
+      !_isLoadingEstimate && _estimateError == null && _estimatedCost != null;
+
   String _mapPackageType(String itemType) {
     const mapping = {
       'Documents': 'document',
@@ -222,7 +228,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
       dropoffLatitude: widget.deliveryPosition!.latitude,
       dropoffLongitude: widget.deliveryPosition!.longitude,
       vehicleType: _mapVehicleType(widget.selectedVehicle),
-      serviceType: widget.isInstantDelivery ? 'express' : 'standard',
+      serviceType: deliveryServiceType(isInstantDelivery: widget.isInstantDelivery),
     );
 
     if (mounted) {
@@ -233,15 +239,32 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
           _estimatedDistance = result['estimatedDistance'] as double?;
           _estimatedDuration = result['estimatedDuration'] as int?;
           _estimatedCurrency = result['currency'] as String? ?? 'ETB';
-          _estimateError = null;
+          _baseDeliveryFee = result['baseDeliveryFee'] as double?;
+          _weightCharge = result['weightCharge'] as double?;
+          _estimateError = _estimatedCost == null
+              ? 'Estimate did not include a cost'
+              : null;
         } else {
           _estimateError = result['message'] as String?;
+          _estimatedCost = null;
+          _baseDeliveryFee = null;
+          _weightCharge = null;
         }
       });
     }
   }
 
   Future<void> _createDeliveryRequest() async {
+    if (!_hasServerEstimate) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Wait for a server price estimate before booking'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     final user = await AuthService().getStoredUser();
 
     final requestData = <String, dynamic>{
@@ -257,7 +280,8 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
       'dropoff_latitude': widget.deliveryPosition?.latitude ?? 0,
       'dropoff_longitude': widget.deliveryPosition?.longitude ?? 0,
       'vehicle_type': _mapVehicleType(widget.selectedVehicle),
-      'service_type': widget.isInstantDelivery ? 'same_day' : 'standard',
+      'service_type':
+          deliveryServiceType(isInstantDelivery: widget.isInstantDelivery),
       'scheduled_pickup': _formatScheduledDateTime(widget.scheduledPickup),
       'scheduled_delivery': _formatScheduledDateTime(widget.scheduledDelivery),
       'estimated_distance': _estimatedDistance ?? 0,
@@ -423,7 +447,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
             mapCenter = widget.deliveryPosition!;
           }
 
-          String estimatedFeeText = 'ETB 150';
+          String estimatedFeeText = 'N/A';
           if (_isLoadingEstimate) {
             estimatedFeeText = 'Loading...';
           } else if (_estimateError != null) {
@@ -432,6 +456,20 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
             estimatedFeeText =
                 '$_estimatedCurrency ${_estimatedCost!.toStringAsFixed(2)}';
           }
+
+          final breakdownParts = <String>[];
+          if (_baseDeliveryFee != null) {
+            breakdownParts.add(
+              'Base ${_baseDeliveryFee!.toStringAsFixed(2)}',
+            );
+          }
+          if (_weightCharge != null) {
+            breakdownParts.add(
+              'Weight ${_weightCharge!.toStringAsFixed(2)}',
+            );
+          }
+          final breakdownText =
+              breakdownParts.isEmpty ? null : breakdownParts.join(' · ');
 
           final theme = Theme.of(context);
           const borderColor = HomeColors.border;
@@ -642,6 +680,23 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                                                               .violet,
                                                         ),
                                                       ),
+                                                if (breakdownText != null &&
+                                                    !_isLoadingEstimate &&
+                                                    _estimateError == null)
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            top: 4),
+                                                    child: Text(
+                                                      breakdownText,
+                                                      style: theme
+                                                          .textTheme.bodySmall
+                                                          ?.copyWith(
+                                                        color: HomeColors
+                                                            .textMuted,
+                                                      ),
+                                                    ),
+                                                  ),
                                                 if (_estimateError != null)
                                                   Padding(
                                                     padding:
@@ -681,7 +736,8 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                                         width: double.infinity,
                                         height: AppColors.buttonHeightMD,
                                         child: ElevatedButton(
-                                          onPressed: _isLoadingRequest
+                                          onPressed: (_isLoadingRequest ||
+                                                  !_hasServerEstimate)
                                               ? null
                                               : _createDeliveryRequest,
                                           style: ElevatedButton.styleFrom(
