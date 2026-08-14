@@ -48,7 +48,21 @@ class ApiErrorResult {
 
   /// Primary user-facing text, with balance/gateway enrichment when present.
   String get displayMessage {
-    final parts = <String>[message];
+    final fieldMessage = _joinedFieldMessages(fieldErrors);
+    final base = (fieldMessage != null &&
+            fieldMessage.isNotEmpty &&
+            _isGenericValidationEnvelope(message))
+        ? fieldMessage
+        : message;
+
+    final parts = <String>[base];
+
+    if (fieldMessage != null &&
+        fieldMessage.isNotEmpty &&
+        !_isGenericValidationEnvelope(message) &&
+        !base.contains(fieldMessage)) {
+      parts.add(fieldMessage);
+    }
 
     if (isInsufficientBalance &&
         balance != null &&
@@ -104,9 +118,16 @@ ApiErrorResult parseApiErrorResult(
 
   final topMessage = _stringMessage(root['message']);
   final fieldMessage = _joinedFieldMessages(fieldErrors);
-  final primaryMessage = (topMessage != null && topMessage.isNotEmpty)
-      ? topMessage
-      : (fieldMessage ?? fallback);
+  // Prefer concrete field errors over generic envelopes like "Validation Error".
+  final primaryMessage = (fieldMessage != null &&
+          fieldMessage.isNotEmpty &&
+          (topMessage == null ||
+              topMessage.isEmpty ||
+              _isGenericValidationEnvelope(topMessage)))
+      ? fieldMessage
+      : ((topMessage != null && topMessage.isNotEmpty)
+          ? topMessage
+          : (fieldMessage ?? fallback));
 
   final balance = _parseDouble(nestedData['balance'] ?? root['balance']);
   final requiredAmount =
@@ -236,6 +257,15 @@ String? _joinedFieldMessages(Map<String, List<String>> fieldErrors) {
   }
   if (parts.isEmpty) return null;
   return parts.join(' ');
+}
+
+bool _isGenericValidationEnvelope(String message) {
+  final normalized = message.trim().toLowerCase();
+  return normalized.isEmpty ||
+      normalized == 'validation error' ||
+      normalized == 'validation failed' ||
+      normalized == 'the given data was invalid' ||
+      normalized == 'the given data was invalid.';
 }
 
 String? _stringMessage(dynamic message) {
