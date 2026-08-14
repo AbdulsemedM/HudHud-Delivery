@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/utils/phone_util.dart';
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/features/payment/data/data_provider/payment_data_provider.dart';
@@ -48,6 +50,7 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
       TextEditingController();
   final TextEditingController _recipientPhoneController =
       TextEditingController();
+  final TextEditingController _senderPhoneController = TextEditingController();
 
   String _whoPays = 'me'; // 'me' or 'recipient'
   String? _paymentType; // API id (e.g. 'wallet', 'waafi')
@@ -81,6 +84,20 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
       ),
     );
     _fetchPaymentMethods();
+    _prefillSenderPhone();
+  }
+
+  Future<void> _prefillSenderPhone() async {
+    final user = await AuthService().getStoredUser();
+    final phone = user?.phone?.trim() ?? '';
+    if (phone.isEmpty || !mounted) return;
+    final parts = splitPhoneForDisplay(phone);
+    final display = parts.nationalNumber.isEmpty
+        ? phone
+        : '0${parts.nationalNumber}';
+    setState(() {
+      _senderPhoneController.text = display;
+    });
   }
 
   Future<void> _fetchPaymentMethods() async {
@@ -129,6 +146,7 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
     _packageDescriptionController.dispose();
     _recipientNameController.dispose();
     _recipientPhoneController.dispose();
+    _senderPhoneController.dispose();
     super.dispose();
   }
 
@@ -200,6 +218,17 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
       }
     }
 
+    final senderPhone = normalizePhoneToBackend(_senderPhoneController.text);
+    if (!RegExp(r'^2519\d{8}$').hasMatch(senderPhone)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a valid sender phone (09xxxxxxxx)'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     if (_recipientNameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -238,6 +267,7 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
           scheduledDelivery: widget.scheduledDelivery,
           whoPays: _whoPays,
           paymentType: _paymentType!,
+          senderPhone: senderPhone,
           recipientName: _recipientNameController.text,
           recipientPhone: _recipientPhoneController.text,
           packageImagePath: _packageImagePath,
@@ -596,6 +626,50 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                               },
                             ),
                           ],
+                          const SizedBox(height: 24),
+                          const Text(
+                            'Sender Information',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: HomeColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: _senderPhoneController,
+                            keyboardType: TextInputType.phone,
+                            style: const TextStyle(color: HomeColors.textPrimary),
+                            decoration: InputDecoration(
+                              labelText: 'Sender phone (09xxxxxxxx)',
+                              hintText: '0912345678',
+                              labelStyle: const TextStyle(
+                                fontSize: 14,
+                                color: HomeColors.textPrimary,
+                              ),
+                              hintStyle: const TextStyle(
+                                color: HomeColors.textMuted,
+                              ),
+                              filled: true,
+                              fillColor: fieldFill,
+                              border: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.circular(AppColors.radiusLG),
+                                borderSide: const BorderSide(color: outline),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.circular(AppColors.radiusLG),
+                                borderSide: const BorderSide(color: outline),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.circular(AppColors.radiusLG),
+                                borderSide:
+                                    const BorderSide(color: HomeColors.violet),
+                              ),
+                            ),
+                          ),
                           const SizedBox(height: 24),
                           // Recipient Information
                           const Text(

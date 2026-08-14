@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
-import 'package:hudhud_delivery/features/checkout/data/data_provider/checkout_data_provider.dart';
-import 'package:hudhud_delivery/features/checkout/data/repository/checkout_repository.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
+import 'package:hudhud_delivery/features/wallet/data/providers/wallet_data_provider.dart';
+import 'package:hudhud_delivery/features/wallet/data/repositories/wallet_repository.dart';
 import 'package:lottie/lottie.dart';
 import 'delivery_tracking_screen.dart';
 
@@ -51,7 +51,7 @@ class FindingCourierScreen extends StatefulWidget {
 
 class _FindingCourierScreenState extends State<FindingCourierScreen> {
   late final CourierRepository _courierRepository;
-  late final CheckoutRepository _checkoutRepository;
+  late final WalletRepository _walletRepository;
   Timer? _pollTimer;
   bool _isCancelling = false;
   bool _hasNavigated = false;
@@ -73,8 +73,8 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
         apiService: ApiService.instance,
       ),
     );
-    _checkoutRepository = CheckoutRepository(
-      checkoutDataProvider: CheckoutDataProvider(
+    _walletRepository = WalletRepository(
+      walletDataProvider: WalletDataProvider(
         apiService: ApiService.instance,
       ),
     );
@@ -160,8 +160,10 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Cancel Order'),
-        content: const Text('Are you sure you want to cancel this order?'),
+        title: const Text('Cancel delivery'),
+        content: const Text(
+          'Are you sure you want to cancel this delivery? Any payment will be refunded to your wallet.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -187,31 +189,45 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
     }
 
     setState(() => _isCancelling = true);
-    final result = await _checkoutRepository.cancelOrder(deliveryId);
+    final result = await _courierRepository.cancelDelivery(
+      deliveryId: deliveryId,
+    );
     if (!mounted) return;
-    setState(() => _isCancelling = false);
 
-    if (result['success'] == true) {
-      _pollTimer?.cancel();
+    if (result['success'] != true) {
+      setState(() => _isCancelling = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            result['message']?.toString() ?? 'Order cancelled successfully',
-          ),
-          backgroundColor: Colors.green,
-        ),
-      );
-      Navigator.pop(context);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            result['message']?.toString() ?? "You can't cancel this order",
+            result['message']?.toString() ?? "You can't cancel this delivery",
           ),
           backgroundColor: Colors.red,
         ),
       );
+      return;
     }
+
+    _pollTimer?.cancel();
+
+    String successMessage =
+        result['message']?.toString() ?? 'Delivery cancelled successfully';
+    try {
+      final balance = await _walletRepository.getBalance();
+      successMessage =
+          'Delivery cancelled. Wallet balance: ${balance.currency} ${balance.balance.toStringAsFixed(2)}';
+    } catch (_) {
+      // Keep cancel success message if balance fetch fails.
+    }
+
+    if (!mounted) return;
+    setState(() => _isCancelling = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(successMessage),
+        backgroundColor: Colors.green,
+      ),
+    );
+    Navigator.pop(context);
   }
 
   @override
@@ -317,7 +333,7 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
                                 ),
                               )
                             : const Text(
-                                'Cancel Order',
+                                'Cancel delivery',
                                 style: TextStyle(
                                   color: AppColors.errorColor,
                                   fontSize: 16,

@@ -236,6 +236,49 @@ class CourierRepository {
     }
   }
 
+  /// Cancel a package delivery via POST /api/services/ride/cancel.
+  Future<Map<String, dynamic>> cancelDelivery({
+    required int deliveryId,
+    String cancellationReason = 'Changed my mind',
+  }) async {
+    try {
+      final response = await courierDataProvider.cancelDelivery(
+        deliveryId: deliveryId,
+        cancellationReason: cancellationReason,
+      );
+
+      if (response['statusCode'] == 200) {
+        final data = response['data'];
+        String? message;
+        if (data is Map) {
+          message = data['message']?.toString();
+        }
+        return {
+          'success': true,
+          'data': data,
+          'message': message ?? 'Delivery cancelled successfully',
+        };
+      }
+
+      String errorMessage =
+          response['errorMessage'] ?? 'Error cancelling delivery';
+      errorMessage = _cleanErrorMessage(errorMessage);
+      return {
+        'success': false,
+        'data': null,
+        'message': errorMessage,
+      };
+    } catch (e) {
+      String errorMessage = e.toString();
+      errorMessage = _cleanErrorMessage(errorMessage);
+      return {
+        'success': false,
+        'data': null,
+        'message': errorMessage,
+      };
+    }
+  }
+
   dynamic _extractOrderId(dynamic data) {
     if (data is Map<String, dynamic>) {
       return data['id'] ?? data['order_id'] ?? data['orderId'];

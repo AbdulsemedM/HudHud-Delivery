@@ -172,4 +172,35 @@ class CourierDataProvider {
       return {'statusCode': 500, 'data': null, 'errorMessage': e.toString()};
     }
   }
+
+  /// POST /api/services/ride/cancel — cancel a package delivery (customer).
+  Future<Map<String, dynamic>> cancelDelivery({
+    required int deliveryId,
+    String cancellationReason = 'Changed my mind',
+  }) async {
+    try {
+      final response = await apiService.post(
+        '${ApiConstants.baseUrl}${ApiConstants.rideCancelById}',
+        data: {
+          'delivery_id': deliveryId,
+          'cancellation_reason': cancellationReason,
+          'cancelled_by': 'user',
+        },
+      );
+
+      return {
+        'statusCode': response.statusCode,
+        'data': response.data,
+        'errorMessage': null,
+      };
+    } on ApiException catch (apiException) {
+      return {
+        'statusCode': apiException.statusCode,
+        'data': null,
+        'errorMessage': apiException.message,
+      };
+    } on Exception catch (e) {
+      return {'statusCode': 500, 'data': null, 'errorMessage': e.toString()};
+    }
+  }
 }

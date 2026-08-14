@@ -6,12 +6,13 @@ import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/widgets/status_chip.dart';
 import '../../../home/presentation/widgets/home_widget.dart';
-import 'package:hudhud_delivery/features/checkout/data/data_provider/checkout_data_provider.dart';
-import 'package:hudhud_delivery/features/checkout/data/repository/checkout_repository.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
+import 'package:hudhud_delivery/features/courier/utils/delivery_cancel.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
+import 'package:hudhud_delivery/features/wallet/data/providers/wallet_data_provider.dart';
+import 'package:hudhud_delivery/features/wallet/data/repositories/wallet_repository.dart';
 import 'delivery_tracking_screen.dart';
 
 class DeliveryDetailsScreen extends StatefulWidget {
@@ -25,7 +26,7 @@ class DeliveryDetailsScreen extends StatefulWidget {
 
 class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
   late final CourierRepository _courierRepository;
-  late final CheckoutRepository _checkoutRepository;
+  late final WalletRepository _walletRepository;
   Map<String, dynamic>? _delivery;
   bool _isLoading = true;
   String? _error;
@@ -39,8 +40,8 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
         apiService: ApiService.instance,
       ),
     );
-    _checkoutRepository = CheckoutRepository(
-      checkoutDataProvider: CheckoutDataProvider(
+    _walletRepository = WalletRepository(
+      walletDataProvider: WalletDataProvider(
         apiService: ApiService.instance,
       ),
     );
@@ -114,9 +115,9 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Cancel Order'),
+        title: const Text('Cancel delivery'),
         content: const Text(
-          'Are you sure you want to cancel this order?',
+          'Are you sure you want to cancel this delivery? Any payment will be refunded to your wallet.',
         ),
         actions: [
           TextButton(
@@ -136,28 +137,42 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
     if (confirmed != true || !mounted) return;
 
     setState(() => _isCancelling = true);
-    final result = await _checkoutRepository.cancelOrder(widget.deliveryId);
+    final result = await _courierRepository.cancelDelivery(
+      deliveryId: widget.deliveryId,
+    );
     if (!mounted) return;
-    setState(() => _isCancelling = false);
 
-    if (result['success'] == true) {
+    if (result['success'] != true) {
+      setState(() => _isCancelling = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-              result['message']?.toString() ?? 'Order cancelled successfully'),
-          backgroundColor: Colors.green,
-        ),
-      );
-      Navigator.pop(context);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-              result['message']?.toString() ?? "You can't cancel this order"),
+              result['message']?.toString() ?? "You can't cancel this delivery"),
           backgroundColor: Colors.red,
         ),
       );
+      return;
     }
+
+    String successMessage =
+        result['message']?.toString() ?? 'Delivery cancelled successfully';
+    try {
+      final balance = await _walletRepository.getBalance();
+      successMessage =
+          'Delivery cancelled. Wallet balance: ${balance.currency} ${balance.balance.toStringAsFixed(2)}';
+    } catch (_) {
+      // Keep cancel success message if balance fetch fails.
+    }
+
+    if (!mounted) return;
+    setState(() => _isCancelling = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(successMessage),
+        backgroundColor: Colors.green,
+      ),
+    );
+    Navigator.pop(context);
   }
 
   void _navigateToTracking() {
@@ -486,41 +501,46 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
                                   ),
                                 ),
                                 const SizedBox(height: 12),
-                                SizedBox(
-                                  width: double.infinity,
-                                  height: AppColors.buttonHeightMD,
-                                  child: OutlinedButton(
-                                    onPressed:
-                                        _isCancelling ? null : _cancelOrder,
-                                    style: OutlinedButton.styleFrom(
-                                      side: const BorderSide(
-                                        color: AppColors.errorColor,
-                                        width: 1.5,
+                                if (canCancelCourierDelivery(
+                                  (_delivery!['current_status'] ??
+                                          _delivery!['status'])
+                                      ?.toString(),
+                                ))
+                                  SizedBox(
+                                    width: double.infinity,
+                                    height: AppColors.buttonHeightMD,
+                                    child: OutlinedButton(
+                                      onPressed:
+                                          _isCancelling ? null : _cancelOrder,
+                                      style: OutlinedButton.styleFrom(
+                                        side: const BorderSide(
+                                          color: AppColors.errorColor,
+                                          width: 1.5,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                              AppColors.radiusLG),
+                                        ),
                                       ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(
-                                            AppColors.radiusLG),
-                                      ),
+                                      child: _isCancelling
+                                          ? const SizedBox(
+                                              width: 24,
+                                              height: 24,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                color: AppColors.errorColor,
+                                              ),
+                                            )
+                                          : const Text(
+                                              'Cancel delivery',
+                                              style: TextStyle(
+                                                color: AppColors.errorColor,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
                                     ),
-                                    child: _isCancelling
-                                        ? const SizedBox(
-                                            width: 24,
-                                            height: 24,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              color: AppColors.errorColor,
-                                            ),
-                                          )
-                                        : const Text(
-                                            'Cancel Order',
-                                            style: TextStyle(
-                                              color: AppColors.errorColor,
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
                                   ),
-                                ),
                               ],
                             ),
                           ),

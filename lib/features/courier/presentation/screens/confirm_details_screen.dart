@@ -18,6 +18,7 @@ import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dar
 import 'package:hudhud_delivery/features/payment/data/data_provider/payment_data_provider.dart';
 import 'package:hudhud_delivery/features/payment/data/repository/payment_repository.dart';
 import 'package:hudhud_delivery/features/payment/presentation/screen/payment_initiate_result_screen.dart';
+import 'package:hudhud_delivery/features/payment/presentation/widgets/payment_details_form.dart';
 import 'finding_courier_screen.dart';
 
 class ConfirmDetailsScreen extends StatefulWidget {
@@ -35,6 +36,7 @@ class ConfirmDetailsScreen extends StatefulWidget {
   final DateTime? scheduledDelivery;
   final String whoPays;
   final String paymentType;
+  final String senderPhone;
   final String recipientName;
   final String recipientPhone;
   final String? packageImagePath;
@@ -56,6 +58,7 @@ class ConfirmDetailsScreen extends StatefulWidget {
     this.scheduledDelivery,
     required this.whoPays,
     required this.paymentType,
+    required this.senderPhone,
     required this.recipientName,
     required this.recipientPhone,
     this.packageImagePath,
@@ -267,6 +270,17 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
 
     final user = await AuthService().getStoredUser();
 
+    final senderPhone = normalizePhoneToBackend(widget.senderPhone);
+    if (!RegExp(r'^2519\d{8}$').hasMatch(senderPhone)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a valid sender phone (09xxxxxxxx)'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     final requestData = <String, dynamic>{
       'package_type': _mapPackageType(widget.itemType),
       'package_description': widget.packageDescription.isNotEmpty
@@ -292,6 +306,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
       'insurance_required': false,
       'special_instructions': '',
       'sender_name': user?.name ?? '',
+      'sender_phone': senderPhone,
       'receiver_name': widget.recipientName,
       'receiver_phone': normalizePhoneToBackend(widget.recipientPhone),
       'package_details': {
@@ -313,11 +328,12 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
       },
     };
 
-    // API falls back to the logged-in user's phone only when sender_phone is
-    // omitted/null — never send an empty string.
-    final senderPhone = normalizePhoneToBackend(user?.phone);
-    if (senderPhone.isNotEmpty) {
-      requestData['sender_phone'] = senderPhone;
+    final paymentPhone = normalizePaymentPhone(
+      widget.paymentDetails?['phone']?.toString(),
+      widget.paymentType,
+    );
+    if (paymentPhone.isNotEmpty) {
+      requestData['payment_phone'] = paymentPhone;
     }
 
     setState(() => _isLoadingRequest = true);
@@ -604,6 +620,13 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                                             _DetailRow(
                                               label: 'What you are sending',
                                               value: widget.itemType,
+                                            ),
+                                            const SizedBox(height: 12),
+                                            _DetailRow(
+                                              label: 'Sender phone',
+                                              value: formatPhoneForDisplay(
+                                                widget.senderPhone,
+                                              ),
                                             ),
                                             const SizedBox(height: 12),
                                             _DetailRow(
