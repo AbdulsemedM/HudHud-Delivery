@@ -7,6 +7,7 @@ import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
+import 'package:hudhud_delivery/features/courier/utils/courier_home_refresh.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../home/presentation/widgets/home_widget.dart';
 import 'delivery_details_screen.dart';
@@ -29,6 +30,7 @@ class _CourierScreenState extends State<CourierScreen> {
   Map<String, dynamic>? _activeDelivery;
   bool _isLoadingActiveDelivery = true;
   String _selectedFilter = 'all';
+  late final void Function() _homeRefreshListener;
 
   @override
   void initState() {
@@ -38,8 +40,16 @@ class _CourierScreenState extends State<CourierScreen> {
         apiService: ApiService.instance,
       ),
     );
+    _homeRefreshListener = () => _refreshData();
+    CourierHomeRefresh.instance.addListener(_homeRefreshListener);
     _fetchDeliveries();
     _fetchActiveDelivery();
+  }
+
+  @override
+  void dispose() {
+    CourierHomeRefresh.instance.removeListener(_homeRefreshListener);
+    super.dispose();
   }
 
   List<Map<String, dynamic>> get _filteredDeliveries {
@@ -62,7 +72,10 @@ class _CourierScreenState extends State<CourierScreen> {
     }).toList();
   }
 
-  Future<void> _fetchActiveDelivery() async {
+  Future<void> _fetchActiveDelivery({bool refresh = false}) async {
+    if (!refresh && mounted) {
+      setState(() => _isLoadingActiveDelivery = true);
+    }
     try {
       final result = await _courierRepository.getUserActiveDelivery();
       if (mounted) {
@@ -85,7 +98,10 @@ class _CourierScreenState extends State<CourierScreen> {
     }
   }
 
-  Future<void> _fetchDeliveries() async {
+  Future<void> _fetchDeliveries({bool refresh = false}) async {
+    if (!refresh && mounted) {
+      setState(() => _isLoadingDeliveries = true);
+    }
     try {
       final result = await _courierRepository.getUserDeliveries(page: 1);
       if (mounted) {
@@ -109,6 +125,13 @@ class _CourierScreenState extends State<CourierScreen> {
         });
       }
     }
+  }
+
+  Future<void> _refreshData() async {
+    await Future.wait([
+      _fetchActiveDelivery(refresh: true),
+      _fetchDeliveries(refresh: true),
+    ]);
   }
 
   String _formatDeliveryDate(dynamic value) {
@@ -190,9 +213,14 @@ class _CourierScreenState extends State<CourierScreen> {
     return Scaffold(
       backgroundColor: HomeColors.background,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppColors.spaceMD),
-          child: Column(
+        child: RefreshIndicator(
+          color: HomeColors.violet,
+          backgroundColor: HomeColors.surface,
+          onRefresh: _refreshData,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(AppColors.spaceMD),
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
@@ -412,6 +440,7 @@ class _CourierScreenState extends State<CourierScreen> {
               const SizedBox(height: 80),
             ],
           ),
+        ),
         ),
       ),
     );

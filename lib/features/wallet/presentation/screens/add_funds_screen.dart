@@ -15,10 +15,12 @@ import 'package:hudhud_delivery/features/wallet/utils/wallet_funding_methods.dar
 
 class AddFundsScreen extends StatefulWidget {
   final String defaultCurrency;
+  final double? initialAmount;
 
   const AddFundsScreen({
     super.key,
     this.defaultCurrency = 'ETB',
+    this.initialAmount,
   });
 
   @override
@@ -51,6 +53,12 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
       paymentDataProvider: PaymentDataProvider(apiService: ApiService.instance),
     );
     _walletBloc = WalletBloc(walletRepository: _walletRepository);
+    if (widget.initialAmount != null && widget.initialAmount! > 0) {
+      final amount = widget.initialAmount!;
+      _amountController.text = amount == amount.roundToDouble()
+          ? amount.toStringAsFixed(0)
+          : amount.toStringAsFixed(2);
+    }
     _fetchPaymentMethods();
   }
 

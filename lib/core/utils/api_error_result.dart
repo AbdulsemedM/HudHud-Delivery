@@ -22,6 +22,7 @@ class ApiErrorResult {
     this.fieldErrors = const {},
     this.balance,
     this.requiredAmount,
+    this.deficit,
     this.gatewayError,
     this.gatewayErrorCode,
   });
@@ -32,6 +33,7 @@ class ApiErrorResult {
   final Map<String, List<String>> fieldErrors;
   final double? balance;
   final double? requiredAmount;
+  final double? deficit;
   final String? gatewayError;
   final String? gatewayErrorCode;
 
@@ -70,6 +72,10 @@ class ApiErrorResult {
       parts.add(
         'Balance: ${_formatAmount(balance!)} · Required: ${_formatAmount(requiredAmount!)}',
       );
+    }
+
+    if (deficit != null && deficit! > 0) {
+      parts.add('Short by: ${_formatAmount(deficit!)}');
     }
 
     if (gatewayError != null && gatewayError!.isNotEmpty) {
@@ -132,6 +138,7 @@ ApiErrorResult parseApiErrorResult(
   final balance = _parseDouble(nestedData['balance'] ?? root['balance']);
   final requiredAmount =
       _parseDouble(nestedData['required'] ?? root['required']);
+  final deficit = _parseDouble(nestedData['deficit'] ?? root['deficit']);
   final gatewayError = _firstNonEmptyString([
     nestedData['gateway_error'],
     root['gateway_error'],
@@ -172,6 +179,7 @@ ApiErrorResult parseApiErrorResult(
     fieldErrors: fieldErrors,
     balance: balance,
     requiredAmount: requiredAmount,
+    deficit: deficit,
     gatewayError: gatewayError,
     gatewayErrorCode: gatewayErrorCode,
   );

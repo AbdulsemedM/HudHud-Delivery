@@ -82,7 +82,7 @@ class ApiConstants {
   static const String wallets = 'wallets';
   static const String walletDetails = '$wallets/{id}';
   static const String wallet = 'wallet';
-  static const String walletBalance = '$wallet/balance';
+  static const String walletBalance = wallet;
   static const String walletTransactions = '$wallet/transactions';
   static const String walletTopup = '$wallet/topup';
   static const String walletAddFunds = '$wallet/add-funds';
@@ -121,6 +121,11 @@ class ApiConstants {
   // Courier delivery endpoints
   static const String deliveryEstimate = 'services/delivery/estimate';
   static const String deliveryRequest = 'services/delivery/request';
+  /// Customer cancel: POST /api/services/delivery/cancel
+  static const String deliveryCancel = 'services/delivery/cancel';
+  /// Retry unpaid payment: POST /api/services/delivery/{id}/retry-payment
+  static const String deliveryRetryPayment =
+      'services/delivery/{id}/retry-payment';
 
   // Ride/Taxi endpoints
   static const String rideEstimate = 'services/ride/estimate';

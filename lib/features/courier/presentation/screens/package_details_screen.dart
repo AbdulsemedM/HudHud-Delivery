@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/utils/phone_util.dart';
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/features/payment/data/data_provider/payment_data_provider.dart';
 import 'package:hudhud_delivery/features/payment/data/repository/payment_repository.dart';
 import 'package:hudhud_delivery/features/payment/model/payment_initiate_result.dart';
 import 'package:hudhud_delivery/features/payment/presentation/widgets/payment_details_form.dart';
+import 'package:hudhud_delivery/features/wallet/data/models/wallet_balance_model.dart';
+import 'package:hudhud_delivery/features/wallet/data/providers/wallet_data_provider.dart';
+import 'package:hudhud_delivery/features/wallet/data/repositories/wallet_repository.dart';
 import 'package:latlong2/latlong.dart';
 import 'confirm_details_screen.dart';
 
@@ -48,6 +53,7 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
       TextEditingController();
   final TextEditingController _recipientPhoneController =
       TextEditingController();
+  final TextEditingController _senderPhoneController = TextEditingController();
 
   String _whoPays = 'me'; // 'me' or 'recipient'
   String? _paymentType; // API id (e.g. 'wallet', 'waafi')
@@ -61,6 +67,10 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
   bool _isLoadingPaymentMethods = true;
   String? _paymentMethodsError;
 
+  WalletBalance? _walletBalance;
+  bool _isLoadingWalletBalance = false;
+  String? _walletBalanceError;
+
   final List<String> _itemTypes = [
     'Electronics/Gadgets',
     'Documents',
@@ -71,6 +81,7 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
   ];
 
   late final PaymentRepository _paymentRepository;
+  late final WalletRepository _walletRepository;
 
   @override
   void initState() {
@@ -80,7 +91,26 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
         apiService: ApiService.instance,
       ),
     );
+    _walletRepository = WalletRepository(
+      walletDataProvider: WalletDataProvider(
+        apiService: ApiService.instance,
+      ),
+    );
     _fetchPaymentMethods();
+    _prefillSenderPhone();
+  }
+
+  Future<void> _prefillSenderPhone() async {
+    final user = await AuthService().getStoredUser();
+    final phone = user?.phone?.trim() ?? '';
+    if (phone.isEmpty || !mounted) return;
+    final parts = splitPhoneForDisplay(phone);
+    final display = parts.nationalNumber.isEmpty
+        ? phone
+        : '0${parts.nationalNumber}';
+    setState(() {
+      _senderPhoneController.text = display;
+    });
   }
 
   Future<void> _fetchPaymentMethods() async {
@@ -111,6 +141,45 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
     }
   }
 
+  Future<void> _fetchWalletBalance() async {
+    setState(() {
+      _isLoadingWalletBalance = true;
+      _walletBalanceError = null;
+    });
+    try {
+      final balance = await _walletRepository.getBalance();
+      if (!mounted) return;
+      setState(() {
+        _walletBalance = balance;
+        _isLoadingWalletBalance = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _walletBalance = null;
+        _isLoadingWalletBalance = false;
+        _walletBalanceError = 'Could not load wallet balance';
+      });
+    }
+  }
+
+  void _onPaymentTypeSelected(String? id) {
+    setState(() {
+      _paymentType = id;
+      _paymentDetails = {};
+      _useHpp = false;
+      _ebirrProvider = 'kaafi';
+      if (id != 'wallet') {
+        _walletBalance = null;
+        _walletBalanceError = null;
+        _isLoadingWalletBalance = false;
+      }
+    });
+    if (id == 'wallet') {
+      _fetchWalletBalance();
+    }
+  }
+
   String? _getSelectedPaymentName() {
     if (_paymentType == null) return null;
     for (final method in _paymentMethods) {
@@ -129,6 +198,7 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
     _packageDescriptionController.dispose();
     _recipientNameController.dispose();
     _recipientPhoneController.dispose();
+    _senderPhoneController.dispose();
     super.dispose();
   }
 
@@ -200,6 +270,17 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
       }
     }
 
+    final senderPhone = normalizePhoneToBackend(_senderPhoneController.text);
+    if (!RegExp(r'^2519\d{8}$').hasMatch(senderPhone)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a valid sender phone (09xxxxxxxx)'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     if (_recipientNameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -238,6 +319,7 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
           scheduledDelivery: widget.scheduledDelivery,
           whoPays: _whoPays,
           paymentType: _paymentType!,
+          senderPhone: senderPhone,
           recipientName: _recipientNameController.text,
           recipientPhone: _recipientPhoneController.text,
           packageImagePath: _packageImagePath,
@@ -526,12 +608,7 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                                                 ),
                                               ),
                                               onTap: () {
-                                                setState(() {
-                                                  _paymentType = id;
-                                                  _paymentDetails = {};
-                                                  _useHpp = false;
-                                                  _ebirrProvider = 'kaafi';
-                                                });
+                                                _onPaymentTypeSelected(id);
                                                 Navigator.pop(context);
                                               },
                                             );
@@ -572,6 +649,15 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                               ),
                             ),
                           ),
+                          if (_paymentType == 'wallet') ...[
+                            const SizedBox(height: 12),
+                            _WalletBalanceBanner(
+                              balance: _walletBalance,
+                              isLoading: _isLoadingWalletBalance,
+                              error: _walletBalanceError,
+                              onRetry: _fetchWalletBalance,
+                            ),
+                          ],
                           if (_paymentType != null &&
                               paymentMethodNeedsDetailsForm(_paymentType)) ...[
                             const SizedBox(height: 12),
@@ -596,6 +682,50 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                               },
                             ),
                           ],
+                          const SizedBox(height: 24),
+                          const Text(
+                            'Sender Information',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: HomeColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: _senderPhoneController,
+                            keyboardType: TextInputType.phone,
+                            style: const TextStyle(color: HomeColors.textPrimary),
+                            decoration: InputDecoration(
+                              labelText: 'Sender phone (09xxxxxxxx)',
+                              hintText: '0912345678',
+                              labelStyle: const TextStyle(
+                                fontSize: 14,
+                                color: HomeColors.textPrimary,
+                              ),
+                              hintStyle: const TextStyle(
+                                color: HomeColors.textMuted,
+                              ),
+                              filled: true,
+                              fillColor: fieldFill,
+                              border: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.circular(AppColors.radiusLG),
+                                borderSide: const BorderSide(color: outline),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.circular(AppColors.radiusLG),
+                                borderSide: const BorderSide(color: outline),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.circular(AppColors.radiusLG),
+                                borderSide:
+                                    const BorderSide(color: HomeColors.violet),
+                              ),
+                            ),
+                          ),
                           const SizedBox(height: 24),
                           // Recipient Information
                           const Text(
@@ -749,6 +879,66 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _WalletBalanceBanner extends StatelessWidget {
+  const _WalletBalanceBanner({
+    required this.balance,
+    required this.isLoading,
+    this.error,
+    this.onRetry,
+  });
+
+  final WalletBalance? balance;
+  final bool isLoading;
+  final String? error;
+  final VoidCallback? onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    String text;
+    Color textColor = HomeColors.textSecondary;
+
+    if (isLoading) {
+      text = 'Loading wallet balance...';
+    } else if (error != null) {
+      text = error!;
+      textColor = AppColors.errorColor;
+    } else if (balance != null) {
+      text =
+          'Wallet balance: ${balance!.currency} ${balance!.balance.toStringAsFixed(2)}';
+    } else {
+      text = 'Wallet balance unavailable';
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: HomeColors.surfaceElevated,
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        border: Border.all(color: HomeColors.border),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.account_balance_wallet_outlined,
+              size: 20, color: HomeColors.violet),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(fontSize: 14, color: textColor),
+            ),
+          ),
+          if (error != null && onRetry != null)
+            TextButton(
+              onPressed: onRetry,
+              child: const Text('Retry'),
+            ),
+        ],
       ),
     );
   }

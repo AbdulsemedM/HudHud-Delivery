@@ -1,4 +1,4 @@
-/// Parsed GET /api/wallet/balance payload.
+/// Parsed GET /api/wallet payload.
 class WalletBalance {
   const WalletBalance({
     required this.balance,

@@ -105,6 +105,24 @@ void main() {
       );
     });
 
+    test('parses insufficient balance with deficit at root', () {
+      final result = parseApiErrorResult({
+        'success': false,
+        'message': 'Insufficient wallet balance',
+        'balance': 0,
+        'required': 48.67,
+        'deficit': 48.67,
+      }, statusCode: 400);
+
+      expect(result.code, 'insufficient_balance');
+      expect(result.balance, 0);
+      expect(result.requiredAmount, 48.67);
+      expect(result.deficit, 48.67);
+      expect(result.isInsufficientBalance, isTrue);
+      expect(result.displayMessage, contains('Insufficient wallet balance'));
+      expect(result.displayMessage, contains('Short by: 48.67'));
+    });
+
     test('passthrough invalid phone message', () {
       final result = parseApiErrorResult({
         'success': false,
