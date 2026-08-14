@@ -7,6 +7,8 @@ import '../../../../core/api/api_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../checkout/data/models/create_order_result.dart';
 import '../../../courier/data/models/create_delivery_result.dart';
+import '../../../courier/presentation/theme/courier_theme.dart';
+import '../../../home/presentation/theme/home_colors.dart';
 import '../../data/data_provider/payment_data_provider.dart';
 import '../../data/repository/payment_repository.dart';
 import '../../model/payment_initiate_result.dart';
@@ -198,7 +200,7 @@ class _PaymentInitiateResultScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Could not refresh payment status'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.errorColor,
           ),
         );
       }
@@ -207,82 +209,108 @@ class _PaymentInitiateResultScreenState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Payment'),
-        backgroundColor: AppColors.primaryColor,
-        foregroundColor: Colors.white,
-        automaticallyImplyLeading: false,
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            children: [
-              Expanded(child: _buildBody(context)),
-              if (_isPollingActive) ...[
-                const SizedBox(height: 8),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: _checking
-                        ? null
-                        : () => _checkStatus(manual: true),
-                    icon: _checking
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.refresh),
-                    label: Text(_checking ? 'Checking…' : 'Check status'),
-                  ),
-                ),
-                const SizedBox(height: 8),
-              ],
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryColor,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+    return CourierTheme.wrap(
+      context,
+      child: Builder(
+        builder: (context) {
+          final theme = Theme.of(context);
+          return Scaffold(
+            backgroundColor: HomeColors.background,
+            appBar: AppBar(
+              title: const Text('Payment'),
+              backgroundColor: HomeColors.surface,
+              foregroundColor: HomeColors.textPrimary,
+              surfaceTintColor: Colors.transparent,
+              elevation: 0,
+              automaticallyImplyLeading: false,
+            ),
+            body: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(AppColors.spaceMD),
+                child: Column(
+                  children: [
+                    Expanded(child: _buildBody(context)),
+                    if (_isPollingActive) ...[
+                      const SizedBox(height: AppColors.spaceSM),
+                      SizedBox(
+                        width: double.infinity,
+                        height: AppColors.buttonHeightMD,
+                        child: OutlinedButton.icon(
+                          onPressed: _checking
+                              ? null
+                              : () => _checkStatus(manual: true),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: HomeColors.textPrimary,
+                            side: const BorderSide(color: HomeColors.border),
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(AppColors.radiusLG),
+                            ),
+                          ),
+                          icon: _checking
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: HomeColors.violet,
+                                  ),
+                                )
+                              : const Icon(Icons.refresh),
+                          label: Text(_checking ? 'Checking…' : 'Check status'),
+                        ),
+                      ),
+                      const SizedBox(height: AppColors.spaceSM),
+                    ],
+                    SizedBox(
+                      width: double.infinity,
+                      height: AppColors.buttonHeightMD,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: HomeColors.violet,
+                          foregroundColor: Colors.white,
+                          disabledBackgroundColor:
+                              HomeColors.violet.withValues(alpha: 0.4),
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.circular(AppColors.radiusLG),
+                          ),
+                        ),
+                        onPressed: () {
+                          final success = result.isSuccess ||
+                              (_polledStatus?.isCompleted ?? false);
+                          if (success &&
+                              _isTerminalSuccess &&
+                              widget.onTerminalSuccess != null) {
+                            widget.onTerminalSuccess!(context);
+                            return;
+                          }
+                          Navigator.of(context).popUntil((route) => route.isFirst);
+                        },
+                        child: Text(
+                          () {
+                            final success = result.isSuccess ||
+                                (_polledStatus?.isCompleted ?? false);
+                            if (!success) return 'Go back';
+                            if (_isTerminalSuccess &&
+                                widget.successActionLabel != null) {
+                              return widget.successActionLabel!;
+                            }
+                            return 'Done';
+                          }(),
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                  onPressed: () {
-                    final success = result.isSuccess ||
-                        (_polledStatus?.isCompleted ?? false);
-                    if (success &&
-                        _isTerminalSuccess &&
-                        widget.onTerminalSuccess != null) {
-                      widget.onTerminalSuccess!(context);
-                      return;
-                    }
-                    Navigator.of(context).popUntil((route) => route.isFirst);
-                  },
-                  child: Text(
-                    () {
-                      final success = result.isSuccess ||
-                          (_polledStatus?.isCompleted ?? false);
-                      if (!success) return 'Go back';
-                      if (_isTerminalSuccess &&
-                          widget.successActionLabel != null) {
-                        return widget.successActionLabel!;
-                      }
-                      return 'Done';
-                    }(),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  ],
                 ),
               ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -304,7 +332,7 @@ class _PaymentInitiateResultScreenState
       if (polled.isCompleted) {
         return _StatusContent(
           icon: Icons.check_circle,
-          iconColor: AppColors.primaryColor,
+          iconColor: HomeColors.violet,
           title: 'Payment successful',
           message: 'Your payment was confirmed.',
           children: [
@@ -327,7 +355,7 @@ class _PaymentInitiateResultScreenState
       }
       return _StatusContent(
         icon: Icons.error_outline,
-        iconColor: Colors.red,
+        iconColor: AppColors.errorColor,
         title: 'Payment ${polled.status ?? 'failed'}',
         message: polled.message ??
             'Payment was not completed. Please try again.',
@@ -342,7 +370,7 @@ class _PaymentInitiateResultScreenState
     if (!result.isSuccess) {
       return _StatusContent(
         icon: Icons.error_outline,
-        iconColor: Colors.red,
+        iconColor: AppColors.errorColor,
         title: 'Payment failed',
         message: result.message ?? 'Could not initiate payment.',
       );
@@ -358,28 +386,25 @@ class _PaymentInitiateResultScreenState
               const SizedBox(
                 width: 14,
                 height: 14,
-                child: CircularProgressIndicator(strokeWidth: 2),
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: HomeColors.violet,
+                ),
               )
             else
               Icon(
                 Icons.hourglass_top,
                 size: 16,
-                color: Theme.of(context)
-                    .colorScheme
-                    .onSurface
-                    .withValues(alpha: 0.6),
+                color: HomeColors.textMuted,
               ),
             const SizedBox(width: 8),
             Text(
               _timedOut
                   ? 'Status check timed out. Tap Check status to retry.'
                   : 'Waiting for payment confirmation…',
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 12,
-                color: Theme.of(context)
-                    .colorScheme
-                    .onSurface
-                    .withValues(alpha: 0.65),
+                color: HomeColors.textMuted,
               ),
             ),
           ],
@@ -395,7 +420,7 @@ class _PaymentInitiateResultScreenState
       case PaymentInitiateUiMode.userActionRequired:
         return _StatusContent(
           icon: Icons.phone_android,
-          iconColor: AppColors.primaryColor,
+          iconColor: HomeColors.violet,
           title: 'Complete on your phone',
           message: result.customerMessage ??
               result.message ??
@@ -431,7 +456,7 @@ class _PaymentInitiateResultScreenState
       case PaymentInitiateUiMode.redirectToHpp:
         return _StatusContent(
           icon: Icons.open_in_browser,
-          iconColor: AppColors.primaryColor,
+          iconColor: HomeColors.violet,
           title: 'Hosted payment',
           message: result.customerMessage ??
               result.message ??
@@ -447,6 +472,7 @@ class _PaymentInitiateResultScreenState
             if (result.redirectUrl != null && result.redirectUrl!.isNotEmpty)
               SizedBox(
                 width: double.infinity,
+                height: AppColors.buttonHeightMD,
                 child: OutlinedButton.icon(
                   onPressed: () {
                     Navigator.of(context).push(
@@ -457,6 +483,14 @@ class _PaymentInitiateResultScreenState
                       ),
                     );
                   },
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: HomeColors.textPrimary,
+                    side: const BorderSide(color: HomeColors.border),
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(AppColors.radiusLG),
+                    ),
+                  ),
                   icon: const Icon(Icons.open_in_browser),
                   label: const Text('Open payment page'),
                 ),
@@ -482,7 +516,7 @@ class _PaymentInitiateResultScreenState
                     : 'Your order is processing while payment confirms.'));
         return _StatusContent(
           icon: isCompleted ? Icons.check_circle : Icons.receipt_long,
-          iconColor: AppColors.primaryColor,
+          iconColor: HomeColors.violet,
           title: isCompleted
               ? 'Payment successful'
               : (isCod
@@ -507,7 +541,7 @@ class _PaymentInitiateResultScreenState
       case PaymentInitiateUiMode.failure:
         return _StatusContent(
           icon: Icons.error_outline,
-          iconColor: Colors.red,
+          iconColor: AppColors.errorColor,
           title: 'Payment failed',
           message: result.message ?? 'Could not initiate payment.',
         );
@@ -532,39 +566,55 @@ class _StatusContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return SingleChildScrollView(
       child: Column(
         children: [
-          const SizedBox(height: 24),
+          const SizedBox(height: AppColors.spaceMD),
           Container(
-            width: 80,
-            height: 80,
+            width: 88,
+            height: 88,
             decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.12),
+              color: iconColor.withValues(alpha: 0.14),
               shape: BoxShape.circle,
+              border: Border.all(color: iconColor.withValues(alpha: 0.25)),
             ),
-            child: Icon(icon, color: iconColor, size: 48),
+            child: Icon(icon, color: iconColor, size: 44),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppColors.spaceLG),
           Text(
             title,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: HomeColors.textPrimary,
+            ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppColors.spaceSM),
           Text(
             message,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-              color: Theme.of(context)
-                  .colorScheme
-                  .onSurface
-                  .withValues(alpha: 0.7),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: HomeColors.textSecondary,
+              height: 1.45,
             ),
           ),
-          const SizedBox(height: 24),
-          ...children,
+          if (children.isNotEmpty) ...[
+            const SizedBox(height: AppColors.spaceLG),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(AppColors.spaceMD),
+              decoration: BoxDecoration(
+                color: HomeColors.surfaceElevated,
+                borderRadius: BorderRadius.circular(AppColors.radiusLG),
+                border: Border.all(color: HomeColors.border),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: children,
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -592,6 +642,7 @@ class _QrContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     Uint8List? imageBytes;
     final raw = result.qrCodeBase64;
     if (raw != null && raw.isNotEmpty) {
@@ -603,42 +654,59 @@ class _QrContent extends StatelessWidget {
     return SingleChildScrollView(
       child: Column(
         children: [
-          const SizedBox(height: 16),
+          const SizedBox(height: AppColors.spaceMD),
           Text(
             result.customerMessage ??
                 result.message ??
                 'Scan the QR code to complete payment.',
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 15),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: HomeColors.textSecondary,
+              height: 1.45,
+            ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: AppColors.spaceLG),
           if (imageBytes != null)
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(AppColors.spaceMD),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.shade300),
+                borderRadius: BorderRadius.circular(AppColors.radiusLG),
+                border: Border.all(color: HomeColors.border),
               ),
               child: Image.memory(imageBytes, width: 260, height: 260),
             )
           else
-            const Icon(Icons.qr_code_2,
-                size: 120, color: AppColors.primaryColor),
-          const SizedBox(height: 20),
-          ...extraChildren,
-          _InfoRow(label: statusLabel, value: expectedStatus),
-          if (result.amount != null)
-            _InfoRow(
-              label: 'Amount',
-              value: '${result.amount} ${result.currency ?? ''}'.trim(),
+            Icon(Icons.qr_code_2, size: 120, color: HomeColors.violet),
+          const SizedBox(height: AppColors.spaceLG),
+          if (extraChildren.isNotEmpty) ...extraChildren,
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(AppColors.spaceMD),
+            decoration: BoxDecoration(
+              color: HomeColors.surfaceElevated,
+              borderRadius: BorderRadius.circular(AppColors.radiusLG),
+              border: Border.all(color: HomeColors.border),
             ),
-          if (result.expiresAt != null)
-            _InfoRow(label: 'Expires', value: result.expiresAt!),
-          if (result.qrId != null) _InfoRow(label: 'QR ID', value: result.qrId!),
-          if (trackingNumber != null && trackingNumber!.isNotEmpty)
-            _InfoRow(label: 'Tracking', value: trackingNumber!),
-          _InfoRow(label: entityLabel, value: '#$orderId'),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _InfoRow(label: statusLabel, value: expectedStatus),
+                if (result.amount != null)
+                  _InfoRow(
+                    label: 'Amount',
+                    value: '${result.amount} ${result.currency ?? ''}'.trim(),
+                  ),
+                if (result.expiresAt != null)
+                  _InfoRow(label: 'Expires', value: result.expiresAt!),
+                if (result.qrId != null)
+                  _InfoRow(label: 'QR ID', value: result.qrId!),
+                if (trackingNumber != null && trackingNumber!.isNotEmpty)
+                  _InfoRow(label: 'Tracking', value: trackingNumber!),
+                _InfoRow(label: entityLabel, value: '#$orderId'),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -653,25 +721,29 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: TextStyle(
-              color: Theme.of(context)
-                  .colorScheme
-                  .onSurface
-                  .withValues(alpha: 0.6),
+          Expanded(
+            child: Text(
+              label,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: HomeColors.textMuted,
+              ),
             ),
           ),
+          const SizedBox(width: 12),
           Flexible(
             child: Text(
               value,
               textAlign: TextAlign.end,
-              style: const TextStyle(fontWeight: FontWeight.w600),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: HomeColors.textPrimary,
+              ),
             ),
           ),
         ],

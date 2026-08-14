@@ -10,7 +10,7 @@ class WalletDataProvider {
 
   WalletDataProvider({required this.apiService});
 
-  /// GET /api/wallet/balance
+  /// GET /api/wallet
   Future<WalletBalance> getBalance() async {
     final response = await apiService.get(
       ApiConstants.walletBalance,

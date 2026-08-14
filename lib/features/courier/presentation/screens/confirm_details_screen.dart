@@ -7,18 +7,24 @@ import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/utils/api_error_result.dart';
 import 'package:hudhud_delivery/core/utils/phone_util.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/models/create_delivery_result.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_estimate.dart';
+import 'package:hudhud_delivery/features/courier/utils/courier_home_refresh.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_payment_helper.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/features/payment/data/data_provider/payment_data_provider.dart';
 import 'package:hudhud_delivery/features/payment/data/repository/payment_repository.dart';
 import 'package:hudhud_delivery/features/payment/presentation/screen/payment_initiate_result_screen.dart';
 import 'package:hudhud_delivery/features/payment/presentation/widgets/payment_details_form.dart';
+import 'package:hudhud_delivery/features/wallet/data/models/wallet_balance_model.dart';
+import 'package:hudhud_delivery/features/wallet/data/providers/wallet_data_provider.dart';
+import 'package:hudhud_delivery/features/wallet/data/repositories/wallet_repository.dart';
+import 'package:hudhud_delivery/features/wallet/presentation/screens/add_funds_screen.dart';
 import 'finding_courier_screen.dart';
 
 class ConfirmDetailsScreen extends StatefulWidget {
@@ -72,10 +78,14 @@ class ConfirmDetailsScreen extends StatefulWidget {
 class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
   late final CourierRepository _courierRepository;
   late final PaymentRepository _paymentRepository;
+  late final WalletRepository _walletRepository;
   gmaps.GoogleMapController? _mapController;
 
   bool _isLoadingEstimate = true;
   bool _isLoadingRequest = false;
+  WalletBalance? _walletBalance;
+  bool _isLoadingWalletBalance = false;
+  String? _walletBalanceError;
   double? _estimatedCost;
   double? _estimatedDistance;
   int? _estimatedDuration;
@@ -99,8 +109,16 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
         apiService: ApiService.instance,
       ),
     );
+    _walletRepository = WalletRepository(
+      walletDataProvider: WalletDataProvider(
+        apiService: ApiService.instance,
+      ),
+    );
     _fetchEstimate();
     _loadMapsAvailability();
+    if (widget.paymentType == 'wallet') {
+      _fetchWalletBalance();
+    }
     if (widget.pickupPosition != null && widget.deliveryPosition != null) {
       _fetchRouteDirections();
     }
@@ -175,6 +193,111 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
 
   bool get _hasServerEstimate =>
       !_isLoadingEstimate && _estimateError == null && _estimatedCost != null;
+
+  bool get _isWalletPayment => widget.paymentType == 'wallet';
+
+  Future<void> _fetchWalletBalance() async {
+    setState(() {
+      _isLoadingWalletBalance = true;
+      _walletBalanceError = null;
+    });
+    try {
+      final balance = await _walletRepository.getBalance();
+      if (!mounted) return;
+      setState(() {
+        _walletBalance = balance;
+        _isLoadingWalletBalance = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _walletBalance = null;
+        _isLoadingWalletBalance = false;
+        _walletBalanceError = 'Could not load wallet balance';
+      });
+    }
+  }
+
+  String? get _walletBalanceLabel {
+    if (!_isWalletPayment) return null;
+    if (_isLoadingWalletBalance) return 'Loading balance...';
+    if (_walletBalanceError != null) return _walletBalanceError;
+    if (_walletBalance != null) {
+      return '${_walletBalance!.currency} ${_walletBalance!.balance.toStringAsFixed(2)}';
+    }
+    return null;
+  }
+
+  double _topUpAmountForError(ApiErrorResult error) {
+    if (error.deficit != null && error.deficit! > 0) return error.deficit!;
+    final required = error.requiredAmount ?? 0;
+    final balance = error.balance ?? 0;
+    final computed = required - balance;
+    return computed > 0 ? computed : required;
+  }
+
+  Future<void> _showInsufficientBalanceDialog(ApiErrorResult error) async {
+    final topUpAmount = _topUpAmountForError(error);
+    final currency = _walletBalance?.currency ?? _estimatedCurrency;
+    final formattedTopUp = topUpAmount == topUpAmount.roundToDouble()
+        ? topUpAmount.toStringAsFixed(0)
+        : topUpAmount.toStringAsFixed(2);
+
+    final shouldTopUp = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Insufficient wallet balance'),
+          content: Text(error.displayMessage),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: Text('Top up $currency $formattedTopUp'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldTopUp != true || !mounted) return;
+
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AddFundsScreen(initialAmount: topUpAmount),
+      ),
+    );
+    if (mounted && _isWalletPayment) {
+      await _fetchWalletBalance();
+    }
+  }
+
+  void _navigateToFindingCourier(CreateDeliveryResult created) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => FindingCourierScreen(
+          deliveryId: created.deliveryId,
+          pickupLocation: widget.pickupLocation,
+          deliveryLocation: widget.deliveryLocation,
+          pickupPosition: widget.pickupPosition,
+          deliveryPosition: widget.deliveryPosition,
+          selectedVehicle: widget.selectedVehicle,
+          itemType: widget.itemType,
+          quantity: widget.quantity,
+          whoPays: widget.whoPays,
+          paymentType: widget.paymentType,
+          recipientName: widget.recipientName,
+          recipientPhone: widget.recipientPhone,
+          packageImagePath: widget.packageImagePath,
+        ),
+      ),
+    );
+  }
 
   String _mapPackageType(String itemType) {
     const mapping = {
@@ -346,6 +469,11 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
 
     if (result['success'] != true) {
       setState(() => _isLoadingRequest = false);
+      final error = result['error'] as ApiErrorResult?;
+      if (error?.isInsufficientBalance == true) {
+        await _showInsufficientBalanceDialog(error!);
+        return;
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(result['message']?.toString() ??
@@ -370,6 +498,8 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
       return;
     }
 
+    CourierHomeRefresh.instance.notifyRefresh();
+
     final amount = created.totalAmount ?? _estimatedCost ?? 0;
     if (amount <= 0) {
       setState(() => _isLoadingRequest = false);
@@ -383,6 +513,32 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
     }
 
     final currency = created.currency ?? _estimatedCurrency;
+
+    if (_isWalletPayment) {
+      setState(() => _isLoadingRequest = false);
+      try {
+        final balance = await _walletRepository.getBalance();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Delivery booked. Wallet balance: '
+                '${balance.currency} ${balance.balance.toStringAsFixed(2)}',
+              ),
+            ),
+          );
+        }
+      } catch (_) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Delivery booked with wallet payment')),
+          );
+        }
+      }
+      if (!mounted) return;
+      _navigateToFindingCourier(created);
+      return;
+    }
 
     try {
       final paymentResult = await initiateDeliveryPayment(
@@ -645,98 +801,112 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                                       const SizedBox(height: AppColors.spaceMD),
                                       _DetailCard(
                                         borderColor: borderColor,
-                                        child: Row(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
-                                            Expanded(
-                                              child: _DetailRow(
-                                                label: 'Payment',
-                                                value: widget.paymentType,
-                                              ),
-                                            ),
-                                            Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.end,
+                                            Row(
                                               children: [
-                                                Text(
-                                                  'Estimated fee',
-                                                  style: theme
-                                                      .textTheme.bodySmall
-                                                      ?.copyWith(
-                                                    color:
-                                                        HomeColors.textMuted,
+                                                Expanded(
+                                                  child: _DetailRow(
+                                                    label: 'Payment',
+                                                    value: widget.paymentType,
                                                   ),
                                                 ),
-                                                const SizedBox(height: 4),
-                                                _isLoadingEstimate
-                                                    ? Shimmer.fromColors(
-                                                        baseColor: HomeColors
-                                                            .surfaceElevated,
-                                                        highlightColor:
-                                                            HomeColors
-                                                                .surfaceElevated
-                                                                .withValues(
-                                                                    alpha:
-                                                                        0.6),
-                                                        child: Container(
-                                                          width: 80,
-                                                          height: 24,
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            color:
-                                                                Colors.white,
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        4),
+                                                Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.end,
+                                                  children: [
+                                                    Text(
+                                                      'Estimated fee',
+                                                      style: theme
+                                                          .textTheme.bodySmall
+                                                          ?.copyWith(
+                                                        color:
+                                                            HomeColors.textMuted,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(height: 4),
+                                                    _isLoadingEstimate
+                                                        ? Shimmer.fromColors(
+                                                            baseColor: HomeColors
+                                                                .surfaceElevated,
+                                                            highlightColor:
+                                                                HomeColors
+                                                                    .surfaceElevated
+                                                                    .withValues(
+                                                                        alpha:
+                                                                            0.6),
+                                                            child: Container(
+                                                              width: 80,
+                                                              height: 24,
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                color:
+                                                                    Colors.white,
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            4),
+                                                              ),
+                                                            ),
+                                                          )
+                                                        : Text(
+                                                            estimatedFeeText,
+                                                            style: theme
+                                                                .textTheme
+                                                                .titleLarge
+                                                                ?.copyWith(
+                                                              fontWeight:
+                                                                  FontWeight.w700,
+                                                              color: HomeColors
+                                                                  .violet,
+                                                            ),
+                                                          ),
+                                                    if (breakdownText != null &&
+                                                        !_isLoadingEstimate &&
+                                                        _estimateError == null)
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets.only(
+                                                                top: 4),
+                                                        child: Text(
+                                                          breakdownText,
+                                                          style: theme
+                                                              .textTheme.bodySmall
+                                                              ?.copyWith(
+                                                            color: HomeColors
+                                                                .textMuted,
                                                           ),
                                                         ),
-                                                      )
-                                                    : Text(
-                                                        estimatedFeeText,
-                                                        style: theme
-                                                            .textTheme
-                                                            .titleLarge
-                                                            ?.copyWith(
-                                                          fontWeight:
-                                                              FontWeight.w700,
-                                                          color: HomeColors
-                                                              .violet,
+                                                      ),
+                                                    if (_estimateError != null)
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets.only(
+                                                                top: 4),
+                                                        child: Text(
+                                                          _estimateError!,
+                                                          style: theme
+                                                              .textTheme.bodySmall
+                                                              ?.copyWith(
+                                                            color: AppColors
+                                                                .errorColor,
+                                                          ),
                                                         ),
                                                       ),
-                                                if (breakdownText != null &&
-                                                    !_isLoadingEstimate &&
-                                                    _estimateError == null)
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            top: 4),
-                                                    child: Text(
-                                                      breakdownText,
-                                                      style: theme
-                                                          .textTheme.bodySmall
-                                                          ?.copyWith(
-                                                        color: HomeColors
-                                                            .textMuted,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                if (_estimateError != null)
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            top: 4),
-                                                    child: Text(
-                                                      _estimateError!,
-                                                      style: theme
-                                                          .textTheme.bodySmall
-                                                          ?.copyWith(
-                                                        color: AppColors
-                                                            .errorColor,
-                                                      ),
-                                                    ),
-                                                  ),
+                                                  ],
+                                                ),
                                               ],
                                             ),
+                                            if (_isWalletPayment &&
+                                                _walletBalanceLabel != null) ...[
+                                              const SizedBox(height: 12),
+                                              _DetailRow(
+                                                label: 'Wallet balance',
+                                                value: _walletBalanceLabel!,
+                                              ),
+                                            ],
                                           ],
                                         ),
                                       ),

@@ -10,6 +10,9 @@ import 'package:hudhud_delivery/features/payment/data/data_provider/payment_data
 import 'package:hudhud_delivery/features/payment/data/repository/payment_repository.dart';
 import 'package:hudhud_delivery/features/payment/model/payment_initiate_result.dart';
 import 'package:hudhud_delivery/features/payment/presentation/widgets/payment_details_form.dart';
+import 'package:hudhud_delivery/features/wallet/data/models/wallet_balance_model.dart';
+import 'package:hudhud_delivery/features/wallet/data/providers/wallet_data_provider.dart';
+import 'package:hudhud_delivery/features/wallet/data/repositories/wallet_repository.dart';
 import 'package:latlong2/latlong.dart';
 import 'confirm_details_screen.dart';
 
@@ -64,6 +67,10 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
   bool _isLoadingPaymentMethods = true;
   String? _paymentMethodsError;
 
+  WalletBalance? _walletBalance;
+  bool _isLoadingWalletBalance = false;
+  String? _walletBalanceError;
+
   final List<String> _itemTypes = [
     'Electronics/Gadgets',
     'Documents',
@@ -74,12 +81,18 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
   ];
 
   late final PaymentRepository _paymentRepository;
+  late final WalletRepository _walletRepository;
 
   @override
   void initState() {
     super.initState();
     _paymentRepository = PaymentRepository(
       paymentDataProvider: PaymentDataProvider(
+        apiService: ApiService.instance,
+      ),
+    );
+    _walletRepository = WalletRepository(
+      walletDataProvider: WalletDataProvider(
         apiService: ApiService.instance,
       ),
     );
@@ -125,6 +138,45 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
           _paymentMethodsError = 'Failed to load payment methods';
         });
       }
+    }
+  }
+
+  Future<void> _fetchWalletBalance() async {
+    setState(() {
+      _isLoadingWalletBalance = true;
+      _walletBalanceError = null;
+    });
+    try {
+      final balance = await _walletRepository.getBalance();
+      if (!mounted) return;
+      setState(() {
+        _walletBalance = balance;
+        _isLoadingWalletBalance = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _walletBalance = null;
+        _isLoadingWalletBalance = false;
+        _walletBalanceError = 'Could not load wallet balance';
+      });
+    }
+  }
+
+  void _onPaymentTypeSelected(String? id) {
+    setState(() {
+      _paymentType = id;
+      _paymentDetails = {};
+      _useHpp = false;
+      _ebirrProvider = 'kaafi';
+      if (id != 'wallet') {
+        _walletBalance = null;
+        _walletBalanceError = null;
+        _isLoadingWalletBalance = false;
+      }
+    });
+    if (id == 'wallet') {
+      _fetchWalletBalance();
     }
   }
 
@@ -556,12 +608,7 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                                                 ),
                                               ),
                                               onTap: () {
-                                                setState(() {
-                                                  _paymentType = id;
-                                                  _paymentDetails = {};
-                                                  _useHpp = false;
-                                                  _ebirrProvider = 'kaafi';
-                                                });
+                                                _onPaymentTypeSelected(id);
                                                 Navigator.pop(context);
                                               },
                                             );
@@ -602,6 +649,15 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                               ),
                             ),
                           ),
+                          if (_paymentType == 'wallet') ...[
+                            const SizedBox(height: 12),
+                            _WalletBalanceBanner(
+                              balance: _walletBalance,
+                              isLoading: _isLoadingWalletBalance,
+                              error: _walletBalanceError,
+                              onRetry: _fetchWalletBalance,
+                            ),
+                          ],
                           if (_paymentType != null &&
                               paymentMethodNeedsDetailsForm(_paymentType)) ...[
                             const SizedBox(height: 12),
@@ -823,6 +879,66 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _WalletBalanceBanner extends StatelessWidget {
+  const _WalletBalanceBanner({
+    required this.balance,
+    required this.isLoading,
+    this.error,
+    this.onRetry,
+  });
+
+  final WalletBalance? balance;
+  final bool isLoading;
+  final String? error;
+  final VoidCallback? onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    String text;
+    Color textColor = HomeColors.textSecondary;
+
+    if (isLoading) {
+      text = 'Loading wallet balance...';
+    } else if (error != null) {
+      text = error!;
+      textColor = AppColors.errorColor;
+    } else if (balance != null) {
+      text =
+          'Wallet balance: ${balance!.currency} ${balance!.balance.toStringAsFixed(2)}';
+    } else {
+      text = 'Wallet balance unavailable';
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: HomeColors.surfaceElevated,
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        border: Border.all(color: HomeColors.border),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.account_balance_wallet_outlined,
+              size: 20, color: HomeColors.violet),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(fontSize: 14, color: textColor),
+            ),
+          ),
+          if (error != null && onRetry != null)
+            TextButton(
+              onPressed: onRetry,
+              child: const Text('Retry'),
+            ),
+        ],
       ),
     );
   }

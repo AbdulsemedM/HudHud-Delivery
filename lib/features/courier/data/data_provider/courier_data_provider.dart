@@ -71,7 +71,7 @@ class CourierDataProvider {
     } on ApiException catch (apiException) {
       return {
         'statusCode': apiException.statusCode,
-        'data': null,
+        'data': apiException.data,
         'errorMessage': apiException.message,
       };
     } on Exception catch (e) {
@@ -173,14 +173,14 @@ class CourierDataProvider {
     }
   }
 
-  /// POST /api/services/ride/cancel — cancel a package delivery (customer).
+  /// POST /api/services/delivery/cancel — cancel a package delivery (customer).
   Future<Map<String, dynamic>> cancelDelivery({
     required int deliveryId,
     String cancellationReason = 'Changed my mind',
   }) async {
     try {
       final response = await apiService.post(
-        '${ApiConstants.baseUrl}${ApiConstants.rideCancelById}',
+        '${ApiConstants.baseUrl}${ApiConstants.deliveryCancel}',
         data: {
           'delivery_id': deliveryId,
           'cancellation_reason': cancellationReason,
@@ -197,6 +197,44 @@ class CourierDataProvider {
       return {
         'statusCode': apiException.statusCode,
         'data': null,
+        'errorMessage': apiException.message,
+      };
+    } on Exception catch (e) {
+      return {'statusCode': 500, 'data': null, 'errorMessage': e.toString()};
+    }
+  }
+
+  /// POST /api/services/delivery/{id}/retry-payment
+  Future<Map<String, dynamic>> retryPayment({
+    required int deliveryId,
+    required String paymentMethod,
+    String? paymentPhone,
+  }) async {
+    try {
+      final path = ApiConstants.deliveryRetryPayment.replaceAll(
+        '{id}',
+        deliveryId.toString(),
+      );
+      final body = <String, dynamic>{
+        'payment_method': paymentMethod,
+      };
+      if (paymentPhone != null && paymentPhone.isNotEmpty) {
+        body['payment_phone'] = paymentPhone;
+      }
+      final response = await apiService.post(
+        '${ApiConstants.baseUrl}$path',
+        data: body,
+      );
+
+      return {
+        'statusCode': response.statusCode,
+        'data': response.data,
+        'errorMessage': null,
+      };
+    } on ApiException catch (apiException) {
+      return {
+        'statusCode': apiException.statusCode,
+        'data': apiException.data,
         'errorMessage': apiException.message,
       };
     } on Exception catch (e) {

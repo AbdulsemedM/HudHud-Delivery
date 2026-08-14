@@ -1,3 +1,5 @@
+import '../../../../core/utils/api_error_result.dart';
+import '../../../payment/model/payment_initiate_result.dart';
 import '../../utils/delivery_estimate.dart';
 import '../data_provider/courier_data_provider.dart';
 import '../models/create_delivery_result.dart';
@@ -92,15 +94,20 @@ class CourierRepository {
           'message': 'Delivery request created successfully',
         };
       } else {
-        String errorMessage =
-            response['errorMessage'] ?? 'Error creating delivery request';
-        errorMessage = _cleanErrorMessage(errorMessage);
+        final statusCode = response['statusCode'] as int?;
+        final parsed = parseApiErrorResult(
+          response['data'],
+          statusCode: statusCode,
+          fallback: response['errorMessage']?.toString() ??
+              'Error creating delivery request',
+        );
         return {
           'success': false,
-          'data': null,
+          'data': response['data'],
           'orderId': null,
           'created': null,
-          'message': errorMessage
+          'message': parsed.displayMessage,
+          'error': parsed,
         };
       }
     } catch (e) {
@@ -236,7 +243,63 @@ class CourierRepository {
     }
   }
 
-  /// Cancel a package delivery via POST /api/services/ride/cancel.
+  /// Retry unpaid payment via POST /api/services/delivery/{id}/retry-payment.
+  Future<Map<String, dynamic>> retryPayment({
+    required int deliveryId,
+    required String paymentMethod,
+    String? paymentPhone,
+  }) async {
+    try {
+      final response = await courierDataProvider.retryPayment(
+        deliveryId: deliveryId,
+        paymentMethod: paymentMethod,
+        paymentPhone: paymentPhone,
+      );
+
+      if (response['statusCode'] == 200 || response['statusCode'] == 201) {
+        final data = response['data'];
+        final envelope = _paymentEnvelope(data);
+        return {
+          'success': true,
+          'data': data,
+          'result': PaymentInitiateResult.fromJson(envelope),
+          'message': envelope['message']?.toString() ?? 'Payment retry started',
+        };
+      }
+
+      final parsed = parseApiErrorResult(
+        response['data'],
+        statusCode: response['statusCode'] as int?,
+        fallback: response['errorMessage']?.toString() ??
+            'Error retrying payment',
+      );
+      return {
+        'success': false,
+        'data': response['data'],
+        'result': null,
+        'message': parsed.displayMessage,
+        'error': parsed,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'data': null,
+        'result': null,
+        'message': _cleanErrorMessage(e.toString()),
+      };
+    }
+  }
+
+  Map<String, dynamic> _paymentEnvelope(dynamic data) {
+    if (data is Map) {
+      final map = Map<String, dynamic>.from(data);
+      if (map.containsKey('success')) return map;
+      return {'success': true, 'data': map};
+    }
+    return {'success': true, 'data': <String, dynamic>{}};
+  }
+
+  /// Cancel a package delivery via POST /api/services/delivery/cancel.
   Future<Map<String, dynamic>> cancelDelivery({
     required int deliveryId,
     String cancellationReason = 'Changed my mind',
