@@ -137,6 +137,34 @@ void main() {
       }, statusCode: 404);
       expect(ride.code, 'ride_not_found');
     });
+
+    test('parses payment amount mismatch 422', () {
+      final result = parseApiErrorResult({
+        'success': false,
+        'message': 'Payment amount does not match the delivery total.',
+        'expected_amount': 95.00,
+        'provided_amount': 161.00,
+        'currency': 'ETB',
+      }, statusCode: 422);
+
+      expect(result.code, 'amount_mismatch');
+      expect(result.isAmountMismatch, isTrue);
+      expect(result.expectedAmount, 95);
+      expect(result.providedAmount, 161);
+      expect(result.displayMessage, contains('Payment amount does not match'));
+      expect(result.displayMessage, contains('Expected: 95'));
+      expect(result.displayMessage, contains('Provided: 161'));
+    });
+
+    test('detects amount mismatch from message when fields missing', () {
+      final result = parseApiErrorResult({
+        'success': false,
+        'message': 'Payment amount does not match the delivery total.',
+      }, statusCode: 422);
+
+      expect(result.isAmountMismatch, isTrue);
+      expect(result.code, 'amount_mismatch');
+    });
   });
 
   group('userFacingApiError', () {

@@ -62,6 +62,7 @@ class PaymentInitiateResult {
     this.amount,
     this.currency,
     this.orderStatus,
+    this.idempotentReplay = false,
     this.raw,
   });
 
@@ -84,6 +85,8 @@ class PaymentInitiateResult {
   final String? amount;
   final String? currency;
   final String? orderStatus;
+  /// True when the API returned the original payment for a repeated Idempotency-Key.
+  final bool idempotentReplay;
   final Map<String, dynamic>? raw;
 
   static bool isEbirrRcsSuccess(Map<String, dynamic> json) {
@@ -177,6 +180,8 @@ class PaymentInitiateResult {
       amount: paymentMap['amount']?.toString(),
       currency: paymentMap['currency']?.toString(),
       orderStatus: dataMap['order_status']?.toString(),
+      idempotentReplay: json['idempotent_replay'] == true ||
+          dataMap['idempotent_replay'] == true,
       raw: json,
     );
   }

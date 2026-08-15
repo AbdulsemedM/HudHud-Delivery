@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../../core/api/api_service.dart';
+import '../../../core/utils/payment_idempotency.dart';
 import '../../checkout/data/models/create_order_result.dart';
 import '../../checkout/data/repository/checkout_repository.dart';
 import '../data/repository/payment_repository.dart';
@@ -179,6 +180,10 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
           amount: amount,
           currency: currency,
           paymentDetails: initiateDetails,
+          idempotencyKey: createPaymentIdempotencyKey(
+            type: 'order',
+            entityId: created.orderId,
+          ),
         );
 
         final result = PaymentInitiateResult.fromJson(raw);

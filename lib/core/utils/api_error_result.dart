@@ -10,6 +10,7 @@ const Set<String> kKnownApiErrorCodes = {
   'ride_not_found',
   'service_not_found',
   'delivery_not_found',
+  'amount_mismatch',
   'SERVICE_COMING_SOON',
 };
 
@@ -25,6 +26,8 @@ class ApiErrorResult {
     this.deficit,
     this.gatewayError,
     this.gatewayErrorCode,
+    this.expectedAmount,
+    this.providedAmount,
   });
 
   final String message;
@@ -36,6 +39,10 @@ class ApiErrorResult {
   final double? deficit;
   final String? gatewayError;
   final String? gatewayErrorCode;
+  /// From payment amount-mismatch 422 (`expected_amount`).
+  final double? expectedAmount;
+  /// From payment amount-mismatch 422 (`provided_amount`).
+  final double? providedAmount;
 
   bool get isInsufficientBalance =>
       code == 'insufficient_balance' ||
@@ -48,9 +55,30 @@ class ApiErrorResult {
   bool get isValidation =>
       code == 'validation_error' || fieldErrors.isNotEmpty;
 
+  /// Payment amount does not match the stored delivery/order total.
+  bool get isAmountMismatch {
+    if (expectedAmount != null && providedAmount != null) return true;
+    if (code == 'amount_mismatch') return true;
+    final lower = message.toLowerCase();
+    return statusCode == 422 &&
+        lower.contains('payment amount') &&
+        lower.contains('does not match');
+  }
+
   /// Primary user-facing text, with balance/gateway enrichment when present.
   String get displayMessage {
     final parts = <String>[message];
+
+    if (isAmountMismatch && expectedAmount != null) {
+      final expected = _formatAmount(expectedAmount!);
+      if (providedAmount != null) {
+        parts.add(
+          'Expected: $expected · Provided: ${_formatAmount(providedAmount!)}',
+        );
+      } else {
+        parts.add('Updated amount: $expected');
+      }
+    }
 
     if (isInsufficientBalance &&
         balance != null &&
@@ -118,6 +146,12 @@ ApiErrorResult parseApiErrorResult(
   final requiredAmount =
       _parseDouble(nestedData['required'] ?? root['required']);
   final deficit = _parseDouble(nestedData['deficit'] ?? root['deficit']);
+  final expectedAmount = _parseDouble(
+    nestedData['expected_amount'] ?? root['expected_amount'],
+  );
+  final providedAmount = _parseDouble(
+    nestedData['provided_amount'] ?? root['provided_amount'],
+  );
   final gatewayError = _firstNonEmptyString([
     nestedData['gateway_error'],
     root['gateway_error'],
@@ -147,6 +181,8 @@ ApiErrorResult parseApiErrorResult(
     fieldErrors: fieldErrors,
     balance: balance,
     requiredAmount: requiredAmount,
+    expectedAmount: expectedAmount,
+    providedAmount: providedAmount,
     gatewayError: gatewayError,
     gatewayErrorCode: gatewayErrorCode,
   );
@@ -161,6 +197,8 @@ ApiErrorResult parseApiErrorResult(
     deficit: deficit,
     gatewayError: gatewayError,
     gatewayErrorCode: gatewayErrorCode,
+    expectedAmount: expectedAmount,
+    providedAmount: providedAmount,
   );
 }
 
@@ -170,11 +208,19 @@ String? _inferCode({
   required Map<String, List<String>> fieldErrors,
   double? balance,
   double? requiredAmount,
+  double? expectedAmount,
+  double? providedAmount,
   String? gatewayError,
   String? gatewayErrorCode,
 }) {
   final lower = message.toLowerCase();
 
+  if (expectedAmount != null && providedAmount != null) {
+    return 'amount_mismatch';
+  }
+  if (lower.contains('payment amount') && lower.contains('does not match')) {
+    return 'amount_mismatch';
+  }
   if (balance != null && requiredAmount != null) {
     return 'insufficient_balance';
   }

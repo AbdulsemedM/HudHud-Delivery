@@ -153,6 +153,7 @@ class _PaymentInitiateResultScreenState
   }
 
   Future<void> _checkStatus({required bool manual}) async {
+    // Poll status only — never call payments/initiate again from this screen.
     final paymentId = result.paymentId;
     if (paymentId == null || paymentId <= 0) return;
     if (_polledStatus?.isTerminal == true) return;

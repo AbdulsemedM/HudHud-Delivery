@@ -35,44 +35,48 @@ class PaymentDataProvider {
     int? packageDeliveryId,
     Map<String, dynamic>? paymentDetails,
     bool? isSandbox,
+    String? idempotencyKey,
   }) async {
-    try {
-      final body = <String, dynamic>{
-        'payment_method_code': paymentMethodCode,
-        'type': type,
-        'amount': amount,
-        'payment_details': paymentDetails ?? {},
-      };
-      if (currency != null && currency.isNotEmpty) {
-        body['currency'] = currency;
-      }
-      if (orderId != null) body['order_id'] = orderId;
-      if (rideId != null) body['ride_id'] = rideId;
-      if (serviceRequestId != null) {
-        body['service_request_id'] = serviceRequestId;
-      }
-      if (packageDeliveryId != null) {
-        body['package_delivery_id'] = packageDeliveryId;
-      }
-      if (isSandbox != null) body['is_sandbox'] = isSandbox;
-
-      // Provider gateways (eBirr/Waafi) often exceed the default 30s receive timeout.
-      final response = await apiService.post(
-        '${ApiConstants.baseUrl}${ApiConstants.paymentsInitiate}',
-        data: body,
-        options: Options(
-          receiveTimeout: const Duration(minutes: 3),
-          sendTimeout: const Duration(minutes: 3),
-        ),
-      );
-      final data = response.data;
-      if (data is Map) {
-        return Map<String, dynamic>.from(data);
-      }
-      return {'success': false, 'message': 'Invalid payment response'};
-    } catch (e) {
-      throw Exception('Failed to initiate payment: $e');
+    final body = <String, dynamic>{
+      'payment_method_code': paymentMethodCode,
+      'type': type,
+      'amount': amount,
+      'payment_details': paymentDetails ?? {},
+    };
+    if (currency != null && currency.isNotEmpty) {
+      body['currency'] = currency;
     }
+    if (orderId != null) body['order_id'] = orderId;
+    if (rideId != null) body['ride_id'] = rideId;
+    if (serviceRequestId != null) {
+      body['service_request_id'] = serviceRequestId;
+    }
+    if (packageDeliveryId != null) {
+      body['package_delivery_id'] = packageDeliveryId;
+    }
+    if (isSandbox != null) body['is_sandbox'] = isSandbox;
+
+    final headers = <String, dynamic>{};
+    if (idempotencyKey != null && idempotencyKey.isNotEmpty) {
+      headers['Idempotency-Key'] = idempotencyKey;
+    }
+
+    // Provider gateways (eBirr/Waafi) often exceed the default 30s receive timeout.
+    // Rethrow ApiException / Dio errors so callers can branch (422, timeouts).
+    final response = await apiService.post(
+      '${ApiConstants.baseUrl}${ApiConstants.paymentsInitiate}',
+      data: body,
+      options: Options(
+        receiveTimeout: const Duration(minutes: 3),
+        sendTimeout: const Duration(minutes: 3),
+        headers: headers.isEmpty ? null : headers,
+      ),
+    );
+    final data = response.data;
+    if (data is Map) {
+      return Map<String, dynamic>.from(data);
+    }
+    return {'success': false, 'message': 'Invalid payment response'};
   }
 
   Future<Map<String, dynamic>> getPaymentStatus(int paymentId) async {

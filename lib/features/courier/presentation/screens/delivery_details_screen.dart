@@ -380,6 +380,21 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
         await _showInsufficientBalanceDialog(error!);
         return;
       }
+      if (error?.isAmountMismatch == true) {
+        await _fetchDetails(refresh: true);
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              error!.displayMessage.isNotEmpty
+                  ? error.displayMessage
+                  : 'Payment amount changed. Review the updated total and try again.',
+            ),
+            backgroundColor: Colors.orange,
+          ),
+        );
+        return;
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(result['message']?.toString() ?? 'Failed to retry payment'),

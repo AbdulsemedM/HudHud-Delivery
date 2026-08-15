@@ -59,6 +59,32 @@ void main() {
       expect(result.method, 'cash_on_delivery');
       expect(result.orderStatus, 'confirmed');
       expect(result.customerMessage, 'Pay KES 1,500.00 upon delivery.');
+      expect(result.idempotentReplay, isFalse);
+    });
+
+    test('parses idempotent_replay as successful initiate', () {
+      const json = {
+        'success': true,
+        'idempotent_replay': true,
+        'message': 'Payment already initiated',
+        'data': {
+          'payment': {
+            'id': 789,
+            'status': 'pending',
+            'method': 'ebirr_coop',
+            'amount': 95.00,
+            'currency': 'ETB',
+          },
+          'next_action': 'user_action_required',
+          'customer_message': 'Approve the payment on your phone.',
+        },
+      };
+
+      final result = PaymentInitiateResult.fromJson(json);
+      expect(result.isSuccess, isTrue);
+      expect(result.idempotentReplay, isTrue);
+      expect(result.paymentId, 789);
+      expect(result.uiMode, PaymentInitiateUiMode.userActionRequired);
     });
 
     test('parses top-level qr_code for show_qr_code', () {

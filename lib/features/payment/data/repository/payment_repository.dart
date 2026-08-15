@@ -1,3 +1,4 @@
+import '../../../../core/api/api_service.dart';
 import '../data_provider/payment_data_provider.dart';
 import '../../model/payment_initiate_result.dart';
 import '../../model/payment_status_result.dart';
@@ -87,35 +88,36 @@ class PaymentRepository {
     int? packageDeliveryId,
     Map<String, dynamic>? paymentDetails,
     bool? isSandbox,
+    String? idempotencyKey,
   }) async {
+    if (paymentMethodCode.isEmpty) {
+      throw Exception('Payment method is required');
+    }
+    if (amount <= 0) {
+      throw Exception('Invalid payment amount: $amount');
+    }
+
+    switch (type) {
+      case 'order':
+        if (orderId == null || orderId <= 0) {
+          throw Exception('Invalid order id: $orderId');
+        }
+      case 'ride':
+        if (rideId == null || rideId <= 0) {
+          throw Exception('Invalid ride id: $rideId');
+        }
+      case 'service':
+        if (serviceRequestId == null || serviceRequestId <= 0) {
+          throw Exception('Invalid service request id: $serviceRequestId');
+        }
+      case 'delivery':
+        if (packageDeliveryId == null || packageDeliveryId <= 0) {
+          throw Exception(
+              'Invalid package delivery id: $packageDeliveryId');
+        }
+    }
+
     try {
-      if (paymentMethodCode.isEmpty) {
-        throw Exception('Payment method is required');
-      }
-      if (amount <= 0) {
-        throw Exception('Invalid payment amount: $amount');
-      }
-
-      switch (type) {
-        case 'order':
-          if (orderId == null || orderId <= 0) {
-            throw Exception('Invalid order id: $orderId');
-          }
-        case 'ride':
-          if (rideId == null || rideId <= 0) {
-            throw Exception('Invalid ride id: $rideId');
-          }
-        case 'service':
-          if (serviceRequestId == null || serviceRequestId <= 0) {
-            throw Exception('Invalid service request id: $serviceRequestId');
-          }
-        case 'delivery':
-          if (packageDeliveryId == null || packageDeliveryId <= 0) {
-            throw Exception(
-                'Invalid package delivery id: $packageDeliveryId');
-          }
-      }
-
       return await paymentDataProvider.initiatePayment(
         paymentMethodCode: paymentMethodCode,
         type: type,
@@ -127,7 +129,10 @@ class PaymentRepository {
         packageDeliveryId: packageDeliveryId,
         paymentDetails: paymentDetails,
         isSandbox: isSandbox,
+        idempotencyKey: idempotencyKey,
       );
+    } on ApiException {
+      rethrow;
     } catch (e) {
       throw Exception('Payment initiation failed: $e');
     }
