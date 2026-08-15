@@ -8,9 +8,11 @@ import 'package:hudhud_delivery/features/payment/data/repository/payment_reposit
 import 'package:hudhud_delivery/features/payment/model/payment_initiate_result.dart';
 import 'package:hudhud_delivery/features/payment/presentation/screen/payment_initiate_result_screen.dart';
 import 'package:hudhud_delivery/features/payment/presentation/widgets/payment_details_form.dart';
+import 'package:hudhud_delivery/features/settings/presentation/widgets/profile_dark_page.dart';
 import 'package:hudhud_delivery/features/wallet/bloc/wallet_bloc.dart';
 import 'package:hudhud_delivery/features/wallet/data/providers/wallet_data_provider.dart';
 import 'package:hudhud_delivery/features/wallet/data/repositories/wallet_repository.dart';
+import 'package:hudhud_delivery/features/wallet/presentation/widgets/wallet_funding_form.dart';
 import 'package:hudhud_delivery/features/wallet/utils/wallet_funding_methods.dart';
 
 class WithdrawFundsScreen extends StatefulWidget {
@@ -52,6 +54,12 @@ class _WithdrawFundsScreenState extends State<WithdrawFundsScreen> {
     );
     _walletBloc = WalletBloc(walletRepository: _walletRepository);
     _fetchPaymentMethods();
+  }
+
+  void _applyAmount(double amount) {
+    _amountController.text = amount == amount.roundToDouble()
+        ? amount.toStringAsFixed(0)
+        : amount.toStringAsFixed(2);
   }
 
   Future<void> _fetchPaymentMethods() async {
@@ -143,23 +151,11 @@ class _WithdrawFundsScreenState extends State<WithdrawFundsScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
-    final borderColor =
-        isDark ? const Color(0xFF2A2A2A) : const Color(0xFFEEEEEE);
 
     return BlocProvider.value(
       value: _walletBloc,
-      child: Scaffold(
-        backgroundColor: theme.scaffoldBackgroundColor,
-        appBar: AppBar(
-          title: Text(l10n.withdrawFundsTitle),
-          backgroundColor: colorScheme.surface,
-          foregroundColor: colorScheme.onSurface,
-          elevation: 0,
-          surfaceTintColor: Colors.transparent,
-        ),
+      child: ProfileDarkPage(
+        title: l10n.withdrawFundsTitle,
         body: BlocConsumer<WalletBloc, WalletState>(
           listener: (context, state) async {
             if (state is WithdrawFundsSuccess) {
@@ -175,152 +171,64 @@ class _WithdrawFundsScreenState extends State<WithdrawFundsScreen> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.message),
-                  backgroundColor: colorScheme.error,
+                  backgroundColor: Colors.red,
                 ),
               );
             }
           },
           builder: (context, state) {
             final isLoading = state is WithdrawFundsLoading;
-            return SafeArea(
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.all(AppColors.spaceMD),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            TextFormField(
-                              controller: _amountController,
-                              keyboardType: const TextInputType.numberWithOptions(
-                                decimal: true,
-                              ),
-                              decoration: InputDecoration(
-                                labelText: l10n.amount,
-                                hintText: l10n.enterWithdrawAmount,
-                                suffixText: widget.defaultCurrency,
-                                border: const OutlineInputBorder(),
-                              ),
-                              validator: (v) {
-                                if (v == null || v.isEmpty) {
-                                  return l10n.enterAmount;
-                                }
-                                final amount = double.tryParse(v);
-                                if (amount == null || amount <= 0) {
-                                  return l10n.validationEnterValidAmount;
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 24),
-                            Text(
-                              l10n.withdrawalMethod,
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            if (_isLoadingPaymentMethods)
-                              const Center(
-                                child: Padding(
-                                  padding: EdgeInsets.all(16),
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                ),
-                              )
-                            else if (_paymentMethods.isEmpty)
-                              Text(
-                                l10n.walletNoPaymentMethods,
-                                style: TextStyle(
-                                  color: colorScheme.onSurfaceVariant,
-                                ),
-                              )
-                            else
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
-                                children: _paymentMethods.map((method) {
-                                  final id = method['id'] as String? ?? '';
-                                  final name =
-                                      method['name'] as String? ?? id;
-                                  final selected = _selectedMethodId == id;
-                                  return FilterChip(
-                                    label: Text(name),
-                                    selected: selected,
-                                    onSelected: (v) {
-                                      if (!v) return;
-                                      setState(() {
-                                        _selectedMethodId = id;
-                                        _paymentDetails = {};
-                                        _useHpp = false;
-                                        _ebirrProvider = 'kaafi';
-                                      });
-                                    },
-                                    showCheckmark: false,
-                                    selectedColor: AppColors.primaryColor,
-                                    labelStyle: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      color: selected
-                                          ? colorScheme.onPrimary
-                                          : colorScheme.onSurfaceVariant,
-                                    ),
-                                    side: BorderSide(
-                                      color: selected
-                                          ? AppColors.primaryColor
-                                          : borderColor,
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
-                            if (_selectedMethodId != null)
-                              PaymentDetailsForm(
-                                key: ValueKey(_selectedMethodId),
-                                paymentMethodCode: _selectedMethodId!,
-                                ebirrProvider: _ebirrProvider,
-                                useHpp: _useHpp,
-                                onEbirrProviderChanged: (v) =>
-                                    setState(() => _ebirrProvider = v),
-                                onUseHppChanged: (v) =>
-                                    setState(() => _useHpp = v),
-                                onChanged: (details) {
-                                  _paymentDetails = details;
-                                },
-                              ),
-                          ],
-                        ),
-                      ),
+            return Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: WalletFundingFormBody(
+                      amountController: _amountController,
+                      currency: widget.defaultCurrency,
+                      amountHint: l10n.enterWithdrawAmount,
+                      amountValidator: (v) {
+                        if (v == null || v.isEmpty) {
+                          return l10n.enterAmount;
+                        }
+                        final amount = double.tryParse(v);
+                        if (amount == null || amount <= 0) {
+                          return l10n.validationEnterValidAmount;
+                        }
+                        return null;
+                      },
+                      onQuickAmountSelected: (amount) {
+                        setState(() => _applyAmount(amount));
+                      },
+                      methodSectionTitle: l10n.withdrawalMethod,
+                      methods: _paymentMethods,
+                      selectedMethodId: _selectedMethodId,
+                      isLoadingMethods: _isLoadingPaymentMethods,
+                      emptyMethodsMessage: l10n.walletNoPaymentMethods,
+                      onMethodSelected: (id) {
+                        setState(() {
+                          _selectedMethodId = id;
+                          _paymentDetails = {};
+                          _useHpp = false;
+                          _ebirrProvider = 'kaafi';
+                        });
+                      },
+                      ebirrProvider: _ebirrProvider,
+                      useHpp: _useHpp,
+                      onEbirrProviderChanged: (v) =>
+                          setState(() => _ebirrProvider = v),
+                      onUseHppChanged: (v) => setState(() => _useHpp = v),
+                      onPaymentDetailsChanged: (details) {
+                        _paymentDetails = details;
+                      },
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(AppColors.spaceMD),
-                      child: SizedBox(
-                        width: double.infinity,
-                        height: AppColors.buttonHeightMD,
-                        child: ElevatedButton(
-                          onPressed: isLoading ? null : _submit,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor,
-                            foregroundColor: Colors.white,
-                          ),
-                          child: isLoading
-                              ? const SizedBox(
-                                  width: 22,
-                                  height: 22,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : Text(l10n.withdrawAction),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                  WalletFundingSubmitBar(
+                    label: l10n.withdrawAction,
+                    isLoading: isLoading,
+                    onPressed: _submit,
+                  ),
+                ],
               ),
             );
           },
