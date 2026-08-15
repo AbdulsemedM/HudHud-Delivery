@@ -70,6 +70,9 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
   WalletBalance? _walletBalance;
   bool _isLoadingWalletBalance = false;
   String? _walletBalanceError;
+  String? _profilePhoneDisplay;
+  bool _senderManuallyCleared = false;
+  String _lastSenderText = '';
 
   final List<String> _itemTypes = [
     'Electronics/Gadgets',
@@ -97,19 +100,56 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
       ),
     );
     _fetchPaymentMethods();
+    _senderPhoneController.addListener(_onSenderPhoneChanged);
     _prefillSenderPhone();
+  }
+
+  String _localPhoneDisplay(String? phone) {
+    final parts = splitPhoneForDisplay(phone);
+    if (parts.nationalNumber.isEmpty) {
+      return (phone ?? '').replaceAll(RegExp(r'\D'), '');
+    }
+    return '0${parts.nationalNumber}';
+  }
+
+  String? get _paymentPhoneSeed {
+    if (_profilePhoneDisplay != null && _profilePhoneDisplay!.isNotEmpty) {
+      return _profilePhoneDisplay;
+    }
+    final sender = _senderPhoneController.text.trim();
+    if (sender.isNotEmpty) return sender;
+    return null;
+  }
+
+  void _onSenderPhoneChanged() {
+    final current = _senderPhoneController.text.trim();
+    if (_lastSenderText.isNotEmpty && current.isEmpty) {
+      _senderManuallyCleared = true;
+    }
+    _lastSenderText = current;
+  }
+
+  void _copyPaymentPhoneToSenderIfNeeded(String? phone) {
+    if (_senderManuallyCleared) return;
+    if (_senderPhoneController.text.trim().isNotEmpty) return;
+    if (phone == null || phone.trim().isEmpty) return;
+    final display = _localPhoneDisplay(phone);
+    if (display.isEmpty) return;
+    _senderPhoneController.text = display;
   }
 
   Future<void> _prefillSenderPhone() async {
     final user = await AuthService().getStoredUser();
     final phone = user?.phone?.trim() ?? '';
     if (phone.isEmpty || !mounted) return;
-    final parts = splitPhoneForDisplay(phone);
-    final display = parts.nationalNumber.isEmpty
-        ? phone
-        : '0${parts.nationalNumber}';
+    final display = _localPhoneDisplay(phone);
+    if (display.isEmpty) return;
     setState(() {
-      _senderPhoneController.text = display;
+      _profilePhoneDisplay = display;
+      if (_senderPhoneController.text.trim().isEmpty &&
+          !_senderManuallyCleared) {
+        _senderPhoneController.text = display;
+      }
     });
   }
 
@@ -169,6 +209,7 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
       _paymentDetails = {};
       _useHpp = false;
       _ebirrProvider = 'kaafi';
+      _senderManuallyCleared = false;
       if (id != 'wallet') {
         _walletBalance = null;
         _walletBalanceError = null;
@@ -198,6 +239,7 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
     _packageDescriptionController.dispose();
     _recipientNameController.dispose();
     _recipientPhoneController.dispose();
+    _senderPhoneController.removeListener(_onSenderPhoneChanged);
     _senderPhoneController.dispose();
     super.dispose();
   }
@@ -662,13 +704,18 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                               paymentMethodNeedsDetailsForm(_paymentType)) ...[
                             const SizedBox(height: 12),
                             PaymentDetailsForm(
+                              key: ValueKey(_paymentType),
                               paymentMethodCode: _paymentType!,
+                              initialPhone: _paymentPhoneSeed,
                               ebirrProvider: _ebirrProvider,
                               useHpp: _useHpp,
                               onChanged: (details) {
                                 setState(() {
                                   _paymentDetails = details;
                                 });
+                                _copyPaymentPhoneToSenderIfNeeded(
+                                  details['phone']?.toString(),
+                                );
                               },
                               onEbirrProviderChanged: (provider) {
                                 setState(() {

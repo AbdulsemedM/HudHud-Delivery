@@ -154,6 +154,16 @@ class _PaymentDetailsFormState extends State<PaymentDetailsForm> {
   @override
   void didUpdateWidget(covariant PaymentDetailsForm oldWidget) {
     super.didUpdateWidget(oldWidget);
+    final initialChanged = oldWidget.initialPhone != widget.initialPhone;
+    if (initialChanged && _phoneController.text.trim().isEmpty) {
+      final display =
+          (widget.initialPhone ?? '').replaceAll(RegExp(r'\D'), '');
+      if (display.isNotEmpty) {
+        _phoneController.text = display;
+        _emitDetails();
+        return;
+      }
+    }
     if (oldWidget.paymentMethodCode != widget.paymentMethodCode ||
         oldWidget.ebirrProvider != widget.ebirrProvider ||
         oldWidget.useHpp != widget.useHpp) {
