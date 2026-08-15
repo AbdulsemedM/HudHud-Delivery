@@ -14,6 +14,7 @@ import 'package:hudhud_delivery/features/splash/presentation/screen/splash_scree
 import 'core/theme/app_theme.dart';
 import 'core/api/api_service.dart';
 import 'core/theme/service_tab_palette.dart';
+import 'app/config/app_env.dart';
 
 // Controllers
 import 'controllers/auth_controller.dart';
@@ -39,6 +40,9 @@ import 'app/widgets/ota_lifecycle_binder.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Env (BASE_URL, etc.) before any Dio / ApiService access.
+  await loadAppEnv();
 
   // Must exist before FCM tap handlers so they can push routes.
   final navigatorKey = GlobalKey<NavigatorState>();
