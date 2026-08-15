@@ -17,10 +17,20 @@ void main() {
         },
       }, statusCode: 422);
 
-      expect(result.code, 'validation_error');
-      expect(result.message, 'The given data was invalid.');
+      expect(result.code, 'payment_method_unavailable');
+      expect(
+        result.message,
+        'This payment method is currently unavailable. The amount must be at least 0.01.',
+      );
       expect(result.fieldErrors['payment_method_code'], isNotEmpty);
-      expect(result.displayMessage, contains('The given data was invalid.'));
+      expect(
+        result.displayMessage,
+        contains('This payment method is currently unavailable.'),
+      );
+      expect(
+        result.displayMessage,
+        contains('The amount must be at least 0.01.'),
+      );
       expect(
         extractApiErrorMessage({
           'success': false,
@@ -31,7 +41,29 @@ void main() {
             ],
           },
         }, statusCode: 422),
-        result.displayMessage,
+        'This payment method is currently unavailable.',
+      );
+    });
+
+    test('surfaces email already taken over generic Validation Error', () {
+      final result = parseApiErrorResult({
+        'message': 'Validation Error',
+        'errors': {
+          'email': ['The email has already been taken.'],
+        },
+      }, statusCode: 422);
+
+      expect(result.code, 'validation_error');
+      expect(result.message, 'The email has already been taken.');
+      expect(result.displayMessage, 'The email has already been taken.');
+      expect(
+        extractApiErrorMessage({
+          'message': 'Validation Error',
+          'errors': {
+            'email': ['The email has already been taken.'],
+          },
+        }, statusCode: 422),
+        'The email has already been taken.',
       );
     });
 
