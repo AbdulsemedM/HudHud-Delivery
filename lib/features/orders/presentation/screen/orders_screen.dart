@@ -8,6 +8,7 @@ import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/guest/utils/guest_sign_in_prompt.dart';
 import 'package:hudhud_delivery/features/home/presentation/screen/location_search_screen.dart';
+import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/features/home/presentation/widgets/home_widget.dart';
 import 'package:hudhud_delivery/features/settings/presentation/screen/notifications_screen.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
@@ -147,187 +148,200 @@ class _OrdersScreenState extends State<OrdersScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colorScheme = Theme.of(context).colorScheme;
+    final homeTheme = HomeColors.darkTheme(Theme.of(context));
 
     return BlocProvider(
       create: (context) => OrdersBloc(
         ordersRepository: context.read<OrdersRepository>(),
       )..add(const FetchOrdersEvent()),
-      child: Scaffold(
-        body: SafeArea(
-          child: RefreshIndicator(
-            onRefresh: () async {
-              context.read<OrdersBloc>().add(const RefreshOrdersEvent());
-            },
-            child: CustomScrollView(
-              controller: _scrollController,
-              slivers: [
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.all(AppColors.spaceMD),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        UserProfileHeader(
-                          name: _currentUser?.name ?? l10n.userDefault,
-                          location: _currentLocation,
-                          isLoadingLocation: _isLoadingLocation,
-                          user: _currentUser,
-                          onLocationTap: _openLocationSearch,
-                          onNotificationsTap: _openNotifications,
-                        ),
-                        const SizedBox(height: AppColors.spaceLG),
-                        const OrdersTitle(),
-                        const SizedBox(height: AppColors.spaceMD),
-                        OrderFilterChips(
-                          selectedStatus: _selectedStatus,
-                          onFilterChanged: _onFilterChanged,
-                        ),
-                        const SizedBox(height: AppColors.spaceMD),
-                      ],
+      child: Theme(
+        data: homeTheme,
+        child: Scaffold(
+          backgroundColor: HomeColors.background,
+          body: SafeArea(
+            child: RefreshIndicator(
+              color: HomeColors.violet,
+              backgroundColor: HomeColors.surface,
+              onRefresh: () async {
+                context.read<OrdersBloc>().add(const RefreshOrdersEvent());
+              },
+              child: CustomScrollView(
+                controller: _scrollController,
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppColors.spaceMD),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          UserProfileHeader(
+                            name: _currentUser?.name ?? l10n.userDefault,
+                            location: _currentLocation,
+                            isLoadingLocation: _isLoadingLocation,
+                            user: _currentUser,
+                            onLocationTap: _openLocationSearch,
+                            onNotificationsTap: _openNotifications,
+                          ),
+                          const SizedBox(height: AppColors.spaceLG),
+                          const OrdersTitle(),
+                          const SizedBox(height: AppColors.spaceMD),
+                          OrderFilterChips(
+                            selectedStatus: _selectedStatus,
+                            onFilterChanged: _onFilterChanged,
+                          ),
+                          const SizedBox(height: AppColors.spaceMD),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                BlocBuilder<OrdersBloc, OrdersState>(
-                  builder: (context, state) {
-                    if (state is OrdersLoading && state.orders.isEmpty) {
-                      return const SliverToBoxAdapter(
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 16),
-                          child: OrdersShimmer(),
-                        ),
-                      );
-                    }
-
-                    if (state is OrdersError && state.orders.isEmpty) {
-                      return SliverFillRemaining(
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.wifi_off_rounded,
-                                size: 48,
-                                color: colorScheme.onSurfaceVariant,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                l10n.failedToLoadOrders(state.message),
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context).textTheme.bodyMedium,
-                              ),
-                              const SizedBox(height: 16),
-                              TextButton.icon(
-                                onPressed: () {
-                                  context
-                                      .read<OrdersBloc>()
-                                      .add(const FetchOrdersEvent());
-                                },
-                                icon: const Icon(Icons.refresh),
-                                label: Text(l10n.actionRetry),
-                              ),
-                            ],
+                  BlocBuilder<OrdersBloc, OrdersState>(
+                    builder: (context, state) {
+                      if (state is OrdersLoading && state.orders.isEmpty) {
+                        return const SliverToBoxAdapter(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 16),
+                            child: OrdersShimmer(),
                           ),
-                        ),
-                      );
-                    }
+                        );
+                      }
 
-                    final orders = state is OrdersLoaded
-                        ? state.orders
-                        : state is OrdersError
-                            ? state.orders
-                            : [];
-
-                    if (orders.isEmpty) {
-                      return SliverFillRemaining(
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Container(
-                                width: 112,
-                                height: 112,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: AppColors.primaryColor
-                                      .withValues(alpha: 0.1),
+                      if (state is OrdersError && state.orders.isEmpty) {
+                        return SliverFillRemaining(
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.wifi_off_rounded,
+                                  size: 48,
+                                  color: HomeColors.textMuted,
                                 ),
-                                child: Icon(
-                                  Icons.receipt_long_outlined,
-                                  size: 56,
-                                  color: AppColors.primaryColor
-                                      .withValues(alpha: 0.85),
-                                ),
-                              ),
-                              const SizedBox(height: 24),
-                              Text(
-                                l10n.orderHistoryEmptyTitle,
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(fontWeight: FontWeight.w600),
-                              ),
-                              const SizedBox(height: 8),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 32),
-                                child: Text(
-                                  l10n.orderHistoryEmptyHint,
+                                const SizedBox(height: 16),
+                                Text(
+                                  l10n.failedToLoadOrders(state.message),
                                   textAlign: TextAlign.center,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
-                                      ?.copyWith(
-                                        color: colorScheme.onSurfaceVariant,
-                                      ),
+                                  style: const TextStyle(
+                                    color: HomeColors.textSecondary,
+                                  ),
                                 ),
-                              ),
-                            ],
+                                const SizedBox(height: 16),
+                                TextButton.icon(
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: HomeColors.violet,
+                                  ),
+                                  onPressed: () {
+                                    context
+                                        .read<OrdersBloc>()
+                                        .add(const FetchOrdersEvent());
+                                  },
+                                  icon: const Icon(Icons.refresh),
+                                  label: Text(l10n.actionRetry),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    }
+                        );
+                      }
 
-                    return SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          if (index >= orders.length) {
-                            return const Padding(
-                              padding: EdgeInsets.all(16.0),
-                              child: Center(
-                                child: CircularProgressIndicator(),
+                      final orders = state is OrdersLoaded
+                          ? state.orders
+                          : state is OrdersError
+                              ? state.orders
+                              : [];
+
+                      if (orders.isEmpty) {
+                        return SliverFillRemaining(
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Container(
+                                  width: 112,
+                                  height: 112,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: HomeColors.violet
+                                        .withValues(alpha: 0.12),
+                                  ),
+                                  child: Icon(
+                                    Icons.receipt_long_outlined,
+                                    size: 56,
+                                    color: HomeColors.violet
+                                        .withValues(alpha: 0.9),
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+                                Text(
+                                  l10n.orderHistoryEmptyTitle,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16,
+                                    color: HomeColors.textPrimary,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 32,
+                                  ),
+                                  child: Text(
+                                    l10n.orderHistoryEmptyHint,
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      color: HomeColors.textSecondary,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }
+
+                      return SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            if (index >= orders.length) {
+                              return const Padding(
+                                padding: EdgeInsets.all(16.0),
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    color: HomeColors.violet,
+                                  ),
+                                ),
+                              );
+                            }
+
+                            final order = orders[index];
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16.0,
+                                vertical: 4.0,
+                              ),
+                              child: OrderItemCard(
+                                order: order,
+                                onTap: () {
+                                  pushOrderDetailsById(
+                                    context,
+                                    orderId: order.id,
+                                  );
+                                },
                               ),
                             );
-                          }
-
-                          final order = orders[index];
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16.0,
-                              vertical: 4.0,
-                            ),
-                            child: OrderItemCard(
-                              order: order,
-                              onTap: () {
-                                pushOrderDetailsById(
-                                  context,
-                                  orderId: order.id,
-                                );
-                              },
-                            ),
-                          );
-                        },
-                        childCount: orders.length +
-                            (state is OrdersLoading && orders.isNotEmpty
-                                ? 1
-                                : 0),
-                      ),
-                    );
-                  },
-                ),
-              ],
+                          },
+                          childCount: orders.length +
+                              (state is OrdersLoading && orders.isNotEmpty
+                                  ? 1
+                                  : 0),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         ),

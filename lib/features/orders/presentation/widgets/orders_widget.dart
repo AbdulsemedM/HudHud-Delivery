@@ -5,6 +5,7 @@ import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/utils/avatar_util.dart';
 import 'package:hudhud_delivery/core/widgets/status_chip.dart';
 import 'package:hudhud_delivery/core/widgets/user_avatar.dart';
+import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/models/user_model.dart';
 import '../../data/models/order_model.dart';
 import 'package:intl/intl.dart';
@@ -23,7 +24,7 @@ class StoryRing extends StatelessWidget {
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: AppColors.primaryColor, width: 2),
+        border: Border.all(color: HomeColors.violet, width: 2),
       ),
       child: child,
     );
@@ -42,8 +43,6 @@ class OrdersHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -57,11 +56,15 @@ class OrdersHeader extends StatelessWidget {
           width: 44,
           height: 44,
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFF4F4F4),
+            color: HomeColors.surface,
             borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: HomeColors.border),
           ),
           child: IconButton(
-            icon: Icon(Icons.notifications_outlined, color: colorScheme.onSurface),
+            icon: const Icon(
+              Icons.notifications_outlined,
+              color: HomeColors.textPrimary,
+            ),
             onPressed: () {},
           ),
         ),
@@ -80,6 +83,7 @@ class OrdersTitle extends StatelessWidget {
       l10n.orders,
       style: Theme.of(context).textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w700,
+            color: HomeColors.textPrimary,
           ),
     );
   }
@@ -122,16 +126,12 @@ class OrderFilterChips extends StatelessWidget {
               labelStyle: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: selected
-                    ? Colors.white
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
+                color: selected ? Colors.white : HomeColors.textMuted,
               ),
-              backgroundColor: Theme.of(context).colorScheme.surface,
-              selectedColor: AppColors.primaryColor,
+              backgroundColor: HomeColors.surface,
+              selectedColor: HomeColors.violet,
               side: BorderSide(
-                color: selected
-                    ? AppColors.primaryColor
-                    : Theme.of(context).colorScheme.outline.withValues(alpha: 0.4),
+                color: selected ? HomeColors.violet : HomeColors.border,
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppColors.radiusFull),
@@ -149,10 +149,8 @@ class OrdersShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final baseColor = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0);
-    final highlightColor =
-        isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF5F5F5);
+    const baseColor = HomeColors.surface;
+    const highlightColor = HomeColors.surfaceElevated;
 
     return Column(
       children: List.generate(4, (index) {
@@ -189,27 +187,27 @@ class OrderItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
+        color: HomeColors.surface,
         borderRadius: BorderRadius.circular(AppColors.radiusLG),
-        border: Border.all(
-          color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFEEEEEE),
-        ),
+        border: Border.all(color: HomeColors.border),
       ),
       child: Row(
         children: [
-          Icon(Icons.local_shipping_outlined, color: colorScheme.onSurfaceVariant),
+          const Icon(
+            Icons.local_shipping_outlined,
+            color: HomeColors.textMuted,
+          ),
           const SizedBox(width: 16),
           Text(
             '$distance KMs',
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
+              color: HomeColors.textPrimary,
             ),
           ),
           const Spacer(),
@@ -221,14 +219,15 @@ class OrderItem extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
+                  color: HomeColors.textPrimary,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 dateTime,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 14,
-                  color: colorScheme.onSurfaceVariant,
+                  color: HomeColors.textMuted,
                 ),
               ),
             ],
@@ -285,14 +284,12 @@ class OrderItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final statusColor = StatusChip.colorForStatus(order.status);
     final amount =
         'ETB ${double.tryParse(order.totalAmount)?.toStringAsFixed(2) ?? order.totalAmount}';
 
     return Material(
-      color: colorScheme.surface,
+      color: HomeColors.surface,
       borderRadius: BorderRadius.circular(AppColors.radiusLG),
       child: InkWell(
         onTap: onTap,
@@ -301,9 +298,7 @@ class OrderItemCard extends StatelessWidget {
           padding: const EdgeInsets.all(AppColors.spaceMD),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppColors.radiusLG),
-            border: Border.all(
-              color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFEEEEEE),
-            ),
+            border: Border.all(color: HomeColors.border),
           ),
           child: Row(
             children: [
@@ -327,25 +322,29 @@ class OrderItemCard extends StatelessWidget {
                   children: [
                     Text(
                       '#${order.orderNumber}',
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                        color: HomeColors.textPrimary,
+                      ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       order.vendor.name,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
+                      style: const TextStyle(
+                        color: HomeColors.textSecondary,
+                        fontSize: 12,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 2),
                     Text(
                       _formatDate(order.createdAt),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
+                      style: const TextStyle(
+                        color: HomeColors.textMuted,
+                        fontSize: 12,
+                      ),
                     ),
                   ],
                 ),
@@ -357,10 +356,11 @@ class OrderItemCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     amount,
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.primaryColor,
-                        ),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                      color: HomeColors.orange,
+                    ),
                   ),
                 ],
               ),

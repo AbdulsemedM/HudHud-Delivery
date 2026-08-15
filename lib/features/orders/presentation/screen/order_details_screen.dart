@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import '../../bloc/orders_bloc.dart';
 import '../../data/models/order_model.dart';
 import '../../data/models/order_tracking_model.dart';
@@ -24,98 +26,115 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     context.read<OrdersBloc>().add(FetchOrderDetailsEvent(widget.orderId));
   }
 
+  ThemeData _homeTheme(BuildContext context) {
+    final base = HomeColors.darkTheme(Theme.of(context));
+    return base.copyWith(
+      cardTheme: CardThemeData(
+        color: HomeColors.surface,
+        elevation: 0,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppColors.radiusLG),
+          side: const BorderSide(color: HomeColors.border),
+        ),
+      ),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: HomeColors.background,
+        foregroundColor: HomeColors.textPrimary,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: IconThemeData(color: HomeColors.textPrimary),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      body: BlocConsumer<OrdersBloc, OrdersState>(
-        listener: (context, state) {
-          if (state is OrdersError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: theme.colorScheme.error,
-              ),
-            );
-          }
-          if (state is OrderCancelled) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: AppColors.successColor,
-              ),
-            );
-            Navigator.of(context).pop();
-          }
-          if (state is OrderRated) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: AppColors.successColor,
-              ),
-            );
-          }
-        },
-        builder: (context, state) {
-          if (state is OrderDetailsLoading) {
-            return _buildLoadingState(context);
-          }
+    return Theme(
+      data: _homeTheme(context),
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+          statusBarBrightness: Brightness.dark,
+        ),
+        child: Scaffold(
+          backgroundColor: HomeColors.background,
+          body: BlocConsumer<OrdersBloc, OrdersState>(
+            listener: (context, state) {
+              if (state is OrdersError) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: AppColors.errorColor,
+                  ),
+                );
+              }
+              if (state is OrderCancelled) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: AppColors.successColor,
+                  ),
+                );
+                Navigator.of(context).pop();
+              }
+              if (state is OrderRated) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: AppColors.successColor,
+                  ),
+                );
+              }
+            },
+            builder: (context, state) {
+              if (state is OrderDetailsLoading) {
+                return _buildLoadingState(context);
+              }
 
-          if (state is OrderDetailsLoaded) {
-            return _buildOrderDetails(
-                context, state.order, state.tracking);
-          }
+              if (state is OrderDetailsLoaded) {
+                return _buildOrderDetails(
+                  context,
+                  state.order,
+                  state.tracking,
+                );
+              }
 
-          if (state is OrdersError) {
-            return _buildErrorState(context, state.message);
-          }
+              if (state is OrdersError) {
+                return _buildErrorState(context, state.message);
+              }
 
-          return Center(
-            child: Text(context.l10n.orderDetailsLoadingMessage),
-          );
-        },
+              return const Center(
+                child: CircularProgressIndicator(color: HomeColors.violet),
+              );
+            },
+          ),
+        ),
       ),
     );
   }
 
   Widget _buildLoadingState(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final baseColor = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0);
-    final highlightColor =
-        isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF5F5F5);
+    const baseColor = HomeColors.surface;
+    const highlightColor = HomeColors.surfaceElevated;
 
     return CustomScrollView(
       slivers: [
         SliverAppBar(
           pinned: true,
-          backgroundColor: AppColors.primaryColor,
+          backgroundColor: HomeColors.background,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+            icon: const Icon(Icons.arrow_back_rounded),
             onPressed: () => Navigator.of(context).pop(),
           ),
         ),
-        SliverToBoxAdapter(
+        const SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Shimmer.fromColors(
+            padding: EdgeInsets.all(16),
+            child: _DetailsShimmer(
               baseColor: baseColor,
               highlightColor: highlightColor,
-              child: Column(
-                children: List.generate(3, (index) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: Container(
-                      height: 120,
-                      decoration: BoxDecoration(
-                        color: baseColor,
-                        borderRadius:
-                            BorderRadius.circular(AppColors.radiusLG),
-                      ),
-                    ),
-                  );
-                }),
-              ),
             ),
           ),
         ),
@@ -124,45 +143,36 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   }
 
   Widget _buildOrderDetails(
-      BuildContext context, OrderModel order, OrderTrackingModel? tracking) {
+    BuildContext context,
+    OrderModel order,
+    OrderTrackingModel? tracking,
+  ) {
     return CustomScrollView(
       slivers: [
         SliverAppBar(
-          expandedHeight: 120,
-          floating: false,
           pinned: true,
-          backgroundColor: AppColors.primaryColor,
+          backgroundColor: HomeColors.background,
+          surfaceTintColor: Colors.transparent,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+            icon: const Icon(Icons.arrow_back_rounded),
             onPressed: () => Navigator.of(context).pop(),
           ),
-          flexibleSpace: FlexibleSpaceBar(
-            title: Text(
-              context.l10n.orderAppBarTitle(order.orderNumber),
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            background: Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    AppColors.primaryColor,
-                    AppColors.primaryDarkColor,
-                  ],
-                ),
-              ),
+          title: Text(
+            context.l10n.orderAppBarTitle(order.orderNumber),
+            style: const TextStyle(
+              color: HomeColors.textPrimary,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
             ),
           ),
           actions: [
             if (order.canBeCancelled)
               IconButton(
-                icon: const Icon(Icons.cancel_outlined, color: Colors.white),
+                icon: const Icon(
+                  Icons.cancel_outlined,
+                  color: AppColors.errorColor,
+                ),
                 onPressed: () => _showCancelOrderDialog(context, order),
               ),
           ],
@@ -201,8 +211,11 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                     order: order,
                     onRate: (rating, review) {
                       context.read<OrdersBloc>().add(
-                            RateOrderEvent(order.id,
-                                rating: rating, review: review),
+                            RateOrderEvent(
+                              order.id,
+                              rating: rating,
+                              review: review,
+                            ),
                           );
                     },
                   ),
@@ -218,34 +231,36 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
 
   Widget _buildErrorState(BuildContext context, String message) {
     final l10n = context.l10n;
-    final colorScheme = Theme.of(context).colorScheme;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
+          const Icon(
             Icons.wifi_off_rounded,
             size: 48,
-            color: colorScheme.onSurfaceVariant,
+            color: HomeColors.textMuted,
           ),
           const SizedBox(height: 16),
           Text(
             l10n.orderDetailsLoadErrorTitle,
-            style: Theme.of(context).textTheme.titleMedium,
+            style: const TextStyle(
+              color: HomeColors.textPrimary,
+              fontWeight: FontWeight.w600,
+              fontSize: 16,
+            ),
           ),
           const SizedBox(height: 8),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32),
             child: Text(
               message,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
+              style: const TextStyle(color: HomeColors.textSecondary),
               textAlign: TextAlign.center,
             ),
           ),
           const SizedBox(height: 24),
           TextButton.icon(
+            style: TextButton.styleFrom(foregroundColor: HomeColors.violet),
             onPressed: () {
               context
                   .read<OrdersBloc>()
@@ -272,6 +287,38 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
           },
         );
       },
+    );
+  }
+}
+
+class _DetailsShimmer extends StatelessWidget {
+  const _DetailsShimmer({
+    required this.baseColor,
+    required this.highlightColor,
+  });
+
+  final Color baseColor;
+  final Color highlightColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: baseColor,
+      highlightColor: highlightColor,
+      child: Column(
+        children: List.generate(3, (index) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: Container(
+              height: 120,
+              decoration: BoxDecoration(
+                color: baseColor,
+                borderRadius: BorderRadius.circular(AppColors.radiusLG),
+              ),
+            ),
+          );
+        }),
+      ),
     );
   }
 }
