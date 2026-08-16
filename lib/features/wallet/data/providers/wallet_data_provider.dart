@@ -131,4 +131,16 @@ class WalletMutationResponse {
       rawData: rawData,
     );
   }
+
+  /// Shape expected by [PaymentInitiateResult.fromJson].
+  Map<String, dynamic> toInitiateEnvelope() {
+    return {
+      'success': true,
+      'message': message,
+      'data': rawData ??
+          (payment != null
+              ? <String, dynamic>{'payment': payment}
+              : <String, dynamic>{}),
+    };
+  }
 }

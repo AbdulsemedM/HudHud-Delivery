@@ -72,6 +72,7 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
       emit(AddFundsSuccess(
         message: response.message,
         payment: response.payment,
+        rawData: response.rawData,
       ));
     } catch (e) {
       emit(AddFundsError(message: userFacingApiError(e)));

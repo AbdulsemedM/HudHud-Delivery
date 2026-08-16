@@ -85,6 +85,7 @@ class PaymentInitiateResult {
   final String? amount;
   final String? currency;
   final String? orderStatus;
+
   /// True when the API returned the original payment for a repeated Idempotency-Key.
   final bool idempotentReplay;
   final Map<String, dynamic>? raw;
@@ -137,8 +138,9 @@ class PaymentInitiateResult {
         data is Map ? Map<String, dynamic>.from(data) : <String, dynamic>{};
 
     final payment = dataMap['payment'];
-    final paymentMap =
-        payment is Map ? Map<String, dynamic>.from(payment) : <String, dynamic>{};
+    final paymentMap = payment is Map
+        ? Map<String, dynamic>.from(payment)
+        : <String, dynamic>{};
 
     final paymentDetails = paymentMap['payment_details'];
     final detailsMap = paymentDetails is Map
@@ -152,9 +154,8 @@ class PaymentInitiateResult {
 
     final topLevelQr = dataMap['qr_code']?.toString();
     final nestedQr = detailsMap['qpay_qr_code']?.toString();
-    final qrRaw = (topLevelQr != null && topLevelQr.isNotEmpty)
-        ? topLevelQr
-        : nestedQr;
+    final qrRaw =
+        (topLevelQr != null && topLevelQr.isNotEmpty) ? topLevelQr : nestedQr;
     final qrCodeBase64 = _stripDataUriPrefix(qrRaw);
 
     return PaymentInitiateResult(
@@ -167,7 +168,8 @@ class PaymentInitiateResult {
       message: message,
       qrCodeBase64: qrCodeBase64,
       qrPayload: detailsMap['qpay_qr_id']?.toString(),
-      qrId: dataMap['qr_id']?.toString() ?? detailsMap['qpay_qr_id']?.toString(),
+      qrId:
+          dataMap['qr_id']?.toString() ?? detailsMap['qpay_qr_id']?.toString(),
       redirectUrl: dataMap['redirect_url']?.toString(),
       expiresAt: dataMap['expires_at']?.toString(),
       transactionId: paymentMap['transaction_id']?.toString(),

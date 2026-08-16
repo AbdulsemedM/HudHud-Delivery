@@ -65,10 +65,26 @@ final class AddFundsLoading extends WalletState {}
 final class AddFundsSuccess extends WalletState {
   final String message;
   final Map<String, dynamic>? payment;
+  final Map<String, dynamic>? rawData;
 
-  const AddFundsSuccess({required this.message, this.payment});
+  const AddFundsSuccess({
+    required this.message,
+    this.payment,
+    this.rawData,
+  });
+
+  /// Full initiate-shaped map for [PaymentInitiateResult.fromJson].
+  Map<String, dynamic> get initiateEnvelope => {
+        'success': true,
+        'message': message,
+        'data': rawData ??
+            (payment != null
+                ? <String, dynamic>{'payment': payment}
+                : <String, dynamic>{}),
+      };
+
   @override
-  List<Object?> get props => [message, payment];
+  List<Object?> get props => [message, payment, rawData];
 }
 
 final class AddFundsError extends WalletState {
