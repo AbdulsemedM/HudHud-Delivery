@@ -14,6 +14,7 @@ const Set<String> kKnownApiErrorCodes = {
   'SERVICE_COMING_SOON',
   'AUTH_ACCOUNT_LOCKED',
   'IDEMPOTENCY_CONFLICT',
+  'DELIVERY_PAYMENT_RETRY_FAILED',
 };
 
 /// Structured parse of Laravel-style / payment API error envelopes.
@@ -66,6 +67,11 @@ class ApiErrorResult {
         lower.contains('payment amount') &&
         lower.contains('does not match');
   }
+
+  /// Delivery retry-payment provider initiation failed (stable error code).
+  bool get isDeliveryPaymentRetryFailed =>
+      code == 'DELIVERY_PAYMENT_RETRY_FAILED' ||
+      gatewayErrorCode == 'DELIVERY_PAYMENT_RETRY_FAILED';
 
   /// Primary user-facing text, with balance/gateway enrichment when present.
   String get displayMessage {

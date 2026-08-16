@@ -9,6 +9,7 @@ import 'package:hudhud_delivery/features/courier/data/repository/courier_reposit
 import 'package:hudhud_delivery/features/courier/presentation/widgets/active_delivery_card.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/features/courier/utils/courier_home_refresh.dart';
+import 'package:hudhud_delivery/features/courier/utils/delivery_status.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../home/presentation/widgets/home_widget.dart';
 import 'delivery_details_screen.dart';
@@ -57,7 +58,7 @@ class _CourierScreenState extends State<CourierScreen> {
     if (_selectedFilter == 'all') return _deliveries;
     return _deliveries.where((d) {
       final status =
-          (d['current_status'] ?? d['status'])?.toString().toLowerCase() ?? '';
+          (resolveDeliveryStatus(d) ?? '').toLowerCase();
       switch (_selectedFilter) {
         case 'active':
           return !status.contains('deliver') &&
@@ -416,8 +417,7 @@ class _CourierScreenState extends State<CourierScreen> {
                   final recipient = d['receiver_name']?.toString() ?? '—';
                   final location = d['dropoff_location']?.toString() ?? '—';
                   final dateTime = _formatDeliveryDate(d['created_at']);
-                  final status =
-                      (d['current_status'] ?? d['status'])?.toString() ?? '—';
+                  final status = resolveDeliveryStatusLabel(d);
                   return _DeliveryHistoryCard(
                     orderId: orderId,
                     recipient: recipient,

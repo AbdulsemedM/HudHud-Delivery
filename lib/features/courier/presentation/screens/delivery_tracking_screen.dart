@@ -12,6 +12,7 @@ import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
 import 'package:hudhud_delivery/features/courier/presentation/widgets/driver_contact_card.dart';
+import 'package:hudhud_delivery/features/courier/utils/delivery_status.dart';
 import 'package:hudhud_delivery/features/chat/utils/chat_navigation.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import '../../../home/presentation/widgets/home_widget.dart';
@@ -298,9 +299,10 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
       );
     }
 
-    final statusText = _trackData?['current_status']?.toString() ??
-        _trackData?['status']?.toString() ??
-        'in_progress';
+    final statusText = resolveDeliveryStatusLabel(
+      _trackData,
+      fallback: 'in_progress',
+    );
     return CourierTheme.wrap(
       context,
       child: Builder(
@@ -436,8 +438,7 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        _trackData?['current_status']
-                                                ?.toString() ??
+                                        resolveDeliveryStatus(_trackData) ??
                                             _trackData?[
                                                     'estimated_delivery_time']
                                                 ?.toString() ??

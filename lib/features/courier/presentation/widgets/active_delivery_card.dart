@@ -3,6 +3,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/widgets/status_chip.dart';
+import 'package:hudhud_delivery/features/courier/utils/delivery_status.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import 'package:latlong2/latlong.dart';
@@ -148,8 +149,7 @@ class _ActiveDeliveryCardState extends State<ActiveDeliveryCard> {
     final delivery = widget.delivery;
     final id = delivery['id'];
     final orderId = id != null ? 'DEL-$id' : '—';
-    final rawStatus =
-        (delivery['current_status'] ?? delivery['status'])?.toString();
+    final rawStatus = resolveDeliveryStatus(delivery);
     final statusMessage = activeDeliveryStatusMessage(l10n, rawStatus);
     final pickupAddress =
         delivery['pickup_location']?.toString() ?? '';

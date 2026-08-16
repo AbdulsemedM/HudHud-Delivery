@@ -4,24 +4,36 @@ import 'package:latlong2/latlong.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
-import 'package:hudhud_delivery/core/utils/api_error_result.dart';
 import 'package:hudhud_delivery/core/utils/phone_util.dart';
 import 'package:hudhud_delivery/core/widgets/status_chip.dart';
 import '../../../home/presentation/widgets/home_widget.dart';
+import 'package:hudhud_delivery/features/checkout/presentation/widgets/checkout_widgets.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_cancel.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_payment_helper.dart';
+import 'package:hudhud_delivery/features/courier/utils/delivery_status.dart';
+import 'package:hudhud_delivery/features/courier/utils/courier_home_refresh.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
+import 'package:hudhud_delivery/features/payment/data/data_provider/payment_data_provider.dart';
+import 'package:hudhud_delivery/features/payment/data/repository/payment_repository.dart';
 import 'package:hudhud_delivery/features/payment/model/payment_initiate_result.dart';
 import 'package:hudhud_delivery/features/payment/presentation/screen/payment_initiate_result_screen.dart';
 import 'package:hudhud_delivery/features/payment/presentation/widgets/payment_details_form.dart';
-import 'package:hudhud_delivery/features/wallet/data/providers/wallet_data_provider.dart';
-import 'package:hudhud_delivery/features/wallet/data/repositories/wallet_repository.dart';
+import 'package:hudhud_delivery/features/payment/presentation/widgets/payment_methods_loader.dart';
 import 'package:hudhud_delivery/features/wallet/presentation/screens/add_funds_screen.dart';
 import 'delivery_tracking_screen.dart';
 
+class _RetryPaymentChoice {
+  const _RetryPaymentChoice({
+    required this.method,
+    this.phone = '',
+  });
+
+  final String method;
+  final String phone;
+}
 class DeliveryDetailsScreen extends StatefulWidget {
   final int deliveryId;
 
@@ -33,7 +45,6 @@ class DeliveryDetailsScreen extends StatefulWidget {
 
 class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
   late final CourierRepository _courierRepository;
-  late final WalletRepository _walletRepository;
   Map<String, dynamic>? _delivery;
   bool _isLoading = true;
   String? _error;
@@ -47,11 +58,6 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
     super.initState();
     _courierRepository = CourierRepository(
       courierDataProvider: CourierDataProvider(
-        apiService: ApiService.instance,
-      ),
-    );
-    _walletRepository = WalletRepository(
-      walletDataProvider: WalletDataProvider(
         apiService: ApiService.instance,
       ),
     );
@@ -89,7 +95,7 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
   }
 
   String _deliveryStatus(Map<String, dynamic> d) {
-    return (d['current_status'] ?? d['status'])?.toString() ?? '—';
+    return resolveDeliveryStatusLabel(d);
   }
 
   LatLng? _parseLatLng(dynamic lat, dynamic lng) {
@@ -138,6 +144,7 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
   }
 
   Future<void> _cancelOrder() async {
+    final paymentStatus = _delivery?['payment_status']?.toString();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => CourierTheme.wrap(
@@ -149,9 +156,9 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
             'Cancel delivery',
             style: TextStyle(color: HomeColors.textPrimary),
           ),
-          content: const Text(
-            'Are you sure you want to cancel this delivery? Any payment will be refunded to your wallet.',
-            style: TextStyle(color: HomeColors.textSecondary),
+          content: Text(
+            cancelDeliveryConfirmMessage(paymentStatus: paymentStatus),
+            style: const TextStyle(color: HomeColors.textSecondary),
           ),
           actions: [
             TextButton(
@@ -193,16 +200,12 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
       return;
     }
 
-    String successMessage =
-        result['message']?.toString() ?? 'Delivery cancelled successfully';
-    try {
-      final balance = await _walletRepository.getBalance();
-      successMessage =
-          'Delivery cancelled. Wallet balance: ${balance.currency} ${balance.balance.toStringAsFixed(2)}';
-    } catch (_) {}
+    final refund = parseDeliveryCancelRefundResponse(result['data'] ?? result);
+    final successMessage = formatDeliveryCancelMessage(refund);
 
     if (!mounted) return;
     setState(() => _isCancelling = false);
+    CourierHomeRefresh.instance.notifyRefresh();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(successMessage),
@@ -268,9 +271,35 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
     );
   }
 
-  Future<String?> _promptPaymentPhone(String paymentMethod) async {
-    var details = <String, dynamic>{};
-    return showModalBottomSheet<String>(
+  /// Payment methods eligible for unpaid delivery retry (no COD).
+  List<Map<String, dynamic>> _retryPaymentMethods(
+    List<Map<String, dynamic>> methods,
+  ) {
+    final filtered = filterAllowedPaymentMethods(methods)
+        .where((m) {
+          final id = m['id']?.toString() ?? '';
+          return id.isNotEmpty &&
+              id != 'cash_on_delivery' &&
+              id != 'cash' &&
+              m['enabled'] != false;
+        })
+        .toList(growable: false);
+    if (filtered.isNotEmpty) return filtered;
+    return filterAllowedPaymentMethods(
+      List<Map<String, dynamic>>.from(kDefaultAllowedPaymentMethods),
+    )
+        .where((m) {
+          final id = m['id']?.toString() ?? '';
+          return id != 'cash_on_delivery' && id != 'cash';
+        })
+        .toList(growable: false);
+  }
+
+  Future<_RetryPaymentChoice?> _promptRetryPaymentSelection({
+    String? initialMethod,
+    String? initialPhone,
+  }) async {
+    return showModalBottomSheet<_RetryPaymentChoice>(
       context: context,
       isScrollControlled: true,
       backgroundColor: HomeColors.surface,
@@ -278,61 +307,22 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (sheetContext) {
-        return Padding(
-          padding: EdgeInsets.fromLTRB(
-            AppColors.spaceMD,
-            AppColors.spaceMD,
-            AppColors.spaceMD,
-            MediaQuery.viewInsetsOf(sheetContext).bottom + AppColors.spaceMD,
+        return PaymentMethodsLoader(
+          repository: PaymentRepository(
+            paymentDataProvider: PaymentDataProvider(
+              apiService: ApiService.instance,
+            ),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Payment phone',
-                style: TextStyle(
-                  color: HomeColors.textPrimary,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 12),
-              PaymentDetailsForm(
-                paymentMethodCode: paymentMethod,
-                onChanged: (value) => details = value,
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                height: AppColors.buttonHeightMD,
-                child: ElevatedButton(
-                  onPressed: () {
-                    final phone = retryPaymentPhone(
-                      paymentMethod: paymentMethod,
-                      paymentPhone: details['phone']?.toString(),
-                    );
-                    final error = validatePaymentPhone(phone, paymentMethod);
-                    if (error != null) {
-                      ScaffoldMessenger.of(sheetContext).showSnackBar(
-                        SnackBar(
-                          content: Text(error),
-                          backgroundColor: AppColors.errorColor,
-                        ),
-                      );
-                      return;
-                    }
-                    Navigator.pop(sheetContext, phone);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: HomeColors.violet,
-                    foregroundColor: Colors.white,
-                  ),
-                  child: const Text('Continue'),
-                ),
-              ),
-            ],
-          ),
+          builder: (context, methods, isLoading, error, reload) {
+            return _RetryPaymentSheet(
+              methods: _retryPaymentMethods(methods),
+              isLoading: isLoading,
+              error: error,
+              onReload: reload,
+              initialMethod: initialMethod,
+              initialPhone: initialPhone,
+            );
+          },
         );
       },
     );
@@ -342,28 +332,22 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
     final d = _delivery;
     if (d == null) return;
 
-    final method = d['payment_method']?.toString() ?? '';
-    if (method.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Payment method is missing'),
-          backgroundColor: AppColors.errorColor,
-        ),
-      );
-      return;
-    }
-
-    var phone = retryPaymentPhone(
-      paymentMethod: method,
+    final previousMethod = d['payment_method']?.toString();
+    final previousPhone = retryPaymentPhone(
+      paymentMethod: previousMethod ?? '',
       paymentPhone: d['payment_phone']?.toString(),
       senderPhone: d['sender_phone']?.toString(),
     );
 
-    if (paymentMethodNeedsDetailsForm(method) && phone.isEmpty) {
-      phone = await _promptPaymentPhone(method) ?? '';
-      if (!mounted) return;
-      if (phone.isEmpty) return;
-    }
+    final choice = await _promptRetryPaymentSelection(
+      initialMethod: previousMethod,
+      initialPhone: previousPhone.isEmpty ? null : previousPhone,
+    );
+    if (!mounted) return;
+    if (choice == null) return;
+
+    final method = choice.method;
+    final phone = choice.phone;
 
     setState(() => _isRetrying = true);
     final result = await _courierRepository.retryPayment(
@@ -389,6 +373,20 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
               error!.displayMessage.isNotEmpty
                   ? error.displayMessage
                   : 'Payment amount changed. Review the updated total and try again.',
+            ),
+            backgroundColor: Colors.orange,
+          ),
+        );
+        return;
+      }
+      if (error?.isDeliveryPaymentRetryFailed == true ||
+          error?.statusCode == 502) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              error!.displayMessage.isNotEmpty
+                  ? error.displayMessage
+                  : 'Delivery payment could not be initiated. Please try again.',
             ),
             backgroundColor: Colors.orange,
           ),
@@ -1166,6 +1164,217 @@ class _BottomActions extends StatelessWidget {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+class _RetryPaymentSheet extends StatefulWidget {
+  const _RetryPaymentSheet({
+    required this.methods,
+    required this.isLoading,
+    required this.onReload,
+    this.error,
+    this.initialMethod,
+    this.initialPhone,
+  });
+
+  final List<Map<String, dynamic>> methods;
+  final bool isLoading;
+  final String? error;
+  final VoidCallback onReload;
+  final String? initialMethod;
+  final String? initialPhone;
+
+  @override
+  State<_RetryPaymentSheet> createState() => _RetryPaymentSheetState();
+}
+
+class _RetryPaymentSheetState extends State<_RetryPaymentSheet> {
+  String? _selectedMethod;
+  Map<String, dynamic> _paymentDetails = {};
+  String _ebirrProvider = 'kaafi';
+  bool _useHpp = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _applySelection(widget.methods);
+    if (widget.initialPhone != null && widget.initialPhone!.isNotEmpty) {
+      _paymentDetails = {'phone': widget.initialPhone};
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _RetryPaymentSheet oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.methods != widget.methods ||
+        oldWidget.isLoading != widget.isLoading) {
+      final before = _selectedMethod;
+      _applySelection(widget.methods);
+      if (before != _selectedMethod) {
+        setState(() {});
+      }
+    }
+  }
+
+  void _applySelection(List<Map<String, dynamic>> methods) {
+    if (methods.isEmpty) return;
+    final preferred = widget.initialMethod;
+    final hasPreferred =
+        preferred != null && methods.any((m) => m['id'] == preferred);
+    final next = hasPreferred
+        ? preferred
+        : (_selectedMethod != null &&
+                methods.any((m) => m['id'] == _selectedMethod)
+            ? _selectedMethod
+            : methods.first['id']?.toString());
+    if (next == _selectedMethod) return;
+    _selectedMethod = next;
+    if (!hasPreferred || next != preferred) {
+      _paymentDetails = {};
+      _useHpp = false;
+      _ebirrProvider = 'kaafi';
+    }
+  }
+
+  void _submit() {
+    final method = _selectedMethod;
+    if (method == null || method.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a payment method'),
+          backgroundColor: AppColors.errorColor,
+        ),
+      );
+      return;
+    }
+
+    var phone = '';
+    if (paymentMethodNeedsDetailsForm(method)) {
+      phone = retryPaymentPhone(
+        paymentMethod: method,
+        paymentPhone: _paymentDetails['phone']?.toString(),
+      );
+      final error = validatePaymentPhone(phone, method);
+      if (error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(error),
+            backgroundColor: AppColors.errorColor,
+          ),
+        );
+        return;
+      }
+    }
+
+    Navigator.pop(
+      context,
+      _RetryPaymentChoice(method: method, phone: phone),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        AppColors.spaceMD,
+        AppColors.spaceMD,
+        AppColors.spaceMD,
+        MediaQuery.viewInsetsOf(context).bottom + AppColors.spaceMD,
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: HomeColors.border,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+            ),
+            const Text(
+              'Retry payment',
+              style: TextStyle(
+                color: HomeColors.textPrimary,
+                fontWeight: FontWeight.w700,
+                fontSize: 18,
+              ),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'Choose a payment method to continue',
+              style: TextStyle(
+                color: HomeColors.textMuted,
+                fontSize: 13,
+              ),
+            ),
+            const SizedBox(height: 16),
+            if (widget.error != null && widget.methods.isEmpty) ...[
+              const Text(
+                'Could not load payment methods',
+                style: TextStyle(color: AppColors.errorColor),
+              ),
+              TextButton(
+                onPressed: widget.onReload,
+                child: const Text('Retry'),
+              ),
+            ] else ...[
+              PaymentMethodGridSection(
+                selectedId: _selectedMethod,
+                methods: widget.methods,
+                isLoading: widget.isLoading,
+                onSelected: (id) {
+                  setState(() {
+                    _selectedMethod = id;
+                    _paymentDetails = {};
+                    _useHpp = false;
+                    _ebirrProvider = 'kaafi';
+                  });
+                },
+              ),
+              if (_selectedMethod != null &&
+                  paymentMethodNeedsDetailsForm(_selectedMethod!)) ...[
+                const SizedBox(height: 12),
+                PaymentDetailsForm(
+                  key: ValueKey(_selectedMethod),
+                  paymentMethodCode: _selectedMethod!,
+                  initialPhone: _paymentDetails['phone']?.toString() ??
+                      (_selectedMethod == widget.initialMethod
+                          ? widget.initialPhone
+                          : null),
+                  ebirrProvider: _ebirrProvider,
+                  useHpp: _useHpp,
+                  onEbirrProviderChanged: (v) =>
+                      setState(() => _ebirrProvider = v),
+                  onUseHppChanged: (v) => setState(() => _useHpp = v),
+                  onChanged: (details) {
+                    _paymentDetails = details;
+                  },
+                ),
+              ],
+            ],
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              height: AppColors.buttonHeightMD,
+              child: ElevatedButton(
+                onPressed: widget.isLoading ? null : _submit,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: HomeColors.violet,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Continue'),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

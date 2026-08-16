@@ -7,9 +7,10 @@ import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
+import 'package:hudhud_delivery/features/courier/utils/courier_home_refresh.dart';
+import 'package:hudhud_delivery/features/courier/utils/delivery_cancel.dart';
+import 'package:hudhud_delivery/features/courier/utils/delivery_status.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
-import 'package:hudhud_delivery/features/wallet/data/providers/wallet_data_provider.dart';
-import 'package:hudhud_delivery/features/wallet/data/repositories/wallet_repository.dart';
 import 'package:lottie/lottie.dart';
 import 'delivery_tracking_screen.dart';
 
@@ -51,7 +52,6 @@ class FindingCourierScreen extends StatefulWidget {
 
 class _FindingCourierScreenState extends State<FindingCourierScreen> {
   late final CourierRepository _courierRepository;
-  late final WalletRepository _walletRepository;
   Timer? _pollTimer;
   bool _isCancelling = false;
   bool _hasNavigated = false;
@@ -63,6 +63,8 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
     'looking_for_driver',
     'looking_for_courier',
     'created',
+    'request_received',
+    'request received',
   };
 
   @override
@@ -70,11 +72,6 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
     super.initState();
     _courierRepository = CourierRepository(
       courierDataProvider: CourierDataProvider(
-        apiService: ApiService.instance,
-      ),
-    );
-    _walletRepository = WalletRepository(
-      walletDataProvider: WalletDataProvider(
         apiService: ApiService.instance,
       ),
     );
@@ -95,9 +92,12 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
     if (data == null) return false;
     if (data['driver'] != null || data['driver_id'] != null) return true;
     final status =
-        (data['current_status'] ?? data['status'] ?? '').toString().toLowerCase();
+        (resolveDeliveryStatus(data) ?? '').toLowerCase().replaceAll(' ', '_');
     if (status.isEmpty) return false;
-    if (_searchingStatuses.contains(status)) return false;
+    if (_searchingStatuses.contains(status) ||
+        _searchingStatuses.contains(status.replaceAll('_', ' '))) {
+      return false;
+    }
     if (status.contains('cancel')) return false;
     return true;
   }
@@ -161,8 +161,8 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Cancel delivery'),
-        content: const Text(
-          'Are you sure you want to cancel this delivery? Any payment will be refunded to your wallet.',
+        content: Text(
+          cancelDeliveryConfirmMessage(),
         ),
         actions: [
           TextButton(
@@ -209,18 +209,12 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
 
     _pollTimer?.cancel();
 
-    String successMessage =
-        result['message']?.toString() ?? 'Delivery cancelled successfully';
-    try {
-      final balance = await _walletRepository.getBalance();
-      successMessage =
-          'Delivery cancelled. Wallet balance: ${balance.currency} ${balance.balance.toStringAsFixed(2)}';
-    } catch (_) {
-      // Keep cancel success message if balance fetch fails.
-    }
+    final refund = parseDeliveryCancelRefundResponse(result['data'] ?? result);
+    final successMessage = formatDeliveryCancelMessage(refund);
 
     if (!mounted) return;
     setState(() => _isCancelling = false);
+    CourierHomeRefresh.instance.notifyRefresh();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(successMessage),

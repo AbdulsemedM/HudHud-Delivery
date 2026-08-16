@@ -107,6 +107,7 @@ class PaymentInitiateResult {
   bool get showUssdSuccessCopy =>
       ussdDispatched ||
       nextAction == 'ussd' ||
+      nextAction == 'approve_ussd' ||
       nextAction == 'poll_status' ||
       nextAction == 'user_action_required';
 
@@ -137,6 +138,7 @@ class PaymentInitiateResult {
         return PaymentInitiateUiMode.redirectToHpp;
       case 'user_action_required':
       case 'ussd':
+      case 'approve_ussd':
         return PaymentInitiateUiMode.userActionRequired;
       case 'poll_status':
         return PaymentInitiateUiMode.ussdPending;
@@ -163,9 +165,14 @@ class PaymentInitiateResult {
     final dataMap =
         data is Map ? Map<String, dynamic>.from(data) : <String, dynamic>{};
 
-    final payment = dataMap['payment'];
+    final payment = dataMap['payment'] ?? json['payment'];
     final paymentMap = payment is Map
         ? Map<String, dynamic>.from(payment)
+        : <String, dynamic>{};
+
+    final delivery = dataMap['delivery'] ?? json['delivery'];
+    final deliveryMap = delivery is Map
+        ? Map<String, dynamic>.from(delivery)
         : <String, dynamic>{};
 
     final paymentDetails = paymentMap['payment_details'];
@@ -173,8 +180,10 @@ class PaymentInitiateResult {
         ? Map<String, dynamic>.from(paymentDetails)
         : <String, dynamic>{};
 
-    final nextAction = dataMap['next_action']?.toString();
+    var nextAction = dataMap['next_action']?.toString() ??
+        json['next_action']?.toString();
     final message = json['message']?.toString() ??
+        paymentMap['message']?.toString() ??
         (ebirrSuccess ? 'RCS_SUCCESS' : null) ??
         'Payment initiated';
 
@@ -184,16 +193,28 @@ class PaymentInitiateResult {
         (topLevelQr != null && topLevelQr.isNotEmpty) ? topLevelQr : nestedQr;
     final qrCodeBase64 = _stripDataUriPrefix(qrRaw);
 
+    final ussdSent = dataMap['ussd_sent'] == true ||
+        json['ussd_sent'] == true ||
+        paymentMap['ussd_sent'] == true ||
+        paymentMap['initiated'] == true;
     final ussdDispatched = dataMap['ussd_dispatched'] == true ||
-        json['ussd_dispatched'] == true;
+        json['ussd_dispatched'] == true ||
+        ussdSent;
     final instantCredit = dataMap['instant_credit'] == true ||
         json['instant_credit'] == true;
+
+    if ((nextAction == null || nextAction.isEmpty) && ussdDispatched) {
+      nextAction = 'approve_ussd';
+    }
+
+    final status = paymentMap['status']?.toString() ??
+        deliveryMap['payment_status']?.toString();
 
     return PaymentInitiateResult(
       isSuccess: true,
       uiMode: uiModeFromNextAction(nextAction),
       paymentId: int.tryParse(paymentMap['id']?.toString() ?? ''),
-      status: paymentMap['status']?.toString(),
+      status: status,
       method: paymentMap['method']?.toString(),
       nextAction: nextAction,
       message: message,
