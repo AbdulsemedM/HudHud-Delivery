@@ -3,14 +3,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/utils/payment_idempotency.dart';
 import 'package:hudhud_delivery/features/payment/data/data_provider/payment_data_provider.dart';
 import 'package:hudhud_delivery/features/payment/data/repository/payment_repository.dart';
 import 'package:hudhud_delivery/features/payment/model/payment_initiate_result.dart';
 import 'package:hudhud_delivery/features/payment/presentation/screen/payment_initiate_result_screen.dart';
 import 'package:hudhud_delivery/features/payment/presentation/widgets/payment_details_form.dart';
+import 'package:hudhud_delivery/features/settings/presentation/widgets/profile_dark_page.dart';
 import 'package:hudhud_delivery/features/wallet/bloc/wallet_bloc.dart';
 import 'package:hudhud_delivery/features/wallet/data/providers/wallet_data_provider.dart';
 import 'package:hudhud_delivery/features/wallet/data/repositories/wallet_repository.dart';
+import 'package:hudhud_delivery/features/wallet/presentation/widgets/wallet_funding_form.dart';
 import 'package:hudhud_delivery/features/wallet/utils/wallet_funding_methods.dart';
 
 class AddFundsScreen extends StatefulWidget {
@@ -38,6 +41,7 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
   Map<String, dynamic> _paymentDetails = {};
   String _ebirrProvider = 'kaafi';
   bool _useHpp = false;
+  String? _idempotencyKey;
 
   late final WalletRepository _walletRepository;
   late final PaymentRepository _paymentRepository;
@@ -54,12 +58,16 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
     );
     _walletBloc = WalletBloc(walletRepository: _walletRepository);
     if (widget.initialAmount != null && widget.initialAmount! > 0) {
-      final amount = widget.initialAmount!;
-      _amountController.text = amount == amount.roundToDouble()
-          ? amount.toStringAsFixed(0)
-          : amount.toStringAsFixed(2);
+      _applyAmount(widget.initialAmount!);
     }
+    _amountController.addListener(_invalidateIdempotencyKey);
     _fetchPaymentMethods();
+  }
+
+  void _applyAmount(double amount) {
+    _amountController.text = amount == amount.roundToDouble()
+        ? amount.toStringAsFixed(0)
+        : amount.toStringAsFixed(2);
   }
 
   Future<void> _fetchPaymentMethods() async {
@@ -87,6 +95,10 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
     _walletBloc.close();
     _amountController.dispose();
     super.dispose();
+  }
+
+  void _invalidateIdempotencyKey() {
+    _idempotencyKey = null;
   }
 
   Future<void> _submit() async {
@@ -122,17 +134,19 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
       orderId: 0,
     );
 
+    _idempotencyKey ??= createWalletIdempotencyKey(operation: 'topup');
+
     _walletBloc.add(AddFundsEvent(
       amount: amount,
       paymentMethodCode: method,
       currency: widget.defaultCurrency,
       paymentDetails: details,
+      idempotencyKey: _idempotencyKey,
     ));
   }
 
-  Future<void> _handlePaymentResult(Map<String, dynamic>? payment) async {
-    if (payment == null) return;
-    final result = PaymentInitiateResult.fromJson(payment);
+  Future<void> _handlePaymentResult(Map<String, dynamic> envelope) async {
+    final result = PaymentInitiateResult.fromJson(envelope);
     if (!result.isSuccess &&
         result.uiMode == PaymentInitiateUiMode.failure &&
         result.paymentId == null) {
@@ -149,40 +163,43 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
     );
   }
 
+  String _successSnackMessage(AddFundsSuccess state) {
+    if (state.message.isNotEmpty) return state.message;
+    if (state.phase == WalletTopUpPhase.completed) {
+      return 'Funds added successfully';
+    }
+    if (state.phase == WalletTopUpPhase.duplicateReplay) {
+      return 'Payment request already exists. Checking status…';
+    }
+    return 'Payment initiated. Complete approval on your phone if prompted.';
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
-    final borderColor =
-        isDark ? const Color(0xFF2A2A2A) : const Color(0xFFEEEEEE);
 
     return BlocProvider.value(
       value: _walletBloc,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(l10n.addFundsTitle),
-          backgroundColor: colorScheme.surface,
-          foregroundColor: colorScheme.onSurface,
-          elevation: 0,
-        ),
+      child: ProfileDarkPage(
+        title: l10n.addFundsTitle,
         body: BlocConsumer<WalletBloc, WalletState>(
           listener: (context, state) async {
             if (state is AddFundsSuccess) {
+              _invalidateIdempotencyKey();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(
-                    state.message.isNotEmpty
-                        ? state.message
-                        : 'Funds added successfully',
-                  ),
-                  backgroundColor: AppColors.successColor,
+                  content: Text(_successSnackMessage(state)),
+                  backgroundColor: state.isPending
+                      ? AppColors.primaryColor
+                      : AppColors.successColor,
                 ),
               );
-              await _handlePaymentResult(state.payment);
+              await _handlePaymentResult(state.initiateEnvelope);
               if (context.mounted) Navigator.pop(context, true);
             } else if (state is AddFundsError) {
+              if (!isTransientPaymentNetworkError(state.message)) {
+                _invalidateIdempotencyKey();
+              }
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.message),
@@ -193,135 +210,57 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
           },
           builder: (context, state) {
             final isLoading = state is AddFundsLoading;
-            return SafeArea(
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            TextFormField(
-                              controller: _amountController,
-                              keyboardType: const TextInputType.numberWithOptions(
-                                decimal: true,
-                              ),
-                              decoration: InputDecoration(
-                                labelText: l10n.amount,
-                                hintText: '0.00',
-                                suffixText: widget.defaultCurrency,
-                                border: const OutlineInputBorder(),
-                              ),
-                              validator: (v) {
-                                final n = double.tryParse(v?.trim() ?? '');
-                                if (n == null || n <= 0) {
-                                  return l10n.validationEnterValidAmount;
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 24),
-                            Text(
-                              l10n.labelPaymentMethod,
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            if (_isLoadingPaymentMethods)
-                              const Center(
-                                child: Padding(
-                                  padding: EdgeInsets.all(16),
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                ),
-                              )
-                            else
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
-                                children: _paymentMethods.map((method) {
-                                  final id = method['id'] as String? ?? '';
-                                  final name =
-                                      method['name'] as String? ?? id;
-                                  final selected = _selectedMethodId == id;
-                                  return FilterChip(
-                                    label: Text(name),
-                                    selected: selected,
-                                    onSelected: (v) {
-                                      if (!v) return;
-                                      setState(() {
-                                        _selectedMethodId = id;
-                                        _paymentDetails = {};
-                                        _useHpp = false;
-                                        _ebirrProvider = 'kaafi';
-                                      });
-                                    },
-                                    showCheckmark: false,
-                                    selectedColor: AppColors.primaryColor,
-                                    labelStyle: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      color: selected
-                                          ? colorScheme.onPrimary
-                                          : colorScheme.onSurfaceVariant,
-                                    ),
-                                    side: BorderSide(
-                                      color: selected
-                                          ? AppColors.primaryColor
-                                          : borderColor,
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
-                            if (_selectedMethodId != null)
-                              PaymentDetailsForm(
-                                key: ValueKey(_selectedMethodId),
-                                paymentMethodCode: _selectedMethodId!,
-                                ebirrProvider: _ebirrProvider,
-                                useHpp: _useHpp,
-                                onEbirrProviderChanged: (v) =>
-                                    setState(() => _ebirrProvider = v),
-                                onUseHppChanged: (v) =>
-                                    setState(() => _useHpp = v),
-                                onChanged: (details) {
-                                  _paymentDetails = details;
-                                },
-                              ),
-                          ],
-                        ),
-                      ),
+            return Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: WalletFundingFormBody(
+                      amountController: _amountController,
+                      currency: widget.defaultCurrency,
+                      amountHint: '0.00',
+                      amountValidator: (v) {
+                        final n = double.tryParse(v?.trim() ?? '');
+                        if (n == null || n <= 0) {
+                          return l10n.validationEnterValidAmount;
+                        }
+                        return null;
+                      },
+                      onQuickAmountSelected: (amount) {
+                        setState(() {
+                          _invalidateIdempotencyKey();
+                          _applyAmount(amount);
+                        });
+                      },
+                      methodSectionTitle: l10n.labelPaymentMethod,
+                      methods: _paymentMethods,
+                      selectedMethodId: _selectedMethodId,
+                      isLoadingMethods: _isLoadingPaymentMethods,
+                      onMethodSelected: (id) {
+                        setState(() {
+                          _invalidateIdempotencyKey();
+                          _selectedMethodId = id;
+                          _paymentDetails = {};
+                          _useHpp = false;
+                          _ebirrProvider = 'kaafi';
+                        });
+                      },
+                      ebirrProvider: _ebirrProvider,
+                      useHpp: _useHpp,
+                      onEbirrProviderChanged: (v) =>
+                          setState(() => _ebirrProvider = v),
+                      onUseHppChanged: (v) => setState(() => _useHpp = v),
+                      onPaymentDetailsChanged: (details) {
+                        _paymentDetails = details;
+                      },
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(AppColors.spaceMD),
-                      child: SizedBox(
-                        width: double.infinity,
-                        height: AppColors.buttonHeightMD,
-                        child: ElevatedButton(
-                          onPressed: isLoading ? null : _submit,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor,
-                            foregroundColor: Colors.white,
-                          ),
-                          child: isLoading
-                              ? const SizedBox(
-                                  width: 22,
-                                  height: 22,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : Text(l10n.walletAddMoney),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                  WalletFundingSubmitBar(
+                    label: l10n.walletAddMoney,
+                    isLoading: isLoading,
+                    onPressed: _submit,
+                  ),
+                ],
               ),
             );
           },

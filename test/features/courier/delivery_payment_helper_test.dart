@@ -1,7 +1,40 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hudhud_delivery/features/courier/data/models/create_delivery_result.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_payment_helper.dart';
 
 void main() {
+  group('resolveServerDeliveryPaymentAmount', () {
+    test('returns persisted total only', () {
+      expect(
+        resolveServerDeliveryPaymentAmount(
+          const CreateDeliveryResult(deliveryId: 1, totalAmount: 95),
+        ),
+        95,
+      );
+    });
+
+    test('rejects missing or non-positive totals', () {
+      expect(
+        resolveServerDeliveryPaymentAmount(
+          const CreateDeliveryResult(deliveryId: 1),
+        ),
+        isNull,
+      );
+      expect(
+        resolveServerDeliveryPaymentAmount(
+          const CreateDeliveryResult(deliveryId: 1, totalAmount: 0),
+        ),
+        isNull,
+      );
+      expect(
+        resolveServerDeliveryPaymentAmount(
+          const CreateDeliveryResult(deliveryId: 1, totalAmount: -5),
+        ),
+        isNull,
+      );
+    });
+  });
+
   group('formatPaymentMethodLabel', () {
     test('maps known API codes to display names', () {
       expect(formatPaymentMethodLabel('wallet'), 'Wallet');

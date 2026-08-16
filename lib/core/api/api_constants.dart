@@ -1,6 +1,8 @@
+import 'package:hudhud_delivery/app/config/app_env.dart';
+
 class ApiConstants {
-  // Base URL
-  static const String baseUrl = 'https://api.hudhuddelivery.com/api/';
+  /// Resolved from root `.env` (`BASE_URL`) only.
+  static String get baseUrl => ApiEnv.baseUrl;
 
   // Timeout values (in milliseconds)
   static const int connectTimeout = 30000; // 30 seconds

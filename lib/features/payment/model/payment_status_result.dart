@@ -120,6 +120,8 @@ bool shouldPollPaymentStatus({
     case 'show_qr_code':
     case 'redirect_to_hpp':
     case 'user_action_required':
+    case 'ussd':
+    case 'approve_ussd':
     case 'poll_status':
       return true;
   }

@@ -123,8 +123,7 @@ class _PaymentInitiateResultScreenState
       );
 
   bool get _isPollingActive =>
-      _shouldPoll &&
-      (_polledStatus == null || !_polledStatus!.isTerminal);
+      _shouldPoll && (_polledStatus == null || !_polledStatus!.isTerminal);
 
   void _maybeStartPolling() {
     if (!_shouldPoll || result.paymentId == null) return;
@@ -153,6 +152,7 @@ class _PaymentInitiateResultScreenState
   }
 
   Future<void> _checkStatus({required bool manual}) async {
+    // Poll status only — never call payments/initiate again from this screen.
     final paymentId = result.paymentId;
     if (paymentId == null || paymentId <= 0) return;
     if (_polledStatus?.isTerminal == true) return;
@@ -285,7 +285,8 @@ class _PaymentInitiateResultScreenState
                             widget.onTerminalSuccess!(context);
                             return;
                           }
-                          Navigator.of(context).popUntil((route) => route.isFirst);
+                          Navigator.of(context)
+                              .popUntil((route) => route.isFirst);
                         },
                         child: Text(
                           () {
@@ -357,8 +358,8 @@ class _PaymentInitiateResultScreenState
         icon: Icons.error_outline,
         iconColor: AppColors.errorColor,
         title: 'Payment ${polled.status ?? 'failed'}',
-        message: polled.message ??
-            'Payment was not completed. Please try again.',
+        message:
+            polled.message ?? 'Payment was not completed. Please try again.',
         children: [
           if (polled.relatedOrderStatus != null)
             _InfoRow(label: _statusLabel, value: polled.relatedOrderStatus!),
@@ -487,8 +488,7 @@ class _PaymentInitiateResultScreenState
                     foregroundColor: HomeColors.textPrimary,
                     side: const BorderSide(color: HomeColors.border),
                     shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppColors.radiusLG),
+                      borderRadius: BorderRadius.circular(AppColors.radiusLG),
                     ),
                   ),
                   icon: const Icon(Icons.open_in_browser),

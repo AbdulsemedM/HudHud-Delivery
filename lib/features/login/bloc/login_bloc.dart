@@ -23,7 +23,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         );
         emit(LoginSuccess());
       } catch (e) {
-        emit(LoginFailure(e.toString()));
+        emit(_failureFrom(e));
       }
     });
     on<GuestLoginRequested>((event, emit) async {
@@ -33,7 +33,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         await GuestBrowseService().enterGuestBrowseMode();
         emit(LoginSuccess());
       } catch (e) {
-        emit(LoginFailure(e.toString()));
+        emit(_failureFrom(e));
       }
     });
     on<GoogleLoginRequested>((event, emit) async {
@@ -46,7 +46,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       } catch (e, st) {
         debugPrint('[GoogleSignIn] LoginBloc: $e');
         debugPrint('$st');
-        emit(LoginFailure(e.toString()));
+        emit(_failureFrom(e));
       }
     });
     on<BiometricLoginRequested>((event, emit) async {
@@ -74,13 +74,28 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         );
         emit(LoginSuccess());
       } catch (e) {
-        final message = e.toString();
-        if (_isInvalidCredentialsError(message)) {
+        final failure = _failureFrom(e);
+        if (_isInvalidCredentialsError(failure.errorMessage)) {
           await biometricService.setBiometricLoginEnabled(false);
         }
-        emit(LoginFailure(message));
+        emit(failure);
       }
     });
+  }
+
+  LoginFailure _failureFrom(Object e) {
+    if (e is LoginFailureException) {
+      return LoginFailure(
+        e.message,
+        attemptsRemaining: e.attemptsRemaining,
+        retryAfterSeconds: e.retryAfterSeconds,
+        isAccountLocked: e.isAccountLocked,
+      );
+    }
+    final text = e.toString();
+    return LoginFailure(
+      text.startsWith('Exception: ') ? text.substring(11) : text,
+    );
   }
 
   bool _isInvalidCredentialsError(String message) {

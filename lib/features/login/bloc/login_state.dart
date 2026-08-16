@@ -17,7 +17,16 @@ final class LoginSuccess extends LoginState {}
 
 final class LoginFailure extends LoginState {
   final String errorMessage;
-  LoginFailure(this.errorMessage);
+  final int? attemptsRemaining;
+  final int? retryAfterSeconds;
+  final bool isAccountLocked;
+
+  LoginFailure(
+    this.errorMessage, {
+    this.attemptsRemaining,
+    this.retryAfterSeconds,
+    this.isAccountLocked = false,
+  });
 }
 
 extension LoginStateLoading on LoginState {

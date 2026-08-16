@@ -59,6 +59,32 @@ void main() {
       expect(result.method, 'cash_on_delivery');
       expect(result.orderStatus, 'confirmed');
       expect(result.customerMessage, 'Pay KES 1,500.00 upon delivery.');
+      expect(result.idempotentReplay, isFalse);
+    });
+
+    test('parses idempotent_replay as successful initiate', () {
+      const json = {
+        'success': true,
+        'idempotent_replay': true,
+        'message': 'Payment already initiated',
+        'data': {
+          'payment': {
+            'id': 789,
+            'status': 'pending',
+            'method': 'ebirr_coop',
+            'amount': 95.00,
+            'currency': 'ETB',
+          },
+          'next_action': 'user_action_required',
+          'customer_message': 'Approve the payment on your phone.',
+        },
+      };
+
+      final result = PaymentInitiateResult.fromJson(json);
+      expect(result.isSuccess, isTrue);
+      expect(result.idempotentReplay, isTrue);
+      expect(result.paymentId, 789);
+      expect(result.uiMode, PaymentInitiateUiMode.userActionRequired);
     });
 
     test('parses top-level qr_code for show_qr_code', () {
@@ -77,7 +103,8 @@ void main() {
           'next_action': 'show_qr_code',
           'qr_code': 'data:image/png;base64,aVZORw0KGgo=',
           'qr_id': 'QR_abc123',
-          'customer_message': 'Please check your phone to complete the payment.',
+          'customer_message':
+              'Please check your phone to complete the payment.',
           'expires_at': '2024-01-15T10:35:00.000000Z',
         },
       };
@@ -256,7 +283,8 @@ void main() {
         {'id': 'ebirr_kaafi', 'enabled': true},
         {'id': 'ebirr_coop', 'enabled': true},
       ]);
-      expect(filtered.map((m) => m['id']), ['wallet', 'ebirr_kaafi', 'ebirr_coop']);
+      expect(filtered.map((m) => m['id']),
+          ['wallet', 'ebirr_kaafi', 'ebirr_coop']);
     });
 
     test('isEbirrPaymentMethodCode recognizes ebirr variants', () {
@@ -271,7 +299,8 @@ void main() {
     test('normalizes phones per method', () {
       expect(normalizePaymentPhone('0712345678', 'waafi'), '254712345678');
       expect(normalizePaymentPhone('0911679409', 'sahay'), '251911679409');
-      expect(normalizePaymentPhone('251915741199', 'ebirr_kaafi'), '251915741199');
+      expect(
+          normalizePaymentPhone('251915741199', 'ebirr_kaafi'), '251915741199');
       expect(normalizePaymentPhone('656013956', 'edahab'), '656013956');
     });
 

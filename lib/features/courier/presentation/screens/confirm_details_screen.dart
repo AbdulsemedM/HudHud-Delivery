@@ -7,7 +7,7 @@ import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
-import 'package:hudhud_delivery/core/utils/api_error_result.dart';
+import 'package:hudhud_delivery/core/utils/payment_idempotency.dart';
 import 'package:hudhud_delivery/core/utils/phone_util.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/models/create_delivery_result.dart';
@@ -95,6 +95,11 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
   String? _estimateError;
   List<LatLng>? _routePolylinePoints;
   bool? _hasGoogleMapsApiKey;
+
+  /// After create succeeds, keep delivery so pay can retry without re-creating.
+  CreateDeliveryResult? _pendingCreatedDelivery;
+  /// Reused only for safe retries of the same logical payment attempt.
+  String? _paymentIdempotencyKey;
 
   @override
   void initState() {
@@ -391,181 +396,217 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
       return;
     }
 
-    final user = await AuthService().getStoredUser();
-
-    final senderPhone = normalizePhoneToBackend(widget.senderPhone);
-    if (!RegExp(r'^2519\d{8}$').hasMatch(senderPhone)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter a valid sender phone (09xxxxxxxx)'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    final requestData = <String, dynamic>{
-      'package_type': _mapPackageType(widget.itemType),
-      'package_description': widget.packageDescription.isNotEmpty
-          ? widget.packageDescription
-          : widget.itemType,
-      'package_weight': widget.packageWeight,
-      'pickup_location': widget.pickupLocation,
-      'pickup_latitude': widget.pickupPosition?.latitude ?? 0,
-      'pickup_longitude': widget.pickupPosition?.longitude ?? 0,
-      'dropoff_location': widget.deliveryLocation,
-      'dropoff_latitude': widget.deliveryPosition?.latitude ?? 0,
-      'dropoff_longitude': widget.deliveryPosition?.longitude ?? 0,
-      'vehicle_type': _mapVehicleType(widget.selectedVehicle),
-      'service_type':
-          deliveryServiceType(isInstantDelivery: widget.isInstantDelivery),
-      'scheduled_pickup': _formatScheduledDateTime(widget.scheduledPickup),
-      'scheduled_delivery': _formatScheduledDateTime(widget.scheduledDelivery),
-      'estimated_distance': _estimatedDistance ?? 0,
-      'estimated_duration': _estimatedDuration ?? 0,
-      'estimated_cost': _estimatedCost ?? 0,
-      'payment_method': _mapPaymentMethod(widget.paymentType),
-      'requires_signature': false,
-      'insurance_required': false,
-      'special_instructions': '',
-      'sender_name': user?.name ?? '',
-      'sender_phone': senderPhone,
-      'receiver_name': widget.recipientName,
-      'receiver_phone': normalizePhoneToBackend(widget.recipientPhone),
-      'package_details': {
-        'name': widget.itemType,
-        'weight': widget.packageWeight,
-        'description': widget.packageDescription.isNotEmpty
-            ? widget.packageDescription
-            : widget.itemType,
-      },
-      'pickup_address': {
-        'latitude': widget.pickupPosition?.latitude ?? 0,
-        'longitude': widget.pickupPosition?.longitude ?? 0,
-        'address': widget.pickupLocation,
-      },
-      'delivery_address': {
-        'latitude': widget.deliveryPosition?.latitude ?? 0,
-        'longitude': widget.deliveryPosition?.longitude ?? 0,
-        'address': widget.deliveryLocation,
-      },
-    };
-
-    final paymentPhone = normalizePaymentPhone(
-      widget.paymentDetails?['phone']?.toString(),
-      widget.paymentType,
-    );
-    if (paymentPhone.isNotEmpty) {
-      requestData['payment_phone'] = paymentPhone;
-    }
-
     setState(() => _isLoadingRequest = true);
 
-    final result = await _courierRepository.createDeliveryRequest(
-      requestData: requestData,
-    );
+    try {
+      var created = _pendingCreatedDelivery;
+      if (created == null) {
+        final user = await AuthService().getStoredUser();
 
-    if (!mounted) return;
-
-    if (result['success'] != true) {
-      setState(() => _isLoadingRequest = false);
-      final error = result['error'] as ApiErrorResult?;
-      if (error?.isInsufficientBalance == true) {
-        await _showInsufficientBalanceDialog(error!);
-        return;
-      }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(result['message']?.toString() ??
-              'Failed to create delivery request'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    final created = result['created'] as CreateDeliveryResult? ??
-        parseCreateDeliveryResponse(result['data']);
-
-    if (!created.isValid) {
-      setState(() => _isLoadingRequest = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Invalid delivery id from create delivery'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    CourierHomeRefresh.instance.notifyRefresh();
-
-    final amount = created.totalAmount ?? _estimatedCost ?? 0;
-    if (amount <= 0) {
-      setState(() => _isLoadingRequest = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Invalid payment amount for delivery'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    final currency = created.currency ?? _estimatedCurrency;
-
-    if (_isWalletPayment) {
-      setState(() => _isLoadingRequest = false);
-      try {
-        final balance = await _walletRepository.getBalance();
-        if (mounted) {
+        final senderPhone = normalizePhoneToBackend(widget.senderPhone);
+        if (!RegExp(r'^2519\d{8}$').hasMatch(senderPhone)) {
+          if (!mounted) return;
+          setState(() => _isLoadingRequest = false);
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Delivery booked. Wallet balance: '
-                '${balance.currency} ${balance.balance.toStringAsFixed(2)}',
-              ),
+            const SnackBar(
+              content: Text('Please enter a valid sender phone (09xxxxxxxx)'),
+              backgroundColor: Colors.red,
             ),
           );
+          return;
         }
-      } catch (_) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Delivery booked with wallet payment')),
-          );
-        }
-      }
-      if (!mounted) return;
-      _navigateToFindingCourier(created);
-      return;
-    }
 
-    try {
+        final requestData = <String, dynamic>{
+          'package_type': _mapPackageType(widget.itemType),
+          'package_description': widget.packageDescription.isNotEmpty
+              ? widget.packageDescription
+              : widget.itemType,
+          'package_weight': widget.packageWeight,
+          'pickup_location': widget.pickupLocation,
+          'pickup_latitude': widget.pickupPosition?.latitude ?? 0,
+          'pickup_longitude': widget.pickupPosition?.longitude ?? 0,
+          'dropoff_location': widget.deliveryLocation,
+          'dropoff_latitude': widget.deliveryPosition?.latitude ?? 0,
+          'dropoff_longitude': widget.deliveryPosition?.longitude ?? 0,
+          'vehicle_type': _mapVehicleType(widget.selectedVehicle),
+          'service_type':
+              deliveryServiceType(isInstantDelivery: widget.isInstantDelivery),
+          'scheduled_pickup': _formatScheduledDateTime(widget.scheduledPickup),
+          'scheduled_delivery':
+              _formatScheduledDateTime(widget.scheduledDelivery),
+          'estimated_distance': _estimatedDistance ?? 0,
+          'estimated_duration': _estimatedDuration ?? 0,
+          'estimated_cost': _estimatedCost ?? 0,
+          'payment_method': _mapPaymentMethod(widget.paymentType),
+          'requires_signature': false,
+          'insurance_required': false,
+          'special_instructions': '',
+          'sender_name': user?.name ?? '',
+          'sender_phone': senderPhone,
+          'receiver_name': widget.recipientName,
+          'receiver_phone': normalizePhoneToBackend(widget.recipientPhone),
+          'package_details': {
+            'name': widget.itemType,
+            'weight': widget.packageWeight,
+            'description': widget.packageDescription.isNotEmpty
+                ? widget.packageDescription
+                : widget.itemType,
+          },
+          'pickup_address': {
+            'latitude': widget.pickupPosition?.latitude ?? 0,
+            'longitude': widget.pickupPosition?.longitude ?? 0,
+            'address': widget.pickupLocation,
+          },
+          'delivery_address': {
+            'latitude': widget.deliveryPosition?.latitude ?? 0,
+            'longitude': widget.deliveryPosition?.longitude ?? 0,
+            'address': widget.deliveryLocation,
+          },
+        };
+
+        final paymentPhone = normalizePaymentPhone(
+          widget.paymentDetails?['phone']?.toString(),
+          widget.paymentType,
+        );
+        if (paymentPhone.isNotEmpty) {
+          requestData['payment_phone'] = paymentPhone;
+        }
+
+        final result = await _courierRepository.createDeliveryRequest(
+          requestData: requestData,
+        );
+
+        if (!mounted) return;
+
+        if (result['success'] != true) {
+          setState(() => _isLoadingRequest = false);
+          final error = result['error'] as ApiErrorResult?;
+          if (error?.isInsufficientBalance == true) {
+            await _showInsufficientBalanceDialog(error!);
+            return;
+          }
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result['message']?.toString() ??
+                  'Failed to create delivery request'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
+
+        created = result['created'] as CreateDeliveryResult? ??
+            parseCreateDeliveryResponse(result['data']);
+
+        if (!created.isValid) {
+          setState(() => _isLoadingRequest = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Invalid delivery id from create delivery'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
+
+        _pendingCreatedDelivery = created;
+        CourierHomeRefresh.instance.notifyRefresh();
+      }
+
+      final delivery = created;
+      final amount = resolveServerDeliveryPaymentAmount(delivery);
+      if (amount == null) {
+        if (!mounted) return;
+        setState(() => _isLoadingRequest = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Server did not return a payment total. Refresh and try again.',
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      // Keep summary UI aligned with the persisted server total.
+      if (_estimatedCost != amount) {
+        setState(() {
+          _estimatedCost = amount;
+          if (delivery.currency != null && delivery.currency!.isNotEmpty) {
+            _estimatedCurrency = delivery.currency!;
+          }
+        });
+      }
+
+      final currency = delivery.currency ?? _estimatedCurrency;
+
+      if (_isWalletPayment) {
+        if (!mounted) return;
+        setState(() => _isLoadingRequest = false);
+        try {
+          final balance = await _walletRepository.getBalance();
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Delivery booked. Wallet balance: '
+                  '${balance.currency} ${balance.balance.toStringAsFixed(2)}',
+                ),
+              ),
+            );
+          }
+        } catch (_) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Delivery booked with wallet payment'),
+              ),
+            );
+          }
+        }
+        if (!mounted) return;
+        _pendingCreatedDelivery = null;
+        _paymentIdempotencyKey = null;
+        _navigateToFindingCourier(delivery);
+        return;
+      }
+
+      _paymentIdempotencyKey ??= createPaymentIdempotencyKey(
+        type: 'delivery',
+        entityId: delivery.deliveryId,
+      );
+
       final paymentResult = await initiateDeliveryPayment(
         repo: _paymentRepository,
-        packageDeliveryId: created.deliveryId,
+        packageDeliveryId: delivery.deliveryId,
         paymentMethodCode: widget.paymentType,
         amount: amount,
         currency: currency,
         paymentDetails: widget.paymentDetails,
+        idempotencyKey: _paymentIdempotencyKey,
       );
 
       if (!mounted) return;
       setState(() => _isLoadingRequest = false);
+
+      // Clear attempt state only after a successful initiate (incl. replay).
+      _paymentIdempotencyKey = null;
+      _pendingCreatedDelivery = null;
 
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => PaymentInitiateResultScreen(
             result: paymentResult,
-            orderId: created.deliveryId.toString(),
-            trackingNumber: created.trackingNumber ?? '',
+            orderId: delivery.deliveryId.toString(),
+            trackingNumber: delivery.trackingNumber ?? '',
             successActionLabel: 'Find courier',
             onTerminalSuccess: (resultContext) {
               Navigator.of(resultContext).pushReplacement(
                 MaterialPageRoute(
                   builder: (_) => FindingCourierScreen(
-                    deliveryId: created.deliveryId,
+                    deliveryId: delivery.deliveryId,
                     pickupLocation: widget.pickupLocation,
                     deliveryLocation: widget.deliveryLocation,
                     pickupPosition: widget.pickupPosition,
@@ -588,13 +629,121 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _isLoadingRequest = false);
+      await _handlePaymentInitiateFailure(e);
+    }
+  }
+
+  Future<void> _handlePaymentInitiateFailure(Object error) async {
+    final parsed = error is ApiException
+        ? parseApiErrorResult(
+            error.data,
+            statusCode: error.statusCode,
+            fallback: error.message,
+          )
+        : null;
+
+    if (parsed?.isAmountMismatch == true) {
+      // New attempt after amount change — do not reuse the old key.
+      _paymentIdempotencyKey = null;
+      await _refreshDeliveryAmountAfterMismatch(
+        expectedAmount: parsed!.expectedAmount,
+        currency: _pendingCreatedDelivery?.currency ?? _estimatedCurrency,
+      );
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(userFacingApiError(e)),
-          backgroundColor: Colors.red,
+          content: Text(
+            parsed.displayMessage.isNotEmpty
+                ? parsed.displayMessage
+                : 'Payment amount changed. Review the updated total and try again.',
+          ),
+          backgroundColor: Colors.orange,
         ),
       );
+      return;
     }
+
+    if (isTransientPaymentNetworkError(error)) {
+      // Keep `_paymentIdempotencyKey` so a safe retry reuses the same key.
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '${userFacingApiError(error)} Tap pay again to retry safely.',
+          ),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    // Definitive failure — next press starts a new payment attempt.
+    _paymentIdempotencyKey = null;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(userFacingApiError(error)),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+
+  Future<void> _refreshDeliveryAmountAfterMismatch({
+    double? expectedAmount,
+    required String currency,
+  }) async {
+    final pending = _pendingCreatedDelivery;
+    if (pending == null) {
+      if (expectedAmount != null && expectedAmount > 0) {
+        setState(() {
+          _estimatedCost = expectedAmount;
+          _estimatedCurrency = currency;
+        });
+      }
+      return;
+    }
+
+    double? refreshedAmount = expectedAmount;
+    String refreshedCurrency = currency;
+
+    final details = await _courierRepository.getUserDeliveryDetails(
+      pending.deliveryId,
+    );
+    if (details['success'] == true && details['data'] is Map) {
+      final data = Map<String, dynamic>.from(details['data'] as Map);
+      final fromDetails = _firstPositiveDouble([
+        data['total_amount'],
+        data['estimated_cost'],
+        data['amount'],
+        data['total'],
+      ]);
+      if (fromDetails != null) refreshedAmount = fromDetails;
+      final c = data['currency']?.toString();
+      if (c != null && c.isNotEmpty) refreshedCurrency = c;
+    }
+
+    if (refreshedAmount == null || refreshedAmount <= 0) return;
+
+    if (!mounted) return;
+    setState(() {
+      _estimatedCost = refreshedAmount;
+      _estimatedCurrency = refreshedCurrency;
+      _pendingCreatedDelivery = CreateDeliveryResult(
+        deliveryId: pending.deliveryId,
+        totalAmount: refreshedAmount,
+        currency: refreshedCurrency,
+        trackingNumber: pending.trackingNumber,
+        status: pending.status,
+        raw: pending.raw,
+      );
+    });
+  }
+
+  double? _firstPositiveDouble(List<dynamic> candidates) {
+    for (final c in candidates) {
+      if (c == null) continue;
+      final value = c is num ? c.toDouble() : double.tryParse(c.toString());
+      if (value != null && value > 0) return value;
+    }
+    return null;
   }
 
   @override

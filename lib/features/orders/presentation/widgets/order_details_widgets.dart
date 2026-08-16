@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/widgets/status_chip.dart';
+import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import '../../data/models/order_model.dart';
 import '../../data/models/order_item_model.dart';
 import '../../data/models/order_tracking_model.dart';
@@ -58,7 +59,7 @@ class OrderStatusCard extends StatelessWidget {
                   const Icon(
                     Icons.access_time_rounded,
                     size: 16,
-                    color: AppColors.primaryColor,
+                    color: HomeColors.violet,
                   ),
                   const SizedBox(width: 4),
                   Text(
@@ -279,7 +280,7 @@ class _OrderTimelineCardState extends State<OrderTimelineCard>
       BuildContext context, TimelineStep step, bool isLast) {
     final colorScheme = Theme.of(context).colorScheme;
     final circleColor = step.isCompleted
-        ? AppColors.primaryColor
+        ? HomeColors.violet
         : colorScheme.surfaceContainerHighest;
     final iconColor =
         step.isCompleted ? Colors.white : colorScheme.onSurfaceVariant;
@@ -310,7 +311,7 @@ class _OrderTimelineCardState extends State<OrderTimelineCard>
                   child: CustomPaint(
                     painter: _DashedLinePainter(
                       color: step.isCompleted
-                          ? AppColors.primaryColor.withValues(alpha: 0.5)
+                          ? HomeColors.violet.withValues(alpha: 0.5)
                           : colorScheme.outline.withValues(alpha: 0.4),
                     ),
                     child: const SizedBox(width: 2),
@@ -621,7 +622,7 @@ class OrderItemsCard extends StatelessWidget {
             item.formattedPrice,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w700,
-                  color: AppColors.primaryColor,
+                  color: HomeColors.violet,
                 ),
           ),
         ],
@@ -662,7 +663,7 @@ class DeliveryInfoCard extends StatelessWidget {
                     l10n.deliveryDetailsPickup,
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: AppColors.primaryColor,
+                          color: HomeColors.violet,
                         ),
                   ),
                 ),
@@ -677,7 +678,7 @@ class DeliveryInfoCard extends StatelessWidget {
                     textAlign: TextAlign.end,
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: AppColors.primaryColor,
+                          color: HomeColors.violet,
                         ),
                   ),
                 ),
@@ -686,12 +687,12 @@ class DeliveryInfoCard extends StatelessWidget {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: AppColors.primaryColor.withValues(alpha: 0.1),
+                    color: HomeColors.violet.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Icon(
                     Icons.map_outlined,
-                    color: AppColors.primaryColor,
+                    color: HomeColors.violet,
                     size: 20,
                   ),
                 ),
@@ -703,7 +704,7 @@ class DeliveryInfoCard extends StatelessWidget {
               children: [
                 const Icon(
                   Icons.location_on_rounded,
-                  color: AppColors.primaryColor,
+                  color: HomeColors.violet,
                   size: 20,
                 ),
                 const SizedBox(width: 8),
@@ -794,7 +795,7 @@ class PaymentInfoCard extends StatelessWidget {
                   order.formattedTotal,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: AppColors.primaryColor,
+                        color: HomeColors.violet,
                       ),
                 ),
               ],
@@ -887,7 +888,7 @@ class OrderSummaryCard extends StatelessWidget {
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontWeight: isTotal ? FontWeight.w700 : FontWeight.w500,
                   color: color ??
-                      (isTotal ? AppColors.primaryColor : null),
+                      (isTotal ? HomeColors.violet : null),
                 ),
           ),
         ],
@@ -1042,7 +1043,7 @@ class _CancelOrderDialogState extends State<CancelOrderDialog> {
                 title: Text(reason),
                 contentPadding: EdgeInsets.zero,
                 trailing: selected
-                    ? const Icon(Icons.check_circle, color: AppColors.primaryColor)
+                    ? const Icon(Icons.check_circle, color: HomeColors.violet)
                     : Icon(
                         Icons.circle_outlined,
                         color: Theme.of(context).colorScheme.onSurfaceVariant,

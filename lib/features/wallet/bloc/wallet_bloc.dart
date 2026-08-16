@@ -61,17 +61,20 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
     AddFundsEvent event,
     Emitter<WalletState> emit,
   ) async {
-    emit(AddFundsLoading());
+    emit(const AddFundsLoading());
     try {
       final response = await walletRepository.topUp(
         amount: event.amount,
         paymentMethodCode: event.paymentMethodCode,
         currency: event.currency,
         paymentDetails: event.paymentDetails,
+        idempotencyKey: event.idempotencyKey,
       );
       emit(AddFundsSuccess(
         message: response.message,
         payment: response.payment,
+        rawData: response.rawData,
+        phase: _topUpPhase(response.payment, response.rawData),
       ));
     } catch (e) {
       emit(AddFundsError(message: userFacingApiError(e)));
@@ -82,19 +85,57 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
     WithdrawFundsEvent event,
     Emitter<WalletState> emit,
   ) async {
-    emit(WithdrawFundsLoading());
+    emit(const WithdrawFundsLoading());
     try {
       final response = await walletRepository.withdraw(
         amount: event.amount,
         paymentMethodCode: event.paymentMethodCode,
+        currency: event.currency,
+        walletId: event.walletId,
         paymentDetails: event.paymentDetails,
+        idempotencyKey: event.idempotencyKey,
       );
       emit(WithdrawFundsSuccess(
         message: response.message,
         payment: response.payment,
+        rawData: response.rawData,
+        phase: _withdrawPhase(response.payment),
       ));
     } catch (e) {
       emit(WithdrawFundsError(message: userFacingApiError(e)));
+    }
+  }
+
+  WalletTopUpPhase _topUpPhase(
+    Map<String, dynamic>? payment,
+    Map<String, dynamic>? rawData,
+  ) {
+    if (rawData?['idempotent_replay'] == true) {
+      return WalletTopUpPhase.duplicateReplay;
+    }
+    final status = payment?['status']?.toString().toLowerCase();
+    if (status == 'completed') return WalletTopUpPhase.completed;
+    if (status == 'failed' || status == 'cancelled') {
+      return WalletTopUpPhase.failed;
+    }
+    return WalletTopUpPhase.pending;
+  }
+
+  WalletWithdrawPhase _withdrawPhase(Map<String, dynamic>? payment) {
+    final status = payment?['status']?.toString().toLowerCase();
+    switch (status) {
+      case 'completed':
+      case 'approved':
+        return WalletWithdrawPhase.approved;
+      case 'rejected':
+      case 'failed':
+      case 'cancelled':
+        return WalletWithdrawPhase.rejected;
+      case 'pending':
+      case 'processing':
+        return WalletWithdrawPhase.pending;
+      default:
+        return WalletWithdrawPhase.submitted;
     }
   }
 }

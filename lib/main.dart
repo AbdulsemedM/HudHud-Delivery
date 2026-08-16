@@ -6,7 +6,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'features/wishlist/bloc/wishlist_bloc.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
-import 'package:hudhud_delivery/features/dashboard/presentation/screen/dashboard_screen.dart';
 import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
 import 'package:hudhud_delivery/features/splash/presentation/screen/splash_screen.dart';
 
@@ -14,6 +13,7 @@ import 'package:hudhud_delivery/features/splash/presentation/screen/splash_scree
 import 'core/theme/app_theme.dart';
 import 'core/api/api_service.dart';
 import 'core/theme/service_tab_palette.dart';
+import 'app/config/app_env.dart';
 
 // Controllers
 import 'controllers/auth_controller.dart';
@@ -39,6 +39,9 @@ import 'app/widgets/ota_lifecycle_binder.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Env (BASE_URL, etc.) before any Dio / ApiService access.
+  await loadAppEnv();
 
   // Must exist before FCM tap handlers so they can push routes.
   final navigatorKey = GlobalKey<NavigatorState>();
@@ -92,12 +95,12 @@ void main() async {
   // Initialize auth service
   final authService = AuthService();
 
-  // Register 401 redirect to home as guest (skip if login is already showing).
+  // Register 401 redirect to login (skip if login is already showing).
   DioClient.instance.setOnUnauthorized(() {
     if (loginScreenIsActive || GuestBrowseService().isGuestBrowseMode) return;
-    GuestBrowseService().enterGuestBrowseMode().then((_) {
+    GuestBrowseService().clearGuestBrowseMode().then((_) {
       navigatorKey.currentState?.pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const DashboardScreen()),
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
         (route) => false,
       );
     });

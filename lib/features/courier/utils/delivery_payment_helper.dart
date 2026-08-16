@@ -2,6 +2,15 @@ import 'package:hudhud_delivery/features/payment/data/repository/payment_reposit
 import 'package:hudhud_delivery/features/payment/model/payment_initiate_result.dart';
 import 'package:hudhud_delivery/features/payment/presentation/widgets/payment_details_form.dart';
 
+import '../data/models/create_delivery_result.dart';
+
+/// Server-persisted delivery total only — never fall back to a client estimate.
+double? resolveServerDeliveryPaymentAmount(CreateDeliveryResult created) {
+  final amount = created.totalAmount;
+  if (amount == null || amount <= 0) return null;
+  return amount;
+}
+
 /// Initiates payment for a parcel delivery via POST /api/payments/initiate (type=delivery).
 Future<PaymentInitiateResult> initiateDeliveryPayment({
   required PaymentRepository repo,
@@ -10,6 +19,7 @@ Future<PaymentInitiateResult> initiateDeliveryPayment({
   required double amount,
   required String currency,
   Map<String, dynamic>? paymentDetails,
+  String? idempotencyKey,
 }) async {
   final details = buildInitiatePaymentDetails(
     paymentMethodCode: paymentMethodCode,
@@ -24,6 +34,7 @@ Future<PaymentInitiateResult> initiateDeliveryPayment({
     amount: amount,
     currency: currency,
     paymentDetails: details,
+    idempotencyKey: idempotencyKey,
   );
 
   return PaymentInitiateResult.fromJson(raw);

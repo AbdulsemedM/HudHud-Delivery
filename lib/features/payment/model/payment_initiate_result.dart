@@ -62,6 +62,10 @@ class PaymentInitiateResult {
     this.amount,
     this.currency,
     this.orderStatus,
+    this.idempotentReplay = false,
+    this.instantCredit = false,
+    this.ussdDispatched = false,
+    this.checkoutRequestId,
     this.raw,
   });
 
@@ -84,7 +88,33 @@ class PaymentInitiateResult {
   final String? amount;
   final String? currency;
   final String? orderStatus;
+
+  /// True when the API returned the original payment for a repeated Idempotency-Key.
+  final bool idempotentReplay;
+
+  /// True when the wallet was credited immediately (rare for USSD providers).
+  final bool instantCredit;
+
+  /// True when a USSD push was already sent to the customer phone.
+  final bool ussdDispatched;
+
+  /// Provider checkout / request id when present.
+  final String? checkoutRequestId;
+
   final Map<String, dynamic>? raw;
+
+  /// Prefer USSD / approve-on-phone copy instead of “payment completed”.
+  bool get showUssdSuccessCopy =>
+      ussdDispatched ||
+      nextAction == 'ussd' ||
+      nextAction == 'approve_ussd' ||
+      nextAction == 'poll_status' ||
+      nextAction == 'user_action_required';
+
+  bool get isPendingPayment {
+    final s = status?.toLowerCase();
+    return s == 'pending' || s == 'processing' || s == null && showUssdSuccessCopy;
+  }
 
   static bool isEbirrRcsSuccess(Map<String, dynamic> json) {
     final message = json['message']?.toString();
@@ -107,6 +137,8 @@ class PaymentInitiateResult {
       case 'redirect_to_hpp':
         return PaymentInitiateUiMode.redirectToHpp;
       case 'user_action_required':
+      case 'ussd':
+      case 'approve_ussd':
         return PaymentInitiateUiMode.userActionRequired;
       case 'poll_status':
         return PaymentInitiateUiMode.ussdPending;
@@ -133,43 +165,69 @@ class PaymentInitiateResult {
     final dataMap =
         data is Map ? Map<String, dynamic>.from(data) : <String, dynamic>{};
 
-    final payment = dataMap['payment'];
-    final paymentMap =
-        payment is Map ? Map<String, dynamic>.from(payment) : <String, dynamic>{};
+    final payment = dataMap['payment'] ?? json['payment'];
+    final paymentMap = payment is Map
+        ? Map<String, dynamic>.from(payment)
+        : <String, dynamic>{};
+
+    final delivery = dataMap['delivery'] ?? json['delivery'];
+    final deliveryMap = delivery is Map
+        ? Map<String, dynamic>.from(delivery)
+        : <String, dynamic>{};
 
     final paymentDetails = paymentMap['payment_details'];
     final detailsMap = paymentDetails is Map
         ? Map<String, dynamic>.from(paymentDetails)
         : <String, dynamic>{};
 
-    final nextAction = dataMap['next_action']?.toString();
+    var nextAction = dataMap['next_action']?.toString() ??
+        json['next_action']?.toString();
     final message = json['message']?.toString() ??
+        paymentMap['message']?.toString() ??
         (ebirrSuccess ? 'RCS_SUCCESS' : null) ??
         'Payment initiated';
 
     final topLevelQr = dataMap['qr_code']?.toString();
     final nestedQr = detailsMap['qpay_qr_code']?.toString();
-    final qrRaw = (topLevelQr != null && topLevelQr.isNotEmpty)
-        ? topLevelQr
-        : nestedQr;
+    final qrRaw =
+        (topLevelQr != null && topLevelQr.isNotEmpty) ? topLevelQr : nestedQr;
     final qrCodeBase64 = _stripDataUriPrefix(qrRaw);
+
+    final ussdSent = dataMap['ussd_sent'] == true ||
+        json['ussd_sent'] == true ||
+        paymentMap['ussd_sent'] == true ||
+        paymentMap['initiated'] == true;
+    final ussdDispatched = dataMap['ussd_dispatched'] == true ||
+        json['ussd_dispatched'] == true ||
+        ussdSent;
+    final instantCredit = dataMap['instant_credit'] == true ||
+        json['instant_credit'] == true;
+
+    if ((nextAction == null || nextAction.isEmpty) && ussdDispatched) {
+      nextAction = 'approve_ussd';
+    }
+
+    final status = paymentMap['status']?.toString() ??
+        deliveryMap['payment_status']?.toString();
 
     return PaymentInitiateResult(
       isSuccess: true,
       uiMode: uiModeFromNextAction(nextAction),
       paymentId: int.tryParse(paymentMap['id']?.toString() ?? ''),
-      status: paymentMap['status']?.toString(),
+      status: status,
       method: paymentMap['method']?.toString(),
       nextAction: nextAction,
       message: message,
       qrCodeBase64: qrCodeBase64,
       qrPayload: detailsMap['qpay_qr_id']?.toString(),
-      qrId: dataMap['qr_id']?.toString() ?? detailsMap['qpay_qr_id']?.toString(),
+      qrId:
+          dataMap['qr_id']?.toString() ?? detailsMap['qpay_qr_id']?.toString(),
       redirectUrl: dataMap['redirect_url']?.toString(),
       expiresAt: dataMap['expires_at']?.toString(),
       transactionId: paymentMap['transaction_id']?.toString(),
       customerMessage: dataMap['customer_message']?.toString(),
       referenceNumber: paymentMap['reference']?.toString() ??
+          paymentMap['reference_id']?.toString() ??
           detailsMap['sahay_reference_number']?.toString() ??
           detailsMap['qpay_awb']?.toString(),
       phone: paymentMap['phone_number']?.toString() ??
@@ -177,6 +235,12 @@ class PaymentInitiateResult {
       amount: paymentMap['amount']?.toString(),
       currency: paymentMap['currency']?.toString(),
       orderStatus: dataMap['order_status']?.toString(),
+      idempotentReplay: json['idempotent_replay'] == true ||
+          dataMap['idempotent_replay'] == true,
+      instantCredit: instantCredit,
+      ussdDispatched: ussdDispatched,
+      checkoutRequestId: dataMap['checkout_request_id']?.toString() ??
+          json['checkout_request_id']?.toString(),
       raw: json,
     );
   }

@@ -6,9 +6,11 @@ import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
+import 'package:hudhud_delivery/features/courier/presentation/widgets/active_delivery_card.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/features/courier/utils/courier_home_refresh.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_history_filter.dart';
+import 'package:hudhud_delivery/features/courier/utils/delivery_status.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../home/presentation/widgets/home_widget.dart';
 import 'delivery_details_screen.dart';
@@ -56,8 +58,10 @@ class _CourierScreenState extends State<CourierScreen> {
   List<Map<String, dynamic>> get _filteredDeliveries {
     if (_selectedFilter == kDeliveryHistoryFilterAll) return _deliveries;
     return _deliveries.where((d) {
-      final status = (d['current_status'] ?? d['status'])?.toString();
-      return matchesDeliveryHistoryFilter(status, _selectedFilter);
+      return matchesDeliveryHistoryFilter(
+        resolveDeliveryStatus(d),
+        _selectedFilter,
+      );
     }).toList();
   }
 
@@ -154,12 +158,7 @@ class _CourierScreenState extends State<CourierScreen> {
   }
 
   LatLng? _parseLatLng(dynamic lat, dynamic lng) {
-    final latVal =
-        lat is num ? lat.toDouble() : double.tryParse(lat?.toString() ?? '');
-    final lngVal =
-        lng is num ? lng.toDouble() : double.tryParse(lng?.toString() ?? '');
-    if (latVal != null && lngVal != null) return LatLng(latVal, lngVal);
-    return null;
+    return parseDeliveryLatLng(lat, lng);
   }
 
   void _navigateToTracking(Map<String, dynamic> delivery) {
@@ -193,11 +192,47 @@ class _CourierScreenState extends State<CourierScreen> {
     );
   }
 
+  Widget _buildCreateDeliveryRow(AppLocalizations l10n) {
+    return Row(
+      children: [
+        Expanded(
+          child: _InstantDeliveryCard(
+            l10n: l10n,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const InstantDeliveryScreen(),
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _ScheduleDeliveryCard(
+            l10n: l10n,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ScheduleDeliveryScreen(),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     const borderColor = HomeColors.border;
+    final hasActive =
+        !_isLoadingActiveDelivery && _activeDelivery != null;
 
     return Scaffold(
       backgroundColor: HomeColors.background,
@@ -212,78 +247,47 @@ class _CourierScreenState extends State<CourierScreen> {
             child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (hasActive) ...[
+                Text(
+                  l10n.courierActiveDelivery,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: HomeColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: AppColors.spaceMD),
+                ActiveDeliveryCard(
+                  delivery: _activeDelivery!,
+                  onTrack: () => _navigateToTracking(_activeDelivery!),
+                ),
+                const SizedBox(height: AppColors.spaceLG),
+                Text(
+                  l10n.courierWhatToDo,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: HomeColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: AppColors.spaceMD),
+                _buildCreateDeliveryRow(l10n),
+              ] else ...[
+                Text(
+                  l10n.courierWhatToDo,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: HomeColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: AppColors.spaceMD),
+                _buildCreateDeliveryRow(l10n),
+              ],
+              const SizedBox(height: AppColors.spaceLG),
               Text(
-                l10n.courierWhatToDo,
+                l10n.history,
                 style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: HomeColors.textPrimary,
                 ),
-              ),
-              const SizedBox(height: AppColors.spaceMD),
-              Row(
-                children: [
-                  Expanded(
-                    child: _InstantDeliveryCard(
-                      l10n: l10n,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                const InstantDeliveryScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _ScheduleDeliveryCard(
-                      l10n: l10n,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                const ScheduleDeliveryScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              if (!_isLoadingActiveDelivery && _activeDelivery != null) ...[
-                const SizedBox(height: AppColors.spaceLG),
-                _ActiveDeliveryBanner(
-                  l10n: l10n,
-                  delivery: _activeDelivery!,
-                  onTap: () => _navigateToTracking(_activeDelivery!),
-                ),
-              ],
-              const SizedBox(height: AppColors.spaceLG),
-              Row(
-                children: [
-                  Text(
-                    l10n.history,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: HomeColors.textPrimary,
-                    ),
-                  ),
-                  const Spacer(),
-                  TextButton(
-                    onPressed: () {},
-                    style: TextButton.styleFrom(
-                      foregroundColor: HomeColors.violet,
-                      textStyle: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    child: Text(l10n.actionViewAll),
-                  ),
-                ],
               ),
               const SizedBox(height: AppColors.spaceMD),
               SingleChildScrollView(
@@ -409,8 +413,7 @@ class _CourierScreenState extends State<CourierScreen> {
                   final recipient = d['receiver_name']?.toString() ?? '—';
                   final location = d['dropoff_location']?.toString() ?? '—';
                   final dateTime = _formatDeliveryDate(d['created_at']);
-                  final status =
-                      (d['current_status'] ?? d['status'])?.toString() ?? '—';
+                  final status = resolveDeliveryStatusLabel(d);
                   return _DeliveryHistoryCard(
                     orderId: orderId,
                     recipient: recipient,
@@ -597,100 +600,6 @@ class _ScheduleDeliveryCard extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ActiveDeliveryBanner extends StatelessWidget {
-  final AppLocalizations l10n;
-  final Map<String, dynamic> delivery;
-  final VoidCallback onTap;
-
-  const _ActiveDeliveryBanner({
-    required this.l10n,
-    required this.delivery,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final id = delivery['id'];
-    final orderId = id != null ? 'DEL-$id' : '—';
-    final status =
-        (delivery['current_status'] ?? delivery['status'])?.toString() ??
-            l10n.courierDeliveryStatusInProgress;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: HomeColors.surface,
-          borderRadius: BorderRadius.circular(AppColors.radiusLG),
-          border: Border.all(color: HomeColors.border),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              height: 160,
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(AppColors.radiusLG),
-                ),
-                color: HomeColors.surfaceElevated,
-              ),
-              child: const Icon(
-                Icons.location_on_rounded,
-                color: HomeColors.violet,
-                size: 48,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(AppColors.spaceMD),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          orderId,
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleSmall
-                              ?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: HomeColors.textPrimary,
-                              ),
-                        ),
-                      ),
-                      StatusChip(status: status),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(4, (index) {
-                      return Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                        width: index == 1 ? 10 : 8,
-                        height: index == 1 ? 10 : 8,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: index <= 1
-                              ? HomeColors.violet
-                              : HomeColors.textMuted.withValues(alpha: 0.35),
-                        ),
-                      );
-                    }),
-                  ),
-                ],
-              ),
-            ),
-          ],
         ),
       ),
     );

@@ -41,12 +41,7 @@ class DioClient {
       },
     );
 
-    // Add interceptors
-    if (kDebugMode) {
-      _dio.interceptors.add(LoggerInterceptor());
-    }
-
-    // Add auth interceptor
+    // Auth first so debug logs see the final Authorization header.
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
@@ -70,6 +65,10 @@ class DioClient {
         },
       ),
     );
+
+    if (kDebugMode) {
+      _dio.interceptors.add(LoggerInterceptor());
+    }
   }
 
   Future<String?> _getAuthToken() async {

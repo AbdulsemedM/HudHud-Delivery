@@ -171,6 +171,7 @@ class _WalletContentState extends State<_WalletContent> {
                   MaterialPageRoute(
                     builder: (_) => WithdrawFundsScreen(
                       defaultCurrency: currency,
+                      walletId: widget.balance.id,
                     ),
                   ),
                 );

@@ -47,10 +47,14 @@ Map<String, dynamic> buildWalletTopupBody({
 Map<String, dynamic> buildWalletWithdrawBody({
   required String paymentMethodCode,
   required double amount,
+  required String currency,
+  required int walletId,
   Map<String, dynamic>? paymentDetails,
 }) {
   return {
+    'wallet_id': walletId,
     'amount': amount,
+    'currency': currency,
     'payment_method_code': paymentMethodCode,
     'payment_details': paymentDetails ?? {},
   };
