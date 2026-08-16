@@ -136,7 +136,7 @@ void main() {
       );
     });
 
-    test('parses payment gateway error', () {
+    test('parses payment gateway error without leaking provider payload', () {
       final result = parseApiErrorResult({
         'success': false,
         'message': 'Payment gateway returned an error',
@@ -149,9 +149,9 @@ void main() {
       expect(result.code, 'payment_failed');
       expect(result.gatewayError, 'Transaction declined by bank');
       expect(result.gatewayErrorCode, 'DECLINED');
-      expect(result.displayMessage, contains('Payment gateway returned an error'));
-      expect(result.displayMessage, contains('Transaction declined by bank'));
-      expect(result.displayMessage, contains('DECLINED'));
+      expect(result.displayMessage, 'Payment gateway returned an error');
+      expect(result.displayMessage, isNot(contains('Transaction declined by bank')));
+      expect(result.displayMessage, isNot(contains('DECLINED')));
     });
 
     test('maps not-found messages', () {

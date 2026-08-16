@@ -63,6 +63,9 @@ class PaymentInitiateResult {
     this.currency,
     this.orderStatus,
     this.idempotentReplay = false,
+    this.instantCredit = false,
+    this.ussdDispatched = false,
+    this.checkoutRequestId,
     this.raw,
   });
 
@@ -88,7 +91,29 @@ class PaymentInitiateResult {
 
   /// True when the API returned the original payment for a repeated Idempotency-Key.
   final bool idempotentReplay;
+
+  /// True when the wallet was credited immediately (rare for USSD providers).
+  final bool instantCredit;
+
+  /// True when a USSD push was already sent to the customer phone.
+  final bool ussdDispatched;
+
+  /// Provider checkout / request id when present.
+  final String? checkoutRequestId;
+
   final Map<String, dynamic>? raw;
+
+  /// Prefer USSD / approve-on-phone copy instead of “payment completed”.
+  bool get showUssdSuccessCopy =>
+      ussdDispatched ||
+      nextAction == 'ussd' ||
+      nextAction == 'poll_status' ||
+      nextAction == 'user_action_required';
+
+  bool get isPendingPayment {
+    final s = status?.toLowerCase();
+    return s == 'pending' || s == 'processing' || s == null && showUssdSuccessCopy;
+  }
 
   static bool isEbirrRcsSuccess(Map<String, dynamic> json) {
     final message = json['message']?.toString();
@@ -111,6 +136,7 @@ class PaymentInitiateResult {
       case 'redirect_to_hpp':
         return PaymentInitiateUiMode.redirectToHpp;
       case 'user_action_required':
+      case 'ussd':
         return PaymentInitiateUiMode.userActionRequired;
       case 'poll_status':
         return PaymentInitiateUiMode.ussdPending;
@@ -158,6 +184,11 @@ class PaymentInitiateResult {
         (topLevelQr != null && topLevelQr.isNotEmpty) ? topLevelQr : nestedQr;
     final qrCodeBase64 = _stripDataUriPrefix(qrRaw);
 
+    final ussdDispatched = dataMap['ussd_dispatched'] == true ||
+        json['ussd_dispatched'] == true;
+    final instantCredit = dataMap['instant_credit'] == true ||
+        json['instant_credit'] == true;
+
     return PaymentInitiateResult(
       isSuccess: true,
       uiMode: uiModeFromNextAction(nextAction),
@@ -175,6 +206,7 @@ class PaymentInitiateResult {
       transactionId: paymentMap['transaction_id']?.toString(),
       customerMessage: dataMap['customer_message']?.toString(),
       referenceNumber: paymentMap['reference']?.toString() ??
+          paymentMap['reference_id']?.toString() ??
           detailsMap['sahay_reference_number']?.toString() ??
           detailsMap['qpay_awb']?.toString(),
       phone: paymentMap['phone_number']?.toString() ??
@@ -184,6 +216,10 @@ class PaymentInitiateResult {
       orderStatus: dataMap['order_status']?.toString(),
       idempotentReplay: json['idempotent_replay'] == true ||
           dataMap['idempotent_replay'] == true,
+      instantCredit: instantCredit,
+      ussdDispatched: ussdDispatched,
+      checkoutRequestId: dataMap['checkout_request_id']?.toString() ??
+          json['checkout_request_id']?.toString(),
       raw: json,
     );
   }

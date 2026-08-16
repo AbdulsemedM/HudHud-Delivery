@@ -7,18 +7,44 @@ import 'package:hudhud_delivery/app/services/google_auth_helper.dart';
 import 'package:hudhud_delivery/features/login/data/data_provider/login_data_provider.dart';
 import 'package:hudhud_delivery/models/user_model.dart';
 
+class LoginFailureException implements Exception {
+  LoginFailureException(
+    this.message, {
+    this.attemptsRemaining,
+    this.retryAfterSeconds,
+    this.isAccountLocked = false,
+    this.code,
+  });
+
+  final String message;
+  final int? attemptsRemaining;
+  final int? retryAfterSeconds;
+  final bool isAccountLocked;
+  final String? code;
+
+  @override
+  String toString() => message;
+}
+
 class LoginRepository {
   final LoginDataProvider loginDataProvider;
   LoginRepository(this.loginDataProvider);
 
-  Future<UserModel> login(String emailOrPhone, String password, String fieldType) async {
+  Future<UserModel> login(
+    String emailOrPhone,
+    String password,
+    String fieldType,
+  ) async {
     AuthService authService = AuthService();
     try {
-      final response = await loginDataProvider.login(emailOrPhone, password, fieldType);
+      final response =
+          await loginDataProvider.login(emailOrPhone, password, fieldType);
       if (response['statusCode'] == 200) {
         final data = response['data'] as Map<String, dynamic>?;
         if (data == null || data['token'] == null || data['user'] == null) {
-          throw 'Invalid server response: missing required data';
+          throw LoginFailureException(
+            'Invalid server response: missing required data',
+          );
         }
 
         final user = await _completeSessionFromLoginData(data, authService);
@@ -29,19 +55,12 @@ class LoginRepository {
         );
         return user;
       } else {
-        // Get clean error message from data provider
-        String errorMessage = response['errorMessage'] ?? 'Login failed';
-        // Clean any prefixes that might exist
-        errorMessage = _cleanErrorMessage(errorMessage);
-        throw errorMessage; // Throw string directly instead of Exception
+        throw _loginFailureFromResponse(response);
       }
     } catch (e) {
-      if (e is String) {
-        rethrow; // Re-throw clean string errors
-      }
-      // Clean any exception messages
-      String errorMessage = _cleanErrorMessage(e.toString());
-      throw errorMessage;
+      if (e is LoginFailureException) rethrow;
+      if (e is String) throw LoginFailureException(e);
+      throw LoginFailureException(_cleanErrorMessage(e.toString()));
     }
   }
 
@@ -63,26 +82,28 @@ class LoginRepository {
         final data = _normalizeLoginPayload(raw);
         return _completeSessionFromLoginData(data, authService);
       }
-      String errorMessage =
-          response['errorMessage'] as String? ?? 'Google login failed';
-      errorMessage = _cleanErrorMessage(errorMessage);
-      debugPrint('[GoogleSignIn] backend HTTP $code: $errorMessage');
-      debugPrint('[GoogleSignIn] backend response data: ${response['data']}');
-      throw errorMessage;
+      throw _loginFailureFromResponse(
+        response,
+        fallback: 'Google login failed',
+      );
     } on GoogleSignInUserCancelled {
+      rethrow;
+    } on LoginFailureException {
       rethrow;
     } catch (e, st) {
       debugPrint('[GoogleSignIn] googleLogin failed: $e');
       debugPrint('$st');
-      if (e is String) rethrow;
-      throw _cleanErrorMessage(e.toString());
+      if (e is String) throw LoginFailureException(e);
+      throw LoginFailureException(_cleanErrorMessage(e.toString()));
     }
   }
 
   /// Accepts either `{ token, user }` or `{ success, data: { token, user } }`.
   Map<String, dynamic> _normalizeLoginPayload(dynamic raw) {
     if (raw is! Map) {
-      throw 'Invalid server response: missing required data';
+      throw LoginFailureException(
+        'Invalid server response: missing required data',
+      );
     }
     final map = Map<String, dynamic>.from(raw);
     if (map['token'] != null && map['user'] != null) {
@@ -94,7 +115,9 @@ class LoginRepository {
         inner['user'] != null) {
       return Map<String, dynamic>.from(inner);
     }
-    throw 'Invalid server response: missing required data';
+    throw LoginFailureException(
+      'Invalid server response: missing required data',
+    );
   }
 
   Future<UserModel> guest() async {
@@ -104,22 +127,89 @@ class LoginRepository {
       if (response['statusCode'] == 200) {
         final data = response['data'] as Map<String, dynamic>?;
         if (data == null || data['token'] == null || data['user'] == null) {
-          throw 'Invalid server response: missing required data';
+          throw LoginFailureException(
+            'Invalid server response: missing required data',
+          );
         }
 
         return _completeSessionFromLoginData(data, authService);
       } else {
-        String errorMessage = response['errorMessage'] ?? 'Guest login failed';
-        errorMessage = _cleanErrorMessage(errorMessage);
-        throw errorMessage;
+        throw _loginFailureFromResponse(
+          response,
+          fallback: 'Guest login failed',
+        );
       }
     } catch (e) {
-      if (e is String) {
-        rethrow;
-      }
-      String errorMessage = _cleanErrorMessage(e.toString());
-      throw errorMessage;
+      if (e is LoginFailureException) rethrow;
+      if (e is String) throw LoginFailureException(e);
+      throw LoginFailureException(_cleanErrorMessage(e.toString()));
     }
+  }
+
+  LoginFailureException _loginFailureFromResponse(
+    Map<String, dynamic> response, {
+    String fallback = 'Login failed',
+  }) {
+    var message = _cleanErrorMessage(
+      response['errorMessage'] as String? ?? fallback,
+    );
+    final statusCode = response['statusCode'] as int?;
+    final code = response['code']?.toString() ??
+        _codeFromData(response['data']);
+    final retryAfter = _parseRetryAfter(
+      response['retryAfter'] ?? _retryAfterFromData(response['data']),
+    );
+    final attempts = _parseAttemptsRemaining(response['data']);
+
+    final isLocked = statusCode == 429 ||
+        code == 'AUTH_ACCOUNT_LOCKED' ||
+        (message.toLowerCase().contains('too many') &&
+            message.toLowerCase().contains('attempt'));
+
+    if (attempts != null && !isLocked) {
+      message = '$message ($attempts attempts remaining)';
+    }
+    if (isLocked && retryAfter != null && retryAfter > 0) {
+      final minutes = (retryAfter / 60).ceil();
+      message = minutes <= 1
+          ? '$message Try again in about a minute.'
+          : '$message Try again in about $minutes minutes.';
+    }
+
+    return LoginFailureException(
+      message,
+      attemptsRemaining: attempts,
+      retryAfterSeconds: retryAfter,
+      isAccountLocked: isLocked,
+      code: code,
+    );
+  }
+
+  String? _codeFromData(dynamic data) {
+    if (data is! Map) return null;
+    return data['code']?.toString() ?? data['error_code']?.toString();
+  }
+
+  dynamic _retryAfterFromData(dynamic data) {
+    if (data is! Map) return null;
+    return data['retry_after'] ?? data['retryAfter'];
+  }
+
+  int? _parseRetryAfter(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse(value.toString());
+  }
+
+  int? _parseAttemptsRemaining(dynamic data) {
+    if (data is! Map) return null;
+    final map = Map<String, dynamic>.from(data);
+    final raw = map['attempts_remaining'] ?? map['remaining_attempts'];
+    if (raw == null) return null;
+    if (raw is int) return raw;
+    if (raw is num) return raw.toInt();
+    return int.tryParse(raw.toString());
   }
 
   Future<UserModel> _completeSessionFromLoginData(
@@ -170,7 +260,6 @@ class LoginRepository {
   }
 
   String _cleanErrorMessage(String message) {
-    // Remove various prefixes that might appear
     if (message.startsWith('Exception: ')) {
       message = message.substring(11);
     }

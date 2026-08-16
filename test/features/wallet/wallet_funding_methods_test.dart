@@ -41,17 +41,19 @@ void main() {
       expect(body.containsKey('wallet_id'), isFalse);
     });
 
-    test('withdraw uses payment_method_code without currency', () {
+    test('withdraw includes wallet_id and currency', () {
       final body = buildWalletWithdrawBody(
         paymentMethodCode: 'edahab',
         amount: 500,
+        currency: 'ETB',
+        walletId: 123,
         paymentDetails: {'phone': '656013956'},
       );
       expect(body['payment_method_code'], 'edahab');
       expect(body['amount'], 500);
+      expect(body['currency'], 'ETB');
+      expect(body['wallet_id'], 123);
       expect(body['payment_details'], {'phone': '656013956'});
-      expect(body.containsKey('currency'), isFalse);
-      expect(body.containsKey('wallet_id'), isFalse);
     });
   });
 }

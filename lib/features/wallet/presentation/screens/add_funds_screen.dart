@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/utils/payment_idempotency.dart';
 import 'package:hudhud_delivery/features/payment/data/data_provider/payment_data_provider.dart';
 import 'package:hudhud_delivery/features/payment/data/repository/payment_repository.dart';
 import 'package:hudhud_delivery/features/payment/model/payment_initiate_result.dart';
@@ -40,6 +41,7 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
   Map<String, dynamic> _paymentDetails = {};
   String _ebirrProvider = 'kaafi';
   bool _useHpp = false;
+  String? _idempotencyKey;
 
   late final WalletRepository _walletRepository;
   late final PaymentRepository _paymentRepository;
@@ -58,6 +60,7 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
     if (widget.initialAmount != null && widget.initialAmount! > 0) {
       _applyAmount(widget.initialAmount!);
     }
+    _amountController.addListener(_invalidateIdempotencyKey);
     _fetchPaymentMethods();
   }
 
@@ -94,6 +97,10 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
     super.dispose();
   }
 
+  void _invalidateIdempotencyKey() {
+    _idempotencyKey = null;
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     final method = _selectedMethodId;
@@ -127,17 +134,19 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
       orderId: 0,
     );
 
+    _idempotencyKey ??= createWalletIdempotencyKey(operation: 'topup');
+
     _walletBloc.add(AddFundsEvent(
       amount: amount,
       paymentMethodCode: method,
       currency: widget.defaultCurrency,
       paymentDetails: details,
+      idempotencyKey: _idempotencyKey,
     ));
   }
 
-  Future<void> _handlePaymentResult(Map<String, dynamic>? payment) async {
-    if (payment == null) return;
-    final result = PaymentInitiateResult.fromJson(payment);
+  Future<void> _handlePaymentResult(Map<String, dynamic> envelope) async {
+    final result = PaymentInitiateResult.fromJson(envelope);
     if (!result.isSuccess &&
         result.uiMode == PaymentInitiateUiMode.failure &&
         result.paymentId == null) {
@@ -154,6 +163,17 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
     );
   }
 
+  String _successSnackMessage(AddFundsSuccess state) {
+    if (state.message.isNotEmpty) return state.message;
+    if (state.phase == WalletTopUpPhase.completed) {
+      return 'Funds added successfully';
+    }
+    if (state.phase == WalletTopUpPhase.duplicateReplay) {
+      return 'Payment request already exists. Checking status…';
+    }
+    return 'Payment initiated. Complete approval on your phone if prompted.';
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -165,19 +185,21 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
         body: BlocConsumer<WalletBloc, WalletState>(
           listener: (context, state) async {
             if (state is AddFundsSuccess) {
+              _invalidateIdempotencyKey();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(
-                    state.message.isNotEmpty
-                        ? state.message
-                        : 'Funds added successfully',
-                  ),
-                  backgroundColor: AppColors.successColor,
+                  content: Text(_successSnackMessage(state)),
+                  backgroundColor: state.isPending
+                      ? AppColors.primaryColor
+                      : AppColors.successColor,
                 ),
               );
-              await _handlePaymentResult(state.payment);
+              await _handlePaymentResult(state.initiateEnvelope);
               if (context.mounted) Navigator.pop(context, true);
             } else if (state is AddFundsError) {
+              if (!isTransientPaymentNetworkError(state.message)) {
+                _invalidateIdempotencyKey();
+              }
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.message),
@@ -205,7 +227,10 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
                         return null;
                       },
                       onQuickAmountSelected: (amount) {
-                        setState(() => _applyAmount(amount));
+                        setState(() {
+                          _invalidateIdempotencyKey();
+                          _applyAmount(amount);
+                        });
                       },
                       methodSectionTitle: l10n.labelPaymentMethod,
                       methods: _paymentMethods,
@@ -213,6 +238,7 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
                       isLoadingMethods: _isLoadingPaymentMethods,
                       onMethodSelected: (id) {
                         setState(() {
+                          _invalidateIdempotencyKey();
                           _selectedMethodId = id;
                           _paymentDetails = {};
                           _useHpp = false;

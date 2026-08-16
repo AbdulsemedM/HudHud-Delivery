@@ -12,6 +12,8 @@ const Set<String> kKnownApiErrorCodes = {
   'delivery_not_found',
   'amount_mismatch',
   'SERVICE_COMING_SOON',
+  'AUTH_ACCOUNT_LOCKED',
+  'IDEMPOTENCY_CONFLICT',
 };
 
 /// Structured parse of Laravel-style / payment API error envelopes.
@@ -106,12 +108,7 @@ class ApiErrorResult {
       parts.add('Short by: ${_formatAmount(deficit!)}');
     }
 
-    if (gatewayError != null && gatewayError!.isNotEmpty) {
-      final codePart = (gatewayErrorCode != null && gatewayErrorCode!.isNotEmpty)
-          ? ' ($gatewayErrorCode)'
-          : '';
-      parts.add('$gatewayError$codePart');
-    }
+    // Never surface raw gateway / provider payloads to customers.
 
     return parts.join('\n');
   }
@@ -188,6 +185,17 @@ ApiErrorResult parseApiErrorResult(
     nestedData['error'],
     nestedData['code'],
   ]);
+
+  // Provider `error_code` (e.g. DECLINED) is not the app error code unless known.
+  final providerErrorCode = _firstNonEmptyString([
+    root['error_code'],
+    nestedData['error_code'],
+  ]);
+  if (code == null &&
+      providerErrorCode != null &&
+      kKnownApiErrorCodes.contains(providerErrorCode)) {
+    code = providerErrorCode;
+  }
 
   if (code != null && !kKnownApiErrorCodes.contains(code)) {
     // Keep unknown codes if they look like snake_case identifiers.

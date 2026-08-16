@@ -28,6 +28,12 @@ String createPaymentIdempotencyKey({
   return '$normalizedType-$entityId-attempt-${generateUuidV4()}';
 }
 
+/// Wallet mutation keys per handoff: `topup-<uuid>` / `withdraw-<uuid>`.
+String createWalletIdempotencyKey({required String operation}) {
+  final op = operation.trim().isEmpty ? 'wallet' : operation.trim();
+  return '$op-${generateUuidV4()}';
+}
+
 /// True for timeouts / connection failures where the same Idempotency-Key
 /// should be reused on a safe retry (avoid duplicate gateway initiation).
 bool isTransientPaymentNetworkError(Object error) {

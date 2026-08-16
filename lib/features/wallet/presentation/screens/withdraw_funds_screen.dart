@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/utils/payment_idempotency.dart';
 import 'package:hudhud_delivery/features/payment/data/data_provider/payment_data_provider.dart';
 import 'package:hudhud_delivery/features/payment/data/repository/payment_repository.dart';
 import 'package:hudhud_delivery/features/payment/model/payment_initiate_result.dart';
@@ -17,10 +18,12 @@ import 'package:hudhud_delivery/features/wallet/utils/wallet_funding_methods.dar
 
 class WithdrawFundsScreen extends StatefulWidget {
   final String defaultCurrency;
+  final int? walletId;
 
   const WithdrawFundsScreen({
     super.key,
     this.defaultCurrency = 'ETB',
+    this.walletId,
   });
 
   @override
@@ -38,6 +41,9 @@ class _WithdrawFundsScreenState extends State<WithdrawFundsScreen> {
   Map<String, dynamic> _paymentDetails = {};
   String _ebirrProvider = 'kaafi';
   bool _useHpp = false;
+  String? _idempotencyKey;
+  int? _walletId;
+  bool _resolvingWalletId = false;
 
   late final WalletRepository _walletRepository;
   late final PaymentRepository _paymentRepository;
@@ -53,13 +59,33 @@ class _WithdrawFundsScreenState extends State<WithdrawFundsScreen> {
       paymentDataProvider: PaymentDataProvider(apiService: ApiService.instance),
     );
     _walletBloc = WalletBloc(walletRepository: _walletRepository);
+    _walletId = widget.walletId;
+    _amountController.addListener(_invalidateIdempotencyKey);
     _fetchPaymentMethods();
+    if (_walletId == null) {
+      _resolveWalletId();
+    }
   }
 
   void _applyAmount(double amount) {
     _amountController.text = amount == amount.roundToDouble()
         ? amount.toStringAsFixed(0)
         : amount.toStringAsFixed(2);
+  }
+
+  Future<void> _resolveWalletId() async {
+    setState(() => _resolvingWalletId = true);
+    try {
+      final balance = await _walletRepository.getBalance();
+      if (!mounted) return;
+      setState(() {
+        _walletId = balance.id;
+        _resolvingWalletId = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _resolvingWalletId = false);
+    }
   }
 
   Future<void> _fetchPaymentMethods() async {
@@ -89,6 +115,10 @@ class _WithdrawFundsScreenState extends State<WithdrawFundsScreen> {
     super.dispose();
   }
 
+  void _invalidateIdempotencyKey() {
+    _idempotencyKey = null;
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     final method = _selectedMethodId;
@@ -99,6 +129,17 @@ class _WithdrawFundsScreenState extends State<WithdrawFundsScreen> {
           backgroundColor: Colors.red,
         ),
       );
+      return;
+    }
+
+    if (_walletId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Wallet is unavailable. Please try again.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      await _resolveWalletId();
       return;
     }
 
@@ -122,16 +163,20 @@ class _WithdrawFundsScreenState extends State<WithdrawFundsScreen> {
       orderId: 0,
     );
 
+    _idempotencyKey ??= createWalletIdempotencyKey(operation: 'withdraw');
+
     _walletBloc.add(WithdrawFundsEvent(
       amount: amount,
       paymentMethodCode: method,
+      currency: widget.defaultCurrency,
+      walletId: _walletId!,
       paymentDetails: details,
+      idempotencyKey: _idempotencyKey,
     ));
   }
 
-  Future<void> _handlePaymentResult(Map<String, dynamic>? payment) async {
-    if (payment == null) return;
-    final result = PaymentInitiateResult.fromJson(payment);
+  Future<void> _handlePaymentResult(Map<String, dynamic> envelope) async {
+    final result = PaymentInitiateResult.fromJson(envelope);
     if (!result.isSuccess &&
         result.uiMode == PaymentInitiateUiMode.failure &&
         result.paymentId == null) {
@@ -148,6 +193,22 @@ class _WithdrawFundsScreenState extends State<WithdrawFundsScreen> {
     );
   }
 
+  String _successSnackMessage(WithdrawFundsSuccess state) {
+    if (state.message.isNotEmpty) return state.message;
+    switch (state.phase) {
+      case WalletWithdrawPhase.approved:
+        return 'Withdrawal completed';
+      case WalletWithdrawPhase.rejected:
+        return 'Withdrawal was rejected';
+      case WalletWithdrawPhase.pending:
+        return 'Withdrawal is pending approval';
+      case WalletWithdrawPhase.submitted:
+      case WalletWithdrawPhase.idle:
+      case WalletWithdrawPhase.failed:
+        return 'Withdrawal request submitted';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -159,15 +220,19 @@ class _WithdrawFundsScreenState extends State<WithdrawFundsScreen> {
         body: BlocConsumer<WalletBloc, WalletState>(
           listener: (context, state) async {
             if (state is WithdrawFundsSuccess) {
+              _invalidateIdempotencyKey();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(state.message),
+                  content: Text(_successSnackMessage(state)),
                   backgroundColor: AppColors.successColor,
                 ),
               );
-              await _handlePaymentResult(state.payment);
+              await _handlePaymentResult(state.initiateEnvelope);
               if (context.mounted) Navigator.of(context).pop(true);
             } else if (state is WithdrawFundsError) {
+              if (!isTransientPaymentNetworkError(state.message)) {
+                _invalidateIdempotencyKey();
+              }
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.message),
@@ -177,7 +242,8 @@ class _WithdrawFundsScreenState extends State<WithdrawFundsScreen> {
             }
           },
           builder: (context, state) {
-            final isLoading = state is WithdrawFundsLoading;
+            final isLoading =
+                state is WithdrawFundsLoading || _resolvingWalletId;
             return Form(
               key: _formKey,
               child: Column(
@@ -198,7 +264,10 @@ class _WithdrawFundsScreenState extends State<WithdrawFundsScreen> {
                         return null;
                       },
                       onQuickAmountSelected: (amount) {
-                        setState(() => _applyAmount(amount));
+                        setState(() {
+                          _invalidateIdempotencyKey();
+                          _applyAmount(amount);
+                        });
                       },
                       methodSectionTitle: l10n.withdrawalMethod,
                       methods: _paymentMethods,
@@ -207,6 +276,7 @@ class _WithdrawFundsScreenState extends State<WithdrawFundsScreen> {
                       emptyMethodsMessage: l10n.walletNoPaymentMethods,
                       onMethodSelected: (id) {
                         setState(() {
+                          _invalidateIdempotencyKey();
                           _selectedMethodId = id;
                           _paymentDetails = {};
                           _useHpp = false;

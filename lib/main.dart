@@ -6,7 +6,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'features/wishlist/bloc/wishlist_bloc.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
-import 'package:hudhud_delivery/features/dashboard/presentation/screen/dashboard_screen.dart';
 import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
 import 'package:hudhud_delivery/features/splash/presentation/screen/splash_screen.dart';
 
@@ -96,12 +95,12 @@ void main() async {
   // Initialize auth service
   final authService = AuthService();
 
-  // Register 401 redirect to home as guest (skip if login is already showing).
+  // Register 401 redirect to login (skip if login is already showing).
   DioClient.instance.setOnUnauthorized(() {
     if (loginScreenIsActive || GuestBrowseService().isGuestBrowseMode) return;
-    GuestBrowseService().enterGuestBrowseMode().then((_) {
+    GuestBrowseService().clearGuestBrowseMode().then((_) {
       navigatorKey.currentState?.pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const DashboardScreen()),
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
         (route) => false,
       );
     });

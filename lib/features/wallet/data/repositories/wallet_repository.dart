@@ -23,24 +23,32 @@ class WalletRepository {
     required String paymentMethodCode,
     required String currency,
     Map<String, dynamic>? paymentDetails,
+    String? idempotencyKey,
   }) async {
     return walletDataProvider.topUp(
       amount: amount,
       paymentMethodCode: paymentMethodCode,
       currency: currency,
       paymentDetails: paymentDetails,
+      idempotencyKey: idempotencyKey,
     );
   }
 
   Future<WalletMutationResponse> withdraw({
     required double amount,
     required String paymentMethodCode,
+    required String currency,
+    required int walletId,
     Map<String, dynamic>? paymentDetails,
+    String? idempotencyKey,
   }) async {
     return walletDataProvider.withdraw(
       amount: amount,
       paymentMethodCode: paymentMethodCode,
+      currency: currency,
+      walletId: walletId,
       paymentDetails: paymentDetails,
+      idempotencyKey: idempotencyKey,
     );
   }
 }

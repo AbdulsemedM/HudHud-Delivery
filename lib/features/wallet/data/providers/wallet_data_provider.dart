@@ -1,6 +1,6 @@
+import 'package:dio/dio.dart';
 import 'package:hudhud_delivery/core/api/api_constants.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
-import 'package:hudhud_delivery/core/utils/api_error_result.dart';
 import '../models/wallet_balance_model.dart';
 import '../models/wallet_transaction_model.dart';
 import '../../utils/wallet_funding_methods.dart';
@@ -39,6 +39,7 @@ class WalletDataProvider {
     required String paymentMethodCode,
     required String currency,
     Map<String, dynamic>? paymentDetails,
+    String? idempotencyKey,
   }) async {
     final body = buildWalletTopupBody(
       paymentMethodCode: paymentMethodCode,
@@ -49,29 +50,44 @@ class WalletDataProvider {
     final response = await apiService.post(
       ApiConstants.walletTopup,
       data: body,
+      options: _idempotencyOptions(idempotencyKey),
     );
-    return WalletMutationResponse.fromApi(response.data, fallbackError: 'Failed to top up');
+    return WalletMutationResponse.fromApi(
+      response.data,
+      fallbackError: 'Failed to top up',
+    );
   }
 
   /// POST /api/wallet/withdraw
   Future<WalletMutationResponse> withdraw({
     required double amount,
     required String paymentMethodCode,
+    required String currency,
+    required int walletId,
     Map<String, dynamic>? paymentDetails,
+    String? idempotencyKey,
   }) async {
     final body = buildWalletWithdrawBody(
       paymentMethodCode: paymentMethodCode,
       amount: amount,
+      currency: currency,
+      walletId: walletId,
       paymentDetails: paymentDetails,
     );
     final response = await apiService.post(
       ApiConstants.walletWithdraw,
       data: body,
+      options: _idempotencyOptions(idempotencyKey),
     );
     return WalletMutationResponse.fromApi(
       response.data,
       fallbackError: 'Failed to withdraw funds',
     );
+  }
+
+  Options? _idempotencyOptions(String? idempotencyKey) {
+    if (idempotencyKey == null || idempotencyKey.isEmpty) return null;
+    return Options(headers: {'Idempotency-Key': idempotencyKey});
   }
 }
 
