@@ -46,6 +46,9 @@ android/local.properties
 .env.*.local
 ios/Flutter/LocalSecrets.xcconfig
 
+# Local documentation / tooling notes
+/docs/
+
 # Symbolication related
 app.*.symbols
 
