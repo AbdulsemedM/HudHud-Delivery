@@ -437,69 +437,83 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                             ),
                           ),
                           const SizedBox(height: 16),
-                          // Quantity
-                          TextFormField(
-                            controller: _quantityController,
-                            keyboardType: TextInputType.number,
-                            style: const TextStyle(color: HomeColors.textPrimary),
-                            decoration: InputDecoration(
-                              labelText: 'Quantity',
-                              labelStyle: const TextStyle(
-                                fontSize: 14,
-                                color: HomeColors.textPrimary,
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: TextFormField(
+                                  controller: _quantityController,
+                                  keyboardType: TextInputType.number,
+                                  style: const TextStyle(
+                                      color: HomeColors.textPrimary),
+                                  decoration: InputDecoration(
+                                    labelText: 'Quantity',
+                                    labelStyle: const TextStyle(
+                                      fontSize: 14,
+                                      color: HomeColors.textPrimary,
+                                    ),
+                                    filled: true,
+                                    fillColor: fieldFill,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(
+                                          AppColors.radiusLG),
+                                      borderSide:
+                                          const BorderSide(color: outline),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(
+                                          AppColors.radiusLG),
+                                      borderSide:
+                                          const BorderSide(color: outline),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(
+                                          AppColors.radiusLG),
+                                      borderSide: const BorderSide(
+                                          color: HomeColors.violet),
+                                    ),
+                                  ),
+                                ),
                               ),
-                              filled: true,
-                              fillColor: fieldFill,
-                              border: OutlineInputBorder(
-                                borderRadius:
-                                    BorderRadius.circular(AppColors.radiusLG),
-                                borderSide: const BorderSide(color: outline),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: TextFormField(
+                                  controller: _packageWeightController,
+                                  keyboardType:
+                                      const TextInputType.numberWithOptions(
+                                          decimal: true),
+                                  style: const TextStyle(
+                                      color: HomeColors.textPrimary),
+                                  decoration: InputDecoration(
+                                    labelText: 'Package Weight (kg)',
+                                    labelStyle: const TextStyle(
+                                      fontSize: 14,
+                                      color: HomeColors.textPrimary,
+                                    ),
+                                    filled: true,
+                                    fillColor: fieldFill,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(
+                                          AppColors.radiusLG),
+                                      borderSide:
+                                          const BorderSide(color: outline),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(
+                                          AppColors.radiusLG),
+                                      borderSide:
+                                          const BorderSide(color: outline),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(
+                                          AppColors.radiusLG),
+                                      borderSide: const BorderSide(
+                                          color: HomeColors.violet),
+                                    ),
+                                  ),
+                                ),
                               ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius:
-                                    BorderRadius.circular(AppColors.radiusLG),
-                                borderSide: const BorderSide(color: outline),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius:
-                                    BorderRadius.circular(AppColors.radiusLG),
-                                borderSide:
-                                    const BorderSide(color: HomeColors.violet),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          // Package Weight (kg)
-                          TextFormField(
-                            controller: _packageWeightController,
-                            keyboardType: const TextInputType.numberWithOptions(
-                                decimal: true),
-                            style: const TextStyle(color: HomeColors.textPrimary),
-                            decoration: InputDecoration(
-                              labelText: 'Package Weight (kg)',
-                              labelStyle: const TextStyle(
-                                fontSize: 14,
-                                color: HomeColors.textPrimary,
-                              ),
-                              filled: true,
-                              fillColor: fieldFill,
-                              border: OutlineInputBorder(
-                                borderRadius:
-                                    BorderRadius.circular(AppColors.radiusLG),
-                                borderSide: const BorderSide(color: outline),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius:
-                                    BorderRadius.circular(AppColors.radiusLG),
-                                borderSide: const BorderSide(color: outline),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius:
-                                    BorderRadius.circular(AppColors.radiusLG),
-                                borderSide:
-                                    const BorderSide(color: HomeColors.violet),
-                              ),
-                            ),
+                            ],
                           ),
                           const SizedBox(height: 16),
                           // Package Description (optional)

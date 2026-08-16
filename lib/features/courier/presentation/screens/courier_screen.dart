@@ -8,6 +8,7 @@ import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/features/courier/utils/courier_home_refresh.dart';
+import 'package:hudhud_delivery/features/courier/utils/delivery_history_filter.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../home/presentation/widgets/home_widget.dart';
 import 'delivery_details_screen.dart';
@@ -29,7 +30,7 @@ class _CourierScreenState extends State<CourierScreen> {
   String? _deliveriesError;
   Map<String, dynamic>? _activeDelivery;
   bool _isLoadingActiveDelivery = true;
-  String _selectedFilter = 'all';
+  String _selectedFilter = kDeliveryHistoryFilterAll;
   late final void Function() _homeRefreshListener;
 
   @override
@@ -53,22 +54,10 @@ class _CourierScreenState extends State<CourierScreen> {
   }
 
   List<Map<String, dynamic>> get _filteredDeliveries {
-    if (_selectedFilter == 'all') return _deliveries;
+    if (_selectedFilter == kDeliveryHistoryFilterAll) return _deliveries;
     return _deliveries.where((d) {
-      final status =
-          (d['current_status'] ?? d['status'])?.toString().toLowerCase() ?? '';
-      switch (_selectedFilter) {
-        case 'active':
-          return !status.contains('deliver') &&
-              !status.contains('cancel') &&
-              status.isNotEmpty;
-        case 'completed':
-          return status.contains('deliver') || status.contains('complete');
-        case 'cancelled':
-          return status.contains('cancel');
-        default:
-          return true;
-      }
+      final status = (d['current_status'] ?? d['status'])?.toString();
+      return matchesDeliveryHistoryFilter(status, _selectedFilter);
     }).toList();
   }
 
@@ -303,28 +292,33 @@ class _CourierScreenState extends State<CourierScreen> {
                   children: [
                     _FilterChip(
                       label: l10n.orders,
-                      selected: _selectedFilter == 'all',
-                      onTap: () => setState(() => _selectedFilter = 'all'),
+                      selected: _selectedFilter == kDeliveryHistoryFilterAll,
+                      onTap: () => setState(
+                          () => _selectedFilter = kDeliveryHistoryFilterAll),
                     ),
                     const SizedBox(width: 8),
                     _FilterChip(
                       label: l10n.courierActiveDelivery,
-                      selected: _selectedFilter == 'active',
-                      onTap: () => setState(() => _selectedFilter = 'active'),
+                      selected:
+                          _selectedFilter == kDeliveryHistoryFilterActive,
+                      onTap: () => setState(() =>
+                          _selectedFilter = kDeliveryHistoryFilterActive),
                     ),
                     const SizedBox(width: 8),
                     _FilterChip(
                       label: l10n.orderStatusDelivered,
-                      selected: _selectedFilter == 'completed',
-                      onTap: () =>
-                          setState(() => _selectedFilter = 'completed'),
+                      selected:
+                          _selectedFilter == kDeliveryHistoryFilterCompleted,
+                      onTap: () => setState(() =>
+                          _selectedFilter = kDeliveryHistoryFilterCompleted),
                     ),
                     const SizedBox(width: 8),
                     _FilterChip(
                       label: l10n.orderStatusCancelled,
-                      selected: _selectedFilter == 'cancelled',
-                      onTap: () =>
-                          setState(() => _selectedFilter = 'cancelled'),
+                      selected:
+                          _selectedFilter == kDeliveryHistoryFilterCancelled,
+                      onTap: () => setState(() =>
+                          _selectedFilter = kDeliveryHistoryFilterCancelled),
                     ),
                   ],
                 ),
