@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/widgets/status_chip.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
@@ -9,6 +10,7 @@ import 'package:hudhud_delivery/features/courier/data/repository/courier_reposit
 import 'package:hudhud_delivery/features/courier/presentation/widgets/active_delivery_card.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/features/courier/utils/courier_home_refresh.dart';
+import 'package:hudhud_delivery/features/courier/utils/courier_access_gate.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_history_filter.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_status.dart';
 import 'package:latlong2/latlong.dart';
@@ -45,8 +47,13 @@ class _CourierScreenState extends State<CourierScreen> {
     );
     _homeRefreshListener = () => _refreshData();
     CourierHomeRefresh.instance.addListener(_homeRefreshListener);
-    _fetchDeliveries();
-    _fetchActiveDelivery();
+    if (GuestBrowseService().isGuestBrowseMode) {
+      _isLoadingDeliveries = false;
+      _isLoadingActiveDelivery = false;
+    } else {
+      _fetchDeliveries();
+      _fetchActiveDelivery();
+    }
   }
 
   @override
@@ -198,7 +205,9 @@ class _CourierScreenState extends State<CourierScreen> {
         Expanded(
           child: _InstantDeliveryCard(
             l10n: l10n,
-            onTap: () {
+            onTap: () async {
+              if (!await requireCourierSendAccess(context)) return;
+              if (!context.mounted) return;
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -212,7 +221,9 @@ class _CourierScreenState extends State<CourierScreen> {
         Expanded(
           child: _ScheduleDeliveryCard(
             l10n: l10n,
-            onTap: () {
+            onTap: () async {
+              if (!await requireCourierSendAccess(context)) return;
+              if (!context.mounted) return;
               Navigator.push(
                 context,
                 MaterialPageRoute(

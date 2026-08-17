@@ -4796,6 +4796,18 @@ abstract class AppLocalizations {
   /// **'Sign in to use this service.'**
   String get guestServiceSignIn;
 
+  /// No description provided for @courierSignInRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to send packages.'**
+  String get courierSignInRequired;
+
+  /// No description provided for @courierPhoneVerificationRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify your phone number before sending packages.'**
+  String get courierPhoneVerificationRequired;
+
   /// No description provided for @wishlistNotesHint.
   ///
   /// In en, this message translates to:

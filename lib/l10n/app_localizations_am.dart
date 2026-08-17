@@ -2476,6 +2476,13 @@ class AppLocalizationsAm extends AppLocalizations {
   String get guestServiceSignIn => 'Sign in to use this service.';
 
   @override
+  String get courierSignInRequired => 'Sign in to send packages.';
+
+  @override
+  String get courierPhoneVerificationRequired =>
+      'Verify your phone number before sending packages.';
+
+  @override
   String get wishlistNotesHint => 'Add a note (optional)';
 
   @override

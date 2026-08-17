@@ -26,6 +26,7 @@ import '../../data/data_provider/home_data_provider.dart';
 import 'package:hudhud_delivery/features/addresses/data/addresses_data_provider.dart';
 import 'package:hudhud_delivery/features/addresses/data/addresses_repository.dart';
 import 'package:hudhud_delivery/features/guest/utils/guest_sign_in_prompt.dart';
+import 'package:hudhud_delivery/core/widgets/verify_phone_dialog.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import 'package:hudhud_delivery/features/addresses/presentation/widgets/delivery_address_selector.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
@@ -367,13 +368,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final user = _currentUser;
     if (user?.phone == null || user!.phone!.isEmpty) return;
 
-    final result = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => _VerifyPhoneDialog(
-        phone: user.phone!,
-        authService: _authService,
-      ),
+    final result = await showVerifyPhoneDialog(
+      context,
+      phone: user.phone!,
+      authService: _authService,
     );
     if (result == true && mounted) {
       await _loadUserData();
@@ -582,145 +580,6 @@ class _VerifyEmailDialogState extends State<_VerifyEmailDialog> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.email_outlined, size: 18),
-              label: Text(_isSending ? 'Sending...' : 'Resend code'),
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(false),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          onPressed: _isVerifying ? null : _verify,
-          child: _isVerifying
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Text('Verify'),
-        ),
-      ],
-    );
-  }
-}
-
-class _VerifyPhoneDialog extends StatefulWidget {
-  final String phone;
-  final AuthService authService;
-
-  const _VerifyPhoneDialog({
-    required this.phone,
-    required this.authService,
-  });
-
-  @override
-  State<_VerifyPhoneDialog> createState() => _VerifyPhoneDialogState();
-}
-
-class _VerifyPhoneDialogState extends State<_VerifyPhoneDialog> {
-  final _codeController = TextEditingController();
-  bool _isSending = false;
-  bool _isVerifying = false;
-  String? _errorMessage;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _sendCode());
-  }
-
-  @override
-  void dispose() {
-    _codeController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _sendCode() async {
-    setState(() {
-      _isSending = true;
-      _errorMessage = null;
-    });
-    final result =
-        await widget.authService.sendPhoneVerificationCode(widget.phone);
-    if (!mounted) return;
-    setState(() => _isSending = false);
-    if (result['success'] == true) {
-      SnackbarUtil.showSuccess(
-          context, result['message'] ?? 'Code sent to your phone.');
-    } else {
-      setState(() => _errorMessage = result['message']);
-    }
-  }
-
-  Future<void> _verify() async {
-    final code = _codeController.text.trim();
-    if (code.isEmpty) {
-      setState(() => _errorMessage = 'Enter the verification code');
-      return;
-    }
-    setState(() {
-      _isVerifying = true;
-      _errorMessage = null;
-    });
-    final result = await widget.authService.verifyPhone(
-      phone: widget.phone,
-      code: code,
-    );
-    if (!mounted) return;
-    setState(() => _isVerifying = false);
-    if (result['success'] == true) {
-      Navigator.of(context).pop(true);
-    } else {
-      setState(() => _errorMessage = result['message']);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Verify Phone'),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'We sent a verification code to ${widget.phone}. Enter it below.',
-              style: TextStyle(color: Colors.grey[700], fontSize: 14),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _codeController,
-              keyboardType: TextInputType.number,
-              maxLength: 6,
-              decoration: const InputDecoration(
-                labelText: 'Verification code',
-                hintText: 'e.g. 056869',
-                border: OutlineInputBorder(),
-                counterText: '',
-              ),
-              onChanged: (_) => setState(() => _errorMessage = null),
-            ),
-            if (_errorMessage != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                _errorMessage!,
-                style: const TextStyle(color: Colors.red, fontSize: 12),
-              ),
-            ],
-            const SizedBox(height: 12),
-            OutlinedButton.icon(
-              onPressed: _isSending ? null : _sendCode,
-              icon: _isSending
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.sms_outlined, size: 18),
               label: Text(_isSending ? 'Sending...' : 'Resend code'),
             ),
           ],
