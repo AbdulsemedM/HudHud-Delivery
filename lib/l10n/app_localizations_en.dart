@@ -2735,4 +2735,157 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get handymanComingSoonTeaser2 => 'Home repairs';
+
+  @override
+  String get pleaseEnterValidSenderPhone =>
+      'Please enter a valid sender phone (09xxxxxxxx)';
+
+  @override
+  String get trackingCodeCopied => 'Tracking code copied';
+
+  @override
+  String get chatMissingDeliveryId =>
+      'Unable to open chat. Missing delivery ID.';
+
+  @override
+  String get waitForPriceEstimate =>
+      'Wait for a server price estimate before booking';
+
+  @override
+  String get invalidDeliveryId => 'Invalid delivery id from create delivery';
+
+  @override
+  String get deliveryBookedWallet => 'Delivery booked with wallet payment';
+
+  @override
+  String get cancelDeliveryTitle => 'Cancel delivery';
+
+  @override
+  String get insufficientWalletBalance => 'Insufficient wallet balance';
+
+  @override
+  String topUpAmount(String currency, String amount) {
+    return 'Top up $currency $amount';
+  }
+
+  @override
+  String get loadMore => 'Load more';
+
+  @override
+  String get viewMap => 'View Map';
+
+  @override
+  String get usePin => 'Use pin';
+
+  @override
+  String get copyOrderId => 'Copy order ID';
+
+  @override
+  String get shareOrder => 'Share order';
+
+  @override
+  String get cartEmpty => 'Your cart is empty';
+
+  @override
+  String promoCodeApplied(String promoCode) {
+    return 'Promo code \"$promoCode\" applied';
+  }
+
+  @override
+  String addressUpdatedTo(String address) {
+    return 'Address updated to: $address';
+  }
+
+  @override
+  String get addValidProductsToCart => 'Please add valid products to your cart';
+
+  @override
+  String get chooseDeliveryLocationFromMap =>
+      'Please choose a delivery location from the map';
+
+  @override
+  String get selectEbirrProvider => 'Please select an eBirr provider';
+
+  @override
+  String get unableToDetermineStore =>
+      'Unable to determine store for this order';
+
+  @override
+  String get gallery => 'Gallery';
+
+  @override
+  String get camera => 'Camera';
+
+  @override
+  String get photoPermissionRequired =>
+      'Camera or photo permission is required';
+
+  @override
+  String couldNotOpenPhotoPicker(String error) {
+    return 'Could not open photo picker: $error';
+  }
+
+  @override
+  String get pleaseEnterYourName => 'Please enter your name';
+
+  @override
+  String get updateFromStore => 'Update from store';
+
+  @override
+  String get openPaymentPage => 'Open payment page';
+
+  @override
+  String get paymentRefreshFailed => 'Could not refresh payment status';
+
+  @override
+  String get searchProductsTitle => 'Search products';
+
+  @override
+  String get calories => 'Calories';
+
+  @override
+  String get protein => 'Protein';
+
+  @override
+  String get actionChange => 'Change';
+
+  @override
+  String get productUnavailable => 'This product is currently unavailable';
+
+  @override
+  String get cancelTripTitle => 'Cancel Trip';
+
+  @override
+  String get cancelTripConfirm => 'Are you sure you want to cancel this trip?';
+
+  @override
+  String get unableToCancelRide => 'Unable to cancel ride. Missing ride ID.';
+
+  @override
+  String get invalidQuoteAmount => 'Invalid quote amount for payment';
+
+  @override
+  String get noOrdersYetStore => 'No orders yet';
+
+  @override
+  String get retryPaymentTitle => 'Retry payment';
+
+  @override
+  String get retryPaymentSubtitle => 'Choose a payment method to continue';
+
+  @override
+  String deliveryBookedWalletBalance(String currency, String balance) {
+    return 'Delivery booked. Wallet balance: $currency $balance';
+  }
+
+  @override
+  String get cancelDeliveryConfirm =>
+      'Are you sure you want to cancel this delivery?';
+
+  @override
+  String get cancelDeliveryConfirmRefund =>
+      'Are you sure you want to cancel this delivery? Confirmed payment will be refunded to your wallet.';
+
+  @override
+  String get cancelOrder => 'Cancel order';
 }

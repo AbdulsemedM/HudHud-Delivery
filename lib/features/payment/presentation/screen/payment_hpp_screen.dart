@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 
 /// Opens a hosted payment page (e.g. Waafi `redirect_to_hpp`).
@@ -80,7 +81,7 @@ class _PaymentHppScreenState extends State<PaymentHppScreen> {
                         });
                         _controller.loadRequest(Uri.parse(widget.redirectUrl));
                       },
-                      child: const Text('Retry'),
+                      child: Text(context.l10n.actionRetry),
                     ),
                   ],
                 ),

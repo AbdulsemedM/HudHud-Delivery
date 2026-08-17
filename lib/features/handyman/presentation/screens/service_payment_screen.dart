@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/handyman/utils/service_payment_helper.dart';
 import 'package:hudhud_delivery/features/payment/data/data_provider/payment_data_provider.dart';
@@ -74,8 +75,8 @@ class _ServicePaymentScreenState extends State<ServicePaymentScreen> {
     final method = _selectedMethod;
     if (method == null || method.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select a payment method'),
+        SnackBar(
+          content: Text(context.l10n.paymentSelectMethodFirst),
           backgroundColor: Colors.red,
         ),
       );

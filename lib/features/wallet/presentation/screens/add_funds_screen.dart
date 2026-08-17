@@ -106,8 +106,8 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
     final method = _selectedMethodId;
     if (method == null || method.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select a payment method'),
+        SnackBar(
+          content: Text(context.l10n.paymentSelectMethodFirst),
           backgroundColor: Colors.red,
         ),
       );

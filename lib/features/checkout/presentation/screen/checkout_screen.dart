@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../app/services/cart_service.dart';
 import '../../../../app/services/location_service.dart';
 import '../../../../app/services/saved_location_service.dart';
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/api/api_service.dart';
 import '../../../home/presentation/screen/map_location_screen.dart';
@@ -112,7 +113,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     });
     if (_cartItems.isEmpty && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Your cart is empty')),
+        SnackBar(content: Text(context.l10n.cartEmpty)),
       );
       Navigator.of(context).pop();
     }
@@ -167,7 +168,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   void _onPromoCodeApplied(String promoCode) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Promo code "$promoCode" applied'),
+            content: Text(context.l10n.promoCodeApplied(promoCode)),
         backgroundColor: AppColors.primaryColor,
       ),
     );
@@ -208,7 +209,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Address updated to: $newAddress'),
+            content: Text(context.l10n.addressUpdatedTo(newAddress)),
             backgroundColor: AppColors.primaryColor,
           ),
         );
@@ -244,8 +245,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
     if (orderItems.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please add valid products to your cart'),
+        SnackBar(
+          content: Text(context.l10n.addValidProductsToCart),
           backgroundColor: Colors.red,
         ),
       );
@@ -254,8 +255,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
     if (_deliveryLatitude == null || _deliveryLongitude == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please choose a delivery location from the map'),
+        SnackBar(
+          content: Text(context.l10n.chooseDeliveryLocationFromMap),
           backgroundColor: Colors.red,
         ),
       );
@@ -264,8 +265,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
     if (_selectedPaymentMethod == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select a payment method'),
+        SnackBar(
+          content: Text(context.l10n.paymentSelectMethodFirst),
           backgroundColor: Colors.red,
         ),
       );
@@ -274,8 +275,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
     if (!isAllowedPaymentMethodCode(_selectedPaymentMethod)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Selected payment method is not available'),
+        SnackBar(
+          content: Text(context.l10n.paymentMethodUnavailable),
           backgroundColor: Colors.red,
         ),
       );
@@ -297,8 +298,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         final provider = _paymentDetails['provider']?.toString();
         if (provider != 'kaafi' && provider != 'coop') {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Please select an eBirr provider'),
+            SnackBar(
+              content: Text(context.l10n.selectEbirrProvider),
               backgroundColor: Colors.red,
             ),
           );
@@ -310,8 +311,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final vendorId = _vendorId;
     if (vendorId == null || vendorId <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Unable to determine store for this order'),
+        SnackBar(
+          content: Text(context.l10n.unableToDetermineStore),
           backgroundColor: Colors.red,
         ),
       );

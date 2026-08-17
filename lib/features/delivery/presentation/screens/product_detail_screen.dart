@@ -67,7 +67,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     if (!product.canOrder) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('This product is currently unavailable'),
+          content: Text(context.l10n.productUnavailable),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );

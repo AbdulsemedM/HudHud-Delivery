@@ -152,27 +152,30 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
         child: AlertDialog(
           backgroundColor: HomeColors.surfaceElevated,
           surfaceTintColor: Colors.transparent,
-          title: const Text(
-            'Cancel delivery',
-            style: TextStyle(color: HomeColors.textPrimary),
+          title: Text(
+            context.l10n.cancelDeliveryTitle,
+            style: const TextStyle(color: HomeColors.textPrimary),
           ),
           content: Text(
-            cancelDeliveryConfirmMessage(paymentStatus: paymentStatus),
+            cancelDeliveryConfirmMessage(
+              context.l10n,
+              paymentStatus: paymentStatus,
+            ),
             style: const TextStyle(color: HomeColors.textSecondary),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, false),
-              child: const Text(
-                'No',
-                style: TextStyle(color: HomeColors.textMuted),
+              child: Text(
+                context.l10n.actionNo,
+                style: const TextStyle(color: HomeColors.textMuted),
               ),
             ),
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, true),
-              child: const Text(
-                'Yes, cancel',
-                style: TextStyle(color: AppColors.errorColor),
+              child: Text(
+                context.l10n.actionYesCancel,
+                style: const TextStyle(color: AppColors.errorColor),
               ),
             ),
           ],
@@ -237,9 +240,9 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
         child: AlertDialog(
           backgroundColor: HomeColors.surfaceElevated,
           surfaceTintColor: Colors.transparent,
-          title: const Text(
-            'Insufficient wallet balance',
-            style: TextStyle(color: HomeColors.textPrimary),
+          title: Text(
+            context.l10n.insufficientWalletBalance,
+            style: const TextStyle(color: HomeColors.textPrimary),
           ),
           content: Text(
             error.displayMessage,
@@ -248,14 +251,14 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, false),
-              child: const Text(
-                'Cancel',
-                style: TextStyle(color: HomeColors.textMuted),
+              child: Text(
+                context.l10n.actionCancel,
+                style: const TextStyle(color: HomeColors.textMuted),
               ),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(dialogContext, true),
-              child: Text('Top up $currency $formattedTopUp'),
+              child: Text(context.l10n.topUpAmount(currency, formattedTopUp)),
             ),
           ],
         ),
@@ -788,7 +791,7 @@ class _SummaryHero extends StatelessWidget {
     await Clipboard.setData(ClipboardData(text: tracking));
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Tracking code copied')),
+      SnackBar(content: Text(context.l10n.trackingCodeCopied)),
     );
   }
 }
@@ -1094,9 +1097,9 @@ class _BottomActions extends StatelessWidget {
                           color: HomeColors.violet,
                         ),
                       )
-                    : const Text(
-                        'Retry payment',
-                        style: TextStyle(
+                    : Text(
+                        context.l10n.retryPaymentTitle,
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
@@ -1242,8 +1245,8 @@ class _RetryPaymentSheetState extends State<_RetryPaymentSheet> {
     final method = _selectedMethod;
     if (method == null || method.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select a payment method'),
+        SnackBar(
+          content: Text(context.l10n.paymentSelectMethodFirst),
           backgroundColor: AppColors.errorColor,
         ),
       );
@@ -1299,31 +1302,31 @@ class _RetryPaymentSheetState extends State<_RetryPaymentSheet> {
                 ),
               ),
             ),
-            const Text(
-              'Retry payment',
-              style: TextStyle(
+            Text(
+              context.l10n.retryPaymentTitle,
+              style: const TextStyle(
                 color: HomeColors.textPrimary,
                 fontWeight: FontWeight.w700,
                 fontSize: 18,
               ),
             ),
             const SizedBox(height: 4),
-            const Text(
-              'Choose a payment method to continue',
-              style: TextStyle(
+            Text(
+              context.l10n.retryPaymentSubtitle,
+              style: const TextStyle(
                 color: HomeColors.textMuted,
                 fontSize: 13,
               ),
             ),
             const SizedBox(height: 16),
             if (widget.error != null && widget.methods.isEmpty) ...[
-              const Text(
-                'Could not load payment methods',
-                style: TextStyle(color: AppColors.errorColor),
+              Text(
+                context.l10n.paymentLoadMethodsError,
+                style: const TextStyle(color: AppColors.errorColor),
               ),
               TextButton(
                 onPressed: widget.onReload,
-                child: const Text('Retry'),
+                child: Text(context.l10n.actionRetry),
               ),
             ] else ...[
               PaymentMethodGridSection(
@@ -1370,7 +1373,7 @@ class _RetryPaymentSheetState extends State<_RetryPaymentSheet> {
                   backgroundColor: HomeColors.violet,
                   foregroundColor: Colors.white,
                 ),
-                child: const Text('Continue'),
+                child: Text(context.l10n.actionContinue),
               ),
             ),
           ],

@@ -1139,5 +1139,77 @@
   "handymanComingSoonTitle": "Help is on its way",
   "handymanComingSoonSubtitle": "Trusted handymen for home repairs — we are putting the finishing touches.",
   "handymanComingSoonTeaser1": "Skilled pros",
-  "handymanComingSoonTeaser2": "Home repairs"
+  "handymanComingSoonTeaser2": "Home repairs",
+  "pleaseEnterValidSenderPhone": "Please enter a valid sender phone (09xxxxxxxx)",
+  "trackingCodeCopied": "Tracking code copied",
+  "chatMissingDeliveryId": "Unable to open chat. Missing delivery ID.",
+  "waitForPriceEstimate": "Wait for a server price estimate before booking",
+  "invalidDeliveryId": "Invalid delivery id from create delivery",
+  "deliveryBookedWallet": "Delivery booked with wallet payment",
+  "cancelDeliveryTitle": "Cancel delivery",
+  "insufficientWalletBalance": "Insufficient wallet balance",
+  "topUpAmount": "Top up {currency} {amount}",
+  "@topUpAmount": {
+    "placeholders": {
+      "currency": {"type": "String"},
+      "amount": {"type": "String"}
+    }
+  },
+  "loadMore": "Load more",
+  "viewMap": "View Map",
+  "usePin": "Use pin",
+  "copyOrderId": "Copy order ID",
+  "shareOrder": "Share order",
+  "cartEmpty": "Your cart is empty",
+  "promoCodeApplied": "Promo code \"{promoCode}\" applied",
+  "@promoCodeApplied": {
+    "placeholders": {
+      "promoCode": {"type": "String"}
+    }
+  },
+  "addressUpdatedTo": "Address updated to: {address}",
+  "@addressUpdatedTo": {
+    "placeholders": {
+      "address": {"type": "String"}
+    }
+  },
+  "addValidProductsToCart": "Please add valid products to your cart",
+  "chooseDeliveryLocationFromMap": "Please choose a delivery location from the map",
+  "selectEbirrProvider": "Please select an eBirr provider",
+  "unableToDetermineStore": "Unable to determine store for this order",
+  "gallery": "Gallery",
+  "camera": "Camera",
+  "photoPermissionRequired": "Camera or photo permission is required",
+  "couldNotOpenPhotoPicker": "Could not open photo picker: {error}",
+  "@couldNotOpenPhotoPicker": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "pleaseEnterYourName": "Please enter your name",
+  "updateFromStore": "Update from store",
+  "openPaymentPage": "Open payment page",
+  "paymentRefreshFailed": "Could not refresh payment status",
+  "searchProductsTitle": "Search products",
+  "calories": "Calories",
+  "protein": "Protein",
+  "actionChange": "Change",
+  "productUnavailable": "This product is currently unavailable",
+  "cancelTripTitle": "Cancel Trip",
+  "cancelTripConfirm": "Are you sure you want to cancel this trip?",
+  "unableToCancelRide": "Unable to cancel ride. Missing ride ID.",
+  "invalidQuoteAmount": "Invalid quote amount for payment",
+  "noOrdersYetStore": "No orders yet",
+  "retryPaymentTitle": "Retry payment",
+  "retryPaymentSubtitle": "Choose a payment method to continue",
+  "deliveryBookedWalletBalance": "Delivery booked. Wallet balance: {currency} {balance}",
+  "@deliveryBookedWalletBalance": {
+    "placeholders": {
+      "currency": {"type": "String"},
+      "balance": {"type": "String"}
+    }
+  },
+  "cancelDeliveryConfirm": "Are you sure you want to cancel this delivery?",
+  "cancelDeliveryConfirmRefund": "Are you sure you want to cancel this delivery? Confirmed payment will be refunded to your wallet.",
+  "cancelOrder": "Cancel order"
 }

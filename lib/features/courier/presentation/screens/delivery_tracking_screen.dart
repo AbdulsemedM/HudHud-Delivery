@@ -6,6 +6,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:lottie/lottie.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/app/services/google_directions_service.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/widgets/status_chip.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
@@ -136,8 +137,8 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
     final deliveryId = widget.deliveryId;
     if (deliveryId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Unable to open chat. Missing delivery ID.'),
+        SnackBar(
+          content: Text(context.l10n.chatMissingDeliveryId),
         ),
       );
       return;

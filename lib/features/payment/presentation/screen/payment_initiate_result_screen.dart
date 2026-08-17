@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import '../../../../core/api/api_service.dart';
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../checkout/data/models/create_order_result.dart';
 import '../../../courier/data/models/create_delivery_result.dart';
@@ -198,8 +199,8 @@ class _PaymentInitiateResultScreenState
       setState(() => _checking = false);
       if (manual) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Could not refresh payment status'),
+          SnackBar(
+            content: Text(context.l10n.paymentRefreshFailed),
             backgroundColor: AppColors.errorColor,
           ),
         );
@@ -217,7 +218,7 @@ class _PaymentInitiateResultScreenState
           return Scaffold(
             backgroundColor: HomeColors.background,
             appBar: AppBar(
-              title: const Text('Payment'),
+              title: Text(context.l10n.paymentScreenTitle),
               backgroundColor: HomeColors.surface,
               foregroundColor: HomeColors.textPrimary,
               surfaceTintColor: Colors.transparent,
@@ -492,7 +493,7 @@ class _PaymentInitiateResultScreenState
                     ),
                   ),
                   icon: const Icon(Icons.open_in_browser),
-                  label: const Text('Open payment page'),
+                  label: Text(context.l10n.openPaymentPage),
                 ),
               ),
           ],

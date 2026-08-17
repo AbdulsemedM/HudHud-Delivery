@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:hudhud_delivery/app/navigation/dashboard_navigation.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
@@ -161,19 +162,19 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Cancel delivery'),
+        title: Text(context.l10n.cancelDeliveryTitle),
         content: Text(
-          cancelDeliveryConfirmMessage(),
+          cancelDeliveryConfirmMessage(context.l10n),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('No'),
+            child: Text(context.l10n.actionNo),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             child: Text(
-              'Yes, Cancel',
+              context.l10n.actionYesCancel,
               style: TextStyle(color: Colors.red[700]),
             ),
           ),

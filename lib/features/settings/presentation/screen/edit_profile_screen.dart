@@ -116,12 +116,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           children: [
             ListTile(
               leading: const Icon(Icons.photo_library_outlined),
-              title: const Text('Gallery'),
+            title: Text(ctx.l10n.gallery),
               onTap: () => Navigator.pop(ctx, ImageSource.gallery),
             ),
             ListTile(
               leading: const Icon(Icons.camera_alt_outlined),
-              title: const Text('Camera'),
+              title: Text(ctx.l10n.camera),
               onTap: () => Navigator.pop(ctx, ImageSource.camera),
             ),
           ],
@@ -134,8 +134,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (!granted) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Camera or photo permission is required'),
+        SnackBar(
+          content: Text(context.l10n.photoPermissionRequired),
         ),
       );
       return;
@@ -158,14 +158,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           content: Text(
             needsRestart
                 ? 'Restart the app fully (stop and run again) to use the photo picker.'
-                : 'Could not open photo picker: ${e.message ?? e.code}',
+                : context.l10n.couldNotOpenPhotoPicker(e.message ?? e.code),
           ),
         ),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not open photo picker: $e')),
+        SnackBar(content: Text(context.l10n.couldNotOpenPhotoPicker('$e'))),
       );
     }
   }
@@ -182,7 +182,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         '${_firstNameController.text} ${_lastNameController.text}'.trim();
     if (fullName.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter your name')),
+        SnackBar(content: Text(context.l10n.pleaseEnterYourName)),
       );
       return;
     }

@@ -179,33 +179,33 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsWishlist => 'قائمة الرغبات';
 
   @override
-  String get wishlistEmptyTitle => 'No saved items yet';
+  String get wishlistEmptyTitle => 'لا توجد عناصر محفوظة بعد';
 
   @override
   String get wishlistEmptySubtitle =>
-      'Save products you love — tap the heart on a product to add it here.';
+      'احفظ المنتجات التي تحبها — اضغط القلب على المنتج لإضافته هنا.';
 
   @override
-  String get wishlistAddedSnack => 'Added to wishlist';
+  String get wishlistAddedSnack => 'تمت الإضافة إلى قائمة الرغبات';
 
   @override
-  String get wishlistRemovedSnack => 'Removed from wishlist';
+  String get wishlistRemovedSnack => 'تمت الإزالة من قائمة الرغبات';
 
   @override
-  String get wishlistSignInTitle => 'Sign in to use your wishlist';
+  String get wishlistSignInTitle => 'سجّل الدخول لاستخدام قائمة الرغبات';
 
   @override
   String get wishlistSignInSubtitle =>
-      'Your saved items are stored on this device when you are logged in.';
+      'تُحفظ عناصرك على هذا الجهاز عند تسجيل الدخول.';
 
   @override
-  String get wishlistLoadError => 'Could not load wishlist';
+  String get wishlistLoadError => 'تعذر تحميل قائمة الرغبات';
 
   @override
-  String get wishlistTooltipAdd => 'Add to wishlist';
+  String get wishlistTooltipAdd => 'إضافة إلى قائمة الرغبات';
 
   @override
-  String get wishlistTooltipRemove => 'Remove from wishlist';
+  String get wishlistTooltipRemove => 'إزالة من قائمة الرغبات';
 
   @override
   String get settingsTermsConditions => 'الشروط والأحكام';
@@ -443,15 +443,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String get phoneVerifiedSuccess => 'تم التحقق من رقم الهاتف بنجاح!';
 
   @override
-  String get accountVerificationBannerTitle => 'Secure your account';
+  String get accountVerificationBannerTitle => 'أمّن حسابك';
 
   @override
   String get accountVerificationEmailSubtitle =>
-      'Confirm your email for receipts and updates.';
+      'أكد بريدك الإلكتروني للإيصالات والتحديثات.';
 
   @override
-  String get accountVerificationPhoneSubtitle =>
-      'Verify your phone for security and support.';
+  String get accountVerificationPhoneSubtitle => 'تحقق من هاتفك للأمان والدعم.';
 
   @override
   String failedToLoadOrders(String error) {
@@ -566,28 +565,28 @@ class AppLocalizationsAr extends AppLocalizations {
       'يرجى إدخال بيانات الاعتماد الخاصة بك للوصول إلى حسابك وجميع الخدمات المتاحة';
 
   @override
-  String get brandTagline => 'DELIVERY, DELIVERED WELL';
+  String get brandTagline => 'توصيل، يُنجَز بإتقان';
 
   @override
-  String get splashTagline => 'YOUR CITY, DELIVERED';
+  String get splashTagline => 'مدينتك، تُوصَل';
 
   @override
-  String get splashStatus => 'Getting things moving…';
+  String get splashStatus => 'نُحرّك الأمور…';
 
   @override
-  String get homeTabFood => 'Food';
+  String get homeTabFood => 'طعام';
 
   @override
-  String get homeTabCourier => 'Courier';
+  String get homeTabCourier => 'ساعي';
 
   @override
-  String get homeTabTaxi => 'Taxi';
+  String get homeTabTaxi => 'تاكسي';
 
   @override
-  String get homeTabHandyman => 'Handyman';
+  String get homeTabHandyman => 'فني منزلي';
 
   @override
-  String get homeSearchHint => 'Search products everywhere';
+  String get homeSearchHint => 'ابحث عن المنتجات في كل مكان';
 
   @override
   String get loginContinueAsGuest => 'المتابعة كضيف';
@@ -602,7 +601,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get loginTabPhone => 'الهاتف';
 
   @override
-  String get loginTabEmailSemantics => 'تسجيل الدخول بالبريد الإلكتروني';
+  String get loginTabEmailSemantics => 'تسجيل الدخول بالبريد';
 
   @override
   String get loginTabPhoneSemantics => 'تسجيل الدخول بالهاتف';
@@ -648,7 +647,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get validationPasswordComplexity =>
-      'يجب أن تتضمن كلمة المرور حرفًا كبيرًا وحرفًا صغيرًا ورقمًا ورمزًا خاصًا';
+      'يجب أن تتضمن كلمة المرور حرفاً كبيراً وصغيراً ورقماً ورمزاً خاصاً';
 
   @override
   String get validationEmailRequired =>
@@ -771,7 +770,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get snackbarInfo => 'هذه رسالة معلومات!';
 
   @override
-  String get snackbarInfoLabel => 'معلومات';
+  String get snackbarInfoLabel => 'معلومة';
 
   @override
   String get undoActionPressed => 'تم الضغط على التراجع عن الإجراء';
@@ -1288,52 +1287,50 @@ class AppLocalizationsAr extends AppLocalizations {
   String get referralCode => 'رمز الإحالة';
 
   @override
-  String get referralCodeOptional => 'Referral code — optional';
+  String get referralCodeOptional => 'رمز الإحالة — اختياري';
 
   @override
   String get hintReferralCode => 'UCZXSD3O';
 
   @override
-  String get signupTitle => 'Create your account';
+  String get signupTitle => 'أنشئ حسابك';
 
   @override
-  String get signupSubtitle =>
-      'Join Hudhud to order from every business in your city.';
+  String get signupSubtitle => 'انضم إلى هودهود للطلب من كل نشاط في مدينتك.';
 
   @override
-  String get hintCreatePassword => 'Create a password';
+  String get hintCreatePassword => 'أنشئ كلمة مرور';
 
   @override
-  String get hintReenterPassword => 'Re-enter your password';
+  String get hintReenterPassword => 'أعد إدخال كلمة المرور';
 
   @override
-  String get passwordStrengthHint => 'Use 8+ characters';
+  String get passwordStrengthHint => 'استخدم 8 أحرف أو أكثر';
 
   @override
-  String get signupAcceptTermsPrefix => 'I\'ve read and accepted Hudhud\'s ';
+  String get signupAcceptTermsPrefix => 'لقد قرأت ووافقت على ';
 
   @override
-  String get signupTermsLink => 'terms and conditions';
+  String get signupTermsLink => 'شروط وأحكام هودهود';
 
   @override
-  String get signupConsentDataPrefix =>
-      'I consent to my data being processed under applicable ';
+  String get signupConsentDataPrefix => 'أوافق على معالجة بياناتي وفق ';
 
   @override
-  String get signupDataProtectionLink => 'data protection laws';
+  String get signupDataProtectionLink => 'قوانين حماية البيانات';
 
   @override
-  String get alreadyHaveAccount => 'Already have an account? ';
+  String get alreadyHaveAccount => 'لديك حساب بالفعل؟ ';
 
   @override
-  String get createAccount => 'Create account';
+  String get createAccount => 'إنشاء حساب';
 
   @override
-  String get signupFormIncomplete => 'Please fill in all required fields';
+  String get signupFormIncomplete => 'يرجى تعبئة جميع الحقول المطلوبة';
 
   @override
   String get signupAcceptLegalRequired =>
-      'Please accept the terms and data protection consent';
+      'يرجى قبول الشروط وموافقة حماية البيانات';
 
   @override
   String get searchQuestions => 'سؤال البحث';
@@ -1574,212 +1571,208 @@ class AppLocalizationsAr extends AppLocalizations {
   String get sendMoney => 'إرسال الأموال';
 
   @override
-  String get exitAppTitle => 'Exit App';
+  String get exitAppTitle => 'الخروج من التطبيق';
 
   @override
-  String get exitAppMessage => 'Are you sure you want to exit the app?';
+  String get exitAppMessage => 'هل أنت متأكد أنك تريد الخروج؟';
 
   @override
-  String get actionExit => 'Exit';
+  String get actionExit => 'خروج';
 
   @override
-  String get loginNoAccountPrompt => 'Don\'t have an account? ';
+  String get loginNoAccountPrompt => 'ليس لديك حساب؟ ';
 
   @override
-  String get loginOrContinueWith => 'or continue with';
+  String get loginOrContinueWith => 'أو تابع عبر';
 
   @override
-  String get continueWithGoogle => 'Continue with Google';
+  String get continueWithGoogle => 'المتابعة عبر Google';
 
   @override
-  String get actionSignUp => 'Sign Up';
+  String get actionSignUp => 'إنشاء حساب';
 
   @override
-  String get paymentScreenTitle => 'Payment';
+  String get paymentScreenTitle => 'الدفع';
 
   @override
-  String get paymentChooseMethodHeading => 'Choose Payment Method';
+  String get paymentChooseMethodHeading => 'اختر طريقة الدفع';
 
   @override
   String get paymentEthiopianOptionsSubtitle =>
-      'Select your preferred Ethiopian payment option';
+      'اختر خيار الدفع الإثيوبي المفضل لديك';
 
   @override
-  String get paymentLoadMethodsError => 'Failed to load payment methods';
+  String get paymentLoadMethodsError => 'فشل تحميل طرق الدفع';
 
   @override
-  String get paymentSelectMethodFirst => 'Please select a payment method';
+  String get paymentSelectMethodFirst => 'يرجى اختيار طريقة دفع';
 
   @override
-  String get paymentMethodUnavailable =>
-      'Selected payment method is no longer available';
+  String get paymentMethodUnavailable => 'طريقة الدفع المحددة لم تعد متاحة';
 
   @override
   String paymentFailedWithError(String error) {
-    return 'Payment failed: $error';
+    return 'فشل الدفع: $error';
   }
 
   @override
   String paymentPayAmountBr(String amount) {
-    return 'Pay $amount Br';
+    return 'ادفع $amount بر';
   }
 
   @override
-  String get paymentSuccessTitle => 'Payment Successful!';
+  String get paymentSuccessTitle => 'تم الدفع بنجاح!';
 
   @override
   String paymentTransactionIdLabel(String id) {
-    return 'Transaction ID: $id';
+    return 'رقم العملية: $id';
   }
 
   @override
-  String get continueShopping => 'Continue Shopping';
+  String get continueShopping => 'متابعة التسوق';
 
   @override
-  String get viewOrder => 'View Order';
+  String get viewOrder => 'عرض الطلب';
 
   @override
-  String get handymanServicesTitle => 'Handyman Services';
+  String get handymanServicesTitle => 'خدمات الفني المنزلي';
 
   @override
-  String get handymanWhatToDo => 'What would you like to do?';
+  String get handymanWhatToDo => 'ماذا تريد أن تفعل؟';
 
   @override
-  String get handymanMyRequests => 'My Requests';
+  String get handymanMyRequests => 'طلباتي';
 
   @override
-  String get handymanNoRequestsYet => 'No service requests yet';
+  String get handymanNoRequestsYet => 'لا توجد طلبات خدمة بعد';
 
   @override
   String get handymanNoRequestsSubtitle =>
-      'Create a request to get quotes from handymen';
+      'أنشئ طلباً للحصول على عروض أسعار من الفنيين';
 
   @override
-  String get handymanCreateNewRequest => 'Create New Request';
+  String get handymanCreateNewRequest => 'إنشاء طلب جديد';
 
   @override
   String get handymanCreateRequestSubtitle =>
-      'Describe your repair or maintenance need and get quotes from handymen.';
+      'صف حاجة الإصلاح أو الصيانة واحصل على عروض أسعار.';
 
   @override
-  String get instantDeliveryTitle => 'Instant Delivery';
+  String get instantDeliveryTitle => 'توصيل فوري';
 
   @override
-  String get tapToSelectPickup => 'Tap to select pickup location';
+  String get tapToSelectPickup => 'اضغط لاختيار موقع الاستلام';
 
   @override
-  String get tapToSelectDelivery => 'Tap to select delivery location';
+  String get tapToSelectDelivery => 'اضغط لاختيار موقع التسليم';
 
   @override
-  String get vehicleType => 'Vehicle Type';
+  String get vehicleType => 'نوع المركبة';
 
   @override
-  String get selectPickupAndDelivery =>
-      'Please select both pickup and delivery locations';
+  String get selectPickupAndDelivery => 'يرجى اختيار موقعي الاستلام والتسليم';
 
   @override
-  String get actionContinue => 'Continue';
+  String get actionContinue => 'متابعة';
 
   @override
   String errorGettingAddress(String error) {
-    return 'Error getting address: $error';
+    return 'خطأ في جلب العنوان: $error';
   }
 
   @override
   String get googleMapsIosMissingKey =>
-      'Google Maps is not configured on iOS. Add GOOGLE_MAPS_API_KEY and restart the app.';
+      'خرائط Google غير مهيأة على iOS. أضف GOOGLE_MAPS_API_KEY وأعد تشغيل التطبيق.';
 
   @override
-  String get dealsModalTitle => 'Deals on deals';
+  String get dealsModalTitle => 'عروض فوق عروض';
 
   @override
   String get dealsModalSubtitle =>
-      'Get upto 50% off on your first Courier delivery fee!';
+      'احصل على خصم يصل إلى 50٪ على رسوم أول توصيل ساعي!';
 
   @override
-  String get dealsModalClaim => 'Claim';
+  String get dealsModalClaim => 'احصل عليها';
 
   @override
-  String get dealsModalClose => 'Maybe later';
+  String get dealsModalClose => 'لاحقاً';
 
   @override
-  String get orderHistoryEmptyTitle => 'No orders yet';
+  String get orderHistoryEmptyTitle => 'لا توجد طلبات بعد';
 
   @override
-  String get orderHistoryEmptySubtitle =>
-      'Browse categories to place your first order.';
+  String get orderHistoryEmptySubtitle => 'تصفح الفئات لتقديم أول طلب.';
 
   @override
-  String get orderHistoryEmptyHint =>
-      'Your order history will appear here once you place an order';
+  String get orderHistoryEmptyHint => 'سيظهر سجل طلباتك هنا بعد تقديم طلب';
 
   @override
-  String get browseDelivery => 'Browse Delivery';
+  String get browseDelivery => 'تصفح التوصيل';
 
   @override
-  String get browseCategories => 'Browse categories';
+  String get browseCategories => 'تصفح الفئات';
 
   @override
   String handymanQuoteCount(int count) {
-    return '$count quote(s)';
+    return '$count عرض سعر';
   }
 
   @override
-  String get orderDetailsLoadingMessage => 'Loading order details...';
+  String get orderDetailsLoadingMessage => 'جاري تحميل تفاصيل الطلب...';
 
   @override
-  String get orderDetailsLoadErrorTitle => 'Error loading order details';
+  String get orderDetailsLoadErrorTitle => 'خطأ في تحميل تفاصيل الطلب';
 
   @override
   String orderAppBarTitle(String orderNumber) {
-    return 'Order #$orderNumber';
+    return 'طلب #$orderNumber';
   }
 
   @override
-  String get paymentSummaryTitle => 'Payment Summary';
+  String get paymentSummaryTitle => 'ملخص الدفع';
 
   @override
-  String get paymentSubtotalLabel => 'Subtotal';
+  String get paymentSubtotalLabel => 'المجموع الفرعي';
 
   @override
-  String get paymentTotalAmountLabel => 'Total Amount';
+  String get paymentTotalAmountLabel => 'المبلغ الإجمالي';
 
   @override
-  String get paymentProcessingTitle => 'Processing Payment';
+  String get paymentProcessingTitle => 'جارٍ معالجة الدفع';
 
   @override
   String paymentProcessingMessage(String method) {
-    return 'Please wait while we process your payment via $method...';
+    return 'يرجى الانتظار بينما نعالج الدفع عبر $method...';
   }
 
   @override
   String courierRecipientLine(String name) {
-    return 'Recipient: $name';
+    return 'المستلم: $name';
   }
 
   @override
-  String get courierTrackDeliveryCta => 'Track delivery';
+  String get courierTrackDeliveryCta => 'تتبع التوصيل';
 
   @override
-  String get courierDeliveryStatusInProgress => 'In progress';
+  String get courierDeliveryStatusInProgress => 'قيد التنفيذ';
 
   @override
-  String get labelDate => 'Date';
+  String get labelDate => 'التاريخ';
 
   @override
   String get hintDateFormat => 'DD/MM/YYYY';
 
   @override
-  String get labelTime => 'Time';
+  String get labelTime => 'الوقت';
 
   @override
   String get hintTimeFormat => 'HH:MM';
 
   @override
-  String get meridiemAm => 'am';
+  String get meridiemAm => 'ص';
 
   @override
-  String get meridiemPm => 'pm';
+  String get meridiemPm => 'م';
 
   @override
   String get scheduleSelectDateTime => 'يرجى اختيار التاريخ والوقت للتسليم';
@@ -1788,329 +1781,328 @@ class AppLocalizationsAr extends AppLocalizations {
   String get scheduleInvalidDateTime => 'تنسيق التاريخ أو الوقت غير صالح';
 
   @override
-  String get servicesScreenTitle => 'Our Services';
+  String get servicesScreenTitle => 'خدماتنا';
 
   @override
-  String get servicesWhatCanWeHelp => 'What can we help you with?';
+  String get servicesWhatCanWeHelp => 'كيف يمكننا مساعدتك؟';
 
   @override
   String servicesAvailableCount(int count) {
-    return '$count services available';
+    return '$count خدمات متاحة';
   }
 
   @override
-  String get servicesErrorTitle => 'Something went wrong';
+  String get servicesErrorTitle => 'حدث خطأ ما';
 
   @override
-  String get servicesEmptyTitle => 'No services yet';
+  String get servicesEmptyTitle => 'لا توجد خدمات بعد';
 
   @override
-  String get servicesEmptySubtitle => 'Check back later for new services';
+  String get servicesEmptySubtitle => 'عد لاحقاً للاطلاع على خدمات جديدة';
 
   @override
-  String get handymanNewRequestTitle => 'New Service Request';
+  String get handymanNewRequestTitle => 'طلب خدمة جديد';
 
   @override
-  String get validationHandymanSelectLocation => 'Please select a location';
+  String get validationHandymanSelectLocation => 'يرجى اختيار موقع';
 
   @override
-  String get validationHandymanSelectDateTime => 'Please select date and time';
+  String get validationHandymanSelectDateTime => 'يرجى اختيار التاريخ والوقت';
 
   @override
   String get validationHandymanSelectSkill =>
-      'Please select at least one skill';
+      'يرجى اختيار مهارة واحدة على الأقل';
 
   @override
-  String get handymanRequestCreatedToast => 'Request created';
+  String get handymanRequestCreatedToast => 'تم إنشاء الطلب';
 
   @override
-  String get handymanRequestCreateFailed => 'Failed to create request';
+  String get handymanRequestCreateFailed => 'فشل إنشاء الطلب';
 
   @override
-  String get labelTitle => 'Title';
+  String get labelTitle => 'العنوان';
 
   @override
-  String get hintTitleHandymanExample => 'e.g. Fix leaking faucet';
+  String get hintTitleHandymanExample => 'مثال: إصلاح صنبور يسرب';
 
   @override
-  String get validationTitleRequired => 'Title is required';
+  String get validationTitleRequired => 'العنوان مطلوب';
 
   @override
-  String get validationDescriptionRequired => 'Description is required';
+  String get validationDescriptionRequired => 'الوصف مطلوب';
 
   @override
-  String get hintDescribeRepair => 'Describe the repair or maintenance needed';
+  String get hintDescribeRepair => 'صف الإصلاح أو الصيانة المطلوبة';
 
   @override
-  String get handymanTapToSelectLocation => 'Tap to select location';
+  String get handymanTapToSelectLocation => 'اضغط لاختيار الموقع';
 
   @override
-  String get labelScheduledDateTime => 'Scheduled Date & Time';
+  String get labelScheduledDateTime => 'التاريخ والوقت المحدد';
 
   @override
-  String get selectDateAndTime => 'Select date and time';
+  String get selectDateAndTime => 'اختر التاريخ والوقت';
 
   @override
-  String get labelEstimatedCostOptional => 'Estimated Cost (optional)';
+  String get labelEstimatedCostOptional => 'التكلفة التقديرية (اختياري)';
 
   @override
   String get hintCostExample => 'e.g. 100';
 
   @override
-  String get handymanSkillsNeeded => 'Skills needed';
+  String get handymanSkillsNeeded => 'المهارات المطلوبة';
 
   @override
-  String get handymanSkillPlumbing => 'Plumbing';
+  String get handymanSkillPlumbing => 'سباكة';
 
   @override
-  String get handymanSkillElectrical => 'Electrical';
+  String get handymanSkillElectrical => 'كهرباء';
 
   @override
-  String get handymanSkillCarpentry => 'Carpentry';
+  String get handymanSkillCarpentry => 'نجارة';
 
   @override
-  String get handymanSkillPainting => 'Painting';
+  String get handymanSkillPainting => 'دهان';
 
   @override
-  String get handymanSkillGeneral => 'General';
+  String get handymanSkillGeneral => 'عام';
 
   @override
-  String get labelToolsCommaSeparated => 'Tools needed (comma-separated)';
+  String get labelToolsCommaSeparated => 'الأدوات المطلوبة (مفصولة بفواصل)';
 
   @override
-  String get hintToolsHandymanExample => 'e.g. wrench set, plumber\'s tape';
+  String get hintToolsHandymanExample => 'مثال: طقم مفاتيح، شريط سباكة';
 
   @override
-  String get labelEstimatedHoursOptional => 'Estimated hours (optional)';
+  String get labelEstimatedHoursOptional => 'الساعات التقديرية (اختياري)';
 
   @override
   String get hintHoursExample => 'e.g. 2';
 
   @override
-  String get handymanCreateRequestCta => 'Create Request';
+  String get handymanCreateRequestCta => 'إنشاء طلب';
 
   @override
-  String get handymanDialogCancelRequestTitle => 'Cancel Request';
+  String get handymanDialogCancelRequestTitle => 'إلغاء الطلب';
 
   @override
   String get handymanDialogCancelRequestMessage =>
-      'Are you sure you want to cancel this service request?';
+      'هل أنت متأكد أنك تريد إلغاء طلب الخدمة هذا؟';
 
   @override
-  String get actionNo => 'No';
+  String get actionNo => 'لا';
 
   @override
-  String get actionYesCancel => 'Yes, Cancel';
+  String get actionYesCancel => 'نعم، إلغاء';
 
   @override
-  String get handymanRequestCancelled => 'Request cancelled';
+  String get handymanRequestCancelled => 'تم إلغاء الطلب';
 
   @override
-  String get handymanCancelFailed => 'Failed to cancel';
+  String get handymanCancelFailed => 'فشل الإلغاء';
 
   @override
-  String get handymanLabelScheduled => 'Scheduled';
+  String get handymanLabelScheduled => 'مجدول';
 
   @override
-  String get handymanSectionRequirements => 'Requirements';
+  String get handymanSectionRequirements => 'المتطلبات';
 
   @override
   String handymanToolsLine(String tools) {
-    return 'Tools: $tools';
+    return 'الأدوات: $tools';
   }
 
   @override
   String handymanEstHoursLine(String hours) {
-    return 'Est. hours: $hours';
+    return 'ساعات تقديرية: $hours';
   }
 
   @override
   String handymanViewQuotesCta(int count) {
-    return 'View $count quote(s)';
+    return 'عرض $count عرض سعر';
   }
 
   @override
-  String get handymanCancelRequest => 'Cancel Request';
+  String get handymanCancelRequest => 'إلغاء الطلب';
 
   @override
-  String get handymanRateServiceTitle => 'Rate Service';
+  String get handymanRateServiceTitle => 'قيّم الخدمة';
 
   @override
-  String get handymanProviderFallback => 'Provider';
+  String get handymanProviderFallback => 'المزود';
 
   @override
-  String get handymanQuotesTitle => 'Quotes';
+  String get handymanQuotesTitle => 'عروض الأسعار';
 
   @override
-  String get handymanAcceptQuoteTitle => 'Accept Quote';
+  String get handymanAcceptQuoteTitle => 'قبول العرض';
 
   @override
   String handymanAcceptQuoteMessage(String amount, String name) {
-    return 'Accept $amount from $name?';
+    return 'قبول $amount من $name؟';
   }
 
   @override
-  String get actionAccept => 'Accept';
+  String get actionAccept => 'قبول';
 
   @override
-  String get actionReject => 'Reject';
+  String get actionReject => 'رفض';
 
   @override
-  String get handymanQuoteAccepted => 'Quote accepted';
+  String get handymanQuoteAccepted => 'تم قبول العرض';
 
   @override
-  String get handymanAcceptQuoteFailed => 'Failed to accept';
+  String get handymanAcceptQuoteFailed => 'فشل القبول';
 
   @override
-  String get handymanRejectQuoteTitle => 'Reject Quote';
+  String get handymanRejectQuoteTitle => 'رفض العرض';
 
   @override
   String handymanRejectQuoteMessage(String name) {
-    return 'Reject quote from $name?';
+    return 'رفض عرض $name؟';
   }
 
   @override
-  String get handymanQuoteRejected => 'Quote rejected';
+  String get handymanQuoteRejected => 'تم رفض العرض';
 
   @override
-  String get handymanRejectQuoteFailed => 'Failed to reject';
+  String get handymanRejectQuoteFailed => 'فشل الرفض';
 
   @override
-  String get handymanNoQuotesYet => 'No quotes yet';
+  String get handymanNoQuotesYet => 'لا توجد عروض بعد';
 
   @override
-  String get handymanNoQuotesSubtitle => 'Handymen will send quotes soon';
+  String get handymanNoQuotesSubtitle => 'سيرسل الفنيون عروض الأسعار قريباً';
 
   @override
-  String get handymanViewProfile => 'View Profile';
+  String get handymanViewProfile => 'عرض الملف';
 
   @override
-  String get handymanHowWasService => 'How was the service?';
+  String get handymanHowWasService => 'كيف كانت الخدمة؟';
 
   @override
-  String get handymanRateTheHandyman => 'Rate the handyman';
+  String get handymanRateTheHandyman => 'قيّم الفني';
 
   @override
-  String get handymanCommentAboutOptional =>
-      'Comment about handyman (optional)';
+  String get handymanCommentAboutOptional => 'تعليق عن الفني (اختياري)';
 
   @override
-  String get handymanRatingPublic => 'Make my rating public';
+  String get handymanRatingPublic => 'اجعل تقييمي عاماً';
 
   @override
-  String get handymanSubmitRating => 'Submit Rating';
+  String get handymanSubmitRating => 'إرسال التقييم';
 
   @override
-  String get ratingThankYou => 'Thank you for your rating!';
+  String get ratingThankYou => 'شكراً لتقييمك!';
 
   @override
-  String get ratingSubmitFailed => 'Failed to submit rating';
+  String get ratingSubmitFailed => 'فشل إرسال التقييم';
 
   @override
-  String get handymanNotFound => 'Handyman not found';
+  String get handymanNotFound => 'الفني غير موجود';
 
   @override
-  String get handymanProfileTitle => 'Handyman Profile';
+  String get handymanProfileTitle => 'ملف الفني';
 
   @override
-  String get handymanAbout => 'About';
+  String get handymanAbout => 'نبذة';
 
   @override
-  String get handymanSkillsHeading => 'Skills';
+  String get handymanSkillsHeading => 'المهارات';
 
   @override
-  String get handymanHourlyRateLabel => 'Hourly Rate';
+  String get handymanHourlyRateLabel => 'الأجر بالساعة';
 
   @override
-  String get handymanExperienceLabel => 'Experience';
+  String get handymanExperienceLabel => 'الخبرة';
 
   @override
   String handymanExperienceYears(String years) {
-    return '$years years';
+    return '$years سنوات';
   }
 
   @override
-  String get labelAddress => 'Address';
+  String get labelAddress => 'العنوان';
 
   @override
-  String get handymanStatsHeading => 'Stats';
+  String get handymanStatsHeading => 'إحصاءات';
 
   @override
-  String get handymanStatServices => 'Services';
+  String get handymanStatServices => 'خدمات';
 
   @override
-  String get handymanStatRating => 'Rating';
+  String get handymanStatRating => 'التقييم';
 
   @override
-  String get handymanStatResponse => 'Response';
+  String get handymanStatResponse => 'الاستجابة';
 
   @override
-  String get forgotPasswordLink => 'Forgot password?';
+  String get forgotPasswordLink => 'نسيت كلمة المرور؟';
 
   @override
-  String get forgotPasswordRequestTitle => 'Reset password';
+  String get forgotPasswordRequestTitle => 'إعادة تعيين كلمة المرور';
 
   @override
   String get forgotPasswordRequestSubtitle =>
-      'Enter your email or phone number. We\'ll send a 6-digit verification code.';
+      'أدخل بريدك أو رقم هاتفك. سنرسل رمز تحقق مكوّناً من 6 أرقام.';
 
   @override
-  String get forgotPasswordSendCode => 'Send code';
+  String get forgotPasswordSendCode => 'إرسال الرمز';
 
   @override
-  String get forgotPasswordVerifyTitle => 'Enter verification code';
+  String get forgotPasswordVerifyTitle => 'أدخل رمز التحقق';
 
   @override
   String forgotPasswordVerifySubtitle(String identifier) {
-    return 'We sent a code to $identifier.';
+    return 'أرسلنا رمزاً إلى $identifier.';
   }
 
   @override
-  String get forgotPasswordOtpLabel => '6-digit code';
+  String get forgotPasswordOtpLabel => 'رمز من 6 أرقام';
 
   @override
   String forgotPasswordTimeRemaining(String time) {
-    return 'Time remaining: $time';
+    return 'الوقت المتبقي: $time';
   }
 
   @override
   String get forgotPasswordCodeExpired =>
-      'This code has expired. Tap resend for a new code.';
+      'انتهت صلاحية هذا الرمز. اضغط إعادة الإرسال للحصول على رمز جديد.';
 
   @override
-  String get forgotPasswordResend => 'Resend code';
+  String get forgotPasswordResend => 'إعادة إرسال الرمز';
 
   @override
-  String get forgotPasswordVerifyButton => 'Verify';
+  String get forgotPasswordVerifyButton => 'تحقق';
 
   @override
-  String get forgotPasswordNewTitle => 'Create new password';
+  String get forgotPasswordNewTitle => 'إنشاء كلمة مرور جديدة';
 
   @override
-  String get forgotPasswordNewSubtitle => 'Use at least 8 characters.';
+  String get forgotPasswordNewSubtitle => 'استخدم 8 أحرف على الأقل.';
 
   @override
-  String get forgotPasswordLabelConfirmPassword => 'Confirm password';
+  String get forgotPasswordLabelConfirmPassword => 'تأكيد كلمة المرور';
 
   @override
-  String get forgotPasswordHintConfirmPassword => 'Re-enter new password';
+  String get forgotPasswordHintConfirmPassword =>
+      'أعد إدخال كلمة المرور الجديدة';
 
   @override
-  String get forgotPasswordSaveButton => 'Save password';
+  String get forgotPasswordSaveButton => 'حفظ كلمة المرور';
 
   @override
   String get forgotPasswordSuccessMessage =>
-      'Password updated. You can sign in now.';
+      'تم تحديث كلمة المرور. يمكنك تسجيل الدخول الآن.';
 
   @override
-  String get validationOtpLength => 'Enter the 6-digit code';
+  String get validationOtpLength => 'أدخل الرمز المكوّن من 6 أرقام';
 
   @override
-  String get validationConfirmPasswordRequired =>
-      'Please confirm your password';
+  String get validationConfirmPasswordRequired => 'يرجى تأكيد كلمة المرور';
 
   @override
-  String get validationPasswordsDoNotMatch => 'Passwords do not match';
+  String get validationPasswordsDoNotMatch => 'كلمتا المرور غير متطابقتين';
 
   @override
   String get addressesTitle => 'عناويني';
@@ -2376,228 +2368,226 @@ class AppLocalizationsAr extends AppLocalizations {
   String get chatCreateSupport => 'بدء المحادثة';
 
   @override
-  String get sosSettingsTitle => 'Safety & SOS';
+  String get sosSettingsTitle => 'السلامة وSOS';
 
   @override
-  String get sosEmergencyContacts => 'Emergency contacts';
+  String get sosEmergencyContacts => 'جهات اتصال الطوارئ';
 
   @override
   String get sosEmergencyContactsSubtitle =>
-      'People notified when you trigger SOS';
+      'الأشخاص الذين يُبلَّغون عند تشغيل SOS';
 
   @override
-  String get sosHistory => 'SOS history';
+  String get sosHistory => 'سجل SOS';
 
   @override
-  String get sosHistorySubtitle => 'View past alerts';
+  String get sosHistorySubtitle => 'عرض التنبيهات السابقة';
 
   @override
-  String get sosTrigger => 'Trigger SOS';
+  String get sosTrigger => 'تشغيل SOS';
 
   @override
-  String get sosTriggerSubtitle => 'Send an emergency alert with your location';
+  String get sosTriggerSubtitle => 'أرسل تنبيه طوارئ مع موقعك';
 
   @override
-  String get sosTriggerConfirmTitle => 'Send SOS alert?';
+  String get sosTriggerConfirmTitle => 'إرسال تنبيه SOS؟';
 
   @override
   String get sosTriggerConfirmMessage =>
-      'Your emergency contacts will be notified with your current location. Only use in a real emergency.';
+      'سيتم إبلاغ جهات اتصال الطوارئ بموقعك الحالي. استخدمه في حالة طوارئ حقيقية فقط.';
 
   @override
-  String get sosDescriptionHint => 'Describe your situation (optional)';
+  String get sosDescriptionHint => 'صف وضعك (اختياري)';
 
   @override
   String get sosLocationRequired =>
-      'Location is required to send an SOS alert. Please enable location permissions.';
+      'الموقع مطلوب لإرسال تنبيه SOS. يرجى تفعيل أذونات الموقع.';
 
   @override
-  String get sosContactAdded => 'Emergency contact added';
+  String get sosContactAdded => 'تمت إضافة جهة اتصال الطوارئ';
 
   @override
-  String get sosContactUpdated => 'Emergency contact updated';
+  String get sosContactUpdated => 'تم تحديث جهة اتصال الطوارئ';
 
   @override
-  String get sosContactDeleted => 'Emergency contact deleted';
+  String get sosContactDeleted => 'تم حذف جهة اتصال الطوارئ';
 
   @override
-  String get sosTriggered => 'SOS alert sent successfully';
+  String get sosTriggered => 'تم إرسال تنبيه SOS بنجاح';
 
   @override
-  String get sosAddContact => 'Add contact';
+  String get sosAddContact => 'إضافة جهة اتصال';
 
   @override
-  String get sosEditContact => 'Edit contact';
+  String get sosEditContact => 'تعديل جهة الاتصال';
 
   @override
-  String get sosNoContacts => 'No emergency contacts yet';
+  String get sosNoContacts => 'لا توجد جهات اتصال للطوارئ بعد';
 
   @override
-  String get sosNoContactsSubtitle =>
-      'Add someone who should be notified in an emergency.';
+  String get sosNoContactsSubtitle => 'أضف شخصاً يجب إبلاغه في حالة الطوارئ.';
 
   @override
-  String get sosNoHistory => 'No SOS alerts yet';
+  String get sosNoHistory => 'لا توجد تنبيهات SOS بعد';
 
   @override
-  String get sosName => 'Full name';
+  String get sosName => 'الاسم الكامل';
 
   @override
-  String get sosPhone => 'Phone number';
+  String get sosPhone => 'رقم الهاتف';
 
   @override
-  String get sosEmail => 'Email (optional)';
+  String get sosEmail => 'البريد الإلكتروني (اختياري)';
 
   @override
-  String get sosRelationship => 'Relationship';
+  String get sosRelationship => 'صلة القرابة';
 
   @override
-  String get sosPrimaryContact => 'Primary contact';
+  String get sosPrimaryContact => 'جهة الاتصال الأساسية';
 
   @override
-  String get sosDeleteContact => 'Delete contact';
+  String get sosDeleteContact => 'حذف جهة الاتصال';
 
   @override
-  String get sosDeleteContactConfirm => 'Remove this emergency contact?';
+  String get sosDeleteContactConfirm => 'إزالة جهة اتصال الطوارئ هذه؟';
 
   @override
-  String get sosStatusActive => 'Active';
+  String get sosStatusActive => 'نشط';
 
   @override
-  String get sosStatusAll => 'All';
+  String get sosStatusAll => 'الكل';
 
   @override
-  String get sosCancel => 'Cancel';
+  String get sosCancel => 'إلغاء';
 
   @override
-  String get sosSendAlert => 'Send alert';
+  String get sosSendAlert => 'إرسال التنبيه';
 
   @override
-  String get sosSaving => 'Saving…';
+  String get sosSaving => 'جارٍ الحفظ…';
 
   @override
-  String get guestBrowseBanner => 'Browsing as guest';
+  String get guestBrowseBanner => 'تصفح كضيف';
 
   @override
-  String get guestBrowseSignIn => 'Sign in';
+  String get guestBrowseSignIn => 'تسجيل الدخول';
 
   @override
-  String get guestSignInRequiredTitle => 'Sign in required';
+  String get guestSignInRequiredTitle => 'تسجيل الدخول مطلوب';
 
   @override
   String get guestSignInRequiredMessage =>
-      'Create an account or sign in to use this feature.';
+      'أنشئ حساباً أو سجّل الدخول لاستخدام هذه الميزة.';
 
   @override
   String get guestSignInRequiredCheckout =>
-      'Sign in to place orders and complete checkout.';
+      'سجّل الدخول لإتمام الطلبات والدفع.';
 
   @override
-  String get guestOrdersSignIn => 'Sign in to view your order history.';
+  String get guestOrdersSignIn => 'سجّل الدخول لعرض سجل طلباتك.';
 
   @override
   String get guestProfileSignIn =>
-      'Sign in to access your profile and settings.';
+      'سجّل الدخول للوصول إلى ملفك الشخصي والإعدادات.';
 
   @override
-  String get guestServiceSignIn => 'Sign in to use this service.';
+  String get guestServiceSignIn => 'سجّل الدخول لاستخدام هذه الخدمة.';
 
   @override
-  String get courierSignInRequired => 'Sign in to send packages.';
+  String get courierSignInRequired => 'سجّل الدخول لإرسال الطرود.';
 
   @override
   String get courierPhoneVerificationRequired =>
-      'Verify your phone number before sending packages.';
+      'تحقق من رقم هاتفك قبل إرسال الطرود.';
 
   @override
-  String get wishlistNotesHint => 'Add a note (optional)';
+  String get wishlistNotesHint => 'أضف ملاحظة (اختياري)';
 
   @override
-  String get wishlistNotesUpdated => 'Note updated';
+  String get wishlistNotesUpdated => 'تم تحديث الملاحظة';
 
   @override
-  String get wishlistShareTitle => 'Share wishlist';
+  String get wishlistShareTitle => 'مشاركة قائمة الرغبات';
 
   @override
-  String get wishlistShareSuccess => 'Wishlist shared successfully';
+  String get wishlistShareSuccess => 'تمت مشاركة قائمة الرغبات بنجاح';
 
   @override
-  String get wishlistPriceDropsTitle => 'Price drop';
+  String get wishlistPriceDropsTitle => 'انخفاض السعر';
 
   @override
-  String get wishlistPriceDropsEmpty => 'No price drops right now';
+  String get wishlistPriceDropsEmpty => 'لا توجد تخفيضات حالياً';
 
   @override
-  String get wishlistMigrateError =>
-      'Could not sync saved items to your account';
+  String get wishlistMigrateError => 'تعذر مزامنة العناصر المحفوظة مع حسابك';
 
   @override
-  String get tipsTitle => 'Tips';
+  String get tipsTitle => 'الإكراميات';
 
   @override
-  String get tipsAddTitle => 'Add a tip';
+  String get tipsAddTitle => 'إضافة إكرامية';
 
   @override
-  String get tipsHistoryTitle => 'Tip history';
+  String get tipsHistoryTitle => 'سجل الإكراميات';
 
   @override
-  String get tipsRecipientLabel => 'Tip recipient';
+  String get tipsRecipientLabel => 'مستلم الإكرامية';
 
   @override
-  String get tipsRecipientDriver => 'Driver';
+  String get tipsRecipientDriver => 'السائق';
 
   @override
-  String get tipsRecipientVendor => 'Restaurant';
+  String get tipsRecipientVendor => 'المطعم';
 
   @override
-  String get tipsRecipientBoth => 'Both';
+  String get tipsRecipientBoth => 'كلاهما';
 
   @override
   String tipsCalculatedAmount(String amount) {
-    return 'Tip amount: ETB $amount';
+    return 'مبلغ الإكرامية: ETB $amount';
   }
 
   @override
-  String get tipsSubmit => 'Send tip';
+  String get tipsSubmit => 'إرسال الإكرامية';
 
   @override
-  String get tipsSuccess => 'Tip sent successfully';
+  String get tipsSuccess => 'تم إرسال الإكرامية بنجاح';
 
   @override
-  String get tipsLoadError => 'Could not load tips';
+  String get tipsLoadError => 'تعذر تحميل الإكراميات';
 
   @override
-  String get tipsCardComingSoon => 'Card payments coming soon';
+  String get tipsCardComingSoon => 'مدفوعات البطاقة قريباً';
 
   @override
-  String get tipsAnonymous => 'Send anonymously';
+  String get tipsAnonymous => 'إرسال دون اسم';
 
   @override
-  String get tipsMessageHint => 'Add a message (optional)';
+  String get tipsMessageHint => 'أضف رسالة (اختياري)';
 
   @override
-  String get tipsStatsTotal => 'Tips given';
+  String get tipsStatsTotal => 'الإكراميات المرسلة';
 
   @override
-  String get tipsStatsAmount => 'Total tipped';
+  String get tipsStatsAmount => 'الإجمالي';
 
   @override
-  String get tipsStatsAverage => 'Average tip';
+  String get tipsStatsAverage => 'المتوسط';
 
   @override
-  String get tipsHistoryEmpty => 'No tips yet';
+  String get tipsHistoryEmpty => 'لا توجد إكراميات بعد';
 
   @override
-  String get tipsPaymentWallet => 'Wallet';
+  String get tipsPaymentWallet => 'المحفظة';
 
   @override
-  String get tipsPaymentCard => 'Card';
+  String get tipsPaymentCard => 'بطاقة';
 
   @override
-  String get tipsStatusCompleted => 'Completed';
+  String get tipsStatusCompleted => 'مكتمل';
 
   @override
-  String get tipsStatusAll => 'All';
+  String get tipsStatusAll => 'الكل';
 
   @override
   String get onboardingWelcomeTitle => 'مرحباً بك في هدهد!';
@@ -2730,4 +2720,153 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get handymanComingSoonTeaser2 => 'إصلاحات منزلية';
+
+  @override
+  String get pleaseEnterValidSenderPhone =>
+      'يرجى إدخال رقم هاتف مرسل صالح (09xxxxxxxx)';
+
+  @override
+  String get trackingCodeCopied => 'تم نسخ رمز التتبع';
+
+  @override
+  String get chatMissingDeliveryId => 'تعذر فتح المحادثة. معرّف التوصيل مفقود.';
+
+  @override
+  String get waitForPriceEstimate => 'انتظر تقدير السعر من الخادم قبل الحجز';
+
+  @override
+  String get invalidDeliveryId => 'معرّف توصيل غير صالح من إنشاء التوصيل';
+
+  @override
+  String get deliveryBookedWallet => 'تم حجز التوصيل عبر المحفظة';
+
+  @override
+  String get cancelDeliveryTitle => 'إلغاء التوصيل';
+
+  @override
+  String get insufficientWalletBalance => 'رصيد المحفظة غير كافٍ';
+
+  @override
+  String topUpAmount(String currency, String amount) {
+    return 'شحن $currency $amount';
+  }
+
+  @override
+  String get loadMore => 'تحميل المزيد';
+
+  @override
+  String get viewMap => 'عرض الخريطة';
+
+  @override
+  String get usePin => 'استخدم الدبوس';
+
+  @override
+  String get copyOrderId => 'نسخ معرّف الطلب';
+
+  @override
+  String get shareOrder => 'مشاركة الطلب';
+
+  @override
+  String get cartEmpty => 'سلتك فارغة';
+
+  @override
+  String promoCodeApplied(String promoCode) {
+    return 'تم تطبيق رمز العرض \"$promoCode\"';
+  }
+
+  @override
+  String addressUpdatedTo(String address) {
+    return 'تم تحديث العنوان إلى: $address';
+  }
+
+  @override
+  String get addValidProductsToCart => 'يرجى إضافة منتجات صالحة إلى سلتك';
+
+  @override
+  String get chooseDeliveryLocationFromMap =>
+      'يرجى اختيار موقع التوصيل من الخريطة';
+
+  @override
+  String get selectEbirrProvider => 'يرجى اختيار مزود eBirr';
+
+  @override
+  String get unableToDetermineStore => 'تعذر تحديد المتجر لهذا الطلب';
+
+  @override
+  String get gallery => 'المعرض';
+
+  @override
+  String get camera => 'الكاميرا';
+
+  @override
+  String get photoPermissionRequired => 'مطلوب إذن الكاميرا أو الصور';
+
+  @override
+  String couldNotOpenPhotoPicker(String error) {
+    return 'تعذر فتح منتقي الصور: $error';
+  }
+
+  @override
+  String get pleaseEnterYourName => 'يرجى إدخال اسمك';
+
+  @override
+  String get updateFromStore => 'التحديث من المتجر';
+
+  @override
+  String get openPaymentPage => 'فتح صفحة الدفع';
+
+  @override
+  String get paymentRefreshFailed => 'تعذر تحديث حالة الدفع';
+
+  @override
+  String get searchProductsTitle => 'البحث عن منتجات';
+
+  @override
+  String get calories => 'سعرات';
+
+  @override
+  String get protein => 'بروتين';
+
+  @override
+  String get actionChange => 'تغيير';
+
+  @override
+  String get productUnavailable => 'هذا المنتج غير متاح حالياً';
+
+  @override
+  String get cancelTripTitle => 'إلغاء الرحلة';
+
+  @override
+  String get cancelTripConfirm => 'هل أنت متأكد أنك تريد إلغاء هذه الرحلة؟';
+
+  @override
+  String get unableToCancelRide => 'تعذر إلغاء الرحلة. معرّف الرحلة مفقود.';
+
+  @override
+  String get invalidQuoteAmount => 'مبلغ عرض السعر غير صالح للدفع';
+
+  @override
+  String get noOrdersYetStore => 'لا توجد طلبات بعد';
+
+  @override
+  String get retryPaymentTitle => 'إعادة محاولة الدفع';
+
+  @override
+  String get retryPaymentSubtitle => 'اختر طريقة دفع للمتابعة';
+
+  @override
+  String deliveryBookedWalletBalance(String currency, String balance) {
+    return 'تم حجز التوصيل. رصيد المحفظة: $currency $balance';
+  }
+
+  @override
+  String get cancelDeliveryConfirm =>
+      'هل أنت متأكد أنك تريد إلغاء هذا التوصيل؟';
+
+  @override
+  String get cancelDeliveryConfirmRefund =>
+      'هل أنت متأكد أنك تريد إلغاء هذا التوصيل؟ سيتم استرداد المبلغ المؤكد إلى محفظتك.';
+
+  @override
+  String get cancelOrder => 'إلغاء الطلب';
 }

@@ -473,7 +473,7 @@ class OrderTrackingCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: const Text('View Map'),
+              child: Text(context.l10n.viewMap),
             ),
           ),
         ],

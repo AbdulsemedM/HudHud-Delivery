@@ -609,7 +609,7 @@ class _ErrorState extends StatelessWidget {
             FilledButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: const Text('Try again'),
+              label: Text(context.l10n.actionTryAgain),
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.primaryColor,
                 foregroundColor: Colors.white,
@@ -846,7 +846,7 @@ class _CategoriesGrid extends StatelessWidget {
                     const SizedBox(height: 8),
                     TextButton(
                       onPressed: onCategoriesRetry,
-                      child: const Text('Retry'),
+                      child: Text(context.l10n.actionRetry),
                     ),
                   ],
                 ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/features/categories/model/categories_products_model.dart';
 import 'package:hudhud_delivery/features/categories/presentation/widgets/categories_widget.dart';
 import 'package:hudhud_delivery/features/delivery/presentation/screens/product_detail_screen.dart';
@@ -118,7 +119,7 @@ class _ProductSearchResultsScreenState extends State<ProductSearchResultsScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Search products'),
+        title: Text(context.l10n.searchProductsTitle),
         backgroundColor: Theme.of(context).colorScheme.surface,
       ),
       body: Column(
@@ -126,7 +127,7 @@ class _ProductSearchResultsScreenState extends State<ProductSearchResultsScreen>
         children: [
           const SizedBox(height: 8),
           ProductSearchField(
-            hint: 'Search products everywhere',
+            hint: context.l10n.homeSearchHint,
             initialValue: widget.initialSearch,
             onSearchChanged: _onSearchChanged,
             onFilterTap: _openPriceFilter,
@@ -153,7 +154,7 @@ class _ProductSearchResultsScreenState extends State<ProductSearchResultsScreen>
                               const SizedBox(height: 16),
                               TextButton(
                                 onPressed: () => _fetch(page: 1),
-                                child: const Text('Retry'),
+                                child: Text(context.l10n.actionRetry),
                               ),
                             ],
                           ),
@@ -192,7 +193,7 @@ class _ProductSearchResultsScreenState extends State<ProductSearchResultsScreen>
                                           page: _currentPage + 1,
                                           loadMore: true,
                                         ),
-                                        child: const Text('Load more'),
+                                        child: Text(context.l10n.loadMore),
                                       ),
                                     ),
                                   );

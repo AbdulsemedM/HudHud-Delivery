@@ -5,6 +5,7 @@ import 'package:hudhud_delivery/app/navigation/cart_navigation.dart';
 import 'package:hudhud_delivery/app/services/cart_service.dart';
 import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/widgets/fallback_network_image.dart';
 import 'package:hudhud_delivery/features/categories/model/categories_products_model.dart';
@@ -347,7 +348,7 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                       ),
                     )
                   : _selectedTab == 'Orders'
-                      ? const Center(child: Text('No orders yet'))
+                      ? Center(child: Text(context.l10n.noOrdersYetStore))
                       : _isLoadingActiveProducts
                           ? const Center(child: CircularProgressIndicator())
                           : _productsError != null
@@ -369,15 +370,15 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                                         const SizedBox(height: 16),
                                         TextButton(
                                           onPressed: _loadVendorProducts,
-                                          child: const Text('Retry'),
+                                          child: Text(context.l10n.actionRetry),
                                         ),
                                       ],
                                     ),
                                   ),
                                 )
                               : _activeProducts.isEmpty
-                                  ? const Center(
-                                      child: Text('No products yet'),
+                                  ? Center(
+                                      child: Text(context.l10n.noProductsYet),
                                     )
                                   : _buildProductsContent(),
             ),
@@ -393,7 +394,7 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
       grouped.putIfAbsent(p.category_id, () => []).add(p);
     }
     final sections = grouped.entries.toList();
-    if (sections.isEmpty) return const Center(child: Text('No products'));
+    if (sections.isEmpty) return Center(child: Text(context.l10n.noProducts));
     return Stack(
       children: [
         SingleChildScrollView(
@@ -461,7 +462,7 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                               page: _currentPage + 1,
                               loadMore: true,
                             ),
-                            child: const Text('Load more'),
+                            child: Text(context.l10n.loadMore),
                           ),
                   ),
                 ),
@@ -926,7 +927,7 @@ class _ProductSectionFromModel extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text('see all', style: TextStyle(fontSize: 14, color: Color(0xFF2C3E50))),
+                    Text(context.l10n.actionSeeAll, style: const TextStyle(fontSize: 14, color: Color(0xFF2C3E50))),
                     const SizedBox(width: 4),
                     Icon(Icons.arrow_forward, size: 16, color: Colors.grey[600]),
                   ],

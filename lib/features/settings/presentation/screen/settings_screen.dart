@@ -6,12 +6,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/app/services/biometric_credential_service.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:provider/provider.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
-import 'package:hudhud_delivery/controllers/theme_controller.dart';
+// import 'package:hudhud_delivery/controllers/theme_controller.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
-import 'package:hudhud_delivery/core/utils/support_launcher.dart';
 import 'package:hudhud_delivery/core/utils/avatar_util.dart';
 import 'package:hudhud_delivery/core/utils/phone_util.dart';
 import 'package:hudhud_delivery/core/widgets/user_avatar.dart';
@@ -27,7 +25,7 @@ import 'package:hudhud_delivery/features/chat/presentation/widgets/chat_unread_b
 import 'package:hudhud_delivery/features/chat/utils/chat_polling_config.dart';
 import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
 import 'package:hudhud_delivery/features/dashboard/presentation/screen/dashboard_screen.dart';
-import 'package:hudhud_delivery/features/onboarding_tour/presentation/onboarding_tour_controller.dart';
+// import 'package:hudhud_delivery/features/onboarding_tour/presentation/onboarding_tour_controller.dart';
 import 'package:hudhud_delivery/features/wallet/data/providers/wallet_data_provider.dart';
 import 'package:hudhud_delivery/features/wallet/data/repositories/wallet_repository.dart';
 import 'package:hudhud_delivery/features/wallet/presentation/screens/wallet_screen.dart';
@@ -41,19 +39,19 @@ import 'notifications_screen.dart';
 import 'edit_profile_screen.dart';
 import 'personal_details_screen.dart';
 import 'terms_conditions_screen.dart';
-import 'package:hudhud_delivery/features/wishlist/presentation/screen/wishlist_screen.dart';
-import 'package:hudhud_delivery/features/tips/presentation/screens/tips_history_screen.dart';
+// import 'package:hudhud_delivery/features/wishlist/presentation/screen/wishlist_screen.dart';
+// import 'package:hudhud_delivery/features/tips/presentation/screens/tips_history_screen.dart';
 
-String _themeModeLabel(AppLocalizations l10n, ThemeController themeController) {
-  switch (themeController.themeMode) {
-    case ThemeMode.light:
-      return l10n.themeLight;
-    case ThemeMode.dark:
-      return l10n.themeDark;
-    case ThemeMode.system:
-      return l10n.themeSystem;
-  }
-}
+// String _themeModeLabel(AppLocalizations l10n, ThemeController themeController) {
+//   switch (themeController.themeMode) {
+//     case ThemeMode.light:
+//       return l10n.themeLight;
+//     case ThemeMode.dark:
+//       return l10n.themeDark;
+//     case ThemeMode.system:
+//       return l10n.themeSystem;
+//   }
+// }
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -66,6 +64,7 @@ class _SettingsScreenState extends State<SettingsScreen>
     with WidgetsBindingObserver {
   UserModel? _user;
   final AuthService _authService = AuthService();
+  // ignore: unused_field
   bool _smsNotificationsEnabled = true;
   double? _walletTotal;
   PackageInfo? _packageInfo;
@@ -355,7 +354,7 @@ class _SettingsScreenState extends State<SettingsScreen>
     final l10n = context.l10n;
     final baseTheme = Theme.of(context);
     final authTheme = AuthScreenColors.darkTheme(baseTheme);
-    final themeController = Provider.of<ThemeController>(context);
+    // final themeController = Provider.of<ThemeController>(context);
     final displayName = _user?.name?.trim().isNotEmpty == true
         ? _user!.name!.trim()
         : l10n.userDefault;
@@ -480,33 +479,35 @@ class _SettingsScreenState extends State<SettingsScreen>
                         },
                       ),
                       const _ProfileTileDivider(),
-                      _ProfileMenuTile(
-                        icon: Icons.favorite_outline,
-                        title: l10n.profileMenuFavorites,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const WishlistScreen(),
-                            ),
-                          );
-                        },
-                      ),
-                      const _ProfileTileDivider(),
-                      _ProfileMenuTile(
-                        icon: Icons.volunteer_activism_outlined,
-                        title: l10n.tipsHistoryTitle,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  const TipsHistoryScreen(),
-                            ),
-                          );
-                        },
-                      ),
-                      const _ProfileTileDivider(),
+                      // TODO: restore when Wishlist launches
+                      // _ProfileMenuTile(
+                      //   icon: Icons.favorite_outline,
+                      //   title: l10n.profileMenuFavorites,
+                      //   onTap: () {
+                      //     Navigator.push(
+                      //       context,
+                      //       MaterialPageRoute(
+                      //         builder: (context) => const WishlistScreen(),
+                      //       ),
+                      //     );
+                      //   },
+                      // ),
+                      // const _ProfileTileDivider(),
+                      // TODO: restore when Tip history launches
+                      // _ProfileMenuTile(
+                      //   icon: Icons.volunteer_activism_outlined,
+                      //   title: l10n.tipsHistoryTitle,
+                      //   onTap: () {
+                      //     Navigator.push(
+                      //       context,
+                      //       MaterialPageRoute(
+                      //         builder: (context) =>
+                      //             const TipsHistoryScreen(),
+                      //       ),
+                      //     );
+                      //   },
+                      // ),
+                      // const _ProfileTileDivider(),
                       _ProfileMenuTile(
                         icon: Icons.chat_bubble_outline,
                         title: l10n.profileMenuMessages,
@@ -534,23 +535,24 @@ class _SettingsScreenState extends State<SettingsScreen>
                           available: _biometricAvailable && !_biometricBusy,
                           onChanged: _onBiometricLoginChanged,
                         ),
-                        const _ProfileTileDivider(),
+                        // const _ProfileTileDivider(),
                       ],
-                      _ProfileMenuTile(
-                        icon: Icons.tune_rounded,
-                        title: l10n.profileMenuAccountSettings,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => _AccountSettingsHubPage(
-                                themeModeLabel:
-                                    _themeModeLabel(l10n, themeController),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
+                      // TODO: restore when Account Settings launches
+                      // _ProfileMenuTile(
+                      //   icon: Icons.tune_rounded,
+                      //   title: l10n.profileMenuAccountSettings,
+                      //   onTap: () {
+                      //     Navigator.push(
+                      //       context,
+                      //       MaterialPageRoute(
+                      //         builder: (context) => _AccountSettingsHubPage(
+                      //           themeModeLabel:
+                      //               _themeModeLabel(l10n, themeController),
+                      //         ),
+                      //       ),
+                      //     );
+                      //   },
+                      // ),
                     ],
                   ),
                   const SizedBox(height: 20),
@@ -569,47 +571,49 @@ class _SettingsScreenState extends State<SettingsScreen>
                           );
                         },
                       ),
-                      const _ProfileTileDivider(),
-                      _ProfileMenuTile(
-                        icon: Icons.moped_outlined,
-                        title: l10n.settingsDeliveryPreferences,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => _DeliveryPreferencesPage(
-                                smsEnabled: _smsNotificationsEnabled,
-                                onSmsChanged: (v) {
-                                  setState(() => _smsNotificationsEnabled = v);
-                                },
-                              ),
-                            ),
-                          );
-                        },
-                      ),
+                      // const _ProfileTileDivider(),
+                      // TODO: restore when Delivery Preferences launches
+                      // _ProfileMenuTile(
+                      //   icon: Icons.moped_outlined,
+                      //   title: l10n.settingsDeliveryPreferences,
+                      //   onTap: () {
+                      //     Navigator.push(
+                      //       context,
+                      //       MaterialPageRoute(
+                      //         builder: (context) => _DeliveryPreferencesPage(
+                      //           smsEnabled: _smsNotificationsEnabled,
+                      //           onSmsChanged: (v) {
+                      //             setState(() => _smsNotificationsEnabled = v);
+                      //           },
+                      //         ),
+                      //       ),
+                      //     );
+                      //   },
+                      // ),
                     ],
                   ),
-                  if (kDebugMode) ...[
-                    const SizedBox(height: 20),
-                    const _ProfileSectionLabel(title: 'Developer'),
-                    _ProfileGroupCard(
-                      children: [
-                        _ProfileMenuTile(
-                          icon: Icons.tour_outlined,
-                          title: l10n.onboardingDebugReplayTour,
-                          onTap: () async {
-                            await OnboardingTourController.resetForTesting();
-                            if (!context.mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(l10n.onboardingDebugReplayTour),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
+                  // TODO: restore when home tour replay is needed
+                  // if (kDebugMode) ...[
+                  //   const SizedBox(height: 20),
+                  //   const _ProfileSectionLabel(title: 'Developer'),
+                  //   _ProfileGroupCard(
+                  //     children: [
+                  //       _ProfileMenuTile(
+                  //         icon: Icons.tour_outlined,
+                  //         title: l10n.onboardingDebugReplayTour,
+                  //         onTap: () async {
+                  //           await OnboardingTourController.resetForTesting();
+                  //           if (!context.mounted) return;
+                  //           ScaffoldMessenger.of(context).showSnackBar(
+                  //             SnackBar(
+                  //               content: Text(l10n.onboardingDebugReplayTour),
+                  //             ),
+                  //           );
+                  //         },
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ],
                   const SizedBox(height: 20),
                   _ProfileSectionLabel(title: l10n.settingsAppSettings),
                   _ProfileGroupCard(
@@ -656,17 +660,18 @@ class _SettingsScreenState extends State<SettingsScreen>
                           );
                         },
                       ),
-                      const _ProfileTileDivider(),
-                      _ProfileMenuTile(
-                        icon: Icons.email_outlined,
-                        title: l10n.settingsContactEmail,
-                        onTap: () async {
-                          final ok = await launchSupportEmail();
-                          if (context.mounted && !ok) {
-                            AuthSnackBar.error(context, l10n.actionTryAgain);
-                          }
-                        },
-                      ),
+                      // TODO: restore as a top-level settings item if needed
+                      // const _ProfileTileDivider(),
+                      // _ProfileMenuTile(
+                      //   icon: Icons.email_outlined,
+                      //   title: l10n.settingsContactEmail,
+                      //   onTap: () async {
+                      //     final ok = await launchSupportEmail();
+                      //     if (context.mounted && !ok) {
+                      //       AuthSnackBar.error(context, l10n.actionTryAgain);
+                      //     }
+                      //   },
+                      // ),
                     ],
                   ),
                   const SizedBox(height: 24),
@@ -1312,9 +1317,11 @@ class _LegalFooter extends StatelessWidget {
   }
 }
 
+// ignore: unused_element
 class _AccountSettingsHubPage extends StatelessWidget {
   final String themeModeLabel;
 
+  // ignore: unused_element
   const _AccountSettingsHubPage({required this.themeModeLabel});
 
   @override
@@ -1383,10 +1390,12 @@ class _AccountSettingsHubPage extends StatelessWidget {
   }
 }
 
+// ignore: unused_element
 class _DeliveryPreferencesPage extends StatefulWidget {
   final bool smsEnabled;
   final ValueChanged<bool> onSmsChanged;
 
+  // ignore: unused_element
   const _DeliveryPreferencesPage({
     required this.smsEnabled,
     required this.onSmsChanged,
@@ -1397,6 +1406,7 @@ class _DeliveryPreferencesPage extends StatefulWidget {
       _DeliveryPreferencesPageState();
 }
 
+// ignore: unused_element
 class _DeliveryPreferencesPageState extends State<_DeliveryPreferencesPage> {
   late bool _sms;
 

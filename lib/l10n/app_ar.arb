@@ -55,15 +55,15 @@
   "settingsNotifications": "إشعارات",
   "settingsSmsNotifications": "إشعارات الرسائل القصيرة",
   "settingsWishlist": "قائمة الرغبات",
-  "wishlistEmptyTitle": "No saved items yet",
-  "wishlistEmptySubtitle": "Save products you love — tap the heart on a product to add it here.",
-  "wishlistAddedSnack": "Added to wishlist",
-  "wishlistRemovedSnack": "Removed from wishlist",
-  "wishlistSignInTitle": "Sign in to use your wishlist",
-  "wishlistSignInSubtitle": "Your saved items are stored on this device when you are logged in.",
-  "wishlistLoadError": "Could not load wishlist",
-  "wishlistTooltipAdd": "Add to wishlist",
-  "wishlistTooltipRemove": "Remove from wishlist",
+  "wishlistEmptyTitle": "لا توجد عناصر محفوظة بعد",
+  "wishlistEmptySubtitle": "احفظ المنتجات التي تحبها — اضغط القلب على المنتج لإضافته هنا.",
+  "wishlistAddedSnack": "تمت الإضافة إلى قائمة الرغبات",
+  "wishlistRemovedSnack": "تمت الإزالة من قائمة الرغبات",
+  "wishlistSignInTitle": "سجّل الدخول لاستخدام قائمة الرغبات",
+  "wishlistSignInSubtitle": "تُحفظ عناصرك على هذا الجهاز عند تسجيل الدخول.",
+  "wishlistLoadError": "تعذر تحميل قائمة الرغبات",
+  "wishlistTooltipAdd": "إضافة إلى قائمة الرغبات",
+  "wishlistTooltipRemove": "إزالة من قائمة الرغبات",
   "settingsTermsConditions": "الشروط والأحكام",
   "settingsFaqs": "الأسئلة الشائعة",
   "settingsHelpDesk": "مكتب المساعدة",
@@ -186,9 +186,9 @@
   "codeSentPhoneDefault": "تم إرسال الرمز إلى هاتفك.",
   "emailVerifiedSuccess": "تم التحقق من البريد الإلكتروني بنجاح!",
   "phoneVerifiedSuccess": "تم التحقق من رقم الهاتف بنجاح!",
-  "accountVerificationBannerTitle": "Secure your account",
-  "accountVerificationEmailSubtitle": "Confirm your email for receipts and updates.",
-  "accountVerificationPhoneSubtitle": "Verify your phone for security and support.",
+  "accountVerificationBannerTitle": "أمّن حسابك",
+  "accountVerificationEmailSubtitle": "أكد بريدك الإلكتروني للإيصالات والتحديثات.",
+  "accountVerificationPhoneSubtitle": "تحقق من هاتفك للأمان والدعم.",
   "failedToLoadOrders": "فشل تحميل الطلبات: {error}",
   "@failedToLoadOrders": {
     "placeholders": {
@@ -237,12 +237,19 @@
   "inProgress": "في تَقَدم",
   "loginTitle": "تسجيل الدخول",
   "loginSubtitle": "يرجى إدخال بيانات الاعتماد الخاصة بك للوصول إلى حسابك وجميع الخدمات المتاحة",
-  "brandTagline": "DELIVERY, DELIVERED WELL",
+  "brandTagline": "توصيل، يُنجَز بإتقان",
+  "splashTagline": "مدينتك، تُوصَل",
+  "splashStatus": "نُحرّك الأمور…",
+  "homeTabFood": "طعام",
+  "homeTabCourier": "ساعي",
+  "homeTabTaxi": "تاكسي",
+  "homeTabHandyman": "فني منزلي",
+  "homeSearchHint": "ابحث عن المنتجات في كل مكان",
   "loginContinueAsGuest": "المتابعة كضيف",
   "labelEmailOrPhone": "عنوان البريد الإلكتروني أو رقم الهاتف",
   "loginTabEmail": "البريد الإلكتروني",
   "loginTabPhone": "الهاتف",
-  "loginTabEmailSemantics": "تسجيل الدخول بالبريد الإلكتروني",
+  "loginTabEmailSemantics": "تسجيل الدخول بالبريد",
   "loginTabPhoneSemantics": "تسجيل الدخول بالهاتف",
   "labelEmail": "البريد الإلكتروني",
   "hintEmail": "مثال: JohnDoe@gmail.com",
@@ -256,7 +263,7 @@
   "validationEmailOrPhoneInvalid": "الرجاء إدخال بريد إلكتروني أو رقم هاتف صالح",
   "validationPasswordRequired": "الرجاء إدخال كلمة المرور الخاصة بك",
   "validationPasswordMin": "يجب أن تتكون كلمة المرور من 8 أحرف على الأقل",
-  "validationPasswordComplexity": "يجب أن تتضمن كلمة المرور حرفًا كبيرًا وحرفًا صغيرًا ورقمًا ورمزًا خاصًا",
+  "validationPasswordComplexity": "يجب أن تتضمن كلمة المرور حرفاً كبيراً وصغيراً ورقماً ورمزاً خاصاً",
   "validationEmailRequired": "الرجاء إدخال البريد الإلكتروني الخاص بك",
   "validationEmailInvalid": "يرجى إدخال عنوان بريد إلكتروني صالح",
   "mainDemoTitle": "عرض تسليم HudHud",
@@ -328,7 +335,7 @@
   "snackbarWarning": "هذه رسالة تحذيرية!",
   "snackbarWarningLabel": "تحذير",
   "snackbarInfo": "هذه رسالة معلومات!",
-  "snackbarInfoLabel": "معلومات",
+  "snackbarInfoLabel": "معلومة",
   "undoActionPressed": "تم الضغط على التراجع عن الإجراء",
   "loadingData": "جارٍ تحميل البيانات...",
   "showLoadingButton": "إظهار التحميل",
@@ -534,21 +541,21 @@
   "emailAddress": "عنوان البريد الإلكتروني",
   "dateOfBirth": "تاريخ الميلاد",
   "referralCode": "رمز الإحالة",
-  "referralCodeOptional": "Referral code — optional",
+  "referralCodeOptional": "رمز الإحالة — اختياري",
   "hintReferralCode": "UCZXSD3O",
-  "signupTitle": "Create your account",
-  "signupSubtitle": "Join Hudhud to order from every business in your city.",
-  "hintCreatePassword": "Create a password",
-  "hintReenterPassword": "Re-enter your password",
-  "passwordStrengthHint": "Use 8+ characters",
-  "signupAcceptTermsPrefix": "I've read and accepted Hudhud's ",
-  "signupTermsLink": "terms and conditions",
-  "signupConsentDataPrefix": "I consent to my data being processed under applicable ",
-  "signupDataProtectionLink": "data protection laws",
-  "alreadyHaveAccount": "Already have an account? ",
-  "createAccount": "Create account",
-  "signupFormIncomplete": "Please fill in all required fields",
-  "signupAcceptLegalRequired": "Please accept the terms and data protection consent",
+  "signupTitle": "أنشئ حسابك",
+  "signupSubtitle": "انضم إلى هودهود للطلب من كل نشاط في مدينتك.",
+  "hintCreatePassword": "أنشئ كلمة مرور",
+  "hintReenterPassword": "أعد إدخال كلمة المرور",
+  "passwordStrengthHint": "استخدم 8 أحرف أو أكثر",
+  "signupAcceptTermsPrefix": "لقد قرأت ووافقت على ",
+  "signupTermsLink": "شروط وأحكام هودهود",
+  "signupConsentDataPrefix": "أوافق على معالجة بياناتي وفق ",
+  "signupDataProtectionLink": "قوانين حماية البيانات",
+  "alreadyHaveAccount": "لديك حساب بالفعل؟ ",
+  "createAccount": "إنشاء حساب",
+  "signupFormIncomplete": "يرجى تعبئة جميع الحقول المطلوبة",
+  "signupAcceptLegalRequired": "يرجى قبول الشروط وموافقة حماية البيانات",
   "searchQuestions": "سؤال البحث",
   "whereTo": "إلى أين؟",
   "taxiCurrentLocation": "الموقع الحالي",
@@ -683,20 +690,20 @@
   "noEmailAvailableShort": "لا يوجد بريد إلكتروني متاح",
   "addMoney": "أضف المال",
   "sendMoney": "إرسال الأموال",
-  "exitAppTitle": "Exit App",
-  "exitAppMessage": "Are you sure you want to exit the app?",
-  "actionExit": "Exit",
-  "loginNoAccountPrompt": "Don't have an account? ",
-  "loginOrContinueWith": "or continue with",
-  "continueWithGoogle": "Continue with Google",
-  "actionSignUp": "Sign Up",
-  "paymentScreenTitle": "Payment",
-  "paymentChooseMethodHeading": "Choose Payment Method",
-  "paymentEthiopianOptionsSubtitle": "Select your preferred Ethiopian payment option",
-  "paymentLoadMethodsError": "Failed to load payment methods",
-  "paymentSelectMethodFirst": "Please select a payment method",
-  "paymentMethodUnavailable": "Selected payment method is no longer available",
-  "paymentFailedWithError": "Payment failed: {error}",
+  "exitAppTitle": "الخروج من التطبيق",
+  "exitAppMessage": "هل أنت متأكد أنك تريد الخروج؟",
+  "actionExit": "خروج",
+  "loginNoAccountPrompt": "ليس لديك حساب؟ ",
+  "loginOrContinueWith": "أو تابع عبر",
+  "continueWithGoogle": "المتابعة عبر Google",
+  "actionSignUp": "إنشاء حساب",
+  "paymentScreenTitle": "الدفع",
+  "paymentChooseMethodHeading": "اختر طريقة الدفع",
+  "paymentEthiopianOptionsSubtitle": "اختر خيار الدفع الإثيوبي المفضل لديك",
+  "paymentLoadMethodsError": "فشل تحميل طرق الدفع",
+  "paymentSelectMethodFirst": "يرجى اختيار طريقة دفع",
+  "paymentMethodUnavailable": "طريقة الدفع المحددة لم تعد متاحة",
+  "paymentFailedWithError": "فشل الدفع: {error}",
   "@paymentFailedWithError": {
     "placeholders": {
       "error": {
@@ -704,7 +711,7 @@
       }
     }
   },
-  "paymentPayAmountBr": "Pay {amount} Br",
+  "paymentPayAmountBr": "ادفع {amount} بر",
   "@paymentPayAmountBr": {
     "placeholders": {
       "amount": {
@@ -712,8 +719,8 @@
       }
     }
   },
-  "paymentSuccessTitle": "Payment Successful!",
-  "paymentTransactionIdLabel": "Transaction ID: {id}",
+  "paymentSuccessTitle": "تم الدفع بنجاح!",
+  "paymentTransactionIdLabel": "رقم العملية: {id}",
   "@paymentTransactionIdLabel": {
     "placeholders": {
       "id": {
@@ -721,22 +728,22 @@
       }
     }
   },
-  "continueShopping": "Continue Shopping",
-  "viewOrder": "View Order",
-  "handymanServicesTitle": "Handyman Services",
-  "handymanWhatToDo": "What would you like to do?",
-  "handymanMyRequests": "My Requests",
-  "handymanNoRequestsYet": "No service requests yet",
-  "handymanNoRequestsSubtitle": "Create a request to get quotes from handymen",
-  "handymanCreateNewRequest": "Create New Request",
-  "handymanCreateRequestSubtitle": "Describe your repair or maintenance need and get quotes from handymen.",
-  "instantDeliveryTitle": "Instant Delivery",
-  "tapToSelectPickup": "Tap to select pickup location",
-  "tapToSelectDelivery": "Tap to select delivery location",
-  "vehicleType": "Vehicle Type",
-  "selectPickupAndDelivery": "Please select both pickup and delivery locations",
-  "actionContinue": "Continue",
-  "errorGettingAddress": "Error getting address: {error}",
+  "continueShopping": "متابعة التسوق",
+  "viewOrder": "عرض الطلب",
+  "handymanServicesTitle": "خدمات الفني المنزلي",
+  "handymanWhatToDo": "ماذا تريد أن تفعل؟",
+  "handymanMyRequests": "طلباتي",
+  "handymanNoRequestsYet": "لا توجد طلبات خدمة بعد",
+  "handymanNoRequestsSubtitle": "أنشئ طلباً للحصول على عروض أسعار من الفنيين",
+  "handymanCreateNewRequest": "إنشاء طلب جديد",
+  "handymanCreateRequestSubtitle": "صف حاجة الإصلاح أو الصيانة واحصل على عروض أسعار.",
+  "instantDeliveryTitle": "توصيل فوري",
+  "tapToSelectPickup": "اضغط لاختيار موقع الاستلام",
+  "tapToSelectDelivery": "اضغط لاختيار موقع التسليم",
+  "vehicleType": "نوع المركبة",
+  "selectPickupAndDelivery": "يرجى اختيار موقعي الاستلام والتسليم",
+  "actionContinue": "متابعة",
+  "errorGettingAddress": "خطأ في جلب العنوان: {error}",
   "@errorGettingAddress": {
     "placeholders": {
       "error": {
@@ -744,17 +751,17 @@
       }
     }
   },
-  "googleMapsIosMissingKey": "Google Maps is not configured on iOS. Add GOOGLE_MAPS_API_KEY and restart the app.",
-  "dealsModalTitle": "Deals on deals",
-  "dealsModalSubtitle": "Get upto 50% off on your first Courier delivery fee!",
-  "dealsModalClaim": "Claim",
-  "dealsModalClose": "Maybe later",
-  "orderHistoryEmptyTitle": "No orders yet",
-  "orderHistoryEmptySubtitle": "Browse categories to place your first order.",
-  "orderHistoryEmptyHint": "Your order history will appear here once you place an order",
-  "browseDelivery": "Browse Delivery",
-  "browseCategories": "Browse categories",
-  "handymanQuoteCount": "{count} quote(s)",
+  "googleMapsIosMissingKey": "خرائط Google غير مهيأة على iOS. أضف GOOGLE_MAPS_API_KEY وأعد تشغيل التطبيق.",
+  "dealsModalTitle": "عروض فوق عروض",
+  "dealsModalSubtitle": "احصل على خصم يصل إلى 50٪ على رسوم أول توصيل ساعي!",
+  "dealsModalClaim": "احصل عليها",
+  "dealsModalClose": "لاحقاً",
+  "orderHistoryEmptyTitle": "لا توجد طلبات بعد",
+  "orderHistoryEmptySubtitle": "تصفح الفئات لتقديم أول طلب.",
+  "orderHistoryEmptyHint": "سيظهر سجل طلباتك هنا بعد تقديم طلب",
+  "browseDelivery": "تصفح التوصيل",
+  "browseCategories": "تصفح الفئات",
+  "handymanQuoteCount": "{count} عرض سعر",
   "@handymanQuoteCount": {
     "placeholders": {
       "count": {
@@ -762,9 +769,9 @@
       }
     }
   },
-  "orderDetailsLoadingMessage": "Loading order details...",
-  "orderDetailsLoadErrorTitle": "Error loading order details",
-  "orderAppBarTitle": "Order #{orderNumber}",
+  "orderDetailsLoadingMessage": "جاري تحميل تفاصيل الطلب...",
+  "orderDetailsLoadErrorTitle": "خطأ في تحميل تفاصيل الطلب",
+  "orderAppBarTitle": "طلب #{orderNumber}",
   "@orderAppBarTitle": {
     "placeholders": {
       "orderNumber": {
@@ -772,11 +779,11 @@
       }
     }
   },
-  "paymentSummaryTitle": "Payment Summary",
-  "paymentSubtotalLabel": "Subtotal",
-  "paymentTotalAmountLabel": "Total Amount",
-  "paymentProcessingTitle": "Processing Payment",
-  "paymentProcessingMessage": "Please wait while we process your payment via {method}...",
+  "paymentSummaryTitle": "ملخص الدفع",
+  "paymentSubtotalLabel": "المجموع الفرعي",
+  "paymentTotalAmountLabel": "المبلغ الإجمالي",
+  "paymentProcessingTitle": "جارٍ معالجة الدفع",
+  "paymentProcessingMessage": "يرجى الانتظار بينما نعالج الدفع عبر {method}...",
   "@paymentProcessingMessage": {
     "placeholders": {
       "method": {
@@ -784,7 +791,7 @@
       }
     }
   },
-  "courierRecipientLine": "Recipient: {name}",
+  "courierRecipientLine": "المستلم: {name}",
   "@courierRecipientLine": {
     "placeholders": {
       "name": {
@@ -792,19 +799,19 @@
       }
     }
   },
-  "courierTrackDeliveryCta": "Track delivery",
-  "courierDeliveryStatusInProgress": "In progress",
-  "labelDate": "Date",
+  "courierTrackDeliveryCta": "تتبع التوصيل",
+  "courierDeliveryStatusInProgress": "قيد التنفيذ",
+  "labelDate": "التاريخ",
   "hintDateFormat": "DD/MM/YYYY",
-  "labelTime": "Time",
+  "labelTime": "الوقت",
   "hintTimeFormat": "HH:MM",
-  "meridiemAm": "am",
-  "meridiemPm": "pm",
+  "meridiemAm": "ص",
+  "meridiemPm": "م",
   "scheduleSelectDateTime": "يرجى اختيار التاريخ والوقت للتسليم",
   "scheduleInvalidDateTime": "تنسيق التاريخ أو الوقت غير صالح",
-  "servicesScreenTitle": "Our Services",
-  "servicesWhatCanWeHelp": "What can we help you with?",
-  "servicesAvailableCount": "{count} services available",
+  "servicesScreenTitle": "خدماتنا",
+  "servicesWhatCanWeHelp": "كيف يمكننا مساعدتك؟",
+  "servicesAvailableCount": "{count} خدمات متاحة",
   "@servicesAvailableCount": {
     "placeholders": {
       "count": {
@@ -812,45 +819,45 @@
       }
     }
   },
-  "servicesErrorTitle": "Something went wrong",
-  "servicesEmptyTitle": "No services yet",
-  "servicesEmptySubtitle": "Check back later for new services",
-  "handymanNewRequestTitle": "New Service Request",
-  "validationHandymanSelectLocation": "Please select a location",
-  "validationHandymanSelectDateTime": "Please select date and time",
-  "validationHandymanSelectSkill": "Please select at least one skill",
-  "handymanRequestCreatedToast": "Request created",
-  "handymanRequestCreateFailed": "Failed to create request",
-  "labelTitle": "Title",
-  "hintTitleHandymanExample": "e.g. Fix leaking faucet",
-  "validationTitleRequired": "Title is required",
-  "validationDescriptionRequired": "Description is required",
-  "hintDescribeRepair": "Describe the repair or maintenance needed",
-  "handymanTapToSelectLocation": "Tap to select location",
-  "labelScheduledDateTime": "Scheduled Date & Time",
-  "selectDateAndTime": "Select date and time",
-  "labelEstimatedCostOptional": "Estimated Cost (optional)",
+  "servicesErrorTitle": "حدث خطأ ما",
+  "servicesEmptyTitle": "لا توجد خدمات بعد",
+  "servicesEmptySubtitle": "عد لاحقاً للاطلاع على خدمات جديدة",
+  "handymanNewRequestTitle": "طلب خدمة جديد",
+  "validationHandymanSelectLocation": "يرجى اختيار موقع",
+  "validationHandymanSelectDateTime": "يرجى اختيار التاريخ والوقت",
+  "validationHandymanSelectSkill": "يرجى اختيار مهارة واحدة على الأقل",
+  "handymanRequestCreatedToast": "تم إنشاء الطلب",
+  "handymanRequestCreateFailed": "فشل إنشاء الطلب",
+  "labelTitle": "العنوان",
+  "hintTitleHandymanExample": "مثال: إصلاح صنبور يسرب",
+  "validationTitleRequired": "العنوان مطلوب",
+  "validationDescriptionRequired": "الوصف مطلوب",
+  "hintDescribeRepair": "صف الإصلاح أو الصيانة المطلوبة",
+  "handymanTapToSelectLocation": "اضغط لاختيار الموقع",
+  "labelScheduledDateTime": "التاريخ والوقت المحدد",
+  "selectDateAndTime": "اختر التاريخ والوقت",
+  "labelEstimatedCostOptional": "التكلفة التقديرية (اختياري)",
   "hintCostExample": "e.g. 100",
-  "handymanSkillsNeeded": "Skills needed",
-  "handymanSkillPlumbing": "Plumbing",
-  "handymanSkillElectrical": "Electrical",
-  "handymanSkillCarpentry": "Carpentry",
-  "handymanSkillPainting": "Painting",
-  "handymanSkillGeneral": "General",
-  "labelToolsCommaSeparated": "Tools needed (comma-separated)",
-  "hintToolsHandymanExample": "e.g. wrench set, plumber's tape",
-  "labelEstimatedHoursOptional": "Estimated hours (optional)",
+  "handymanSkillsNeeded": "المهارات المطلوبة",
+  "handymanSkillPlumbing": "سباكة",
+  "handymanSkillElectrical": "كهرباء",
+  "handymanSkillCarpentry": "نجارة",
+  "handymanSkillPainting": "دهان",
+  "handymanSkillGeneral": "عام",
+  "labelToolsCommaSeparated": "الأدوات المطلوبة (مفصولة بفواصل)",
+  "hintToolsHandymanExample": "مثال: طقم مفاتيح، شريط سباكة",
+  "labelEstimatedHoursOptional": "الساعات التقديرية (اختياري)",
   "hintHoursExample": "e.g. 2",
-  "handymanCreateRequestCta": "Create Request",
-  "handymanDialogCancelRequestTitle": "Cancel Request",
-  "handymanDialogCancelRequestMessage": "Are you sure you want to cancel this service request?",
-  "actionNo": "No",
-  "actionYesCancel": "Yes, Cancel",
-  "handymanRequestCancelled": "Request cancelled",
-  "handymanCancelFailed": "Failed to cancel",
-  "handymanLabelScheduled": "Scheduled",
-  "handymanSectionRequirements": "Requirements",
-  "handymanToolsLine": "Tools: {tools}",
+  "handymanCreateRequestCta": "إنشاء طلب",
+  "handymanDialogCancelRequestTitle": "إلغاء الطلب",
+  "handymanDialogCancelRequestMessage": "هل أنت متأكد أنك تريد إلغاء طلب الخدمة هذا؟",
+  "actionNo": "لا",
+  "actionYesCancel": "نعم، إلغاء",
+  "handymanRequestCancelled": "تم إلغاء الطلب",
+  "handymanCancelFailed": "فشل الإلغاء",
+  "handymanLabelScheduled": "مجدول",
+  "handymanSectionRequirements": "المتطلبات",
+  "handymanToolsLine": "الأدوات: {tools}",
   "@handymanToolsLine": {
     "placeholders": {
       "tools": {
@@ -858,7 +865,7 @@
       }
     }
   },
-  "handymanEstHoursLine": "Est. hours: {hours}",
+  "handymanEstHoursLine": "ساعات تقديرية: {hours}",
   "@handymanEstHoursLine": {
     "placeholders": {
       "hours": {
@@ -866,7 +873,7 @@
       }
     }
   },
-  "handymanViewQuotesCta": "View {count} quote(s)",
+  "handymanViewQuotesCta": "عرض {count} عرض سعر",
   "@handymanViewQuotesCta": {
     "placeholders": {
       "count": {
@@ -874,12 +881,12 @@
       }
     }
   },
-  "handymanCancelRequest": "Cancel Request",
-  "handymanRateServiceTitle": "Rate Service",
-  "handymanProviderFallback": "Provider",
-  "handymanQuotesTitle": "Quotes",
-  "handymanAcceptQuoteTitle": "Accept Quote",
-  "handymanAcceptQuoteMessage": "Accept {amount} from {name}?",
+  "handymanCancelRequest": "إلغاء الطلب",
+  "handymanRateServiceTitle": "قيّم الخدمة",
+  "handymanProviderFallback": "المزود",
+  "handymanQuotesTitle": "عروض الأسعار",
+  "handymanAcceptQuoteTitle": "قبول العرض",
+  "handymanAcceptQuoteMessage": "قبول {amount} من {name}؟",
   "@handymanAcceptQuoteMessage": {
     "placeholders": {
       "amount": {
@@ -890,12 +897,12 @@
       }
     }
   },
-  "actionAccept": "Accept",
-  "actionReject": "Reject",
-  "handymanQuoteAccepted": "Quote accepted",
-  "handymanAcceptQuoteFailed": "Failed to accept",
-  "handymanRejectQuoteTitle": "Reject Quote",
-  "handymanRejectQuoteMessage": "Reject quote from {name}?",
+  "actionAccept": "قبول",
+  "actionReject": "رفض",
+  "handymanQuoteAccepted": "تم قبول العرض",
+  "handymanAcceptQuoteFailed": "فشل القبول",
+  "handymanRejectQuoteTitle": "رفض العرض",
+  "handymanRejectQuoteMessage": "رفض عرض {name}؟",
   "@handymanRejectQuoteMessage": {
     "placeholders": {
       "name": {
@@ -903,25 +910,25 @@
       }
     }
   },
-  "handymanQuoteRejected": "Quote rejected",
-  "handymanRejectQuoteFailed": "Failed to reject",
-  "handymanNoQuotesYet": "No quotes yet",
-  "handymanNoQuotesSubtitle": "Handymen will send quotes soon",
-  "handymanViewProfile": "View Profile",
-  "handymanHowWasService": "How was the service?",
-  "handymanRateTheHandyman": "Rate the handyman",
-  "handymanCommentAboutOptional": "Comment about handyman (optional)",
-  "handymanRatingPublic": "Make my rating public",
-  "handymanSubmitRating": "Submit Rating",
-  "ratingThankYou": "Thank you for your rating!",
-  "ratingSubmitFailed": "Failed to submit rating",
-  "handymanNotFound": "Handyman not found",
-  "handymanProfileTitle": "Handyman Profile",
-  "handymanAbout": "About",
-  "handymanSkillsHeading": "Skills",
-  "handymanHourlyRateLabel": "Hourly Rate",
-  "handymanExperienceLabel": "Experience",
-  "handymanExperienceYears": "{years} years",
+  "handymanQuoteRejected": "تم رفض العرض",
+  "handymanRejectQuoteFailed": "فشل الرفض",
+  "handymanNoQuotesYet": "لا توجد عروض بعد",
+  "handymanNoQuotesSubtitle": "سيرسل الفنيون عروض الأسعار قريباً",
+  "handymanViewProfile": "عرض الملف",
+  "handymanHowWasService": "كيف كانت الخدمة؟",
+  "handymanRateTheHandyman": "قيّم الفني",
+  "handymanCommentAboutOptional": "تعليق عن الفني (اختياري)",
+  "handymanRatingPublic": "اجعل تقييمي عاماً",
+  "handymanSubmitRating": "إرسال التقييم",
+  "ratingThankYou": "شكراً لتقييمك!",
+  "ratingSubmitFailed": "فشل إرسال التقييم",
+  "handymanNotFound": "الفني غير موجود",
+  "handymanProfileTitle": "ملف الفني",
+  "handymanAbout": "نبذة",
+  "handymanSkillsHeading": "المهارات",
+  "handymanHourlyRateLabel": "الأجر بالساعة",
+  "handymanExperienceLabel": "الخبرة",
+  "handymanExperienceYears": "{years} سنوات",
   "@handymanExperienceYears": {
     "placeholders": {
       "years": {
@@ -929,17 +936,17 @@
       }
     }
   },
-  "labelAddress": "Address",
-  "handymanStatsHeading": "Stats",
-  "handymanStatServices": "Services",
-  "handymanStatRating": "Rating",
-  "handymanStatResponse": "Response",
-  "forgotPasswordLink": "Forgot password?",
-  "forgotPasswordRequestTitle": "Reset password",
-  "forgotPasswordRequestSubtitle": "Enter your email or phone number. We'll send a 6-digit verification code.",
-  "forgotPasswordSendCode": "Send code",
-  "forgotPasswordVerifyTitle": "Enter verification code",
-  "forgotPasswordVerifySubtitle": "We sent a code to {identifier}.",
+  "labelAddress": "العنوان",
+  "handymanStatsHeading": "إحصاءات",
+  "handymanStatServices": "خدمات",
+  "handymanStatRating": "التقييم",
+  "handymanStatResponse": "الاستجابة",
+  "forgotPasswordLink": "نسيت كلمة المرور؟",
+  "forgotPasswordRequestTitle": "إعادة تعيين كلمة المرور",
+  "forgotPasswordRequestSubtitle": "أدخل بريدك أو رقم هاتفك. سنرسل رمز تحقق مكوّناً من 6 أرقام.",
+  "forgotPasswordSendCode": "إرسال الرمز",
+  "forgotPasswordVerifyTitle": "أدخل رمز التحقق",
+  "forgotPasswordVerifySubtitle": "أرسلنا رمزاً إلى {identifier}.",
   "@forgotPasswordVerifySubtitle": {
     "placeholders": {
       "identifier": {
@@ -947,8 +954,8 @@
       }
     }
   },
-  "forgotPasswordOtpLabel": "6-digit code",
-  "forgotPasswordTimeRemaining": "Time remaining: {time}",
+  "forgotPasswordOtpLabel": "رمز من 6 أرقام",
+  "forgotPasswordTimeRemaining": "الوقت المتبقي: {time}",
   "@forgotPasswordTimeRemaining": {
     "placeholders": {
       "time": {
@@ -956,18 +963,18 @@
       }
     }
   },
-  "forgotPasswordCodeExpired": "This code has expired. Tap resend for a new code.",
-  "forgotPasswordResend": "Resend code",
-  "forgotPasswordVerifyButton": "Verify",
-  "forgotPasswordNewTitle": "Create new password",
-  "forgotPasswordNewSubtitle": "Use at least 8 characters.",
-  "forgotPasswordLabelConfirmPassword": "Confirm password",
-  "forgotPasswordHintConfirmPassword": "Re-enter new password",
-  "forgotPasswordSaveButton": "Save password",
-  "forgotPasswordSuccessMessage": "Password updated. You can sign in now.",
-  "validationOtpLength": "Enter the 6-digit code",
-  "validationConfirmPasswordRequired": "Please confirm your password",
-  "validationPasswordsDoNotMatch": "Passwords do not match",
+  "forgotPasswordCodeExpired": "انتهت صلاحية هذا الرمز. اضغط إعادة الإرسال للحصول على رمز جديد.",
+  "forgotPasswordResend": "إعادة إرسال الرمز",
+  "forgotPasswordVerifyButton": "تحقق",
+  "forgotPasswordNewTitle": "إنشاء كلمة مرور جديدة",
+  "forgotPasswordNewSubtitle": "استخدم 8 أحرف على الأقل.",
+  "forgotPasswordLabelConfirmPassword": "تأكيد كلمة المرور",
+  "forgotPasswordHintConfirmPassword": "أعد إدخال كلمة المرور الجديدة",
+  "forgotPasswordSaveButton": "حفظ كلمة المرور",
+  "forgotPasswordSuccessMessage": "تم تحديث كلمة المرور. يمكنك تسجيل الدخول الآن.",
+  "validationOtpLength": "أدخل الرمز المكوّن من 6 أرقام",
+  "validationConfirmPasswordRequired": "يرجى تأكيد كلمة المرور",
+  "validationPasswordsDoNotMatch": "كلمتا المرور غير متطابقتين",
   "addressesTitle": "عناويني",
   "addressesEmptyTitle": "لا توجد عناوين محفوظة",
   "addressesEmptySubtitle": "أضف عنوانًا لتسريع الدفع والتوصيل.",
@@ -1055,6 +1062,84 @@
   "chatFile": "ملف",
   "chatLoadError": "تعذر تحميل الرسائل",
   "chatCreateSupport": "بدء المحادثة",
+  "sosSettingsTitle": "السلامة وSOS",
+  "sosEmergencyContacts": "جهات اتصال الطوارئ",
+  "sosEmergencyContactsSubtitle": "الأشخاص الذين يُبلَّغون عند تشغيل SOS",
+  "sosHistory": "سجل SOS",
+  "sosHistorySubtitle": "عرض التنبيهات السابقة",
+  "sosTrigger": "تشغيل SOS",
+  "sosTriggerSubtitle": "أرسل تنبيه طوارئ مع موقعك",
+  "sosTriggerConfirmTitle": "إرسال تنبيه SOS؟",
+  "sosTriggerConfirmMessage": "سيتم إبلاغ جهات اتصال الطوارئ بموقعك الحالي. استخدمه في حالة طوارئ حقيقية فقط.",
+  "sosDescriptionHint": "صف وضعك (اختياري)",
+  "sosLocationRequired": "الموقع مطلوب لإرسال تنبيه SOS. يرجى تفعيل أذونات الموقع.",
+  "sosContactAdded": "تمت إضافة جهة اتصال الطوارئ",
+  "sosContactUpdated": "تم تحديث جهة اتصال الطوارئ",
+  "sosContactDeleted": "تم حذف جهة اتصال الطوارئ",
+  "sosTriggered": "تم إرسال تنبيه SOS بنجاح",
+  "sosAddContact": "إضافة جهة اتصال",
+  "sosEditContact": "تعديل جهة الاتصال",
+  "sosNoContacts": "لا توجد جهات اتصال للطوارئ بعد",
+  "sosNoContactsSubtitle": "أضف شخصاً يجب إبلاغه في حالة الطوارئ.",
+  "sosNoHistory": "لا توجد تنبيهات SOS بعد",
+  "sosName": "الاسم الكامل",
+  "sosPhone": "رقم الهاتف",
+  "sosEmail": "البريد الإلكتروني (اختياري)",
+  "sosRelationship": "صلة القرابة",
+  "sosPrimaryContact": "جهة الاتصال الأساسية",
+  "sosDeleteContact": "حذف جهة الاتصال",
+  "sosDeleteContactConfirm": "إزالة جهة اتصال الطوارئ هذه؟",
+  "sosStatusActive": "نشط",
+  "sosStatusAll": "الكل",
+  "sosCancel": "إلغاء",
+  "sosSendAlert": "إرسال التنبيه",
+  "sosSaving": "جارٍ الحفظ…",
+  "guestBrowseBanner": "تصفح كضيف",
+  "guestBrowseSignIn": "تسجيل الدخول",
+  "guestSignInRequiredTitle": "تسجيل الدخول مطلوب",
+  "guestSignInRequiredMessage": "أنشئ حساباً أو سجّل الدخول لاستخدام هذه الميزة.",
+  "guestSignInRequiredCheckout": "سجّل الدخول لإتمام الطلبات والدفع.",
+  "guestOrdersSignIn": "سجّل الدخول لعرض سجل طلباتك.",
+  "guestProfileSignIn": "سجّل الدخول للوصول إلى ملفك الشخصي والإعدادات.",
+  "guestServiceSignIn": "سجّل الدخول لاستخدام هذه الخدمة.",
+  "courierSignInRequired": "سجّل الدخول لإرسال الطرود.",
+  "courierPhoneVerificationRequired": "تحقق من رقم هاتفك قبل إرسال الطرود.",
+  "wishlistNotesHint": "أضف ملاحظة (اختياري)",
+  "wishlistNotesUpdated": "تم تحديث الملاحظة",
+  "wishlistShareTitle": "مشاركة قائمة الرغبات",
+  "wishlistShareSuccess": "تمت مشاركة قائمة الرغبات بنجاح",
+  "wishlistPriceDropsTitle": "انخفاض السعر",
+  "wishlistPriceDropsEmpty": "لا توجد تخفيضات حالياً",
+  "wishlistMigrateError": "تعذر مزامنة العناصر المحفوظة مع حسابك",
+  "tipsTitle": "الإكراميات",
+  "tipsAddTitle": "إضافة إكرامية",
+  "tipsHistoryTitle": "سجل الإكراميات",
+  "tipsRecipientLabel": "مستلم الإكرامية",
+  "tipsRecipientDriver": "السائق",
+  "tipsRecipientVendor": "المطعم",
+  "tipsRecipientBoth": "كلاهما",
+  "tipsCalculatedAmount": "مبلغ الإكرامية: ETB {amount}",
+  "@tipsCalculatedAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "tipsSubmit": "إرسال الإكرامية",
+  "tipsSuccess": "تم إرسال الإكرامية بنجاح",
+  "tipsLoadError": "تعذر تحميل الإكراميات",
+  "tipsCardComingSoon": "مدفوعات البطاقة قريباً",
+  "tipsAnonymous": "إرسال دون اسم",
+  "tipsMessageHint": "أضف رسالة (اختياري)",
+  "tipsStatsTotal": "الإكراميات المرسلة",
+  "tipsStatsAmount": "الإجمالي",
+  "tipsStatsAverage": "المتوسط",
+  "tipsHistoryEmpty": "لا توجد إكراميات بعد",
+  "tipsPaymentWallet": "المحفظة",
+  "tipsPaymentCard": "بطاقة",
+  "tipsStatusCompleted": "مكتمل",
+  "tipsStatusAll": "الكل",
   "onboardingWelcomeTitle": "مرحباً بك في هدهد!",
   "onboardingWelcomeSubtitle": "أرسل الطرود عبر المدينة اليوم — الطعام والمشاوير والخدمات المنزلية قادمة قريباً.",
   "onboardingFoodTitle": "طعام وبقالة",
@@ -1093,5 +1178,91 @@
   "handymanComingSoonTitle": "المساعدة في الطريق",
   "handymanComingSoonSubtitle": "فنيون موثوقون لإصلاحات المنزل — نضع اللمسات الأخيرة.",
   "handymanComingSoonTeaser1": "محترفون مهرة",
-  "handymanComingSoonTeaser2": "إصلاحات منزلية"
+  "handymanComingSoonTeaser2": "إصلاحات منزلية",
+  "pleaseEnterValidSenderPhone": "يرجى إدخال رقم هاتف مرسل صالح (09xxxxxxxx)",
+  "trackingCodeCopied": "تم نسخ رمز التتبع",
+  "chatMissingDeliveryId": "تعذر فتح المحادثة. معرّف التوصيل مفقود.",
+  "waitForPriceEstimate": "انتظر تقدير السعر من الخادم قبل الحجز",
+  "invalidDeliveryId": "معرّف توصيل غير صالح من إنشاء التوصيل",
+  "deliveryBookedWallet": "تم حجز التوصيل عبر المحفظة",
+  "cancelDeliveryTitle": "إلغاء التوصيل",
+  "insufficientWalletBalance": "رصيد المحفظة غير كافٍ",
+  "topUpAmount": "شحن {currency} {amount}",
+  "@topUpAmount": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "loadMore": "تحميل المزيد",
+  "viewMap": "عرض الخريطة",
+  "usePin": "استخدم الدبوس",
+  "copyOrderId": "نسخ معرّف الطلب",
+  "shareOrder": "مشاركة الطلب",
+  "cartEmpty": "سلتك فارغة",
+  "promoCodeApplied": "تم تطبيق رمز العرض \"{promoCode}\"",
+  "@promoCodeApplied": {
+    "placeholders": {
+      "promoCode": {
+        "type": "String"
+      }
+    }
+  },
+  "addressUpdatedTo": "تم تحديث العنوان إلى: {address}",
+  "@addressUpdatedTo": {
+    "placeholders": {
+      "address": {
+        "type": "String"
+      }
+    }
+  },
+  "addValidProductsToCart": "يرجى إضافة منتجات صالحة إلى سلتك",
+  "chooseDeliveryLocationFromMap": "يرجى اختيار موقع التوصيل من الخريطة",
+  "selectEbirrProvider": "يرجى اختيار مزود eBirr",
+  "unableToDetermineStore": "تعذر تحديد المتجر لهذا الطلب",
+  "gallery": "المعرض",
+  "camera": "الكاميرا",
+  "photoPermissionRequired": "مطلوب إذن الكاميرا أو الصور",
+  "couldNotOpenPhotoPicker": "تعذر فتح منتقي الصور: {error}",
+  "@couldNotOpenPhotoPicker": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "pleaseEnterYourName": "يرجى إدخال اسمك",
+  "updateFromStore": "التحديث من المتجر",
+  "openPaymentPage": "فتح صفحة الدفع",
+  "paymentRefreshFailed": "تعذر تحديث حالة الدفع",
+  "searchProductsTitle": "البحث عن منتجات",
+  "calories": "سعرات",
+  "protein": "بروتين",
+  "actionChange": "تغيير",
+  "productUnavailable": "هذا المنتج غير متاح حالياً",
+  "cancelTripTitle": "إلغاء الرحلة",
+  "cancelTripConfirm": "هل أنت متأكد أنك تريد إلغاء هذه الرحلة؟",
+  "unableToCancelRide": "تعذر إلغاء الرحلة. معرّف الرحلة مفقود.",
+  "invalidQuoteAmount": "مبلغ عرض السعر غير صالح للدفع",
+  "noOrdersYetStore": "لا توجد طلبات بعد",
+  "retryPaymentTitle": "إعادة محاولة الدفع",
+  "retryPaymentSubtitle": "اختر طريقة دفع للمتابعة",
+  "deliveryBookedWalletBalance": "تم حجز التوصيل. رصيد المحفظة: {currency} {balance}",
+  "@deliveryBookedWalletBalance": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      },
+      "balance": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelDeliveryConfirm": "هل أنت متأكد أنك تريد إلغاء هذا التوصيل؟",
+  "cancelDeliveryConfirmRefund": "هل أنت متأكد أنك تريد إلغاء هذا التوصيل؟ سيتم استرداد المبلغ المؤكد إلى محفظتك.",
+  "cancelOrder": "إلغاء الطلب"
 }

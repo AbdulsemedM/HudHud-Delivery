@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Persists the user's app language (English + regional languages).
@@ -29,6 +30,7 @@ class LocaleController extends ChangeNotifier {
     final code = prefs.getString(_prefsKey);
     if (code != null && supportedLanguageCodes.contains(code)) {
       _locale = Locale(code);
+      Intl.defaultLocale = code;
       notifyListeners();
     }
   }
@@ -37,6 +39,7 @@ class LocaleController extends ChangeNotifier {
     if (!supportedLanguageCodes.contains(locale.languageCode)) return;
     if (_locale == locale) return;
     _locale = locale;
+    Intl.defaultLocale = locale.languageCode;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_prefsKey, locale.languageCode);
     notifyListeners();

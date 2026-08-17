@@ -108,8 +108,8 @@ class _ServiceQuotesScreenState extends State<ServiceQuotesScreen> {
           0;
       if (amount <= 0) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Invalid quote amount for payment'),
+          SnackBar(
+            content: Text(context.l10n.invalidQuoteAmount),
             backgroundColor: Colors.red,
           ),
         );

@@ -20,6 +20,7 @@
         tools:ignore="ScopedStorage" />
     
     <application
+        android:localeConfig="@xml/locales_config"
         android:label="HudHud Delivery"
         android:icon="@mipmap/ic_launcher">
         <activity

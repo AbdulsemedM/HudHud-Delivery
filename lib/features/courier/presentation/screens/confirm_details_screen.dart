@@ -6,6 +6,7 @@ import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/utils/payment_idempotency.dart';
 import 'package:hudhud_delivery/core/utils/phone_util.dart';
@@ -252,16 +253,16 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Insufficient wallet balance'),
+          title: Text(context.l10n.insufficientWalletBalance),
           content: Text(error.displayMessage),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, false),
-              child: const Text('Cancel'),
+              child: Text(context.l10n.actionCancel),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(dialogContext, true),
-              child: Text('Top up $currency $formattedTopUp'),
+              child: Text(context.l10n.topUpAmount(currency, formattedTopUp)),
             ),
           ],
         );
@@ -379,8 +380,8 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
   Future<void> _createDeliveryRequest() async {
     if (!_hasServerEstimate) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Wait for a server price estimate before booking'),
+        SnackBar(
+          content: Text(context.l10n.waitForPriceEstimate),
           backgroundColor: Colors.red,
         ),
       );
@@ -399,8 +400,8 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
           if (!mounted) return;
           setState(() => _isLoadingRequest = false);
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Please enter a valid sender phone (09xxxxxxxx)'),
+            SnackBar(
+              content: Text(context.l10n.pleaseEnterValidSenderPhone),
               backgroundColor: Colors.red,
             ),
           );
@@ -492,8 +493,8 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
         if (!created.isValid) {
           setState(() => _isLoadingRequest = false);
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Invalid delivery id from create delivery'),
+            SnackBar(
+              content: Text(context.l10n.invalidDeliveryId),
               backgroundColor: Colors.red,
             ),
           );
@@ -541,8 +542,10 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
-                  'Delivery booked. Wallet balance: '
-                  '${balance.currency} ${balance.balance.toStringAsFixed(2)}',
+                  context.l10n.deliveryBookedWalletBalance(
+                    balance.currency,
+                    balance.balance.toStringAsFixed(2),
+                  ),
                 ),
               ),
             );
@@ -550,8 +553,8 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
         } catch (_) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Delivery booked with wallet payment'),
+              SnackBar(
+                content: Text(context.l10n.deliveryBookedWallet),
               ),
             );
           }

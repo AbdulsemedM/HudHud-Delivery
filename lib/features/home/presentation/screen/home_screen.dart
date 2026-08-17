@@ -544,14 +544,14 @@ class _VerifyEmailDialogState extends State<_VerifyEmailDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Verify Email'),
+      title: Text(context.l10n.verifyEmailDialogTitle),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'We sent a verification code to ${widget.email}. Enter it below.',
+              context.l10n.verifyEmailBody(widget.email),
               style: TextStyle(color: Colors.grey[700], fontSize: 14),
             ),
             const SizedBox(height: 16),
@@ -559,10 +559,10 @@ class _VerifyEmailDialogState extends State<_VerifyEmailDialog> {
               controller: _codeController,
               keyboardType: TextInputType.number,
               maxLength: 6,
-              decoration: const InputDecoration(
-                labelText: 'Verification code',
-                hintText: 'e.g. 111248',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: context.l10n.verificationCodeLabel,
+                hintText: context.l10n.verificationCodeHintExample,
+                border: const OutlineInputBorder(),
                 counterText: '',
               ),
               onChanged: (_) => setState(() => _errorMessage = null),
@@ -584,7 +584,9 @@ class _VerifyEmailDialogState extends State<_VerifyEmailDialog> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.email_outlined, size: 18),
-              label: Text(_isSending ? 'Sending...' : 'Resend code'),
+              label: Text(_isSending
+                  ? context.l10n.actionSending
+                  : context.l10n.forgotPasswordResend),
             ),
           ],
         ),
@@ -592,7 +594,7 @@ class _VerifyEmailDialogState extends State<_VerifyEmailDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
-          child: const Text('Cancel'),
+          child: Text(context.l10n.actionCancel),
         ),
         FilledButton(
           onPressed: _isVerifying ? null : _verify,
@@ -602,7 +604,7 @@ class _VerifyEmailDialogState extends State<_VerifyEmailDialog> {
                   height: 20,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Text('Verify'),
+              : Text(context.l10n.actionVerify),
         ),
       ],
     );

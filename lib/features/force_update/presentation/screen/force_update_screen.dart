@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'package:hudhud_delivery/app/services/ota_log.dart';
 import 'package:hudhud_delivery/core/config/store_config.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 
 /// Blocking screen when the installed binary is below [minimumSupportedVersion].
@@ -109,7 +110,7 @@ class ForceUpdateScreen extends StatelessWidget {
                       backgroundColor: AppColors.primaryColor,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                    child: const Text('Update from store'),
+                    child: Text(context.l10n.updateFromStore),
                   ),
                   const SizedBox(height: 28),
                 ],

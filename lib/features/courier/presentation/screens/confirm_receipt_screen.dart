@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
@@ -127,7 +128,7 @@ class _ConfirmReceiptScreenState extends State<ConfirmReceiptScreen> {
                             ),
                           ),
                           const SizedBox(height: 16),
-                          TextButton(onPressed: _loadDelivery, child: const Text('Retry')),
+                          TextButton(onPressed: _loadDelivery, child: Text(context.l10n.actionRetry)),
                         ],
                       ),
                     ),

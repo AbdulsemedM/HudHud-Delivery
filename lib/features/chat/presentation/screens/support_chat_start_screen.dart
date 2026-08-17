@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/core/config/support_config.dart';
+import 'package:hudhud_delivery/core/utils/support_launcher.dart';
 import 'package:hudhud_delivery/features/chat/chat_bloc_provider.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
+import 'package:hudhud_delivery/features/settings/presentation/widgets/auth_feedback.dart';
 import 'package:hudhud_delivery/features/settings/presentation/widgets/profile_dark_page.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
 
@@ -105,6 +108,35 @@ class _SupportChatStartScreenState extends State<SupportChatStartScreen> {
                       ),
                     )
                   : Text(l10n.chatCreateSupport),
+            ),
+            const SizedBox(height: 28),
+            const Divider(color: AuthScreenColors.surfaceBorder),
+            const SizedBox(height: 20),
+            OutlinedButton.icon(
+              onPressed: _loading
+                  ? null
+                  : () async {
+                      final ok = await launchSupportEmail();
+                      if (context.mounted && !ok) {
+                        AuthSnackBar.error(context, l10n.actionTryAgain);
+                      }
+                    },
+              icon: const Icon(Icons.email_outlined, size: 20),
+              label: Text(l10n.settingsContactEmail),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AuthScreenColors.textPrimary,
+                side: const BorderSide(color: AuthScreenColors.surfaceBorder),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              SupportConfig.supportEmail,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: AuthScreenColors.textSecondary,
+                fontSize: 12,
+              ),
             ),
           ],
         ),

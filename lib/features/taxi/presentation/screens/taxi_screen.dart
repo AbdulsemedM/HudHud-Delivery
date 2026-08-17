@@ -315,8 +315,8 @@ class _TaxiScreenState extends State<TaxiScreen> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppColors.radiusLG),
         ),
-        title: const Text('Cancel Trip'),
-        content: const Text('Are you sure you want to cancel this trip?'),
+        title: Text(l10n.cancelTripTitle),
+        content: Text(l10n.cancelTripConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),

@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 
 import '../../bloc/categories_bloc.dart';
@@ -648,7 +649,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 
                                     onPressed: _fetchProducts,
 
-                                    child: const Text('Retry'),
+                                    child: Text(context.l10n.actionRetry),
 
                                   ),
 
@@ -816,7 +817,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 
                                         ),
 
-                                        child: const Text('Load more'),
+                                        child: Text(context.l10n.loadMore),
 
                                       ),
 

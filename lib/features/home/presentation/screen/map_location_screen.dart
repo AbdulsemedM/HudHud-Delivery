@@ -7,6 +7,7 @@ import 'package:hudhud_delivery/app/utils/human_readable_address.dart';
 import 'package:hudhud_delivery/app/services/custom_location_service.dart';
 import 'package:hudhud_delivery/app/services/startup_location_service.dart';
 import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/widgets/centered_pin_map.dart';
 
 class MapLocationScreen extends StatefulWidget {
@@ -369,9 +370,9 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
                       backgroundColor: Colors.orange,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
-                    child: const Text(
-                      'Select Location',
-                      style: TextStyle(color: Colors.white),
+                    child: Text(
+                      context.l10n.selectLocationTitle,
+                      style: const TextStyle(color: Colors.white),
                     ),
                   ),
                 ),
@@ -400,7 +401,7 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
     return Scaffold(
       backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        title: const Text('Select Location'),
+        title: Text(context.l10n.selectLocationTitle),
         backgroundColor: colorScheme.surface,
         foregroundColor: colorScheme.onSurface,
         elevation: 0,
@@ -555,7 +556,7 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
               FilledButton.icon(
                 onPressed: _getCurrentLocation,
                 icon: const Icon(Icons.refresh),
-                label: const Text('Try again'),
+                label: Text(context.l10n.actionTryAgain),
               ),
             ],
           ),
@@ -621,7 +622,7 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
                     TextButton(
                       onPressed: () =>
                           _confirmLocation(_centerPickPlace!),
-                      child: const Text('Use pin'),
+                      child: Text(context.l10n.usePin),
                     ),
                   ],
                 ),

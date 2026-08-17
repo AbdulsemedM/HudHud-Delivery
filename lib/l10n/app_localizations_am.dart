@@ -556,28 +556,28 @@ class AppLocalizationsAm extends AppLocalizations {
       'እባክህ መለያህን እና ሁሉንም ያሉትን አገልግሎቶች ለመድረስ ምስክርነትህን አስገባ';
 
   @override
-  String get brandTagline => 'DELIVERY, DELIVERED WELL';
+  String get brandTagline => 'መላኪያ፣ በደንብ የደረሰ';
 
   @override
-  String get splashTagline => 'YOUR CITY, DELIVERED';
+  String get splashTagline => 'ከተማዎ፣ የደረሰ';
 
   @override
-  String get splashStatus => 'Getting things moving…';
+  String get splashStatus => 'ነገሮችን እያንቀሳቀስን ነው…';
 
   @override
-  String get homeTabFood => 'Food';
+  String get homeTabFood => 'ምግብ';
 
   @override
-  String get homeTabCourier => 'Courier';
+  String get homeTabCourier => 'መልእክተኛ';
 
   @override
-  String get homeTabTaxi => 'Taxi';
+  String get homeTabTaxi => 'ታክሲ';
 
   @override
-  String get homeTabHandyman => 'Handyman';
+  String get homeTabHandyman => 'የቤት ሰራተኛ';
 
   @override
-  String get homeSearchHint => 'Search products everywhere';
+  String get homeSearchHint => 'ምርቶችን በሁሉም ቦታ ይፈልጉ';
 
   @override
   String get loginContinueAsGuest => 'እንደ እንግዳ ይቀጥሉ';
@@ -966,7 +966,7 @@ class AppLocalizationsAm extends AppLocalizations {
   String get cardLast4 => 'የመጨረሻው ካርድ 4 አሃዞች';
 
   @override
-  String get cardLast4Hint => '4242';
+  String get cardLast4Hint => 'ለምሳሌ 4242';
 
   @override
   String get cardBrand => 'የካርድ ብራንድ';
@@ -1271,52 +1271,49 @@ class AppLocalizationsAm extends AppLocalizations {
   String get referralCode => 'የማጣቀሻ ኮድ';
 
   @override
-  String get referralCodeOptional => 'Referral code — optional';
+  String get referralCodeOptional => 'የማጣቀሻ ኮድ — አማራጭ';
 
   @override
   String get hintReferralCode => 'UCZXSD3O';
 
   @override
-  String get signupTitle => 'Create your account';
+  String get signupTitle => 'መለያዎን ይፍጠሩ';
 
   @override
-  String get signupSubtitle =>
-      'Join Hudhud to order from every business in your city.';
+  String get signupSubtitle => 'ከከተማዎ ውስጥ ካሉ ንግዶች ለመዘዝ ሁድሁድን ይቀላቀሉ።';
 
   @override
-  String get hintCreatePassword => 'Create a password';
+  String get hintCreatePassword => 'የይለፍ ቃል ይፍጠሩ';
 
   @override
-  String get hintReenterPassword => 'Re-enter your password';
+  String get hintReenterPassword => 'የይለፍ ቃልዎን እንደገና ያስገቡ';
 
   @override
-  String get passwordStrengthHint => 'Use 8+ characters';
+  String get passwordStrengthHint => '8+ ቁምፊዎችን ይጠቀሙ';
 
   @override
-  String get signupAcceptTermsPrefix => 'I\'ve read and accepted Hudhud\'s ';
+  String get signupAcceptTermsPrefix => 'የሁድሁድን ';
 
   @override
-  String get signupTermsLink => 'terms and conditions';
+  String get signupTermsLink => 'ውሎች እና ሁኔታዎች';
 
   @override
-  String get signupConsentDataPrefix =>
-      'I consent to my data being processed under applicable ';
+  String get signupConsentDataPrefix => 'ውሂቤ በሚመለከተው ';
 
   @override
-  String get signupDataProtectionLink => 'data protection laws';
+  String get signupDataProtectionLink => 'የውሂብ ጥበቃ ሕግ';
 
   @override
-  String get alreadyHaveAccount => 'Already have an account? ';
+  String get alreadyHaveAccount => 'መለያ አለዎት? ';
 
   @override
-  String get createAccount => 'Create account';
+  String get createAccount => 'መለያ ፍጠር';
 
   @override
-  String get signupFormIncomplete => 'Please fill in all required fields';
+  String get signupFormIncomplete => 'እባክዎ ሁሉንም አስፈላጊ መስኮች ይሙሉ';
 
   @override
-  String get signupAcceptLegalRequired =>
-      'Please accept the terms and data protection consent';
+  String get signupAcceptLegalRequired => 'እባክዎ ውሎቹን እና የውሂብ ጥበቃ ፈቃድን ይቀበሉ';
 
   @override
   String get searchQuestions => 'ጥያቄ ፈልግ';
@@ -1755,7 +1752,7 @@ class AppLocalizationsAm extends AppLocalizations {
   String get meridiemAm => 'ጥዋት';
 
   @override
-  String get meridiemPm => 'ማታ';
+  String get meridiemPm => 'ከሰዓት';
 
   @override
   String get scheduleSelectDateTime => 'እባክዎ ለመላኪያ ቀን እና ሰዓት ይምረጡ';
@@ -2228,479 +2225,616 @@ class AppLocalizationsAm extends AppLocalizations {
   String get addressesDeletedSuccess => 'አድራሻ ተሰርዟል';
 
   @override
-  String get chatTitle => 'Messages';
+  String get chatTitle => 'መልእክቶች';
 
   @override
-  String get chatEmpty => 'No conversations yet';
+  String get chatEmpty => 'እስካሁን ውይይት የለም';
 
   @override
-  String get chatEmptySubtitle =>
-      'Start chatting about an order or contact support.';
+  String get chatEmptySubtitle => 'ስለ ትዕዛዝ ይወያዩ ወይም ድጋፍን ያግኙ።';
 
   @override
-  String get chatContactSupport => 'Contact support';
+  String get chatContactSupport => 'ድጋፍን ያግኙ';
 
   @override
-  String get chatViewOrders => 'View orders';
+  String get chatViewOrders => 'ትዕዛዞችን ይመልከቱ';
 
   @override
-  String get chatSearchHint => 'Search messages';
+  String get chatSearchHint => 'መልእክቶችን ይፈልጉ';
 
   @override
-  String get chatTypeMessage => 'Type a message…';
+  String get chatTypeMessage => 'መልእክት ይጻፉ…';
 
   @override
-  String get chatSend => 'Send';
+  String get chatSend => 'ላክ';
 
   @override
-  String get chatSupportSubject => 'What do you need help with?';
+  String get chatSupportSubject => 'በምን ልንረዳዎ እንችላለን?';
 
   @override
-  String get chatSupportSubjectHint => 'Brief subject';
+  String get chatSupportSubjectHint => 'አጭር ርዕስ';
 
   @override
-  String get chatSupportTitle => 'New support chat';
+  String get chatSupportTitle => 'አዲስ የድጋፍ ውይይት';
 
   @override
-  String get chatEdited => 'edited';
+  String get chatEdited => 'ተስተካክሏል';
 
   @override
-  String get chatDeleted => 'This message was deleted';
+  String get chatDeleted => 'ይህ መልእክት ተሰርዟል';
 
   @override
-  String get chatSendFailed => 'Couldn\'t send message';
+  String get chatSendFailed => 'መልእክት መላክ አልተቻለም';
 
   @override
-  String get chatOrderTitle => 'Order chat';
+  String get chatOrderTitle => 'የትዕዛዝ ውይይት';
 
   @override
-  String get chatSupportChatTitle => 'Support';
+  String get chatSupportChatTitle => 'ድጋፍ';
 
   @override
-  String get chatRideTitle => 'Ride chat';
+  String get chatRideTitle => 'የጉዞ ውይይት';
 
   @override
-  String get chatAttachImage => 'Gallery';
+  String get chatAttachImage => 'ጋለሪ';
 
   @override
-  String get chatAttachFile => 'Document';
+  String get chatAttachFile => 'ሰነድ';
 
   @override
-  String get chatAttachAudio => 'Voice';
+  String get chatAttachAudio => 'ድምጽ';
 
   @override
-  String get chatShareLocation => 'Location';
+  String get chatShareLocation => 'አካባቢ';
 
   @override
-  String get chatEditingMessage => 'Editing message';
+  String get chatEditingMessage => 'መልእክት በማስተካከል ላይ';
 
   @override
-  String get chatCopy => 'Copy';
+  String get chatCopy => 'ቅዳ';
 
   @override
-  String get chatEdit => 'Edit';
+  String get chatEdit => 'አርትዕ';
 
   @override
-  String get chatDelete => 'Delete';
+  String get chatDelete => 'ሰርዝ';
 
   @override
-  String get chatRetry => 'Tap to retry';
+  String get chatRetry => 'እንደገና ለመሞከር ይንኩ';
 
   @override
-  String get chatOpenMaps => 'Open in Maps';
+  String get chatOpenMaps => 'በካርታ ክፈት';
 
   @override
-  String get chatNewSupport => 'New support chat';
+  String get chatNewSupport => 'አዲስ የድጋፍ ውይይት';
 
   @override
-  String get chatTypeOrder => 'Order';
+  String get chatTypeOrder => 'ትዕዛዝ';
 
   @override
-  String get chatTypeSupport => 'Support';
+  String get chatTypeSupport => 'ድጋፍ';
 
   @override
-  String get chatTypeRide => 'Ride';
+  String get chatTypeRide => 'ጉዞ';
 
   @override
-  String get chatOpenOrder => 'View order';
+  String get chatOpenOrder => 'ትዕዛዝ ይመልከቱ';
 
   @override
-  String get chatRecording => 'Recording…';
+  String get chatRecording => 'በመቅዳት ላይ…';
 
   @override
-  String get chatSlideToCancel => 'Slide up to cancel';
+  String get chatSlideToCancel => 'ለመሰረዝ ወደ ላይ ያንሸራትቱ';
 
   @override
-  String get chatPhoto => 'Photo';
+  String get chatPhoto => 'ፎቶ';
 
   @override
-  String get chatVoiceMessage => 'Voice message';
+  String get chatVoiceMessage => 'የድምጽ መልእክት';
 
   @override
-  String get chatLocation => 'Location';
+  String get chatLocation => 'አካባቢ';
 
   @override
-  String get chatFile => 'File';
+  String get chatFile => 'ፋይል';
 
   @override
-  String get chatLoadError => 'Could not load messages';
+  String get chatLoadError => 'መልእክቶችን መጫን አልተቻለም';
 
   @override
-  String get chatCreateSupport => 'Start chat';
+  String get chatCreateSupport => 'ውይይት ጀምር';
 
   @override
-  String get sosSettingsTitle => 'Safety & SOS';
+  String get sosSettingsTitle => 'ደህንነት እና SOS';
 
   @override
-  String get sosEmergencyContacts => 'Emergency contacts';
+  String get sosEmergencyContacts => 'የአደጋ ጊዜ እውቂያዎች';
 
   @override
-  String get sosEmergencyContactsSubtitle =>
-      'People notified when you trigger SOS';
+  String get sosEmergencyContactsSubtitle => 'SOS ሲያስነሱ የሚነገራቸው ሰዎች';
 
   @override
-  String get sosHistory => 'SOS history';
+  String get sosHistory => 'የSOS ታሪክ';
 
   @override
-  String get sosHistorySubtitle => 'View past alerts';
+  String get sosHistorySubtitle => 'ያለፉ ማንቂያዎችን ይመልከቱ';
 
   @override
-  String get sosTrigger => 'Trigger SOS';
+  String get sosTrigger => 'SOS አስነሳ';
 
   @override
-  String get sosTriggerSubtitle => 'Send an emergency alert with your location';
+  String get sosTriggerSubtitle => 'ከአካባቢዎ ጋር የአደጋ ማንቂያ ይላኩ';
 
   @override
-  String get sosTriggerConfirmTitle => 'Send SOS alert?';
+  String get sosTriggerConfirmTitle => 'የSOS ማንቂያ ይላክ?';
 
   @override
   String get sosTriggerConfirmMessage =>
-      'Your emergency contacts will be notified with your current location. Only use in a real emergency.';
+      'የአደጋ ጊዜ እውቂያዎችዎ ከአሁኑ አካባቢዎ ጋር ይነገራሉ። በእውነተኛ አደጋ ብቻ ይጠቀሙ።';
 
   @override
-  String get sosDescriptionHint => 'Describe your situation (optional)';
+  String get sosDescriptionHint => 'ሁኔታዎን ይግለጹ (አማራጭ)';
 
   @override
-  String get sosLocationRequired =>
-      'Location is required to send an SOS alert. Please enable location permissions.';
+  String get sosLocationRequired => 'SOS ለመላክ አካባቢ ያስፈልጋል። እባክዎ የአካባቢ ፈቃድ ያንቁ።';
 
   @override
-  String get sosContactAdded => 'Emergency contact added';
+  String get sosContactAdded => 'የአደጋ ጊዜ እውቂያ ታክሏል';
 
   @override
-  String get sosContactUpdated => 'Emergency contact updated';
+  String get sosContactUpdated => 'የአደጋ ጊዜ እውቂያ ተዘምኗል';
 
   @override
-  String get sosContactDeleted => 'Emergency contact deleted';
+  String get sosContactDeleted => 'የአደጋ ጊዜ እውቂያ ተሰርዟል';
 
   @override
-  String get sosTriggered => 'SOS alert sent successfully';
+  String get sosTriggered => 'የSOS ማንቂያ በተሳካ ሁኔታ ተልኳል';
 
   @override
-  String get sosAddContact => 'Add contact';
+  String get sosAddContact => 'እውቂያ ጨምር';
 
   @override
-  String get sosEditContact => 'Edit contact';
+  String get sosEditContact => 'እውቂያ አርትዕ';
 
   @override
-  String get sosNoContacts => 'No emergency contacts yet';
+  String get sosNoContacts => 'እስካሁን የአደጋ ጊዜ እውቂያ የለም';
 
   @override
-  String get sosNoContactsSubtitle =>
-      'Add someone who should be notified in an emergency.';
+  String get sosNoContactsSubtitle => 'በአደጋ ጊዜ ሊነገረው የሚገባ ሰው ያክሉ።';
 
   @override
-  String get sosNoHistory => 'No SOS alerts yet';
+  String get sosNoHistory => 'እስካሁን የSOS ማንቂያ የለም';
 
   @override
-  String get sosName => 'Full name';
+  String get sosName => 'ሙሉ ስም';
 
   @override
-  String get sosPhone => 'Phone number';
+  String get sosPhone => 'ስልክ ቁጥር';
 
   @override
-  String get sosEmail => 'Email (optional)';
+  String get sosEmail => 'ኢሜይል (አማራጭ)';
 
   @override
-  String get sosRelationship => 'Relationship';
+  String get sosRelationship => 'ግንኙነት';
 
   @override
-  String get sosPrimaryContact => 'Primary contact';
+  String get sosPrimaryContact => 'ዋና እውቂያ';
 
   @override
-  String get sosDeleteContact => 'Delete contact';
+  String get sosDeleteContact => 'እውቂያ ሰርዝ';
 
   @override
-  String get sosDeleteContactConfirm => 'Remove this emergency contact?';
+  String get sosDeleteContactConfirm => 'ይህን የአደጋ ጊዜ እውቂያ ያስወግዱ?';
 
   @override
-  String get sosStatusActive => 'Active';
+  String get sosStatusActive => 'ንቁ';
 
   @override
-  String get sosStatusAll => 'All';
+  String get sosStatusAll => 'ሁሉም';
 
   @override
-  String get sosCancel => 'Cancel';
+  String get sosCancel => 'ሰርዝ';
 
   @override
-  String get sosSendAlert => 'Send alert';
+  String get sosSendAlert => 'ማንቂያ ላክ';
 
   @override
-  String get sosSaving => 'Saving…';
+  String get sosSaving => 'በማስቀመጥ ላይ…';
 
   @override
-  String get guestBrowseBanner => 'Browsing as guest';
+  String get guestBrowseBanner => 'እንደ እንግዳ በመመልከት ላይ';
 
   @override
-  String get guestBrowseSignIn => 'Sign in';
+  String get guestBrowseSignIn => 'ግባ';
 
   @override
-  String get guestSignInRequiredTitle => 'Sign in required';
+  String get guestSignInRequiredTitle => 'መግባት ያስፈልጋል';
 
   @override
-  String get guestSignInRequiredMessage =>
-      'Create an account or sign in to use this feature.';
+  String get guestSignInRequiredMessage => 'ይህን ባህሪ ለመጠቀም መለያ ይፍጠሩ ወይም ይግቡ።';
 
   @override
-  String get guestSignInRequiredCheckout =>
-      'Sign in to place orders and complete checkout.';
+  String get guestSignInRequiredCheckout => 'ትዕዛዝ ለመስጠት እና ክፍያ ለመጨረስ ይግቡ።';
 
   @override
-  String get guestOrdersSignIn => 'Sign in to view your order history.';
+  String get guestOrdersSignIn => 'የትዕዛዝ ታሪክዎን ለማየት ይግቡ።';
 
   @override
-  String get guestProfileSignIn =>
-      'Sign in to access your profile and settings.';
+  String get guestProfileSignIn => 'መገለጫዎን እና ቅንብሮችን ለማግኘት ይግቡ።';
 
   @override
-  String get guestServiceSignIn => 'Sign in to use this service.';
+  String get guestServiceSignIn => 'ይህን አገልግሎት ለመጠቀም ይግቡ።';
 
   @override
-  String get courierSignInRequired => 'Sign in to send packages.';
+  String get courierSignInRequired => 'ጥቅሎችን ለመላክ ይግቡ።';
 
   @override
   String get courierPhoneVerificationRequired =>
-      'Verify your phone number before sending packages.';
+      'ጥቅሎችን ከመላክዎ በፊት ስልክ ቁጥርዎን ያረጋግጡ።';
 
   @override
-  String get wishlistNotesHint => 'Add a note (optional)';
+  String get wishlistNotesHint => 'ማስታወሻ ጨምር (አማራጭ)';
 
   @override
-  String get wishlistNotesUpdated => 'Note updated';
+  String get wishlistNotesUpdated => 'ማስታወሻ ተዘምኗል';
 
   @override
-  String get wishlistShareTitle => 'Share wishlist';
+  String get wishlistShareTitle => 'የምኞት ዝርዝር አጋራ';
 
   @override
-  String get wishlistShareSuccess => 'Wishlist shared successfully';
+  String get wishlistShareSuccess => 'የምኞት ዝርዝር በተሳካ ሁኔታ ተጋርቷል';
 
   @override
-  String get wishlistPriceDropsTitle => 'Price drop';
+  String get wishlistPriceDropsTitle => 'የዋጋ ቅናሽ';
 
   @override
-  String get wishlistPriceDropsEmpty => 'No price drops right now';
+  String get wishlistPriceDropsEmpty => 'አሁን የዋጋ ቅናሽ የለም';
 
   @override
-  String get wishlistMigrateError =>
-      'Could not sync saved items to your account';
+  String get wishlistMigrateError => 'የተቀመጡ ንጥሎችን ወደ መለያዎ ማመሳሰል አልተቻለም';
 
   @override
-  String get tipsTitle => 'Tips';
+  String get tipsTitle => 'ጠቃሚ ገንዘብ';
 
   @override
-  String get tipsAddTitle => 'Add a tip';
+  String get tipsAddTitle => 'ጠቃሚ ገንዘብ ጨምር';
 
   @override
-  String get tipsHistoryTitle => 'Tip history';
+  String get tipsHistoryTitle => 'የጠቃሚ ገንዘብ ታሪክ';
 
   @override
-  String get tipsRecipientLabel => 'Tip recipient';
+  String get tipsRecipientLabel => 'ተቀባይ';
 
   @override
-  String get tipsRecipientDriver => 'Driver';
+  String get tipsRecipientDriver => 'ሹፌር';
 
   @override
-  String get tipsRecipientVendor => 'Restaurant';
+  String get tipsRecipientVendor => 'ምግብ ቤት';
 
   @override
-  String get tipsRecipientBoth => 'Both';
+  String get tipsRecipientBoth => 'ሁለቱም';
 
   @override
   String tipsCalculatedAmount(String amount) {
-    return 'Tip amount: ETB $amount';
+    return 'መጠን: ETB $amount';
   }
 
   @override
-  String get tipsSubmit => 'Send tip';
+  String get tipsSubmit => 'ጠቃሚ ገንዘብ ላክ';
 
   @override
-  String get tipsSuccess => 'Tip sent successfully';
+  String get tipsSuccess => 'ጠቃሚ ገንዘብ በተሳካ ሁኔታ ተልኳል';
 
   @override
-  String get tipsLoadError => 'Could not load tips';
+  String get tipsLoadError => 'ጠቃሚ ገንዘብ መጫን አልተቻለም';
 
   @override
-  String get tipsCardComingSoon => 'Card payments coming soon';
+  String get tipsCardComingSoon => 'የካርድ ክፍያ በቅርቡ';
 
   @override
-  String get tipsAnonymous => 'Send anonymously';
+  String get tipsAnonymous => 'በስም አልባ ላክ';
 
   @override
-  String get tipsMessageHint => 'Add a message (optional)';
+  String get tipsMessageHint => 'መልእክት ጨምር (አማራጭ)';
 
   @override
-  String get tipsStatsTotal => 'Tips given';
+  String get tipsStatsTotal => 'የተላኩ ጠቃሚ ገንዘቦች';
 
   @override
-  String get tipsStatsAmount => 'Total tipped';
+  String get tipsStatsAmount => 'ጠቅላላ';
 
   @override
-  String get tipsStatsAverage => 'Average tip';
+  String get tipsStatsAverage => 'አማካይ';
 
   @override
-  String get tipsHistoryEmpty => 'No tips yet';
+  String get tipsHistoryEmpty => 'እስካሁን ጠቃሚ ገንዘብ የለም';
 
   @override
-  String get tipsPaymentWallet => 'Wallet';
+  String get tipsPaymentWallet => 'ዋሌት';
 
   @override
-  String get tipsPaymentCard => 'Card';
+  String get tipsPaymentCard => 'ካርድ';
 
   @override
-  String get tipsStatusCompleted => 'Completed';
+  String get tipsStatusCompleted => 'ተጠናቋል';
 
   @override
-  String get tipsStatusAll => 'All';
+  String get tipsStatusAll => 'ሁሉም';
 
   @override
-  String get onboardingWelcomeTitle => 'Welcome to HudHud!';
+  String get onboardingWelcomeTitle => 'ወደ ሁድሁድ እንኳን ደህና መጡ!';
 
   @override
   String get onboardingWelcomeSubtitle =>
-      'Send parcels across town today — food, rides, and home services are coming soon.';
+      'ዛሬ ጥቅሎችን በከተማው ላይ ይላኩ — ምግብ፣ ጉዞ እና የቤት አገልግሎቶች በቅርቡ ይመጣሉ።';
 
   @override
-  String get onboardingFoodTitle => 'Food & Groceries';
+  String get onboardingFoodTitle => 'ምግብ እና ግሮሰሪ';
 
   @override
   String get onboardingFoodDescription =>
-      'Coming soon — order meals and groceries from local shops in minutes.';
+      'በቅርቡ — ምግብ እና ግሮሰሪ ከአካባቢ ሱቆች በደቂቃዎች ውስጥ ይዘዙ።';
 
   @override
-  String get onboardingCourierTitle => 'Courier';
+  String get onboardingCourierTitle => 'መልእክተኛ';
 
   @override
   String get onboardingCourierDescription =>
-      'Send packages across town with fast, reliable delivery.';
+      'ጥቅሎችን በከተማው ላይ በፈጣን እና አስተማማኝ መላኪያ ይላኩ።';
 
   @override
-  String get onboardingTaxiTitle => 'Taxi';
+  String get onboardingTaxiTitle => 'ታክሲ';
 
   @override
   String get onboardingTaxiDescription =>
-      'Coming soon — book a ride anywhere in the city with a tap.';
+      'በቅርቡ — በአንድ መታ በከተማው ውስጥ በማንኛውም ቦታ ጉዞ ይያዙ።';
 
   @override
-  String get onboardingHandymanTitle => 'Handyman';
+  String get onboardingHandymanTitle => 'የቤት ሰራተኛ';
 
   @override
   String get onboardingHandymanDescription =>
-      'Coming soon — book trusted pros for repairs and home services.';
+      'በቅርቡ — ለጥገና እና የቤት አገልግሎቶች የታመኑ ባለሙያዎችን ይያዙ።';
 
   @override
-  String get onboardingGetStarted => 'Get Started';
+  String get onboardingGetStarted => 'ጀምር';
 
   @override
-  String get onboardingSpotlightLocationTitle => 'Your delivery location';
+  String get onboardingSpotlightLocationTitle => 'የመላኪያ አካባቢዎ';
 
   @override
   String get onboardingSpotlightLocationDescription =>
-      'Tap here to set or change where orders should be delivered.';
+      'ትዕዛዞች የሚደርሱበትን ቦታ ለማዘጋጀት ወይም ለመቀየር እዚህ ይንኩ።';
 
   @override
-  String get onboardingSpotlightNotificationsTitle => 'Stay in the loop';
+  String get onboardingSpotlightNotificationsTitle => 'መረጃ ይቀበሉ';
 
   @override
   String get onboardingSpotlightNotificationsDescription =>
-      'Check order updates, offers, and important alerts here.';
+      'የትዕዛዝ ዝመናዎችን፣ ቅናሾችን እና አስፈላጊ ማንቂያዎችን እዚህ ይመልከቱ።';
 
   @override
-  String get onboardingSpotlightFoodTitle => 'Food & Groceries';
+  String get onboardingSpotlightFoodTitle => 'ምግብ እና ግሮሰሪ';
 
   @override
   String get onboardingSpotlightFoodDescription =>
-      'Coming soon — browse restaurants and shops to order food and essentials.';
+      'በቅርቡ — ምግብ እና አስፈላጊ ነገሮችን ለመዘዝ ሬስቶራንቶችን እና ሱቆችን ያስሱ።';
 
   @override
-  String get onboardingSpotlightCourierTitle => 'Courier';
+  String get onboardingSpotlightCourierTitle => 'መልእክተኛ';
 
   @override
   String get onboardingSpotlightCourierDescription =>
-      'Send parcels and documents with on-demand pickup — available now.';
+      'ጥቅሎችን እና ሰነዶችን በፍላጎት መውሰድ ይላኩ — አሁን ይገኛል።';
 
   @override
-  String get onboardingSpotlightTaxiTitle => 'Taxi';
+  String get onboardingSpotlightTaxiTitle => 'ታክሲ';
 
   @override
   String get onboardingSpotlightTaxiDescription =>
-      'Coming soon — request a ride and track your driver in real time.';
+      'በቅርቡ — ጉዞ ይጠይቁ እና ሹፌርዎን በቀጥታ ይከታተሉ።';
 
   @override
-  String get onboardingSpotlightHandymanTitle => 'Handyman';
+  String get onboardingSpotlightHandymanTitle => 'የቤት ሰራተኛ';
 
   @override
   String get onboardingSpotlightHandymanDescription =>
-      'Coming soon — find skilled help for home repairs and maintenance.';
+      'በቅርቡ — ለቤት ጥገና እና ጥገና ችሎታ ያለው እርዳታ ያግኙ።';
 
   @override
-  String get onboardingSpotlightDoneTitle => 'You\'re all set!';
+  String get onboardingSpotlightDoneTitle => 'ተዘጋጅተዋል!';
 
   @override
   String get onboardingSpotlightDoneDescription =>
-      'Courier is ready now. Food, Taxi, and Handyman are coming soon — switch tabs anytime. Enjoy HudHud!';
+      'መልእክተኛ አሁን ዝግጁ ነው። ምግብ፣ ታክሲ እና የቤት ሰራተኛ በቅርቡ ይመጣሉ — በማንኛውም ጊዜ ትሮችን ይቀይሩ። ሁድሁድን ይደሰቱ!';
 
   @override
-  String get onboardingDebugReplayTour => 'Replay home tour (debug)';
+  String get onboardingDebugReplayTour => 'የመነሻ ጉብኝት እንደገና አጫውት (debug)';
 
   @override
-  String get serviceComingSoonBadge => 'Coming Soon';
+  String get serviceComingSoonBadge => 'በቅርቡ';
 
   @override
-  String get foodComingSoonTitle => 'Something delicious is brewing';
+  String get foodComingSoonTitle => 'ጣፋጭ ነገር እየተዘጋጀ ነው';
 
   @override
-  String get foodComingSoonSubtitle =>
-      'Groceries and meals from your favourite vendors — launching soon.';
+  String get foodComingSoonSubtitle => 'ግሮሰሪ እና ምግብ ከሚወዷቸው ሻጮች — በቅርቡ ይጀምራል።';
 
   @override
-  String get foodComingSoonTeaser1 => 'Fresh groceries';
+  String get foodComingSoonTeaser1 => 'ትኩስ ግሮሰሪ';
 
   @override
-  String get foodComingSoonTeaser2 => 'Local favourites';
+  String get foodComingSoonTeaser2 => 'የአካባቢ ተመራጮች';
 
   @override
-  String get taxiComingSoonTitle => 'Your next ride is almost here';
+  String get taxiComingSoonTitle => 'ቀጣይ ጉዞዎ ሊደርስ ነው';
 
   @override
-  String get taxiComingSoonSubtitle =>
-      'Affordable trips across the city, just around the corner.';
+  String get taxiComingSoonSubtitle => 'በከተማው ውስጥ ተመጣጣኝ ጉዞዎች፣ በቅርቡ።';
 
   @override
-  String get taxiComingSoonTeaser1 => 'Quick pickups';
+  String get taxiComingSoonTeaser1 => 'ፈጣን መውሰድ';
 
   @override
-  String get taxiComingSoonTeaser2 => 'Fair fares';
+  String get taxiComingSoonTeaser2 => 'ፍትሃዊ ዋጋ';
 
   @override
-  String get handymanComingSoonTitle => 'Help is on its way';
+  String get handymanComingSoonTitle => 'እርዳታ በመንገድ ላይ ነው';
 
   @override
   String get handymanComingSoonSubtitle =>
-      'Trusted handymen for home repairs — we are putting the finishing touches.';
+      'ለቤት ጥገና የታመኑ ባለሙያዎች — የመጨረሻ ንክኪዎችን እያደረግን ነው።';
 
   @override
-  String get handymanComingSoonTeaser1 => 'Skilled pros';
+  String get handymanComingSoonTeaser1 => 'ችሎታ ያላቸው ባለሙያዎች';
 
   @override
-  String get handymanComingSoonTeaser2 => 'Home repairs';
+  String get handymanComingSoonTeaser2 => 'የቤት ጥገና';
+
+  @override
+  String get pleaseEnterValidSenderPhone =>
+      'እባክዎ የላኪ ስልክ ቁጥር ትክክለኛ ያስገቡ (09xxxxxxxx)';
+
+  @override
+  String get trackingCodeCopied => 'የመከታተያ ኮድ ተቀድቷል';
+
+  @override
+  String get chatMissingDeliveryId => 'ውይይት መክፈት አልተቻለም። የመላኪያ መታወቂያ የለም።';
+
+  @override
+  String get waitForPriceEstimate => 'ከመያዝዎ በፊት የዋጋ ግምት ይጠብቁ';
+
+  @override
+  String get invalidDeliveryId => 'ከመፍጠር የመጣ የመላኪያ መታወቂያ ልክ አይደለም';
+
+  @override
+  String get deliveryBookedWallet => 'መላኪያ በዋሌት ክፍያ ተይዟል';
+
+  @override
+  String get cancelDeliveryTitle => 'መላኪያ ሰርዝ';
+
+  @override
+  String get insufficientWalletBalance => 'በቂ የዋሌት ቀሪ ሂሳብ የለም';
+
+  @override
+  String topUpAmount(String currency, String amount) {
+    return '$currency $amount ጨምር';
+  }
+
+  @override
+  String get loadMore => 'ተጨማሪ ጫን';
+
+  @override
+  String get viewMap => 'ካርታ ይመልከቱ';
+
+  @override
+  String get usePin => 'ፒን ተጠቀም';
+
+  @override
+  String get copyOrderId => 'የትዕዛዝ መታወቂያ ቅዳ';
+
+  @override
+  String get shareOrder => 'ትዕዛዝ አጋራ';
+
+  @override
+  String get cartEmpty => 'ጋሪዎ ባዶ ነው';
+
+  @override
+  String promoCodeApplied(String promoCode) {
+    return 'የቅናሽ ኮድ \"$promoCode\" ተተግብሯል';
+  }
+
+  @override
+  String addressUpdatedTo(String address) {
+    return 'አድራሻ ወደ $address ተዘምኗል';
+  }
+
+  @override
+  String get addValidProductsToCart => 'እባክዎ ልክ የሆኑ ምርቶችን ወደ ጋሪዎ ያክሉ';
+
+  @override
+  String get chooseDeliveryLocationFromMap => 'እባክዎ ከካርታው የመላኪያ አካባቢ ይምረጡ';
+
+  @override
+  String get selectEbirrProvider => 'እባክዎ የኢብር አቅራቢ ይምረጡ';
+
+  @override
+  String get unableToDetermineStore => 'ለዚህ ትዕዛዝ ሱቁን መለየት አልተቻለም';
+
+  @override
+  String get gallery => 'ጋለሪ';
+
+  @override
+  String get camera => 'ካሜራ';
+
+  @override
+  String get photoPermissionRequired => 'የካሜራ ወይም የፎቶ ፈቃድ ያስፈልጋል';
+
+  @override
+  String couldNotOpenPhotoPicker(String error) {
+    return 'የፎቶ መምረጫ መክፈት አልተቻለም: $error';
+  }
+
+  @override
+  String get pleaseEnterYourName => 'እባክዎ ስምዎን ያስገቡ';
+
+  @override
+  String get updateFromStore => 'ከሱቅ ያዘምኑ';
+
+  @override
+  String get openPaymentPage => 'የክፍያ ገጽ ክፈት';
+
+  @override
+  String get paymentRefreshFailed => 'የክፍያ ሁኔታ ማደስ አልተቻለም';
+
+  @override
+  String get searchProductsTitle => 'ምርቶችን ይፈልጉ';
+
+  @override
+  String get calories => 'ካሎሪ';
+
+  @override
+  String get protein => 'ፕሮቲን';
+
+  @override
+  String get actionChange => 'ቀይር';
+
+  @override
+  String get productUnavailable => 'ይህ ምርት በአሁኑ ጊዜ አይገኝም';
+
+  @override
+  String get cancelTripTitle => 'ጉዞ ሰርዝ';
+
+  @override
+  String get cancelTripConfirm => 'እርግጠኛ ነዎት ይህን ጉዞ መሰረዝ ይፈልጋሉ?';
+
+  @override
+  String get unableToCancelRide => 'ጉዞን መሰረዝ አልተቻለም። የጉዞ መታወቂያ የለም።';
+
+  @override
+  String get invalidQuoteAmount => 'ለክፍያ ልክ ያልሆነ የዋጋ ግምት';
+
+  @override
+  String get noOrdersYetStore => 'እስካሁን ትዕዛዝ የለም';
+
+  @override
+  String get retryPaymentTitle => 'ክፍያን እንደገና ሞክር';
+
+  @override
+  String get retryPaymentSubtitle => 'ለመቀጠል የክፍያ ዘዴ ይምረጡ';
+
+  @override
+  String deliveryBookedWalletBalance(String currency, String balance) {
+    return 'መላኪያ ተይዟል። የዋሌት ቀሪ ሂሳብ: $currency $balance';
+  }
+
+  @override
+  String get cancelDeliveryConfirm => 'እርግጠኛ ነዎት ይህን መላኪያ መሰረዝ ይፈልጋሉ?';
+
+  @override
+  String get cancelDeliveryConfirmRefund =>
+      'እርግጠኛ ነዎት ይህን መላኪያ መሰረዝ ይፈልጋሉ? የተረጋገጠ ክፍያ ወደ ዋሌትዎ ይመለሳል።';
+
+  @override
+  String get cancelOrder => 'ትዕዛዝ ሰርዝ';
 }

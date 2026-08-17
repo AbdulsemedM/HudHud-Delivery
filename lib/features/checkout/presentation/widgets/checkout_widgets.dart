@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../payment/presentation/widgets/payment_widgets.dart';
 
@@ -590,7 +591,7 @@ class DeliveryAddressSection extends StatelessWidget {
           TextButton.icon(
             onPressed: onChangeAddress,
             icon: const Icon(Icons.edit_location_alt_outlined, size: 18),
-            label: const Text('Change'),
+            label: Text(context.l10n.actionChange),
             style: TextButton.styleFrom(
               foregroundColor: AppColors.primaryColor,
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),

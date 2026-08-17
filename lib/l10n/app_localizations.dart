@@ -5215,6 +5215,276 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Home repairs'**
   String get handymanComingSoonTeaser2;
+
+  /// No description provided for @pleaseEnterValidSenderPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid sender phone (09xxxxxxxx)'**
+  String get pleaseEnterValidSenderPhone;
+
+  /// No description provided for @trackingCodeCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Tracking code copied'**
+  String get trackingCodeCopied;
+
+  /// No description provided for @chatMissingDeliveryId.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to open chat. Missing delivery ID.'**
+  String get chatMissingDeliveryId;
+
+  /// No description provided for @waitForPriceEstimate.
+  ///
+  /// In en, this message translates to:
+  /// **'Wait for a server price estimate before booking'**
+  String get waitForPriceEstimate;
+
+  /// No description provided for @invalidDeliveryId.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid delivery id from create delivery'**
+  String get invalidDeliveryId;
+
+  /// No description provided for @deliveryBookedWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery booked with wallet payment'**
+  String get deliveryBookedWallet;
+
+  /// No description provided for @cancelDeliveryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel delivery'**
+  String get cancelDeliveryTitle;
+
+  /// No description provided for @insufficientWalletBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Insufficient wallet balance'**
+  String get insufficientWalletBalance;
+
+  /// No description provided for @topUpAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Top up {currency} {amount}'**
+  String topUpAmount(String currency, String amount);
+
+  /// No description provided for @loadMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more'**
+  String get loadMore;
+
+  /// No description provided for @viewMap.
+  ///
+  /// In en, this message translates to:
+  /// **'View Map'**
+  String get viewMap;
+
+  /// No description provided for @usePin.
+  ///
+  /// In en, this message translates to:
+  /// **'Use pin'**
+  String get usePin;
+
+  /// No description provided for @copyOrderId.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy order ID'**
+  String get copyOrderId;
+
+  /// No description provided for @shareOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Share order'**
+  String get shareOrder;
+
+  /// No description provided for @cartEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Your cart is empty'**
+  String get cartEmpty;
+
+  /// No description provided for @promoCodeApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'Promo code \"{promoCode}\" applied'**
+  String promoCodeApplied(String promoCode);
+
+  /// No description provided for @addressUpdatedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Address updated to: {address}'**
+  String addressUpdatedTo(String address);
+
+  /// No description provided for @addValidProductsToCart.
+  ///
+  /// In en, this message translates to:
+  /// **'Please add valid products to your cart'**
+  String get addValidProductsToCart;
+
+  /// No description provided for @chooseDeliveryLocationFromMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Please choose a delivery location from the map'**
+  String get chooseDeliveryLocationFromMap;
+
+  /// No description provided for @selectEbirrProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select an eBirr provider'**
+  String get selectEbirrProvider;
+
+  /// No description provided for @unableToDetermineStore.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to determine store for this order'**
+  String get unableToDetermineStore;
+
+  /// No description provided for @gallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get gallery;
+
+  /// No description provided for @camera.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get camera;
+
+  /// No description provided for @photoPermissionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera or photo permission is required'**
+  String get photoPermissionRequired;
+
+  /// No description provided for @couldNotOpenPhotoPicker.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open photo picker: {error}'**
+  String couldNotOpenPhotoPicker(String error);
+
+  /// No description provided for @pleaseEnterYourName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your name'**
+  String get pleaseEnterYourName;
+
+  /// No description provided for @updateFromStore.
+  ///
+  /// In en, this message translates to:
+  /// **'Update from store'**
+  String get updateFromStore;
+
+  /// No description provided for @openPaymentPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Open payment page'**
+  String get openPaymentPage;
+
+  /// No description provided for @paymentRefreshFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not refresh payment status'**
+  String get paymentRefreshFailed;
+
+  /// No description provided for @searchProductsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search products'**
+  String get searchProductsTitle;
+
+  /// No description provided for @calories.
+  ///
+  /// In en, this message translates to:
+  /// **'Calories'**
+  String get calories;
+
+  /// No description provided for @protein.
+  ///
+  /// In en, this message translates to:
+  /// **'Protein'**
+  String get protein;
+
+  /// No description provided for @actionChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get actionChange;
+
+  /// No description provided for @productUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This product is currently unavailable'**
+  String get productUnavailable;
+
+  /// No description provided for @cancelTripTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Trip'**
+  String get cancelTripTitle;
+
+  /// No description provided for @cancelTripConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to cancel this trip?'**
+  String get cancelTripConfirm;
+
+  /// No description provided for @unableToCancelRide.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to cancel ride. Missing ride ID.'**
+  String get unableToCancelRide;
+
+  /// No description provided for @invalidQuoteAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid quote amount for payment'**
+  String get invalidQuoteAmount;
+
+  /// No description provided for @noOrdersYetStore.
+  ///
+  /// In en, this message translates to:
+  /// **'No orders yet'**
+  String get noOrdersYetStore;
+
+  /// No description provided for @retryPaymentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry payment'**
+  String get retryPaymentTitle;
+
+  /// No description provided for @retryPaymentSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a payment method to continue'**
+  String get retryPaymentSubtitle;
+
+  /// No description provided for @deliveryBookedWalletBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery booked. Wallet balance: {currency} {balance}'**
+  String deliveryBookedWalletBalance(String currency, String balance);
+
+  /// No description provided for @cancelDeliveryConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to cancel this delivery?'**
+  String get cancelDeliveryConfirm;
+
+  /// No description provided for @cancelDeliveryConfirmRefund.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to cancel this delivery? Confirmed payment will be refunded to your wallet.'**
+  String get cancelDeliveryConfirmRefund;
+
+  /// No description provided for @cancelOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel order'**
+  String get cancelOrder;
 }
 
 class _AppLocalizationsDelegate

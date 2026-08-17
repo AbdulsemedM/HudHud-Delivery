@@ -1,3 +1,5 @@
+import 'package:hudhud_delivery/l10n/app_localizations.dart';
+
 /// Whether a courier delivery can still be cancelled by the customer.
 ///
 /// Cancellation is blocked once the package is picked up (and for terminal
@@ -47,12 +49,14 @@ bool isCollectedDeliveryPaymentStatus(String? paymentStatus) {
 }
 
 /// Confirm-dialog body. Mentions wallet refund only when payment was collected.
-String cancelDeliveryConfirmMessage({String? paymentStatus}) {
+String cancelDeliveryConfirmMessage(
+  AppLocalizations l10n, {
+  String? paymentStatus,
+}) {
   if (isCollectedDeliveryPaymentStatus(paymentStatus)) {
-    return 'Are you sure you want to cancel this delivery? '
-        'Confirmed payment will be refunded to your wallet.';
+    return l10n.cancelDeliveryConfirmRefund;
   }
-  return 'Are you sure you want to cancel this delivery?';
+  return l10n.cancelDeliveryConfirm;
 }
 
 /// Parsed cancel-delivery refund fields (when API includes them).

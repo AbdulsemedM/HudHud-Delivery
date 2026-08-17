@@ -185,8 +185,8 @@ class _FindingDriverScreenState extends State<FindingDriverScreen> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppColors.radiusLG),
         ),
-        title: const Text('Cancel Trip'),
-        content: const Text('Are you sure you want to cancel this trip?'),
+        title: Text(l10n.cancelTripTitle),
+        content: Text(l10n.cancelTripConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -206,8 +206,8 @@ class _FindingDriverScreenState extends State<FindingDriverScreen> {
     final rideId = widget.rideId;
     if (rideId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Unable to cancel ride. Missing ride ID.'),
+        SnackBar(
+          content: Text(l10n.unableToCancelRide),
           backgroundColor: AppColors.errorColor,
         ),
       );

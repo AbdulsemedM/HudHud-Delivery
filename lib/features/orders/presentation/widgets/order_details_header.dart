@@ -452,16 +452,16 @@ class _OrderHeaderMenu extends StatelessWidget {
           child: ListTile(
             contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.copy_rounded, size: 22),
-            title: const Text('Copy order ID'),
+            title: Text(l10n.copyOrderId),
             subtitle: Text('#${order.id}', style: const TextStyle(fontSize: 12)),
           ),
         ),
-        const PopupMenuItem(
+        PopupMenuItem(
           value: 'share',
           child: ListTile(
             contentPadding: EdgeInsets.zero,
-            leading: Icon(Icons.share_rounded, size: 22),
-            title: Text('Share order'),
+            leading: const Icon(Icons.share_rounded, size: 22),
+            title: Text(l10n.shareOrder),
           ),
         ),
         if (onCancel != null)
@@ -471,7 +471,7 @@ class _OrderHeaderMenu extends StatelessWidget {
               contentPadding: EdgeInsets.zero,
               leading: Icon(Icons.cancel_outlined, size: 22, color: scheme.error),
               title: Text(
-                'Cancel order',
+                l10n.cancelOrder,
                 style: TextStyle(color: scheme.error, fontWeight: FontWeight.w600),
               ),
             ),

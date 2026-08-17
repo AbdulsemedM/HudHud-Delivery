@@ -5,7 +5,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'features/wishlist/bloc/wishlist_bloc.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:hudhud_delivery/core/l10n/fallback_localizations.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
 import 'package:hudhud_delivery/features/splash/presentation/screen/splash_screen.dart';
 
@@ -181,8 +183,22 @@ class _MyAppState extends State<MyApp> {
               darkTheme: themeDark,
               themeMode: themeController.themeMode,
               locale: localeController.locale,
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              localizationsDelegates: const [
+                AppLocalizations.delegate,
+                FallbackMaterialLocalizationsDelegate(),
+                FallbackCupertinoLocalizationsDelegate(),
+                GlobalWidgetsLocalizations.delegate,
+              ],
               supportedLocales: AppLocalizations.supportedLocales,
+              localeListResolutionCallback: (locales, supported) {
+                final selected = localeController.locale;
+                for (final locale in supported) {
+                  if (locale.languageCode == selected.languageCode) {
+                    return selected;
+                  }
+                }
+                return const Locale('en');
+              },
               home: const SplashScreen(),
               builder: (context, child) {
                 // Update system UI overlay style when theme changes

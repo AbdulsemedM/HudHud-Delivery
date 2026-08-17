@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/utils/phone_util.dart';
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
@@ -113,8 +114,8 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
     // TODO: Implement image picker
     // For now, just show a message
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Image picker will be implemented'),
+      SnackBar(
+        content: Text(context.l10n.imagePickerTodo),
       ),
     );
   }
@@ -155,8 +156,8 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
   void _navigateToConfirm() {
     if (_itemTypeController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select item type'),
+        SnackBar(
+          content: Text(context.l10n.pleaseSelectItemType),
           backgroundColor: Colors.red,
         ),
       );
@@ -165,8 +166,8 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
 
     if (_quantityController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter quantity'),
+        SnackBar(
+          content: Text(context.l10n.pleaseEnterQuantity),
           backgroundColor: Colors.red,
         ),
       );
@@ -176,8 +177,8 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
     final weight = double.tryParse(_packageWeightController.text);
     if (weight == null || weight <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter a valid package weight (kg)'),
+        SnackBar(
+          content: Text(context.l10n.pleaseEnterValidWeight),
           backgroundColor: Colors.red,
         ),
       );
@@ -187,8 +188,8 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
     final senderPhone = normalizePhoneToBackend(_senderPhoneController.text);
     if (!RegExp(r'^2519\d{8}$').hasMatch(senderPhone)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter a valid sender phone (09xxxxxxxx)'),
+        SnackBar(
+          content: Text(context.l10n.pleaseEnterValidSenderPhone),
           backgroundColor: Colors.red,
         ),
       );
@@ -197,8 +198,8 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
 
     if (_recipientNameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter recipient name'),
+        SnackBar(
+          content: Text(context.l10n.pleaseEnterRecipientName),
           backgroundColor: Colors.red,
         ),
       );
@@ -207,8 +208,8 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
 
     if (_recipientPhoneController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter recipient phone number'),
+        SnackBar(
+          content: Text(context.l10n.pleaseEnterRecipientPhone),
           backgroundColor: Colors.red,
         ),
       );

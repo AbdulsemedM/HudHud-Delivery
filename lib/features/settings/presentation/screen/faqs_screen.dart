@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 
 class FAQsScreen extends StatefulWidget {
@@ -62,7 +63,7 @@ class _FAQsScreenState extends State<FAQsScreen> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('FAQs'),
+        title: Text(context.l10n.settingsFaqs),
         backgroundColor: colorScheme.surface,
         elevation: 0,
         leading: IconButton(

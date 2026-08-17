@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../model/categories_products_model.dart';
 import '../../../wishlist/presentation/widgets/wishlist_toggle_button.dart';
@@ -506,8 +507,8 @@ class ProductDetailsModal extends StatelessWidget {
                               Text('${product.calories}',
                                   style: const TextStyle(
                                       fontWeight: FontWeight.bold)),
-                              const Text('Calories',
-                                  style: TextStyle(fontSize: 12)),
+                              Text(context.l10n.calories,
+                                  style: const TextStyle(fontSize: 12)),
                             ],
                           ),
                         if (product.protein != null)
@@ -519,8 +520,8 @@ class ProductDetailsModal extends StatelessWidget {
                               Text('${product.protein}g',
                                   style: const TextStyle(
                                       fontWeight: FontWeight.bold)),
-                              const Text('Protein',
-                                  style: TextStyle(fontSize: 12)),
+                              Text(context.l10n.protein,
+                                  style: const TextStyle(fontSize: 12)),
                             ],
                           ),
                       ],
