@@ -3,7 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
-import 'package:hudhud_delivery/features/handyman/presentation/screens/handyman_screen.dart';
+import 'package:hudhud_delivery/core/theme/service_tab_palette.dart';
+import 'package:hudhud_delivery/core/utils/snackbar_util.dart';
+// import 'package:hudhud_delivery/features/handyman/presentation/screens/handyman_screen.dart';
+import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
+import 'package:hudhud_delivery/features/home/presentation/widgets/service_coming_soon_screen.dart';
 import 'package:hudhud_delivery/features/service_types/bloc/service_types_bloc.dart';
 import 'package:hudhud_delivery/features/service_types/data/data_provider/service_types_data_provider.dart';
 import 'package:hudhud_delivery/features/service_types/data/repository/service_types_repository.dart';
@@ -406,9 +410,34 @@ class _ServiceCard extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const HandymanScreen(),
+                builder: (context) => Scaffold(
+                  backgroundColor: HomeColors.background,
+                  appBar: AppBar(
+                    backgroundColor: HomeColors.background,
+                    foregroundColor: HomeColors.textPrimary,
+                    title: Text(context.l10n.homeTabHandyman),
+                  ),
+                  body: const ServiceComingSoonScreen(
+                    mode: HomeServiceMode.handyman,
+                  ),
+                ),
               ),
             );
+            return;
+          }
+          if (service.code == 'grocery' || service.code == 'food') {
+            SnackbarUtil.showComingSoon(
+              context,
+              context.l10n.foodComingSoonSubtitle,
+            );
+            return;
+          }
+          if (service.code == 'taxi') {
+            SnackbarUtil.showComingSoon(
+              context,
+              context.l10n.taxiComingSoonSubtitle,
+            );
+            return;
           }
           // TODO: other services
         },

@@ -2688,4 +2688,46 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get onboardingDebugReplayTour => 'إعادة جولة الصفحة الرئيسية (تصحيح)';
+
+  @override
+  String get serviceComingSoonBadge => 'قريباً';
+
+  @override
+  String get foodComingSoonTitle => 'شيء لذيذ في الطريق';
+
+  @override
+  String get foodComingSoonSubtitle =>
+      'بقالة ووجبات من متاجرك المفضلة — قريباً.';
+
+  @override
+  String get foodComingSoonTeaser1 => 'بقالة طازجة';
+
+  @override
+  String get foodComingSoonTeaser2 => 'مفضلات محلية';
+
+  @override
+  String get taxiComingSoonTitle => 'رحلتك القادمة على وشك الوصول';
+
+  @override
+  String get taxiComingSoonSubtitle =>
+      'رحلات بأسعار معقولة في جميع أنحاء المدينة، قريباً.';
+
+  @override
+  String get taxiComingSoonTeaser1 => 'استلام سريع';
+
+  @override
+  String get taxiComingSoonTeaser2 => 'أسعار عادلة';
+
+  @override
+  String get handymanComingSoonTitle => 'المساعدة في الطريق';
+
+  @override
+  String get handymanComingSoonSubtitle =>
+      'فنيون موثوقون لإصلاحات المنزل — نضع اللمسات الأخيرة.';
+
+  @override
+  String get handymanComingSoonTeaser1 => 'محترفون مهرة';
+
+  @override
+  String get handymanComingSoonTeaser2 => 'إصلاحات منزلية';
 }

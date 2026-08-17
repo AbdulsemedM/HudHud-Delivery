@@ -1080,5 +1080,18 @@
   "onboardingSpotlightHandymanDescription": "قريباً — اعثر على مساعدة مهرة لإصلاحات وصيانة المنزل.",
   "onboardingSpotlightDoneTitle": "أنت جاهز!",
   "onboardingSpotlightDoneDescription": "البريد السريع جاهز الآن. الطعام والتاكسي والفني المنزلي قادمة قريباً — بدّل التبويبات في أي وقت. استمتع بهدهد!",
-  "onboardingDebugReplayTour": "إعادة جولة الصفحة الرئيسية (تصحيح)"
+  "onboardingDebugReplayTour": "إعادة جولة الصفحة الرئيسية (تصحيح)",
+  "serviceComingSoonBadge": "قريباً",
+  "foodComingSoonTitle": "شيء لذيذ في الطريق",
+  "foodComingSoonSubtitle": "بقالة ووجبات من متاجرك المفضلة — قريباً.",
+  "foodComingSoonTeaser1": "بقالة طازجة",
+  "foodComingSoonTeaser2": "مفضلات محلية",
+  "taxiComingSoonTitle": "رحلتك القادمة على وشك الوصول",
+  "taxiComingSoonSubtitle": "رحلات بأسعار معقولة في جميع أنحاء المدينة، قريباً.",
+  "taxiComingSoonTeaser1": "استلام سريع",
+  "taxiComingSoonTeaser2": "أسعار عادلة",
+  "handymanComingSoonTitle": "المساعدة في الطريق",
+  "handymanComingSoonSubtitle": "فنيون موثوقون لإصلاحات المنزل — نضع اللمسات الأخيرة.",
+  "handymanComingSoonTeaser1": "محترفون مهرة",
+  "handymanComingSoonTeaser2": "إصلاحات منزلية"
 }

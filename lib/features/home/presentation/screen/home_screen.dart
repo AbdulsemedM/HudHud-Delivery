@@ -3,11 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/features/settings/presentation/screen/notifications_screen.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
-import 'package:hudhud_delivery/features/delivery/presentation/screens/all_categories_screen.dart';
-import 'package:hudhud_delivery/features/handyman/presentation/screens/handyman_screen.dart';
+// import 'package:hudhud_delivery/features/delivery/presentation/screens/all_categories_screen.dart';
+// import 'package:hudhud_delivery/features/handyman/presentation/screens/handyman_screen.dart';
 import 'package:hudhud_delivery/features/courier/presentation/screens/courier_screen.dart';
-import 'package:hudhud_delivery/features/taxi/presentation/screens/taxi_screen.dart';
+// import 'package:hudhud_delivery/features/taxi/presentation/screens/taxi_screen.dart';
 import '../widgets/home_service_tab_bar.dart';
+import '../widgets/service_coming_soon_screen.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
 import 'package:hudhud_delivery/app/services/custom_location_service.dart';
@@ -452,9 +453,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     index: _serviceMode.index,
                     children: const [
                       CourierScreen(),
-                      AllCategoriesScreen(embedded: true),
-                      TaxiScreen(),
-                      HandymanScreen(embedded: true),
+                      // AllCategoriesScreen(embedded: true), // TODO: restore when Food & Groceries launches
+                      ServiceComingSoonScreen(mode: HomeServiceMode.foodGroceries),
+                      // TaxiScreen(), // TODO: restore when Taxi launches
+                      ServiceComingSoonScreen(mode: HomeServiceMode.taxi),
+                      // HandymanScreen(embedded: true), // TODO: restore when Handyman launches
+                      ServiceComingSoonScreen(mode: HomeServiceMode.handyman),
                     ],
                   ),
                 ),

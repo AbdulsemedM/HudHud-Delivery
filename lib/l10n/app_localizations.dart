@@ -5137,6 +5137,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Replay home tour (debug)'**
   String get onboardingDebugReplayTour;
+
+  /// No description provided for @serviceComingSoonBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming Soon'**
+  String get serviceComingSoonBadge;
+
+  /// No description provided for @foodComingSoonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Something delicious is brewing'**
+  String get foodComingSoonTitle;
+
+  /// No description provided for @foodComingSoonSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Groceries and meals from your favourite vendors — launching soon.'**
+  String get foodComingSoonSubtitle;
+
+  /// No description provided for @foodComingSoonTeaser1.
+  ///
+  /// In en, this message translates to:
+  /// **'Fresh groceries'**
+  String get foodComingSoonTeaser1;
+
+  /// No description provided for @foodComingSoonTeaser2.
+  ///
+  /// In en, this message translates to:
+  /// **'Local favourites'**
+  String get foodComingSoonTeaser2;
+
+  /// No description provided for @taxiComingSoonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your next ride is almost here'**
+  String get taxiComingSoonTitle;
+
+  /// No description provided for @taxiComingSoonSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Affordable trips across the city, just around the corner.'**
+  String get taxiComingSoonSubtitle;
+
+  /// No description provided for @taxiComingSoonTeaser1.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick pickups'**
+  String get taxiComingSoonTeaser1;
+
+  /// No description provided for @taxiComingSoonTeaser2.
+  ///
+  /// In en, this message translates to:
+  /// **'Fair fares'**
+  String get taxiComingSoonTeaser2;
+
+  /// No description provided for @handymanComingSoonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Help is on its way'**
+  String get handymanComingSoonTitle;
+
+  /// No description provided for @handymanComingSoonSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Trusted handymen for home repairs — we are putting the finishing touches.'**
+  String get handymanComingSoonSubtitle;
+
+  /// No description provided for @handymanComingSoonTeaser1.
+  ///
+  /// In en, this message translates to:
+  /// **'Skilled pros'**
+  String get handymanComingSoonTeaser1;
+
+  /// No description provided for @handymanComingSoonTeaser2.
+  ///
+  /// In en, this message translates to:
+  /// **'Home repairs'**
+  String get handymanComingSoonTeaser2;
 }
 
 class _AppLocalizationsDelegate

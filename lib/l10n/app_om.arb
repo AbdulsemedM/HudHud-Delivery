@@ -1076,5 +1076,18 @@
   "onboardingSpotlightHandymanDescription": "Coming soon — find skilled help for home repairs and maintenance.",
   "onboardingSpotlightDoneTitle": "You're all set!",
   "onboardingSpotlightDoneDescription": "Courier is ready now. Food, Taxi, and Handyman are coming soon — switch tabs anytime. Enjoy HudHud!",
-  "onboardingDebugReplayTour": "Replay home tour (debug)"
+  "onboardingDebugReplayTour": "Replay home tour (debug)",
+  "serviceComingSoonBadge": "Coming Soon",
+  "foodComingSoonTitle": "Something delicious is brewing",
+  "foodComingSoonSubtitle": "Groceries and meals from your favourite vendors — launching soon.",
+  "foodComingSoonTeaser1": "Fresh groceries",
+  "foodComingSoonTeaser2": "Local favourites",
+  "taxiComingSoonTitle": "Your next ride is almost here",
+  "taxiComingSoonSubtitle": "Affordable trips across the city, just around the corner.",
+  "taxiComingSoonTeaser1": "Quick pickups",
+  "taxiComingSoonTeaser2": "Fair fares",
+  "handymanComingSoonTitle": "Help is on its way",
+  "handymanComingSoonSubtitle": "Trusted handymen for home repairs — we are putting the finishing touches.",
+  "handymanComingSoonTeaser1": "Skilled pros",
+  "handymanComingSoonTeaser2": "Home repairs"
 }

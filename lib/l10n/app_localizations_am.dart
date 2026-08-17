@@ -2661,4 +2661,46 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get onboardingDebugReplayTour => 'Replay home tour (debug)';
+
+  @override
+  String get serviceComingSoonBadge => 'Coming Soon';
+
+  @override
+  String get foodComingSoonTitle => 'Something delicious is brewing';
+
+  @override
+  String get foodComingSoonSubtitle =>
+      'Groceries and meals from your favourite vendors — launching soon.';
+
+  @override
+  String get foodComingSoonTeaser1 => 'Fresh groceries';
+
+  @override
+  String get foodComingSoonTeaser2 => 'Local favourites';
+
+  @override
+  String get taxiComingSoonTitle => 'Your next ride is almost here';
+
+  @override
+  String get taxiComingSoonSubtitle =>
+      'Affordable trips across the city, just around the corner.';
+
+  @override
+  String get taxiComingSoonTeaser1 => 'Quick pickups';
+
+  @override
+  String get taxiComingSoonTeaser2 => 'Fair fares';
+
+  @override
+  String get handymanComingSoonTitle => 'Help is on its way';
+
+  @override
+  String get handymanComingSoonSubtitle =>
+      'Trusted handymen for home repairs — we are putting the finishing touches.';
+
+  @override
+  String get handymanComingSoonTeaser1 => 'Skilled pros';
+
+  @override
+  String get handymanComingSoonTeaser2 => 'Home repairs';
 }
