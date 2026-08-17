@@ -299,6 +299,84 @@ class CourierRepository {
     return {'success': true, 'data': <String, dynamic>{}};
   }
 
+  /// Confirm package receipt via POST /api/services/delivery/{id}/confirm-receipt.
+  Future<Map<String, dynamic>> confirmDeliveryReceipt(int deliveryId) async {
+    try {
+      final response =
+          await courierDataProvider.confirmDeliveryReceipt(deliveryId);
+
+      if (response['statusCode'] == 200 || response['statusCode'] == 201) {
+        final data = response['data'];
+        String? message;
+        if (data is Map) {
+          message = data['message']?.toString();
+        }
+        return {
+          'success': true,
+          'data': data,
+          'message': message ?? 'Receipt confirmed successfully',
+        };
+      }
+
+      String errorMessage =
+          response['errorMessage'] ?? 'Error confirming receipt';
+      errorMessage = _cleanErrorMessage(errorMessage);
+      return {
+        'success': false,
+        'data': response['data'],
+        'message': errorMessage,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'data': null,
+        'message': _cleanErrorMessage(e.toString()),
+      };
+    }
+  }
+
+  /// Rate a package delivery via POST /api/services/delivery/{id}/rate.
+  Future<Map<String, dynamic>> rateDelivery({
+    required int deliveryId,
+    required int rating,
+    String? comment,
+  }) async {
+    try {
+      final response = await courierDataProvider.rateDelivery(
+        deliveryId: deliveryId,
+        rating: rating,
+        comment: comment,
+      );
+
+      if (response['statusCode'] == 200 || response['statusCode'] == 201) {
+        final data = response['data'];
+        String? message;
+        if (data is Map) {
+          message = data['message']?.toString();
+        }
+        return {
+          'success': true,
+          'data': data,
+          'message': message ?? 'Rating submitted successfully',
+        };
+      }
+
+      String errorMessage = response['errorMessage'] ?? 'Error submitting rating';
+      errorMessage = _cleanErrorMessage(errorMessage);
+      return {
+        'success': false,
+        'data': response['data'],
+        'message': errorMessage,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'data': null,
+        'message': _cleanErrorMessage(e.toString()),
+      };
+    }
+  }
+
   /// Cancel a package delivery via POST /api/services/delivery/cancel.
   Future<Map<String, dynamic>> cancelDelivery({
     required int deliveryId,

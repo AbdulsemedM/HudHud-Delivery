@@ -316,15 +316,6 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
     return mapping[itemType] ?? 'other';
   }
 
-  String _mapVehicleType(String vehicle) {
-    const mapping = {
-      'motorcycle': 'motorbike',
-      'car': 'car',
-      'van': 'van',
-    };
-    return mapping[vehicle] ?? vehicle;
-  }
-
   String _mapPaymentMethod(String paymentType) {
     // paymentType is already the API id from fetched payment methods
     if (paymentType.isNotEmpty) return paymentType;
@@ -358,7 +349,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
       pickupLongitude: widget.pickupPosition!.longitude,
       dropoffLatitude: widget.deliveryPosition!.latitude,
       dropoffLongitude: widget.deliveryPosition!.longitude,
-      vehicleType: _mapVehicleType(widget.selectedVehicle),
+      vehicleType: mapCourierVehicleType(widget.selectedVehicle),
       serviceType: deliveryServiceType(isInstantDelivery: widget.isInstantDelivery),
     );
 
@@ -428,7 +419,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
           'dropoff_location': widget.deliveryLocation,
           'dropoff_latitude': widget.deliveryPosition?.latitude ?? 0,
           'dropoff_longitude': widget.deliveryPosition?.longitude ?? 0,
-          'vehicle_type': _mapVehicleType(widget.selectedVehicle),
+          'vehicle_type': mapCourierVehicleType(widget.selectedVehicle),
           'service_type':
               deliveryServiceType(isInstantDelivery: widget.isInstantDelivery),
           'scheduled_pickup': _formatScheduledDateTime(widget.scheduledPickup),
@@ -566,6 +557,15 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
           }
         }
         if (!mounted) return;
+        _pendingCreatedDelivery = null;
+        _paymentIdempotencyKey = null;
+        _navigateToFindingCourier(delivery);
+        return;
+      }
+
+      if (isOfflineDeliveryPayment(widget.paymentType)) {
+        if (!mounted) return;
+        setState(() => _isLoadingRequest = false);
         _pendingCreatedDelivery = null;
         _paymentIdempotencyKey = null;
         _navigateToFindingCourier(delivery);

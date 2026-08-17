@@ -11,6 +11,12 @@ double? resolveServerDeliveryPaymentAmount(CreateDeliveryResult created) {
   return amount;
 }
 
+/// Cash-on-delivery and canonical cash — no online payment initiation.
+bool isOfflineDeliveryPayment(String? method) {
+  final m = (method ?? '').toLowerCase().trim();
+  return m == 'cash_on_delivery' || m == 'cash';
+}
+
 /// Initiates payment for a parcel delivery via POST /api/payments/initiate (type=delivery).
 Future<PaymentInitiateResult> initiateDeliveryPayment({
   required PaymentRepository repo,

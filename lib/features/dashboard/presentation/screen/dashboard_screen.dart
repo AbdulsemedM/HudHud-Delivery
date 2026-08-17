@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/app/navigation/app_navigator.dart';
+import 'package:hudhud_delivery/app/navigation/dashboard_navigation.dart';
 import 'package:hudhud_delivery/app/navigation/fcm_notification_router.dart';
 import 'package:hudhud_delivery/app/navigation/fcm_order_navigation.dart';
 import 'package:hudhud_delivery/app/services/fcm_service.dart';
@@ -45,6 +46,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
         syncDefaultAddressFromApi();
       }
     });
+    DashboardNavigation.instance.register(_onDashboardNavigationRequest);
+  }
+
+  void _onDashboardNavigationRequest({
+    required int tabIndex,
+    required bool refreshHome,
+  }) {
+    if (!mounted) return;
+    setState(() => _selectedIndex = tabIndex.clamp(0, _screens.length - 1));
+    context.read<ServiceAccentController>().setDashboardIndex(_selectedIndex);
+    if (refreshHome && tabIndex == 0) {
+      _homeTabActivation.value = _homeTabActivation.value + 1;
+    }
   }
 
   Future<void> _handleFcmLaunchNavigation() async {
@@ -87,6 +101,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   void dispose() {
+    DashboardNavigation.instance.unregister();
     _homeTabActivation.dispose();
     super.dispose();
   }

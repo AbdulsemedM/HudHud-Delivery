@@ -1,4 +1,5 @@
 import 'package:hudhud_delivery/models/notification_model.dart';
+import 'package:hudhud_delivery/features/courier/utils/delivery_notification.dart';
 
 import '../data_provider/notifications_data_provider.dart';
 
@@ -27,7 +28,22 @@ class NotificationsRepository {
     if (userId != null) {
       notifications = notifications.where((n) => n.userId == userId).toList();
     }
+    notifications = _dedupeDeliveryNotifications(notifications);
     return notifications;
+  }
+
+  List<NotificationModel> _dedupeDeliveryNotifications(
+    List<NotificationModel> notifications,
+  ) {
+    final deduped = dedupeDeliveryNotificationsByKey<NotificationModel>(
+      items: notifications,
+      routingDataFor: (item) => item.routingData,
+      createdAtFor: (item) => item.createdAt,
+    );
+    return filterStaleDeliveryNotifications<NotificationModel>(
+      items: deduped,
+      routingDataFor: (item) => item.routingData,
+    );
   }
 
   /// Fetches a single notification by id from /api/notifications/{id}.

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/app/notifications/notification_events.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/features/forgot_password/presentation/screen/forgot_password_identifier_screen.dart';
+import 'fcm_delivery_navigation.dart';
 import 'fcm_order_navigation.dart';
 
 /// Deferred FCM navigation when the navigator is not ready or user is unauthenticated.
@@ -114,10 +115,17 @@ Future<void> _routeFromPayload(
     return;
   }
 
+  // Package delivery notifications (delivery_id + screen/status/type).
+  if (await routeDeliveryNotificationPayload(context, data)) {
+    return;
+  }
+  if (!context.mounted) return;
+
   if (event.isNotEmpty) {
     if (isCustomerOrderEvent(event)) {
       final orderId = parseOrderIdFromPayload(data);
       if (orderId != null) {
+        if (!context.mounted) return;
         pushOrderDetailsById(context, orderId: orderId);
         return;
       }
@@ -149,19 +157,31 @@ Future<void> _routeFromPayload(
   // Legacy payloads without a standardised event field.
   final legacyOrderId = parseOrderIdFromPayload(data);
   if (legacyOrderId != null) {
+    if (!context.mounted) return;
     pushOrderDetailsById(context, orderId: legacyOrderId);
     return;
   }
 
   // Advisory screen hint fallback.
-  _routeByScreenHint(data['screen']);
+  if (!context.mounted) return;
+  await _routeByScreenHint(context, data['screen'], data);
 }
 
-void _routeByScreenHint(String? screen) {
+Future<void> _routeByScreenHint(
+  BuildContext context,
+  String? screen,
+  Map<String, String> data,
+) async {
   final hint = screen?.trim().toLowerCase();
   if (hint == null || hint.isEmpty) return;
 
   switch (hint) {
+    case NotificationScreens.verifyDelivery:
+    case NotificationScreens.deliveryTracking:
+    case NotificationScreens.rateDelivery:
+    case NotificationScreens.confirmReceipt:
+      await routeDeliveryNotificationPayload(context, data);
+      break;
     case NotificationScreens.orderDetails:
       // No order id — fall through to orders list.
       PendingFcmDashboardTab.setPending(1);

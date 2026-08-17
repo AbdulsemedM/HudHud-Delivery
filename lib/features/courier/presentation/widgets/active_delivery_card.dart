@@ -32,13 +32,16 @@ String activeDeliveryStatusMessage(
     case 'assigned':
     case 'courier_assigned':
     case 'driver_assigned':
+    case 'pickup_assigned':
     case 'on_the_way_to_pickup':
+    case 'en_route_pickup':
       return 'Courier on the way to pickup';
     case 'arrived_at_pickup':
     case 'at_pickup':
       return 'Courier at pickup';
     case 'picked_up':
     case 'package_picked_up':
+    case 'en_route_dropoff':
       return l10n.orderStatusTextPickedUp;
     case 'in_transit':
     case 'on_the_way':

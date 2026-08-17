@@ -52,6 +52,20 @@ void main() {
     });
   });
 
+  group('isOfflineDeliveryPayment', () {
+    test('returns true for cash methods', () {
+      expect(isOfflineDeliveryPayment('cash_on_delivery'), isTrue);
+      expect(isOfflineDeliveryPayment('cash'), isTrue);
+      expect(isOfflineDeliveryPayment('CASH_ON_DELIVERY'), isTrue);
+    });
+
+    test('returns false for online methods', () {
+      expect(isOfflineDeliveryPayment('wallet'), isFalse);
+      expect(isOfflineDeliveryPayment('ebirr_coop'), isFalse);
+      expect(isOfflineDeliveryPayment(null), isFalse);
+    });
+  });
+
   group('canRetryDeliveryPayment', () {
     test('hides for paid, COD, and cancelled deliveries', () {
       expect(

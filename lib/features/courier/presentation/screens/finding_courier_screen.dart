@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:hudhud_delivery/app/navigation/dashboard_navigation.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
@@ -224,6 +225,13 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
     Navigator.pop(context);
   }
 
+  void _goToHome() {
+    CourierHomeRefresh.instance.notifyRefresh();
+    DashboardNavigation.instance.goToHome(refreshHome: true);
+    if (!mounted) return;
+    Navigator.of(context).popUntil((route) => route.isFirst);
+  }
+
   @override
   Widget build(BuildContext context) {
     return CourierTheme.wrap(
@@ -300,6 +308,34 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
                     ),
                   ),
                   const Spacer(),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppColors.spaceMD,
+                    ),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: AppColors.buttonHeightMD,
+                      child: FilledButton(
+                        onPressed: _goToHome,
+                        style: FilledButton.styleFrom(
+                          backgroundColor: HomeColors.violet,
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.circular(AppColors.radiusLG),
+                          ),
+                        ),
+                        child: const Text(
+                          'Go to home',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                   Padding(
                     padding: const EdgeInsets.all(AppColors.spaceMD),
                     child: SizedBox(

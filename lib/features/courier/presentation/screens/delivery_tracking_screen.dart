@@ -60,8 +60,10 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
 
   Map<String, dynamic>? _trackData;
   bool _isLoadingTrack = true;
+  bool _isRefreshingTrack = false;
   String? _trackError;
   List<LatLng>? _routePolylinePoints;
+  DateTime? _driverLocationUpdatedAt;
 
   late final CourierRepository _courierRepository;
 
@@ -187,15 +189,21 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
 
   Future<void> _fetchTrackData() async {
     if (widget.deliveryId == null) return;
+    final isInitialLoad = _isLoadingTrack;
+    if (!isInitialLoad && mounted) {
+      setState(() => _isRefreshingTrack = true);
+    }
     try {
       final result =
           await _courierRepository.getDeliveryTrack(widget.deliveryId!);
       if (mounted) {
         setState(() {
           _isLoadingTrack = false;
+          _isRefreshingTrack = false;
           if (result['success'] == true) {
             _trackData = result['data'] as Map<String, dynamic>?;
             _vehiclePosition = _parseDriverLocation(_trackData);
+            _driverLocationUpdatedAt = _parseDriverLocationUpdatedAt(_trackData);
             _trackError = null;
           } else {
             _trackData = null;
@@ -207,10 +215,70 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
       if (mounted) {
         setState(() {
           _isLoadingTrack = false;
+          _isRefreshingTrack = false;
           _trackData = null;
           _trackError = 'Failed to load tracking';
         });
       }
+    }
+  }
+
+  DateTime? _parseDriverLocationUpdatedAt(Map<String, dynamic>? data) {
+    if (data == null) return null;
+    for (final key in const [
+      'last_updated',
+      'driver_location_updated_at',
+      'location_updated_at',
+    ]) {
+      final parsed = DateTime.tryParse(data[key]?.toString() ?? '');
+      if (parsed != null) return parsed.toLocal();
+    }
+
+    final driverLocation = data['driver_location'];
+    if (driverLocation is Map) {
+      for (final key in const ['updated_at', 'last_updated', 'recorded_at']) {
+        final parsed = DateTime.tryParse(driverLocation[key]?.toString() ?? '');
+        if (parsed != null) return parsed.toLocal();
+      }
+    }
+
+    final driver = data['driver'];
+    if (driver is Map) {
+      for (final key in const ['location_updated_at', 'last_updated']) {
+        final parsed = DateTime.tryParse(driver[key]?.toString() ?? '');
+        if (parsed != null) return parsed.toLocal();
+      }
+    }
+    return null;
+  }
+
+  _DriverLocationFreshness _locationFreshness() {
+    if (_isRefreshingTrack) {
+      return _DriverLocationFreshness.updating;
+    }
+
+    final updatedAt = _driverLocationUpdatedAt;
+    if (updatedAt == null) {
+      return _DriverLocationFreshness.unknown;
+    }
+
+    final age = DateTime.now().difference(updatedAt);
+    if (age.inMinutes >= 2) {
+      return _DriverLocationFreshness.stale;
+    }
+    return _DriverLocationFreshness.fresh;
+  }
+
+  String _locationFreshnessLabel(_DriverLocationFreshness freshness) {
+    switch (freshness) {
+      case _DriverLocationFreshness.updating:
+        return 'Updating location…';
+      case _DriverLocationFreshness.stale:
+        return 'Location may be stale';
+      case _DriverLocationFreshness.fresh:
+        return 'Live location';
+      case _DriverLocationFreshness.unknown:
+        return 'Waiting for location';
     }
   }
 
@@ -303,6 +371,10 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
       _trackData,
       fallback: 'in_progress',
     );
+    final locationFreshness = _locationFreshness();
+    final locationUpdatedLabel = _driverLocationUpdatedAt != null
+        ? _formatTimestamp(_driverLocationUpdatedAt!.toIso8601String())
+        : '—';
     return CourierTheme.wrap(
       context,
       child: Builder(
@@ -367,6 +439,18 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                     child: StatusChip(status: statusText),
                   ),
                 ),
+                // Location freshness badge
+                if (!_isLoadingTrack && _trackError == null)
+                  Positioned(
+                    top: 96,
+                    left: 16,
+                    right: 16,
+                    child: _LocationFreshnessBanner(
+                      label: _locationFreshnessLabel(locationFreshness),
+                      freshness: locationFreshness,
+                      lastUpdated: locationUpdatedLabel,
+                    ),
+                  ),
                 // Bottom Sheet Modal
                 DraggableScrollableSheet(
                   initialChildSize: 0.5,
@@ -534,9 +618,7 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                                                           'dropoff_location']
                                                       ?.toString() ??
                                                   widget.deliveryLocation,
-                                              createdDate: _formatTimestamp(
-                                                  _trackData?[
-                                                      'last_updated']),
+                                              createdDate: locationUpdatedLabel,
                                               borderColor: borderColor,
                                             ),
                                             const SizedBox(height: 16),
@@ -573,6 +655,88 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+enum _DriverLocationFreshness { updating, fresh, stale, unknown }
+
+class _LocationFreshnessBanner extends StatelessWidget {
+  const _LocationFreshnessBanner({
+    required this.label,
+    required this.freshness,
+    required this.lastUpdated,
+  });
+
+  final String label;
+  final _DriverLocationFreshness freshness;
+  final String lastUpdated;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color accent;
+    switch (freshness) {
+      case _DriverLocationFreshness.updating:
+        accent = HomeColors.orange;
+      case _DriverLocationFreshness.stale:
+        accent = AppColors.errorColor;
+      case _DriverLocationFreshness.fresh:
+        accent = AppColors.successColor;
+      case _DriverLocationFreshness.unknown:
+        accent = HomeColors.textMuted;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: HomeColors.surfaceElevated.withValues(alpha: 0.95),
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        border: Border.all(color: HomeColors.border),
+      ),
+      child: Row(
+        children: [
+          if (freshness == _DriverLocationFreshness.updating)
+            SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: accent,
+              ),
+            )
+          else
+            Icon(
+              freshness == _DriverLocationFreshness.stale
+                  ? Icons.location_disabled_outlined
+                  : Icons.my_location_outlined,
+              size: 18,
+              color: accent,
+            ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: HomeColors.textPrimary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                ),
+                Text(
+                  'Last update: $lastUpdated',
+                  style: const TextStyle(
+                    color: HomeColors.textSecondary,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -1,6 +1,29 @@
+/// Minimum weight (kg) used for early estimates before package details are entered.
+const kCourierEstimateMinWeightKg = 1.0;
+
+/// Minimum quantity used for early estimates before package details are entered.
+const kCourierEstimateMinQuantity = 1;
+
+/// Effective placeholder weight sent to the estimate API (min weight × min quantity).
+const kCourierEstimatePlaceholderWeightKg =
+    kCourierEstimateMinWeightKg * kCourierEstimateMinQuantity;
+
+/// Generic package type for early estimates before item type is selected.
+const kCourierEstimatePlaceholderPackageType = 'other';
+
 /// Maps booking mode to the API `service_type` used by both estimate and create.
 String deliveryServiceType({required bool isInstantDelivery}) {
   return isInstantDelivery ? 'same_day' : 'standard';
+}
+
+/// Maps UI vehicle id to API `vehicle_type`.
+String mapCourierVehicleType(String vehicle) {
+  const mapping = {
+    'motorcycle': 'motorbike',
+    'car': 'car',
+    'van': 'van',
+  };
+  return mapping[vehicle] ?? vehicle;
 }
 
 /// Server quote from POST /api/services/delivery/estimate. Cost is never derived locally.

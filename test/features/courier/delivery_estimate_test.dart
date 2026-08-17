@@ -12,6 +12,30 @@ void main() {
     });
   });
 
+  group('courier estimate placeholders', () {
+    test('placeholder weight is min weight times min quantity', () {
+      expect(kCourierEstimatePlaceholderWeightKg, 1.0);
+      expect(
+        kCourierEstimatePlaceholderWeightKg,
+        kCourierEstimateMinWeightKg * kCourierEstimateMinQuantity,
+      );
+    });
+
+    test('placeholder package type is other', () {
+      expect(kCourierEstimatePlaceholderPackageType, 'other');
+    });
+  });
+
+  group('mapCourierVehicleType', () {
+    test('maps motorcycle to motorbike', () {
+      expect(mapCourierVehicleType('motorcycle'), 'motorbike');
+    });
+
+    test('passes through unknown values', () {
+      expect(mapCourierVehicleType('truck'), 'truck');
+    });
+  });
+
   group('parseDeliveryEstimate', () {
     test('parses flat estimate payload from the API', () {
       final estimate = parseDeliveryEstimate({

@@ -204,6 +204,67 @@ class CourierDataProvider {
     }
   }
 
+  /// POST /api/services/delivery/{id}/confirm-receipt
+  Future<Map<String, dynamic>> confirmDeliveryReceipt(int deliveryId) async {
+    try {
+      final path = ApiConstants.deliveryConfirmReceipt.replaceAll(
+        '{id}',
+        deliveryId.toString(),
+      );
+      final response = await apiService.post('${ApiConstants.baseUrl}$path');
+
+      return {
+        'statusCode': response.statusCode,
+        'data': response.data,
+        'errorMessage': null,
+      };
+    } on ApiException catch (apiException) {
+      return {
+        'statusCode': apiException.statusCode,
+        'data': apiException.data,
+        'errorMessage': apiException.message,
+      };
+    } on Exception catch (e) {
+      return {'statusCode': 500, 'data': null, 'errorMessage': e.toString()};
+    }
+  }
+
+  /// POST /api/services/delivery/{id}/rate
+  Future<Map<String, dynamic>> rateDelivery({
+    required int deliveryId,
+    required int rating,
+    String? comment,
+  }) async {
+    try {
+      final path = ApiConstants.deliveryRate.replaceAll(
+        '{id}',
+        deliveryId.toString(),
+      );
+      final body = <String, dynamic>{
+        'rating': rating,
+        if (comment != null && comment.isNotEmpty) 'comment': comment,
+      };
+      final response = await apiService.post(
+        '${ApiConstants.baseUrl}$path',
+        data: body,
+      );
+
+      return {
+        'statusCode': response.statusCode,
+        'data': response.data,
+        'errorMessage': null,
+      };
+    } on ApiException catch (apiException) {
+      return {
+        'statusCode': apiException.statusCode,
+        'data': apiException.data,
+        'errorMessage': apiException.message,
+      };
+    } on Exception catch (e) {
+      return {'statusCode': 500, 'data': null, 'errorMessage': e.toString()};
+    }
+  }
+
   /// POST /api/services/delivery/{id}/retry-payment
   Future<Map<String, dynamic>> retryPayment({
     required int deliveryId,

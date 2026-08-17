@@ -1,9 +1,19 @@
+import 'package:hudhud_delivery/features/courier/utils/delivery_notification.dart';
+
 /// Customer-relevant FCM notification event and screen identifiers.
 ///
 /// Event names from the server may arrive as `ORDER_CREATED` or `order_created`;
 /// always match using [normalizeEvent].
 class NotificationEvents {
   NotificationEvents._();
+
+  // Package delivery lifecycle (Aug 2026 API)
+  static const pickupAssigned = 'pickup_assigned';
+  static const enRoutePickup = 'en_route_pickup';
+  static const atPickup = 'at_pickup';
+  static const enRouteDropoff = 'en_route_dropoff';
+  static const atDropoff = 'at_dropoff';
+  static const delivered = 'delivered';
 
   // Customer order lifecycle
   static const orderCreated = 'order_created';
@@ -34,9 +44,13 @@ class NotificationEvents {
   static const suspiciousActivity = 'suspicious_activity';
   static const accountLocked = 'account_locked';
 
-  static const customerOrderEvents = {
-    orderCreated,
-    searchingForRider,
+  static const packageDeliveryEvents = {
+    pickupAssigned,
+    enRoutePickup,
+    atPickup,
+    enRouteDropoff,
+    atDropoff,
+    delivered,
     riderAssigned,
     riderEnRoutePickup,
     riderArrivedPickup,
@@ -48,9 +62,15 @@ class NotificationEvents {
     deliveryCancelled,
     deliveryFailed,
     riderReassigned,
-    scheduledDeliveryReminder,
     deliveryDelayed,
     etaUpdated,
+  };
+
+  static const customerOrderEvents = {
+    orderCreated,
+    searchingForRider,
+    ...packageDeliveryEvents,
+    scheduledDeliveryReminder,
   };
 
   static const securityEvents = {
@@ -72,6 +92,12 @@ class NotificationEvents {
   };
 }
 
+class NotificationTypes {
+  NotificationTypes._();
+
+  static const otpRequired = 'otp_required';
+}
+
 class NotificationScreens {
   NotificationScreens._();
 
@@ -79,6 +105,10 @@ class NotificationScreens {
   static const orders = 'orders';
   static const home = 'home';
   static const settings = 'settings';
+  static const verifyDelivery = 'verify_delivery';
+  static const deliveryTracking = 'delivery_tracking';
+  static const rateDelivery = 'rate_delivery';
+  static const confirmReceipt = 'confirm_receipt';
 }
 
 /// Normalises event names to lowercase snake_case for comparison.
@@ -107,6 +137,36 @@ int? parseOrderIdFromPayload(Map<String, String> data) {
     }
   }
   return null;
+}
+
+/// Extracts a package delivery id from FCM / in-app notification payload keys.
+int? parseDeliveryIdFromPayload(Map<String, String> data) {
+  for (final key in const ['delivery_id', 'deliveryId']) {
+    if (data.containsKey(key)) {
+      final n = int.tryParse(data[key]!);
+      if (n != null) return n;
+    }
+  }
+  return null;
+}
+
+String? parseDeliveryStatusFromPayload(Map<String, String> data) {
+  final raw = data['new_status'] ?? data['status'] ?? data['event'];
+  final normalized = normalizeDeliveryStatus(raw);
+  return normalized.isEmpty ? null : normalized;
+}
+
+bool isOtpRequiredPayload(Map<String, String> data) {
+  final type = data['type']?.trim().toLowerCase();
+  if (type == NotificationTypes.otpRequired) return true;
+  return normalizeEvent(data['event']) == NotificationTypes.otpRequired;
+}
+
+bool isPackageDeliveryEvent(String? event) {
+  final normalized = normalizeDeliveryStatus(event);
+  if (normalized.isEmpty) return false;
+  return NotificationEvents.packageDeliveryEvents.contains(normalized) ||
+      isDeliveryLifecycleStatus(normalized);
 }
 
 bool isCustomerOrderEvent(String? event) {

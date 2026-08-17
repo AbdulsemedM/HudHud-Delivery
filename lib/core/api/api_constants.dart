@@ -128,6 +128,9 @@ class ApiConstants {
   /// Retry unpaid payment: POST /api/services/delivery/{id}/retry-payment
   static const String deliveryRetryPayment =
       'services/delivery/{id}/retry-payment';
+  static const String deliveryConfirmReceipt =
+      'services/delivery/{id}/confirm-receipt';
+  static const String deliveryRate = 'services/delivery/{id}/rate';
 
   // Ride/Taxi endpoints
   static const String rideEstimate = 'services/ride/estimate';
