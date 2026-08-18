@@ -2378,6 +2378,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chatLoadError => 'Could not load messages';
 
   @override
+  String get chatLeftConversation => 'You have left this conversation';
+
+  @override
+  String get chatRejoin => 'Rejoin';
+
+  @override
   String get chatCreateSupport => 'Start chat';
 
   @override

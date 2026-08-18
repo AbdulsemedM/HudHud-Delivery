@@ -1,5 +1,5 @@
 class NotificationModel {
-  final int id;
+  final String id;
   final int userId;
   final String title;
   final String message;
@@ -30,6 +30,7 @@ class NotificationModel {
     final messageFromPayload = payloadMap['message']?.toString();
 
     final readAt = json['read_at'];
+    final hasReadAt = readAt != null && readAt.toString().trim().isNotEmpty;
 
     final routingData = <String, String>{};
     payloadMap.forEach((key, value) {
@@ -37,12 +38,14 @@ class NotificationModel {
       routingData[key.toString()] = value.toString();
     });
 
+    final id = json['id']?.toString().trim() ?? '';
+
     return NotificationModel(
-      id: _asInt(json['id']),
+      id: id,
       userId: _asInt(json['user_id'] ?? json['notifiable_id']),
       title: json['title']?.toString() ?? titleFromPayload ?? 'Notification',
       message: json['message']?.toString() ?? messageFromPayload ?? '',
-      isRead: readAt != null || (json['is_read'] ?? 0) == 1,
+      isRead: hasReadAt || _asBool(json['is_read']),
       createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ??
           DateTime.now(),
       updatedAt: DateTime.tryParse(json['updated_at'] as String? ?? '') ??
@@ -58,13 +61,22 @@ class NotificationModel {
     return 0;
   }
 
+  static bool _asBool(dynamic value) {
+    if (value == true || value == 1) return true;
+    if (value is String) {
+      final normalized = value.toLowerCase().trim();
+      return normalized == 'true' || normalized == '1';
+    }
+    return false;
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'user_id': userId,
       'title': title,
       'message': message,
-      'is_read': isRead ? 1 : 0,
+      'is_read': isRead,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
       'data': routingData,
@@ -72,7 +84,7 @@ class NotificationModel {
   }
 
   NotificationModel copyWith({
-    int? id,
+    String? id,
     int? userId,
     String? title,
     String? message,

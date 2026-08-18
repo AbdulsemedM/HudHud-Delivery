@@ -2397,6 +2397,12 @@ class AppLocalizationsOm extends AppLocalizations {
   String get chatLoadError => 'Ergaawwan fe\'uu hin dandeenye';
 
   @override
+  String get chatLeftConversation => 'Mariin kanaa irraa bahteetta';
+
+  @override
+  String get chatRejoin => 'Deebi\'ii makaa';
+
+  @override
   String get chatCreateSupport => 'Haasaa jalqabi';
 
   @override

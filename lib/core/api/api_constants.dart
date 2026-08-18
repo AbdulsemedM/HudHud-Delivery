@@ -115,6 +115,8 @@ class ApiConstants {
   // Notifications endpoints (GET /api/notifications, GET /api/notifications/{id})
   static const String notificationsList = 'notifications';
   static const String notificationDetails = 'notifications/{id}';
+  static const String notificationsRead = 'notifications/read';
+  static const String notificationsReadAll = 'notifications/read-all';
 
   // Service types endpoints
   static const String serviceTypes = 'service-types';
@@ -167,6 +169,7 @@ class ApiConstants {
   static const String chatConversationMessages =
       'chat/conversations/{id}/messages';
   static const String chatConversationRead = 'chat/conversations/{id}/read';
+  static const String chatConversationRejoin = 'chat/conversations/{id}/rejoin';
   static const String chatUnreadCount = 'chat/unread-count';
   static const String chatOrder = 'chat/order/{orderId}';
   static const String chatSupport = 'chat/support';

@@ -2365,6 +2365,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get chatLoadError => 'تعذر تحميل الرسائل';
 
   @override
+  String get chatLeftConversation => 'لقد غادرت هذه المحادثة';
+
+  @override
+  String get chatRejoin => 'إعادة الانضمام';
+
+  @override
   String get chatCreateSupport => 'بدء المحادثة';
 
   @override

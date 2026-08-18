@@ -1022,6 +1022,8 @@
   "chatLocation": "Location",
   "chatFile": "File",
   "chatLoadError": "Could not load messages",
+  "chatLeftConversation": "You have left this conversation",
+  "chatRejoin": "Rejoin",
   "chatCreateSupport": "Start chat",
   "sosSettingsTitle": "Safety & SOS",
   "sosEmergencyContacts": "Emergency contacts",

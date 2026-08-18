@@ -4550,6 +4550,18 @@ abstract class AppLocalizations {
   /// **'Could not load messages'**
   String get chatLoadError;
 
+  /// No description provided for @chatLeftConversation.
+  ///
+  /// In en, this message translates to:
+  /// **'You have left this conversation'**
+  String get chatLeftConversation;
+
+  /// No description provided for @chatRejoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejoin'**
+  String get chatRejoin;
+
   /// No description provided for @chatCreateSupport.
   ///
   /// In en, this message translates to:

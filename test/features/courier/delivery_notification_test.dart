@@ -30,7 +30,7 @@ void main() {
 
     test('dedupeDeliveryNotificationsByKey keeps newest per delivery/status', () {
       final older = NotificationModel(
-        id: 1,
+        id: '1',
         userId: 1,
         title: 'Older',
         message: 'Assigned',
@@ -43,7 +43,7 @@ void main() {
         },
       );
       final newer = NotificationModel(
-        id: 2,
+        id: '2',
         userId: 1,
         title: 'Newer',
         message: 'At dropoff',
@@ -63,12 +63,12 @@ void main() {
       );
 
       expect(deduped.length, 1);
-      expect(deduped.first.id, 2);
+      expect(deduped.first.id, '2');
     });
 
     test('filterStaleDeliveryNotifications drops older lifecycle statuses', () {
       final assigned = NotificationModel(
-        id: 1,
+        id: '1',
         userId: 1,
         title: 'Assigned',
         message: '',
@@ -81,7 +81,7 @@ void main() {
         },
       );
       final dropoff = NotificationModel(
-        id: 2,
+        id: '2',
         userId: 1,
         title: 'At dropoff',
         message: '',
@@ -100,7 +100,7 @@ void main() {
       );
 
       expect(filtered.length, 1);
-      expect(filtered.first.id, 2);
+      expect(filtered.first.id, '2');
     });
 
     test('isOtpRequiredPayload detects otp_required type', () {

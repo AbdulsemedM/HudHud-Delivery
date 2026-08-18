@@ -228,26 +228,34 @@ class _ChatRoomViewState extends State<_ChatRoomView>
                         ],
                       ),
               ),
-              ChatInputBar(
-                controller: _textController,
-                isSending: state.isSending,
-                isEditing: state.editingMessageId != null,
-                textOnly: isPackageDelivery,
-                pendingAttachmentPaths: _pendingPaths,
-                onRemoveAttachment: (i) {
-                  setState(() => _pendingPaths.removeAt(i));
-                },
-                onSendText: () => _handleSend(context, state),
-                onAttach: () => _handleAttach(context),
-                onAudioRecorded: (path) {
-                  context.read<ChatRoomBloc>().add(
-                        SendAudioMessageEvent(
-                          caption: l10n.chatVoiceMessage,
-                          filePath: path,
-                        ),
-                      );
-                },
-              ),
+              if (state.hasLeft)
+                _ChatRejoinBar(
+                  isRejoining: state.isRejoining,
+                  onRejoin: () => context
+                      .read<ChatRoomBloc>()
+                      .add(const RejoinChatEvent()),
+                )
+              else
+                ChatInputBar(
+                  controller: _textController,
+                  isSending: state.isSending,
+                  isEditing: state.editingMessageId != null,
+                  textOnly: isPackageDelivery,
+                  pendingAttachmentPaths: _pendingPaths,
+                  onRemoveAttachment: (i) {
+                    setState(() => _pendingPaths.removeAt(i));
+                  },
+                  onSendText: () => _handleSend(context, state),
+                  onAttach: () => _handleAttach(context),
+                  onAudioRecorded: (path) {
+                    context.read<ChatRoomBloc>().add(
+                          SendAudioMessageEvent(
+                            caption: l10n.chatVoiceMessage,
+                            filePath: path,
+                          ),
+                        );
+                  },
+                ),
             ],
           ),
         );
@@ -479,5 +487,54 @@ class _MessageList extends StatelessWidget {
     final nxt = next.createdAt ?? next.deliveredAt;
     if (cur == null || nxt == null) return false;
     return cur.year != nxt.year || cur.month != nxt.month || cur.day != nxt.day;
+  }
+}
+
+class _ChatRejoinBar extends StatelessWidget {
+  final bool isRejoining;
+  final VoidCallback onRejoin;
+
+  const _ChatRejoinBar({
+    required this.isRejoining,
+    required this.onRejoin,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    return Material(
+      color: theme.colorScheme.surface,
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                l10n.chatLeftConversation,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: isRejoining ? null : onRejoin,
+                  child: isRejoining
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Text(l10n.chatRejoin),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

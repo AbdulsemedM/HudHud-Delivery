@@ -123,6 +123,19 @@ class ChatDataProvider {
     );
   }
 
+  Future<Map<String, dynamic>> rejoinConversation(int id) {
+    return _wrap(
+      () => apiService.post(
+        _url(
+          ApiConstants.replacePathParams(
+            ApiConstants.chatConversationRejoin,
+            {'id': id},
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<Map<String, dynamic>> sendMessage(
     int conversationId,
     SendChatMessageRequest request,
@@ -225,6 +238,19 @@ class ChatDataProvider {
         _url(
           ApiConstants.replacePathParams(
             ApiConstants.packageDeliveryRead,
+            {'deliveryId': deliveryId},
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<Map<String, dynamic>> rejoinPackageDelivery(int deliveryId) {
+    return _wrap(
+      () => apiService.post(
+        _url(
+          ApiConstants.replacePathParams(
+            ApiConstants.packageDeliveryRejoin,
             {'deliveryId': deliveryId},
           ),
         ),

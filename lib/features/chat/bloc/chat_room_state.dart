@@ -18,6 +18,8 @@ class ChatRoomLoaded extends ChatRoomState {
   final List<ChatParticipantModel> participants;
   final bool isSending;
   final bool isLoadingHistory;
+  final bool hasLeft;
+  final bool isRejoining;
   final int? editingMessageId;
   final String? editingDraft;
   final int newMessagesWhileScrolledUp;
@@ -28,6 +30,8 @@ class ChatRoomLoaded extends ChatRoomState {
     required this.participants,
     this.isSending = false,
     this.isLoadingHistory = false,
+    this.hasLeft = false,
+    this.isRejoining = false,
     this.editingMessageId,
     this.editingDraft,
     this.newMessagesWhileScrolledUp = 0,
@@ -39,6 +43,8 @@ class ChatRoomLoaded extends ChatRoomState {
     List<ChatParticipantModel>? participants,
     bool? isSending,
     bool? isLoadingHistory,
+    bool? hasLeft,
+    bool? isRejoining,
     int? editingMessageId,
     String? editingDraft,
     int? newMessagesWhileScrolledUp,
@@ -50,6 +56,8 @@ class ChatRoomLoaded extends ChatRoomState {
       participants: participants ?? this.participants,
       isSending: isSending ?? this.isSending,
       isLoadingHistory: isLoadingHistory ?? this.isLoadingHistory,
+      hasLeft: hasLeft ?? this.hasLeft,
+      isRejoining: isRejoining ?? this.isRejoining,
       editingMessageId:
           clearEditing ? null : (editingMessageId ?? this.editingMessageId),
       editingDraft: clearEditing ? null : (editingDraft ?? this.editingDraft),

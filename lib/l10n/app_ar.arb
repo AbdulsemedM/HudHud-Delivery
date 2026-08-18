@@ -1061,6 +1061,8 @@
   "chatLocation": "موقع",
   "chatFile": "ملف",
   "chatLoadError": "تعذر تحميل الرسائل",
+  "chatLeftConversation": "لقد غادرت هذه المحادثة",
+  "chatRejoin": "إعادة الانضمام",
   "chatCreateSupport": "بدء المحادثة",
   "sosSettingsTitle": "السلامة وSOS",
   "sosEmergencyContacts": "جهات اتصال الطوارئ",

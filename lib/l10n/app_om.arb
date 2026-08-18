@@ -1061,6 +1061,8 @@
   "chatLocation": "Bakka",
   "chatFile": "Faayila",
   "chatLoadError": "Ergaawwan fe'uu hin dandeenye",
+  "chatLeftConversation": "Mariin kanaa irraa bahteetta",
+  "chatRejoin": "Deebi'ii makaa",
   "chatCreateSupport": "Haasaa jalqabi",
   "sosSettingsTitle": "Nageenyaa fi SOS",
   "sosEmergencyContacts": "Quunnamtii balaa",

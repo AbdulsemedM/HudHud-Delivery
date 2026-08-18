@@ -45,6 +45,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
     on<RetrySendMessageEvent>(_onRetry);
     on<PauseChatPollingEvent>(_onPausePolling);
     on<ResumeChatPollingEvent>(_onResumePolling);
+    on<RejoinChatEvent>(_onRejoin);
   }
 
   @override
@@ -99,7 +100,8 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
             conversation: detail.conversation,
             messages: detail.messages,
             participants: detail.participants,
-            isLoadingHistory: detail.messages.isEmpty,
+            isLoadingHistory: detail.messages.isEmpty && !detail.hasLeft,
+            hasLeft: detail.hasLeft,
           ),
         );
         _startPolling(event.conversationId);
@@ -121,6 +123,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
           messages: detail.messages,
           participants: detail.participants,
           isLoadingHistory: false,
+          hasLeft: detail.hasLeft,
         ),
       );
       _startPolling(event.conversationId);
@@ -161,7 +164,8 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
       final detail = await _fetchConversationDetail(current);
       final merged = _mergeMessages(current.messages, detail.messages);
       if (!_messagesChanged(current.messages, merged) &&
-          !current.isLoadingHistory) {
+          !current.isLoadingHistory &&
+          current.hasLeft == detail.hasLeft) {
         return;
       }
       emit(
@@ -170,6 +174,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
           messages: merged,
           participants: detail.participants,
           isLoadingHistory: false,
+          hasLeft: detail.hasLeft,
         ),
       );
     } catch (_) {
@@ -214,32 +219,34 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
     List<ChatMessageModel> existing,
     List<ChatMessageModel> incoming,
   ) {
-    final map = <int, ChatMessageModel>{};
+    final incomingIds = <int>{};
+    final serverIncoming = <ChatMessageModel>[];
     for (final m in incoming) {
-      if (m.id > 0) map[m.id] = m;
+      if (m.id <= 0) continue;
+      if (!incomingIds.add(m.id)) continue;
+      serverIncoming.add(m);
     }
 
+    final keptPrior = <ChatMessageModel>[];
+    final optimistic = <ChatMessageModel>[];
     for (final m in existing) {
       if (m.id < 0) {
         if (m.localStatus != ChatMessageStatus.sending &&
             m.localStatus != ChatMessageStatus.failed) {
           continue;
         }
-        final hasServerCopy =
-            incoming.any((s) => _matchesOptimistic(s, m));
-        if (!hasServerCopy) map[m.id] = m;
+        final hasServerCopy = incoming.any((s) => _matchesOptimistic(s, m));
+        if (!hasServerCopy) optimistic.add(m);
         continue;
       }
-      map.putIfAbsent(m.id, () => m);
+      if (!incomingIds.contains(m.id)) {
+        keptPrior.add(m);
+      }
     }
 
-    final list = map.values.toList()
-      ..sort((a, b) {
-        final at = a.createdAt ?? a.deliveredAt ?? DateTime(1970);
-        final bt = b.createdAt ?? b.deliveredAt ?? DateTime(1970);
-        return at.compareTo(bt);
-      });
-    return list;
+    // Server order is authoritative. Keep older local window messages first,
+    // then the API window, then unconfirmed optimistic sends.
+    return [...keptPrior, ...serverIncoming, ...optimistic];
   }
 
   Future<void> _onSendText(
@@ -249,7 +256,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
     final text = event.text.trim();
     if (text.isEmpty) return;
     final current = state;
-    if (current is! ChatRoomLoaded) return;
+    if (current is! ChatRoomLoaded || current.hasLeft) return;
 
     if (current.editingMessageId != null) {
       add(EditMessageEvent(
@@ -271,7 +278,11 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
     Emitter<ChatRoomState> emit,
   ) async {
     final current = state;
-    if (current is! ChatRoomLoaded || event.filePaths.isEmpty) return;
+    if (current is! ChatRoomLoaded ||
+        current.hasLeft ||
+        event.filePaths.isEmpty) {
+      return;
+    }
     final request = SendChatMessageRequest(
       message: event.caption.isEmpty ? 'Photo' : event.caption,
       type: ChatMessageType.image,
@@ -285,7 +296,11 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
     Emitter<ChatRoomState> emit,
   ) async {
     final current = state;
-    if (current is! ChatRoomLoaded || event.filePaths.isEmpty) return;
+    if (current is! ChatRoomLoaded ||
+        current.hasLeft ||
+        event.filePaths.isEmpty) {
+      return;
+    }
     final request = SendChatMessageRequest(
       message: event.caption.isEmpty ? 'File' : event.caption,
       type: ChatMessageType.file,
@@ -299,7 +314,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
     Emitter<ChatRoomState> emit,
   ) async {
     final current = state;
-    if (current is! ChatRoomLoaded) return;
+    if (current is! ChatRoomLoaded || current.hasLeft) return;
     final request = SendChatMessageRequest(
       message: event.caption.isEmpty ? 'Voice message' : event.caption,
       type: ChatMessageType.audio,
@@ -313,7 +328,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
     Emitter<ChatRoomState> emit,
   ) async {
     final current = state;
-    if (current is! ChatRoomLoaded) return;
+    if (current is! ChatRoomLoaded || current.hasLeft) return;
     final request = SendChatMessageRequest(
       message: event.caption.isEmpty ? "I'm at this location" : event.caption,
       type: ChatMessageType.location,
@@ -425,7 +440,9 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
   ) async {
     final request = _pendingRetries[event.tempMessageId];
     final current = state;
-    if (request == null || current is! ChatRoomLoaded) return;
+    if (request == null || current is! ChatRoomLoaded || current.hasLeft) {
+      return;
+    }
     final cleaned = current.messages
         .where((m) => m.id != event.tempMessageId)
         .toList();
@@ -516,5 +533,36 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
     final current = state;
     if (current is! ChatRoomLoaded) return;
     emit(current.copyWith(clearEditing: true));
+  }
+
+  Future<void> _onRejoin(
+    RejoinChatEvent event,
+    Emitter<ChatRoomState> emit,
+  ) async {
+    final current = state;
+    if (current is! ChatRoomLoaded || !current.hasLeft || current.isRejoining) {
+      return;
+    }
+    emit(current.copyWith(isRejoining: true));
+    try {
+      if (packageDeliveryId != null) {
+        await repository.rejoinPackageDelivery(packageDeliveryId!);
+      } else {
+        await repository.rejoinConversation(current.conversation.id);
+      }
+      final detail = await _fetchConversationDetail(current);
+      emit(
+        current.copyWith(
+          conversation: detail.conversation,
+          messages: _mergeMessages(current.messages, detail.messages),
+          participants: detail.participants,
+          hasLeft: detail.hasLeft,
+          isRejoining: false,
+          isLoadingHistory: false,
+        ),
+      );
+    } catch (e) {
+      emit(current.copyWith(isRejoining: false));
+    }
   }
 }

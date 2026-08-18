@@ -115,3 +115,7 @@ class PauseChatPollingEvent extends ChatRoomEvent {
 class ResumeChatPollingEvent extends ChatRoomEvent {
   const ResumeChatPollingEvent();
 }
+
+class RejoinChatEvent extends ChatRoomEvent {
+  const RejoinChatEvent();
+}

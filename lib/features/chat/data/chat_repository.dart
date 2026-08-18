@@ -108,6 +108,11 @@ class ChatRepository {
     _ensureSuccess(response, 'Error marking conversation read');
   }
 
+  Future<void> rejoinConversation(int conversationId) async {
+    final response = await dataProvider.rejoinConversation(conversationId);
+    _ensureSuccess(response, 'Error rejoining conversation');
+  }
+
   Future<ChatMessageModel> editMessage(int messageId, String text) async {
     final response = await dataProvider.editMessage(messageId, text);
     _ensureSuccess(response, 'Error editing message');
@@ -154,6 +159,11 @@ class ChatRepository {
   Future<void> markPackageDeliveryRead(int deliveryId) async {
     final response = await dataProvider.markPackageDeliveryRead(deliveryId);
     _ensureSuccess(response, 'Error marking package delivery chat read');
+  }
+
+  Future<void> rejoinPackageDelivery(int deliveryId) async {
+    final response = await dataProvider.rejoinPackageDelivery(deliveryId);
+    _ensureSuccess(response, 'Error rejoining conversation');
   }
 
   Future<ChatMessageModel> sendPackageDeliveryMessage(

@@ -2402,6 +2402,12 @@ class AppLocalizationsSo extends AppLocalizations {
   String get chatLoadError => 'Fariimaha lama soo dejin karin';
 
   @override
+  String get chatLeftConversation => 'Waad ka baxday wadahadalkan';
+
+  @override
+  String get chatRejoin => 'Ku soo noqo';
+
+  @override
   String get chatCreateSupport => 'Bilow wada hadal';
 
   @override

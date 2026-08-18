@@ -72,6 +72,7 @@ class PackageDeliveryChatMapper {
       participants: participants.isNotEmpty
           ? participants
           : detail.participants,
+      hasLeft: detail.hasLeft,
     );
   }
 

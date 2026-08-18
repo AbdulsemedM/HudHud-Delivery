@@ -2342,6 +2342,12 @@ class AppLocalizationsAm extends AppLocalizations {
   String get chatLoadError => 'መልእክቶችን መጫን አልተቻለም';
 
   @override
+  String get chatLeftConversation => 'ይህን ውይይት ለቀዋል';
+
+  @override
+  String get chatRejoin => 'እንደገና ይቀላቀሉ';
+
+  @override
   String get chatCreateSupport => 'ውይይት ጀምር';
 
   @override

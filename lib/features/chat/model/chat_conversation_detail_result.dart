@@ -7,11 +7,13 @@ class ChatConversationDetailResult {
   final ChatConversationModel conversation;
   final List<ChatMessageModel> messages;
   final List<ChatParticipantModel> participants;
+  final bool hasLeft;
 
   const ChatConversationDetailResult({
     required this.conversation,
     required this.messages,
     this.participants = const [],
+    this.hasLeft = false,
   });
 
   /// Builds room state from POST open/create responses (e.g. support chat)
@@ -29,6 +31,7 @@ class ChatConversationDetailResult {
       conversation: conversation,
       messages: const [],
       participants: conversation.participants,
+      hasLeft: false,
     );
   }
 
@@ -71,6 +74,7 @@ class ChatConversationDetailResult {
       participants: participants.isNotEmpty
           ? participants
           : conversation.participants,
+      hasLeft: _asBool(data['has_left']),
     );
   }
 
@@ -89,12 +93,16 @@ class ChatConversationDetailResult {
       if (!seenIds.add(message.id)) continue;
       list.add(message);
     }
-    // API returns newest first; UI uses reverse list — keep chronological asc.
-    list.sort((a, b) {
-      final at = a.createdAt ?? a.deliveredAt ?? DateTime(1970);
-      final bt = b.createdAt ?? b.deliveredAt ?? DateTime(1970);
-      return at.compareTo(bt);
-    });
+    // Server order is authoritative (oldest first). Do not reorder by timestamp.
     return list;
+  }
+
+  static bool _asBool(dynamic value) {
+    if (value == true || value == 1) return true;
+    if (value is String) {
+      final normalized = value.toLowerCase().trim();
+      return normalized == 'true' || normalized == '1';
+    }
+    return false;
   }
 }

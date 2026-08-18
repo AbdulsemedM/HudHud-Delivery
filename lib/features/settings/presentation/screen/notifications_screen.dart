@@ -27,102 +27,153 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     context.read<NotificationsBloc>().add(FetchNotificationsEvent());
   }
 
+  void _refetch(NotificationsState state) {
+    final loaded = state is NotificationsLoaded ? state : null;
+    context.read<NotificationsBloc>().add(
+          FetchNotificationsEvent(
+            page: loaded?.page ?? 1,
+            perPage: loaded?.perPage ?? 20,
+          ),
+        );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ProfileDarkPage(
-      title: 'Notifications',
-      body: BlocBuilder<NotificationsBloc, NotificationsState>(
-        builder: (context, state) {
-          if (state is NotificationsLoading) {
-            return const Padding(
-              padding: EdgeInsets.all(16),
-              child: _NotificationsShimmer(),
-            );
-          }
-          if (state is NotificationsFailure) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 48,
-                      color: AuthScreenColors.textMuted,
+    return BlocBuilder<NotificationsBloc, NotificationsState>(
+      builder: (context, state) {
+        return ProfileDarkPage(
+          title: 'Notifications',
+          actions: [
+            if (state is NotificationsLoaded && state.unreadCount > 0)
+              TextButton(
+                onPressed: () {
+                  context
+                      .read<NotificationsBloc>()
+                      .add(MarkAllNotificationsReadEvent());
+                },
+                child: const Text(
+                  'Mark all read',
+                  style: TextStyle(color: AuthScreenColors.orange),
+                ),
+              ),
+          ],
+          body: _buildBody(context, state),
+        );
+      },
+    );
+  }
+
+  Widget _buildBody(BuildContext context, NotificationsState state) {
+    if (state is NotificationsLoading) {
+      return const Padding(
+        padding: EdgeInsets.all(16),
+        child: _NotificationsShimmer(),
+      );
+    }
+    if (state is NotificationsFailure) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.error_outline,
+                size: 48,
+                color: AuthScreenColors.textMuted,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                state.message,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: AuthScreenColors.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 24),
+              TextButton.icon(
+                onPressed: () => _refetch(state),
+                icon: const Icon(
+                  Icons.refresh,
+                  color: AuthScreenColors.orange,
+                ),
+                label: const Text(
+                  'Retry',
+                  style: TextStyle(color: AuthScreenColors.orange),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    if (state is NotificationsLoaded) {
+      final grouped = _groupNotificationsByDate(state.notifications);
+      if (grouped.isEmpty && state.temporaryError == null) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Lottie.asset('assets/animations/browse.json', width: 160),
+              const SizedBox(height: 16),
+              const Text(
+                'No notifications yet',
+                style: TextStyle(
+                  color: AuthScreenColors.textPrimary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+      return RefreshIndicator(
+        onRefresh: () async => _refetch(state),
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          children: [
+            if (state.temporaryError != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                child: Material(
+                  color: AuthScreenColors.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  child: ListTile(
+                    leading: const Icon(
+                      Icons.cloud_off_outlined,
+                      color: AuthScreenColors.orange,
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      state.message,
-                      textAlign: TextAlign.center,
+                    title: Text(
+                      state.temporaryError!,
                       style: const TextStyle(
-                        fontSize: 16,
                         color: AuthScreenColors.textSecondary,
+                        fontSize: 14,
                       ),
                     ),
-                    const SizedBox(height: 24),
-                    TextButton.icon(
-                      onPressed: () {
-                        context
-                            .read<NotificationsBloc>()
-                            .add(FetchNotificationsEvent());
-                      },
-                      icon: const Icon(
-                        Icons.refresh,
-                        color: AuthScreenColors.orange,
-                      ),
-                      label: const Text(
+                    trailing: TextButton(
+                      onPressed: () => _refetch(state),
+                      child: const Text(
                         'Retry',
                         style: TextStyle(color: AuthScreenColors.orange),
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ),
-            );
-          }
-          if (state is NotificationsLoaded) {
-            final grouped = _groupNotificationsByDate(state.notifications);
-            if (grouped.isEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Lottie.asset('assets/animations/browse.json', width: 160),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'No notifications yet',
-                      style: TextStyle(
-                        color: AuthScreenColors.textPrimary,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
+            ...grouped.entries.map((entry) {
+              return _NotificationSection(
+                title: entry.key,
+                notifications: entry.value,
               );
-            }
-            return RefreshIndicator(
-              onRefresh: () async {
-                context
-                    .read<NotificationsBloc>()
-                    .add(FetchNotificationsEvent());
-              },
-              child: ListView(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                children: grouped.entries.map((entry) {
-                  return _NotificationSection(
-                    title: entry.key,
-                    notifications: entry.value,
-                  );
-                }).toList(),
-              ),
-            );
-          }
-          return const SizedBox.shrink();
-        },
-      ),
-    );
+            }),
+          ],
+        ),
+      );
+    }
+    return const SizedBox.shrink();
   }
 
   Map<String, List<NotificationModel>> _groupNotificationsByDate(
@@ -210,9 +261,7 @@ class _NotificationItem extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
-        onTap: notification.routingData.isEmpty
-            ? null
-            : () => _onTap(context),
+        onTap: () => _onTap(context),
         child: Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       padding: const EdgeInsets.all(16),
@@ -277,6 +326,12 @@ class _NotificationItem extends StatelessWidget {
   }
 
   Future<void> _onTap(BuildContext context) async {
+    if (!notification.isRead) {
+      context
+          .read<NotificationsBloc>()
+          .add(MarkNotificationReadEvent(notification.id));
+    }
+    if (notification.routingData.isEmpty) return;
     final navKey = AppNavigator.navigatorKey;
     if (navKey == null) return;
     await openNotificationFromPayloadMap(

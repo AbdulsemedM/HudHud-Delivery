@@ -1061,6 +1061,8 @@
   "chatLocation": "Goob",
   "chatFile": "Fayl",
   "chatLoadError": "Fariimaha lama soo dejin karin",
+  "chatLeftConversation": "Waad ka baxday wadahadalkan",
+  "chatRejoin": "Ku soo noqo",
   "chatCreateSupport": "Bilow wada hadal",
   "sosSettingsTitle": "Badbaadada iyo SOS",
   "sosEmergencyContacts": "Xidhiidhada degdegga",
