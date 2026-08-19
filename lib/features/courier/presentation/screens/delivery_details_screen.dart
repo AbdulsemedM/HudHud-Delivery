@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
@@ -15,6 +14,7 @@ import 'package:hudhud_delivery/features/courier/utils/delivery_cancel.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_payment_helper.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_status.dart';
 import 'package:hudhud_delivery/features/courier/utils/courier_home_refresh.dart';
+import 'package:hudhud_delivery/features/courier/utils/courier_live_job_screen.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/features/payment/data/data_provider/payment_data_provider.dart';
 import 'package:hudhud_delivery/features/payment/data/repository/payment_repository.dart';
@@ -23,7 +23,6 @@ import 'package:hudhud_delivery/features/payment/presentation/screen/payment_ini
 import 'package:hudhud_delivery/features/payment/presentation/widgets/payment_details_form.dart';
 import 'package:hudhud_delivery/features/payment/presentation/widgets/payment_methods_loader.dart';
 import 'package:hudhud_delivery/features/wallet/presentation/screens/add_funds_screen.dart';
-import 'delivery_tracking_screen.dart';
 
 class _RetryPaymentChoice {
   const _RetryPaymentChoice({
@@ -96,15 +95,6 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
 
   String _deliveryStatus(Map<String, dynamic> d) {
     return resolveDeliveryStatusLabel(d);
-  }
-
-  LatLng? _parseLatLng(dynamic lat, dynamic lng) {
-    final latVal =
-        lat is num ? lat.toDouble() : double.tryParse(lat?.toString() ?? '');
-    final lngVal =
-        lng is num ? lng.toDouble() : double.tryParse(lng?.toString() ?? '');
-    if (latVal != null && lngVal != null) return LatLng(latVal, lngVal);
-    return null;
   }
 
   String _formatDate(dynamic value) {
@@ -427,27 +417,10 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
 
   void _navigateToTracking() {
     if (_delivery == null) return;
-    final d = _delivery!;
-    final pickupPos = _parseLatLng(d['pickup_latitude'], d['pickup_longitude']);
-    final dropoffPos =
-        _parseLatLng(d['dropoff_latitude'], d['dropoff_longitude']);
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => DeliveryTrackingScreen(
-          deliveryId: widget.deliveryId,
-          pickupLocation: d['pickup_location']?.toString() ?? '',
-          deliveryLocation: d['dropoff_location']?.toString() ?? '',
-          pickupPosition: pickupPos,
-          deliveryPosition: dropoffPos,
-          selectedVehicle: d['vehicle_type']?.toString() ?? 'motorbike',
-          itemType: d['package_type']?.toString() ?? '',
-          quantity: d['package_weight']?.toString() ?? '1',
-          whoPays: 'me',
-          paymentType: d['payment_method']?.toString() ?? 'cash',
-          recipientName: d['receiver_name']?.toString() ?? '',
-          recipientPhone: d['receiver_phone']?.toString() ?? '',
-        ),
+        builder: (context) => courierLiveJobScreenFromDelivery(_delivery!),
       ),
     );
   }

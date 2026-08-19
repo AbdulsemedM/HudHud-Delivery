@@ -114,6 +114,22 @@ void main() {
       );
     });
 
+    test('isDeliverySearchingForDriver covers pending dispatch', () {
+      expect(isDeliverySearchingForDriver('pending'), isTrue);
+      expect(isDeliverySearchingForDriver('searching'), isTrue);
+      expect(isDeliverySearchingForDriver('pickup_assigned'), isFalse);
+      expect(isDeliverySearchingForDriver('accepted'), isFalse);
+    });
+
+    test('isDeliveryAcceptedForTracking is true after assignment', () {
+      expect(isDeliveryAcceptedForTracking('searching'), isFalse);
+      expect(isDeliveryAcceptedForTracking('pending'), isFalse);
+      expect(isDeliveryAcceptedForTracking('pickup_assigned'), isTrue);
+      expect(isDeliveryAcceptedForTracking('accepted'), isTrue);
+      expect(isDeliveryAcceptedForTracking('en_route_dropoff'), isTrue);
+      expect(isDeliveryAcceptedForTracking('delivered'), isFalse);
+    });
+
     test('isDeliveryTerminalStatus detects closed deliveries', () {
       expect(isDeliveryTerminalStatus('delivered'), isTrue);
       expect(isDeliveryTerminalStatus('cancelled'), isTrue);

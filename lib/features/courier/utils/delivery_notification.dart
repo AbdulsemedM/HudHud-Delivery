@@ -29,6 +29,7 @@ const deliveryStatusAliases = {
   'arrived_at_dropoff': 'at_dropoff',
   'delivery_completed': 'delivered',
   'completed': 'delivered',
+  'accepted': 'pickup_assigned',
 };
 
 /// Rank used to compare lifecycle progress (higher = further along).
@@ -65,6 +66,31 @@ bool isDeliveryTerminalStatus(String? rawStatus) {
       status == 'canceled' ||
       status == 'failed' ||
       status == 'returned';
+}
+
+/// True once a driver has accepted and exact location may be shown.
+bool isDeliveryAcceptedForTracking(String? rawStatus) {
+  if (isDeliveryTerminalStatus(rawStatus)) return false;
+  return deliveryStatusRank(rawStatus) >= 10;
+}
+
+/// True while nearest-first dispatch is still offering the job.
+bool isDeliverySearchingForDriver(String? rawStatus) {
+  if (isDeliveryAcceptedForTracking(rawStatus)) return false;
+  if (isDeliveryTerminalStatus(rawStatus)) return false;
+  final status = normalizeDeliveryStatus(rawStatus);
+  const searching = {
+    'searching',
+    'pending',
+    'pending_payment',
+    'requested',
+    'looking_for_driver',
+    'looking_for_courier',
+    'finding_courier',
+    'created',
+    'request_received',
+  };
+  return status.isEmpty || searching.contains(status);
 }
 
 /// Normalises a delivery status to lowercase snake_case with alias resolution.

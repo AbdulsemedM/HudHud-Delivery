@@ -5497,6 +5497,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cancel order'**
   String get cancelOrder;
+
+  /// No description provided for @courierFindingNearestDrivers.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding the nearest available drivers'**
+  String get courierFindingNearestDrivers;
+
+  /// No description provided for @courierFindingNearestDriversSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We are finding the nearest available driver. Live driver location appears only after acceptance.'**
+  String get courierFindingNearestDriversSubtitle;
+
+  /// No description provided for @courierDriverLocationUpdating.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver location is updating'**
+  String get courierDriverLocationUpdating;
 }
 
 class _AppLocalizationsDelegate

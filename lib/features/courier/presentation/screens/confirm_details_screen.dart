@@ -735,6 +735,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
         currency: refreshedCurrency,
         trackingNumber: pending.trackingNumber,
         status: pending.status,
+        dispatch: pending.dispatch,
         raw: pending.raw,
       );
     });

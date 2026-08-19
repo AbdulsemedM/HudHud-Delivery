@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:latlong2/latlong.dart';
 
 import 'package:hudhud_delivery/app/notifications/notification_events.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
@@ -7,10 +6,9 @@ import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/courier/presentation/screens/confirm_receipt_screen.dart';
 import 'package:hudhud_delivery/features/courier/presentation/screens/delivery_details_screen.dart';
-import 'package:hudhud_delivery/features/courier/presentation/screens/delivery_tracking_screen.dart';
 import 'package:hudhud_delivery/features/courier/presentation/screens/rate_delivery_screen.dart';
 import 'package:hudhud_delivery/features/courier/presentation/screens/verify_delivery_otp_screen.dart';
-import 'package:hudhud_delivery/features/courier/presentation/widgets/active_delivery_card.dart';
+import 'package:hudhud_delivery/features/courier/utils/courier_live_job_screen.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_notification.dart';
 
 /// Tracks the latest known delivery status per delivery for stale-push suppression.
@@ -61,10 +59,6 @@ CourierRepository _courierRepository() => CourierRepository(
       ),
     );
 
-LatLng? _parseLatLng(Map<String, dynamic> delivery, String latKey, String lngKey) {
-  return parseDeliveryLatLng(delivery[latKey], delivery[lngKey]);
-}
-
 Future<Map<String, dynamic>?> _fetchDeliveryDetails(int deliveryId) async {
   final result = await _courierRepository().getUserDeliveryDetails(deliveryId);
   if (result['success'] == true) {
@@ -108,31 +102,8 @@ Future<void> openDeliveryTrackingById(
 
   await Navigator.of(context).push(
     MaterialPageRoute<void>(
-      builder: (_) => _trackingScreenFromDelivery(delivery),
+      builder: (_) => courierLiveJobScreenFromDelivery(delivery),
     ),
-  );
-}
-
-DeliveryTrackingScreen _trackingScreenFromDelivery(
-  Map<String, dynamic> delivery,
-) {
-  final deliveryId = delivery['id'] is int
-      ? delivery['id'] as int
-      : int.tryParse(delivery['id']?.toString() ?? '');
-
-  return DeliveryTrackingScreen(
-    deliveryId: deliveryId,
-    pickupLocation: delivery['pickup_location']?.toString() ?? '',
-    deliveryLocation: delivery['dropoff_location']?.toString() ?? '',
-    pickupPosition: _parseLatLng(delivery, 'pickup_latitude', 'pickup_longitude'),
-    deliveryPosition: _parseLatLng(delivery, 'dropoff_latitude', 'dropoff_longitude'),
-    selectedVehicle: delivery['vehicle_type']?.toString() ?? 'motorbike',
-    itemType: delivery['package_type']?.toString() ?? '',
-    quantity: delivery['package_weight']?.toString() ?? '1',
-    whoPays: 'me',
-    paymentType: delivery['payment_method']?.toString() ?? 'cash',
-    recipientName: delivery['receiver_name']?.toString() ?? '',
-    recipientPhone: delivery['receiver_phone']?.toString() ?? '',
   );
 }
 
@@ -150,7 +121,7 @@ Future<void> openVerifyDeliveryOtpFromPayload(
       isDeliveryTerminalStatus(resolveDeliveryStatusFromMap(delivery))) {
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => _trackingScreenFromDelivery(delivery),
+        builder: (_) => courierLiveJobScreenFromDelivery(delivery),
       ),
     );
     return;

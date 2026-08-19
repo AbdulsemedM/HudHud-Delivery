@@ -1213,5 +1213,8 @@
   },
   "cancelDeliveryConfirm": "Are you sure you want to cancel this delivery?",
   "cancelDeliveryConfirmRefund": "Are you sure you want to cancel this delivery? Confirmed payment will be refunded to your wallet.",
-  "cancelOrder": "Cancel order"
+  "cancelOrder": "Cancel order",
+  "courierFindingNearestDrivers": "Finding the nearest available drivers",
+  "courierFindingNearestDriversSubtitle": "We are finding the nearest available driver. Live driver location appears only after acceptance.",
+  "courierDriverLocationUpdating": "Driver location is updating"
 }

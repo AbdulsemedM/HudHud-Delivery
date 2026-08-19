@@ -2916,4 +2916,15 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get cancelOrder => 'Ajaja haqi';
+
+  @override
+  String get courierFindingNearestDrivers =>
+      'Finding the nearest available drivers';
+
+  @override
+  String get courierFindingNearestDriversSubtitle =>
+      'We are finding the nearest available driver. Live driver location appears only after acceptance.';
+
+  @override
+  String get courierDriverLocationUpdating => 'Driver location is updating';
 }

@@ -10,9 +10,11 @@ import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/widgets/status_chip.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
+import 'package:hudhud_delivery/features/courier/data/models/delivery_live_tracking.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
 import 'package:hudhud_delivery/features/courier/presentation/widgets/driver_contact_card.dart';
+import 'package:hudhud_delivery/features/courier/utils/delivery_notification.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_status.dart';
 import 'package:hudhud_delivery/features/chat/utils/chat_navigation.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
@@ -60,10 +62,18 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
   Timer? _pollTimer;
 
   Map<String, dynamic>? _trackData;
+  DeliveryLiveTracking? _liveTracking;
+  GeoPoint? _retainedDriverPoint;
+  bool _driverLocationStale = false;
+  bool _trackingAvailable = false;
+  bool _stopPolling = false;
+  int _pollIntervalSeconds = 7;
   bool _isLoadingTrack = true;
   bool _isRefreshingTrack = false;
   String? _trackError;
   List<LatLng>? _routePolylinePoints;
+  GeoPoint? _lastRouteOrigin;
+  GeoPoint? _lastRouteDestination;
   DateTime? _driverLocationUpdatedAt;
 
   late final CourierRepository _courierRepository;
@@ -78,18 +88,33 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
     );
 
     if (widget.pickupPosition != null && widget.deliveryPosition != null) {
-      _fetchRouteDirections();
+      _fetchRouteDirections(
+        origin: GeoPoint(
+          latitude: widget.pickupPosition!.latitude,
+          longitude: widget.pickupPosition!.longitude,
+        ),
+        destination: GeoPoint(
+          latitude: widget.deliveryPosition!.latitude,
+          longitude: widget.deliveryPosition!.longitude,
+        ),
+      );
     }
 
     if (widget.deliveryId != null) {
       _fetchTrackData();
-      _pollTimer = Timer.periodic(
-        const Duration(seconds: 8),
-        (_) => _fetchTrackData(),
-      );
+      _startPollTimer();
     } else {
       _isLoadingTrack = false;
     }
+  }
+
+  void _startPollTimer() {
+    _pollTimer?.cancel();
+    if (_stopPolling) return;
+    _pollTimer = Timer.periodic(
+      Duration(seconds: _pollIntervalSeconds),
+      (_) => _fetchTrackData(),
+    );
   }
 
   @override
@@ -146,13 +171,25 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
     await openPackageDeliveryChat(context, deliveryId);
   }
 
-  Future<void> _fetchRouteDirections() async {
-    if (widget.pickupPosition == null || widget.deliveryPosition == null) return;
+  Future<void> _fetchRouteDirections({
+    required GeoPoint origin,
+    required GeoPoint destination,
+  }) async {
+    final same = _lastRouteOrigin != null &&
+        _lastRouteDestination != null &&
+        _lastRouteOrigin!.latitude == origin.latitude &&
+        _lastRouteOrigin!.longitude == origin.longitude &&
+        _lastRouteDestination!.latitude == destination.latitude &&
+        _lastRouteDestination!.longitude == destination.longitude;
+    if (same && _routePolylinePoints != null) return;
+
+    _lastRouteOrigin = origin;
+    _lastRouteDestination = destination;
     final result = await GoogleDirectionsService.getDirections(
-      originLat: widget.pickupPosition!.latitude,
-      originLng: widget.pickupPosition!.longitude,
-      destLat: widget.deliveryPosition!.latitude,
-      destLng: widget.deliveryPosition!.longitude,
+      originLat: origin.latitude,
+      originLng: origin.longitude,
+      destLat: destination.latitude,
+      destLng: destination.longitude,
     );
     if (!mounted) return;
     setState(() {
@@ -189,38 +226,137 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
   }
 
   Future<void> _fetchTrackData() async {
-    if (widget.deliveryId == null) return;
+    if (widget.deliveryId == null || _stopPolling) return;
     final isInitialLoad = _isLoadingTrack;
     if (!isInitialLoad && mounted) {
       setState(() => _isRefreshingTrack = true);
     }
     try {
+      final liveResult =
+          await _courierRepository.getDeliveryLiveTracking(widget.deliveryId!);
+      if (!mounted) return;
+
+      if (liveResult['notFound'] == true) {
+        _stopPolling = true;
+        _pollTimer?.cancel();
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context);
+        }
+        return;
+      }
+
+      if (liveResult['success'] == true) {
+        final live = liveResult['tracking'] as DeliveryLiveTracking?;
+        await _applyLiveTracking(live);
+        return;
+      }
+
       final result =
           await _courierRepository.getDeliveryTrack(widget.deliveryId!);
-      if (mounted) {
-        setState(() {
-          _isLoadingTrack = false;
-          _isRefreshingTrack = false;
-          if (result['success'] == true) {
-            _trackData = result['data'] as Map<String, dynamic>?;
-            _vehiclePosition = _parseDriverLocation(_trackData);
-            _driverLocationUpdatedAt = _parseDriverLocationUpdatedAt(_trackData);
-            _trackError = null;
-          } else {
-            _trackData = null;
-            _trackError = result['message'] as String?;
+      if (!mounted) return;
+      setState(() {
+        _isLoadingTrack = false;
+        _isRefreshingTrack = false;
+        if (result['success'] == true) {
+          _trackData = result['data'] as Map<String, dynamic>?;
+          final parsed = _parseDriverLocation(_trackData);
+          if (parsed != null) {
+            _vehiclePosition = parsed;
+            _retainedDriverPoint = GeoPoint(
+              latitude: parsed.latitude,
+              longitude: parsed.longitude,
+            );
           }
-        });
-      }
+          if (_trackData?['driver'] != null) {
+            _trackingAvailable = true;
+          }
+          _driverLocationUpdatedAt = _parseDriverLocationUpdatedAt(_trackData);
+          _trackError = null;
+        } else {
+          _trackError = result['message'] as String?;
+        }
+      });
     } catch (e) {
       if (mounted) {
         setState(() {
           _isLoadingTrack = false;
           _isRefreshingTrack = false;
-          _trackData = null;
           _trackError = 'Failed to load tracking';
         });
       }
+    }
+  }
+
+  Future<void> _applyLiveTracking(DeliveryLiveTracking? live) async {
+    if (live == null || !mounted) return;
+
+    final retained = retainDriverLocation(
+      previous: _retainedDriverPoint,
+      incoming: live.driverLocation,
+    );
+    final nextPoll = live.pollAfterSeconds < 1 ? 7 : live.pollAfterSeconds;
+    final intervalChanged = nextPoll != _pollIntervalSeconds;
+    _pollIntervalSeconds = nextPoll;
+
+    final terminal = isDeliveryTerminalStatus(live.status);
+    if (terminal) {
+      _stopPolling = true;
+      _pollTimer?.cancel();
+    }
+
+    setState(() {
+      _isLoadingTrack = false;
+      _isRefreshingTrack = false;
+      _liveTracking = live;
+      _trackingAvailable = live.trackingAvailable;
+      _driverLocationStale = live.driverLocation?.isLive == false;
+      _retainedDriverPoint = retained;
+      if (retained != null) {
+        _vehiclePosition = LatLng(retained.latitude, retained.longitude);
+      }
+      if (live.driverLocation?.recordedAt != null) {
+        _driverLocationUpdatedAt = live.driverLocation!.recordedAt!.toLocal();
+      }
+      _trackError = null;
+      _trackData = {
+        ...?_trackData,
+        'status': live.status,
+        if (live.trackingAvailable && live.driver != null)
+          'driver': {
+            'id': live.driver!.id,
+            'name': live.driver!.name,
+            'phone': live.driver!.phone,
+            'vehicle_type': live.driver!.vehicleType,
+            'vehicle_color': live.driver!.vehicleColor,
+            'vehicle_plate_number': live.driver!.vehiclePlateNumber,
+            'rating': live.driver!.rating,
+          }
+        else
+          'driver': null,
+        'estimated_arrival_minutes': live.estimatedArrivalMinutes,
+      };
+    });
+
+    if (intervalChanged && !_stopPolling) {
+      _startPollTimer();
+    }
+
+    final origin = live.routeOrigin ?? retained;
+    GeoPoint? destination = live.routeDestination ?? live.destination;
+    if (destination == null) {
+      final label = live.effectiveDestinationLabel;
+      final fallback = label == 'dropoff'
+          ? widget.deliveryPosition
+          : widget.pickupPosition;
+      if (fallback != null) {
+        destination = GeoPoint(
+          latitude: fallback.latitude,
+          longitude: fallback.longitude,
+        );
+      }
+    }
+    if (origin != null && destination != null) {
+      await _fetchRouteDirections(origin: origin, destination: destination);
     }
   }
 
@@ -254,7 +390,7 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
   }
 
   _DriverLocationFreshness _locationFreshness() {
-    if (_isRefreshingTrack) {
+    if (_isRefreshingTrack || _driverLocationStale) {
       return _DriverLocationFreshness.updating;
     }
 
@@ -270,10 +406,13 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
     return _DriverLocationFreshness.fresh;
   }
 
-  String _locationFreshnessLabel(_DriverLocationFreshness freshness) {
+  String _locationFreshnessLabel(
+    BuildContext context,
+    _DriverLocationFreshness freshness,
+  ) {
     switch (freshness) {
       case _DriverLocationFreshness.updating:
-        return 'Updating location…';
+        return context.l10n.courierDriverLocationUpdating;
       case _DriverLocationFreshness.stale:
         return 'Location may be stale';
       case _DriverLocationFreshness.fresh:
@@ -336,6 +475,8 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
         gmaps.Marker(
           markerId: const gmaps.MarkerId('vehicle'),
           position: _toG(_vehiclePosition!),
+          rotation: _liveTracking?.driverLocation?.heading ?? 0,
+          flat: _liveTracking?.driverLocation?.heading != null,
           icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
             gmaps.BitmapDescriptor.hueViolet,
           ),
@@ -355,13 +496,24 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
     }
 
     Set<gmaps.Polyline> polylines = {};
-    if (widget.pickupPosition != null && widget.deliveryPosition != null) {
+    final routeStart = _lastRouteOrigin != null
+        ? LatLng(_lastRouteOrigin!.latitude, _lastRouteOrigin!.longitude)
+        : _vehiclePosition ?? widget.pickupPosition;
+    final routeEnd = _lastRouteDestination != null
+        ? LatLng(
+            _lastRouteDestination!.latitude,
+            _lastRouteDestination!.longitude,
+          )
+        : (_liveTracking?.effectiveDestinationLabel == 'dropoff'
+            ? widget.deliveryPosition
+            : widget.pickupPosition ?? widget.deliveryPosition);
+    if (routeStart != null && routeEnd != null) {
       polylines.add(
         gmaps.Polyline(
           polylineId: const gmaps.PolylineId('route'),
           points: _routePolylinePoints != null && _routePolylinePoints!.length >= 2
               ? _routePolylinePoints!.map(_toG).toList()
-              : [_toG(widget.pickupPosition!), _toG(widget.deliveryPosition!)],
+              : [_toG(routeStart), _toG(routeEnd)],
           color: HomeColors.violet,
           width: 4,
         ),
@@ -441,15 +593,45 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                   ),
                 ),
                 // Location freshness badge
-                if (!_isLoadingTrack && _trackError == null)
+                if (!_isLoadingTrack &&
+                    _trackError == null &&
+                    _trackingAvailable)
                   Positioned(
                     top: 96,
                     left: 16,
                     right: 16,
                     child: _LocationFreshnessBanner(
-                      label: _locationFreshnessLabel(locationFreshness),
+                      label: _locationFreshnessLabel(context, locationFreshness),
                       freshness: locationFreshness,
                       lastUpdated: locationUpdatedLabel,
+                    ),
+                  ),
+                if (!_isLoadingTrack &&
+                    _trackError == null &&
+                    !_trackingAvailable)
+                  Positioned(
+                    top: 96,
+                    left: 16,
+                    right: 16,
+                    child: Material(
+                      color: HomeColors.surfaceElevated.withValues(alpha: 0.95),
+                      borderRadius: BorderRadius.circular(AppColors.radiusLG),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
+                        child: Text(
+                          _liveTracking?.message ??
+                              context.l10n.courierFindingNearestDrivers,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: HomeColors.textPrimary,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 // Bottom Sheet Modal
@@ -581,23 +763,33 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                                         child: Column(
                                           children: [
                                             // Driver Information (only when driver assigned)
-                                            if (_trackData?['driver'] !=
-                                                null) ...[
+                                            if (_trackingAvailable &&
+                                                (_liveTracking?.driver !=
+                                                        null ||
+                                                    _trackData?['driver'] !=
+                                                        null)) ...[
                                               DriverContactCard(
-                                                driverName: _trackData![
-                                                            'driver']
-                                                        is Map<String,
-                                                            dynamic>
-                                                    ? ((_trackData![
-                                                                    'driver']
-                                                                as Map<
-                                                                    String,
-                                                                    dynamic>)[
-                                                            'name']
-                                                        ?.toString() ??
-                                                        'Driver')
-                                                    : _trackData!['driver']
-                                                        .toString(),
+                                                driverName: _liveTracking
+                                                        ?.driver?.name ??
+                                                    (_trackData!['driver']
+                                                            is Map<String,
+                                                                dynamic>
+                                                        ? ((_trackData![
+                                                                        'driver']
+                                                                    as Map<
+                                                                        String,
+                                                                        dynamic>)[
+                                                                'name']
+                                                            ?.toString() ??
+                                                            'Driver')
+                                                        : _trackData!['driver']
+                                                            .toString()),
+                                                details: [
+                                                  _liveTracking?.driver
+                                                      ?.vehiclePlateNumber,
+                                                  _liveTracking
+                                                      ?.driver?.phone,
+                                                ].whereType<String>().where((s) => s.isNotEmpty).join(' · '),
                                                 borderColor: borderColor,
                                                 onMessage: _messageDriver,
                                               ),

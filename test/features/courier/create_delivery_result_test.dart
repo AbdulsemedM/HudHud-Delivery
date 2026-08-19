@@ -23,6 +23,31 @@ void main() {
       expect(result.trackingNumber, 'HUD123456789');
       expect(result.status, 'pending_payment');
       expect(result.isPendingPayment, isTrue);
+      expect(result.dispatch, isNull);
+    });
+
+    test('parses dispatch block from delivery create response', () {
+      final result = parseCreateDeliveryResponse({
+        'message': 'Delivery requested successfully!',
+        'delivery': {'id': 654, 'status': 'pending'},
+        'tracking_number': 'DEL-00000654',
+        'dispatch': {
+          'opened': true,
+          'kind': 'delivery',
+          'wave': 1,
+          'radius_km': 2,
+          'driver_count': 3,
+          'offer_expires_at': '2026-08-19T10:31:00.000000Z',
+        },
+      });
+      expect(result.deliveryId, 654);
+      expect(result.dispatch, isNotNull);
+      expect(result.dispatch!.opened, isTrue);
+      expect(result.dispatch!.kind, 'delivery');
+      expect(result.dispatch!.wave, 1);
+      expect(result.dispatch!.radiusKm, 2);
+      expect(result.dispatch!.driverCount, 3);
+      expect(result.dispatch!.offerExpiresAt, '2026-08-19T10:31:00.000000Z');
     });
 
     test('parses nested delivery.id legacy shape', () {

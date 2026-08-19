@@ -150,6 +150,66 @@ class CourierDataProvider {
     }
   }
 
+  /// GET /api/customer/nearby-drivers — anonymous markers near pickup.
+  Future<Map<String, dynamic>> getNearbyDrivers({
+    required double latitude,
+    required double longitude,
+    int? radius,
+    String? vehicleType,
+  }) async {
+    try {
+      final query = <String, dynamic>{
+        'latitude': latitude,
+        'longitude': longitude,
+        if (radius != null) 'radius': radius,
+        if (vehicleType != null && vehicleType.isNotEmpty)
+          'vehicle_type': vehicleType,
+      };
+      final response = await apiService.get(
+        '${ApiConstants.baseUrl}${ApiConstants.customerNearbyDrivers}',
+        queryParameters: query,
+      );
+
+      return {
+        'statusCode': response.statusCode,
+        'data': response.data,
+        'errorMessage': null,
+      };
+    } on ApiException catch (apiException) {
+      return {
+        'statusCode': apiException.statusCode,
+        'data': apiException.data,
+        'errorMessage': apiException.message,
+      };
+    } on Exception catch (e) {
+      return {'statusCode': 500, 'data': null, 'errorMessage': e.toString()};
+    }
+  }
+
+  /// GET /api/customer/deliveries/{id}/live-tracking
+  Future<Map<String, dynamic>> getDeliveryLiveTracking(int deliveryId) async {
+    try {
+      final url = ApiConstants.baseUrl +
+          ApiConstants.customerDeliveryLiveTracking
+              .replaceAll('{id}', deliveryId.toString());
+      final response = await apiService.get(url);
+
+      return {
+        'statusCode': response.statusCode,
+        'data': response.data,
+        'errorMessage': null,
+      };
+    } on ApiException catch (apiException) {
+      return {
+        'statusCode': apiException.statusCode,
+        'data': apiException.data,
+        'errorMessage': apiException.message,
+      };
+    } on Exception catch (e) {
+      return {'statusCode': 500, 'data': null, 'errorMessage': e.toString()};
+    }
+  }
+
   /// GET /api/user/deliveries/active - fetches user's active delivery (if any)
   Future<Map<String, dynamic>> getUserActiveDelivery() async {
     try {

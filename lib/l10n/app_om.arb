@@ -1266,5 +1266,8 @@
   },
   "cancelDeliveryConfirm": "Dhugumatti geejjibaa kana haquu barbaaddaa?",
   "cancelDeliveryConfirmRefund": "Dhugumatti geejjibaa kana haquu barbaaddaa? Kaffaltiun mirkanaa'e gara boorsaa keetti deebi'a.",
-  "cancelOrder": "Ajaja haqi"
+  "cancelOrder": "Ajaja haqi",
+  "courierFindingNearestDrivers": "Finding the nearest available drivers",
+  "courierFindingNearestDriversSubtitle": "We are finding the nearest available driver. Live driver location appears only after acceptance.",
+  "courierDriverLocationUpdating": "Driver location is updating"
 }

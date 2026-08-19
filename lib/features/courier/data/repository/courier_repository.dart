@@ -3,6 +3,8 @@ import '../../../payment/model/payment_initiate_result.dart';
 import '../../utils/delivery_estimate.dart';
 import '../data_provider/courier_data_provider.dart';
 import '../models/create_delivery_result.dart';
+import '../models/delivery_live_tracking.dart';
+import '../models/nearby_drivers_result.dart';
 
 class CourierRepository {
   final CourierDataProvider courierDataProvider;
@@ -165,6 +167,92 @@ class CourierRepository {
         'lastPage': 1,
         'total': 0,
         'message': errorMessage,
+      };
+    }
+  }
+
+  /// GET /api/customer/nearby-drivers. [retryable] is false on 422.
+  Future<Map<String, dynamic>> getNearbyDrivers({
+    required double latitude,
+    required double longitude,
+    int? radius,
+    String? vehicleType,
+  }) async {
+    try {
+      final response = await courierDataProvider.getNearbyDrivers(
+        latitude: latitude,
+        longitude: longitude,
+        radius: radius,
+        vehicleType: vehicleType,
+      );
+      final statusCode = response['statusCode'] as int?;
+      if (statusCode == 200) {
+        final parsed = parseNearbyDriversResponse(response['data']);
+        return {
+          'success': true,
+          'retryable': true,
+          'nearby': parsed,
+          'message': null,
+        };
+      }
+      final retryable = statusCode != 422;
+      return {
+        'success': false,
+        'retryable': retryable,
+        'nearby': null,
+        'message': _cleanErrorMessage(
+          response['errorMessage']?.toString() ?? 'Error fetching nearby drivers',
+        ),
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'retryable': true,
+        'nearby': null,
+        'message': _cleanErrorMessage(e.toString()),
+      };
+    }
+  }
+
+  /// GET /api/customer/deliveries/{id}/live-tracking. [notFound] is true on 404.
+  Future<Map<String, dynamic>> getDeliveryLiveTracking(int deliveryId) async {
+    try {
+      final response =
+          await courierDataProvider.getDeliveryLiveTracking(deliveryId);
+      final statusCode = response['statusCode'] as int?;
+      if (statusCode == 200) {
+        final parsed = parseDeliveryLiveTrackingResponse(response['data']);
+        return {
+          'success': true,
+          'notFound': false,
+          'tracking': parsed,
+          'message': null,
+        };
+      }
+      if (statusCode == 404) {
+        return {
+          'success': false,
+          'notFound': true,
+          'tracking': null,
+          'message': _cleanErrorMessage(
+            response['errorMessage']?.toString() ?? 'Tracking not found',
+          ),
+        };
+      }
+      return {
+        'success': false,
+        'notFound': false,
+        'tracking': null,
+        'message': _cleanErrorMessage(
+          response['errorMessage']?.toString() ?? 'Error fetching live tracking',
+        ),
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'notFound': false,
+        'tracking': null,
+        'message': _cleanErrorMessage(e.toString()),
       };
     }
   }

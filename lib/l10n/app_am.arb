@@ -1273,5 +1273,8 @@
   },
   "cancelDeliveryConfirm": "እርግጠኛ ነዎት ይህን መላኪያ መሰረዝ ይፈልጋሉ?",
   "cancelDeliveryConfirmRefund": "እርግጠኛ ነዎት ይህን መላኪያ መሰረዝ ይፈልጋሉ? የተረጋገጠ ክፍያ ወደ ዋሌትዎ ይመለሳል።",
-  "cancelOrder": "ትዕዛዝ ሰርዝ"
+  "cancelOrder": "ትዕዛዝ ሰርዝ",
+  "courierFindingNearestDrivers": "Finding the nearest available drivers",
+  "courierFindingNearestDriversSubtitle": "We are finding the nearest available driver. Live driver location appears only after acceptance.",
+  "courierDriverLocationUpdating": "Driver location is updating"
 }

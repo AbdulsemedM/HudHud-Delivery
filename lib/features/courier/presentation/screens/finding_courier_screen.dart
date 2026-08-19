@@ -8,9 +8,11 @@ import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
+import 'package:hudhud_delivery/features/courier/data/models/delivery_live_tracking.dart';
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
 import 'package:hudhud_delivery/features/courier/utils/courier_home_refresh.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_cancel.dart';
+import 'package:hudhud_delivery/features/courier/utils/delivery_notification.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_status.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:lottie/lottie.dart';
@@ -57,6 +59,8 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
   Timer? _pollTimer;
   bool _isCancelling = false;
   bool _hasNavigated = false;
+  int _pollIntervalSeconds = 10;
+  String? _searchMessage;
 
   static const _searchingStatuses = {
     'searching',
@@ -67,6 +71,7 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
     'created',
     'request_received',
     'request received',
+    'pending_payment',
   };
 
   @override
@@ -78,8 +83,13 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
       ),
     );
     _pollAssignment();
+    _startPollTimer();
+  }
+
+  void _startPollTimer() {
+    _pollTimer?.cancel();
     _pollTimer = Timer.periodic(
-      const Duration(seconds: 4),
+      Duration(seconds: _pollIntervalSeconds),
       (_) => _pollAssignment(),
     );
   }
@@ -90,25 +100,57 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
     super.dispose();
   }
 
-  bool _isAssigned(Map<String, dynamic>? data) {
+  bool _isSearchingStatus(String? status) {
+    if (status == null || status.isEmpty) return true;
+    final normalized = status.toLowerCase().replaceAll(' ', '_');
+    return _searchingStatuses.contains(normalized) ||
+        _searchingStatuses.contains(status.toLowerCase());
+  }
+
+  bool _isAssignedFromPayload(Map<String, dynamic>? data) {
     if (data == null) return false;
-    if (data['driver'] != null || data['driver_id'] != null) return true;
-    final status =
-        (resolveDeliveryStatus(data) ?? '').toLowerCase().replaceAll(' ', '_');
-    if (status.isEmpty) return false;
-    if (_searchingStatuses.contains(status) ||
-        _searchingStatuses.contains(status.replaceAll('_', ' '))) {
-      return false;
+    final status = resolveDeliveryStatus(data);
+    if (isDeliveryAcceptedForTracking(status)) return true;
+    if (_isSearchingStatus(status)) return false;
+    if (data['driver'] != null || data['driver_id'] != null) {
+      return !isDeliveryTerminalStatus(status);
     }
-    if (status.contains('cancel')) return false;
-    return true;
+    return false;
   }
 
   Future<void> _pollAssignment() async {
     if (_hasNavigated || _isCancelling || !mounted) return;
 
-    Map<String, dynamic>? data;
+    DeliveryLiveTracking? live;
+    if (widget.deliveryId != null) {
+      final liveResult =
+          await _courierRepository.getDeliveryLiveTracking(widget.deliveryId!);
+      if (liveResult['success'] == true) {
+        live = liveResult['tracking'] as DeliveryLiveTracking?;
+        final nextPoll = live?.pollAfterSeconds ?? 10;
+        if (nextPoll != _pollIntervalSeconds && nextPoll >= 1) {
+          _pollIntervalSeconds = nextPoll;
+          _startPollTimer();
+        }
+        final message = live?.message;
+        if (message != null &&
+            message.isNotEmpty &&
+            message != _searchMessage &&
+            mounted) {
+          setState(() => _searchMessage = message);
+        }
+        if (live?.trackingAvailable == true) {
+          _openTracking();
+          return;
+        }
+        if (_isSearchingStatus(live?.status) ||
+            live?.trackingAvailable == false) {
+          return;
+        }
+      }
+    }
 
+    Map<String, dynamic>? data;
     if (widget.deliveryId != null) {
       final track = await _courierRepository.getDeliveryTrack(widget.deliveryId!);
       if (track['success'] == true) {
@@ -116,7 +158,7 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
       }
     }
 
-    if (!_isAssigned(data)) {
+    if (!_isAssignedFromPayload(data)) {
       final active = await _courierRepository.getUserActiveDelivery();
       if (active['success'] == true) {
         data = active['delivery'] as Map<String, dynamic>?;
@@ -124,21 +166,27 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
     }
 
     if (!mounted || _hasNavigated) return;
-    if (!_isAssigned(data)) return;
+    if (!_isAssignedFromPayload(data)) return;
 
-    final deliveryId = widget.deliveryId ??
-        (data?['id'] is int
-            ? data!['id'] as int
-            : int.tryParse(data?['id']?.toString() ?? ''));
+    _openTracking(
+      deliveryId: widget.deliveryId ??
+          (data?['id'] is int
+              ? data!['id'] as int
+              : int.tryParse(data?['id']?.toString() ?? '')),
+    );
+  }
 
+  void _openTracking({int? deliveryId}) {
+    if (_hasNavigated) return;
     _hasNavigated = true;
     _pollTimer?.cancel();
-
+    final id = deliveryId ?? widget.deliveryId;
+    if (!mounted) return;
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
         builder: (context) => DeliveryTrackingScreen(
-          deliveryId: deliveryId,
+          deliveryId: id,
           pickupLocation: widget.pickupLocation,
           deliveryLocation: widget.deliveryLocation,
           pickupPosition: widget.pickupPosition,
@@ -277,7 +325,7 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
                                   ),
                                   const SizedBox(height: AppColors.spaceMD),
                                   Text(
-                                    'Looking for courier...',
+                                    context.l10n.courierFindingNearestDrivers,
                                     style: theme.textTheme.bodyMedium?.copyWith(
                                       color: HomeColors.textPrimary,
                                     ),
@@ -289,7 +337,7 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
                         ),
                         const SizedBox(height: AppColors.spaceMD),
                         Text(
-                          'Finding a Courier',
+                          context.l10n.courierFindingNearestDrivers,
                           style: theme.textTheme.headlineSmall?.copyWith(
                             fontWeight: FontWeight.w700,
                             color: HomeColors.violet,
@@ -297,7 +345,8 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'We are searching for the best courier near you',
+                          _searchMessage ??
+                              context.l10n.courierFindingNearestDriversSubtitle,
                           textAlign: TextAlign.center,
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: HomeColors.textMuted,

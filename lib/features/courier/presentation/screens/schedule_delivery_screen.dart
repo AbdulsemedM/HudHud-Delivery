@@ -14,7 +14,9 @@ import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
 import 'package:hudhud_delivery/features/courier/presentation/widgets/delivery_estimate_banner.dart';
+import 'package:hudhud_delivery/features/courier/presentation/widgets/nearby_driver_markers.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_estimate.dart';
+import 'package:hudhud_delivery/features/courier/utils/nearby_drivers_poller.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import '../../../home/presentation/screen/location_search_screen.dart';
 import 'package_details_screen.dart';
@@ -29,6 +31,7 @@ class ScheduleDeliveryScreen extends StatefulWidget {
 class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
   gmaps.GoogleMapController? _mapController;
   late final CourierRepository _courierRepository;
+  late final NearbyDriversPoller _nearbyPoller;
   Timer? _estimateDebounce;
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _timeController = TextEditingController();
@@ -80,8 +83,24 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
         apiService: ApiService.instance,
       ),
     );
+    _nearbyPoller = NearbyDriversPoller(
+      repository: _courierRepository,
+      onUpdate: () {
+        if (mounted) setState(() {});
+      },
+    );
     _loadMapsAvailability();
     _getCurrentLocation();
+  }
+
+  void _syncNearbyDrivers() {
+    final pickup = _pickupPosition;
+    if (pickup == null) return;
+    _nearbyPoller.setTarget(
+      latitude: pickup.latitude,
+      longitude: pickup.longitude,
+      vehicleType: mapCourierVehicleType(_selectedVehicle),
+    );
   }
 
   Future<void> _loadMapsAvailability() async {
@@ -95,6 +114,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
   @override
   void dispose() {
     _estimateDebounce?.cancel();
+    _nearbyPoller.dispose();
     _dateController.dispose();
     _timeController.dispose();
     super.dispose();
@@ -190,6 +210,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
           _mapController?.moveCamera(
             gmaps.CameraUpdate.newLatLngZoom(_toG(latLng), 15.0),
           );
+          _syncNearbyDrivers();
         }
       } else {
         if (mounted) {
@@ -246,6 +267,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
             gmaps.CameraUpdate.newLatLngZoom(_toG(coordinates), 15.0),
           );
         }
+        _syncNearbyDrivers();
       }
     }
   }
@@ -317,6 +339,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
             gmaps.CameraUpdate.newLatLngZoom(_toG(point), 15.0),
           );
         }
+        if (isPickup) _syncNearbyDrivers();
       }
     } catch (e) {
       if (mounted) {
@@ -801,6 +824,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                                               _selectedVehicle = 'motorcycle';
                                             });
                                             _scheduleEstimateFetch();
+                                            _syncNearbyDrivers();
                                           },
                                         ),
                                       ),
@@ -979,7 +1003,10 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
       );
     }
 
-    return gmaps.GoogleMap(
+    final privacy = _nearbyPoller.result.privacyMessage;
+    return Stack(
+      children: [
+        gmaps.GoogleMap(
       initialCameraPosition: gmaps.CameraPosition(
         target: _toG(_currentPosition),
         zoom: 15.0,
@@ -1004,6 +1031,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
               gmaps.BitmapDescriptor.hueRed,
             ),
           ),
+        ...nearbyDriverMapMarkers(_nearbyPoller.result.drivers),
       },
       polylines: _pickupPosition != null && _deliveryPosition != null
           ? {
@@ -1029,6 +1057,29 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
       onTap: (point) {
         _showLocationSelectionDialog(LatLng(point.latitude, point.longitude));
       },
+    ),
+        if (privacy != null && privacy.isNotEmpty)
+          Positioned(
+            left: 12,
+            right: 12,
+            bottom: 12,
+            child: Material(
+              color: HomeColors.surfaceElevated.withValues(alpha: 0.92),
+              borderRadius: BorderRadius.circular(8),
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: Text(
+                  privacy,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: HomeColors.textMuted,
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

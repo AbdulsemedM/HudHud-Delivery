@@ -1,3 +1,35 @@
+/// Nearest-first dispatch wave from POST /api/services/delivery/request.
+class DeliveryDispatch {
+  const DeliveryDispatch({
+    this.opened = false,
+    this.kind,
+    this.wave,
+    this.radiusKm,
+    this.driverCount,
+    this.offerExpiresAt,
+  });
+
+  final bool opened;
+  final String? kind;
+  final int? wave;
+  final double? radiusKm;
+  final int? driverCount;
+  final String? offerExpiresAt;
+}
+
+DeliveryDispatch? parseDeliveryDispatch(dynamic value) {
+  final map = _asMap(value);
+  if (map.isEmpty) return null;
+  return DeliveryDispatch(
+    opened: map['opened'] == true,
+    kind: _firstString([map['kind']]),
+    wave: _firstInt([map['wave']]),
+    radiusKm: _firstDouble([map['radius_km'], map['radiusKm']]),
+    driverCount: _firstInt([map['driver_count'], map['driverCount']]),
+    offerExpiresAt: _firstString([map['offer_expires_at']]),
+  );
+}
+
 /// Parsed fields from POST /api/services/delivery/request success payload.
 class CreateDeliveryResult {
   const CreateDeliveryResult({
@@ -6,6 +38,7 @@ class CreateDeliveryResult {
     this.currency,
     this.trackingNumber,
     this.status,
+    this.dispatch,
     this.raw = const {},
   });
 
@@ -14,6 +47,7 @@ class CreateDeliveryResult {
   final String? currency;
   final String? trackingNumber;
   final String? status;
+  final DeliveryDispatch? dispatch;
   final Map<String, dynamic> raw;
 
   bool get isValid => deliveryId > 0;
@@ -43,6 +77,10 @@ CreateDeliveryResult parseCreateDeliveryResponse(
   if (nestedDelivery.isNotEmpty) {
     payload = {...payload, ...nestedDelivery};
   }
+
+  final dispatch = parseDeliveryDispatch(
+    payload['dispatch'] ?? root['dispatch'] ?? nestedData['dispatch'],
+  );
 
   final deliveryId = _firstInt([
         payload['delivery_id'],
@@ -86,6 +124,7 @@ CreateDeliveryResult parseCreateDeliveryResponse(
     currency: currency,
     trackingNumber: trackingNumber,
     status: status,
+    dispatch: dispatch,
     raw: payload,
   );
 }

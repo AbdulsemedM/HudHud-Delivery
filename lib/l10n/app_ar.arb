@@ -1266,5 +1266,8 @@
   },
   "cancelDeliveryConfirm": "هل أنت متأكد أنك تريد إلغاء هذا التوصيل؟",
   "cancelDeliveryConfirmRefund": "هل أنت متأكد أنك تريد إلغاء هذا التوصيل؟ سيتم استرداد المبلغ المؤكد إلى محفظتك.",
-  "cancelOrder": "إلغاء الطلب"
+  "cancelOrder": "إلغاء الطلب",
+  "courierFindingNearestDrivers": "Finding the nearest available drivers",
+  "courierFindingNearestDriversSubtitle": "We are finding the nearest available driver. Live driver location appears only after acceptance.",
+  "courierDriverLocationUpdating": "Driver location is updating"
 }

@@ -11,12 +11,11 @@ import 'package:hudhud_delivery/features/courier/presentation/widgets/active_del
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/features/courier/utils/courier_home_refresh.dart';
 import 'package:hudhud_delivery/features/courier/utils/courier_access_gate.dart';
+import 'package:hudhud_delivery/features/courier/utils/courier_live_job_screen.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_history_filter.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_status.dart';
-import 'package:latlong2/latlong.dart';
 import '../../../home/presentation/widgets/home_widget.dart';
 import 'delivery_details_screen.dart';
-import 'delivery_tracking_screen.dart';
 import 'instant_delivery_screen.dart';
 import 'schedule_delivery_screen.dart';
 
@@ -164,37 +163,11 @@ class _CourierScreenState extends State<CourierScreen> {
     return months[month - 1];
   }
 
-  LatLng? _parseLatLng(dynamic lat, dynamic lng) {
-    return parseDeliveryLatLng(lat, lng);
-  }
-
   void _navigateToTracking(Map<String, dynamic> delivery) {
-    final pickupPos = _parseLatLng(
-      delivery['pickup_latitude'],
-      delivery['pickup_longitude'],
-    );
-    final dropoffPos = _parseLatLng(
-      delivery['dropoff_latitude'],
-      delivery['dropoff_longitude'],
-    );
-    final deliveryId = delivery['id'] as int?;
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => DeliveryTrackingScreen(
-          deliveryId: deliveryId,
-          pickupLocation: delivery['pickup_location']?.toString() ?? '',
-          deliveryLocation: delivery['dropoff_location']?.toString() ?? '',
-          pickupPosition: pickupPos,
-          deliveryPosition: dropoffPos,
-          selectedVehicle: delivery['vehicle_type']?.toString() ?? 'motorbike',
-          itemType: delivery['package_type']?.toString() ?? '',
-          quantity: delivery['package_weight']?.toString() ?? '1',
-          whoPays: 'me',
-          paymentType: delivery['payment_method']?.toString() ?? 'cash',
-          recipientName: delivery['receiver_name']?.toString() ?? '',
-          recipientPhone: delivery['receiver_phone']?.toString() ?? '',
-        ),
+        builder: (context) => courierLiveJobScreenFromDelivery(delivery),
       ),
     );
   }

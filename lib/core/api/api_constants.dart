@@ -148,6 +148,11 @@ class ApiConstants {
   static const String userDeliveries = 'user/deliveries';
   static const String userDeliveryDetails = 'user/deliveries/{id}';
   static const String userDeliveriesActive = 'user/deliveries/active';
+  /// GET /api/customer/nearby-drivers — anonymous pre-booking markers.
+  static const String customerNearbyDrivers = 'customer/nearby-drivers';
+  /// GET /api/customer/deliveries/{id}/live-tracking
+  static const String customerDeliveryLiveTracking =
+      'customer/deliveries/{id}/live-tracking';
 
   // Handyman / Service requests
   static const String customerServiceRequests = 'customer/services/requests';

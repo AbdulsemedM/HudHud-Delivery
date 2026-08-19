@@ -5,6 +5,7 @@ import 'package:hudhud_delivery/core/theme/app_colors.dart';
 /// Driver row with message action for courier delivery tracking.
 class DriverContactCard extends StatelessWidget {
   final String driverName;
+  final String? details;
   final VoidCallback onMessage;
   final Color borderColor;
 
@@ -13,6 +14,7 @@ class DriverContactCard extends StatelessWidget {
     required this.driverName,
     required this.onMessage,
     required this.borderColor,
+    this.details,
   });
 
   @override
@@ -49,9 +51,9 @@ class DriverContactCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                const Text(
-                  'Driver',
-                  style: TextStyle(
+                Text(
+                  (details == null || details!.isEmpty) ? 'Driver' : details!,
+                  style: const TextStyle(
                     fontSize: 14,
                     color: HomeColors.textMuted,
                   ),
