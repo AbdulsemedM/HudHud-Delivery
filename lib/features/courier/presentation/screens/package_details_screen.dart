@@ -63,6 +63,8 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
   @override
   void initState() {
     super.initState();
+    _quantityController.text = '1';
+    _packageWeightController.text = '1';
     _senderPhoneController.addListener(_onSenderPhoneChanged);
     _prefillSenderPhone();
   }
