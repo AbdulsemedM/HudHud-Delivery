@@ -643,7 +643,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get validationPasswordMin =>
-      'يجب أن تتكون كلمة المرور من 8 أحرف على الأقل';
+      'يجب أن تتكون كلمة المرور من 6 أحرف على الأقل';
 
   @override
   String get validationPasswordComplexity =>
@@ -1305,7 +1305,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get hintReenterPassword => 'أعد إدخال كلمة المرور';
 
   @override
-  String get passwordStrengthHint => 'استخدم 8 أحرف أو أكثر';
+  String get passwordStrengthHint => 'استخدم 6 أحرف أو أكثر';
 
   @override
   String get signupAcceptTermsPrefix => 'لقد قرأت ووافقت على ';
@@ -2079,7 +2079,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get forgotPasswordNewTitle => 'إنشاء كلمة مرور جديدة';
 
   @override
-  String get forgotPasswordNewSubtitle => 'استخدم 8 أحرف على الأقل.';
+  String get forgotPasswordNewSubtitle => 'استخدم 6 أحرف على الأقل.';
 
   @override
   String get forgotPasswordLabelConfirmPassword => 'تأكيد كلمة المرور';

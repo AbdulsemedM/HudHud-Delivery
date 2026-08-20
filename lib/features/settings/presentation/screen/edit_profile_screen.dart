@@ -12,7 +12,6 @@ import 'package:hudhud_delivery/core/widgets/phone_number_field.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
 import 'package:hudhud_delivery/features/settings/presentation/widgets/profile_dark_page.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import '../widgets/edit_profile_widget.dart';
@@ -98,13 +97,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       return status.isGranted || status.isLimited;
     }
 
-    if (Platform.isAndroid) {
-      final sdk = (await DeviceInfoPlugin().androidInfo).version.sdkInt;
-      if (sdk >= 33) return true;
-      final storage = await Permission.storage.request();
-      return storage.isGranted;
-    }
-
+    // Android gallery uses the system photo picker; no storage permission needed.
     return true;
   }
 
@@ -147,6 +140,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         maxWidth: 1200,
         maxHeight: 1200,
         imageQuality: 85,
+        requestFullMetadata: source != ImageSource.gallery,
       );
       if (picked == null || !mounted) return;
       setState(() => _avatarLocalPath = picked.path);

@@ -6,7 +6,7 @@ String? validatePasswordStrength(String? value, AppLocalizations l10n) {
   if (value == null || value.isEmpty) {
     return l10n.validationPasswordRequired;
   }
-  if (value.length < 8) {
+  if (value.length < 6) {
     return l10n.validationPasswordMin;
   }
   if (!RegExp(r'[A-Z]').hasMatch(value)) {

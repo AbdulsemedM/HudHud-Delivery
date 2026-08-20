@@ -172,40 +172,48 @@ class _CourierScreenState extends State<CourierScreen> {
     );
   }
 
-  Widget _buildCreateDeliveryRow(AppLocalizations l10n) {
+  Future<void> _openInstantDelivery() async {
+    if (!await requireCourierSendAccess(context)) return;
+    if (!mounted) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const InstantDeliveryScreen(),
+      ),
+    );
+  }
+
+  Future<void> _openScheduleDelivery() async {
+    if (!await requireCourierSendAccess(context)) return;
+    if (!mounted) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const ScheduleDeliveryScreen(),
+      ),
+    );
+  }
+
+  Widget _buildCreateDeliveryRow(AppLocalizations l10n, {required bool hasActive}) {
+    final scheduleCard = _ScheduleDeliveryCard(
+      l10n: l10n,
+      onTap: _openScheduleDelivery,
+    );
+
+    if (hasActive) {
+      return scheduleCard;
+    }
+
     return Row(
       children: [
         Expanded(
           child: _InstantDeliveryCard(
             l10n: l10n,
-            onTap: () async {
-              if (!await requireCourierSendAccess(context)) return;
-              if (!context.mounted) return;
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const InstantDeliveryScreen(),
-                ),
-              );
-            },
+            onTap: _openInstantDelivery,
           ),
         ),
         const SizedBox(width: 12),
-        Expanded(
-          child: _ScheduleDeliveryCard(
-            l10n: l10n,
-            onTap: () async {
-              if (!await requireCourierSendAccess(context)) return;
-              if (!context.mounted) return;
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const ScheduleDeliveryScreen(),
-                ),
-              );
-            },
-          ),
-        ),
+        Expanded(child: scheduleCard),
       ],
     );
   }
@@ -220,6 +228,16 @@ class _CourierScreenState extends State<CourierScreen> {
 
     return Scaffold(
       backgroundColor: HomeColors.background,
+      floatingActionButton: hasActive
+          ? FloatingActionButton.extended(
+              heroTag: 'courier_instant_delivery_fab',
+              backgroundColor: HomeColors.orange,
+              foregroundColor: Colors.white,
+              icon: const Icon(Icons.flash_on_rounded),
+              label: Text(l10n.courierInstantTitle),
+              onPressed: _openInstantDelivery,
+            )
+          : null,
       body: SafeArea(
         child: RefreshIndicator(
           color: HomeColors.violet,
@@ -253,7 +271,7 @@ class _CourierScreenState extends State<CourierScreen> {
                   ),
                 ),
                 const SizedBox(height: AppColors.spaceMD),
-                _buildCreateDeliveryRow(l10n),
+                _buildCreateDeliveryRow(l10n, hasActive: true),
               ] else ...[
                 Text(
                   l10n.courierWhatToDo,
@@ -263,7 +281,7 @@ class _CourierScreenState extends State<CourierScreen> {
                   ),
                 ),
                 const SizedBox(height: AppColors.spaceMD),
-                _buildCreateDeliveryRow(l10n),
+                _buildCreateDeliveryRow(l10n, hasActive: false),
               ],
               const SizedBox(height: AppColors.spaceLG),
               Text(
@@ -480,7 +498,7 @@ class _InstantDeliveryCard extends StatelessWidget {
           height: 120,
           padding: const EdgeInsets.all(AppColors.spaceMD),
           decoration: BoxDecoration(
-            color: HomeColors.violet,
+            color: HomeColors.orange,
             borderRadius: BorderRadius.circular(AppColors.radiusLG),
           ),
           child: Stack(

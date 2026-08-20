@@ -654,7 +654,7 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get validationPasswordMin =>
-      'Jechi icciitii yoo xiqqaate arfiilee 8 ta\'uu qaba';
+      'Jechi icciitii yoo xiqqaate arfiilee 6 ta\'uu qaba';
 
   @override
   String get validationPasswordComplexity =>
@@ -1318,7 +1318,7 @@ class AppLocalizationsOm extends AppLocalizations {
   String get hintReenterPassword => 'Jecha icciitii kee irra deebi\'ii galchi';
 
   @override
-  String get passwordStrengthHint => 'Arfiilee 8+ fayyadami';
+  String get passwordStrengthHint => 'Arfiilee 6+ fayyadami';
 
   @override
   String get signupAcceptTermsPrefix => 'Kan HudHud ';
@@ -2105,7 +2105,7 @@ class AppLocalizationsOm extends AppLocalizations {
   String get forgotPasswordNewTitle => 'Jecha icciitii haaraa uumi';
 
   @override
-  String get forgotPasswordNewSubtitle => 'Yoo xiqqaate arfiilee 8 fayyadami.';
+  String get forgotPasswordNewSubtitle => 'Yoo xiqqaate arfiilee 6 fayyadami.';
 
   @override
   String get forgotPasswordLabelConfirmPassword => 'Jecha icciitii mirkaneessi';

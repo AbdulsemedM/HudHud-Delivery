@@ -235,7 +235,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                     if (v == null || v.isEmpty) {
                       return l10n.validationPasswordRequired;
                     }
-                    if (v.length < 8) {
+                    if (v.length < 6) {
                       return l10n.validationPasswordMin;
                     }
                     return null;

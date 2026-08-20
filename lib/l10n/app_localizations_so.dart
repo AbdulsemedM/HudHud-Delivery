@@ -651,7 +651,7 @@ class AppLocalizationsSo extends AppLocalizations {
 
   @override
   String get validationPasswordMin =>
-      'Erayga sirta ah waa inuu ahaadaa ugu yaraan 8 xaraf';
+      'Erayga sirta ah waa inuu ahaadaa ugu yaraan 6 xaraf';
 
   @override
   String get validationPasswordComplexity =>
@@ -1318,7 +1318,7 @@ class AppLocalizationsSo extends AppLocalizations {
   String get hintReenterPassword => 'Mar kale geli eraygaaga sirta ah';
 
   @override
-  String get passwordStrengthHint => 'Isticmaal 8+ xaraf';
+  String get passwordStrengthHint => 'Isticmaal 6+ xaraf';
 
   @override
   String get signupAcceptTermsPrefix => 'Waan akhriyey oo aqbalay ';
@@ -2110,7 +2110,7 @@ class AppLocalizationsSo extends AppLocalizations {
   String get forgotPasswordNewTitle => 'Samee eray sir ah oo cusub';
 
   @override
-  String get forgotPasswordNewSubtitle => 'Isticmaal ugu yaraan 8 xaraf.';
+  String get forgotPasswordNewSubtitle => 'Isticmaal ugu yaraan 6 xaraf.';
 
   @override
   String get forgotPasswordLabelConfirmPassword => 'Xaqiiji erayga sirta';

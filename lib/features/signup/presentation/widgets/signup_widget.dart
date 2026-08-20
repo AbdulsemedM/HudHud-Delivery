@@ -129,7 +129,7 @@ class SignupFormState extends State<SignupForm> {
   int _passwordStrengthScore(String password) {
     if (password.isEmpty) return 0;
     var score = 0;
-    if (password.length >= 8) score++;
+    if (password.length >= 6) score++;
     if (password.contains(RegExp(r'[A-Z]')) &&
         password.contains(RegExp(r'[a-z]'))) {
       score++;
@@ -349,7 +349,7 @@ class SignupFormState extends State<SignupForm> {
               if (value == null || value.trim().isEmpty) {
                 return l10n.validationPasswordRequired;
               }
-              if (value.length < 8) {
+              if (value.length < 6) {
                 return l10n.validationPasswordMin;
               }
               return null;

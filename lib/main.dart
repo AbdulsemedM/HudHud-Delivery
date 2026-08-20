@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'core/api/dio_client.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -38,9 +40,20 @@ import 'features/orders/data/repositories/orders_repository.dart';
 // Widgets
 import 'app/widgets/app_connectivity_banner.dart';
 import 'app/widgets/ota_lifecycle_binder.dart';
+import 'package:image_picker_android/image_picker_android.dart';
+import 'package:image_picker_platform_interface/image_picker_platform_interface.dart';
+
+void _configureAndroidPhotoPicker() {
+  if (!Platform.isAndroid) return;
+  final impl = ImagePickerPlatform.instance;
+  if (impl is ImagePickerAndroid) {
+    impl.useAndroidPhotoPicker = true;
+  }
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  _configureAndroidPhotoPicker();
 
   // Env (BASE_URL, etc.) before any Dio / ApiService access.
   await loadAppEnv();

@@ -76,7 +76,10 @@ Future<AttachmentPickerResult?> showAttachmentPickerSheet(
   switch (action) {
     case AttachmentPickerAction.image:
       final picker = ImagePicker();
-      final images = await picker.pickMultiImage(imageQuality: 85);
+      final images = await picker.pickMultiImage(
+        imageQuality: 85,
+        requestFullMetadata: false,
+      );
       if (images.isEmpty) return null;
       return AttachmentPickerResult(
         action: action,
