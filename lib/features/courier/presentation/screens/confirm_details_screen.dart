@@ -848,7 +848,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                           ],
                         ),
                         child: const Icon(
-                          Icons.two_wheeler,
+                          Icons.pedal_bike,
                           color: HomeColors.violet,
                           size: 24,
                         ),

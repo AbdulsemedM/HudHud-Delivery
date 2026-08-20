@@ -1024,7 +1024,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deliveryLocationLabel => 'Delivery Location';
 
   @override
-  String get vehicleMotorcycle => 'Motorcycle';
+  String get vehicleMotorcycle => 'Bicycle';
 
   @override
   String get vehicleCar => 'Car';

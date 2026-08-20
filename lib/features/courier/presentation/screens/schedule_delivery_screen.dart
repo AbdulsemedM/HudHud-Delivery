@@ -487,7 +487,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
           final theme = Theme.of(context);
           final colorScheme = theme.colorScheme;
           final topPad = MediaQuery.paddingOf(context).top;
-          const initialSheetSize = 0.55;
+          const initialSheetSize = 0.5;
 
           return Scaffold(
             backgroundColor: HomeColors.background,
@@ -546,7 +546,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                 DraggableScrollableSheet(
                   initialChildSize: initialSheetSize,
                   minChildSize: 0.35,
-                  maxChildSize: 0.9,
+                  maxChildSize: 0.85,
                   builder: (context, scrollController) {
                     return Container(
                       decoration: const BoxDecoration(
@@ -815,7 +815,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                                     children: [
                                       Expanded(
                                         child: _VehicleTypeOption(
-                                          icon: Icons.two_wheeler,
+                                          icon: Icons.pedal_bike,
                                           label: l10n.vehicleMotorcycle,
                                           isSelected: _selectedVehicle ==
                                               'motorcycle',

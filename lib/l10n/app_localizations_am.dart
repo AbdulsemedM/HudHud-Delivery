@@ -1011,7 +1011,7 @@ class AppLocalizationsAm extends AppLocalizations {
   String get deliveryLocationLabel => 'የማስረከቢያ ቦታ';
 
   @override
-  String get vehicleMotorcycle => 'ሞተርሳይክል';
+  String get vehicleMotorcycle => 'ብስክሌት';
 
   @override
   String get vehicleCar => 'መኪና';

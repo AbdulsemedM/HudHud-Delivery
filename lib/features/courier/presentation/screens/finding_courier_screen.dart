@@ -1,8 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
+import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
 import 'package:hudhud_delivery/app/navigation/dashboard_navigation.dart';
+import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
@@ -10,12 +13,14 @@ import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/courier/data/models/delivery_live_tracking.dart';
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
+import 'package:hudhud_delivery/features/courier/presentation/widgets/nearby_driver_markers.dart';
 import 'package:hudhud_delivery/features/courier/utils/courier_home_refresh.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_cancel.dart';
+import 'package:hudhud_delivery/features/courier/utils/delivery_estimate.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_notification.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_status.dart';
+import 'package:hudhud_delivery/features/courier/utils/nearby_drivers_poller.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
-import 'package:lottie/lottie.dart';
 import 'delivery_tracking_screen.dart';
 
 class FindingCourierScreen extends StatefulWidget {
@@ -56,9 +61,16 @@ class FindingCourierScreen extends StatefulWidget {
 
 class _FindingCourierScreenState extends State<FindingCourierScreen> {
   late final CourierRepository _courierRepository;
+  late final NearbyDriversPoller _nearbyPoller;
+
   Timer? _pollTimer;
+  gmaps.GoogleMapController? _mapController;
+  gmaps.BitmapDescriptor? _deliveryGuyIcon;
+  List<LatLng>? _routePolylinePoints;
+  bool? _hasGoogleMapsApiKey;
   bool _isCancelling = false;
   bool _hasNavigated = false;
+  bool _didFocusPickup = false;
   int _pollIntervalSeconds = 10;
   String? _searchMessage;
 
@@ -74,6 +86,13 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
     'pending_payment',
   };
 
+  /// Static search rings around pickup (meters) — no per-frame rebuilds.
+  static const double _searchInnerRadiusM = 220;
+  static const double _searchOuterRadiusM = 480;
+  static const double _pickupZoom = 14.8;
+  static const int _nearbyRadiusKm = 10;
+  static const double _sheetFraction = 0.36;
+
   @override
   void initState() {
     super.initState();
@@ -82,8 +101,63 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
         apiService: ApiService.instance,
       ),
     );
+    _nearbyPoller = NearbyDriversPoller(
+      repository: _courierRepository,
+      onUpdate: () {
+        if (mounted) setState(() {});
+      },
+    );
+
+    _loadDeliveryGuyIcon();
+    _loadMapsAvailability();
+    _startNearbyPoller();
+    if (widget.pickupPosition != null && widget.deliveryPosition != null) {
+      _fetchRouteDirections();
+    }
     _pollAssignment();
     _startPollTimer();
+  }
+
+  Future<void> _loadDeliveryGuyIcon() async {
+    final icon = await loadDeliveryGuyMapIcon();
+    if (!mounted || icon == null) return;
+    setState(() => _deliveryGuyIcon = icon);
+  }
+
+  void _startNearbyPoller() {
+    final pickup = widget.pickupPosition;
+    if (pickup == null) return;
+    _nearbyPoller.setTarget(
+      latitude: pickup.latitude,
+      longitude: pickup.longitude,
+      vehicleType: mapCourierVehicleType(widget.selectedVehicle),
+      radius: _nearbyRadiusKm,
+    );
+  }
+
+  Future<void> _loadMapsAvailability() async {
+    final key = await GoogleMapsApiKeyProvider.getKey();
+    if (!mounted) return;
+    setState(() {
+      _hasGoogleMapsApiKey = key.trim().isNotEmpty;
+    });
+  }
+
+  Future<void> _fetchRouteDirections() async {
+    final pickup = widget.pickupPosition;
+    final delivery = widget.deliveryPosition;
+    if (pickup == null || delivery == null) return;
+    final result = await GoogleDirectionsService.getDirections(
+      originLat: pickup.latitude,
+      originLng: pickup.longitude,
+      destLat: delivery.latitude,
+      destLng: delivery.longitude,
+    );
+    if (!mounted) return;
+    // Update polyline only — do not re-fit camera (keeps zoom usable).
+    setState(() {
+      _routePolylinePoints = result?.polylinePoints;
+    });
   }
 
   void _startPollTimer() {
@@ -97,7 +171,112 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
   @override
   void dispose() {
     _pollTimer?.cancel();
+    _nearbyPoller.dispose();
+    _mapController?.dispose();
     super.dispose();
+  }
+
+  static gmaps.LatLng _toG(LatLng p) => gmaps.LatLng(p.latitude, p.longitude);
+
+  void _focusPickupOnce() {
+    if (_didFocusPickup) return;
+    final controller = _mapController;
+    final pickup = widget.pickupPosition;
+    if (controller == null) return;
+
+    _didFocusPickup = true;
+    if (pickup != null) {
+      controller.moveCamera(
+        gmaps.CameraUpdate.newLatLngZoom(_toG(pickup), _pickupZoom),
+      );
+      return;
+    }
+    final delivery = widget.deliveryPosition;
+    if (delivery != null) {
+      controller.moveCamera(
+        gmaps.CameraUpdate.newLatLngZoom(_toG(delivery), _pickupZoom),
+      );
+    }
+  }
+
+  LatLng get _mapCenter =>
+      widget.pickupPosition ??
+      widget.deliveryPosition ??
+      const LatLng(9.03, 38.74);
+
+  Set<gmaps.Marker> get _markers {
+    return {
+      if (widget.pickupPosition != null)
+        gmaps.Marker(
+          markerId: const gmaps.MarkerId('pickup'),
+          position: _toG(widget.pickupPosition!),
+          infoWindow: gmaps.InfoWindow(
+            title: 'Pickup',
+            snippet: widget.pickupLocation,
+          ),
+          icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+            gmaps.BitmapDescriptor.hueAzure,
+          ),
+        ),
+      if (widget.deliveryPosition != null)
+        gmaps.Marker(
+          markerId: const gmaps.MarkerId('delivery'),
+          position: _toG(widget.deliveryPosition!),
+          infoWindow: gmaps.InfoWindow(
+            title: 'Delivery',
+            snippet: widget.deliveryLocation,
+          ),
+          icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+            gmaps.BitmapDescriptor.hueRed,
+          ),
+        ),
+      ...nearbyDriverMapMarkers(
+        _nearbyPoller.result.drivers,
+        icon: _deliveryGuyIcon,
+      ),
+    };
+  }
+
+  Set<gmaps.Polyline> get _polylines {
+    final pickup = widget.pickupPosition;
+    final delivery = widget.deliveryPosition;
+    if (pickup == null || delivery == null) return {};
+    final points = _routePolylinePoints != null &&
+            _routePolylinePoints!.length >= 2
+        ? _routePolylinePoints!.map(_toG).toList()
+        : [_toG(pickup), _toG(delivery)];
+    return {
+      gmaps.Polyline(
+        polylineId: const gmaps.PolylineId('route'),
+        points: points,
+        color: HomeColors.violet,
+        width: 3,
+      ),
+    };
+  }
+
+  Set<gmaps.Circle> get _searchCircles {
+    final pickup = widget.pickupPosition;
+    if (pickup == null) return {};
+    final center = _toG(pickup);
+    return {
+      gmaps.Circle(
+        circleId: const gmaps.CircleId('search_ring_outer'),
+        center: center,
+        radius: _searchOuterRadiusM,
+        fillColor: HomeColors.violet.withValues(alpha: 0.08),
+        strokeColor: HomeColors.violet.withValues(alpha: 0.28),
+        strokeWidth: 1,
+      ),
+      gmaps.Circle(
+        circleId: const gmaps.CircleId('search_ring_inner'),
+        center: center,
+        radius: _searchInnerRadiusM,
+        fillColor: HomeColors.violet.withValues(alpha: 0.12),
+        strokeColor: HomeColors.violet.withValues(alpha: 0.35),
+        strokeWidth: 1,
+      ),
+    };
   }
 
   bool _isSearchingStatus(String? status) {
@@ -289,139 +468,165 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
         builder: (context) {
           final theme = Theme.of(context);
           const borderColor = HomeColors.border;
+          final privacy = _nearbyPoller.result.privacyMessage;
+          final nearbyEmpty = _nearbyPoller.result.drivers.isEmpty;
 
-          return Scaffold(
-            backgroundColor: HomeColors.background,
-            body: SafeArea(
-              child: Column(
+          return PopScope(
+            canPop: false,
+            onPopInvokedWithResult: (didPop, _) {
+              if (!didPop) _goToHome();
+            },
+            child: Scaffold(
+              backgroundColor: HomeColors.background,
+              body: Stack(
                 children: [
-                  const Spacer(),
-                  Container(
-                    margin: const EdgeInsets.symmetric(
-                        horizontal: AppColors.spaceMD),
-                    padding: const EdgeInsets.all(AppColors.spaceLG),
-                    decoration: BoxDecoration(
-                      color: HomeColors.surface,
-                      borderRadius: BorderRadius.circular(AppColors.radiusLG),
-                      border: Border.all(color: borderColor),
-                    ),
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          width: 180,
-                          height: 180,
-                          child: Lottie.asset(
-                            'assets/animations/loading.json',
-                            fit: BoxFit.contain,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      HomeColors.violet,
-                                    ),
-                                    strokeWidth: 3,
-                                  ),
-                                  const SizedBox(height: AppColors.spaceMD),
-                                  Text(
-                                    context.l10n.courierFindingNearestDrivers,
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      color: HomeColors.textPrimary,
-                                    ),
-                                  ),
-                                ],
-                              );
-                            },
-                          ),
+                  _buildMapOrFallback(context),
+                  Positioned(
+                    top: MediaQuery.paddingOf(context).top + 8,
+                    left: 16,
+                    child: Material(
+                      color: HomeColors.surfaceElevated,
+                      shape: const CircleBorder(),
+                      elevation: 2,
+                      child: IconButton(
+                        icon: const Icon(
+                          Icons.close,
+                          color: HomeColors.textPrimary,
                         ),
-                        const SizedBox(height: AppColors.spaceMD),
-                        Text(
-                          context.l10n.courierFindingNearestDrivers,
-                          style: theme.textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: HomeColors.violet,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          _searchMessage ??
-                              context.l10n.courierFindingNearestDriversSubtitle,
-                          textAlign: TextAlign.center,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: HomeColors.textMuted,
-                          ),
-                        ),
-                        const SizedBox(height: AppColors.spaceLG),
-                        _LoadingDots(),
-                      ],
-                    ),
-                  ),
-                  const Spacer(),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppColors.spaceMD,
-                    ),
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: AppColors.buttonHeightMD,
-                      child: FilledButton(
                         onPressed: _goToHome,
-                        style: FilledButton.styleFrom(
-                          backgroundColor: HomeColors.violet,
-                          shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(AppColors.radiusLG),
-                          ),
-                        ),
-                        child: const Text(
-                          'Go to home',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                        tooltip: 'Go to home',
                       ),
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  Padding(
-                    padding: const EdgeInsets.all(AppColors.spaceMD),
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: AppColors.buttonHeightMD,
-                      child: OutlinedButton(
-                        onPressed: _isCancelling ? null : _cancelOrder,
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(
-                            color: AppColors.errorColor,
-                            width: 1.5,
+                  DraggableScrollableSheet(
+                    initialChildSize: _sheetFraction,
+                    minChildSize: 0.28,
+                    maxChildSize: 0.55,
+                    builder: (context, scrollController) {
+                      return Container(
+                        decoration: const BoxDecoration(
+                          color: HomeColors.surface,
+                          borderRadius: BorderRadius.vertical(
+                            top: Radius.circular(AppColors.radiusLG),
                           ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(AppColors.radiusLG),
+                          border: Border(
+                            top: BorderSide(color: borderColor),
+                            left: BorderSide(color: borderColor),
+                            right: BorderSide(color: borderColor),
                           ),
                         ),
-                        child: _isCancelling
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: AppColors.errorColor,
+                        child: ListView(
+                          controller: scrollController,
+                          padding: const EdgeInsets.fromLTRB(
+                            AppColors.spaceMD,
+                            8,
+                            AppColors.spaceMD,
+                            AppColors.spaceMD,
+                          ),
+                          children: [
+                            Center(
+                              child: Container(
+                                width: 40,
+                                height: 4,
+                                decoration: BoxDecoration(
+                                  color: HomeColors.border,
+                                  borderRadius: BorderRadius.circular(2),
                                 ),
-                              )
-                            : const Text(
-                                'Cancel delivery',
-                                style: TextStyle(
-                                  color: AppColors.errorColor,
-                                  fontSize: 16,
+                              ),
+                            ),
+                            const SizedBox(height: AppColors.spaceMD),
+                            Text(
+                              context.l10n.courierFindingNearestDrivers,
+                              textAlign: TextAlign.center,
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: HomeColors.violet,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              _searchMessage ??
+                                  context.l10n
+                                      .courierFindingNearestDriversSubtitle,
+                              textAlign: TextAlign.center,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: HomeColors.textMuted,
+                              ),
+                            ),
+                            if (nearbyEmpty) ...[
+                              const SizedBox(height: 8),
+                              Text(
+                                'No drivers nearby yet — still searching',
+                                textAlign: TextAlign.center,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: HomeColors.textMuted,
+                                ),
+                              ),
+                            ],
+                            if (privacy != null && privacy.isNotEmpty) ...[
+                              const SizedBox(height: 8),
+                              Text(
+                                privacy,
+                                textAlign: TextAlign.center,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: HomeColors.textMuted,
+                                ),
+                              ),
+                            ],
+                            const SizedBox(height: AppColors.spaceMD),
+                            const _LoadingDots(),
+                            const SizedBox(height: AppColors.spaceLG),
+                            SizedBox(
+                              width: double.infinity,
+                              height: AppColors.buttonHeightMD,
+                              child: OutlinedButton(
+                                onPressed:
+                                    _isCancelling ? null : _cancelOrder,
+                                style: OutlinedButton.styleFrom(
+                                  side: const BorderSide(
+                                    color: AppColors.errorColor,
+                                    width: 1.5,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                      AppColors.radiusLG,
+                                    ),
+                                  ),
+                                ),
+                                child: _isCancelling
+                                    ? const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: AppColors.errorColor,
+                                        ),
+                                      )
+                                    : const Text(
+                                        'Cancel delivery',
+                                        style: TextStyle(
+                                          color: AppColors.errorColor,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            TextButton(
+                              onPressed: _goToHome,
+                              child: Text(
+                                'Go to home',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: HomeColors.violet,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
-                      ),
-                    ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -431,9 +636,65 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
       ),
     );
   }
+
+  Widget _buildMapOrFallback(BuildContext context) {
+    final theme = Theme.of(context);
+    if (_hasGoogleMapsApiKey == null) {
+      return const ColoredBox(
+        color: HomeColors.background,
+        child: Center(
+          child: CircularProgressIndicator(color: HomeColors.violet),
+        ),
+      );
+    }
+    if (_hasGoogleMapsApiKey == false) {
+      return ColoredBox(
+        color: HomeColors.background,
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(
+              context.l10n.taxiGoogleMapsNotConfigured,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: HomeColors.textPrimary,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    final bottomPadding =
+        MediaQuery.sizeOf(context).height * _sheetFraction;
+
+    return gmaps.GoogleMap(
+      initialCameraPosition: gmaps.CameraPosition(
+        target: _toG(_mapCenter),
+        zoom: _pickupZoom,
+      ),
+      padding: EdgeInsets.only(bottom: bottomPadding),
+      myLocationButtonEnabled: false,
+      zoomControlsEnabled: false,
+      mapToolbarEnabled: false,
+      zoomGesturesEnabled: true,
+      scrollGesturesEnabled: true,
+      rotateGesturesEnabled: true,
+      tiltGesturesEnabled: true,
+      markers: _markers,
+      polylines: _polylines,
+      circles: _searchCircles,
+      onMapCreated: (controller) {
+        _mapController = controller;
+        _focusPickupOnce();
+      },
+    );
+  }
 }
 
 class _LoadingDots extends StatefulWidget {
+  const _LoadingDots();
+
   @override
   State<_LoadingDots> createState() => _LoadingDotsState();
 }

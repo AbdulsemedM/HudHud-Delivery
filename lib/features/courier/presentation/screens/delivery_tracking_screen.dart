@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
 import 'package:lottie/lottie.dart';
@@ -17,6 +15,7 @@ import 'package:hudhud_delivery/features/courier/data/models/delivery_live_track
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
 import 'package:hudhud_delivery/features/courier/presentation/widgets/driver_contact_card.dart';
+import 'package:hudhud_delivery/features/courier/presentation/widgets/nearby_driver_markers.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_notification.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_status.dart';
 import 'package:hudhud_delivery/features/chat/utils/chat_navigation.dart';
@@ -60,8 +59,6 @@ class DeliveryTrackingScreen extends StatefulWidget {
 }
 
 class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
-  static const _deliveryGuyAsset = 'assets/images/delivery-guy.png';
-
   gmaps.GoogleMapController? _mapController;
   LatLng? _vehiclePosition;
   Timer? _pollTimer;
@@ -113,33 +110,9 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
   }
 
   Future<void> _loadDeliveryGuyIcon() async {
-    try {
-      final data = await rootBundle.load(_deliveryGuyAsset);
-      final dpr = WidgetsBinding
-          .instance.platformDispatcher.views.first.devicePixelRatio;
-      // Decode to ~48–56 logical dp so the pin matches default marker size.
-      const logicalWidth = 56.0;
-      final targetWidth = (logicalWidth * dpr).round().clamp(72, 168);
-      final codec = await ui.instantiateImageCodec(
-        data.buffer.asUint8List(),
-        targetWidth: targetWidth,
-      );
-      final frame = await codec.getNextFrame();
-      final image = frame.image;
-      final byteData =
-          await image.toByteData(format: ui.ImageByteFormat.png);
-      if (byteData == null || !mounted) return;
-
-      final aspect = image.width / image.height;
-      final logicalHeight = logicalWidth / aspect;
-      final icon = gmaps.BitmapDescriptor.fromBytes(
-        byteData.buffer.asUint8List(),
-        size: Size(logicalWidth, logicalHeight),
-      );
-      setState(() => _deliveryGuyIcon = icon);
-    } catch (_) {
-      // Keep violet default marker fallback.
-    }
+    final icon = await loadDeliveryGuyMapIcon();
+    if (!mounted || icon == null) return;
+    setState(() => _deliveryGuyIcon = icon);
   }
 
   void _startPollTimer() {

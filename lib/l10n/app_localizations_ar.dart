@@ -1026,7 +1026,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get deliveryLocationLabel => 'موقع التسليم';
 
   @override
-  String get vehicleMotorcycle => 'دراجة نارية';
+  String get vehicleMotorcycle => 'دراجة';
 
   @override
   String get vehicleCar => 'سيارة';

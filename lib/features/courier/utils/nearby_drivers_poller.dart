@@ -20,6 +20,7 @@ class NearbyDriversPoller {
   double? _latitude;
   double? _longitude;
   String? _vehicleType;
+  int? _radius;
   int _refreshAfterSeconds = 15;
 
   int get refreshAfterSeconds => _refreshAfterSeconds;
@@ -28,13 +29,16 @@ class NearbyDriversPoller {
     required double latitude,
     required double longitude,
     required String vehicleType,
+    int? radius,
   }) {
     final same = _latitude == latitude &&
         _longitude == longitude &&
-        _vehicleType == vehicleType;
+        _vehicleType == vehicleType &&
+        _radius == radius;
     _latitude = latitude;
     _longitude = longitude;
     _vehicleType = vehicleType;
+    _radius = radius;
     if (stoppedForInvalidCoordinates) return;
     if (!same || _timer == null) {
       _restartTimer(fetchNow: true);
@@ -66,6 +70,7 @@ class NearbyDriversPoller {
     final response = await repository.getNearbyDrivers(
       latitude: lat,
       longitude: lng,
+      radius: _radius,
       vehicleType: vehicle,
     );
 

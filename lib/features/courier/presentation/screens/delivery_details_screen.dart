@@ -532,6 +532,7 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
             paymentMethod: d['payment_method']?.toString(),
             deliveryStatus: _deliveryStatus(d),
           ),
+          canTrack: canTrackCourierDelivery(_deliveryStatus(d)),
           canCancel: canCancelCourierDelivery(_deliveryStatus(d)),
           isRetrying: _isRetrying,
           isCancelling: _isCancelling,
@@ -1015,6 +1016,7 @@ class _DetailField extends StatelessWidget {
 class _BottomActions extends StatelessWidget {
   const _BottomActions({
     required this.canRetry,
+    required this.canTrack,
     required this.canCancel,
     required this.isRetrying,
     required this.isCancelling,
@@ -1024,6 +1026,7 @@ class _BottomActions extends StatelessWidget {
   });
 
   final bool canRetry;
+  final bool canTrack;
   final bool canCancel;
   final bool isRetrying;
   final bool isCancelling;
@@ -1034,6 +1037,9 @@ class _BottomActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final busy = isRetrying || isCancelling;
+    if (!canRetry && !canTrack && !canCancel) {
+      return const SizedBox.shrink();
+    }
     return Container(
       padding: EdgeInsets.fromLTRB(
         AppColors.spaceMD,
@@ -1079,32 +1085,35 @@ class _BottomActions extends StatelessWidget {
                       ),
               ),
             ),
-            const SizedBox(height: AppColors.spaceSM),
+            if (canTrack || canCancel) const SizedBox(height: AppColors.spaceSM),
           ],
-          SizedBox(
-            width: double.infinity,
-            height: AppColors.buttonHeightMD,
-            child: ElevatedButton(
-              onPressed: busy ? null : onTrack,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: HomeColors.violet,
-                foregroundColor: Colors.white,
-                disabledBackgroundColor: HomeColors.violet.withValues(alpha: 0.4),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppColors.radiusLG),
+          if (canTrack) ...[
+            SizedBox(
+              width: double.infinity,
+              height: AppColors.buttonHeightMD,
+              child: ElevatedButton(
+                onPressed: busy ? null : onTrack,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: HomeColors.violet,
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor:
+                      HomeColors.violet.withValues(alpha: 0.4),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppColors.radiusLG),
+                  ),
                 ),
-              ),
-              child: const Text(
-                'Track delivery',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
+                child: const Text(
+                  'Track delivery',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),
-          ),
-          if (canCancel) ...[
-            const SizedBox(height: AppColors.spaceSM),
+            if (canCancel) const SizedBox(height: AppColors.spaceSM),
+          ],
+          if (canCancel)
             SizedBox(
               width: double.infinity,
               height: AppColors.buttonHeightMD,
@@ -1138,7 +1147,6 @@ class _BottomActions extends StatelessWidget {
                       ),
               ),
             ),
-          ],
         ],
       ),
     );

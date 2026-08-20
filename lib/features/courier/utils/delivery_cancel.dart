@@ -1,14 +1,18 @@
+import 'package:hudhud_delivery/features/courier/utils/delivery_notification.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
 
 /// Whether a courier delivery can still be cancelled by the customer.
 ///
-/// Cancellation is blocked once the package is picked up (and for terminal
-/// delivered / cancelled states).
+/// Cancellation is blocked once a courier is assigned (and for all later /
+/// terminal states).
 bool canCancelCourierDelivery(String? status) {
   if (status == null || status.trim().isEmpty) return true;
+  if (isDeliveryTerminalStatus(status)) return false;
+  if (isDeliveryAcceptedForTracking(status)) return false;
 
   final normalized = status.toLowerCase().trim().replaceAll(' ', '_');
 
+  // Legacy statuses that may not map cleanly into lifecycle ranks.
   const blockedExact = {
     'picked_up',
     'in_transit',
@@ -26,11 +30,17 @@ bool canCancelCourierDelivery(String? status) {
       normalized.contains('out_for_delivery') ||
       normalized.contains('delivered') ||
       normalized.contains('completed') ||
-      normalized.contains('cancel')) {
+      normalized.contains('cancel') ||
+      normalized.contains('assign')) {
     return false;
   }
 
   return true;
+}
+
+/// Whether the customer can open live tracking for this delivery.
+bool canTrackCourierDelivery(String? status) {
+  return !isDeliveryTerminalStatus(status);
 }
 
 /// Provider-confirmed payment statuses that may produce a wallet refund on cancel.

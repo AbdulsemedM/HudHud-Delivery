@@ -381,7 +381,7 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                 // Bottom Sheet Modal
                 DraggableScrollableSheet(
                   initialChildSize: initialSheetSize,
-                  minChildSize: 0.3,
+                  minChildSize: 0.35,
                   maxChildSize: 0.85,
                   builder: (context, scrollController) {
                     return Container(
@@ -472,7 +472,7 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                               children: [
                                 Expanded(
                                   child: _VehicleTypeOption(
-                                    icon: Icons.two_wheeler,
+                                    icon: Icons.pedal_bike,
                                     label: l10n.vehicleMotorcycle,
                                     isSelected:
                                         _selectedVehicle == 'motorcycle',
@@ -619,7 +619,9 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
         if (_pickupPosition != null && _deliveryPosition != null) {
           _fetchRouteDirections();
           _fitBounds();
+          _scheduleEstimateFetch();
         } else {
+          _scheduleEstimateFetch();
           _mapController?.moveCamera(
             gmaps.CameraUpdate.newLatLngZoom(_toG(point), 15.0),
           );

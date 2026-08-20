@@ -719,10 +719,10 @@ class HistoryItem extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          // Motorcycle icon and location with "Drop off"
+          // Bicycle icon and location with "Drop off"
           Row(
             children: [
-              // Motorcycle icon (light blue outline)
+              // Bicycle icon (light blue outline)
               Container(
                 width: 20,
                 height: 20,
@@ -735,7 +735,7 @@ class HistoryItem extends StatelessWidget {
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: const Icon(
-                  Icons.two_wheeler,
+                  Icons.pedal_bike,
                   size: 12,
                   color: Color(0xFF64B5F6), // Light blue
                 ),

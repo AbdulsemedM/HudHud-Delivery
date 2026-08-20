@@ -1037,7 +1037,7 @@ class AppLocalizationsOm extends AppLocalizations {
   String get deliveryLocationLabel => 'Bakka Geejjibaa';
 
   @override
-  String get vehicleMotorcycle => 'Mootar Saayikilii';
+  String get vehicleMotorcycle => 'Biskiletii';
 
   @override
   String get vehicleCar => 'Konkolaataa';

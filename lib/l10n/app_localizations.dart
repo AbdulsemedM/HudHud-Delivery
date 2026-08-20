@@ -2027,7 +2027,7 @@ abstract class AppLocalizations {
   /// No description provided for @vehicleMotorcycle.
   ///
   /// In en, this message translates to:
-  /// **'Motorcycle'**
+  /// **'Bicycle'**
   String get vehicleMotorcycle;
 
   /// No description provided for @vehicleCar.
