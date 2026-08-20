@@ -2868,6 +2868,17 @@ class AppLocalizationsSo extends AppLocalizations {
   String get updateFromStore => 'Ka cusbooneysii dukaanka';
 
   @override
+  String get softUpdateTitle => 'Cusboonaysi ayaa diyaar ah';
+
+  @override
+  String softUpdateMessage(String currentVersion, String latestVersion) {
+    return 'Waxaad ku jirtaa $currentVersion. Nooca $latestVersion ayaa dukaanka ku yaal.';
+  }
+
+  @override
+  String get updateLater => 'Goor dambe';
+
+  @override
   String get openPaymentPage => 'Fur bogga lacag-bixinta';
 
   @override

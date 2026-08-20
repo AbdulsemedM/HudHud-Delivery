@@ -1,13 +1,10 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:url_launcher/url_launcher.dart';
 
-import 'package:hudhud_delivery/app/services/ota_log.dart';
 import 'package:hudhud_delivery/core/config/store_config.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/utils/store_launcher.dart';
 
 /// Blocking screen when the installed binary is below [minimumSupportedVersion].
 ///
@@ -23,31 +20,6 @@ class ForceUpdateScreen extends StatelessWidget {
   final String currentVersion;
   final String minimumSupportedVersion;
   final String latestStoreVersion;
-
-  Future<void> _openStore() async {
-    final uri = _storeUri();
-    OtaLog.info('force_update_open_store', {'uri': uri.toString()});
-    final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
-    if (!launched) {
-      OtaLog.warn('force_update_open_store_failed', {'uri': uri.toString()});
-    }
-  }
-
-  Uri _storeUri() {
-    if (Platform.isAndroid) {
-      return Uri.parse(
-        'https://play.google.com/store/apps/details?id=${StoreConfig.androidPackageId}',
-      );
-    }
-    if (StoreConfig.iosAppStoreId.isNotEmpty) {
-      return Uri.parse(
-        'https://apps.apple.com/app/id${StoreConfig.iosAppStoreId}',
-      );
-    }
-    return Uri.parse(
-      'https://apps.apple.com/search?term=${Uri.encodeComponent(StoreConfig.appDisplayName)}',
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -105,7 +77,7 @@ class ForceUpdateScreen extends StatelessWidget {
                   ),
                   const Spacer(),
                   FilledButton(
-                    onPressed: _openStore,
+                    onPressed: openAppStoreListing,
                     style: FilledButton.styleFrom(
                       backgroundColor: AppColors.primaryColor,
                       padding: const EdgeInsets.symmetric(vertical: 16),

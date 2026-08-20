@@ -2791,6 +2791,17 @@ class AppLocalizationsAm extends AppLocalizations {
   String get updateFromStore => 'ከሱቅ ያዘምኑ';
 
   @override
+  String get softUpdateTitle => 'አዲስ ስሪት አለ';
+
+  @override
+  String softUpdateMessage(String currentVersion, String latestVersion) {
+    return 'እርስዎ በ $currentVersion ላይ ነዎት። ስሪት $latestVersion በሱቁ ላይ ይገኛል።';
+  }
+
+  @override
+  String get updateLater => 'በኋላ';
+
+  @override
   String get openPaymentPage => 'የክፍያ ገጽ ክፈት';
 
   @override

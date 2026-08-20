@@ -2862,6 +2862,17 @@ class AppLocalizationsOm extends AppLocalizations {
   String get updateFromStore => 'Suuqii irraa haaromsi';
 
   @override
+  String get softUpdateTitle => 'Fooyya\'inni jira';
+
+  @override
+  String softUpdateMessage(String currentVersion, String latestVersion) {
+    return 'Vershiinii $currentVersion fayyadamtaa. Vershiinii $latestVersion suuqii irratti argama.';
+  }
+
+  @override
+  String get updateLater => 'Booda';
+
+  @override
   String get openPaymentPage => 'Fuula kaffaltii bani';
 
   @override

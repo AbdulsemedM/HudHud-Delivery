@@ -1247,6 +1247,19 @@
   },
   "pleaseEnterYourName": "እባክዎ ስምዎን ያስገቡ",
   "updateFromStore": "ከሱቅ ያዘምኑ",
+  "softUpdateTitle": "አዲስ ስሪት አለ",
+  "softUpdateMessage": "እርስዎ በ {currentVersion} ላይ ነዎት። ስሪት {latestVersion} በሱቁ ላይ ይገኛል።",
+  "@softUpdateMessage": {
+    "placeholders": {
+      "currentVersion": {
+        "type": "String"
+      },
+      "latestVersion": {
+        "type": "String"
+      }
+    }
+  },
+  "updateLater": "በኋላ",
   "openPaymentPage": "የክፍያ ገጽ ክፈት",
   "paymentRefreshFailed": "የክፍያ ሁኔታ ማደስ አልተቻለም",
   "searchProductsTitle": "ምርቶችን ይፈልጉ",

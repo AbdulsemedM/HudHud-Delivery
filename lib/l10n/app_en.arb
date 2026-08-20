@@ -1191,6 +1191,19 @@
   },
   "pleaseEnterYourName": "Please enter your name",
   "updateFromStore": "Update from store",
+  "softUpdateTitle": "Update available",
+  "softUpdateMessage": "You're on {currentVersion}. Version {latestVersion} is available on the store.",
+  "@softUpdateMessage": {
+    "placeholders": {
+      "currentVersion": {
+        "type": "String"
+      },
+      "latestVersion": {
+        "type": "String"
+      }
+    }
+  },
+  "updateLater": "Later",
   "openPaymentPage": "Open payment page",
   "paymentRefreshFailed": "Could not refresh payment status",
   "searchProductsTitle": "Search products",

@@ -2822,6 +2822,17 @@ class AppLocalizationsAr extends AppLocalizations {
   String get updateFromStore => 'التحديث من المتجر';
 
   @override
+  String get softUpdateTitle => 'يتوفر تحديث';
+
+  @override
+  String softUpdateMessage(String currentVersion, String latestVersion) {
+    return 'أنت على الإصدار $currentVersion. الإصدار $latestVersion متاح في المتجر.';
+  }
+
+  @override
+  String get updateLater => 'لاحقاً';
+
+  @override
   String get openPaymentPage => 'فتح صفحة الدفع';
 
   @override

@@ -11,7 +11,12 @@ class RemoteConfigService {
   RemoteConfigService._();
   static final RemoteConfigService instance = RemoteConfigService._();
 
+  /// Legacy shared minimum (used when a platform-specific key is empty).
   static const String keyMinimumSupportedVersion = 'minimum_supported_version';
+  static const String keyMinimumSupportedVersionAndroid =
+      'minimum_supported_version_android';
+  static const String keyMinimumSupportedVersionIos =
+      'minimum_supported_version_ios';
   static const String keyLatestStoreVersionAndroid =
       'latest_store_version_android';
   static const String keyLatestStoreVersionIos = 'latest_store_version_ios';
@@ -24,8 +29,13 @@ class RemoteConfigService {
   bool get isInitialized => _initialized;
 
   /// Defaults keep the app usable until console values are set.
+  ///
+  /// Platform-specific minimums default to empty so existing configs that only
+  /// set [keyMinimumSupportedVersion] keep working.
   static final Map<String, dynamic> _defaults = {
     keyMinimumSupportedVersion: '0.0.0',
+    keyMinimumSupportedVersionAndroid: '',
+    keyMinimumSupportedVersionIos: '',
     keyLatestStoreVersionAndroid: '1.0.0',
     keyLatestStoreVersionIos: '1.0.0',
     keyKillSwitchPatchDisabled: false,
@@ -51,6 +61,9 @@ class RemoteConfigService {
       _initialized = true;
       OtaLog.info('remote_config_ready', {
         'minimum_supported_version': minimumSupportedVersion,
+        'minimum_supported_version_android': minimumSupportedVersionAndroid,
+        'minimum_supported_version_ios': minimumSupportedVersionIos,
+        'minimum_for_platform': minimumSupportedVersionForPlatform,
         'latest_store_version_android': latestStoreVersionAndroid,
         'latest_store_version_ios': latestStoreVersionIos,
         'kill_switch_patch_disabled': isPatchKillSwitchEnabled,
@@ -82,6 +95,24 @@ class RemoteConfigService {
   String get minimumSupportedVersion =>
       _remoteConfig?.getString(keyMinimumSupportedVersion) ??
       _defaults[keyMinimumSupportedVersion] as String;
+
+  String get minimumSupportedVersionAndroid =>
+      _remoteConfig?.getString(keyMinimumSupportedVersionAndroid) ??
+      _defaults[keyMinimumSupportedVersionAndroid] as String;
+
+  String get minimumSupportedVersionIos =>
+      _remoteConfig?.getString(keyMinimumSupportedVersionIos) ??
+      _defaults[keyMinimumSupportedVersionIos] as String;
+
+  /// Platform minimum: prefer android/ios key when non-empty, else legacy shared.
+  String get minimumSupportedVersionForPlatform {
+    final platformSpecific = Platform.isIOS
+        ? minimumSupportedVersionIos
+        : minimumSupportedVersionAndroid;
+    final trimmed = platformSpecific.trim();
+    if (trimmed.isNotEmpty) return trimmed;
+    return minimumSupportedVersion;
+  }
 
   String get latestStoreVersionAndroid =>
       _remoteConfig?.getString(keyLatestStoreVersionAndroid) ??

@@ -5396,6 +5396,24 @@ abstract class AppLocalizations {
   /// **'Update from store'**
   String get updateFromStore;
 
+  /// No description provided for @softUpdateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Update available'**
+  String get softUpdateTitle;
+
+  /// No description provided for @softUpdateMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re on {currentVersion}. Version {latestVersion} is available on the store.'**
+  String softUpdateMessage(String currentVersion, String latestVersion);
+
+  /// No description provided for @updateLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get updateLater;
+
   /// No description provided for @openPaymentPage.
   ///
   /// In en, this message translates to:

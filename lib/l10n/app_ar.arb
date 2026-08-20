@@ -1240,6 +1240,19 @@
   },
   "pleaseEnterYourName": "يرجى إدخال اسمك",
   "updateFromStore": "التحديث من المتجر",
+  "softUpdateTitle": "يتوفر تحديث",
+  "softUpdateMessage": "أنت على الإصدار {currentVersion}. الإصدار {latestVersion} متاح في المتجر.",
+  "@softUpdateMessage": {
+    "placeholders": {
+      "currentVersion": {
+        "type": "String"
+      },
+      "latestVersion": {
+        "type": "String"
+      }
+    }
+  },
+  "updateLater": "لاحقاً",
   "openPaymentPage": "فتح صفحة الدفع",
   "paymentRefreshFailed": "تعذر تحديث حالة الدفع",
   "searchProductsTitle": "البحث عن منتجات",

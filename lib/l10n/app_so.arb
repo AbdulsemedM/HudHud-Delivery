@@ -1240,6 +1240,19 @@
   },
   "pleaseEnterYourName": "Fadlan geli magacaaga",
   "updateFromStore": "Ka cusbooneysii dukaanka",
+  "softUpdateTitle": "Cusboonaysi ayaa diyaar ah",
+  "softUpdateMessage": "Waxaad ku jirtaa {currentVersion}. Nooca {latestVersion} ayaa dukaanka ku yaal.",
+  "@softUpdateMessage": {
+    "placeholders": {
+      "currentVersion": {
+        "type": "String"
+      },
+      "latestVersion": {
+        "type": "String"
+      }
+    }
+  },
+  "updateLater": "Goor dambe",
   "openPaymentPage": "Fur bogga lacag-bixinta",
   "paymentRefreshFailed": "Xaaladda lacag-bixinta dib looma cusbooneysiin karin",
   "searchProductsTitle": "Raadi alaabada",

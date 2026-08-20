@@ -7,6 +7,7 @@ import 'package:hudhud_delivery/app/services/remote_config_service.dart';
 import 'package:hudhud_delivery/app/services/startup_location_service.dart';
 import 'package:hudhud_delivery/features/dashboard/presentation/screen/dashboard_screen.dart';
 import 'package:hudhud_delivery/features/force_update/presentation/screen/force_update_screen.dart';
+import 'package:hudhud_delivery/features/force_update/presentation/widgets/soft_update_dialog.dart';
 import 'package:hudhud_delivery/features/splash/presentation/theme/splash_colors.dart';
 import '../widgets/splash_widget.dart';
 
@@ -78,17 +79,18 @@ class _SplashScreenState extends State<SplashScreen>
     await Future.delayed(const Duration(seconds: 3));
     if (!mounted) return;
 
+    ForceUpdateCheckResult? updateCheck;
     try {
-      final force = await _forceUpdateService.check();
+      updateCheck = await _forceUpdateService.check();
       if (!mounted) return;
-      if (force.required) {
+      if (updateCheck.required) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (_) => ForceUpdateScreen(
-              currentVersion: force.currentVersion,
-              minimumSupportedVersion: force.minimumSupportedVersion,
-              latestStoreVersion: force.latestStoreVersion,
+              currentVersion: updateCheck!.currentVersion,
+              minimumSupportedVersion: updateCheck.minimumSupportedVersion,
+              latestStoreVersion: updateCheck.latestStoreVersion,
             ),
           ),
         );
@@ -98,6 +100,16 @@ class _SplashScreenState extends State<SplashScreen>
       // Fail open: never block the app if the force-update check errors.
     }
 
+    // Soft prompt stays on splash so it isn't lost after pushReplacement.
+    if (mounted && updateCheck?.softSuggested == true) {
+      await showSoftUpdateDialog(
+        context,
+        currentVersion: updateCheck!.currentVersion,
+        latestStoreVersion: updateCheck.latestStoreVersion,
+      );
+    }
+
+    if (!mounted) return;
     await _goToHome();
   }
 

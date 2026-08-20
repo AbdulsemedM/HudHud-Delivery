@@ -1240,6 +1240,19 @@
   },
   "pleaseEnterYourName": "Maaloo maqaa kee galchi",
   "updateFromStore": "Suuqii irraa haaromsi",
+  "softUpdateTitle": "Fooyya'inni jira",
+  "softUpdateMessage": "Vershiinii {currentVersion} fayyadamtaa. Vershiinii {latestVersion} suuqii irratti argama.",
+  "@softUpdateMessage": {
+    "placeholders": {
+      "currentVersion": {
+        "type": "String"
+      },
+      "latestVersion": {
+        "type": "String"
+      }
+    }
+  },
+  "updateLater": "Booda",
   "openPaymentPage": "Fuula kaffaltii bani",
   "paymentRefreshFailed": "Haala kaffaltii haaromsuu hin dandeenye",
   "searchProductsTitle": "Oomishaalee barbaadi",

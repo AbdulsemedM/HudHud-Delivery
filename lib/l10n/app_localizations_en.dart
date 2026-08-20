@@ -2841,6 +2841,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get updateFromStore => 'Update from store';
 
   @override
+  String get softUpdateTitle => 'Update available';
+
+  @override
+  String softUpdateMessage(String currentVersion, String latestVersion) {
+    return 'You\'re on $currentVersion. Version $latestVersion is available on the store.';
+  }
+
+  @override
+  String get updateLater => 'Later';
+
+  @override
   String get openPaymentPage => 'Open payment page';
 
   @override
