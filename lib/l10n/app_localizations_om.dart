@@ -496,6 +496,9 @@ class AppLocalizationsOm extends AppLocalizations {
   String get history => 'Seenaa';
 
   @override
+  String get showMore => 'Dabalataan agarsiisi';
+
+  @override
   String get featuresSectionTitle => 'HudHud waliin maal gochuu dandeessu';
 
   @override

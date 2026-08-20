@@ -487,6 +487,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get history => 'تاريخ';
 
   @override
+  String get showMore => 'عرض المزيد';
+
+  @override
   String get featuresSectionTitle => 'ما يمكنك فعله مع HudHud';
 
   @override

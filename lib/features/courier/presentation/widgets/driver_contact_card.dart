@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 
-/// Driver row with message action for courier delivery tracking.
+/// Driver row with call and message actions for courier delivery tracking.
 class DriverContactCard extends StatelessWidget {
   final String driverName;
   final String? details;
   final VoidCallback onMessage;
+  final VoidCallback? onCall;
   final Color borderColor;
 
   const DriverContactCard({
@@ -14,6 +15,7 @@ class DriverContactCard extends StatelessWidget {
     required this.driverName,
     required this.onMessage,
     required this.borderColor,
+    this.onCall,
     this.details,
   });
 
@@ -61,7 +63,25 @@ class DriverContactCard extends StatelessWidget {
               ],
             ),
           ),
+          if (onCall != null)
+            IconButton(
+              tooltip: 'Call',
+              icon: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: const BoxDecoration(
+                  color: HomeColors.surface,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.phone_outlined,
+                  size: 20,
+                  color: HomeColors.orange,
+                ),
+              ),
+              onPressed: onCall,
+            ),
           IconButton(
+            tooltip: 'Message',
             icon: Container(
               padding: const EdgeInsets.all(8),
               decoration: const BoxDecoration(

@@ -481,6 +481,9 @@ class AppLocalizationsAm extends AppLocalizations {
   String get history => 'ታሪክ';
 
   @override
+  String get showMore => 'ተጨማሪ አሳይ';
+
+  @override
   String get featuresSectionTitle => 'በሁድሁድ ምን ማድረግ ትችላለህ';
 
   @override

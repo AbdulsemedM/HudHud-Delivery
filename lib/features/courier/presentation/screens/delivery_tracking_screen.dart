@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
 import 'package:lottie/lottie.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
@@ -57,24 +60,24 @@ class DeliveryTrackingScreen extends StatefulWidget {
 }
 
 class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
+  static const _deliveryGuyAsset = 'assets/images/delivery-guy.png';
+
   gmaps.GoogleMapController? _mapController;
   LatLng? _vehiclePosition;
   Timer? _pollTimer;
+  gmaps.BitmapDescriptor? _deliveryGuyIcon;
 
   Map<String, dynamic>? _trackData;
   DeliveryLiveTracking? _liveTracking;
   GeoPoint? _retainedDriverPoint;
-  bool _driverLocationStale = false;
   bool _trackingAvailable = false;
   bool _stopPolling = false;
   int _pollIntervalSeconds = 7;
   bool _isLoadingTrack = true;
-  bool _isRefreshingTrack = false;
   String? _trackError;
   List<LatLng>? _routePolylinePoints;
   GeoPoint? _lastRouteOrigin;
   GeoPoint? _lastRouteDestination;
-  DateTime? _driverLocationUpdatedAt;
 
   late final CourierRepository _courierRepository;
 
@@ -86,6 +89,7 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
         apiService: ApiService.instance,
       ),
     );
+    _loadDeliveryGuyIcon();
 
     if (widget.pickupPosition != null && widget.deliveryPosition != null) {
       _fetchRouteDirections(
@@ -105,6 +109,36 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
       _startPollTimer();
     } else {
       _isLoadingTrack = false;
+    }
+  }
+
+  Future<void> _loadDeliveryGuyIcon() async {
+    try {
+      final data = await rootBundle.load(_deliveryGuyAsset);
+      final dpr = WidgetsBinding
+          .instance.platformDispatcher.views.first.devicePixelRatio;
+      // Decode to ~48–56 logical dp so the pin matches default marker size.
+      const logicalWidth = 56.0;
+      final targetWidth = (logicalWidth * dpr).round().clamp(72, 168);
+      final codec = await ui.instantiateImageCodec(
+        data.buffer.asUint8List(),
+        targetWidth: targetWidth,
+      );
+      final frame = await codec.getNextFrame();
+      final image = frame.image;
+      final byteData =
+          await image.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData == null || !mounted) return;
+
+      final aspect = image.width / image.height;
+      final logicalHeight = logicalWidth / aspect;
+      final icon = gmaps.BitmapDescriptor.fromBytes(
+        byteData.buffer.asUint8List(),
+        size: Size(logicalWidth, logicalHeight),
+      );
+      setState(() => _deliveryGuyIcon = icon);
+    } catch (_) {
+      // Keep violet default marker fallback.
     }
   }
 
@@ -171,6 +205,37 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
     await openPackageDeliveryChat(context, deliveryId);
   }
 
+  String? _driverPhone() {
+    final livePhone = _liveTracking?.driver?.phone?.trim();
+    if (livePhone != null && livePhone.isNotEmpty) return livePhone;
+
+    final driver = _trackData?['driver'];
+    if (driver is Map) {
+      final phone = driver['phone']?.toString().trim();
+      if (phone != null && phone.isNotEmpty) return phone;
+    }
+    return null;
+  }
+
+  Future<void> _callDriver() async {
+    final phone = _driverPhone();
+    if (phone == null || phone.isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Driver phone number is unavailable')),
+      );
+      return;
+    }
+    final uri = Uri(scheme: 'tel', path: phone);
+    final launched =
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!launched && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open the phone dialer')),
+      );
+    }
+  }
+
   Future<void> _fetchRouteDirections({
     required GeoPoint origin,
     required GeoPoint destination,
@@ -227,10 +292,6 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
 
   Future<void> _fetchTrackData() async {
     if (widget.deliveryId == null || _stopPolling) return;
-    final isInitialLoad = _isLoadingTrack;
-    if (!isInitialLoad && mounted) {
-      setState(() => _isRefreshingTrack = true);
-    }
     try {
       final liveResult =
           await _courierRepository.getDeliveryLiveTracking(widget.deliveryId!);
@@ -256,7 +317,6 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
       if (!mounted) return;
       setState(() {
         _isLoadingTrack = false;
-        _isRefreshingTrack = false;
         if (result['success'] == true) {
           _trackData = result['data'] as Map<String, dynamic>?;
           final parsed = _parseDriverLocation(_trackData);
@@ -270,7 +330,6 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
           if (_trackData?['driver'] != null) {
             _trackingAvailable = true;
           }
-          _driverLocationUpdatedAt = _parseDriverLocationUpdatedAt(_trackData);
           _trackError = null;
         } else {
           _trackError = result['message'] as String?;
@@ -280,7 +339,6 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
       if (mounted) {
         setState(() {
           _isLoadingTrack = false;
-          _isRefreshingTrack = false;
           _trackError = 'Failed to load tracking';
         });
       }
@@ -306,16 +364,11 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
 
     setState(() {
       _isLoadingTrack = false;
-      _isRefreshingTrack = false;
       _liveTracking = live;
       _trackingAvailable = live.trackingAvailable;
-      _driverLocationStale = live.driverLocation?.isLive == false;
       _retainedDriverPoint = retained;
       if (retained != null) {
         _vehiclePosition = LatLng(retained.latitude, retained.longitude);
-      }
-      if (live.driverLocation?.recordedAt != null) {
-        _driverLocationUpdatedAt = live.driverLocation!.recordedAt!.toLocal();
       }
       _trackError = null;
       _trackData = {
@@ -360,89 +413,6 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
     }
   }
 
-  DateTime? _parseDriverLocationUpdatedAt(Map<String, dynamic>? data) {
-    if (data == null) return null;
-    for (final key in const [
-      'last_updated',
-      'driver_location_updated_at',
-      'location_updated_at',
-    ]) {
-      final parsed = DateTime.tryParse(data[key]?.toString() ?? '');
-      if (parsed != null) return parsed.toLocal();
-    }
-
-    final driverLocation = data['driver_location'];
-    if (driverLocation is Map) {
-      for (final key in const ['updated_at', 'last_updated', 'recorded_at']) {
-        final parsed = DateTime.tryParse(driverLocation[key]?.toString() ?? '');
-        if (parsed != null) return parsed.toLocal();
-      }
-    }
-
-    final driver = data['driver'];
-    if (driver is Map) {
-      for (final key in const ['location_updated_at', 'last_updated']) {
-        final parsed = DateTime.tryParse(driver[key]?.toString() ?? '');
-        if (parsed != null) return parsed.toLocal();
-      }
-    }
-    return null;
-  }
-
-  _DriverLocationFreshness _locationFreshness() {
-    if (_isRefreshingTrack || _driverLocationStale) {
-      return _DriverLocationFreshness.updating;
-    }
-
-    final updatedAt = _driverLocationUpdatedAt;
-    if (updatedAt == null) {
-      return _DriverLocationFreshness.unknown;
-    }
-
-    final age = DateTime.now().difference(updatedAt);
-    if (age.inMinutes >= 2) {
-      return _DriverLocationFreshness.stale;
-    }
-    return _DriverLocationFreshness.fresh;
-  }
-
-  String _locationFreshnessLabel(
-    BuildContext context,
-    _DriverLocationFreshness freshness,
-  ) {
-    switch (freshness) {
-      case _DriverLocationFreshness.updating:
-        return context.l10n.courierDriverLocationUpdating;
-      case _DriverLocationFreshness.stale:
-        return 'Location may be stale';
-      case _DriverLocationFreshness.fresh:
-        return 'Live location';
-      case _DriverLocationFreshness.unknown:
-        return 'Waiting for location';
-    }
-  }
-
-  String _formatTimestamp(dynamic value) {
-    if (value == null) return '—';
-    final str = value.toString();
-    try {
-      final dt = DateTime.tryParse(str);
-      if (dt != null) {
-        return '${dt.day} ${_monthName(dt.month)} ${dt.year}, '
-            '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
-      }
-    } catch (_) {}
-    return str;
-  }
-
-  String _monthName(int month) {
-    const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
-    ];
-    return months[month - 1];
-  }
-
   @override
   Widget build(BuildContext context) {
     // Calculate center point for map
@@ -475,11 +445,10 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
         gmaps.Marker(
           markerId: const gmaps.MarkerId('vehicle'),
           position: _toG(_vehiclePosition!),
-          rotation: _liveTracking?.driverLocation?.heading ?? 0,
-          flat: _liveTracking?.driverLocation?.heading != null,
-          icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-            gmaps.BitmapDescriptor.hueViolet,
-          ),
+          icon: _deliveryGuyIcon ??
+              gmaps.BitmapDescriptor.defaultMarkerWithHue(
+                gmaps.BitmapDescriptor.hueViolet,
+              ),
         ),
       );
     }
@@ -524,10 +493,6 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
       _trackData,
       fallback: 'in_progress',
     );
-    final locationFreshness = _locationFreshness();
-    final locationUpdatedLabel = _driverLocationUpdatedAt != null
-        ? _formatTimestamp(_driverLocationUpdatedAt!.toIso8601String())
-        : '—';
     return CourierTheme.wrap(
       context,
       child: Builder(
@@ -592,20 +557,6 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                     child: StatusChip(status: statusText),
                   ),
                 ),
-                // Location freshness badge
-                if (!_isLoadingTrack &&
-                    _trackError == null &&
-                    _trackingAvailable)
-                  Positioned(
-                    top: 96,
-                    left: 16,
-                    right: 16,
-                    child: _LocationFreshnessBanner(
-                      label: _locationFreshnessLabel(context, locationFreshness),
-                      freshness: locationFreshness,
-                      lastUpdated: locationUpdatedLabel,
-                    ),
-                  ),
                 if (!_isLoadingTrack &&
                     _trackError == null &&
                     !_trackingAvailable)
@@ -787,10 +738,12 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                                                 details: [
                                                   _liveTracking?.driver
                                                       ?.vehiclePlateNumber,
-                                                  _liveTracking
-                                                      ?.driver?.phone,
+                                                  _driverPhone(),
                                                 ].whereType<String>().where((s) => s.isNotEmpty).join(' · '),
                                                 borderColor: borderColor,
+                                                onCall: _driverPhone() != null
+                                                    ? _callDriver
+                                                    : null,
                                                 onMessage: _messageDriver,
                                               ),
                                               const SizedBox(height: 16),
@@ -811,7 +764,9 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                                                           'dropoff_location']
                                                       ?.toString() ??
                                                   widget.deliveryLocation,
-                                              createdDate: locationUpdatedLabel,
+                                              createdDate: _trackData?['created_at']
+                                                      ?.toString() ??
+                                                  '—',
                                               borderColor: borderColor,
                                             ),
                                             const SizedBox(height: 16),
@@ -848,88 +803,6 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
             ),
           );
         },
-      ),
-    );
-  }
-}
-
-enum _DriverLocationFreshness { updating, fresh, stale, unknown }
-
-class _LocationFreshnessBanner extends StatelessWidget {
-  const _LocationFreshnessBanner({
-    required this.label,
-    required this.freshness,
-    required this.lastUpdated,
-  });
-
-  final String label;
-  final _DriverLocationFreshness freshness;
-  final String lastUpdated;
-
-  @override
-  Widget build(BuildContext context) {
-    final Color accent;
-    switch (freshness) {
-      case _DriverLocationFreshness.updating:
-        accent = HomeColors.orange;
-      case _DriverLocationFreshness.stale:
-        accent = AppColors.errorColor;
-      case _DriverLocationFreshness.fresh:
-        accent = AppColors.successColor;
-      case _DriverLocationFreshness.unknown:
-        accent = HomeColors.textMuted;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: HomeColors.surfaceElevated.withValues(alpha: 0.95),
-        borderRadius: BorderRadius.circular(AppColors.radiusLG),
-        border: Border.all(color: HomeColors.border),
-      ),
-      child: Row(
-        children: [
-          if (freshness == _DriverLocationFreshness.updating)
-            SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: accent,
-              ),
-            )
-          else
-            Icon(
-              freshness == _DriverLocationFreshness.stale
-                  ? Icons.location_disabled_outlined
-                  : Icons.my_location_outlined,
-              size: 18,
-              color: accent,
-            ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: HomeColors.textPrimary,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                  ),
-                ),
-                Text(
-                  'Last update: $lastUpdated',
-                  style: const TextStyle(
-                    color: HomeColors.textSecondary,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

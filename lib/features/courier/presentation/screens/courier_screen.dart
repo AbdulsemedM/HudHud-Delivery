@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
-import 'package:hudhud_delivery/core/widgets/status_chip.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/courier/presentation/widgets/active_delivery_card.dart';
+import 'package:hudhud_delivery/features/courier/presentation/widgets/delivery_history_card.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/features/courier/utils/courier_home_refresh.dart';
 import 'package:hudhud_delivery/features/courier/utils/courier_access_gate.dart';
 import 'package:hudhud_delivery/features/courier/utils/courier_live_job_screen.dart';
-import 'package:hudhud_delivery/features/courier/utils/delivery_history_filter.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_status.dart';
+import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
 import '../../../home/presentation/widgets/home_widget.dart';
 import 'delivery_details_screen.dart';
+import 'delivery_history_screen.dart';
 import 'instant_delivery_screen.dart';
 import 'schedule_delivery_screen.dart';
 
@@ -27,13 +28,15 @@ class CourierScreen extends StatefulWidget {
 }
 
 class _CourierScreenState extends State<CourierScreen> {
+  static const _homeHistoryPreviewCount = 5;
+
   late final CourierRepository _courierRepository;
   List<Map<String, dynamic>> _deliveries = [];
   bool _isLoadingDeliveries = true;
   String? _deliveriesError;
   Map<String, dynamic>? _activeDelivery;
   bool _isLoadingActiveDelivery = true;
-  String _selectedFilter = kDeliveryHistoryFilterAll;
+  int _deliveriesLastPage = 1;
   late final void Function() _homeRefreshListener;
 
   @override
@@ -61,15 +64,15 @@ class _CourierScreenState extends State<CourierScreen> {
     super.dispose();
   }
 
-  List<Map<String, dynamic>> get _filteredDeliveries {
-    if (_selectedFilter == kDeliveryHistoryFilterAll) return _deliveries;
-    return _deliveries.where((d) {
-      return matchesDeliveryHistoryFilter(
-        resolveDeliveryStatus(d),
-        _selectedFilter,
-      );
-    }).toList();
+  List<Map<String, dynamic>> get _recentDeliveries {
+    if (_deliveries.length <= _homeHistoryPreviewCount) {
+      return _deliveries;
+    }
+    return _deliveries.take(_homeHistoryPreviewCount).toList();
   }
+
+  bool get _hasMoreHistory =>
+      _deliveries.length > _homeHistoryPreviewCount || _deliveriesLastPage > 1;
 
   Future<void> _fetchActiveDelivery({bool refresh = false}) async {
     if (!refresh && mounted) {
@@ -108,9 +111,11 @@ class _CourierScreenState extends State<CourierScreen> {
           _isLoadingDeliveries = false;
           if (result['success'] == true) {
             _deliveries = result['deliveries'] as List<Map<String, dynamic>>;
+            _deliveriesLastPage = result['lastPage'] as int? ?? 1;
             _deliveriesError = null;
           } else {
             _deliveries = [];
+            _deliveriesLastPage = 1;
             _deliveriesError = result['message'] as String?;
           }
         });
@@ -119,6 +124,7 @@ class _CourierScreenState extends State<CourierScreen> {
       if (mounted) {
         setState(() {
           _deliveries = [];
+          _deliveriesLastPage = 1;
           _isLoadingDeliveries = false;
           _deliveriesError = context.l10n.failedToLoadHistory;
         });
@@ -133,41 +139,20 @@ class _CourierScreenState extends State<CourierScreen> {
     ]);
   }
 
-  String _formatDeliveryDate(dynamic value) {
-    if (value == null) return '—';
-    final str = value.toString();
-    try {
-      final dt = DateTime.tryParse(str);
-      if (dt != null) {
-        return '${dt.day} ${_monthName(dt.month)} ${dt.year}, ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
-      }
-    } catch (_) {}
-    return str;
-  }
-
-  String _monthName(int month) {
-    const months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December'
-    ];
-    return months[month - 1];
-  }
-
   void _navigateToTracking(Map<String, dynamic> delivery) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => courierLiveJobScreenFromDelivery(delivery),
+      ),
+    );
+  }
+
+  void _openFullHistory() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const DeliveryHistoryScreen(),
       ),
     );
   }
@@ -194,16 +179,7 @@ class _CourierScreenState extends State<CourierScreen> {
     );
   }
 
-  Widget _buildCreateDeliveryRow(AppLocalizations l10n, {required bool hasActive}) {
-    final scheduleCard = _ScheduleDeliveryCard(
-      l10n: l10n,
-      onTap: _openScheduleDelivery,
-    );
-
-    if (hasActive) {
-      return scheduleCard;
-    }
-
+  Widget _buildCreateDeliveryRow(AppLocalizations l10n) {
     return Row(
       children: [
         Expanded(
@@ -213,7 +189,12 @@ class _CourierScreenState extends State<CourierScreen> {
           ),
         ),
         const SizedBox(width: 12),
-        Expanded(child: scheduleCard),
+        Expanded(
+          child: _ScheduleDeliveryCard(
+            l10n: l10n,
+            onTap: _openScheduleDelivery,
+          ),
+        ),
       ],
     );
   }
@@ -231,7 +212,7 @@ class _CourierScreenState extends State<CourierScreen> {
       floatingActionButton: hasActive
           ? FloatingActionButton.extended(
               heroTag: 'courier_instant_delivery_fab',
-              backgroundColor: HomeColors.orange,
+              backgroundColor: AuthScreenColors.orange,
               foregroundColor: Colors.white,
               icon: const Icon(Icons.flash_on_rounded),
               label: Text(l10n.courierInstantTitle),
@@ -262,16 +243,6 @@ class _CourierScreenState extends State<CourierScreen> {
                   delivery: _activeDelivery!,
                   onTrack: () => _navigateToTracking(_activeDelivery!),
                 ),
-                const SizedBox(height: AppColors.spaceLG),
-                Text(
-                  l10n.courierWhatToDo,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: HomeColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: AppColors.spaceMD),
-                _buildCreateDeliveryRow(l10n, hasActive: true),
               ] else ...[
                 Text(
                   l10n.courierWhatToDo,
@@ -281,53 +252,32 @@ class _CourierScreenState extends State<CourierScreen> {
                   ),
                 ),
                 const SizedBox(height: AppColors.spaceMD),
-                _buildCreateDeliveryRow(l10n, hasActive: false),
+                _buildCreateDeliveryRow(l10n),
               ],
               const SizedBox(height: AppColors.spaceLG),
-              Text(
-                l10n.history,
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: HomeColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: AppColors.spaceMD),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    _FilterChip(
-                      label: l10n.orders,
-                      selected: _selectedFilter == kDeliveryHistoryFilterAll,
-                      onTap: () => setState(
-                          () => _selectedFilter = kDeliveryHistoryFilterAll),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      l10n.history,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: HomeColors.textPrimary,
+                      ),
                     ),
-                    const SizedBox(width: 8),
-                    _FilterChip(
-                      label: l10n.courierActiveDelivery,
-                      selected:
-                          _selectedFilter == kDeliveryHistoryFilterActive,
-                      onTap: () => setState(() =>
-                          _selectedFilter = kDeliveryHistoryFilterActive),
+                  ),
+                  if (_hasMoreHistory)
+                    TextButton(
+                      onPressed: _openFullHistory,
+                      style: TextButton.styleFrom(
+                        foregroundColor: AuthScreenColors.orange,
+                        padding: EdgeInsets.zero,
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: Text(l10n.showMore),
                     ),
-                    const SizedBox(width: 8),
-                    _FilterChip(
-                      label: l10n.orderStatusDelivered,
-                      selected:
-                          _selectedFilter == kDeliveryHistoryFilterCompleted,
-                      onTap: () => setState(() =>
-                          _selectedFilter = kDeliveryHistoryFilterCompleted),
-                    ),
-                    const SizedBox(width: 8),
-                    _FilterChip(
-                      label: l10n.orderStatusCancelled,
-                      selected:
-                          _selectedFilter == kDeliveryHistoryFilterCancelled,
-                      onTap: () => setState(() =>
-                          _selectedFilter = kDeliveryHistoryFilterCancelled),
-                    ),
-                  ],
-                ),
+                ],
               ),
               const SizedBox(height: AppColors.spaceMD),
               if (_isLoadingDeliveries)
@@ -335,17 +285,8 @@ class _CourierScreenState extends State<CourierScreen> {
               else if (_deliveriesError != null)
                 SizedBox(
                   width: double.infinity,
-                  height: MediaQuery.sizeOf(context).height * 0.35,
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const Icon(
-                        Icons.wifi_off_rounded,
-                        size: 48,
-                        color: HomeColors.textMuted,
-                      ),
-                      const SizedBox(height: AppColors.spaceMD),
                       Text(
                         _deliveriesError!,
                         textAlign: TextAlign.center,
@@ -367,37 +308,26 @@ class _CourierScreenState extends State<CourierScreen> {
                     ],
                   ),
                 )
-              else if (_filteredDeliveries.isEmpty)
-                SizedBox(
-                  width: double.infinity,
-                  height: MediaQuery.sizeOf(context).height * 0.35,
+              else if (_recentDeliveries.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Container(
-                        width: 112,
-                        height: 112,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: HomeColors.violet.withValues(alpha: 0.12),
-                        ),
-                        child: Icon(
-                          Icons.local_shipping_outlined,
-                          size: 56,
-                          color: HomeColors.violet.withValues(alpha: 0.9),
-                        ),
+                      Icon(
+                        Icons.local_shipping_outlined,
+                        size: 40,
+                        color: HomeColors.violet.withValues(alpha: 0.9),
                       ),
-                      const SizedBox(height: AppColors.spaceLG),
+                      const SizedBox(height: 12),
                       Text(
                         l10n.courierNoHistory,
                         textAlign: TextAlign.center,
-                        style: theme.textTheme.titleMedium?.copyWith(
+                        style: theme.textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: HomeColors.textPrimary,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 4),
                       Text(
                         l10n.courierHistoryEmptySubtitle,
                         textAlign: TextAlign.center,
@@ -409,19 +339,14 @@ class _CourierScreenState extends State<CourierScreen> {
                   ),
                 )
               else
-                ..._filteredDeliveries.map((d) {
+                ..._recentDeliveries.map((d) {
                   final id = d['id'] as int?;
-                  final orderId = id != null ? 'DEL-$id' : '—';
-                  final recipient = d['receiver_name']?.toString() ?? '—';
-                  final location = d['dropoff_location']?.toString() ?? '—';
-                  final dateTime = _formatDeliveryDate(d['created_at']);
-                  final status = resolveDeliveryStatusLabel(d);
-                  return _DeliveryHistoryCard(
-                    orderId: orderId,
-                    recipient: recipient,
-                    location: location,
-                    dateTime: dateTime,
-                    status: status,
+                  return DeliveryHistoryCard(
+                    orderId: id != null ? 'DEL-$id' : '—',
+                    recipient: d['receiver_name']?.toString() ?? '—',
+                    location: d['dropoff_location']?.toString() ?? '—',
+                    dateTime: formatDeliveryHistoryDate(d['created_at']),
+                    status: resolveDeliveryStatusLabel(d),
                     borderColor: borderColor,
                     onTap: id != null
                         ? () {
@@ -446,41 +371,6 @@ class _CourierScreenState extends State<CourierScreen> {
   }
 }
 
-class _FilterChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _FilterChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return FilterChip(
-      label: Text(label),
-      selected: selected,
-      onSelected: (_) => onTap(),
-      showCheckmark: false,
-      labelStyle: TextStyle(
-        fontSize: 12,
-        fontWeight: FontWeight.w600,
-        color: selected ? Colors.white : HomeColors.textMuted,
-      ),
-      backgroundColor: HomeColors.surface,
-      selectedColor: HomeColors.violet,
-      side: BorderSide(
-        color: selected ? HomeColors.violet : HomeColors.border,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppColors.radiusFull),
-      ),
-    );
-  }
-}
-
 class _InstantDeliveryCard extends StatelessWidget {
   final AppLocalizations l10n;
   final VoidCallback onTap;
@@ -498,7 +388,7 @@ class _InstantDeliveryCard extends StatelessWidget {
           height: 120,
           padding: const EdgeInsets.all(AppColors.spaceMD),
           decoration: BoxDecoration(
-            color: HomeColors.orange,
+            color: AuthScreenColors.orange,
             borderRadius: BorderRadius.circular(AppColors.radiusLG),
           ),
           child: Stack(
@@ -601,97 +491,6 @@ class _ScheduleDeliveryCard extends StatelessWidget {
                 ],
               ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _DeliveryHistoryCard extends StatelessWidget {
-  final String orderId;
-  final String recipient;
-  final String location;
-  final String dateTime;
-  final String status;
-  final Color borderColor;
-  final VoidCallback? onTap;
-
-  const _DeliveryHistoryCard({
-    required this.orderId,
-    required this.recipient,
-    required this.location,
-    required this.dateTime,
-    required this.status,
-    required this.borderColor,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final statusColor = StatusChip.colorForStatus(status);
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Material(
-        color: HomeColors.surface,
-        borderRadius: BorderRadius.circular(AppColors.radiusLG),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(AppColors.radiusLG),
-          child: Container(
-            padding: const EdgeInsets.all(AppColors.spaceMD),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(AppColors.radiusLG),
-              border: Border.all(color: borderColor),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    Icons.local_shipping_rounded,
-                    color: statusColor,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        orderId,
-                        style: Theme.of(context)
-                            .textTheme
-                            .labelMedium
-                            ?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: HomeColors.textPrimary,
-                            ),
-                      ),
-                      Text(
-                        recipient,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: HomeColors.textMuted,
-                            ),
-                      ),
-                      Text(
-                        dateTime,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: HomeColors.textMuted,
-                            ),
-                      ),
-                    ],
-                  ),
-                ),
-                StatusChip(status: status),
-              ],
-            ),
           ),
         ),
       ),

@@ -1010,6 +1010,12 @@ abstract class AppLocalizations {
   /// **'History'**
   String get history;
 
+  /// No description provided for @showMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Show more'**
+  String get showMore;
+
   /// No description provided for @featuresSectionTitle.
   ///
   /// In en, this message translates to:

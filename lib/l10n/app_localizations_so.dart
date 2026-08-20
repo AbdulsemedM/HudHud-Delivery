@@ -494,6 +494,9 @@ class AppLocalizationsSo extends AppLocalizations {
   String get history => 'Taariikhda';
 
   @override
+  String get showMore => 'Tus wax badan';
+
+  @override
   String get featuresSectionTitle => 'Maxaad ku samayn kartaa HudHud';
 
   @override

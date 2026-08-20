@@ -489,6 +489,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get history => 'History';
 
   @override
+  String get showMore => 'Show more';
+
+  @override
   String get featuresSectionTitle => 'What you can do with HudHud';
 
   @override
