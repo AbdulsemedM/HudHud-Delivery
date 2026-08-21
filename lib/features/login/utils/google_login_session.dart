@@ -34,6 +34,11 @@ Map<String, dynamic> normalizeGoogleLoginPayload(dynamic raw) {
     );
   }
   session['token'] = token;
+  // Preserve additive enrollment flag from outer envelope when nested.
+  if (!session.containsKey('phone_enrollment_required') &&
+      map.containsKey('phone_enrollment_required')) {
+    session['phone_enrollment_required'] = map['phone_enrollment_required'];
+  }
   return session;
 }
 

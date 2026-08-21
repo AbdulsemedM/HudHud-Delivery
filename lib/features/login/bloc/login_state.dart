@@ -15,8 +15,12 @@ final class LoginLoading extends LoginState {
 
 final class LoginSuccess extends LoginState {
   final LoginAction action;
+  final bool phoneEnrollmentRequired;
 
-  LoginSuccess(this.action);
+  LoginSuccess(
+    this.action, {
+    this.phoneEnrollmentRequired = false,
+  });
 }
 
 final class LoginFailure extends LoginState {

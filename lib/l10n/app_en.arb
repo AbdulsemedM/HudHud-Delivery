@@ -1248,5 +1248,37 @@
   "cancelOrder": "Cancel order",
   "courierFindingNearestDrivers": "Finding the nearest available drivers",
   "courierFindingNearestDriversSubtitle": "We are finding the nearest available driver. Live driver location appears only after acceptance.",
-  "courierDriverLocationUpdating": "Driver location is updating"
+  "courierDriverLocationUpdating": "Driver location is updating",
+  "phoneEnrollmentTitle": "Add your phone number",
+  "phoneEnrollmentSubtitle": "We need a verified mobile number for deliveries, wallet, and account security.",
+  "phoneEnrollmentOtpTitle": "Verify your phone",
+  "phoneEnrollmentOtpSubtitle": "Enter the 6-digit code sent to {phone}.",
+  "@phoneEnrollmentOtpSubtitle": {
+    "placeholders": {
+      "phone": {"type": "String"}
+    }
+  },
+  "phoneEnrollmentSendCode": "Send code",
+  "phoneEnrollmentVerify": "Verify",
+  "phoneEnrollmentResend": "Resend code",
+  "phoneEnrollmentResendIn": "Resend in {seconds}s",
+  "@phoneEnrollmentResendIn": {
+    "placeholders": {
+      "seconds": {"type": "int"}
+    }
+  },
+  "phoneEnrollmentContactSupport": "Contact support",
+  "phoneEnrollmentSignOut": "Sign out",
+  "phoneEnrollmentChangeNumber": "Change phone number",
+  "phoneEnrollmentRetry": "Try again",
+  "phoneEnrollmentPhoneInvalid": "Enter a valid Ethiopian mobile number.",
+  "phoneEnrollmentPhoneInUse": "This number is already linked to another HudHud account.",
+  "phoneEnrollmentChangeRequiresSupport": "This verified number can only be changed with support help.",
+  "phoneEnrollmentCooldown": "Please wait before requesting another code.",
+  "phoneEnrollmentRateLimited": "Too many attempts. Please try again later.",
+  "phoneEnrollmentDeliveryFailed": "We could not send the SMS. Please try again.",
+  "phoneEnrollmentNotPending": "Request a new verification code to continue.",
+  "phoneEnrollmentCodeExpired": "This code has expired. Request a new one.",
+  "phoneEnrollmentCodeInvalid": "That code is incorrect. Please try again.",
+  "phoneEnrollmentGenericError": "Something went wrong. Please try again."
 }

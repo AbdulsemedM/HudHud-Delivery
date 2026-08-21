@@ -5605,6 +5605,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Driver location is updating'**
   String get courierDriverLocationUpdating;
+
+  /// No description provided for @phoneEnrollmentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your phone number'**
+  String get phoneEnrollmentTitle;
+
+  /// No description provided for @phoneEnrollmentSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We need a verified mobile number for deliveries, wallet, and account security.'**
+  String get phoneEnrollmentSubtitle;
+
+  /// No description provided for @phoneEnrollmentOtpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify your phone'**
+  String get phoneEnrollmentOtpTitle;
+
+  /// No description provided for @phoneEnrollmentOtpSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6-digit code sent to {phone}.'**
+  String phoneEnrollmentOtpSubtitle(String phone);
+
+  /// No description provided for @phoneEnrollmentSendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Send code'**
+  String get phoneEnrollmentSendCode;
+
+  /// No description provided for @phoneEnrollmentVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify'**
+  String get phoneEnrollmentVerify;
+
+  /// No description provided for @phoneEnrollmentResend.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend code'**
+  String get phoneEnrollmentResend;
+
+  /// No description provided for @phoneEnrollmentResendIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend in {seconds}s'**
+  String phoneEnrollmentResendIn(int seconds);
+
+  /// No description provided for @phoneEnrollmentContactSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact support'**
+  String get phoneEnrollmentContactSupport;
+
+  /// No description provided for @phoneEnrollmentSignOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get phoneEnrollmentSignOut;
+
+  /// No description provided for @phoneEnrollmentChangeNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Change phone number'**
+  String get phoneEnrollmentChangeNumber;
+
+  /// No description provided for @phoneEnrollmentRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get phoneEnrollmentRetry;
+
+  /// No description provided for @phoneEnrollmentPhoneInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid Ethiopian mobile number.'**
+  String get phoneEnrollmentPhoneInvalid;
+
+  /// No description provided for @phoneEnrollmentPhoneInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'This number is already linked to another HudHud account.'**
+  String get phoneEnrollmentPhoneInUse;
+
+  /// No description provided for @phoneEnrollmentChangeRequiresSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'This verified number can only be changed with support help.'**
+  String get phoneEnrollmentChangeRequiresSupport;
+
+  /// No description provided for @phoneEnrollmentCooldown.
+  ///
+  /// In en, this message translates to:
+  /// **'Please wait before requesting another code.'**
+  String get phoneEnrollmentCooldown;
+
+  /// No description provided for @phoneEnrollmentRateLimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Please try again later.'**
+  String get phoneEnrollmentRateLimited;
+
+  /// No description provided for @phoneEnrollmentDeliveryFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We could not send the SMS. Please try again.'**
+  String get phoneEnrollmentDeliveryFailed;
+
+  /// No description provided for @phoneEnrollmentNotPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Request a new verification code to continue.'**
+  String get phoneEnrollmentNotPending;
+
+  /// No description provided for @phoneEnrollmentCodeExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'This code has expired. Request a new one.'**
+  String get phoneEnrollmentCodeExpired;
+
+  /// No description provided for @phoneEnrollmentCodeInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'That code is incorrect. Please try again.'**
+  String get phoneEnrollmentCodeInvalid;
+
+  /// No description provided for @phoneEnrollmentGenericError.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get phoneEnrollmentGenericError;
 }
 
 class _AppLocalizationsDelegate

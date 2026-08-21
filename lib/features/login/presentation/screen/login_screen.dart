@@ -2,11 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/app/services/biometric_credential_service.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
-import 'package:hudhud_delivery/features/dashboard/presentation/screen/dashboard_screen.dart';
 import 'package:hudhud_delivery/features/login/bloc/login_bloc.dart';
 import 'package:hudhud_delivery/features/login/data/data_provider/login_data_provider.dart';
 import 'package:hudhud_delivery/features/login/data/repository/login_repository.dart';
@@ -14,6 +12,7 @@ import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_co
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_brand_header.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_dark_scaffold.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/login_widget.dart';
+import 'package:hudhud_delivery/features/login/utils/phone_enrollment_navigation.dart';
 import 'package:hudhud_delivery/features/settings/presentation/widgets/auth_feedback.dart';
 import 'package:hudhud_delivery/features/signup/presentation/screen/signup_screen.dart';
 
@@ -167,29 +166,15 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> _navigateAfterSuccess() async {
+  Future<void> _navigateAfterSuccess({
+    required bool phoneEnrollmentRequired,
+  }) async {
     if (!mounted) return;
-    if (widget.resumeAfterAuth) {
-      final authed = await AuthService().isAuthenticated();
-      if (!mounted) return;
-      if (authed) {
-        Navigator.pop(context, true);
-      } else {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const DashboardScreen(),
-          ),
-        );
-      }
-    } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const DashboardScreen(),
-        ),
-      );
-    }
+    await navigateAfterAuthenticatedLogin(
+      context,
+      phoneEnrollmentRequired: phoneEnrollmentRequired,
+      resumeAfterAuth: widget.resumeAfterAuth,
+    );
   }
 
   @override
@@ -214,7 +199,9 @@ class _LoginScreenState extends State<LoginScreen> {
               if (state.action == LoginAction.credentials) {
                 await _maybeOfferBiometricOptIn();
               }
-              await _navigateAfterSuccess();
+              await _navigateAfterSuccess(
+                phoneEnrollmentRequired: state.phoneEnrollmentRequired,
+              );
             } else if (state is LoginFailure) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(

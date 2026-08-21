@@ -21,6 +21,10 @@ class ApiConstants {
   static const String guest = '$auth/guest';
   /// POST body: `id_token`, optional `user_type`, optional device metadata.
   static const String googleLogin = '$auth/google-login';
+  /// Authenticated phone enrollment (Sanctum). Do not add to [unauthenticatedAuthPaths].
+  static const String phoneEnrollmentStatus = '$auth/phone-enrollment/status';
+  static const String phoneEnrollmentRequest = '$auth/phone-enrollment/request';
+  static const String phoneEnrollmentVerify = '$auth/phone-enrollment/verify';
   /// Password reset OTP flow (unauthenticated): POST `/api/password/...`
   static const String passwordResetOtp = 'password/reset-otp';
   static const String passwordVerifyOtp = 'password/verify-otp';

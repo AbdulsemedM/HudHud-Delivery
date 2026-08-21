@@ -7,6 +7,7 @@ import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/courier/presentation/widgets/active_delivery_card.dart';
+import 'package:hudhud_delivery/features/courier/presentation/widgets/courier_history_empty_state.dart';
 import 'package:hudhud_delivery/features/courier/presentation/widgets/delivery_history_card.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/features/courier/utils/courier_home_refresh.dart';
@@ -133,9 +134,22 @@ class _CourierScreenState extends State<CourierScreen> {
   }
 
   Future<void> _refreshData() async {
+    if (GuestBrowseService().isGuestBrowseMode) {
+      if (mounted) {
+        setState(() {
+          _deliveries = [];
+          _activeDelivery = null;
+          _deliveriesError = null;
+          _isLoadingDeliveries = false;
+          _isLoadingActiveDelivery = false;
+        });
+      }
+      return;
+    }
+    // Show loading (including guest → signed-in refetch after login).
     await Future.wait([
-      _fetchActiveDelivery(refresh: true),
-      _fetchDeliveries(refresh: true),
+      _fetchActiveDelivery(),
+      _fetchDeliveries(),
     ]);
   }
 
@@ -309,34 +323,10 @@ class _CourierScreenState extends State<CourierScreen> {
                   ),
                 )
               else if (_recentDeliveries.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 24),
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.local_shipping_outlined,
-                        size: 40,
-                        color: HomeColors.violet.withValues(alpha: 0.9),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        l10n.courierNoHistory,
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: HomeColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        l10n.courierHistoryEmptySubtitle,
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: HomeColors.textMuted,
-                        ),
-                      ),
-                    ],
-                  ),
+                CourierHistoryEmptyState(
+                  compact: true,
+                  onPrimaryAction: hasActive ? null : _openInstantDelivery,
+                  primaryActionLabel: l10n.courierInstantTitle,
                 )
               else
                 ..._recentDeliveries.map((d) {

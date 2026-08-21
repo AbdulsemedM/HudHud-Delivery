@@ -6,6 +6,7 @@ import 'package:hudhud_delivery/app/services/google_auth_helper.dart';
 import 'package:hudhud_delivery/core/utils/login_device_metadata.dart';
 import 'package:hudhud_delivery/features/login/data/data_provider/login_data_provider.dart';
 import 'package:hudhud_delivery/features/login/utils/google_login_session.dart';
+import 'package:hudhud_delivery/features/login/utils/phone_enrollment_gate.dart';
 import 'package:hudhud_delivery/models/user_model.dart';
 
 class LoginFailureException implements Exception {
@@ -31,7 +32,7 @@ class LoginRepository {
   final LoginDataProvider loginDataProvider;
   LoginRepository(this.loginDataProvider);
 
-  Future<UserModel> login(
+  Future<LoginSessionResult> login(
     String emailOrPhone,
     String password,
     String fieldType,
@@ -48,13 +49,13 @@ class LoginRepository {
           );
         }
 
-        final user = await _completeSessionFromLoginData(data, authService);
+        final result = await _completeSessionFromLoginData(data, authService);
         await _persistBiometricCredentialsAfterLogin(
           emailOrPhone: emailOrPhone,
           password: password,
           fieldType: fieldType,
         );
-        return user;
+        return result;
       } else {
         throw _loginFailureFromResponse(response);
       }
@@ -65,7 +66,9 @@ class LoginRepository {
     }
   }
 
-  Future<UserModel> googleLogin({LoginDeviceMetadata? deviceMetadata}) async {
+  Future<LoginSessionResult> googleLogin({
+    LoginDeviceMetadata? deviceMetadata,
+  }) async {
     final authService = AuthService();
     try {
       final idToken = await obtainGoogleIdToken();
@@ -103,7 +106,7 @@ class LoginRepository {
     }
   }
 
-  Future<UserModel> guest() async {
+  Future<LoginSessionResult> guest() async {
     final authService = AuthService();
     try {
       final response = await loginDataProvider.guest();
@@ -205,7 +208,7 @@ class LoginRepository {
     return int.tryParse(raw.toString());
   }
 
-  Future<UserModel> _completeSessionFromLoginData(
+  Future<LoginSessionResult> _completeSessionFromLoginData(
     Map<String, dynamic> data,
     AuthService authService,
   ) async {
@@ -222,11 +225,12 @@ class LoginRepository {
       expiresIn: data['expires_in'] is int ? data['expires_in'] as int : null,
     );
 
+    UserModel user;
     try {
       final profileUser = await authService.fetchProfileAndStore(
         permissions: permissions,
       );
-      return profileUser ?? loginUser;
+      user = profileUser ?? loginUser;
     } catch (_) {
       await authService.storeUserSession(
         user: loginUser,
@@ -234,8 +238,16 @@ class LoginRepository {
         refreshToken: data['refresh_token']?.toString(),
         expiresIn: data['expires_in'] is int ? data['expires_in'] as int : null,
       );
-      return loginUser;
+      user = loginUser;
     }
+
+    return LoginSessionResult(
+      user: user,
+      phoneEnrollmentRequired: needsPhoneEnrollment(
+        loginData: data,
+        user: user,
+      ),
+    );
   }
 
   /// Saves identifier + password for later biometric enable / silent login.

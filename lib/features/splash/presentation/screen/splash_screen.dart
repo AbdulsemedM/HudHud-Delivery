@@ -8,6 +8,8 @@ import 'package:hudhud_delivery/app/services/startup_location_service.dart';
 import 'package:hudhud_delivery/features/dashboard/presentation/screen/dashboard_screen.dart';
 import 'package:hudhud_delivery/features/force_update/presentation/screen/force_update_screen.dart';
 import 'package:hudhud_delivery/features/force_update/presentation/widgets/soft_update_dialog.dart';
+import 'package:hudhud_delivery/features/login/presentation/screen/phone_enrollment_screen.dart';
+import 'package:hudhud_delivery/features/login/utils/phone_enrollment_gate.dart';
 import 'package:hudhud_delivery/features/splash/presentation/theme/splash_colors.dart';
 import '../widgets/splash_widget.dart';
 
@@ -114,11 +116,29 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   /// Always open home. Use stored token when present; otherwise browse as guest.
+  /// Authenticated users who still need phone enrollment are gated first.
   Future<void> _goToHome() async {
     final isAuthenticated = await _authService.isAuthenticated();
     await GuestBrowseService().configureBrowseSession(
       isAuthenticated: isAuthenticated,
     );
+    if (!mounted) return;
+
+    if (isAuthenticated) {
+      final user =
+          _authService.currentUser ?? await _authService.getStoredUser();
+      if (!mounted) return;
+      if (user != null && userNeedsPhoneEnrollment(user)) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const PhoneEnrollmentScreen(),
+          ),
+        );
+        return;
+      }
+    }
+
     if (!mounted) return;
     Navigator.pushReplacement(
       context,

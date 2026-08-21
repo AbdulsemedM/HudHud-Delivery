@@ -16,12 +16,15 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     on<LoginFormSubmitted>((event, emit) async {
       emit(LoginLoading(LoginAction.credentials));
       try {
-        await loginRepository.login(
+        final result = await loginRepository.login(
           event.emailOrPhone,
           event.password,
           event.fieldType,
         );
-        emit(LoginSuccess(LoginAction.credentials));
+        emit(LoginSuccess(
+          LoginAction.credentials,
+          phoneEnrollmentRequired: result.phoneEnrollmentRequired,
+        ));
       } catch (e) {
         emit(_failureFrom(e));
       }
@@ -39,8 +42,11 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     on<GoogleLoginRequested>((event, emit) async {
       emit(LoginLoading(LoginAction.google));
       try {
-        await loginRepository.googleLogin();
-        emit(LoginSuccess(LoginAction.google));
+        final result = await loginRepository.googleLogin();
+        emit(LoginSuccess(
+          LoginAction.google,
+          phoneEnrollmentRequired: result.phoneEnrollmentRequired,
+        ));
       } on GoogleSignInUserCancelled {
         emit(LoginInitial());
       } catch (e, st) {
@@ -67,12 +73,15 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
       emit(LoginLoading(LoginAction.biometric));
       try {
-        await loginRepository.login(
+        final result = await loginRepository.login(
           credentials.identifier,
           credentials.password,
           credentials.fieldType,
         );
-        emit(LoginSuccess(LoginAction.biometric));
+        emit(LoginSuccess(
+          LoginAction.biometric,
+          phoneEnrollmentRequired: result.phoneEnrollmentRequired,
+        ));
       } catch (e) {
         final failure = _failureFrom(e);
         if (_isInvalidCredentialsError(failure.errorMessage)) {
