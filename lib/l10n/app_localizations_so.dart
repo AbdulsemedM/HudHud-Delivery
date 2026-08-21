@@ -139,6 +139,17 @@ class AppLocalizationsSo extends AppLocalizations {
       'Si degdeg ah ugu gal farta ama Face ID aaladdan';
 
   @override
+  String get settingsBiometricSubtitleEnabled =>
+      'Furanyahay — isticmaal farta ama Face ID si aad u gasho';
+
+  @override
+  String get settingsBiometricSubtitleOffReady => 'Xiran — fur wakhti kasta';
+
+  @override
+  String get settingsBiometricSubtitleSignInOnce =>
+      'Hal mar geli si aad u karti geliso';
+
+  @override
   String get biometricAuthReason => 'Xaqiiji aqoonsigaaga si aad u sii wadato';
 
   @override
@@ -164,6 +175,19 @@ class AppLocalizationsSo extends AppLocalizations {
   @override
   String get biometricDisabledSuccess =>
       'Galitaanka bayoomatrika waa la joojiyay';
+
+  @override
+  String get biometricOptInTitle => 'Karti geli galitaanka bayoomatrika?';
+
+  @override
+  String get biometricOptInMessage =>
+      'Isticmaal farta ama Face ID si aad ugu dhaqso gasho marka xigta.';
+
+  @override
+  String get biometricOptInEnable => 'Karti geli';
+
+  @override
+  String get biometricOptInNotNow => 'Hadda maya';
 
   @override
   String get loginBiometricButtonSemantics => 'Ku gal bayoomatrika';

@@ -139,6 +139,18 @@ class AppLocalizationsAr extends AppLocalizations {
       'سجّل الدخول بسرعة ببصمة الإصبع أو Face ID على هذا الجهاز';
 
   @override
+  String get settingsBiometricSubtitleEnabled =>
+      'مفعّل — استخدم بصمة الإصبع أو Face ID لتسجيل الدخول';
+
+  @override
+  String get settingsBiometricSubtitleOffReady =>
+      'متوقف — يمكنك تفعيله في أي وقت';
+
+  @override
+  String get settingsBiometricSubtitleSignInOnce =>
+      'سجّل الدخول مرة واحدة للتفعيل';
+
+  @override
   String get biometricAuthReason => 'تحقق من هويتك للمتابعة';
 
   @override
@@ -162,6 +174,19 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get biometricDisabledSuccess => 'تم إيقاف تسجيل الدخول البيومتري';
+
+  @override
+  String get biometricOptInTitle => 'تفعيل تسجيل الدخول البيومتري؟';
+
+  @override
+  String get biometricOptInMessage =>
+      'استخدم بصمة الإصبع أو Face ID لتسجيل الدخول بشكل أسرع في المرة القادمة.';
+
+  @override
+  String get biometricOptInEnable => 'تفعيل';
+
+  @override
+  String get biometricOptInNotNow => 'ليس الآن';
 
   @override
   String get loginBiometricButtonSemantics => 'تسجيل الدخول بالبيومترية';

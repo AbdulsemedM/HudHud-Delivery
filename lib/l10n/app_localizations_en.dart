@@ -139,6 +139,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'Sign in quickly with fingerprint or Face ID on this device';
 
   @override
+  String get settingsBiometricSubtitleEnabled =>
+      'On — use fingerprint or Face ID to sign in';
+
+  @override
+  String get settingsBiometricSubtitleOffReady => 'Off — turn on anytime';
+
+  @override
+  String get settingsBiometricSubtitleSignInOnce => 'Sign in once to enable';
+
+  @override
   String get biometricAuthReason => 'Verify your identity to continue';
 
   @override
@@ -162,6 +172,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get biometricDisabledSuccess => 'Biometric login disabled';
+
+  @override
+  String get biometricOptInTitle => 'Enable biometric login?';
+
+  @override
+  String get biometricOptInMessage =>
+      'Use fingerprint or Face ID to sign in faster next time.';
+
+  @override
+  String get biometricOptInEnable => 'Enable';
+
+  @override
+  String get biometricOptInNotNow => 'Not now';
 
   @override
   String get loginBiometricButtonSemantics => 'Sign in with biometrics';

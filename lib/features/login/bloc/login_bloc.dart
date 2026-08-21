@@ -21,7 +21,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           event.password,
           event.fieldType,
         );
-        emit(LoginSuccess());
+        emit(LoginSuccess(LoginAction.credentials));
       } catch (e) {
         emit(_failureFrom(e));
       }
@@ -31,7 +31,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       try {
         await AuthService().clearAllData();
         await GuestBrowseService().enterGuestBrowseMode();
-        emit(LoginSuccess());
+        emit(LoginSuccess(LoginAction.guest));
       } catch (e) {
         emit(_failureFrom(e));
       }
@@ -40,7 +40,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       emit(LoginLoading(LoginAction.google));
       try {
         await loginRepository.googleLogin();
-        emit(LoginSuccess());
+        emit(LoginSuccess(LoginAction.google));
       } on GoogleSignInUserCancelled {
         emit(LoginInitial());
       } catch (e, st) {
@@ -72,11 +72,11 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           credentials.password,
           credentials.fieldType,
         );
-        emit(LoginSuccess());
+        emit(LoginSuccess(LoginAction.biometric));
       } catch (e) {
         final failure = _failureFrom(e);
         if (_isInvalidCredentialsError(failure.errorMessage)) {
-          await biometricService.setBiometricLoginEnabled(false);
+          await biometricService.clearAll();
         }
         emit(failure);
       }

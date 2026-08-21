@@ -70,6 +70,7 @@ class _SettingsScreenState extends State<SettingsScreen>
   PackageInfo? _packageInfo;
   bool _biometricEnabled = false;
   bool _biometricAvailable = false;
+  bool _biometricHasCredentials = false;
   bool _biometricBusy = false;
   bool _useFaceBiometricIcon = false;
   int _chatUnreadCount = 0;
@@ -141,11 +142,13 @@ class _SettingsScreenState extends State<SettingsScreen>
     if (kIsWeb) return;
     final available = await _biometricService.isDeviceSupported();
     final enabled = await _biometricService.isBiometricLoginEnabled();
+    final hasCredentials = await _biometricService.hasCredentialBlob();
     final types = await _biometricService.getAvailableBiometrics();
     if (mounted) {
       setState(() {
         _biometricAvailable = available;
         _biometricEnabled = enabled;
+        _biometricHasCredentials = hasCredentials;
         _useFaceBiometricIcon = types.contains(BiometricType.face);
       });
     }
@@ -157,7 +160,7 @@ class _SettingsScreenState extends State<SettingsScreen>
 
     if (!value) {
       setState(() => _biometricBusy = true);
-      await _biometricService.setBiometricLoginEnabled(false);
+      await _biometricService.optOut();
       if (!mounted) return;
       setState(() {
         _biometricEnabled = false;
@@ -177,10 +180,30 @@ class _SettingsScreenState extends State<SettingsScreen>
     );
     if (!authenticated || !mounted) return;
 
+    if (await _biometricService.hasCredentialBlob()) {
+      setState(() => _biometricBusy = true);
+      final ok = await _biometricService.enableBiometricLogin();
+      if (!mounted) return;
+      setState(() {
+        _biometricEnabled = ok;
+        _biometricHasCredentials = true;
+        _biometricBusy = false;
+      });
+      if (ok) {
+        AuthSnackBar.success(context, l10n.biometricEnabledSuccess);
+      } else {
+        AuthSnackBar.info(context, l10n.biometricNoCredentials);
+      }
+      return;
+    }
+
     final saved = await _showBiometricEnableDialog();
     if (!mounted) return;
     if (saved) {
-      setState(() => _biometricEnabled = true);
+      setState(() {
+        _biometricEnabled = true;
+        _biometricHasCredentials = true;
+      });
       AuthSnackBar.success(context, l10n.biometricEnabledSuccess);
     }
   }
@@ -277,6 +300,7 @@ class _SettingsScreenState extends State<SettingsScreen>
       password: passwordController.text,
       fieldType: fieldType,
     );
+    await _biometricService.enableBiometricLogin();
     identifierController.dispose();
     passwordController.dispose();
     return true;
@@ -532,7 +556,9 @@ class _SettingsScreenState extends State<SettingsScreen>
                         _ProfileBiometricTile(
                           useFaceIcon: _useFaceBiometricIcon,
                           enabled: _biometricEnabled,
-                          available: _biometricAvailable && !_biometricBusy,
+                          deviceSupported: _biometricAvailable,
+                          switchEnabled: _biometricAvailable && !_biometricBusy,
+                          hasCredentials: _biometricHasCredentials,
                           onChanged: _onBiometricLoginChanged,
                         ),
                         // const _ProfileTileDivider(),
@@ -846,15 +872,26 @@ class _ProfileMenuTile extends StatelessWidget {
 class _ProfileBiometricTile extends StatelessWidget {
   final bool useFaceIcon;
   final bool enabled;
-  final bool available;
+  final bool deviceSupported;
+  final bool switchEnabled;
+  final bool hasCredentials;
   final ValueChanged<bool> onChanged;
 
   const _ProfileBiometricTile({
     required this.useFaceIcon,
     required this.enabled,
-    required this.available,
+    required this.deviceSupported,
+    required this.switchEnabled,
+    required this.hasCredentials,
     required this.onChanged,
   });
+
+  String _subtitle(AppLocalizations l10n) {
+    if (!deviceSupported) return l10n.biometricNotAvailable;
+    if (enabled) return l10n.settingsBiometricSubtitleEnabled;
+    if (hasCredentials) return l10n.settingsBiometricSubtitleOffReady;
+    return l10n.settingsBiometricSubtitleSignInOnce;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -892,7 +929,7 @@ class _ProfileBiometricTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  l10n.settingsBiometricLoginSubtitle,
+                  _subtitle(l10n),
                   style: const TextStyle(
                     fontSize: 12,
                     height: 1.35,
@@ -905,7 +942,7 @@ class _ProfileBiometricTile extends StatelessWidget {
           const SizedBox(width: 8),
           _ProfileGradientSwitch(
             value: enabled,
-            onChanged: available ? onChanged : null,
+            onChanged: switchEnabled ? onChanged : null,
           ),
         ],
       ),

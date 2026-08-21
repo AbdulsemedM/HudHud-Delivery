@@ -362,6 +362,24 @@ abstract class AppLocalizations {
   /// **'Sign in quickly with fingerprint or Face ID on this device'**
   String get settingsBiometricLoginSubtitle;
 
+  /// No description provided for @settingsBiometricSubtitleEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'On — use fingerprint or Face ID to sign in'**
+  String get settingsBiometricSubtitleEnabled;
+
+  /// No description provided for @settingsBiometricSubtitleOffReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Off — turn on anytime'**
+  String get settingsBiometricSubtitleOffReady;
+
+  /// No description provided for @settingsBiometricSubtitleSignInOnce.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in once to enable'**
+  String get settingsBiometricSubtitleSignInOnce;
+
   /// No description provided for @biometricAuthReason.
   ///
   /// In en, this message translates to:
@@ -403,6 +421,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Biometric login disabled'**
   String get biometricDisabledSuccess;
+
+  /// No description provided for @biometricOptInTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable biometric login?'**
+  String get biometricOptInTitle;
+
+  /// No description provided for @biometricOptInMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Use fingerprint or Face ID to sign in faster next time.'**
+  String get biometricOptInMessage;
+
+  /// No description provided for @biometricOptInEnable.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable'**
+  String get biometricOptInEnable;
+
+  /// No description provided for @biometricOptInNotNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get biometricOptInNotNow;
 
   /// No description provided for @loginBiometricButtonSemantics.
   ///

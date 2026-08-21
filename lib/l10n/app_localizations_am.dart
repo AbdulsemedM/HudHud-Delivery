@@ -139,6 +139,16 @@ class AppLocalizationsAm extends AppLocalizations {
       'በዚህ መሣሪያ ላይ በጣት አሻራ ወይም Face ID በፍጥነት ይግቡ';
 
   @override
+  String get settingsBiometricSubtitleEnabled =>
+      'በርቷል — ለመግባት ጣት አሻራ ወይም Face ID ይጠቀሙ';
+
+  @override
+  String get settingsBiometricSubtitleOffReady => 'ጠፍቷል — በማንኛውም ጊዜ ያብሩ';
+
+  @override
+  String get settingsBiometricSubtitleSignInOnce => 'ለማንቃት አንዴ ይግቡ';
+
+  @override
   String get biometricAuthReason => 'ለመቀጠል ማንነትዎን ያረጋግጡ';
 
   @override
@@ -160,6 +170,19 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get biometricDisabledSuccess => 'ባዮሜትሪክ መግቢያ ተዘግቷል';
+
+  @override
+  String get biometricOptInTitle => 'ባዮሜትሪክ መግቢያ ይንቃ?';
+
+  @override
+  String get biometricOptInMessage =>
+      'በሚቀጥለው ጊዜ በፍጥነት ለመግባት ጣት አሻራ ወይም Face ID ይጠቀሙ።';
+
+  @override
+  String get biometricOptInEnable => 'አንቃ';
+
+  @override
+  String get biometricOptInNotNow => 'አሁን አይደለም';
 
   @override
   String get loginBiometricButtonSemantics => 'በባዮሜትሪክ ይግቡ';

@@ -49,7 +49,7 @@ class LoginRepository {
         }
 
         final user = await _completeSessionFromLoginData(data, authService);
-        await _maybeRefreshBiometricCredentials(
+        await _persistBiometricCredentialsAfterLogin(
           emailOrPhone: emailOrPhone,
           password: password,
           fieldType: fieldType,
@@ -238,13 +238,27 @@ class LoginRepository {
     }
   }
 
-  Future<void> _maybeRefreshBiometricCredentials({
+  /// Saves identifier + password for later biometric enable / silent login.
+  /// Does not auto-enable biometric unlock.
+  Future<void> _persistBiometricCredentialsAfterLogin({
     required String emailOrPhone,
     required String password,
     required String fieldType,
   }) async {
     final biometric = BiometricCredentialService();
-    if (!await biometric.isBiometricLoginEnabled()) return;
+    if (!await biometric.isDeviceSupported()) return;
+
+    final existing = await biometric.peekCredentials();
+    if (existing != null) {
+      final matches = await biometric.matchesStoredLoginIdentifier(
+        emailOrPhone,
+        fieldType: fieldType,
+      );
+      if (!matches) {
+        await biometric.clearSessionKeepOptOut();
+      }
+    }
+
     await biometric.saveCredentials(
       identifier: emailOrPhone,
       password: password,

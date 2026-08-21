@@ -13,7 +13,11 @@ final class LoginLoading extends LoginState {
   LoginLoading(this.action);
 }
 
-final class LoginSuccess extends LoginState {}
+final class LoginSuccess extends LoginState {
+  final LoginAction action;
+
+  LoginSuccess(this.action);
+}
 
 final class LoginFailure extends LoginState {
   final String errorMessage;

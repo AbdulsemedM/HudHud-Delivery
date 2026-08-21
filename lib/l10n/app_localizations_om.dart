@@ -139,6 +139,18 @@ class AppLocalizationsOm extends AppLocalizations {
       'Meeshaa kana irratti asharaa qubaa yookiin Face ID fayyadamuun saffisaan seeni';
 
   @override
+  String get settingsBiometricSubtitleEnabled =>
+      'Banaa — asharaa qubaa yookiin Face ID fayyadamuun seeni';
+
+  @override
+  String get settingsBiometricSubtitleOffReady =>
+      'Cufame — yeroo barbaadde bani';
+
+  @override
+  String get settingsBiometricSubtitleSignInOnce =>
+      'Tokko seeni akka dandeessiftu';
+
+  @override
   String get biometricAuthReason => 'Itti fufuuf eenyummaa kee mirkaneessi';
 
   @override
@@ -162,6 +174,19 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get biometricDisabledSuccess => 'Seensi baayomeetirikii cufame';
+
+  @override
+  String get biometricOptInTitle => 'Seensa baayomeetirikii dandeessisi?';
+
+  @override
+  String get biometricOptInMessage =>
+      'Yeroo itti aanutti saffisaan seenuuf asharaa qubaa yookiin Face ID fayyadami.';
+
+  @override
+  String get biometricOptInEnable => 'Dandeessisi';
+
+  @override
+  String get biometricOptInNotNow => 'Amma miti';
 
   @override
   String get loginBiometricButtonSemantics =>
