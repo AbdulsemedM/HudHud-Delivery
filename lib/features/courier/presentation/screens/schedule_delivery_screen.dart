@@ -55,9 +55,22 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
   String _estimatedCurrency = 'ETB';
   double? _baseDeliveryFee;
   double? _weightCharge;
+  String? _timeBandName;
+  double? _timeBandSurcharge;
+  String? _quotedScheduledPickup;
 
   bool get _canFetchEstimate =>
-      _pickupPosition != null && _deliveryPosition != null;
+      _pickupPosition != null &&
+      _deliveryPosition != null &&
+      _dateController.text.isNotEmpty &&
+      _timeController.text.isNotEmpty &&
+      _parseScheduledDateTime() != null;
+
+  bool get _hasServerEstimate =>
+      !_isLoadingEstimate &&
+      _estimateError == null &&
+      _estimatedCost != null &&
+      _quotedScheduledPickup != null;
 
   static gmaps.LatLng _toG(LatLng p) => gmaps.LatLng(p.latitude, p.longitude);
 
@@ -131,6 +144,9 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
         _estimatedDuration = null;
         _baseDeliveryFee = null;
         _weightCharge = null;
+        _timeBandName = null;
+        _timeBandSurcharge = null;
+        _quotedScheduledPickup = null;
       });
       return;
     }
@@ -143,9 +159,14 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
   Future<void> _fetchEstimate() async {
     if (_pickupPosition == null || _deliveryPosition == null) return;
 
+    final scheduled = _parseScheduledDateTime();
+    if (scheduled == null) return;
+    final scheduledPickup = formatDeliveryScheduledPickup(scheduled);
+
     setState(() {
       _isLoadingEstimate = true;
       _estimateError = null;
+      _quotedScheduledPickup = null;
     });
 
     final result = await _courierRepository.estimateDelivery(
@@ -157,6 +178,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
       dropoffLongitude: _deliveryPosition!.longitude,
       vehicleType: mapCourierVehicleType(_selectedVehicle),
       serviceType: deliveryServiceType(isInstantDelivery: false),
+      scheduledPickup: scheduledPickup,
     );
 
     if (!mounted) return;
@@ -169,16 +191,33 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
         _estimatedCurrency = result['currency'] as String? ?? 'ETB';
         _baseDeliveryFee = result['baseDeliveryFee'] as double?;
         _weightCharge = result['weightCharge'] as double?;
+        _timeBandName = result['timeBandName'] as String?;
+        _timeBandSurcharge = result['timeBandSurcharge'] as double?;
+        _quotedScheduledPickup =
+            result['scheduledPickup'] as String? ?? scheduledPickup;
         _estimateError = _estimatedCost == null
             ? 'Estimate did not include a cost'
             : null;
+        if (_estimateError != null) {
+          _quotedScheduledPickup = null;
+        }
       } else {
-        _estimateError = result['message'] as String?;
+        final error = result['error'] as ApiErrorResult?;
+        if (error?.hasScheduledPickupValidation == true) {
+          _estimateError = context.l10n.chooseValidFuturePickup;
+        } else if (error?.isRouteDistanceError == true) {
+          _estimateError = context.l10n.refreshQuoteRouteDistance;
+        } else {
+          _estimateError = result['message'] as String?;
+        }
         _estimatedCost = null;
         _estimatedDistance = null;
         _estimatedDuration = null;
         _baseDeliveryFee = null;
         _weightCharge = null;
+        _timeBandName = null;
+        _timeBandSurcharge = null;
+        _quotedScheduledPickup = null;
       }
     });
   }
@@ -460,6 +499,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
         _dateController.text =
             '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}';
       });
+      _scheduleEstimateFetch();
     }
   }
 
@@ -474,6 +514,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
             '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
         _timePeriod = picked.period == DayPeriod.am ? 'am' : 'pm';
       });
+      _scheduleEstimateFetch();
     }
   }
 
@@ -859,7 +900,10 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                                     ],
                                   ),
                                   DeliveryEstimateBanner(
-                                    isVisible: _canFetchEstimate,
+                                    isVisible: _canFetchEstimate ||
+                                        _isLoadingEstimate ||
+                                        _estimateError != null ||
+                                        _estimatedCost != null,
                                     isLoading: _isLoadingEstimate,
                                     error: _estimateError,
                                     estimatedCost: _estimatedCost,
@@ -868,6 +912,8 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                                     currency: _estimatedCurrency,
                                     baseDeliveryFee: _baseDeliveryFee,
                                     weightCharge: _weightCharge,
+                                    timeBandName: _timeBandName,
+                                    timeBandSurcharge: _timeBandSurcharge,
                                   ),
                                   const SizedBox(height: 16),
                                   SizedBox(
@@ -910,6 +956,19 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                                             SnackBar(
                                               content: Text(l10n
                                                   .scheduleInvalidDateTime),
+                                              backgroundColor:
+                                                  colorScheme.error,
+                                            ),
+                                          );
+                                          return;
+                                        }
+
+                                        if (!_hasServerEstimate) {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                              content: Text(l10n
+                                                  .waitForEstimateBeforeContinue),
                                               backgroundColor:
                                                   colorScheme.error,
                                             ),

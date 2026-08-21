@@ -2791,6 +2791,23 @@ class AppLocalizationsSo extends AppLocalizations {
   String get invalidDeliveryId => 'ID-ga gaarsiinta ee la sameeyey sax maaha';
 
   @override
+  String timeBandPickupSurcharge(String band, String currency, String amount) {
+    return 'Kharashka qaadista $band: $currency $amount';
+  }
+
+  @override
+  String get chooseValidFuturePickup =>
+      'Fadlan dooro taariikh iyo waqti qaadis mustaqbal ah oo sax ah.';
+
+  @override
+  String get refreshQuoteRouteDistance =>
+      'Waddada lama xisaabin karo. Fadlan cusboonaysii qiyaasta oo isku day mar kale.';
+
+  @override
+  String get waitForEstimateBeforeContinue =>
+      'Sug qiyaasta qiimaha ka hor intaadan sii wadin';
+
+  @override
   String get deliveryBookedWallet =>
       'Gaarsiinta waxaa lagu qabtay lacag-bixinta jeebka';
 

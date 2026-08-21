@@ -2717,6 +2717,22 @@ class AppLocalizationsAm extends AppLocalizations {
   String get invalidDeliveryId => 'ከመፍጠር የመጣ የመላኪያ መታወቂያ ልክ አይደለም';
 
   @override
+  String timeBandPickupSurcharge(String band, String currency, String amount) {
+    return '$band የመውሰጃ ተጨማሪ ክፍያ፦ $currency $amount';
+  }
+
+  @override
+  String get chooseValidFuturePickup =>
+      'እባክዎ የሚቀጥል ትክክለኛ የመውሰጃ ቀን እና ሰዓት ይምረጡ።';
+
+  @override
+  String get refreshQuoteRouteDistance =>
+      'መንገዱን ማስላት አልተቻለም። እባክዎ ግምቱን ያድሱ እና እንደገና ይሞክሩ።';
+
+  @override
+  String get waitForEstimateBeforeContinue => 'ከመቀጠልዎ በፊት የዋጋ ግምት ይጠብቁ';
+
+  @override
   String get deliveryBookedWallet => 'መላኪያ በዋሌት ክፍያ ተይዟል';
 
   @override

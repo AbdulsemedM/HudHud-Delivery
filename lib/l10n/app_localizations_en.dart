@@ -2764,6 +2764,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get invalidDeliveryId => 'Invalid delivery id from create delivery';
 
   @override
+  String timeBandPickupSurcharge(String band, String currency, String amount) {
+    return '$band pickup surcharge: $currency $amount';
+  }
+
+  @override
+  String get chooseValidFuturePickup =>
+      'Please choose a valid future pickup date and time.';
+
+  @override
+  String get refreshQuoteRouteDistance =>
+      'Unable to calculate the route. Please refresh the quote and try again.';
+
+  @override
+  String get waitForEstimateBeforeContinue =>
+      'Wait for a price estimate before continuing';
+
+  @override
   String get deliveryBookedWallet => 'Delivery booked with wallet payment';
 
   @override

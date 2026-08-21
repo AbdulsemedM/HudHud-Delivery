@@ -5264,6 +5264,30 @@ abstract class AppLocalizations {
   /// **'Invalid delivery id from create delivery'**
   String get invalidDeliveryId;
 
+  /// No description provided for @timeBandPickupSurcharge.
+  ///
+  /// In en, this message translates to:
+  /// **'{band} pickup surcharge: {currency} {amount}'**
+  String timeBandPickupSurcharge(String band, String currency, String amount);
+
+  /// No description provided for @chooseValidFuturePickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Please choose a valid future pickup date and time.'**
+  String get chooseValidFuturePickup;
+
+  /// No description provided for @refreshQuoteRouteDistance.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to calculate the route. Please refresh the quote and try again.'**
+  String get refreshQuoteRouteDistance;
+
+  /// No description provided for @waitForEstimateBeforeContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Wait for a price estimate before continuing'**
+  String get waitForEstimateBeforeContinue;
+
   /// No description provided for @deliveryBookedWallet.
   ///
   /// In en, this message translates to:

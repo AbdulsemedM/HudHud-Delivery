@@ -14,6 +14,7 @@ import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data
 import 'package:hudhud_delivery/features/courier/data/models/create_delivery_result.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
+import 'package:hudhud_delivery/features/courier/presentation/widgets/delivery_estimate_banner.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_estimate.dart';
 import 'package:hudhud_delivery/features/courier/utils/courier_home_refresh.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_payment_helper.dart';
@@ -88,12 +89,14 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
   bool _isLoadingWalletBalance = false;
   String? _walletBalanceError;
   double? _estimatedCost;
-  double? _estimatedDistance;
-  int? _estimatedDuration;
   String _estimatedCurrency = 'ETB';
   double? _baseDeliveryFee;
   double? _weightCharge;
+  String? _timeBandName;
+  double? _timeBandSurcharge;
   String? _estimateError;
+  /// Exact `scheduled_pickup` string used for the last successful quote.
+  String? _quotedScheduledPickup;
   List<LatLng>? _routePolylinePoints;
   bool? _hasGoogleMapsApiKey;
 
@@ -198,7 +201,10 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
   }
 
   bool get _hasServerEstimate =>
-      !_isLoadingEstimate && _estimateError == null && _estimatedCost != null;
+      !_isLoadingEstimate &&
+      _estimateError == null &&
+      _estimatedCost != null &&
+      (widget.scheduledPickup == null || _quotedScheduledPickup != null);
 
   bool get _isWalletPayment => widget.paymentType == 'wallet';
 
@@ -323,15 +329,10 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
     return 'cash';
   }
 
-  /// Formats DateTime for API as "yyyy-MM-ddTHH:mm:ss" (e.g. "2024-01-15T14:30:00")
+  /// Formats DateTime for API as Africa/Addis_Ababa with fixed +03:00.
   String? _formatScheduledDateTime(DateTime? dt) {
     if (dt == null) return null;
-    return '${dt.year.toString().padLeft(4, '0')}-'
-        '${dt.month.toString().padLeft(2, '0')}-'
-        '${dt.day.toString().padLeft(2, '0')}T'
-        '${dt.hour.toString().padLeft(2, '0')}:'
-        '${dt.minute.toString().padLeft(2, '0')}:'
-        '${dt.second.toString().padLeft(2, '0')}';
+    return formatDeliveryScheduledPickup(dt);
   }
 
   Future<void> _fetchEstimate() async {
@@ -339,9 +340,17 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
       setState(() {
         _isLoadingEstimate = false;
         _estimateError = 'Location coordinates required for estimate';
+        _quotedScheduledPickup = null;
       });
       return;
     }
+
+    setState(() {
+      _isLoadingEstimate = true;
+      _estimateError = null;
+    });
+
+    final scheduledPickup = _formatScheduledDateTime(widget.scheduledPickup);
 
     final result = await _courierRepository.estimateDelivery(
       packageType: _mapPackageType(widget.itemType),
@@ -351,7 +360,9 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
       dropoffLatitude: widget.deliveryPosition!.latitude,
       dropoffLongitude: widget.deliveryPosition!.longitude,
       vehicleType: mapCourierVehicleType(widget.selectedVehicle),
-      serviceType: deliveryServiceType(isInstantDelivery: widget.isInstantDelivery),
+      serviceType:
+          deliveryServiceType(isInstantDelivery: widget.isInstantDelivery),
+      scheduledPickup: scheduledPickup,
     );
 
     if (mounted) {
@@ -359,19 +370,35 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
         _isLoadingEstimate = false;
         if (result['success'] == true) {
           _estimatedCost = result['estimatedCost'] as double?;
-          _estimatedDistance = result['estimatedDistance'] as double?;
-          _estimatedDuration = result['estimatedDuration'] as int?;
           _estimatedCurrency = result['currency'] as String? ?? 'ETB';
           _baseDeliveryFee = result['baseDeliveryFee'] as double?;
           _weightCharge = result['weightCharge'] as double?;
+          _timeBandName = result['timeBandName'] as String?;
+          _timeBandSurcharge = result['timeBandSurcharge'] as double?;
+          _quotedScheduledPickup = scheduledPickup != null
+              ? (result['scheduledPickup'] as String? ?? scheduledPickup)
+              : null;
           _estimateError = _estimatedCost == null
               ? 'Estimate did not include a cost'
               : null;
+          if (_estimateError != null) {
+            _quotedScheduledPickup = null;
+          }
         } else {
-          _estimateError = result['message'] as String?;
+          final error = result['error'] as ApiErrorResult?;
+          if (error?.hasScheduledPickupValidation == true) {
+            _estimateError = context.l10n.chooseValidFuturePickup;
+          } else if (error?.isRouteDistanceError == true) {
+            _estimateError = context.l10n.refreshQuoteRouteDistance;
+          } else {
+            _estimateError = result['message'] as String?;
+          }
           _estimatedCost = null;
           _baseDeliveryFee = null;
           _weightCharge = null;
+          _timeBandName = null;
+          _timeBandSurcharge = null;
+          _quotedScheduledPickup = null;
         }
       });
     }
@@ -408,6 +435,13 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
           return;
         }
 
+        final scheduledPickup = _quotedScheduledPickup ??
+            _formatScheduledDateTime(widget.scheduledPickup);
+        final scheduledDelivery = widget.scheduledDelivery != null
+            ? (scheduledPickup ??
+                _formatScheduledDateTime(widget.scheduledDelivery))
+            : null;
+
         final requestData = <String, dynamic>{
           'package_type': _mapPackageType(widget.itemType),
           'package_description': widget.packageDescription.isNotEmpty
@@ -423,12 +457,8 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
           'vehicle_type': mapCourierVehicleType(widget.selectedVehicle),
           'service_type':
               deliveryServiceType(isInstantDelivery: widget.isInstantDelivery),
-          'scheduled_pickup': _formatScheduledDateTime(widget.scheduledPickup),
-          'scheduled_delivery':
-              _formatScheduledDateTime(widget.scheduledDelivery),
-          'estimated_distance': _estimatedDistance ?? 0,
-          'estimated_duration': _estimatedDuration ?? 0,
-          'estimated_cost': _estimatedCost ?? 0,
+          'scheduled_pickup': scheduledPickup,
+          'scheduled_delivery': scheduledDelivery,
           'payment_method': _mapPaymentMethod(widget.paymentType),
           'requires_signature': false,
           'insurance_required': false,
@@ -475,6 +505,31 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
           final error = result['error'] as ApiErrorResult?;
           if (error?.isInsufficientBalance == true) {
             await _showInsufficientBalanceDialog(error!);
+            return;
+          }
+          if (error?.hasScheduledPickupValidation == true) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(context.l10n.chooseValidFuturePickup),
+                backgroundColor: Colors.red,
+              ),
+            );
+            return;
+          }
+          if (error?.isRouteDistanceError == true) {
+            setState(() {
+              _estimatedCost = null;
+              _quotedScheduledPickup = null;
+              _estimateError = context.l10n.refreshQuoteRouteDistance;
+              _pendingCreatedDelivery = null;
+            });
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(context.l10n.refreshQuoteRouteDistance),
+                backgroundColor: Colors.red,
+              ),
+            );
+            await _fetchEstimate();
             return;
           }
           ScaffoldMessenger.of(context).showSnackBar(
@@ -782,6 +837,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                 '$_estimatedCurrency ${_estimatedCost!.toStringAsFixed(2)}';
           }
 
+          final l10n = context.l10n;
           final breakdownParts = <String>[];
           if (_baseDeliveryFee != null) {
             breakdownParts.add(
@@ -795,6 +851,17 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
           }
           final breakdownText =
               breakdownParts.isEmpty ? null : breakdownParts.join(' · ');
+
+          final bandLabel = formatTimeBandDisplayName(_timeBandName);
+          final surchargeText = _timeBandSurcharge != null &&
+                  _timeBandSurcharge! > 0 &&
+                  bandLabel.isNotEmpty
+              ? l10n.timeBandPickupSurcharge(
+                  bandLabel,
+                  _estimatedCurrency,
+                  _timeBandSurcharge!.toStringAsFixed(2),
+                )
+              : null;
 
           final theme = Theme.of(context);
           const borderColor = HomeColors.border;
@@ -1030,6 +1097,25 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                                                               ?.copyWith(
                                                             color: HomeColors
                                                                 .textMuted,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    if (surchargeText != null &&
+                                                        !_isLoadingEstimate &&
+                                                        _estimateError == null)
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets.only(
+                                                                top: 4),
+                                                        child: Text(
+                                                          surchargeText,
+                                                          style: theme
+                                                              .textTheme.bodySmall
+                                                              ?.copyWith(
+                                                            color: HomeColors
+                                                                .textMuted,
+                                                            fontWeight:
+                                                                FontWeight.w600,
                                                           ),
                                                         ),
                                                       ),

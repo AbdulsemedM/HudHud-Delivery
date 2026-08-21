@@ -52,6 +52,8 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
   String _estimatedCurrency = 'ETB';
   double? _baseDeliveryFee;
   double? _weightCharge;
+  String? _timeBandName;
+  double? _timeBandSurcharge;
 
   bool get _canFetchEstimate =>
       _pickupPosition != null && _deliveryPosition != null;
@@ -118,6 +120,8 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
         _estimatedDuration = null;
         _baseDeliveryFee = null;
         _weightCharge = null;
+        _timeBandName = null;
+        _timeBandSurcharge = null;
       });
       return;
     }
@@ -156,6 +160,8 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
         _estimatedCurrency = result['currency'] as String? ?? 'ETB';
         _baseDeliveryFee = result['baseDeliveryFee'] as double?;
         _weightCharge = result['weightCharge'] as double?;
+        _timeBandName = result['timeBandName'] as String?;
+        _timeBandSurcharge = result['timeBandSurcharge'] as double?;
         _estimateError = _estimatedCost == null
             ? 'Estimate did not include a cost'
             : null;
@@ -166,6 +172,8 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
         _estimatedDuration = null;
         _baseDeliveryFee = null;
         _weightCharge = null;
+        _timeBandName = null;
+        _timeBandSurcharge = null;
       }
     });
   }
@@ -523,6 +531,8 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                               currency: _estimatedCurrency,
                               baseDeliveryFee: _baseDeliveryFee,
                               weightCharge: _weightCharge,
+                              timeBandName: _timeBandName,
+                              timeBandSurcharge: _timeBandSurcharge,
                             ),
                             const SizedBox(height: 16),
                             // Continue Button

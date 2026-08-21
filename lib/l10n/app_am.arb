@@ -1194,6 +1194,17 @@
   "chatMissingDeliveryId": "ውይይት መክፈት አልተቻለም። የመላኪያ መታወቂያ የለም።",
   "waitForPriceEstimate": "ከመያዝዎ በፊት የዋጋ ግምት ይጠብቁ",
   "invalidDeliveryId": "ከመፍጠር የመጣ የመላኪያ መታወቂያ ልክ አይደለም",
+  "timeBandPickupSurcharge": "{band} የመውሰጃ ተጨማሪ ክፍያ፦ {currency} {amount}",
+  "@timeBandPickupSurcharge": {
+    "placeholders": {
+      "band": {"type": "String"},
+      "currency": {"type": "String"},
+      "amount": {"type": "String"}
+    }
+  },
+  "chooseValidFuturePickup": "እባክዎ የሚቀጥል ትክክለኛ የመውሰጃ ቀን እና ሰዓት ይምረጡ።",
+  "refreshQuoteRouteDistance": "መንገዱን ማስላት አልተቻለም። እባክዎ ግምቱን ያድሱ እና እንደገና ይሞክሩ።",
+  "waitForEstimateBeforeContinue": "ከመቀጠልዎ በፊት የዋጋ ግምት ይጠብቁ",
   "deliveryBookedWallet": "መላኪያ በዋሌት ክፍያ ተይዟል",
   "cancelDeliveryTitle": "መላኪያ ሰርዝ",
   "insufficientWalletBalance": "በቂ የዋሌት ቀሪ ሂሳብ የለም",

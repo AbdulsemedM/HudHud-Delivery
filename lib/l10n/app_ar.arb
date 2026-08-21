@@ -1187,6 +1187,17 @@
   "chatMissingDeliveryId": "تعذر فتح المحادثة. معرّف التوصيل مفقود.",
   "waitForPriceEstimate": "انتظر تقدير السعر من الخادم قبل الحجز",
   "invalidDeliveryId": "معرّف توصيل غير صالح من إنشاء التوصيل",
+  "timeBandPickupSurcharge": "رسوم استلام {band}: {currency} {amount}",
+  "@timeBandPickupSurcharge": {
+    "placeholders": {
+      "band": {"type": "String"},
+      "currency": {"type": "String"},
+      "amount": {"type": "String"}
+    }
+  },
+  "chooseValidFuturePickup": "يرجى اختيار تاريخ ووقت استلام مستقبلي صالح.",
+  "refreshQuoteRouteDistance": "تعذر حساب المسار. يرجى تحديث التقدير والمحاولة مرة أخرى.",
+  "waitForEstimateBeforeContinue": "انتظر تقدير السعر قبل المتابعة",
   "deliveryBookedWallet": "تم حجز التوصيل عبر المحفظة",
   "cancelDeliveryTitle": "إلغاء التوصيل",
   "insufficientWalletBalance": "رصيد المحفظة غير كافٍ",

@@ -1148,6 +1148,17 @@
   "chatMissingDeliveryId": "Unable to open chat. Missing delivery ID.",
   "waitForPriceEstimate": "Wait for a server price estimate before booking",
   "invalidDeliveryId": "Invalid delivery id from create delivery",
+  "timeBandPickupSurcharge": "{band} pickup surcharge: {currency} {amount}",
+  "@timeBandPickupSurcharge": {
+    "placeholders": {
+      "band": {"type": "String"},
+      "currency": {"type": "String"},
+      "amount": {"type": "String"}
+    }
+  },
+  "chooseValidFuturePickup": "Please choose a valid future pickup date and time.",
+  "refreshQuoteRouteDistance": "Unable to calculate the route. Please refresh the quote and try again.",
+  "waitForEstimateBeforeContinue": "Wait for a price estimate before continuing",
   "deliveryBookedWallet": "Delivery booked with wallet payment",
   "cancelDeliveryTitle": "Cancel delivery",
   "insufficientWalletBalance": "Insufficient wallet balance",

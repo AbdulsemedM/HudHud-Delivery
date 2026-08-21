@@ -2747,6 +2747,22 @@ class AppLocalizationsAr extends AppLocalizations {
   String get invalidDeliveryId => 'معرّف توصيل غير صالح من إنشاء التوصيل';
 
   @override
+  String timeBandPickupSurcharge(String band, String currency, String amount) {
+    return 'رسوم استلام $band: $currency $amount';
+  }
+
+  @override
+  String get chooseValidFuturePickup =>
+      'يرجى اختيار تاريخ ووقت استلام مستقبلي صالح.';
+
+  @override
+  String get refreshQuoteRouteDistance =>
+      'تعذر حساب المسار. يرجى تحديث التقدير والمحاولة مرة أخرى.';
+
+  @override
+  String get waitForEstimateBeforeContinue => 'انتظر تقدير السعر قبل المتابعة';
+
+  @override
   String get deliveryBookedWallet => 'تم حجز التوصيل عبر المحفظة';
 
   @override

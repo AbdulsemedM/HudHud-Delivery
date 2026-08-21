@@ -1187,6 +1187,17 @@
   "chatMissingDeliveryId": "Haasaa banuu hin dandeenye. ID geejjibaa hin jiru.",
   "waitForPriceEstimate": "Ajajuu dura tilmaama gatii servernii eegi",
   "invalidDeliveryId": "ID geejjibaa uumame sirrii miti",
+  "timeBandPickupSurcharge": "Kaffaltii fudhatinsa {band}: {currency} {amount}",
+  "@timeBandPickupSurcharge": {
+    "placeholders": {
+      "band": {"type": "String"},
+      "currency": {"type": "String"},
+      "amount": {"type": "String"}
+    }
+  },
+  "chooseValidFuturePickup": "Maalifiiduu fi sa'aatii fudhatinsa gara fuulduraa ta'e sirrii ta'e filadhu.",
+  "refreshQuoteRouteDistance": "Karaa shallaguun hin dandeenye. Tilmaama haaromsuun deebi'ii yaali.",
+  "waitForEstimateBeforeContinue": "Itti fufuu dura tilmaama gatii eegi",
   "deliveryBookedWallet": "Geejjibaan kaffaltii boorsaa tiin qabameera",
   "cancelDeliveryTitle": "Geejjibaa haqi",
   "insufficientWalletBalance": "Hanga boorsaa gahaa hin jiru",

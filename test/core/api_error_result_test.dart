@@ -197,6 +197,36 @@ void main() {
       expect(result.isAmountMismatch, isTrue);
       expect(result.code, 'amount_mismatch');
     });
+
+    test('preserves ROUTE_DISTANCE_* codes on 503', () {
+      final result = parseApiErrorResult({
+        'success': false,
+        'message': 'Unable to resolve delivery route distance.',
+        'error': 'ROUTE_DISTANCE_UNAVAILABLE',
+      }, statusCode: 503);
+
+      expect(result.code, 'ROUTE_DISTANCE_UNAVAILABLE');
+      expect(result.isRouteDistanceError, isTrue);
+      expect(result.statusCode, 503);
+    });
+
+    test('detects scheduled_pickup field validation', () {
+      final result = parseApiErrorResult({
+        'message': 'The given data was invalid.',
+        'errors': {
+          'scheduled_pickup': [
+            'The scheduled pickup must be a future date and time.',
+          ],
+        },
+      }, statusCode: 422);
+
+      expect(result.isValidation, isTrue);
+      expect(result.hasScheduledPickupValidation, isTrue);
+      expect(
+        result.displayMessage,
+        contains('future date and time'),
+      );
+    });
   });
 
   group('userFacingApiError', () {

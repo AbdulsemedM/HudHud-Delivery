@@ -2783,6 +2783,23 @@ class AppLocalizationsOm extends AppLocalizations {
   String get invalidDeliveryId => 'ID geejjibaa uumame sirrii miti';
 
   @override
+  String timeBandPickupSurcharge(String band, String currency, String amount) {
+    return 'Kaffaltii fudhatinsa $band: $currency $amount';
+  }
+
+  @override
+  String get chooseValidFuturePickup =>
+      'Maalifiiduu fi sa\'aatii fudhatinsa gara fuulduraa ta\'e sirrii ta\'e filadhu.';
+
+  @override
+  String get refreshQuoteRouteDistance =>
+      'Karaa shallaguun hin dandeenye. Tilmaama haaromsuun deebi\'ii yaali.';
+
+  @override
+  String get waitForEstimateBeforeContinue =>
+      'Itti fufuu dura tilmaama gatii eegi';
+
+  @override
   String get deliveryBookedWallet =>
       'Geejjibaan kaffaltii boorsaa tiin qabameera';
 

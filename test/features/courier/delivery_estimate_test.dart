@@ -36,6 +36,22 @@ void main() {
     });
   });
 
+  group('formatDeliveryScheduledPickup', () {
+    test('formats wall clock as Addis Ababa with +03:00', () {
+      expect(
+        formatDeliveryScheduledPickup(DateTime(2026, 8, 23, 20, 0, 0)),
+        '2026-08-23T20:00:00+03:00',
+      );
+    });
+
+    test('pads single-digit fields', () {
+      expect(
+        formatDeliveryScheduledPickup(DateTime(2026, 1, 5, 9, 5, 7)),
+        '2026-01-05T09:05:07+03:00',
+      );
+    });
+  });
+
   group('parseDeliveryEstimate', () {
     test('parses flat estimate payload from the API', () {
       final estimate = parseDeliveryEstimate({
@@ -60,6 +76,50 @@ void main() {
       expect(estimate.distanceRate, 20.0);
       expect(estimate.freeDistance, 2.0);
       expect(estimate.weightCharge, 6.0);
+      expect(estimate.timeBandName, isNull);
+      expect(estimate.hasTimeBandSurcharge, isFalse);
+    });
+
+    test('parses night time-band pricing from the handoff sample', () {
+      final estimate = parseDeliveryEstimate({
+        'estimated_distance': 10.9,
+        'estimated_duration': 31,
+        'estimated_cost': 172.8,
+        'currency': 'ETB',
+        'pricing': {
+          'time_band': {
+            'name': 'night',
+            'multiplier': 1.2,
+            'surcharge_rate': 0.2,
+            'evaluated_pickup_at': '2026-08-23T20:00:00+03:00',
+            'timezone': 'Africa/Addis_Ababa',
+            'night_hours': {
+              'start': 20,
+              'end': 6,
+            },
+          },
+          'time_band_surcharge': 28.8,
+        },
+        'route': {
+          'source': 'google_routes',
+          'distance_meters': 10900,
+          'duration_seconds': 1860,
+        },
+      });
+
+      expect(estimate.isValid, isTrue);
+      expect(estimate.estimatedCost, 172.8);
+      expect(estimate.estimatedDistance, 10.9);
+      expect(estimate.estimatedDuration, 31);
+      expect(estimate.timeBandName, 'night');
+      expect(estimate.timeBandMultiplier, 1.2);
+      expect(estimate.timeBandSurchargeRate, 0.2);
+      expect(estimate.timeBandSurcharge, 28.8);
+      expect(estimate.hasTimeBandSurcharge, isTrue);
+      expect(estimate.evaluatedPickupAt, '2026-08-23T20:00:00+03:00');
+      expect(estimate.timezone, 'Africa/Addis_Ababa');
+      expect(estimate.nightHoursStart, 20);
+      expect(estimate.nightHoursEnd, 6);
     });
 
     test('parses nested data wrapper', () {

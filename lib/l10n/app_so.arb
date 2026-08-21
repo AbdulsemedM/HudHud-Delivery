@@ -1187,6 +1187,17 @@
   "chatMissingDeliveryId": "Wada hadalka lama furi karo. ID-ga gaarsiinta waa maqan.",
   "waitForPriceEstimate": "Sug qiyaasta qiimaha server-ka ka hor intaadan qabsan",
   "invalidDeliveryId": "ID-ga gaarsiinta ee la sameeyey sax maaha",
+  "timeBandPickupSurcharge": "Kharashka qaadista {band}: {currency} {amount}",
+  "@timeBandPickupSurcharge": {
+    "placeholders": {
+      "band": {"type": "String"},
+      "currency": {"type": "String"},
+      "amount": {"type": "String"}
+    }
+  },
+  "chooseValidFuturePickup": "Fadlan dooro taariikh iyo waqti qaadis mustaqbal ah oo sax ah.",
+  "refreshQuoteRouteDistance": "Waddada lama xisaabin karo. Fadlan cusboonaysii qiyaasta oo isku day mar kale.",
+  "waitForEstimateBeforeContinue": "Sug qiyaasta qiimaha ka hor intaadan sii wadin",
   "deliveryBookedWallet": "Gaarsiinta waxaa lagu qabtay lacag-bixinta jeebka",
   "cancelDeliveryTitle": "Jooji gaarsiinta",
   "insufficientWalletBalance": "Hadhaaga jeebku kuma filna",
