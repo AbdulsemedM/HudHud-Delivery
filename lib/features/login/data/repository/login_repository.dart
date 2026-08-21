@@ -2,9 +2,10 @@ import 'package:flutter/foundation.dart';
 
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/app/services/biometric_credential_service.dart';
-import 'package:hudhud_delivery/app/services/fcm_service.dart';
 import 'package:hudhud_delivery/app/services/google_auth_helper.dart';
+import 'package:hudhud_delivery/core/utils/login_device_metadata.dart';
 import 'package:hudhud_delivery/features/login/data/data_provider/login_data_provider.dart';
+import 'package:hudhud_delivery/features/login/utils/google_login_session.dart';
 import 'package:hudhud_delivery/models/user_model.dart';
 
 class LoginFailureException implements Exception {
@@ -64,27 +65,31 @@ class LoginRepository {
     }
   }
 
-  Future<UserModel> googleLogin() async {
+  Future<UserModel> googleLogin({LoginDeviceMetadata? deviceMetadata}) async {
     final authService = AuthService();
     try {
       final idToken = await obtainGoogleIdToken();
       debugPrint(
         '[GoogleSignIn] id_token received (length ${idToken.length})',
       );
-      final deviceToken = await FcmService().getToken();
       final response = await loginDataProvider.googleLogin(
         idToken: idToken,
-        deviceToken: deviceToken,
+        deviceMetadata: deviceMetadata,
       );
       final code = response['statusCode'] as int?;
       if (code == 200 || code == 201) {
         final raw = response['data'];
-        final data = _normalizeLoginPayload(raw);
-        return _completeSessionFromLoginData(data, authService);
+        try {
+          final data = normalizeGoogleLoginPayload(raw);
+          return _completeSessionFromLoginData(data, authService);
+        } on FormatException catch (e) {
+          throw LoginFailureException(e.message);
+        }
       }
       throw _loginFailureFromResponse(
         response,
-        fallback: 'Google login failed',
+        fallback: 'Google sign-in failed.',
+        preferGoogleFallbacks: true,
       );
     } on GoogleSignInUserCancelled {
       rethrow;
@@ -96,28 +101,6 @@ class LoginRepository {
       if (e is String) throw LoginFailureException(e);
       throw LoginFailureException(_cleanErrorMessage(e.toString()));
     }
-  }
-
-  /// Accepts either `{ token, user }` or `{ success, data: { token, user } }`.
-  Map<String, dynamic> _normalizeLoginPayload(dynamic raw) {
-    if (raw is! Map) {
-      throw LoginFailureException(
-        'Invalid server response: missing required data',
-      );
-    }
-    final map = Map<String, dynamic>.from(raw);
-    if (map['token'] != null && map['user'] != null) {
-      return map;
-    }
-    final inner = map['data'];
-    if (inner is Map &&
-        inner['token'] != null &&
-        inner['user'] != null) {
-      return Map<String, dynamic>.from(inner);
-    }
-    throw LoginFailureException(
-      'Invalid server response: missing required data',
-    );
   }
 
   Future<UserModel> guest() async {
@@ -149,13 +132,23 @@ class LoginRepository {
   LoginFailureException _loginFailureFromResponse(
     Map<String, dynamic> response, {
     String fallback = 'Login failed',
+    bool preferGoogleFallbacks = false,
   }) {
-    var message = _cleanErrorMessage(
-      response['errorMessage'] as String? ?? fallback,
-    );
     final statusCode = response['statusCode'] as int?;
     final code = response['code']?.toString() ??
         _codeFromData(response['data']);
+    var message = _cleanErrorMessage(
+      response['errorMessage'] as String? ?? fallback,
+    );
+
+    if (preferGoogleFallbacks) {
+      message = googleSignInFailureMessage(
+        code: code,
+        apiMessage: message,
+        fallback: fallback,
+      );
+    }
+
     final retryAfter = _parseRetryAfter(
       response['retryAfter'] ?? _retryAfterFromData(response['data']),
     );

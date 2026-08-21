@@ -49,7 +49,12 @@ class DioClient {
             handler.next(options);
             return;
           }
-          // Add auth token if available
+          // Session-creation endpoints must not send an old HudHud Bearer token.
+          if (ApiConstants.isUnauthenticatedAuthPath(options.path)) {
+            options.headers.remove('Authorization');
+            handler.next(options);
+            return;
+          }
           final token = await _getAuthToken();
           if (token != null) {
             options.headers['Authorization'] = 'Bearer $token';
@@ -57,7 +62,11 @@ class DioClient {
           handler.next(options);
         },
         onError: (error, handler) async {
+          final path = error.requestOptions.path;
+          final isSessionCreation =
+              ApiConstants.isUnauthenticatedAuthPath(path);
           if (error.response?.statusCode == 401 &&
+              !isSessionCreation &&
               !GuestBrowseService().isGuestBrowseMode) {
             await _handleUnauthorized();
           }
