@@ -72,6 +72,7 @@ dependencies:
   file_picker: ^8.1.7
   record: ^6.2.1
   just_audio: ^0.9.42
+  audio_session: ^0.1.25
   cached_network_image: ^3.4.1
   flutter_linkify: ^6.0.0
   shorebird_code_push: ^2.0.7
@@ -108,6 +109,7 @@ flutter:
     - assets/images/
     - assets/images/home_service_tabs/
     - assets/animations/
+    - assets/sound/
     - .env
     - shorebird.yaml
 
