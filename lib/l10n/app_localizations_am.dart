@@ -139,6 +139,16 @@ class AppLocalizationsAm extends AppLocalizations {
       'በዚህ መሣሪያ ላይ በጣት አሻራ ወይም Face ID በፍጥነት ይግቡ';
 
   @override
+  String get settingsBiometricSubtitleEnabled =>
+      'በርቷል — ለመግባት ጣት አሻራ ወይም Face ID ይጠቀሙ';
+
+  @override
+  String get settingsBiometricSubtitleOffReady => 'ጠፍቷል — በማንኛውም ጊዜ ያብሩ';
+
+  @override
+  String get settingsBiometricSubtitleSignInOnce => 'ለማንቃት አንዴ ይግቡ';
+
+  @override
   String get biometricAuthReason => 'ለመቀጠል ማንነትዎን ያረጋግጡ';
 
   @override
@@ -160,6 +170,19 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get biometricDisabledSuccess => 'ባዮሜትሪክ መግቢያ ተዘግቷል';
+
+  @override
+  String get biometricOptInTitle => 'ባዮሜትሪክ መግቢያ ይንቃ?';
+
+  @override
+  String get biometricOptInMessage =>
+      'በሚቀጥለው ጊዜ በፍጥነት ለመግባት ጣት አሻራ ወይም Face ID ይጠቀሙ።';
+
+  @override
+  String get biometricOptInEnable => 'አንቃ';
+
+  @override
+  String get biometricOptInNotNow => 'አሁን አይደለም';
 
   @override
   String get loginBiometricButtonSemantics => 'በባዮሜትሪክ ይግቡ';
@@ -2717,6 +2740,22 @@ class AppLocalizationsAm extends AppLocalizations {
   String get invalidDeliveryId => 'ከመፍጠር የመጣ የመላኪያ መታወቂያ ልክ አይደለም';
 
   @override
+  String timeBandPickupSurcharge(String band, String currency, String amount) {
+    return '$band የመውሰጃ ተጨማሪ ክፍያ፦ $currency $amount';
+  }
+
+  @override
+  String get chooseValidFuturePickup =>
+      'እባክዎ የሚቀጥል ትክክለኛ የመውሰጃ ቀን እና ሰዓት ይምረጡ።';
+
+  @override
+  String get refreshQuoteRouteDistance =>
+      'መንገዱን ማስላት አልተቻለም። እባክዎ ግምቱን ያድሱ እና እንደገና ይሞክሩ።';
+
+  @override
+  String get waitForEstimateBeforeContinue => 'ከመቀጠልዎ በፊት የዋጋ ግምት ይጠብቁ';
+
+  @override
   String get deliveryBookedWallet => 'መላኪያ በዋሌት ክፍያ ተይዟል';
 
   @override
@@ -2868,4 +2907,85 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get courierDriverLocationUpdating => 'Driver location is updating';
+
+  @override
+  String get phoneEnrollmentTitle => 'Add your phone number';
+
+  @override
+  String get phoneEnrollmentSubtitle =>
+      'We need a verified mobile number for deliveries, wallet, and account security.';
+
+  @override
+  String get phoneEnrollmentOtpTitle => 'Verify your phone';
+
+  @override
+  String phoneEnrollmentOtpSubtitle(String phone) {
+    return 'Enter the 6-digit code sent to $phone.';
+  }
+
+  @override
+  String get phoneEnrollmentSendCode => 'Send code';
+
+  @override
+  String get phoneEnrollmentVerify => 'Verify';
+
+  @override
+  String get phoneEnrollmentResend => 'Resend code';
+
+  @override
+  String phoneEnrollmentResendIn(int seconds) {
+    return 'Resend in ${seconds}s';
+  }
+
+  @override
+  String get phoneEnrollmentContactSupport => 'Contact support';
+
+  @override
+  String get phoneEnrollmentSignOut => 'Sign out';
+
+  @override
+  String get phoneEnrollmentChangeNumber => 'Change phone number';
+
+  @override
+  String get phoneEnrollmentRetry => 'Try again';
+
+  @override
+  String get phoneEnrollmentPhoneInvalid =>
+      'Enter a valid Ethiopian mobile number.';
+
+  @override
+  String get phoneEnrollmentPhoneInUse =>
+      'This number is already linked to another HudHud account.';
+
+  @override
+  String get phoneEnrollmentChangeRequiresSupport =>
+      'This verified number can only be changed with support help.';
+
+  @override
+  String get phoneEnrollmentCooldown =>
+      'Please wait before requesting another code.';
+
+  @override
+  String get phoneEnrollmentRateLimited =>
+      'Too many attempts. Please try again later.';
+
+  @override
+  String get phoneEnrollmentDeliveryFailed =>
+      'We could not send the SMS. Please try again.';
+
+  @override
+  String get phoneEnrollmentNotPending =>
+      'Request a new verification code to continue.';
+
+  @override
+  String get phoneEnrollmentCodeExpired =>
+      'This code has expired. Request a new one.';
+
+  @override
+  String get phoneEnrollmentCodeInvalid =>
+      'That code is incorrect. Please try again.';
+
+  @override
+  String get phoneEnrollmentGenericError =>
+      'Something went wrong. Please try again.';
 }

@@ -1,6 +1,8 @@
 import 'package:country_picker/country_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hudhud_delivery/app/services/biometric_credential_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/utils/phone_util.dart';
 import 'package:hudhud_delivery/features/forgot_password/presentation/screen/forgot_password_identifier_screen.dart';
@@ -74,10 +76,70 @@ class _LoginFormState extends State<LoginForm> {
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  final _biometricService = BiometricCredentialService();
   bool _isPasswordVisible = false;
   LoginMethod _method = LoginMethod.phone;
   String _dialCode = kDefaultPhoneDialCode;
   String _countryIso = 'ET';
+  bool _showBiometric = false;
+  bool _useFaceIcon = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _emailController.addListener(_refreshBiometricVisibility);
+    _phoneController.addListener(_refreshBiometricVisibility);
+    _loadBiometricAvailability();
+  }
+
+  Future<void> _loadBiometricAvailability() async {
+    if (kIsWeb) return;
+    final useFace = await _biometricService.prefersFaceIcon();
+    if (!mounted) return;
+    setState(() => _useFaceIcon = useFace);
+    await _refreshBiometricVisibility();
+  }
+
+  Future<void> _refreshBiometricVisibility() async {
+    if (kIsWeb) {
+      if (_showBiometric && mounted) {
+        setState(() => _showBiometric = false);
+      }
+      return;
+    }
+
+    final supported = await _biometricService.isDeviceSupported();
+    final enabledSession = await _biometricService.hasEnabledSession();
+    if (!supported || !enabledSession) {
+      if (_showBiometric && mounted) {
+        setState(() => _showBiometric = false);
+      }
+      return;
+    }
+
+    final attempted = _currentIdentifierOrEmpty();
+    var matches = true;
+    if (attempted.isNotEmpty) {
+      matches = await _biometricService.matchesStoredLoginIdentifier(
+        attempted,
+        fieldType: _method == LoginMethod.email ? 'email' : 'phone',
+      );
+    }
+
+    if (!mounted) return;
+    if (_showBiometric != matches) {
+      setState(() => _showBiometric = matches);
+    }
+  }
+
+  String _currentIdentifierOrEmpty() {
+    if (_method == LoginMethod.email) {
+      return _emailController.text.trim();
+    }
+    final national = cleanNationalPhoneDigits(_phoneController.text);
+    if (national.isEmpty) return '';
+    return normalizePhoneToBackend('$_dialCode$national');
+  }
 
   String? _validateEmail(String? value, AppLocalizations l10n) {
     if (value == null || value.trim().isEmpty) {
@@ -101,37 +163,88 @@ class _LoginFormState extends State<LoginForm> {
     return null;
   }
 
+  void _onBiometricTap() {
+    final l10n = context.l10n;
+    context.read<LoginBloc>().add(
+          BiometricLoginRequested(
+            authReason: l10n.biometricAuthReason,
+            noCredentialsMessage: l10n.biometricNoCredentials,
+            authFailedMessage: l10n.biometricLoginFailed,
+          ),
+        );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return Form(
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          LoginMethodTabs(
-            selected: _method,
-            authStyle: true,
-            onChanged: (method) => setState(() => _method = method),
-          ),
-          const SizedBox(height: 20),
-          if (_method == LoginMethod.phone)
-            AuthPhoneNumberField(
-              countryCode: _dialCode,
-              countryIsoCode: _countryIso,
-              numberController: _phoneController,
-              hintText: l10n.hintPhoneNational,
-              onCountryChanged: (Country country) {
-                setState(() {
-                  _dialCode = '+${country.phoneCode}';
-                  _countryIso = country.countryCode;
-                });
+    return BlocListener<LoginBloc, LoginState>(
+      listenWhen: (previous, current) => current is LoginFailure,
+      listener: (context, state) {
+        if (state is LoginFailure) {
+          _loadBiometricAvailability();
+        }
+      },
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            LoginMethodTabs(
+              selected: _method,
+              authStyle: true,
+              onChanged: (method) {
+                setState(() => _method = method);
+                _refreshBiometricVisibility();
               },
-              validator: (v) => _validatePhone(v, l10n),
-            )
-          else ...[
+            ),
+            const SizedBox(height: 20),
+            if (_method == LoginMethod.phone)
+              AuthPhoneNumberField(
+                countryCode: _dialCode,
+                countryIsoCode: _countryIso,
+                numberController: _phoneController,
+                hintText: l10n.hintPhoneNational,
+                onCountryChanged: (Country country) {
+                  setState(() {
+                    _dialCode = '+${country.phoneCode}';
+                    _countryIso = country.countryCode;
+                  });
+                  _refreshBiometricVisibility();
+                },
+                validator: (v) => _validatePhone(v, l10n),
+              )
+            else ...[
+              Text(
+                l10n.labelEmail,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: AuthScreenColors.textSecondary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 6),
+              TextFormField(
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                autofillHints: const [AutofillHints.email],
+                style: const TextStyle(
+                  color: AuthScreenColors.textPrimary,
+                  fontSize: 15,
+                ),
+                decoration: authFieldDecoration(
+                  hint: l10n.hintEmail,
+                  prefixIcon: const Icon(
+                    Icons.mail_outline_rounded,
+                    color: AuthScreenColors.textSecondary,
+                    size: 20,
+                  ),
+                ),
+                validator: (v) => _validateEmail(v, l10n),
+              ),
+            ],
+            const SizedBox(height: 16),
             Text(
-              l10n.labelEmail,
+              l10n.labelPassword,
               style: const TextStyle(
                 fontSize: 13,
                 color: AuthScreenColors.textSecondary,
@@ -140,107 +253,141 @@ class _LoginFormState extends State<LoginForm> {
             ),
             const SizedBox(height: 6),
             TextFormField(
-              controller: _emailController,
-              keyboardType: TextInputType.emailAddress,
-              autofillHints: const [AutofillHints.email],
+              controller: _passwordController,
+              obscureText: !_isPasswordVisible,
               style: const TextStyle(
                 color: AuthScreenColors.textPrimary,
                 fontSize: 15,
               ),
               decoration: authFieldDecoration(
-                hint: l10n.hintEmail,
+                hint: l10n.hintPassword,
                 prefixIcon: const Icon(
-                  Icons.mail_outline_rounded,
+                  Icons.lock_outline_rounded,
                   color: AuthScreenColors.textSecondary,
                   size: 20,
                 ),
-              ),
-              validator: (v) => _validateEmail(v, l10n),
-            ),
-          ],
-          const SizedBox(height: 16),
-          Text(
-            l10n.labelPassword,
-            style: const TextStyle(
-              fontSize: 13,
-              color: AuthScreenColors.textSecondary,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 6),
-          TextFormField(
-            controller: _passwordController,
-            obscureText: !_isPasswordVisible,
-            style: const TextStyle(
-              color: AuthScreenColors.textPrimary,
-              fontSize: 15,
-            ),
-            decoration: authFieldDecoration(
-              hint: l10n.hintPassword,
-              prefixIcon: const Icon(
-                Icons.lock_outline_rounded,
-                color: AuthScreenColors.textSecondary,
-                size: 20,
-              ),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _isPasswordVisible
-                      ? Icons.visibility_rounded
-                      : Icons.visibility_off_rounded,
-                  color: AuthScreenColors.textSecondary,
-                ),
-                onPressed: () {
-                  setState(() => _isPasswordVisible = !_isPasswordVisible);
-                },
-              ),
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return l10n.validationPasswordRequired;
-              }
-              if (value.length < 6) {
-                return l10n.validationPasswordMin;
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const ForgotPasswordIdentifierScreen(),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _isPasswordVisible
+                        ? Icons.visibility_rounded
+                        : Icons.visibility_off_rounded,
+                    color: AuthScreenColors.textSecondary,
                   ),
+                  onPressed: () {
+                    setState(() => _isPasswordVisible = !_isPasswordVisible);
+                  },
+                ),
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return l10n.validationPasswordRequired;
+                }
+                if (value.length < 6) {
+                  return l10n.validationPasswordMin;
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const ForgotPasswordIdentifierScreen(),
+                    ),
+                  );
+                },
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(
+                  l10n.forgotPasswordLink,
+                  style: const TextStyle(
+                    color: AuthScreenColors.orange,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            BlocBuilder<LoginBloc, LoginState>(
+              builder: (context, state) {
+                return AuthGradientButton(
+                  label: l10n.loginTitle,
+                  loading: state.isLoginLoading(LoginAction.credentials),
+                  onPressed: state.isAnyLoginLoading ? null : _submitForm,
                 );
               },
-              style: TextButton.styleFrom(
-                padding: EdgeInsets.zero,
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: Text(
-                l10n.forgotPasswordLink,
-                style: const TextStyle(
-                  color: AuthScreenColors.orange,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
             ),
-          ),
-          const SizedBox(height: 20),
-          BlocBuilder<LoginBloc, LoginState>(
-            builder: (context, state) {
-              return AuthGradientButton(
-                label: l10n.loginTitle,
-                loading: state is LoginLoading,
-                onPressed: state is LoginLoading ? null : _submitForm,
-              );
-            },
-          ),
-        ],
+            if (_showBiometric) ...[
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  const Expanded(
+                    child: Divider(
+                      color: AuthScreenColors.textSecondary,
+                      thickness: 0.6,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Text(
+                      l10n.loginBiometricOrDivider,
+                      style: const TextStyle(
+                        color: AuthScreenColors.textSecondary,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                  const Expanded(
+                    child: Divider(
+                      color: AuthScreenColors.textSecondary,
+                      thickness: 0.6,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              BlocBuilder<LoginBloc, LoginState>(
+                builder: (context, state) {
+                  final loading = state.isLoginLoading(LoginAction.biometric);
+                  return Center(
+                    child: Semantics(
+                      button: true,
+                      label: l10n.loginBiometricButtonSemantics,
+                      child: IconButton(
+                        onPressed:
+                            state.isAnyLoginLoading ? null : _onBiometricTap,
+                        iconSize: 40,
+                        color: AuthScreenColors.orange,
+                        icon: loading
+                            ? const SizedBox(
+                                width: 28,
+                                height: 28,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: AuthScreenColors.orange,
+                                ),
+                              )
+                            : Icon(
+                                _useFaceIcon
+                                    ? Icons.face_outlined
+                                    : Icons.fingerprint_outlined,
+                                size: 40,
+                              ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
@@ -266,6 +413,8 @@ class _LoginFormState extends State<LoginForm> {
 
   @override
   void dispose() {
+    _emailController.removeListener(_refreshBiometricVisibility);
+    _phoneController.removeListener(_refreshBiometricVisibility);
     _emailController.dispose();
     _phoneController.dispose();
     _passwordController.dispose();

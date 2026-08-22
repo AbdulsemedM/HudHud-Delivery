@@ -58,16 +58,15 @@ class LoginDataProvider {
   /// POST /api/auth/google-login — customer app uses `user_type: customer`.
   Future<Map<String, dynamic>> googleLogin({
     required String idToken,
-    String? deviceToken,
+    LoginDeviceMetadata? deviceMetadata,
   }) async {
     try {
       final body = <String, dynamic>{
         'id_token': idToken,
         'user_type': 'customer',
       };
-      if (deviceToken != null && deviceToken.isNotEmpty) {
-        body['device_token'] = deviceToken;
-      }
+      final meta = deviceMetadata ?? await LoginDeviceMetadata.collect();
+      meta.applyTo(body);
       final response = await apiService.post(
         ApiConstants.googleLogin,
         data: body,

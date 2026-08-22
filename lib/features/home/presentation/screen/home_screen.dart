@@ -28,6 +28,7 @@ import 'package:hudhud_delivery/features/addresses/data/addresses_data_provider.
 import 'package:hudhud_delivery/features/addresses/data/addresses_repository.dart';
 import 'package:hudhud_delivery/features/guest/utils/guest_sign_in_prompt.dart';
 import 'package:hudhud_delivery/core/widgets/verify_phone_dialog.dart';
+import 'package:hudhud_delivery/features/login/utils/phone_enrollment_navigation.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import 'package:hudhud_delivery/features/addresses/presentation/widgets/delivery_address_selector.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
@@ -140,8 +141,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       if (mounted) setState(() => _currentUser = null);
       return;
     }
-    // Fetch fresh profile from API to get updated verification status; fallback to stored user
-    final user = await _authService.getUserProfile() ??
+    // Always hit the API after login / tab return so verification + name stay current.
+    final user = await _authService.getUserProfile(forceRefresh: true) ??
         await _authService.getStoredUser();
     if (mounted) {
       setState(() {
@@ -367,7 +368,19 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   Future<void> _openVerifyPhoneFlow() async {
     final user = _currentUser;
-    if (user?.phone == null || user!.phone!.isEmpty) return;
+    if (user?.phone == null || user!.phone!.isEmpty) {
+      final enrolled = await openPhoneEnrollmentGate(context);
+      if (enrolled && mounted) {
+        await _loadUserData();
+        if (mounted) {
+          SnackbarUtil.showSuccess(
+            context,
+            context.l10n.phoneVerifiedSuccess,
+          );
+        }
+      }
+      return;
+    }
 
     final result = await showVerifyPhoneDialog(
       context,

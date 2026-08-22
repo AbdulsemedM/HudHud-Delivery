@@ -6,7 +6,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../app/services/fcm_service.dart';
 
-/// Optional device / app fields for `POST /api/login`.
+/// Optional device / app fields for password and Google login session requests.
 class LoginDeviceMetadata {
   const LoginDeviceMetadata({
     this.fcmToken,

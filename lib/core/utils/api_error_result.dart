@@ -73,6 +73,24 @@ class ApiErrorResult {
       code == 'DELIVERY_PAYMENT_RETRY_FAILED' ||
       gatewayErrorCode == 'DELIVERY_PAYMENT_RETRY_FAILED';
 
+  /// Route distance could not be resolved (503 `ROUTE_DISTANCE_*`).
+  bool get isRouteDistanceError {
+    if (_isRouteDistanceCode(code) || _isRouteDistanceCode(gatewayErrorCode)) {
+      return true;
+    }
+    if (statusCode == 503) {
+      final lower = message.toLowerCase();
+      if (lower.contains('route_distance') || lower.contains('route distance')) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /// Validation failed specifically on `scheduled_pickup`.
+  bool get hasScheduledPickupValidation =>
+      fieldErrors.containsKey('scheduled_pickup');
+
   /// Primary user-facing text, with balance/gateway enrichment when present.
   String get displayMessage {
     final fieldMessage = _joinedFieldMessages(fieldErrors);
@@ -204,8 +222,10 @@ ApiErrorResult parseApiErrorResult(
   }
 
   if (code != null && !kKnownApiErrorCodes.contains(code)) {
-    // Keep unknown codes if they look like snake_case identifiers.
-    if (!RegExp(r'^[a-z][a-z0-9_]*$').hasMatch(code)) {
+    // Keep SCREAMING_SNAKE route-distance codes and lowercase snake_case ids.
+    if (_isRouteDistanceCode(code)) {
+      // preserve as-is
+    } else if (!RegExp(r'^[a-z][a-z0-9_]*$').hasMatch(code)) {
       code = null;
     }
   }
@@ -278,6 +298,10 @@ String? _inferCode({
   if (fieldErrors.isNotEmpty || statusCode == 422) {
     return 'validation_error';
   }
+  if (statusCode == 503 &&
+      (lower.contains('route_distance') || lower.contains('route distance'))) {
+    return 'ROUTE_DISTANCE_UNAVAILABLE';
+  }
   if (statusCode == 404) {
     if (lower.contains('ride')) return 'ride_not_found';
     if (lower.contains('service')) return 'service_not_found';
@@ -285,6 +309,11 @@ String? _inferCode({
     if (lower.contains('order')) return 'order_not_found';
   }
   return _inferCodeFromStatus(statusCode);
+}
+
+bool _isRouteDistanceCode(String? code) {
+  if (code == null || code.isEmpty) return false;
+  return code.toUpperCase().startsWith('ROUTE_DISTANCE');
 }
 
 String? _inferCodeFromStatus(int? statusCode) {

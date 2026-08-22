@@ -43,13 +43,15 @@ Future<String> obtainGoogleIdToken() async {
     if (idToken == null || idToken.isEmpty) {
       final msg = !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS
           ? 'Google did not return an ID token. iOS needs: (1) `CLIENT_ID` and '
-              '`REVERSED_CLIENT_ID` in ios/Runner/GoogleService-Info.plist from Firebase, '
-              '(2) `GOOGLE_IOS_REVERSED_CLIENT_ID` in ios/Flutter/LocalSecrets.xcconfig for the '
-              'URL scheme, (3) optional `--dart-define=GOOGLE_IOS_CLIENT_ID=...` if plist has no '
-              'CLIENT_ID, (4) `--dart-define=GOOGLE_SIGN_IN_SERVER_CLIENT_ID=...` for backend ID token.'
+              '`REVERSED_CLIENT_ID` in ios/GoogleService-Info.plist from Firebase, '
+              '(2) `GOOGLE_IOS_REVERSED_CLIENT_ID` in ios/Flutter/LocalSecrets.xcconfig matching '
+              'that REVERSED_CLIENT_ID (URL scheme), (3) optional '
+              '`--dart-define=GOOGLE_IOS_CLIENT_ID=...` if plist has no CLIENT_ID, '
+              '(4) `--dart-define=GOOGLE_SIGN_IN_SERVER_CLIENT_ID=...` for backend ID token.'
           : 'Google did not return an ID token. On Android, ensure the Web OAuth client id '
               'is set (default in GoogleSignInConfig) or pass '
-              '--dart-define=GOOGLE_SIGN_IN_SERVER_CLIENT_ID=...';
+              '--dart-define=GOOGLE_SIGN_IN_SERVER_CLIENT_ID=..., and that this machine\'s '
+              'keystore SHA-1 is registered in Firebase for com.hudhud.userapp.';
       debugPrint('[GoogleSignIn] $msg');
       throw StateError(msg);
     }

@@ -1,10 +1,24 @@
 import 'package:dio/dio.dart';
 import 'package:hudhud_delivery/core/utils/api_error_message.dart';
 // import 'package:flutter/foundation.dart';
+import 'api_constants.dart';
 import 'dio_client.dart';
 
 export 'package:hudhud_delivery/core/utils/api_error_message.dart'
     show extractApiErrorMessage, parseApiErrorResult, ApiErrorResult;
+
+/// Message for HTTP 401. Session-creation failures are not HudHud session expiry.
+String unauthorizedErrorMessage({
+  required String? requestPath,
+  required String apiMessage,
+}) {
+  if (ApiConstants.isUnauthenticatedAuthPath(requestPath)) {
+    return apiMessage.isNotEmpty
+        ? apiMessage
+        : 'Authentication failed. Please try again.';
+  }
+  return 'Your session has expired. Please login again.';
+}
 
 class ApiService {
   static ApiService? _instance;
@@ -207,7 +221,10 @@ class ApiService {
         );
       case 401:
         return ApiException(
-          'Your session has expired. Please login again.',
+          unauthorizedErrorMessage(
+            requestPath: error.requestOptions.path,
+            apiMessage: message,
+          ),
           statusCode: statusCode,
           data: payload,
           code: code,
@@ -276,6 +293,19 @@ class ApiService {
         if (code == ApiException.serviceComingSoonCode) {
           return ApiException(
             message.isNotEmpty ? message : 'Coming soon',
+            statusCode: statusCode,
+            data: payload,
+            code: code,
+            retryAfter: retryAfter,
+          );
+        }
+        // Google / session-creation temporary outages: keep API message for retry UX.
+        if (ApiConstants.isUnauthenticatedAuthPath(
+              error.requestOptions.path,
+            ) &&
+            message.isNotEmpty) {
+          return ApiException(
+            message,
             statusCode: statusCode,
             data: payload,
             code: code,

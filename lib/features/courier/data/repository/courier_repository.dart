@@ -12,6 +12,8 @@ class CourierRepository {
   CourierRepository({required this.courierDataProvider});
 
   /// Estimate delivery cost. Returns estimated_distance, estimated_duration, estimated_cost.
+  /// Pass [scheduledPickup] (ISO-8601 with offset) for scheduled bookings so the
+  /// API prices against the requested Addis Ababa pickup time.
   Future<Map<String, dynamic>> estimateDelivery({
     required String packageType,
     required double packageWeight,
@@ -21,6 +23,7 @@ class CourierRepository {
     required double dropoffLongitude,
     required String vehicleType,
     required String serviceType,
+    String? scheduledPickup,
   }) async {
     try {
       final response = await courierDataProvider.estimateDelivery(
@@ -32,6 +35,7 @@ class CourierRepository {
         dropoffLongitude: dropoffLongitude,
         vehicleType: vehicleType,
         serviceType: serviceType,
+        scheduledPickup: scheduledPickup,
       );
 
       if (response['statusCode'] == 200 || response['statusCode'] == 201) {
@@ -47,20 +51,34 @@ class CourierRepository {
           'distanceRate': estimate.distanceRate,
           'freeDistance': estimate.freeDistance,
           'weightCharge': estimate.weightCharge,
+          'timeBandName': estimate.timeBandName,
+          'timeBandMultiplier': estimate.timeBandMultiplier,
+          'timeBandSurchargeRate': estimate.timeBandSurchargeRate,
+          'timeBandSurcharge': estimate.timeBandSurcharge,
+          'evaluatedPickupAt': estimate.evaluatedPickupAt,
+          'timezone': estimate.timezone,
+          'nightHoursStart': estimate.nightHoursStart,
+          'nightHoursEnd': estimate.nightHoursEnd,
+          'scheduledPickup': scheduledPickup,
           'data': rawData,
           'message': 'Estimate retrieved successfully',
         };
       } else {
-        String errorMessage =
-            response['errorMessage'] ?? 'Error getting delivery estimate';
-        errorMessage = _cleanErrorMessage(errorMessage);
+        final statusCode = response['statusCode'] as int?;
+        final parsed = parseApiErrorResult(
+          response['data'],
+          statusCode: statusCode,
+          fallback: response['errorMessage']?.toString() ??
+              'Error getting delivery estimate',
+        );
         return {
           'success': false,
           'estimatedDistance': null,
           'estimatedDuration': null,
           'estimatedCost': null,
-          'data': null,
-          'message': errorMessage,
+          'data': response['data'],
+          'message': parsed.displayMessage,
+          'error': parsed,
         };
       }
     } catch (e) {

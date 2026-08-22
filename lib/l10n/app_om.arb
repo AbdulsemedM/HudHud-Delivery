@@ -43,6 +43,9 @@
   "settingsChangePassword": "Jecha Darbii Jijjiiri",
   "settingsBiometricLogin": "Seensa baayomeetirikii",
   "settingsBiometricLoginSubtitle": "Meeshaa kana irratti asharaa qubaa yookiin Face ID fayyadamuun saffisaan seeni",
+  "settingsBiometricSubtitleEnabled": "Banaa — asharaa qubaa yookiin Face ID fayyadamuun seeni",
+  "settingsBiometricSubtitleOffReady": "Cufame — yeroo barbaadde bani",
+  "settingsBiometricSubtitleSignInOnce": "Tokko seeni akka dandeessiftu",
   "biometricAuthReason": "Itti fufuuf eenyummaa kee mirkaneessi",
   "biometricEnableEnterPassword": "Seensa baayomeetirikii dandeessisuuf jecha darbii kee galchi",
   "biometricNotAvailable": "Seensi baayomeetirikii meeshaa kana irratti hin jiru",
@@ -50,6 +53,10 @@
   "biometricLoginFailed": "Seensi baayomeetirikii hin milkoofne. Irra deebi'ii yookiin jecha darbii fayyadami.",
   "biometricEnabledSuccess": "Seensi baayomeetirikii dandeessifame",
   "biometricDisabledSuccess": "Seensi baayomeetirikii cufame",
+  "biometricOptInTitle": "Seensa baayomeetirikii dandeessisi?",
+  "biometricOptInMessage": "Yeroo itti aanutti saffisaan seenuuf asharaa qubaa yookiin Face ID fayyadami.",
+  "biometricOptInEnable": "Dandeessisi",
+  "biometricOptInNotNow": "Amma miti",
   "loginBiometricButtonSemantics": "Baayomeetirikii fayyadamuun seeni",
   "loginBiometricOrDivider": "yookiin baayomeetirikii fayyadamuun seeni",
   "settingsNotifications": "Beeksisa",
@@ -1187,6 +1194,17 @@
   "chatMissingDeliveryId": "Haasaa banuu hin dandeenye. ID geejjibaa hin jiru.",
   "waitForPriceEstimate": "Ajajuu dura tilmaama gatii servernii eegi",
   "invalidDeliveryId": "ID geejjibaa uumame sirrii miti",
+  "timeBandPickupSurcharge": "Kaffaltii fudhatinsa {band}: {currency} {amount}",
+  "@timeBandPickupSurcharge": {
+    "placeholders": {
+      "band": {"type": "String"},
+      "currency": {"type": "String"},
+      "amount": {"type": "String"}
+    }
+  },
+  "chooseValidFuturePickup": "Maalifiiduu fi sa'aatii fudhatinsa gara fuulduraa ta'e sirrii ta'e filadhu.",
+  "refreshQuoteRouteDistance": "Karaa shallaguun hin dandeenye. Tilmaama haaromsuun deebi'ii yaali.",
+  "waitForEstimateBeforeContinue": "Itti fufuu dura tilmaama gatii eegi",
   "deliveryBookedWallet": "Geejjibaan kaffaltii boorsaa tiin qabameera",
   "cancelDeliveryTitle": "Geejjibaa haqi",
   "insufficientWalletBalance": "Hanga boorsaa gahaa hin jiru",
@@ -1283,5 +1301,37 @@
   "cancelOrder": "Ajaja haqi",
   "courierFindingNearestDrivers": "Finding the nearest available drivers",
   "courierFindingNearestDriversSubtitle": "We are finding the nearest available driver. Live driver location appears only after acceptance.",
-  "courierDriverLocationUpdating": "Driver location is updating"
+  "courierDriverLocationUpdating": "Driver location is updating",
+  "phoneEnrollmentTitle": "Add your phone number",
+  "phoneEnrollmentSubtitle": "We need a verified mobile number for deliveries, wallet, and account security.",
+  "phoneEnrollmentOtpTitle": "Verify your phone",
+  "phoneEnrollmentOtpSubtitle": "Enter the 6-digit code sent to {phone}.",
+  "@phoneEnrollmentOtpSubtitle": {
+    "placeholders": {
+      "phone": {"type": "String"}
+    }
+  },
+  "phoneEnrollmentSendCode": "Send code",
+  "phoneEnrollmentVerify": "Verify",
+  "phoneEnrollmentResend": "Resend code",
+  "phoneEnrollmentResendIn": "Resend in {seconds}s",
+  "@phoneEnrollmentResendIn": {
+    "placeholders": {
+      "seconds": {"type": "int"}
+    }
+  },
+  "phoneEnrollmentContactSupport": "Contact support",
+  "phoneEnrollmentSignOut": "Sign out",
+  "phoneEnrollmentChangeNumber": "Change phone number",
+  "phoneEnrollmentRetry": "Try again",
+  "phoneEnrollmentPhoneInvalid": "Enter a valid Ethiopian mobile number.",
+  "phoneEnrollmentPhoneInUse": "This number is already linked to another HudHud account.",
+  "phoneEnrollmentChangeRequiresSupport": "This verified number can only be changed with support help.",
+  "phoneEnrollmentCooldown": "Please wait before requesting another code.",
+  "phoneEnrollmentRateLimited": "Too many attempts. Please try again later.",
+  "phoneEnrollmentDeliveryFailed": "We could not send the SMS. Please try again.",
+  "phoneEnrollmentNotPending": "Request a new verification code to continue.",
+  "phoneEnrollmentCodeExpired": "This code has expired. Request a new one.",
+  "phoneEnrollmentCodeInvalid": "That code is incorrect. Please try again.",
+  "phoneEnrollmentGenericError": "Something went wrong. Please try again."
 }

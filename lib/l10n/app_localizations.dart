@@ -362,6 +362,24 @@ abstract class AppLocalizations {
   /// **'Sign in quickly with fingerprint or Face ID on this device'**
   String get settingsBiometricLoginSubtitle;
 
+  /// No description provided for @settingsBiometricSubtitleEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'On — use fingerprint or Face ID to sign in'**
+  String get settingsBiometricSubtitleEnabled;
+
+  /// No description provided for @settingsBiometricSubtitleOffReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Off — turn on anytime'**
+  String get settingsBiometricSubtitleOffReady;
+
+  /// No description provided for @settingsBiometricSubtitleSignInOnce.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in once to enable'**
+  String get settingsBiometricSubtitleSignInOnce;
+
   /// No description provided for @biometricAuthReason.
   ///
   /// In en, this message translates to:
@@ -403,6 +421,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Biometric login disabled'**
   String get biometricDisabledSuccess;
+
+  /// No description provided for @biometricOptInTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable biometric login?'**
+  String get biometricOptInTitle;
+
+  /// No description provided for @biometricOptInMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Use fingerprint or Face ID to sign in faster next time.'**
+  String get biometricOptInMessage;
+
+  /// No description provided for @biometricOptInEnable.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable'**
+  String get biometricOptInEnable;
+
+  /// No description provided for @biometricOptInNotNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get biometricOptInNotNow;
 
   /// No description provided for @loginBiometricButtonSemantics.
   ///
@@ -5264,6 +5306,30 @@ abstract class AppLocalizations {
   /// **'Invalid delivery id from create delivery'**
   String get invalidDeliveryId;
 
+  /// No description provided for @timeBandPickupSurcharge.
+  ///
+  /// In en, this message translates to:
+  /// **'{band} pickup surcharge: {currency} {amount}'**
+  String timeBandPickupSurcharge(String band, String currency, String amount);
+
+  /// No description provided for @chooseValidFuturePickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Please choose a valid future pickup date and time.'**
+  String get chooseValidFuturePickup;
+
+  /// No description provided for @refreshQuoteRouteDistance.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to calculate the route. Please refresh the quote and try again.'**
+  String get refreshQuoteRouteDistance;
+
+  /// No description provided for @waitForEstimateBeforeContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Wait for a price estimate before continuing'**
+  String get waitForEstimateBeforeContinue;
+
   /// No description provided for @deliveryBookedWallet.
   ///
   /// In en, this message translates to:
@@ -5539,6 +5605,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Driver location is updating'**
   String get courierDriverLocationUpdating;
+
+  /// No description provided for @phoneEnrollmentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your phone number'**
+  String get phoneEnrollmentTitle;
+
+  /// No description provided for @phoneEnrollmentSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We need a verified mobile number for deliveries, wallet, and account security.'**
+  String get phoneEnrollmentSubtitle;
+
+  /// No description provided for @phoneEnrollmentOtpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify your phone'**
+  String get phoneEnrollmentOtpTitle;
+
+  /// No description provided for @phoneEnrollmentOtpSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6-digit code sent to {phone}.'**
+  String phoneEnrollmentOtpSubtitle(String phone);
+
+  /// No description provided for @phoneEnrollmentSendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Send code'**
+  String get phoneEnrollmentSendCode;
+
+  /// No description provided for @phoneEnrollmentVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify'**
+  String get phoneEnrollmentVerify;
+
+  /// No description provided for @phoneEnrollmentResend.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend code'**
+  String get phoneEnrollmentResend;
+
+  /// No description provided for @phoneEnrollmentResendIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend in {seconds}s'**
+  String phoneEnrollmentResendIn(int seconds);
+
+  /// No description provided for @phoneEnrollmentContactSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact support'**
+  String get phoneEnrollmentContactSupport;
+
+  /// No description provided for @phoneEnrollmentSignOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get phoneEnrollmentSignOut;
+
+  /// No description provided for @phoneEnrollmentChangeNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Change phone number'**
+  String get phoneEnrollmentChangeNumber;
+
+  /// No description provided for @phoneEnrollmentRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get phoneEnrollmentRetry;
+
+  /// No description provided for @phoneEnrollmentPhoneInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid Ethiopian mobile number.'**
+  String get phoneEnrollmentPhoneInvalid;
+
+  /// No description provided for @phoneEnrollmentPhoneInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'This number is already linked to another HudHud account.'**
+  String get phoneEnrollmentPhoneInUse;
+
+  /// No description provided for @phoneEnrollmentChangeRequiresSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'This verified number can only be changed with support help.'**
+  String get phoneEnrollmentChangeRequiresSupport;
+
+  /// No description provided for @phoneEnrollmentCooldown.
+  ///
+  /// In en, this message translates to:
+  /// **'Please wait before requesting another code.'**
+  String get phoneEnrollmentCooldown;
+
+  /// No description provided for @phoneEnrollmentRateLimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Please try again later.'**
+  String get phoneEnrollmentRateLimited;
+
+  /// No description provided for @phoneEnrollmentDeliveryFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We could not send the SMS. Please try again.'**
+  String get phoneEnrollmentDeliveryFailed;
+
+  /// No description provided for @phoneEnrollmentNotPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Request a new verification code to continue.'**
+  String get phoneEnrollmentNotPending;
+
+  /// No description provided for @phoneEnrollmentCodeExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'This code has expired. Request a new one.'**
+  String get phoneEnrollmentCodeExpired;
+
+  /// No description provided for @phoneEnrollmentCodeInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'That code is incorrect. Please try again.'**
+  String get phoneEnrollmentCodeInvalid;
+
+  /// No description provided for @phoneEnrollmentGenericError.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get phoneEnrollmentGenericError;
 }
 
 class _AppLocalizationsDelegate

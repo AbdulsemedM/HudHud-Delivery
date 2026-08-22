@@ -1,10 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hudhud_delivery/app/services/auth_service.dart';
+import 'package:hudhud_delivery/app/services/biometric_credential_service.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
-import 'package:hudhud_delivery/features/dashboard/presentation/screen/dashboard_screen.dart';
 import 'package:hudhud_delivery/features/login/bloc/login_bloc.dart';
 import 'package:hudhud_delivery/features/login/data/data_provider/login_data_provider.dart';
 import 'package:hudhud_delivery/features/login/data/repository/login_repository.dart';
@@ -12,6 +12,8 @@ import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_co
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_brand_header.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_dark_scaffold.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/login_widget.dart';
+import 'package:hudhud_delivery/features/login/utils/phone_enrollment_navigation.dart';
+import 'package:hudhud_delivery/features/settings/presentation/widgets/auth_feedback.dart';
 import 'package:hudhud_delivery/features/signup/presentation/screen/signup_screen.dart';
 
 /// True while a [LoginScreen] is in the widget tree (used to avoid 401 re-push loops).
@@ -109,6 +111,72 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
+  Future<void> _maybeOfferBiometricOptIn() async {
+    if (kIsWeb) return;
+    final biometric = BiometricCredentialService();
+    if (!await biometric.shouldOfferOptIn()) return;
+    if (!mounted) return;
+
+    final l10n = context.l10n;
+    final enable = await AuthModal.dialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return AuthAlertDialog(
+          title: l10n.biometricOptInTitle,
+          content: Text(
+            l10n.biometricOptInMessage,
+            style: const TextStyle(
+              color: AuthScreenColors.textSecondary,
+              fontSize: 14,
+              height: 1.4,
+            ),
+          ),
+          actions: [
+            AuthDialogAction(
+              label: l10n.biometricOptInNotNow,
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+            ),
+            AuthDialogAction(
+              label: l10n.biometricOptInEnable,
+              filled: true,
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (!mounted) return;
+
+    if (enable == true) {
+      final authenticated = await biometric.authenticate(
+        localizedReason: l10n.biometricAuthReason,
+      );
+      if (!authenticated) {
+        await biometric.optOut();
+        return;
+      }
+      final ok = await biometric.enableBiometricLogin();
+      if (!ok && mounted) {
+        AuthSnackBar.info(context, l10n.biometricNoCredentials);
+      }
+    } else {
+      await biometric.optOut();
+    }
+  }
+
+  Future<void> _navigateAfterSuccess({
+    required bool phoneEnrollmentRequired,
+  }) async {
+    if (!mounted) return;
+    await navigateAfterAuthenticatedLogin(
+      context,
+      phoneEnrollmentRequired: phoneEnrollmentRequired,
+      resumeAfterAuth: widget.resumeAfterAuth,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
@@ -128,27 +196,12 @@ class _LoginScreenState extends State<LoginScreen> {
               current is LoginSuccess || current is LoginFailure,
           listener: (context, state) async {
             if (state is LoginSuccess) {
-              if (widget.resumeAfterAuth) {
-                final authed = await AuthService().isAuthenticated();
-                if (!context.mounted) return;
-                if (authed) {
-                  Navigator.pop(context, true);
-                } else {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const DashboardScreen(),
-                    ),
-                  );
-                }
-              } else {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const DashboardScreen(),
-                  ),
-                );
+              if (state.action == LoginAction.credentials) {
+                await _maybeOfferBiometricOptIn();
               }
+              await _navigateAfterSuccess(
+                phoneEnrollmentRequired: state.phoneEnrollmentRequired,
+              );
             } else if (state is LoginFailure) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(

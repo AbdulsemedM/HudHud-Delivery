@@ -8,7 +8,8 @@ class CourierDataProvider {
 
   /// POST /api/services/delivery/estimate
   /// Payload: package_type, package_weight, pickup_latitude, pickup_longitude,
-  /// dropoff_latitude, dropoff_longitude, vehicle_type, service_type
+  /// dropoff_latitude, dropoff_longitude, vehicle_type, service_type,
+  /// optional scheduled_pickup (ISO-8601 with timezone offset).
   Future<Map<String, dynamic>> estimateDelivery({
     required String packageType,
     required double packageWeight,
@@ -18,6 +19,7 @@ class CourierDataProvider {
     required double dropoffLongitude,
     required String vehicleType,
     required String serviceType,
+    String? scheduledPickup,
   }) async {
     try {
       final Map<String, dynamic> estimateData = {
@@ -30,6 +32,9 @@ class CourierDataProvider {
         'vehicle_type': vehicleType,
         'service_type': serviceType,
       };
+      if (scheduledPickup != null && scheduledPickup.isNotEmpty) {
+        estimateData['scheduled_pickup'] = scheduledPickup;
+      }
 
       final response = await apiService.post(
         '${ApiConstants.baseUrl}${ApiConstants.deliveryEstimate}',
@@ -44,7 +49,7 @@ class CourierDataProvider {
     } on ApiException catch (apiException) {
       return {
         'statusCode': apiException.statusCode,
-        'data': null,
+        'data': apiException.data,
         'errorMessage': apiException.message,
       };
     } on Exception catch (e) {

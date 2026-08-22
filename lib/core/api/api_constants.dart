@@ -19,13 +19,60 @@ class ApiConstants {
   /// POST — returns same shape as [login] (token, user, optional refresh_token).
   /// Coordinate path with backend if it differs.
   static const String guest = '$auth/guest';
-  /// POST body: `id_token`, optional `user_type`, optional `device_token`.
+  /// POST body: `id_token`, optional `user_type`, optional device metadata.
   static const String googleLogin = '$auth/google-login';
+  /// Authenticated phone enrollment (Sanctum). Do not add to [unauthenticatedAuthPaths].
+  static const String phoneEnrollmentStatus = '$auth/phone-enrollment/status';
+  static const String phoneEnrollmentRequest = '$auth/phone-enrollment/request';
+  static const String phoneEnrollmentVerify = '$auth/phone-enrollment/verify';
   /// Password reset OTP flow (unauthenticated): POST `/api/password/...`
   static const String passwordResetOtp = 'password/reset-otp';
   static const String passwordVerifyOtp = 'password/verify-otp';
   static const String passwordResendOtp = 'password/resend-otp';
   static const String passwordResetWithToken = 'password/reset-with-token';
+
+  /// Session-creation / public auth paths — never attach Bearer or clear session on 401.
+  static const List<String> unauthenticatedAuthPaths = [
+    login,
+    register,
+    guest,
+    googleLogin,
+    passwordResetOtp,
+    passwordVerifyOtp,
+    passwordResendOtp,
+    passwordResetWithToken,
+  ];
+
+  /// Whether [path] is a session-creation or other unauthenticated auth endpoint.
+  ///
+  /// Accepts relative Dio paths (`auth/google-login`), absolute (`/api/auth/google-login`),
+  /// or full URLs.
+  static bool isUnauthenticatedAuthPath(String? path) {
+    if (path == null || path.isEmpty) return false;
+    var normalized = path.trim();
+    final uri = Uri.tryParse(normalized);
+    if (uri != null && uri.hasScheme) {
+      normalized = uri.path;
+    }
+    final q = normalized.indexOf('?');
+    if (q >= 0) normalized = normalized.substring(0, q);
+    normalized = normalized.replaceAll('\\', '/');
+    while (normalized.startsWith('/')) {
+      normalized = normalized.substring(1);
+    }
+    if (normalized.startsWith('api/')) {
+      normalized = normalized.substring(4);
+    }
+    normalized = normalized.toLowerCase();
+    for (final candidate in unauthenticatedAuthPaths) {
+      final c = candidate.startsWith('/') ? candidate.substring(1) : candidate;
+      if (normalized == c.toLowerCase() ||
+          normalized.endsWith('/${c.toLowerCase()}')) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   // FCM endpoints
   static const String fcmToken = 'fcm/token';

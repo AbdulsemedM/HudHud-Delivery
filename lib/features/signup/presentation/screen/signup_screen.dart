@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
-import 'package:hudhud_delivery/features/dashboard/presentation/screen/dashboard_screen.dart';
 import 'package:hudhud_delivery/features/login/bloc/login_bloc.dart';
 import 'package:hudhud_delivery/features/login/data/data_provider/login_data_provider.dart';
 import 'package:hudhud_delivery/features/login/data/repository/login_repository.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_dark_scaffold.dart';
+import 'package:hudhud_delivery/features/login/utils/phone_enrollment_navigation.dart';
 import 'package:hudhud_delivery/features/signup/bloc/signup_bloc.dart';
 import 'package:hudhud_delivery/features/signup/data/data_provider/signup_data_provider.dart';
 import 'package:hudhud_delivery/features/signup/data/repository/signup_repository.dart';
@@ -47,20 +46,14 @@ class _SignupScreenState extends State<SignupScreen> {
     super.dispose();
   }
 
-  Future<void> _onGoogleSuccess(BuildContext context) async {
-    if (widget.resumeAfterAuth) {
-      final authed = await AuthService().isAuthenticated();
-      if (!context.mounted) return;
-      if (authed) {
-        Navigator.pop(context, true);
-        return;
-      }
-    }
-    if (!context.mounted) return;
-    Navigator.pushAndRemoveUntil(
+  Future<void> _onGoogleSuccess(
+    BuildContext context, {
+    required bool phoneEnrollmentRequired,
+  }) async {
+    await navigateAfterAuthenticatedLogin(
       context,
-      MaterialPageRoute(builder: (_) => const DashboardScreen()),
-      (route) => false,
+      phoneEnrollmentRequired: phoneEnrollmentRequired,
+      resumeAfterAuth: widget.resumeAfterAuth,
     );
   }
 
@@ -76,7 +69,10 @@ class _SignupScreenState extends State<SignupScreen> {
             current is LoginSuccess || current is LoginFailure,
         listener: (context, state) {
           if (state is LoginSuccess) {
-            _onGoogleSuccess(context);
+            _onGoogleSuccess(
+              context,
+              phoneEnrollmentRequired: state.phoneEnrollmentRequired,
+            );
           } else if (state is LoginFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(

@@ -139,6 +139,17 @@ class AppLocalizationsSo extends AppLocalizations {
       'Si degdeg ah ugu gal farta ama Face ID aaladdan';
 
   @override
+  String get settingsBiometricSubtitleEnabled =>
+      'Furanyahay — isticmaal farta ama Face ID si aad u gasho';
+
+  @override
+  String get settingsBiometricSubtitleOffReady => 'Xiran — fur wakhti kasta';
+
+  @override
+  String get settingsBiometricSubtitleSignInOnce =>
+      'Hal mar geli si aad u karti geliso';
+
+  @override
   String get biometricAuthReason => 'Xaqiiji aqoonsigaaga si aad u sii wadato';
 
   @override
@@ -164,6 +175,19 @@ class AppLocalizationsSo extends AppLocalizations {
   @override
   String get biometricDisabledSuccess =>
       'Galitaanka bayoomatrika waa la joojiyay';
+
+  @override
+  String get biometricOptInTitle => 'Karti geli galitaanka bayoomatrika?';
+
+  @override
+  String get biometricOptInMessage =>
+      'Isticmaal farta ama Face ID si aad ugu dhaqso gasho marka xigta.';
+
+  @override
+  String get biometricOptInEnable => 'Karti geli';
+
+  @override
+  String get biometricOptInNotNow => 'Hadda maya';
 
   @override
   String get loginBiometricButtonSemantics => 'Ku gal bayoomatrika';
@@ -2791,6 +2815,23 @@ class AppLocalizationsSo extends AppLocalizations {
   String get invalidDeliveryId => 'ID-ga gaarsiinta ee la sameeyey sax maaha';
 
   @override
+  String timeBandPickupSurcharge(String band, String currency, String amount) {
+    return 'Kharashka qaadista $band: $currency $amount';
+  }
+
+  @override
+  String get chooseValidFuturePickup =>
+      'Fadlan dooro taariikh iyo waqti qaadis mustaqbal ah oo sax ah.';
+
+  @override
+  String get refreshQuoteRouteDistance =>
+      'Waddada lama xisaabin karo. Fadlan cusboonaysii qiyaasta oo isku day mar kale.';
+
+  @override
+  String get waitForEstimateBeforeContinue =>
+      'Sug qiyaasta qiimaha ka hor intaadan sii wadin';
+
+  @override
   String get deliveryBookedWallet =>
       'Gaarsiinta waxaa lagu qabtay lacag-bixinta jeebka';
 
@@ -2947,4 +2988,85 @@ class AppLocalizationsSo extends AppLocalizations {
 
   @override
   String get courierDriverLocationUpdating => 'Driver location is updating';
+
+  @override
+  String get phoneEnrollmentTitle => 'Add your phone number';
+
+  @override
+  String get phoneEnrollmentSubtitle =>
+      'We need a verified mobile number for deliveries, wallet, and account security.';
+
+  @override
+  String get phoneEnrollmentOtpTitle => 'Verify your phone';
+
+  @override
+  String phoneEnrollmentOtpSubtitle(String phone) {
+    return 'Enter the 6-digit code sent to $phone.';
+  }
+
+  @override
+  String get phoneEnrollmentSendCode => 'Send code';
+
+  @override
+  String get phoneEnrollmentVerify => 'Verify';
+
+  @override
+  String get phoneEnrollmentResend => 'Resend code';
+
+  @override
+  String phoneEnrollmentResendIn(int seconds) {
+    return 'Resend in ${seconds}s';
+  }
+
+  @override
+  String get phoneEnrollmentContactSupport => 'Contact support';
+
+  @override
+  String get phoneEnrollmentSignOut => 'Sign out';
+
+  @override
+  String get phoneEnrollmentChangeNumber => 'Change phone number';
+
+  @override
+  String get phoneEnrollmentRetry => 'Try again';
+
+  @override
+  String get phoneEnrollmentPhoneInvalid =>
+      'Enter a valid Ethiopian mobile number.';
+
+  @override
+  String get phoneEnrollmentPhoneInUse =>
+      'This number is already linked to another HudHud account.';
+
+  @override
+  String get phoneEnrollmentChangeRequiresSupport =>
+      'This verified number can only be changed with support help.';
+
+  @override
+  String get phoneEnrollmentCooldown =>
+      'Please wait before requesting another code.';
+
+  @override
+  String get phoneEnrollmentRateLimited =>
+      'Too many attempts. Please try again later.';
+
+  @override
+  String get phoneEnrollmentDeliveryFailed =>
+      'We could not send the SMS. Please try again.';
+
+  @override
+  String get phoneEnrollmentNotPending =>
+      'Request a new verification code to continue.';
+
+  @override
+  String get phoneEnrollmentCodeExpired =>
+      'This code has expired. Request a new one.';
+
+  @override
+  String get phoneEnrollmentCodeInvalid =>
+      'That code is incorrect. Please try again.';
+
+  @override
+  String get phoneEnrollmentGenericError =>
+      'Something went wrong. Please try again.';
 }

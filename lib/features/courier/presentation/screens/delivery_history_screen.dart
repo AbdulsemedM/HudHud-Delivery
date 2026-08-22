@@ -6,6 +6,7 @@ import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/courier/presentation/screens/delivery_details_screen.dart';
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
+import 'package:hudhud_delivery/features/courier/presentation/widgets/courier_history_empty_state.dart';
 import 'package:hudhud_delivery/features/courier/presentation/widgets/delivery_history_card.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_history_filter.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_status.dart';
@@ -226,46 +227,14 @@ class _DeliveryHistoryScreenState extends State<DeliveryHistoryScreen> {
                   ),
                 )
               else if (filtered.isEmpty)
-                SliverFillRemaining(
+                const SliverFillRemaining(
                   hasScrollBody: false,
                   child: Padding(
-                    padding: const EdgeInsets.all(AppColors.spaceMD),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 112,
-                          height: 112,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: HomeColors.violet.withValues(alpha: 0.12),
-                          ),
-                          child: Icon(
-                            Icons.local_shipping_outlined,
-                            size: 56,
-                            color: HomeColors.violet.withValues(alpha: 0.9),
-                          ),
-                        ),
-                        const SizedBox(height: AppColors.spaceLG),
-                        Text(
-                          l10n.courierNoHistory,
-                          textAlign: TextAlign.center,
-                          style:
-                              Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: HomeColors.textPrimary,
-                                  ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          l10n.courierHistoryEmptySubtitle,
-                          textAlign: TextAlign.center,
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: HomeColors.textMuted,
-                                  ),
-                        ),
-                      ],
+                    padding: EdgeInsets.all(AppColors.spaceMD),
+                    child: Center(
+                      child: CourierHistoryEmptyState(
+                        compact: false,
+                      ),
                     ),
                   ),
                 )

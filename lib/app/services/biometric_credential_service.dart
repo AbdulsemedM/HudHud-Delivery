@@ -22,6 +22,9 @@ class BiometricStoredCredentials {
 
 /// Stores email/phone login credentials in OS secure storage, bound to this device.
 /// Biometric verification is required in app UI before reading credentials.
+///
+/// Credentials may be persisted without enabling unlock (`saveCredentials`).
+/// Enable is a separate opt-in (`enableBiometricLogin`).
 class BiometricCredentialService {
   BiometricCredentialService._internal();
   static final BiometricCredentialService _instance =
@@ -31,6 +34,7 @@ class BiometricCredentialService {
   static const _schemaVersion = 1;
   static const _enabledKey = 'biometric_login_enabled';
   static const _credentialsKey = 'biometric_credentials_blob';
+  static const _optedOutKey = 'biometric_user_opted_out';
 
   static const _storage = FlutterSecureStorage(
     aOptions: AndroidOptions(
@@ -62,6 +66,12 @@ class BiometricCredentialService {
     }
   }
 
+  /// Face unlock available → face icon; otherwise fingerprint.
+  Future<bool> prefersFaceIcon() async {
+    final types = await getAvailableBiometrics();
+    return types.contains(BiometricType.face);
+  }
+
   Future<bool> authenticate({required String localizedReason}) async {
     try {
       return await _localAuth.authenticate(
@@ -81,21 +91,36 @@ class BiometricCredentialService {
     return value == 'true';
   }
 
-  Future<void> setBiometricLoginEnabled(bool enabled) async {
-    if (enabled) {
-      await _storage.write(key: _enabledKey, value: 'true');
-    } else {
-      await clearCredentials();
-      await _storage.delete(key: _enabledKey);
-    }
+  Future<bool> hasUserOptedOut() async {
+    final value = await _storage.read(key: _optedOutKey);
+    return value == 'true';
   }
 
-  Future<bool> hasStoredCredentials() async {
-    if (!await isBiometricLoginEnabled()) return false;
+  /// Credentials present regardless of enabled flag.
+  Future<bool> hasCredentialBlob() async {
     final creds = await _readCredentialsInternal(validateDevice: true);
     return creds != null;
   }
 
+  /// Enabled and credentials present (show biometric login control).
+  Future<bool> hasEnabledSession() async {
+    if (!await isBiometricLoginEnabled()) return false;
+    return hasCredentialBlob();
+  }
+
+  /// Back-compat alias for [hasEnabledSession].
+  Future<bool> hasStoredCredentials() => hasEnabledSession();
+
+  /// Device supports biometrics, credentials saved, not enabled, not opted out.
+  Future<bool> shouldOfferOptIn() async {
+    if (!await isDeviceSupported()) return false;
+    if (await isBiometricLoginEnabled()) return false;
+    if (await hasUserOptedOut()) return false;
+    if (!await hasCredentialBlob()) return false;
+    return true;
+  }
+
+  /// Persist credentials without enabling biometric login.
   Future<void> saveCredentials({
     required String identifier,
     required String password,
@@ -110,12 +135,74 @@ class BiometricCredentialService {
       'deviceFingerprint': fingerprint,
     });
     await _storage.write(key: _credentialsKey, value: payload);
+  }
+
+  /// Enable unlock; requires credentials already saved. Clears opt-out.
+  /// Returns `false` if there is no credential blob.
+  Future<bool> enableBiometricLogin() async {
+    if (!await hasCredentialBlob()) return false;
     await _storage.write(key: _enabledKey, value: 'true');
+    await _storage.delete(key: _optedOutKey);
+    return true;
+  }
+
+  /// Disable unlock but keep credentials for easy re-enable.
+  Future<void> optOut() async {
+    await _storage.write(key: _enabledKey, value: 'false');
+    await _storage.write(key: _optedOutKey, value: 'true');
+  }
+
+  /// Disable unlock; keep credentials. Prefer [optOut] for Settings off.
+  Future<void> disableBiometricLogin() => optOut();
+
+  /// Wipe credentials but keep opt-out (e.g. account switch).
+  Future<void> clearSessionKeepOptOut() async {
+    await _storage.delete(key: _credentialsKey);
+    await _storage.write(key: _enabledKey, value: 'false');
+  }
+
+  /// Full wipe of biometric session and opt-out flag.
+  Future<void> clearAll() async {
+    await _storage.delete(key: _credentialsKey);
+    await _storage.delete(key: _enabledKey);
+    await _storage.delete(key: _optedOutKey);
+  }
+
+  /// @Deprecated — use [optOut] or [clearAll]. Kept for call-site migration.
+  Future<void> setBiometricLoginEnabled(bool enabled) async {
+    if (enabled) {
+      await enableBiometricLogin();
+    } else {
+      await optOut();
+    }
   }
 
   Future<BiometricStoredCredentials?> readCredentials() async {
     if (!await isBiometricLoginEnabled()) return null;
     return _readCredentialsInternal(validateDevice: true);
+  }
+
+  /// Peek stored credentials without requiring enabled (for matching / persist).
+  Future<BiometricStoredCredentials?> peekCredentials() {
+    return _readCredentialsInternal(validateDevice: true);
+  }
+
+  Future<bool> matchesStoredLoginIdentifier(
+    String attempted, {
+    String? fieldType,
+  }) async {
+    final stored = await peekCredentials();
+    if (stored == null) return false;
+
+    final type = fieldType ?? stored.fieldType;
+    if (type == 'email') {
+      return attempted.trim().toLowerCase() ==
+          stored.identifier.trim().toLowerCase();
+    }
+
+    final attemptedDigits = attempted.replaceAll(RegExp(r'\D'), '');
+    final storedDigits = stored.identifier.replaceAll(RegExp(r'\D'), '');
+    return attemptedDigits.isNotEmpty && attemptedDigits == storedDigits;
   }
 
   Future<BiometricStoredCredentials?> _readCredentialsInternal({

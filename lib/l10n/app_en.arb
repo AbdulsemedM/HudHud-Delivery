@@ -43,6 +43,9 @@
   "settingsChangePassword": "Change Password",
   "settingsBiometricLogin": "Biometric login",
   "settingsBiometricLoginSubtitle": "Sign in quickly with fingerprint or Face ID on this device",
+  "settingsBiometricSubtitleEnabled": "On — use fingerprint or Face ID to sign in",
+  "settingsBiometricSubtitleOffReady": "Off — turn on anytime",
+  "settingsBiometricSubtitleSignInOnce": "Sign in once to enable",
   "biometricAuthReason": "Verify your identity to continue",
   "biometricEnableEnterPassword": "Enter your password to enable biometric login",
   "biometricNotAvailable": "Biometric login is not available on this device",
@@ -50,6 +53,10 @@
   "biometricLoginFailed": "Biometric sign-in failed. Try again or use your password.",
   "biometricEnabledSuccess": "Biometric login enabled",
   "biometricDisabledSuccess": "Biometric login disabled",
+  "biometricOptInTitle": "Enable biometric login?",
+  "biometricOptInMessage": "Use fingerprint or Face ID to sign in faster next time.",
+  "biometricOptInEnable": "Enable",
+  "biometricOptInNotNow": "Not now",
   "loginBiometricButtonSemantics": "Sign in with biometrics",
   "loginBiometricOrDivider": "or sign in with biometrics",
   "settingsNotifications": "Notifications",
@@ -1148,6 +1155,17 @@
   "chatMissingDeliveryId": "Unable to open chat. Missing delivery ID.",
   "waitForPriceEstimate": "Wait for a server price estimate before booking",
   "invalidDeliveryId": "Invalid delivery id from create delivery",
+  "timeBandPickupSurcharge": "{band} pickup surcharge: {currency} {amount}",
+  "@timeBandPickupSurcharge": {
+    "placeholders": {
+      "band": {"type": "String"},
+      "currency": {"type": "String"},
+      "amount": {"type": "String"}
+    }
+  },
+  "chooseValidFuturePickup": "Please choose a valid future pickup date and time.",
+  "refreshQuoteRouteDistance": "Unable to calculate the route. Please refresh the quote and try again.",
+  "waitForEstimateBeforeContinue": "Wait for a price estimate before continuing",
   "deliveryBookedWallet": "Delivery booked with wallet payment",
   "cancelDeliveryTitle": "Cancel delivery",
   "insufficientWalletBalance": "Insufficient wallet balance",
@@ -1230,5 +1248,37 @@
   "cancelOrder": "Cancel order",
   "courierFindingNearestDrivers": "Finding the nearest available drivers",
   "courierFindingNearestDriversSubtitle": "We are finding the nearest available driver. Live driver location appears only after acceptance.",
-  "courierDriverLocationUpdating": "Driver location is updating"
+  "courierDriverLocationUpdating": "Driver location is updating",
+  "phoneEnrollmentTitle": "Add your phone number",
+  "phoneEnrollmentSubtitle": "We need a verified mobile number for deliveries, wallet, and account security.",
+  "phoneEnrollmentOtpTitle": "Verify your phone",
+  "phoneEnrollmentOtpSubtitle": "Enter the 6-digit code sent to {phone}.",
+  "@phoneEnrollmentOtpSubtitle": {
+    "placeholders": {
+      "phone": {"type": "String"}
+    }
+  },
+  "phoneEnrollmentSendCode": "Send code",
+  "phoneEnrollmentVerify": "Verify",
+  "phoneEnrollmentResend": "Resend code",
+  "phoneEnrollmentResendIn": "Resend in {seconds}s",
+  "@phoneEnrollmentResendIn": {
+    "placeholders": {
+      "seconds": {"type": "int"}
+    }
+  },
+  "phoneEnrollmentContactSupport": "Contact support",
+  "phoneEnrollmentSignOut": "Sign out",
+  "phoneEnrollmentChangeNumber": "Change phone number",
+  "phoneEnrollmentRetry": "Try again",
+  "phoneEnrollmentPhoneInvalid": "Enter a valid Ethiopian mobile number.",
+  "phoneEnrollmentPhoneInUse": "This number is already linked to another HudHud account.",
+  "phoneEnrollmentChangeRequiresSupport": "This verified number can only be changed with support help.",
+  "phoneEnrollmentCooldown": "Please wait before requesting another code.",
+  "phoneEnrollmentRateLimited": "Too many attempts. Please try again later.",
+  "phoneEnrollmentDeliveryFailed": "We could not send the SMS. Please try again.",
+  "phoneEnrollmentNotPending": "Request a new verification code to continue.",
+  "phoneEnrollmentCodeExpired": "This code has expired. Request a new one.",
+  "phoneEnrollmentCodeInvalid": "That code is incorrect. Please try again.",
+  "phoneEnrollmentGenericError": "Something went wrong. Please try again."
 }
