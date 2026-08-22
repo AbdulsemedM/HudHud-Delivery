@@ -80,9 +80,9 @@ dependencies:
   flutter_dotenv: ^6.0.1
 
 dependency_overrides:
-  # Shorebird builds with Flutter 3.44.x; use Built-in Kotlin Android impl.
-  # Avoid 0.8.13+17 (Kotlin Pigeon without Built-in Kotlin) which breaks javac.
-  image_picker_android: 0.8.13+19
+  # Local Flutter SDK is Dart 3.11; 0.8.13+18+ requires Dart 3.12.
+  # Stay on +16 to also avoid 0.8.13+17 Kotlin Pigeon / javac breakage.
+  image_picker_android: 0.8.13+16
 
 dev_dependencies:
   flutter_test:
