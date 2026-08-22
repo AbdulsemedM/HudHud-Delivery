@@ -2769,6 +2769,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String get handymanComingSoonTeaser2 => 'Home repairs';
 
   @override
+  String get ordersComingSoonTitle => 'Your order hub is on the way';
+
+  @override
+  String get ordersComingSoonSubtitle =>
+      'Track every delivery, reorder in one tap, and keep receipts in one place — launching soon.';
+
+  @override
+  String get ordersComingSoonTeaser1 => 'Live tracking';
+
+  @override
+  String get ordersComingSoonTeaser2 => 'One-tap reorder';
+
+  @override
+  String get ordersComingSoonTeaser3 => 'Digital receipts';
+
+  @override
+  String get ordersComingSoonStep1 =>
+      'Courier deliveries on Home — available now';
+
+  @override
+  String get ordersComingSoonStep2 =>
+      'Unified order timeline across all services';
+
+  @override
+  String get ordersComingSoonStep3 => 'Smart reorder and saved favourites';
+
+  @override
+  String get ordersComingSoonCta => 'Send a delivery now';
+
+  @override
+  String get ordersComingSoonFootnote =>
+      'Need a package delivered today? Use Courier on the Home tab.';
+
+  @override
   String get pleaseEnterValidSenderPhone =>
       'Please enter a valid sender phone (09xxxxxxxx)';
 

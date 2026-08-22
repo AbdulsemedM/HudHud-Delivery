@@ -5276,6 +5276,66 @@ abstract class AppLocalizations {
   /// **'Home repairs'**
   String get handymanComingSoonTeaser2;
 
+  /// No description provided for @ordersComingSoonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your order hub is on the way'**
+  String get ordersComingSoonTitle;
+
+  /// No description provided for @ordersComingSoonSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Track every delivery, reorder in one tap, and keep receipts in one place — launching soon.'**
+  String get ordersComingSoonSubtitle;
+
+  /// No description provided for @ordersComingSoonTeaser1.
+  ///
+  /// In en, this message translates to:
+  /// **'Live tracking'**
+  String get ordersComingSoonTeaser1;
+
+  /// No description provided for @ordersComingSoonTeaser2.
+  ///
+  /// In en, this message translates to:
+  /// **'One-tap reorder'**
+  String get ordersComingSoonTeaser2;
+
+  /// No description provided for @ordersComingSoonTeaser3.
+  ///
+  /// In en, this message translates to:
+  /// **'Digital receipts'**
+  String get ordersComingSoonTeaser3;
+
+  /// No description provided for @ordersComingSoonStep1.
+  ///
+  /// In en, this message translates to:
+  /// **'Courier deliveries on Home — available now'**
+  String get ordersComingSoonStep1;
+
+  /// No description provided for @ordersComingSoonStep2.
+  ///
+  /// In en, this message translates to:
+  /// **'Unified order timeline across all services'**
+  String get ordersComingSoonStep2;
+
+  /// No description provided for @ordersComingSoonStep3.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart reorder and saved favourites'**
+  String get ordersComingSoonStep3;
+
+  /// No description provided for @ordersComingSoonCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a delivery now'**
+  String get ordersComingSoonCta;
+
+  /// No description provided for @ordersComingSoonFootnote.
+  ///
+  /// In en, this message translates to:
+  /// **'Need a package delivered today? Use Courier on the Home tab.'**
+  String get ordersComingSoonFootnote;
+
   /// No description provided for @pleaseEnterValidSenderPhone.
   ///
   /// In en, this message translates to:
