@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
@@ -101,36 +102,38 @@ class _SignupScreenState extends State<SignupScreen> {
                   _SignInPrompt(
                     onPressed: () => Navigator.pop(context),
                   ),
-                  const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      const Expanded(
-                        child: Divider(
-                          color: AuthScreenColors.textSecondary,
-                          thickness: 0.6,
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: Text(
-                          l10n.loginOrContinueWith,
-                          style: const TextStyle(
+                  if (defaultTargetPlatform != TargetPlatform.iOS) ...[
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        const Expanded(
+                          child: Divider(
                             color: AuthScreenColors.textSecondary,
-                            fontSize: 13,
+                            thickness: 0.6,
                           ),
                         ),
-                      ),
-                      const Expanded(
-                        child: Divider(
-                          color: AuthScreenColors.textSecondary,
-                          thickness: 0.6,
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Text(
+                            l10n.loginOrContinueWith,
+                            style: const TextStyle(
+                              color: AuthScreenColors.textSecondary,
+                              fontSize: 13,
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  const _GoogleSignInButton(),
-                  const SizedBox(height: 8),
+                        const Expanded(
+                          child: Divider(
+                            color: AuthScreenColors.textSecondary,
+                            thickness: 0.6,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    const _GoogleSignInButton(),
+                    const SizedBox(height: 8),
+                  ],
                 ],
               );
             },

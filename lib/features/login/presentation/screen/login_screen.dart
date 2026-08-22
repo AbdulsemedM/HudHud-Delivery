@@ -255,8 +255,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       ],
                     ),
                     const SizedBox(height: 16),
-                    const _GoogleSignInButton(),
-                    const SizedBox(height: 12),
+                    if (defaultTargetPlatform != TargetPlatform.iOS) ...[
+                      const _GoogleSignInButton(),
+                      const SizedBox(height: 12),
+                    ],
                     const _GuestLoginButton(),
                     const SizedBox(height: 16),
                   ],
