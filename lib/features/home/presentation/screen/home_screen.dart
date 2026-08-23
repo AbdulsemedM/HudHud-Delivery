@@ -33,6 +33,7 @@ import 'package:hudhud_delivery/features/login/utils/phone_enrollment_navigation
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import 'package:hudhud_delivery/features/addresses/presentation/widgets/delivery_address_selector.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
+import 'package:hudhud_delivery/features/home/data/marketing_offers_prompt_prefs.dart';
 import 'package:hudhud_delivery/features/onboarding_tour/presentation/onboarding_tour_controller.dart';
 import 'package:hudhud_delivery/features/onboarding_tour/presentation/onboarding_tour_keys.dart';
 
@@ -180,8 +181,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
-  /// Once per process (cold start). Navigating back to Home creates a new
-  /// [HomeScreen] and must not show this again.
+  /// At most once per process, and only every third eligible app open.
   Future<void> _tryShowMarketingOffersPrompt() async {
     if (!mounted) return;
     if (_marketingOffersCheckedThisProcess) return;
@@ -191,6 +191,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final u = _currentUser;
     if (u == null) return;
     if (u.marketingConsent) return;
+    if (!await MarketingOffersPromptPrefs.shouldShowThisLaunch()) return;
+    if (!mounted) return;
     await showDialog<void>(
       context: context,
       barrierDismissible: true,
