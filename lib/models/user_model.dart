@@ -16,6 +16,8 @@ class UserModel {
   final String? avatar;
   final String? avatarUrl;
   final String? referralCode;
+  /// Explicit marketing opt-in. Missing or non-true values are false.
+  final bool marketingConsent;
 
   UserModel({
     this.id,
@@ -30,6 +32,7 @@ class UserModel {
     this.avatar,
     this.avatarUrl,
     this.referralCode,
+    this.marketingConsent = false,
   });
 
   bool get isEmailVerified => emailVerifiedAt != null;
@@ -52,6 +55,7 @@ class UserModel {
     String? avatar,
     String? avatarUrl,
     String? referralCode,
+    bool? marketingConsent,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -66,6 +70,7 @@ class UserModel {
       avatar: avatar ?? this.avatar,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       referralCode: referralCode ?? this.referralCode,
+      marketingConsent: marketingConsent ?? this.marketingConsent,
     );
   }
 
@@ -83,6 +88,7 @@ class UserModel {
       'avatar': avatar,
       'avatar_url': avatarUrl,
       'referral_code': referralCode,
+      'marketing_consent': marketingConsent,
     };
   }
 
@@ -115,7 +121,32 @@ class UserModel {
       userMap['avatar_thumb_url'] = avatarThumb;
     }
 
+    if (userMap['marketing_consent'] == null &&
+        envelope['marketing_consent'] != null) {
+      userMap['marketing_consent'] = envelope['marketing_consent'];
+    }
+    if (userMap['settings'] == null && envelope['settings'] is Map) {
+      userMap['settings'] = envelope['settings'];
+    }
+
     return userMap;
+  }
+
+  /// Only explicit true / 1 / "true" counts as opted in.
+  static bool parseMarketingConsent(Map<String, dynamic> map) {
+    if (_isExplicitTrue(map['marketing_consent'])) return true;
+    final settings = map['settings'];
+    if (settings is Map &&
+        _isExplicitTrue(Map<String, dynamic>.from(settings)['marketing_consent'])) {
+      return true;
+    }
+    return false;
+  }
+
+  static bool _isExplicitTrue(dynamic v) {
+    if (v == true || v == 1) return true;
+    if (v is String && v.trim().toLowerCase() == 'true') return true;
+    return false;
   }
 
   static String? _parseAvatarUrl(Map<String, dynamic> map) {
@@ -161,6 +192,7 @@ class UserModel {
       avatar: _parseAvatarPath(map),
       avatarUrl: _parseAvatarUrl(map),
       referralCode: map['referral_code']?.toString(),
+      marketingConsent: parseMarketingConsent(map),
     );
   }
 
@@ -189,7 +221,8 @@ class UserModel {
         other.dateOfBirth == dateOfBirth &&
         other.avatar == avatar &&
         other.avatarUrl == avatarUrl &&
-        other.referralCode == referralCode;
+        other.referralCode == referralCode &&
+        other.marketingConsent == marketingConsent;
   }
 
   @override
@@ -205,6 +238,7 @@ class UserModel {
         dateOfBirth.hashCode ^
         avatar.hashCode ^
         avatarUrl.hashCode ^
-        referralCode.hashCode;
+        referralCode.hashCode ^
+        marketingConsent.hashCode;
   }
 }

@@ -83,6 +83,9 @@ class ApiConstants {
   static const String users = '/users';
   static const String profile =
       'profile'; // GET /api/profile returns user object at root
+  /// PUT JSON: marketing_consent, promotional_offers, marketing_emails.
+  static const String profileNotificationPreferences =
+      'profile/notification-preferences';
   /// POST multipart: name, email, phone, optional avatar file.
   static const String updateProfile = 'update-profile';
   static const String changePassword = '$users/change-password';

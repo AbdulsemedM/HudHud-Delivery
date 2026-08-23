@@ -73,6 +73,7 @@ class _SettingsScreenState extends State<SettingsScreen>
   bool _biometricHasCredentials = false;
   bool _biometricBusy = false;
   bool _useFaceBiometricIcon = false;
+  bool _marketingConsentBusy = false;
   int _chatUnreadCount = 0;
   Timer? _chatUnreadTimer;
   final BiometricCredentialService _biometricService =
@@ -205,6 +206,40 @@ class _SettingsScreenState extends State<SettingsScreen>
         _biometricHasCredentials = true;
       });
       AuthSnackBar.success(context, l10n.biometricEnabledSuccess);
+    }
+  }
+
+  Future<void> _onMarketingConsentChanged(bool value) async {
+    if (_marketingConsentBusy) return;
+    if (GuestBrowseService().isGuestBrowseMode) return;
+
+    final previous = _user?.marketingConsent ?? false;
+    setState(() {
+      _marketingConsentBusy = true;
+      _user = _user?.copyWith(marketingConsent: value);
+    });
+
+    try {
+      final updated = await _authService.updateMarketingConsent(value);
+      if (!mounted) return;
+      setState(() {
+        _user = updated;
+        _marketingConsentBusy = false;
+      });
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _user = _user?.copyWith(marketingConsent: previous);
+        _marketingConsentBusy = false;
+      });
+      AuthSnackBar.error(context, e.message);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _user = _user?.copyWith(marketingConsent: previous);
+        _marketingConsentBusy = false;
+      });
+      AuthSnackBar.error(context, e.toString());
     }
   }
 
@@ -659,6 +694,14 @@ class _SettingsScreenState extends State<SettingsScreen>
                           );
                         },
                       ),
+                      if (!GuestBrowseService().isGuestBrowseMode) ...[
+                        const _ProfileTileDivider(),
+                        _ProfileMarketingConsentTile(
+                          enabled: _user?.marketingConsent ?? false,
+                          switchEnabled: !_marketingConsentBusy,
+                          onChanged: _onMarketingConsentChanged,
+                        ),
+                      ],
                       const _ProfileTileDivider(),
                       _ProfileMenuTile(
                         icon: Icons.language_outlined,
@@ -930,6 +973,74 @@ class _ProfileBiometricTile extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   _subtitle(l10n),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    height: 1.35,
+                    color: AuthScreenColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          _ProfileGradientSwitch(
+            value: enabled,
+            onChanged: switchEnabled ? onChanged : null,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProfileMarketingConsentTile extends StatelessWidget {
+  final bool enabled;
+  final bool switchEnabled;
+  final ValueChanged<bool> onChanged;
+
+  const _ProfileMarketingConsentTile({
+    required this.enabled,
+    required this.switchEnabled,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: AuthScreenColors.orange.withValues(alpha: 0.12),
+            ),
+            child: const Icon(
+              Icons.campaign_outlined,
+              color: AuthScreenColors.orange,
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.settingsMarketingOffers,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                    color: AuthScreenColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  l10n.settingsMarketingOffersSubtitle,
                   style: const TextStyle(
                     fontSize: 12,
                     height: 1.35,

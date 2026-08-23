@@ -200,6 +200,13 @@ class AppLocalizationsOm extends AppLocalizations {
   String get settingsNotifications => 'Beeksisa';
 
   @override
+  String get settingsMarketingOffers => 'Dhiyeessii fi haaromsa HudHud fudhadhu';
+
+  @override
+  String get settingsMarketingOffersSubtitle =>
+      'Filannoo. Beeksisa, SMS ykn iimeeliin dhiyeessii erguu dandeenya. Yeroo kamiyyuu cufuu dandeessa.';
+
+  @override
   String get settingsSmsNotifications => 'Beeksisa Ergaa gabaabaa';
 
   @override
@@ -572,6 +579,9 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get courierInstantTitle => 'Geejjibaa Battalaa';
+
+  @override
+  String get courierAddDelivery => 'Geejjibaa dabali';
 
   @override
   String get courierInstantSubtitle =>

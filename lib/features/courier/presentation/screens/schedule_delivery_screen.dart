@@ -53,10 +53,6 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
   double? _estimatedDistance;
   int? _estimatedDuration;
   String _estimatedCurrency = 'ETB';
-  double? _baseDeliveryFee;
-  double? _weightCharge;
-  String? _timeBandName;
-  double? _timeBandSurcharge;
   String? _quotedScheduledPickup;
 
   bool get _canFetchEstimate =>
@@ -142,10 +138,6 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
         _estimatedCost = null;
         _estimatedDistance = null;
         _estimatedDuration = null;
-        _baseDeliveryFee = null;
-        _weightCharge = null;
-        _timeBandName = null;
-        _timeBandSurcharge = null;
         _quotedScheduledPickup = null;
       });
       return;
@@ -189,10 +181,6 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
         _estimatedDistance = result['estimatedDistance'] as double?;
         _estimatedDuration = result['estimatedDuration'] as int?;
         _estimatedCurrency = result['currency'] as String? ?? 'ETB';
-        _baseDeliveryFee = result['baseDeliveryFee'] as double?;
-        _weightCharge = result['weightCharge'] as double?;
-        _timeBandName = result['timeBandName'] as String?;
-        _timeBandSurcharge = result['timeBandSurcharge'] as double?;
         _quotedScheduledPickup =
             result['scheduledPickup'] as String? ?? scheduledPickup;
         _estimateError = _estimatedCost == null
@@ -213,10 +201,6 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
         _estimatedCost = null;
         _estimatedDistance = null;
         _estimatedDuration = null;
-        _baseDeliveryFee = null;
-        _weightCharge = null;
-        _timeBandName = null;
-        _timeBandSurcharge = null;
         _quotedScheduledPickup = null;
       }
     });
@@ -910,10 +894,6 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                                     estimatedDistance: _estimatedDistance,
                                     estimatedDuration: _estimatedDuration,
                                     currency: _estimatedCurrency,
-                                    baseDeliveryFee: _baseDeliveryFee,
-                                    weightCharge: _weightCharge,
-                                    timeBandName: _timeBandName,
-                                    timeBandSurcharge: _timeBandSurcharge,
                                   ),
                                   const SizedBox(height: 16),
                                   SizedBox(

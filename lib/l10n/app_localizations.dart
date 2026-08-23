@@ -464,6 +464,18 @@ abstract class AppLocalizations {
   /// **'Notifications'**
   String get settingsNotifications;
 
+  /// No description provided for @settingsMarketingOffers.
+  ///
+  /// In en, this message translates to:
+  /// **'Receive HudHud offers and updates'**
+  String get settingsMarketingOffers;
+
+  /// No description provided for @settingsMarketingOffersSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional. We may send promotions by push, SMS, or email. You can turn this off at any time.'**
+  String get settingsMarketingOffersSubtitle;
+
   /// No description provided for @settingsSmsNotifications.
   ///
   /// In en, this message translates to:
@@ -1153,6 +1165,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Instant Delivery'**
   String get courierInstantTitle;
+
+  /// No description provided for @courierAddDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Delivery'**
+  String get courierAddDelivery;
 
   /// No description provided for @courierInstantSubtitle.
   ///

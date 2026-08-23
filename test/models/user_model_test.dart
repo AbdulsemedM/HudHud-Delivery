@@ -45,4 +45,68 @@ void main() {
       expect(user.avatarUrl, 'https://example.com/thumb.jpg');
     });
   });
+
+  group('UserModel.marketingConsent', () {
+    test('defaults to false when omitted', () {
+      final user = UserModel.fromMap({'id': 1});
+      expect(user.marketingConsent, isFalse);
+    });
+
+    test('treats null, 0, and false as not consented', () {
+      expect(
+        UserModel.fromMap({'marketing_consent': null}).marketingConsent,
+        isFalse,
+      );
+      expect(
+        UserModel.fromMap({'marketing_consent': 0}).marketingConsent,
+        isFalse,
+      );
+      expect(
+        UserModel.fromMap({'marketing_consent': false}).marketingConsent,
+        isFalse,
+      );
+      expect(
+        UserModel.fromMap({'marketing_consent': 'false'}).marketingConsent,
+        isFalse,
+      );
+    });
+
+    test('opts in only for explicit true values', () {
+      expect(
+        UserModel.fromMap({'marketing_consent': true}).marketingConsent,
+        isTrue,
+      );
+      expect(
+        UserModel.fromMap({'marketing_consent': 1}).marketingConsent,
+        isTrue,
+      );
+      expect(
+        UserModel.fromMap({'marketing_consent': 'true'}).marketingConsent,
+        isTrue,
+      );
+    });
+
+    test('reads nested settings.marketing_consent', () {
+      final user = UserModel.fromMap({
+        'id': 2,
+        'settings': {'marketing_consent': true},
+      });
+      expect(user.marketingConsent, isTrue);
+    });
+
+    test('copies envelope-level marketing_consent onto user map', () {
+      final map = UserModel.userMapFromApiEnvelope({
+        'success': true,
+        'data': {'id': 3, 'name': 'A'},
+        'marketing_consent': true,
+      });
+      expect(map, isNotNull);
+      expect(UserModel.fromMap(map!).marketingConsent, isTrue);
+    });
+
+    test('round-trips through toMap', () {
+      final user = UserModel(id: 4, marketingConsent: true);
+      expect(UserModel.fromMap(user.toMap()).marketingConsent, isTrue);
+    });
+  });
 }

@@ -14,7 +14,6 @@ import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data
 import 'package:hudhud_delivery/features/courier/data/models/create_delivery_result.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
-import 'package:hudhud_delivery/features/courier/presentation/widgets/delivery_estimate_banner.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_estimate.dart';
 import 'package:hudhud_delivery/features/courier/utils/courier_home_refresh.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_payment_helper.dart';
@@ -90,10 +89,6 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
   String? _walletBalanceError;
   double? _estimatedCost;
   String _estimatedCurrency = 'ETB';
-  double? _baseDeliveryFee;
-  double? _weightCharge;
-  String? _timeBandName;
-  double? _timeBandSurcharge;
   String? _estimateError;
   /// Exact `scheduled_pickup` string used for the last successful quote.
   String? _quotedScheduledPickup;
@@ -371,10 +366,6 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
         if (result['success'] == true) {
           _estimatedCost = result['estimatedCost'] as double?;
           _estimatedCurrency = result['currency'] as String? ?? 'ETB';
-          _baseDeliveryFee = result['baseDeliveryFee'] as double?;
-          _weightCharge = result['weightCharge'] as double?;
-          _timeBandName = result['timeBandName'] as String?;
-          _timeBandSurcharge = result['timeBandSurcharge'] as double?;
           _quotedScheduledPickup = scheduledPickup != null
               ? (result['scheduledPickup'] as String? ?? scheduledPickup)
               : null;
@@ -394,10 +385,6 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
             _estimateError = result['message'] as String?;
           }
           _estimatedCost = null;
-          _baseDeliveryFee = null;
-          _weightCharge = null;
-          _timeBandName = null;
-          _timeBandSurcharge = null;
           _quotedScheduledPickup = null;
         }
       });
@@ -837,32 +824,6 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                 '$_estimatedCurrency ${_estimatedCost!.toStringAsFixed(2)}';
           }
 
-          final l10n = context.l10n;
-          final breakdownParts = <String>[];
-          if (_baseDeliveryFee != null) {
-            breakdownParts.add(
-              'Base ${_baseDeliveryFee!.toStringAsFixed(2)}',
-            );
-          }
-          if (_weightCharge != null) {
-            breakdownParts.add(
-              'Weight ${_weightCharge!.toStringAsFixed(2)}',
-            );
-          }
-          final breakdownText =
-              breakdownParts.isEmpty ? null : breakdownParts.join(' · ');
-
-          final bandLabel = formatTimeBandDisplayName(_timeBandName);
-          final surchargeText = _timeBandSurcharge != null &&
-                  _timeBandSurcharge! > 0 &&
-                  bandLabel.isNotEmpty
-              ? l10n.timeBandPickupSurcharge(
-                  bandLabel,
-                  _estimatedCurrency,
-                  _timeBandSurcharge!.toStringAsFixed(2),
-                )
-              : null;
-
           final theme = Theme.of(context);
           const borderColor = HomeColors.border;
           return Scaffold(
@@ -1083,42 +1044,6 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                                                                   .violet,
                                                             ),
                                                           ),
-                                                    if (breakdownText != null &&
-                                                        !_isLoadingEstimate &&
-                                                        _estimateError == null)
-                                                      Padding(
-                                                        padding:
-                                                            const EdgeInsets.only(
-                                                                top: 4),
-                                                        child: Text(
-                                                          breakdownText,
-                                                          style: theme
-                                                              .textTheme.bodySmall
-                                                              ?.copyWith(
-                                                            color: HomeColors
-                                                                .textMuted,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    if (surchargeText != null &&
-                                                        !_isLoadingEstimate &&
-                                                        _estimateError == null)
-                                                      Padding(
-                                                        padding:
-                                                            const EdgeInsets.only(
-                                                                top: 4),
-                                                        child: Text(
-                                                          surchargeText,
-                                                          style: theme
-                                                              .textTheme.bodySmall
-                                                              ?.copyWith(
-                                                            color: HomeColors
-                                                                .textMuted,
-                                                            fontWeight:
-                                                                FontWeight.w600,
-                                                          ),
-                                                        ),
-                                                      ),
                                                     if (_estimateError != null)
                                                       Padding(
                                                         padding:

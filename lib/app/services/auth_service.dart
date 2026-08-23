@@ -1029,6 +1029,41 @@ class AuthService {
     await _storeUser(user);
   }
 
+  /// PUT /api/profile/notification-preferences. All three flags share [consented].
+  Future<UserModel> updateMarketingConsent(bool consented) async {
+    final current = _currentUser;
+    if (current == null) {
+      throw ApiException('Not signed in', statusCode: 401);
+    }
+
+    final response = await _apiService.put(
+      ApiConstants.profileNotificationPreferences,
+      data: {
+        'marketing_consent': consented,
+        'promotional_offers': consented,
+        'marketing_emails': consented,
+      },
+    );
+
+    var value = consented;
+    final body = response.data;
+    if (body is Map) {
+      final map = Map<String, dynamic>.from(body);
+      final data = map['data'];
+      if (data is Map) {
+        value = UserModel.parseMarketingConsent(
+          Map<String, dynamic>.from(data),
+        );
+      } else {
+        value = UserModel.parseMarketingConsent(map);
+      }
+    }
+
+    final updated = current.copyWith(marketingConsent: value);
+    await updateCurrentUser(updated);
+    return updated;
+  }
+
   // Store user session data from external sources (e.g., signup)
   Future<void> storeUserSession({
     required UserModel user,

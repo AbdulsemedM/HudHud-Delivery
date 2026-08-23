@@ -35,7 +35,7 @@ class PackageDetailsScreen extends StatefulWidget {
 }
 
 class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
-  final TextEditingController _itemTypeController = TextEditingController();
+  String? _itemType;
   final TextEditingController _quantityController = TextEditingController();
   final TextEditingController _packageWeightController =
       TextEditingController();
@@ -101,7 +101,6 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
 
   @override
   void dispose() {
-    _itemTypeController.dispose();
     _quantityController.dispose();
     _packageWeightController.dispose();
     _packageDescriptionController.dispose();
@@ -156,7 +155,7 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
   }
 
   void _navigateToConfirm() {
-    if (_itemTypeController.text.isEmpty) {
+    if (_itemType == null || _itemType!.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(context.l10n.pleaseSelectItemType),
@@ -227,7 +226,7 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
           pickupPosition: widget.pickupPosition,
           deliveryPosition: widget.deliveryPosition,
           selectedVehicle: widget.selectedVehicle,
-          itemType: _itemTypeController.text,
+          itemType: _itemType!,
           quantity: _quantityController.text,
           packageWeight: weight,
           packageDescription: _packageDescriptionController.text.trim(),
@@ -292,63 +291,43 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                             ),
                           ),
                           const SizedBox(height: 16),
-                          GestureDetector(
-                            onTap: () {
-                              showModalBottomSheet(
-                                context: context,
-                                backgroundColor: HomeColors.surface,
-                                builder: (context) => Container(
-                                  padding: const EdgeInsets.all(20),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: _itemTypes.map((type) {
-                                      return ListTile(
-                                        title: Text(
-                                          type,
-                                          style: const TextStyle(
-                                            color: HomeColors.textPrimary,
-                                          ),
-                                        ),
-                                        onTap: () {
-                                          setState(() {
-                                            _itemTypeController.text = type;
-                                          });
-                                          Navigator.pop(context);
-                                        },
-                                      );
-                                    }).toList(),
-                                  ),
-                                ),
-                              );
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: fieldFill,
-                                borderRadius:
-                                    BorderRadius.circular(AppColors.radiusLG),
-                                border: Border.all(color: outline),
-                              ),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      _itemTypeController.text.isEmpty
-                                          ? 'Select type of item (e.g. gadget, document)'
-                                          : _itemTypeController.text,
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: _itemTypeController.text.isEmpty
-                                            ? HomeColors.textMuted
-                                            : HomeColors.textPrimary,
-                                      ),
-                                    ),
-                                  ),
-                                  const Icon(Icons.keyboard_arrow_down,
-                                      color: HomeColors.textMuted),
-                                ],
+                          DropdownButtonFormField<String>(
+                            initialValue: _itemType,
+                            isExpanded: true,
+                            dropdownColor: HomeColors.surface,
+                            icon: const Icon(
+                              Icons.keyboard_arrow_down,
+                              color: HomeColors.textMuted,
+                            ),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: HomeColors.textPrimary,
+                            ),
+                            decoration: _fieldDecoration(
+                              labelText: 'What are you sending',
+                              hintText:
+                                  'Select type of item (e.g. gadget, document)',
+                              fieldFill: fieldFill,
+                              outline: outline,
+                            ),
+                            hint: const Text(
+                              'Select type of item (e.g. gadget, document)',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: HomeColors.textMuted,
                               ),
                             ),
+                            items: _itemTypes
+                                .map(
+                                  (type) => DropdownMenuItem<String>(
+                                    value: type,
+                                    child: Text(type),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (value) {
+                              setState(() => _itemType = value);
+                            },
                           ),
                           const SizedBox(height: 16),
                           Row(

@@ -228,8 +228,8 @@ class _CourierScreenState extends State<CourierScreen> {
               heroTag: 'courier_instant_delivery_fab',
               backgroundColor: AuthScreenColors.orange,
               foregroundColor: Colors.white,
-              icon: const Icon(Icons.flash_on_rounded),
-              label: Text(l10n.courierInstantTitle),
+              icon: const Icon(Icons.add_rounded),
+              label: Text(l10n.courierAddDelivery),
               onPressed: _openInstantDelivery,
             )
           : null,

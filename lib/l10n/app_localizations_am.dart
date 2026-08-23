@@ -194,6 +194,13 @@ class AppLocalizationsAm extends AppLocalizations {
   String get settingsNotifications => 'ማሳወቂያዎች';
 
   @override
+  String get settingsMarketingOffers => 'የሁድሁድ ቅናሾችን እና ዝማኔዎችን ተቀበል';
+
+  @override
+  String get settingsMarketingOffersSubtitle =>
+      'አማራጭ። በፑሽ፣ በኤስኤምኤስ ወይም በኢሜይል ልናቀርብ እንችላለን። በማንኛውም ጊዜ ማጥፋት ይችላሉ።';
+
+  @override
   String get settingsSmsNotifications => 'የኤስኤምኤስ ማሳወቂያዎች';
 
   @override
@@ -553,6 +560,9 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get courierInstantTitle => 'ፈጣን ማድረስ';
+
+  @override
+  String get courierAddDelivery => 'ማድረሻ ጨምር';
 
   @override
   String get courierInstantSubtitle => 'መልእክተኛ ጥቅልዎን ብቻ ይወስዳል እና ወዲያውኑ ያቀርባል።';

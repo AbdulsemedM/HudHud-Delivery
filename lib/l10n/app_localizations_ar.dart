@@ -198,6 +198,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsNotifications => 'إشعارات';
 
   @override
+  String get settingsMarketingOffers => 'تلقي عروض وتحديثات هدهود';
+
+  @override
+  String get settingsMarketingOffersSubtitle =>
+      'اختياري. قد نرسل عروضاً عبر الإشعارات أو الرسائل أو البريد. يمكنك إيقاف ذلك في أي وقت.';
+
+  @override
   String get settingsSmsNotifications => 'إشعارات الرسائل القصيرة';
 
   @override
@@ -562,6 +569,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get courierInstantTitle => 'التسليم الفوري';
+
+  @override
+  String get courierAddDelivery => 'إضافة توصيل';
 
   @override
   String get courierInstantSubtitle =>

@@ -4,12 +4,6 @@ import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:shimmer/shimmer.dart';
 
-/// Capitalizes the API time-band name for display (e.g. night → Night).
-String formatTimeBandDisplayName(String? name) {
-  if (name == null || name.isEmpty) return '';
-  return name[0].toUpperCase() + name.substring(1);
-}
-
 /// Server estimate summary shown on location/vehicle selection screens.
 class DeliveryEstimateBanner extends StatelessWidget {
   const DeliveryEstimateBanner({
@@ -21,10 +15,6 @@ class DeliveryEstimateBanner extends StatelessWidget {
     this.estimatedDistance,
     this.estimatedDuration,
     this.currency = 'ETB',
-    this.baseDeliveryFee,
-    this.weightCharge,
-    this.timeBandName,
-    this.timeBandSurcharge,
   });
 
   final bool isVisible;
@@ -34,10 +24,6 @@ class DeliveryEstimateBanner extends StatelessWidget {
   final double? estimatedDistance;
   final int? estimatedDuration;
   final String currency;
-  final double? baseDeliveryFee;
-  final double? weightCharge;
-  final String? timeBandName;
-  final double? timeBandSurcharge;
 
   @override
   Widget build(BuildContext context) {
@@ -47,16 +33,6 @@ class DeliveryEstimateBanner extends StatelessWidget {
     final theme = Theme.of(context);
     const borderColor = HomeColors.border;
 
-    final breakdownParts = <String>[];
-    if (baseDeliveryFee != null) {
-      breakdownParts.add('Base ${baseDeliveryFee!.toStringAsFixed(2)}');
-    }
-    if (weightCharge != null) {
-      breakdownParts.add('Weight ${weightCharge!.toStringAsFixed(2)}');
-    }
-    final breakdownText =
-        breakdownParts.isEmpty ? null : breakdownParts.join(' · ');
-
     final metaParts = <String>[];
     if (estimatedDistance != null) {
       metaParts.add('${estimatedDistance!.toStringAsFixed(1)} km');
@@ -65,16 +41,6 @@ class DeliveryEstimateBanner extends StatelessWidget {
       metaParts.add('${estimatedDuration!} min');
     }
     final metaText = metaParts.isEmpty ? null : metaParts.join(' · ');
-
-    final bandLabel = formatTimeBandDisplayName(timeBandName);
-    final surchargeText =
-        timeBandSurcharge != null && timeBandSurcharge! > 0 && bandLabel.isNotEmpty
-            ? l10n.timeBandPickupSurcharge(
-                bandLabel,
-                currency,
-                timeBandSurcharge!.toStringAsFixed(2),
-              )
-            : null;
 
     String costText = '—';
     if (!isLoading && error == null && estimatedCost != null) {
@@ -148,25 +114,6 @@ class DeliveryEstimateBanner extends StatelessWidget {
                 metaText,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: HomeColors.textMuted,
-                ),
-              ),
-            ],
-            if (breakdownText != null && !isLoading && error == null) ...[
-              const SizedBox(height: 4),
-              Text(
-                breakdownText,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: HomeColors.textMuted,
-                ),
-              ),
-            ],
-            if (surchargeText != null && !isLoading && error == null) ...[
-              const SizedBox(height: 4),
-              Text(
-                surchargeText,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: HomeColors.textMuted,
-                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],

@@ -196,6 +196,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsNotifications => 'Notifications';
 
   @override
+  String get settingsMarketingOffers => 'Receive HudHud offers and updates';
+
+  @override
+  String get settingsMarketingOffersSubtitle =>
+      'Optional. We may send promotions by push, SMS, or email. You can turn this off at any time.';
+
+  @override
   String get settingsSmsNotifications => 'SMS Notifications';
 
   @override
@@ -562,6 +569,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get courierInstantTitle => 'Instant Delivery';
+
+  @override
+  String get courierAddDelivery => 'Add Delivery';
 
   @override
   String get courierInstantSubtitle =>

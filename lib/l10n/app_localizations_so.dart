@@ -199,6 +199,14 @@ class AppLocalizationsSo extends AppLocalizations {
   String get settingsNotifications => 'Ogeysiisyada';
 
   @override
+  String get settingsMarketingOffers =>
+      'Hel dalacsiinta iyo cusboonaysiinta HudHud';
+
+  @override
+  String get settingsMarketingOffersSubtitle =>
+      'Ikhtiyaari. Waxaan kuu diri karnaa dalacsiin push, SMS, ama email. Waqti kasta waad dami kartaa.';
+
+  @override
   String get settingsSmsNotifications => 'Ogeysiisyada SMS';
 
   @override
@@ -568,6 +576,9 @@ class AppLocalizationsSo extends AppLocalizations {
 
   @override
   String get courierInstantTitle => 'Bixinta degdega ah';
+
+  @override
+  String get courierAddDelivery => 'Ku dar gaarsiin';
 
   @override
   String get courierInstantSubtitle =>
