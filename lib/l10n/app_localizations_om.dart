@@ -200,7 +200,8 @@ class AppLocalizationsOm extends AppLocalizations {
   String get settingsNotifications => 'Beeksisa';
 
   @override
-  String get settingsMarketingOffers => 'Dhiyeessii fi haaromsa HudHud fudhadhu';
+  String get settingsMarketingOffers =>
+      'Dhiyeessii fi haaromsa HudHud fudhadhu';
 
   @override
   String get settingsMarketingOffersSubtitle =>
