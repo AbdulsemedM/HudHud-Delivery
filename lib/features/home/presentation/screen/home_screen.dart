@@ -20,6 +20,7 @@ import 'package:hudhud_delivery/models/user_model.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/controllers/service_accent_controller.dart';
 import 'package:hudhud_delivery/core/utils/snackbar_util.dart';
+import 'package:hudhud_delivery/features/settings/presentation/widgets/auth_feedback.dart';
 import '../../bloc/home_bloc.dart';
 import '../widgets/home_widget.dart';
 import '../../data/repository/home_repository.dart';
@@ -68,6 +69,9 @@ class HomeScreenWrapper extends StatelessWidget {
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final AuthService _authService = AuthService();
 
+  /// Survives Home being disposed when leaving the tab (dashboard is not an IndexedStack).
+  static bool _marketingOffersCheckedThisProcess = false;
+
   bool _syncedServiceAccent = false;
 
   UserModel? _currentUser;
@@ -78,6 +82,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   bool _verificationPromptOpen = false;
   bool _verifyBannerDismissed = false;
+  bool _launchPromptSequenceStarted = false;
+  bool _launchPromptSequenceComplete = false;
 
   final OnboardingTourKeys _tourKeys = OnboardingTourKeys();
 
@@ -89,7 +95,27 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     OnboardingTourController.replaySignal.addListener(_onReplayTourRequested);
     _loadUserData();
     _requestLocationAndUpdate(resumeRefresh: false);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeStartOnboardingTour());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _runLaunchPromptSequence());
+  }
+
+  Future<void> _runLaunchPromptSequence() async {
+    if (_launchPromptSequenceStarted) return;
+    _launchPromptSequenceStarted = true;
+    try {
+      if (!mounted) return;
+      await OnboardingTourController.maybeStart(
+        context: context,
+        keys: _tourKeys,
+      );
+      if (!mounted) return;
+      await _loadUserData();
+      if (!mounted) return;
+      await _tryShowVerificationPrompt();
+      if (!mounted) return;
+      await _tryShowMarketingOffersPrompt();
+    } finally {
+      _launchPromptSequenceComplete = true;
+    }
   }
 
   void _maybeStartOnboardingTour() {
@@ -108,7 +134,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void _onHomeTabActivation() {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
+      if (!_launchPromptSequenceComplete) return;
       await _loadUserData();
+      if (!mounted) return;
+      await _tryShowVerificationPrompt();
     });
   }
 
@@ -148,10 +177,39 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       setState(() {
         _currentUser = user;
       });
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _tryShowVerificationPrompt();
-      });
     }
+  }
+
+  /// Once per process (cold start). Navigating back to Home creates a new
+  /// [HomeScreen] and must not show this again.
+  Future<void> _tryShowMarketingOffersPrompt() async {
+    if (!mounted) return;
+    if (_marketingOffersCheckedThisProcess) return;
+    _marketingOffersCheckedThisProcess = true;
+    if (GuestBrowseService().isGuestBrowseMode) return;
+    if (!context.read<ServiceAccentController>().isOnHomeTab) return;
+    final u = _currentUser;
+    if (u == null) return;
+    if (u.marketingConsent) return;
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) => MarketingOffersPromptDialog(
+        onNotNow: () => Navigator.of(ctx).pop(),
+        onAccept: () async {
+          try {
+            final updated = await _authService.updateMarketingConsent(true);
+            if (!mounted) return;
+            setState(() => _currentUser = updated);
+            if (ctx.mounted) Navigator.of(ctx).pop();
+          } on ApiException catch (e) {
+            if (mounted) AuthSnackBar.error(context, e.message);
+          } catch (e) {
+            if (mounted) AuthSnackBar.error(context, e.toString());
+          }
+        },
+      ),
+    );
   }
 
   /// Shows when Home tab is selected and email or phone still needs verification.

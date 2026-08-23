@@ -8,6 +8,66 @@ import '../../../../core/utils/avatar_util.dart';
 import '../../../../core/widgets/user_avatar.dart';
 import '../../../../models/user_model.dart';
 
+/// Shown on app open when a signed-in user has not opted into marketing offers.
+class MarketingOffersPromptDialog extends StatefulWidget {
+  final Future<void> Function() onAccept;
+  final VoidCallback onNotNow;
+
+  const MarketingOffersPromptDialog({
+    super.key,
+    required this.onAccept,
+    required this.onNotNow,
+  });
+
+  @override
+  State<MarketingOffersPromptDialog> createState() =>
+      _MarketingOffersPromptDialogState();
+}
+
+class _MarketingOffersPromptDialogState extends State<MarketingOffersPromptDialog> {
+  bool _busy = false;
+
+  Future<void> _accept() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      await widget.onAccept();
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      title: Text(l10n.settingsMarketingOffers),
+      content: Text(
+        l10n.settingsMarketingOffersSubtitle,
+        style: theme.textTheme.bodyMedium,
+      ),
+      actions: [
+        TextButton(
+          onPressed: _busy ? null : widget.onNotNow,
+          child: Text(l10n.dealsModalClose),
+        ),
+        FilledButton(
+          onPressed: _busy ? null : _accept,
+          child: _busy
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : Text(l10n.actionOk),
+        ),
+      ],
+    );
+  }
+}
+
 /// Shown when the user lands on the Home tab and email or phone is not verified.
 class AccountVerificationPromptDialog extends StatelessWidget {
   final UserModel user;
