@@ -257,10 +257,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 16),
                     if (defaultTargetPlatform != TargetPlatform.iOS) ...[
                       const _GoogleSignInButton(),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
                     ],
-                    const _GuestLoginButton(),
-                    const SizedBox(height: 16),
                   ],
                 );
               },
@@ -308,45 +306,6 @@ class _SignUpPrompt extends StatelessWidget {
           ),
           textAlign: TextAlign.center,
         ),
-      ),
-    );
-  }
-}
-
-class _GuestLoginButton extends StatelessWidget {
-  const _GuestLoginButton();
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    return SizedBox(
-      width: double.infinity,
-      child: BlocBuilder<LoginBloc, LoginState>(
-        builder: (context, state) {
-          final loading = state.isLoginLoading(LoginAction.guest);
-          return TextButton(
-            onPressed: state.isAnyLoginLoading
-                ? null
-                : () => context.read<LoginBloc>().add(GuestLoginRequested()),
-            child: loading
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: AuthScreenColors.lavender,
-                    ),
-                  )
-                : Text(
-                    l10n.loginContinueAsGuest,
-                    style: const TextStyle(
-                      color: AuthScreenColors.lavender,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-          );
-        },
       ),
     );
   }

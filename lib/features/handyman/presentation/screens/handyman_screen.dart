@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
@@ -8,7 +7,6 @@ import 'package:hudhud_delivery/core/widgets/status_chip.dart';
 import 'package:hudhud_delivery/features/handyman/data/data_provider/handyman_data_provider.dart';
 import 'package:hudhud_delivery/features/handyman/data/models/service_request_model.dart';
 import 'package:hudhud_delivery/features/handyman/data/repository/handyman_repository.dart';
-import 'package:hudhud_delivery/features/guest/utils/guest_sign_in_prompt.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/features/home/presentation/widgets/home_widget.dart';
 import 'package:lottie/lottie.dart';
@@ -39,18 +37,10 @@ class _HandymanScreenState extends State<HandymanScreen> {
     _repository = HandymanRepository(
       dataProvider: HandymanDataProvider(apiService: ApiService.instance),
     );
-    if (GuestBrowseService().isGuestBrowseMode) {
-      _isLoading = false;
-    } else {
-      _fetchRequests();
-    }
+    _fetchRequests();
   }
 
   Future<void> _fetchRequests() async {
-    if (!await requireSignInForBackend(context)) {
-      if (mounted) setState(() => _isLoading = false);
-      return;
-    }
     if (!mounted) return;
     setState(() {
       _isLoading = true;

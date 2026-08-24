@@ -102,36 +102,4 @@ class LoginDataProvider {
       };
     }
   }
-
-  Future<Map<String, dynamic>> guest() async {
-    try {
-      final response = await apiService.post(
-        ApiConstants.guest,
-        data: <String, dynamic>{},
-      );
-      return {
-        'statusCode': response.statusCode,
-        'data': response.data,
-        'errorMessage': null,
-        'code': null,
-        'retryAfter': null,
-      };
-    } on ApiException catch (apiError) {
-      return {
-        'statusCode': apiError.statusCode,
-        'data': apiError.data,
-        'errorMessage': apiError.message,
-        'code': apiError.code,
-        'retryAfter': apiError.retryAfter,
-      };
-    } on Exception {
-      return {
-        'statusCode': 500,
-        'data': null,
-        'errorMessage': _genericUnexpected,
-        'code': null,
-        'retryAfter': null,
-      };
-    }
-  }
 }

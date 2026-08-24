@@ -1,32 +1,16 @@
-import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
-import 'package:hudhud_delivery/core/api/api_service.dart';
-import 'package:hudhud_delivery/features/guest/data/public_catalog_data_provider.dart';
-import 'package:hudhud_delivery/features/guest/data/public_catalog_repository.dart';
 import 'package:hudhud_delivery/features/orders/data/models/vendor_model.dart';
 
 import '../data_provider/vendors_data_provider.dart';
 
 class VendorsRepository {
   final VendorsDataProvider vendorsDataProvider;
-  final PublicCatalogRepository? publicCatalogRepository;
 
   VendorsRepository({
     required this.vendorsDataProvider,
-    PublicCatalogRepository? publicCatalogRepository,
-  }) : publicCatalogRepository = publicCatalogRepository ??
-            PublicCatalogRepository(
-              dataProvider: PublicCatalogDataProvider(
-                apiService: ApiService.instance,
-              ),
-            );
-
-  Future<bool> _usePublicCatalog() => GuestBrowseService().isActive();
+  });
 
   /// GET /api/vendors?page=
   Future<List<VendorModel>> getVendors({int page = 1}) async {
-    if (await _usePublicCatalog()) {
-      return publicCatalogRepository!.getVendors(page: page);
-    }
     final response = await vendorsDataProvider.getVendors(page: page);
     if (response['statusCode'] != 200) {
       throw Exception(

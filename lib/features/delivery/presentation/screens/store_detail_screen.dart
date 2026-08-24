@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/app/navigation/cart_navigation.dart';
 import 'package:hudhud_delivery/app/services/cart_service.dart';
-import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
@@ -13,9 +12,7 @@ import 'package:hudhud_delivery/features/categories/presentation/widgets/categor
 import 'package:hudhud_delivery/features/delivery/presentation/screens/product_detail_screen.dart';
 import 'package:hudhud_delivery/features/guest/data/branches_repository.dart';
 import 'package:hudhud_delivery/features/guest/model/branch_model.dart';
-import 'package:hudhud_delivery/features/guest/utils/guest_sign_in_prompt.dart';
 import 'package:hudhud_delivery/features/orders/data/models/vendor_model.dart';
-import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import 'package:hudhud_delivery/features/products/data/products_data_provider.dart';
 import 'package:hudhud_delivery/features/products/data/products_repository.dart';
 import 'package:hudhud_delivery/features/products/model/products_query.dart';
@@ -318,14 +315,6 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                     label: 'Orders',
                     isSelected: _selectedTab == 'Orders',
                     onTap: () {
-                      if (GuestBrowseService().isGuestBrowseMode) {
-                        final l10n = AppLocalizations.of(context)!;
-                        showGuestSignInRequiredDialog(
-                          context,
-                          message: l10n.guestOrdersSignIn,
-                        );
-                        return;
-                      }
                       setState(() {
                         _selectedTab = 'Orders';
                       });

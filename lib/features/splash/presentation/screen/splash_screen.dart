@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/app/services/force_update_service.dart';
-import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
 import 'package:hudhud_delivery/app/services/remote_config_service.dart';
 import 'package:hudhud_delivery/app/services/startup_location_service.dart';
 import 'package:hudhud_delivery/features/dashboard/presentation/screen/dashboard_screen.dart';
 import 'package:hudhud_delivery/features/force_update/presentation/screen/force_update_screen.dart';
 import 'package:hudhud_delivery/features/force_update/presentation/widgets/soft_update_dialog.dart';
+import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
 import 'package:hudhud_delivery/features/login/presentation/screen/phone_enrollment_screen.dart';
 import 'package:hudhud_delivery/features/login/utils/phone_enrollment_gate.dart';
 import 'package:hudhud_delivery/features/splash/presentation/theme/splash_colors.dart';
@@ -112,34 +112,37 @@ class _SplashScreenState extends State<SplashScreen>
     }
 
     if (!mounted) return;
-    await _goToHome();
+    await _navigateAfterAuthCheck();
   }
 
-  /// Always open home. Use stored token when present; otherwise browse as guest.
-  /// Authenticated users who still need phone enrollment are gated first.
-  Future<void> _goToHome() async {
+  /// Authenticated → dashboard (or phone enrollment). Otherwise → login.
+  Future<void> _navigateAfterAuthCheck() async {
     final isAuthenticated = await _authService.isAuthenticated();
-    await GuestBrowseService().configureBrowseSession(
-      isAuthenticated: isAuthenticated,
-    );
     if (!mounted) return;
 
-    if (isAuthenticated) {
-      final user =
-          _authService.currentUser ?? await _authService.getStoredUser();
-      if (!mounted) return;
-      if (user != null && userNeedsPhoneEnrollment(user)) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const PhoneEnrollmentScreen(),
-          ),
-        );
-        return;
-      }
+    if (!isAuthenticated) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const LoginScreen(),
+        ),
+      );
+      return;
     }
 
+    final user =
+        _authService.currentUser ?? await _authService.getStoredUser();
     if (!mounted) return;
+    if (user != null && userNeedsPhoneEnrollment(user)) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const PhoneEnrollmentScreen(),
+        ),
+      );
+      return;
+    }
+
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(

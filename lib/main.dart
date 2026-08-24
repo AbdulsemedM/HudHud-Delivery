@@ -28,7 +28,6 @@ import 'controllers/service_accent_controller.dart';
 // Services
 import 'app/services/fcm_service.dart';
 import 'app/services/auth_service.dart';
-import 'app/services/guest_browse_service.dart';
 import 'app/services/remote_config_service.dart';
 import 'app/navigation/app_navigator.dart';
 import 'app/navigation/fcm_notification_router.dart';
@@ -112,13 +111,11 @@ void main() async {
 
   // Register 401 redirect to login (skip if login is already showing).
   DioClient.instance.setOnUnauthorized(() {
-    if (loginScreenIsActive || GuestBrowseService().isGuestBrowseMode) return;
-    GuestBrowseService().clearGuestBrowseMode().then((_) {
-      navigatorKey.currentState?.pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-        (route) => false,
-      );
-    });
+    if (loginScreenIsActive) return;
+    navigatorKey.currentState?.pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      (route) => false,
+    );
   });
 
   // Initialize orders repository

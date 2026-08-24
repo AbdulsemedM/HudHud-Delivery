@@ -37,6 +37,7 @@ class FindingCourierScreen extends StatefulWidget {
   final String recipientName;
   final String recipientPhone;
   final String? packageImagePath;
+  final List<LatLng>? routePolylinePoints;
 
   const FindingCourierScreen({
     super.key,
@@ -53,6 +54,7 @@ class FindingCourierScreen extends StatefulWidget {
     required this.recipientName,
     required this.recipientPhone,
     this.packageImagePath,
+    this.routePolylinePoints,
   });
 
   @override
@@ -111,6 +113,11 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
     _loadDeliveryGuyIcon();
     _loadMapsAvailability();
     _startNearbyPoller();
+    final seeded = widget.routePolylinePoints;
+    // Two points are a pickup→dropoff shortcut, not a road route.
+    if (seeded != null && seeded.length > 2) {
+      _routePolylinePoints = seeded;
+    }
     if (widget.pickupPosition != null && widget.deliveryPosition != null) {
       _fetchRouteDirections();
     }
@@ -147,17 +154,27 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
     final pickup = widget.pickupPosition;
     final delivery = widget.deliveryPosition;
     if (pickup == null || delivery == null) return;
-    final result = await GoogleDirectionsService.getDirections(
-      originLat: pickup.latitude,
-      originLng: pickup.longitude,
-      destLat: delivery.latitude,
-      destLng: delivery.longitude,
-    );
-    if (!mounted) return;
-    // Update polyline only — do not re-fit camera (keeps zoom usable).
-    setState(() {
-      _routePolylinePoints = result?.polylinePoints;
-    });
+
+    for (var attempt = 0; attempt < 3; attempt++) {
+      if (attempt > 0) {
+        await Future<void>.delayed(Duration(milliseconds: 400 * attempt));
+      }
+      if (!mounted) return;
+      final result = await GoogleDirectionsService.getDirections(
+        originLat: pickup.latitude,
+        originLng: pickup.longitude,
+        destLat: delivery.latitude,
+        destLng: delivery.longitude,
+      );
+      if (!mounted) return;
+      final points = result?.polylinePoints;
+      if (points != null && points.length > 2) {
+        setState(() {
+          _routePolylinePoints = points;
+        });
+        return;
+      }
+    }
   }
 
   void _startPollTimer() {
@@ -238,19 +255,14 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
   }
 
   Set<gmaps.Polyline> get _polylines {
-    final pickup = widget.pickupPosition;
-    final delivery = widget.deliveryPosition;
-    if (pickup == null || delivery == null) return {};
-    final points = _routePolylinePoints != null &&
-            _routePolylinePoints!.length >= 2
-        ? _routePolylinePoints!.map(_toG).toList()
-        : [_toG(pickup), _toG(delivery)];
+    final points = _routePolylinePoints;
+    if (points == null || points.length < 3) return {};
     return {
       gmaps.Polyline(
         polylineId: const gmaps.PolylineId('route'),
-        points: points,
+        points: points.map(_toG).toList(),
         color: HomeColors.violet,
-        width: 3,
+        width: 4,
       ),
     };
   }

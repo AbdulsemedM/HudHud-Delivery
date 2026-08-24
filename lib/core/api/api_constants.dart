@@ -16,9 +16,6 @@ class ApiConstants {
   static const String logout = '$auth/logout';
   static const String refreshToken = '$auth/refresh';
 
-  /// POST — returns same shape as [login] (token, user, optional refresh_token).
-  /// Coordinate path with backend if it differs.
-  static const String guest = '$auth/guest';
   /// POST body: `id_token`, optional `user_type`, optional device metadata.
   static const String googleLogin = '$auth/google-login';
   /// Authenticated phone enrollment (Sanctum). Do not add to [unauthenticatedAuthPaths].
@@ -35,7 +32,6 @@ class ApiConstants {
   static const List<String> unauthenticatedAuthPaths = [
     login,
     register,
-    guest,
     googleLogin,
     passwordResetOtp,
     passwordVerifyOtp,

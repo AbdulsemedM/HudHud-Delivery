@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
-import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
 import 'package:hudhud_delivery/features/categories/model/categories_products_model.dart';
-import 'package:hudhud_delivery/features/guest/utils/guest_sign_in_prompt.dart';
 import 'package:hudhud_delivery/features/wishlist/bloc/wishlist_bloc.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
 
@@ -52,16 +50,9 @@ class _WishlistToggleButtonState extends State<WishlistToggleButton> {
   }
 
   void _toggle() {
-    if (GuestBrowseService().isGuestBrowseMode) {
-      showGuestSignInRequiredDialog(context);
-      return;
-    }
     final userId = _userId;
     final productId = widget.product.id;
-    if (userId == null || productId == null) {
-      showGuestSignInRequiredDialog(context);
-      return;
-    }
+    if (userId == null || productId == null) return;
 
     final bloc = context.read<WishlistBloc>();
     final state = bloc.state;
@@ -87,8 +78,7 @@ class _WishlistToggleButtonState extends State<WishlistToggleButton> {
   Widget build(BuildContext context) {
     final productId = widget.product.id;
     final userId = _userId;
-    final guest = GuestBrowseService().isGuestBrowseMode;
-    final disabled = guest || userId == null || productId == null;
+    final disabled = userId == null || productId == null;
     final colorScheme = Theme.of(context).colorScheme;
 
     return BlocBuilder<WishlistBloc, WishlistState>(
@@ -106,7 +96,7 @@ class _WishlistToggleButtonState extends State<WishlistToggleButton> {
           tooltip: isWishlisted
               ? l10n.wishlistTooltipRemove
               : l10n.wishlistTooltipAdd,
-          onPressed: disabled || _loading ? (guest ? _toggle : null) : _toggle,
+          onPressed: disabled || _loading ? null : _toggle,
           icon: _loading
               ? SizedBox(
                   width: widget.size,

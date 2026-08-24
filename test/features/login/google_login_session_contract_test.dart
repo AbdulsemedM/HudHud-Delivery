@@ -17,7 +17,6 @@ void main() {
       );
       expect(ApiConstants.isUnauthenticatedAuthPath('login'), isTrue);
       expect(ApiConstants.isUnauthenticatedAuthPath('register'), isTrue);
-      expect(ApiConstants.isUnauthenticatedAuthPath('auth/guest'), isTrue);
       expect(
         ApiConstants.isUnauthenticatedAuthPath('password/reset-otp'),
         isTrue,
@@ -32,6 +31,7 @@ void main() {
       expect(ApiConstants.isUnauthenticatedAuthPath('profile'), isFalse);
       expect(ApiConstants.isUnauthenticatedAuthPath('auth/logout'), isFalse);
       expect(ApiConstants.isUnauthenticatedAuthPath('auth/refresh'), isFalse);
+      expect(ApiConstants.isUnauthenticatedAuthPath('auth/guest'), isFalse);
       expect(ApiConstants.isUnauthenticatedAuthPath(null), isFalse);
       expect(ApiConstants.isUnauthenticatedAuthPath(''), isFalse);
     });

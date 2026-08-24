@@ -23,8 +23,7 @@ import 'package:hudhud_delivery/features/chat/presentation/screens/support_chat_
 import 'package:hudhud_delivery/features/chat/chat_bloc_provider.dart';
 import 'package:hudhud_delivery/features/chat/presentation/widgets/chat_unread_badge.dart';
 import 'package:hudhud_delivery/features/chat/utils/chat_polling_config.dart';
-import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
-import 'package:hudhud_delivery/features/dashboard/presentation/screen/dashboard_screen.dart';
+import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
 // import 'package:hudhud_delivery/features/onboarding_tour/presentation/onboarding_tour_controller.dart';
 import 'package:hudhud_delivery/features/wallet/data/providers/wallet_data_provider.dart';
 import 'package:hudhud_delivery/features/wallet/data/repositories/wallet_repository.dart';
@@ -123,7 +122,6 @@ class _SettingsScreenState extends State<SettingsScreen>
   }
 
   Future<void> _fetchChatUnreadCount() async {
-    if (GuestBrowseService().isGuestBrowseMode) return;
     try {
       final count = await createChatRepository().getUnreadCount();
       if (mounted) setState(() => _chatUnreadCount = count);
@@ -211,7 +209,6 @@ class _SettingsScreenState extends State<SettingsScreen>
 
   Future<void> _onMarketingConsentChanged(bool value) async {
     if (_marketingConsentBusy) return;
-    if (GuestBrowseService().isGuestBrowseMode) return;
 
     final previous = _user?.marketingConsent ?? false;
     setState(() {
@@ -391,11 +388,10 @@ class _SettingsScreenState extends State<SettingsScreen>
       if (shouldLogout == true) {
         final authService = AuthService();
         await authService.logout();
-        await GuestBrowseService().enterGuestBrowseMode();
 
         if (context.mounted) {
           Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => const DashboardScreen()),
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
             (route) => false,
           );
         }
@@ -694,14 +690,12 @@ class _SettingsScreenState extends State<SettingsScreen>
                           );
                         },
                       ),
-                      if (!GuestBrowseService().isGuestBrowseMode) ...[
-                        const _ProfileTileDivider(),
-                        _ProfileMarketingConsentTile(
-                          enabled: _user?.marketingConsent ?? false,
-                          switchEnabled: !_marketingConsentBusy,
-                          onChanged: _onMarketingConsentChanged,
-                        ),
-                      ],
+                      const _ProfileTileDivider(),
+                      _ProfileMarketingConsentTile(
+                        enabled: _user?.marketingConsent ?? false,
+                        switchEnabled: !_marketingConsentBusy,
+                        onChanged: _onMarketingConsentChanged,
+                      ),
                       const _ProfileTileDivider(),
                       _ProfileMenuTile(
                         icon: Icons.language_outlined,

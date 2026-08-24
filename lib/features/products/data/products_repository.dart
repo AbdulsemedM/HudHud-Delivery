@@ -1,4 +1,3 @@
-import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/features/categories/model/categories_products_model.dart';
 import 'package:hudhud_delivery/features/guest/data/public_catalog_data_provider.dart';
@@ -22,12 +21,7 @@ class ProductsRepository {
               ),
             );
 
-  Future<bool> _usePublicCatalog() => GuestBrowseService().isActive();
-
   Future<ProductsListResult> getProducts(ProductsQuery query) async {
-    if (await _usePublicCatalog()) {
-      return publicCatalogRepository!.getProducts(query);
-    }
     final response = await productsDataProvider.getProducts(query);
     if (response['statusCode'] != 200) {
       throw Exception(
@@ -43,19 +37,12 @@ class ProductsRepository {
     return publicCatalogRepository!.getFeaturedProducts(limit: limit);
   }
 
-  /// GET /api/popular/products (auth) or /api/public/popular/products (guest).
+  /// GET /api/popular/products
   Future<List<PopularProductModel>> getPopularProducts({
     String period = 'month',
     int? vendorId,
     int? categoryId,
   }) async {
-    if (await _usePublicCatalog()) {
-      return publicCatalogRepository!.getPopularProducts(
-        period: period,
-        vendorId: vendorId,
-        categoryId: categoryId,
-      );
-    }
     final response = await productsDataProvider.getPopularProducts(
       period: period,
       vendorId: vendorId,

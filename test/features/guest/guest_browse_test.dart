@@ -1,35 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
 import 'package:hudhud_delivery/features/categories/model/category_tree_model.dart';
 import 'package:hudhud_delivery/features/guest/data/public_catalog_repository.dart';
 import 'package:hudhud_delivery/features/guest/model/branch_model.dart';
 import 'package:hudhud_delivery/features/products/model/products_list_result.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-
-  group('GuestBrowseService', () {
-    setUp(() async {
-      SharedPreferences.setMockInitialValues({});
-      await GuestBrowseService().clearGuestBrowseMode();
-    });
-
-    test('enterGuestBrowseMode sets active flag', () async {
-      final service = GuestBrowseService();
-      expect(await service.isActive(), isFalse);
-      await service.enterGuestBrowseMode();
-      expect(await service.isActive(), isTrue);
-      expect(service.isGuestBrowseMode, isTrue);
-    });
-
-    test('clearGuestBrowseMode resets flag', () async {
-      final service = GuestBrowseService();
-      await service.enterGuestBrowseMode();
-      await service.clearGuestBrowseMode();
-      expect(await service.isActive(), isFalse);
-    });
-  });
 
   group('ProductsListResult public API', () {
     test('parses empty filtered products response', () {

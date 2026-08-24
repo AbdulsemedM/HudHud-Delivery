@@ -110,8 +110,9 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
   void initState() {
     super.initState();
     _selectedVehicle = mapCourierVehicleType(widget.selectedVehicle);
-    _paymentType = isOfflineDeliveryPayment(widget.paymentType)
-        ? 'wallet'
+    _paymentType = isOfflineDeliveryPayment(widget.paymentType) ||
+            widget.paymentType.isEmpty
+        ? 'cash_on_delivery'
         : widget.paymentType;
     _paymentDetails = Map<String, dynamic>.from(widget.paymentDetails ?? {});
     _courierRepository = CourierRepository(
@@ -278,25 +279,25 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
 
   void _navigateToFindingCourier(CreateDeliveryResult created) {
     Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => FindingCourierScreen(
-          deliveryId: created.deliveryId,
-          pickupLocation: widget.pickupLocation,
-          deliveryLocation: widget.deliveryLocation,
-          pickupPosition: widget.pickupPosition,
-          deliveryPosition: widget.deliveryPosition,
-          selectedVehicle: _selectedVehicle,
-          itemType: widget.itemType,
-          quantity: widget.quantity,
-          whoPays: widget.whoPays,
-          paymentType: widget.paymentType,
-          recipientName: widget.recipientName,
-          recipientPhone: widget.recipientPhone,
-          packageImagePath: widget.packageImagePath,
-        ),
-      ),
-    );
+        context,
+        MaterialPageRoute(
+          builder: (_) => FindingCourierScreen(
+            deliveryId: created.deliveryId,
+            pickupLocation: widget.pickupLocation,
+            deliveryLocation: widget.deliveryLocation,
+            pickupPosition: widget.pickupPosition,
+            deliveryPosition: widget.deliveryPosition,
+            selectedVehicle: _selectedVehicle,
+            itemType: widget.itemType,
+            quantity: widget.quantity,
+            whoPays: widget.whoPays,
+            paymentType: _paymentType,
+            recipientName: widget.recipientName,
+            recipientPhone: widget.recipientPhone,
+            packageImagePath: widget.packageImagePath,
+            routePolylinePoints: _routePolylinePoints,
+          ),
+        ));
   }
 
   String _mapPackageType(String itemType) {
@@ -312,11 +313,8 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
   }
 
   String _mapPaymentMethod(String paymentType) {
-    // paymentType is already the API id from fetched payment methods
-    if (paymentType.isNotEmpty && !isOfflineDeliveryPayment(paymentType)) {
-      return paymentType;
-    }
-    return 'wallet';
+    if (paymentType.isEmpty) return 'cash_on_delivery';
+    return paymentType;
   }
 
   /// Formats DateTime for API as Africa/Addis_Ababa with fixed +03:00.
@@ -387,7 +385,8 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
           _quotedScheduledPickup = null;
         }
       });
-      if ((result['error'] as ApiErrorResult?)?.isPickupServiceAreaUnavailable ==
+      if ((result['error'] as ApiErrorResult?)
+              ?.isPickupServiceAreaUnavailable ==
           true) {
         await _handlePickupServiceAreaUnavailable();
       } else if ((result['error'] as ApiErrorResult?)
@@ -421,7 +420,8 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
     if (!mounted) return;
 
     final rawTypes = result['success'] == true
-        ? List<String>.from(result['supportedVehicleTypes'] as List? ?? const [])
+        ? List<String>.from(
+            result['supportedVehicleTypes'] as List? ?? const [])
         : const <String>[];
     final applied = applyCourierSupportedVehicleTypes(
       supportedVehicleTypes: rawTypes,
@@ -760,25 +760,24 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
             trackingNumber: delivery.trackingNumber ?? '',
             successActionLabel: 'Find courier',
             onTerminalSuccess: (resultContext) {
-              Navigator.of(resultContext).pushReplacement(
-                MaterialPageRoute(
-                  builder: (_) => FindingCourierScreen(
-                    deliveryId: delivery.deliveryId,
-                    pickupLocation: widget.pickupLocation,
-                    deliveryLocation: widget.deliveryLocation,
-                    pickupPosition: widget.pickupPosition,
-                    deliveryPosition: widget.deliveryPosition,
-                    selectedVehicle: _selectedVehicle,
-                    itemType: widget.itemType,
-                    quantity: widget.quantity,
-                    whoPays: widget.whoPays,
-                    paymentType: _paymentType,
-                    recipientName: widget.recipientName,
-                    recipientPhone: widget.recipientPhone,
-                    packageImagePath: widget.packageImagePath,
-                  ),
+              Navigator.of(resultContext).pushReplacement(MaterialPageRoute(
+                builder: (_) => FindingCourierScreen(
+                  deliveryId: delivery.deliveryId,
+                  pickupLocation: widget.pickupLocation,
+                  deliveryLocation: widget.deliveryLocation,
+                  pickupPosition: widget.pickupPosition,
+                  deliveryPosition: widget.deliveryPosition,
+                  selectedVehicle: _selectedVehicle,
+                  itemType: widget.itemType,
+                  quantity: widget.quantity,
+                  whoPays: widget.whoPays,
+                  paymentType: _paymentType,
+                  recipientName: widget.recipientName,
+                  recipientPhone: widget.recipientPhone,
+                  packageImagePath: widget.packageImagePath,
+                  routePolylinePoints: _routePolylinePoints,
                 ),
-              );
+              ));
             },
           ),
         ),
@@ -1117,8 +1116,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                                                     child: Container(
                                                       width: 80,
                                                       height: 24,
-                                                      decoration:
-                                                          BoxDecoration(
+                                                      decoration: BoxDecoration(
                                                         color: Colors.white,
                                                         borderRadius:
                                                             BorderRadius
@@ -1145,8 +1143,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                                                   style: theme
                                                       .textTheme.bodySmall
                                                       ?.copyWith(
-                                                    color:
-                                                        AppColors.errorColor,
+                                                    color: AppColors.errorColor,
                                                   ),
                                                 ),
                                               ),

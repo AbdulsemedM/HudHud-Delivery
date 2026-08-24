@@ -10,7 +10,6 @@ import 'package:hudhud_delivery/features/courier/presentation/screens/courier_sc
 import '../widgets/home_service_tab_bar.dart';
 import '../widgets/service_coming_soon_screen.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
-import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
 import 'package:hudhud_delivery/app/services/custom_location_service.dart';
 import 'package:hudhud_delivery/app/services/geocoding_service.dart';
 import 'package:hudhud_delivery/app/services/location_service.dart';
@@ -27,10 +26,8 @@ import '../../data/repository/home_repository.dart';
 import '../../data/data_provider/home_data_provider.dart';
 import 'package:hudhud_delivery/features/addresses/data/addresses_data_provider.dart';
 import 'package:hudhud_delivery/features/addresses/data/addresses_repository.dart';
-import 'package:hudhud_delivery/features/guest/utils/guest_sign_in_prompt.dart';
 import 'package:hudhud_delivery/core/widgets/verify_phone_dialog.dart';
 import 'package:hudhud_delivery/features/login/utils/phone_enrollment_navigation.dart';
-import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import 'package:hudhud_delivery/features/addresses/presentation/widgets/delivery_address_selector.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/features/home/data/marketing_offers_prompt_prefs.dart';
@@ -167,10 +164,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _loadUserData() async {
-    if (GuestBrowseService().isGuestBrowseMode) {
-      if (mounted) setState(() => _currentUser = null);
-      return;
-    }
     // Always hit the API after login / tab return so verification + name stay current.
     final user = await _authService.getUserProfile(forceRefresh: true) ??
         await _authService.getStoredUser();
@@ -186,7 +179,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (!mounted) return;
     if (_marketingOffersCheckedThisProcess) return;
     _marketingOffersCheckedThisProcess = true;
-    if (GuestBrowseService().isGuestBrowseMode) return;
     if (!context.read<ServiceAccentController>().isOnHomeTab) return;
     final u = _currentUser;
     if (u == null) return;
@@ -386,17 +378,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   void _openNotifications() async {
-    if (GuestBrowseService().isGuestBrowseMode) {
-      final l10n = AppLocalizations.of(context)!;
-      final authed = await showGuestSignInRequiredDialog(
-        context,
-        message: l10n.guestSignInRequiredMessage,
-      );
-      if (!authed) return;
-      if (!context.mounted) return;
-      await _loadUserData();
-      if (!context.mounted) return;
-    }
     if (!context.mounted) return;
     _pushNotificationsScreen();
   }
@@ -459,7 +440,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final isGuest = GuestBrowseService().isGuestBrowseMode;
     final showVerify = _currentUser != null &&
         !_verifyBannerDismissed &&
         (!_currentUser!.isEmailVerified || !_currentUser!.isPhoneVerified);
@@ -485,14 +465,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     location: _currentLocation,
                     isLoadingLocation: _isLoadingLocation,
                     user: _currentUser,
-                    isGuest: isGuest,
                     locationKey: _tourKeys.locationKey,
                     notificationsKey: _tourKeys.notificationsKey,
-                    onGuestSignIn: () async {
-                      final authed =
-                          await showGuestSignInRequiredDialog(context);
-                      if (authed && mounted) await _loadUserData();
-                    },
                     onLocationTap: _openLocationSearch,
                     onNotificationsTap: _openNotifications,
                   ),

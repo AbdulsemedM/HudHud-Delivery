@@ -106,32 +106,6 @@ class LoginRepository {
     }
   }
 
-  Future<LoginSessionResult> guest() async {
-    final authService = AuthService();
-    try {
-      final response = await loginDataProvider.guest();
-      if (response['statusCode'] == 200) {
-        final data = response['data'] as Map<String, dynamic>?;
-        if (data == null || data['token'] == null || data['user'] == null) {
-          throw LoginFailureException(
-            'Invalid server response: missing required data',
-          );
-        }
-
-        return _completeSessionFromLoginData(data, authService);
-      } else {
-        throw _loginFailureFromResponse(
-          response,
-          fallback: 'Guest login failed',
-        );
-      }
-    } catch (e) {
-      if (e is LoginFailureException) rethrow;
-      if (e is String) throw LoginFailureException(e);
-      throw LoginFailureException(_cleanErrorMessage(e.toString()));
-    }
-  }
-
   LoginFailureException _loginFailureFromResponse(
     Map<String, dynamic> response, {
     String fallback = 'Login failed',

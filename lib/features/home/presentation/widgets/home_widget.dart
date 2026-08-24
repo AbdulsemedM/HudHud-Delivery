@@ -233,8 +233,6 @@ class UserProfileHeader extends StatefulWidget {
   final VoidCallback onLocationTap;
   final VoidCallback onNotificationsTap;
   final UserModel? user;
-  final bool isGuest;
-  final VoidCallback? onGuestSignIn;
   final GlobalKey? locationKey;
   final GlobalKey? notificationsKey;
 
@@ -246,8 +244,6 @@ class UserProfileHeader extends StatefulWidget {
     required this.onLocationTap,
     required this.onNotificationsTap,
     this.user,
-    this.isGuest = false,
-    this.onGuestSignIn,
     this.locationKey,
     this.notificationsKey,
   });
@@ -309,7 +305,7 @@ class _UserProfileHeaderState extends State<UserProfileHeader>
                     color: HomeColors.surfaceElevated,
                     alignment: Alignment.center,
                     child: Text(
-                      widget.isGuest ? '?' : _initial,
+                      _initial,
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
@@ -325,7 +321,7 @@ class _UserProfileHeaderState extends State<UserProfileHeader>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                widget.isGuest ? 'Guest' : widget.name,
+                widget.name,
                 style: const TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 16,
@@ -337,69 +333,56 @@ class _UserProfileHeaderState extends State<UserProfileHeader>
               const SizedBox(height: 4),
               KeyedSubtree(
                 key: widget.locationKey,
-                child: widget.isGuest
-                    ? GestureDetector(
-                        onTap: widget.onGuestSignIn,
-                        child: const Text(
-                          'Sign in to save your addresses',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: HomeColors.textMuted,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      )
-                    : GestureDetector(
-                        onTap: () {
-                          _chevronController.forward(from: 0).then((_) {
-                            _chevronController.reverse();
-                          });
-                          widget.onLocationTap();
-                        },
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.location_on_rounded,
-                              color: HomeColors.orange,
-                              size: 16,
-                            ),
-                            const SizedBox(width: 4),
-                            Flexible(
-                              child: widget.isLoadingLocation
-                                  ? const SizedBox(
-                                      width: 12,
-                                      height: 12,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: HomeColors.orange,
-                                      ),
-                                    )
-                                  : Text(
-                                      widget.location.isEmpty
-                                          ? l10n.yourLocation
-                                          : widget.location,
-                                      style: const TextStyle(
-                                        color: HomeColors.orange,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 12,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
-                                    ),
-                            ),
-                            RotationTransition(
-                              turns: Tween<double>(begin: 0, end: 0.5)
-                                  .animate(_chevronController),
-                              child: const Icon(
-                                Icons.chevron_right_rounded,
-                                color: HomeColors.orange,
-                                size: 18,
+                child: GestureDetector(
+                  onTap: () {
+                    _chevronController.forward(from: 0).then((_) {
+                      _chevronController.reverse();
+                    });
+                    widget.onLocationTap();
+                  },
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.location_on_rounded,
+                        color: HomeColors.orange,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: widget.isLoadingLocation
+                            ? const SizedBox(
+                                width: 12,
+                                height: 12,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: HomeColors.orange,
+                                ),
+                              )
+                            : Text(
+                                widget.location.isEmpty
+                                    ? l10n.yourLocation
+                                    : widget.location,
+                                style: const TextStyle(
+                                  color: HomeColors.orange,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
                               ),
-                            ),
-                          ],
+                      ),
+                      RotationTransition(
+                        turns: Tween<double>(begin: 0, end: 0.5)
+                            .animate(_chevronController),
+                        child: const Icon(
+                          Icons.chevron_right_rounded,
+                          color: HomeColors.orange,
+                          size: 18,
                         ),
                       ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),

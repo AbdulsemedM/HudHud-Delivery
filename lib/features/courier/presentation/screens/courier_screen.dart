@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
@@ -50,13 +49,8 @@ class _CourierScreenState extends State<CourierScreen> {
     );
     _homeRefreshListener = () => _refreshData();
     CourierHomeRefresh.instance.addListener(_homeRefreshListener);
-    if (GuestBrowseService().isGuestBrowseMode) {
-      _isLoadingDeliveries = false;
-      _isLoadingActiveDelivery = false;
-    } else {
-      _fetchDeliveries();
-      _fetchActiveDelivery();
-    }
+    _fetchDeliveries();
+    _fetchActiveDelivery();
   }
 
   @override
@@ -134,19 +128,6 @@ class _CourierScreenState extends State<CourierScreen> {
   }
 
   Future<void> _refreshData() async {
-    if (GuestBrowseService().isGuestBrowseMode) {
-      if (mounted) {
-        setState(() {
-          _deliveries = [];
-          _activeDelivery = null;
-          _deliveriesError = null;
-          _isLoadingDeliveries = false;
-          _isLoadingActiveDelivery = false;
-        });
-      }
-      return;
-    }
-    // Show loading (including guest → signed-in refetch after login).
     await Future.wait([
       _fetchActiveDelivery(),
       _fetchDeliveries(),

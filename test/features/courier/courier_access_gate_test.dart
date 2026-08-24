@@ -14,26 +14,16 @@ UserModel _user({DateTime? phoneVerifiedAt}) {
 
 void main() {
   group('canSendCourierPackage', () {
-    test('returns false for guest browse', () {
-      expect(
-        canSendCourierPackage(
-          isGuest: true,
-          user: _user(phoneVerifiedAt: DateTime.now()),
-        ),
-        isFalse,
-      );
-    });
-
     test('returns false when user is null', () {
       expect(
-        canSendCourierPackage(isGuest: false, user: null),
+        canSendCourierPackage(user: null),
         isFalse,
       );
     });
 
     test('returns false when phone is not verified', () {
       expect(
-        canSendCourierPackage(isGuest: false, user: _user()),
+        canSendCourierPackage(user: _user()),
         isFalse,
       );
     });
@@ -41,7 +31,6 @@ void main() {
     test('returns true when signed in and phone verified', () {
       expect(
         canSendCourierPackage(
-          isGuest: false,
           user: _user(phoneVerifiedAt: DateTime(2026, 1, 1)),
         ),
         isTrue,

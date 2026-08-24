@@ -10,8 +10,6 @@ class LoginFormSubmitted extends LoginEvent {
   LoginFormSubmitted(this.emailOrPhone, this.password, this.fieldType);
 }
 
-class GuestLoginRequested extends LoginEvent {}
-
 class GoogleLoginRequested extends LoginEvent {}
 
 class BiometricLoginRequested extends LoginEvent {

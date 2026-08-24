@@ -1,10 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/app/services/biometric_credential_service.dart';
 import 'package:hudhud_delivery/app/services/google_auth_helper.dart';
-import 'package:hudhud_delivery/app/services/guest_browse_service.dart';
 import '../data/repository/login_repository.dart';
 
 part 'login_event.dart';
@@ -25,16 +23,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           LoginAction.credentials,
           phoneEnrollmentRequired: result.phoneEnrollmentRequired,
         ));
-      } catch (e) {
-        emit(_failureFrom(e));
-      }
-    });
-    on<GuestLoginRequested>((event, emit) async {
-      emit(LoginLoading(LoginAction.guest));
-      try {
-        await AuthService().clearAllData();
-        await GuestBrowseService().enterGuestBrowseMode();
-        emit(LoginSuccess(LoginAction.guest));
       } catch (e) {
         emit(_failureFrom(e));
       }
