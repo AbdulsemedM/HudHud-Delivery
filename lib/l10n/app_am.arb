@@ -455,9 +455,29 @@
   "categoryMore": "ተጨማሪ",
   "pickupLocationLabel": "የመውሰጃ ቦታ",
   "deliveryLocationLabel": "የማስረከቢያ ቦታ",
-  "vehicleMotorcycle": "ብስክሌት",
-  "vehicleCar": "መኪና",
-  "vehicleVan": "ቫን",
+  "vehicleMotorcycle": "በሞተርሳይክል ማድረሻ",
+  "vehicleCar": "በመኪና ማድረሻ",
+  "vehicleVan": "ፈጣን ጭነት",
+  "vehicleBajaj": "በባጃጅ ማድረሻ",
+  "vehiclePickup": "በፒካፕ ማድረሻ",
+  "pickupOutsideDeliveryServiceArea": "የመውሰጃው አድራሻ ከሁድሁድ የተዋቀረ የማድረሻ አገልግሎት ክልል ውጭ ነው።",
+  "selectAvailableVehicleType": "ከሚገኙት የተሽከርካሪ ዓይነቶች አንዱን ይምረጡ",
+  "sendAPackageTitle": "ጥቅል ላክ",
+  "courierDeliveryAddressPlaceholder": "የማድረሻ አድራሻ",
+  "addInfoAboutDelivery": "ስለ ማድረሻው መረጃ ጨምር",
+  "courierEstimateFromPrice": "ከ {currency} {amount}",
+  "@courierEstimateFromPrice": {
+    "placeholders": {
+      "currency": {"type": "String"},
+      "amount": {"type": "String"}
+    }
+  },
+  "courierEstimateMinutes": "{minutes} ደቂቃ",
+  "@courierEstimateMinutes": {
+    "placeholders": {
+      "minutes": {"type": "int"}
+    }
+  },
   "fromWallet": "ከዋሌት",
   "enterWithdrawAmount": "ለማውጣት መጠን ያስገቡ",
   "withdrawalMethod": "የማስወገጃ ዘዴ",

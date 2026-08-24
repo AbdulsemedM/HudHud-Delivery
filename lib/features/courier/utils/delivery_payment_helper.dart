@@ -17,6 +17,20 @@ bool isOfflineDeliveryPayment(String? method) {
   return m == 'cash_on_delivery' || m == 'cash';
 }
 
+/// Booking / confirm UI — never offer cash on delivery.
+List<Map<String, dynamic>> excludeCashOnDeliveryPaymentMethods(
+  List<Map<String, dynamic>> methods,
+) {
+  return methods
+      .where((m) {
+        final id = m['id']?.toString() ?? '';
+        return id.isNotEmpty &&
+            !isOfflineDeliveryPayment(id) &&
+            m['enabled'] != false;
+      })
+      .toList(growable: false);
+}
+
 /// Initiates payment for a parcel delivery via POST /api/payments/initiate (type=delivery).
 Future<PaymentInitiateResult> initiateDeliveryPayment({
   required PaymentRepository repo,

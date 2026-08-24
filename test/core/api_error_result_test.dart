@@ -210,6 +210,32 @@ void main() {
       expect(result.statusCode, 503);
     });
 
+    test('detects CITY_VEHICLE_NOT_SUPPORTED on 422', () {
+      final result = parseApiErrorResult({
+        'success': false,
+        'code': 'CITY_VEHICLE_NOT_SUPPORTED',
+        'message':
+            'Addis Ababa does not support motorbike deliveries. Available vehicle types: bajaj, pickup.',
+      }, statusCode: 422);
+
+      expect(result.code, 'CITY_VEHICLE_NOT_SUPPORTED');
+      expect(result.isCityVehicleNotSupported, isTrue);
+      expect(result.statusCode, 422);
+      expect(result.displayMessage, contains('does not support'));
+    });
+
+    test('detects PICKUP_SERVICE_AREA_UNAVAILABLE on 422', () {
+      final result = parseApiErrorResult({
+        'success': false,
+        'code': 'PICKUP_SERVICE_AREA_UNAVAILABLE',
+        'message': 'HudHud does not currently serve the selected pickup city.',
+      }, statusCode: 422);
+
+      expect(result.code, 'PICKUP_SERVICE_AREA_UNAVAILABLE');
+      expect(result.isPickupServiceAreaUnavailable, isTrue);
+      expect(result.isCityVehicleNotSupported, isFalse);
+    });
+
     test('detects scheduled_pickup field validation', () {
       final result = parseApiErrorResult({
         'message': 'The given data was invalid.',

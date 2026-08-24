@@ -455,9 +455,29 @@
   "categoryMore": "Wax badan",
   "pickupLocationLabel": "Goobta laga soo qaadayo",
   "deliveryLocationLabel": "Goobta lagu geynayo",
-  "vehicleMotorcycle": "Baaskiil",
-  "vehicleCar": "Baabuur",
-  "vehicleVan": "Faannii",
+  "vehicleMotorcycle": "Gaarsiin mooto",
+  "vehicleCar": "Gaarsiin gaadhi",
+  "vehicleVan": "Xamuul degdeg ah",
+  "vehicleBajaj": "Gaarsiin baajaaj",
+  "vehiclePickup": "Gaarsiin pickup",
+  "pickupOutsideDeliveryServiceArea": "Goobta soo qaadista kama baxdo aagga adeegga gaarsiinta ee HudHud.",
+  "selectAvailableVehicleType": "Dooro nooca gaadhiga ee la heli karo",
+  "sendAPackageTitle": "DIR XIRMO",
+  "courierDeliveryAddressPlaceholder": "Cinwaanka gaarsiinta",
+  "addInfoAboutDelivery": "Ku dar macluumaadka gaarsiinta",
+  "courierEstimateFromPrice": "laga bilaabo {currency} {amount}",
+  "@courierEstimateFromPrice": {
+    "placeholders": {
+      "currency": {"type": "String"},
+      "amount": {"type": "String"}
+    }
+  },
+  "courierEstimateMinutes": "{minutes} daqiiqo",
+  "@courierEstimateMinutes": {
+    "placeholders": {
+      "minutes": {"type": "int"}
+    }
+  },
   "fromWallet": "Laga soo bilaabo Wallet",
   "enterWithdrawAmount": "Geli cadadka aad kala baxayso",
   "withdrawalMethod": "Habka Ka-noqoshada",

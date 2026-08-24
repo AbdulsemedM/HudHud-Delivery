@@ -1069,13 +1069,46 @@ class AppLocalizationsSo extends AppLocalizations {
   String get deliveryLocationLabel => 'Goobta lagu geynayo';
 
   @override
-  String get vehicleMotorcycle => 'Baaskiil';
+  String get vehicleMotorcycle => 'Gaarsiin mooto';
 
   @override
-  String get vehicleCar => 'Baabuur';
+  String get vehicleCar => 'Gaarsiin gaadhi';
 
   @override
-  String get vehicleVan => 'Faannii';
+  String get vehicleVan => 'Xamuul degdeg ah';
+
+  @override
+  String get vehicleBajaj => 'Gaarsiin baajaaj';
+
+  @override
+  String get vehiclePickup => 'Gaarsiin pickup';
+
+  @override
+  String get pickupOutsideDeliveryServiceArea =>
+      'Goobta soo qaadista kama baxdo aagga adeegga gaarsiinta ee HudHud.';
+
+  @override
+  String get selectAvailableVehicleType =>
+      'Dooro nooca gaadhiga ee la heli karo';
+
+  @override
+  String get sendAPackageTitle => 'DIR XIRMO';
+
+  @override
+  String get courierDeliveryAddressPlaceholder => 'Cinwaanka gaarsiinta';
+
+  @override
+  String get addInfoAboutDelivery => 'Ku dar macluumaadka gaarsiinta';
+
+  @override
+  String courierEstimateFromPrice(String currency, String amount) {
+    return 'laga bilaabo $currency $amount';
+  }
+
+  @override
+  String courierEstimateMinutes(int minutes) {
+    return '$minutes daqiiqo';
+  }
 
   @override
   String get fromWallet => 'Laga soo bilaabo Wallet';

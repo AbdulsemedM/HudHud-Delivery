@@ -1061,13 +1061,45 @@ class AppLocalizationsAr extends AppLocalizations {
   String get deliveryLocationLabel => 'موقع التسليم';
 
   @override
-  String get vehicleMotorcycle => 'دراجة';
+  String get vehicleMotorcycle => 'التوصيل بالدراجة النارية';
 
   @override
-  String get vehicleCar => 'سيارة';
+  String get vehicleCar => 'التوصيل بالسيارة';
 
   @override
-  String get vehicleVan => 'فان';
+  String get vehicleVan => 'شحن سريع';
+
+  @override
+  String get vehicleBajaj => 'التوصيل بالباجاج';
+
+  @override
+  String get vehiclePickup => 'التوصيل بالبيك أب';
+
+  @override
+  String get pickupOutsideDeliveryServiceArea =>
+      'موقع الاستلام خارج منطقة خدمة التوصيل المحددة لدى هدهود.';
+
+  @override
+  String get selectAvailableVehicleType => 'اختر نوع مركبة متاحاً';
+
+  @override
+  String get sendAPackageTitle => 'أرسل طرداً';
+
+  @override
+  String get courierDeliveryAddressPlaceholder => 'عنوان التسليم';
+
+  @override
+  String get addInfoAboutDelivery => 'أضف معلومات عن التسليم';
+
+  @override
+  String courierEstimateFromPrice(String currency, String amount) {
+    return 'من $currency $amount';
+  }
+
+  @override
+  String courierEstimateMinutes(int minutes) {
+    return '$minutes د';
+  }
 
   @override
   String get fromWallet => 'من المحفظة';

@@ -174,6 +174,8 @@ class ApiConstants {
 
   // Courier delivery endpoints
   static const String deliveryEstimate = 'services/delivery/estimate';
+  /// GET /api/services/delivery/service-areas?pickup_location=
+  static const String deliveryServiceAreas = 'services/delivery/service-areas';
   static const String deliveryRequest = 'services/delivery/request';
   /// Customer cancel: POST /api/services/delivery/cancel
   static const String deliveryCancel = 'services/delivery/cancel';

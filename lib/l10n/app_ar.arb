@@ -455,9 +455,29 @@
   "categoryMore": "أكثر",
   "pickupLocationLabel": "موقع الالتقاط",
   "deliveryLocationLabel": "موقع التسليم",
-  "vehicleMotorcycle": "دراجة",
-  "vehicleCar": "سيارة",
-  "vehicleVan": "فان",
+  "vehicleMotorcycle": "التوصيل بالدراجة النارية",
+  "vehicleCar": "التوصيل بالسيارة",
+  "vehicleVan": "شحن سريع",
+  "vehicleBajaj": "التوصيل بالباجاج",
+  "vehiclePickup": "التوصيل بالبيك أب",
+  "pickupOutsideDeliveryServiceArea": "موقع الاستلام خارج منطقة خدمة التوصيل المحددة لدى هدهود.",
+  "selectAvailableVehicleType": "اختر نوع مركبة متاحاً",
+  "sendAPackageTitle": "أرسل طرداً",
+  "courierDeliveryAddressPlaceholder": "عنوان التسليم",
+  "addInfoAboutDelivery": "أضف معلومات عن التسليم",
+  "courierEstimateFromPrice": "من {currency} {amount}",
+  "@courierEstimateFromPrice": {
+    "placeholders": {
+      "currency": {"type": "String"},
+      "amount": {"type": "String"}
+    }
+  },
+  "courierEstimateMinutes": "{minutes} د",
+  "@courierEstimateMinutes": {
+    "placeholders": {
+      "minutes": {"type": "int"}
+    }
+  },
   "fromWallet": "من المحفظة",
   "enterWithdrawAmount": "أدخل المبلغ المراد سحبه",
   "withdrawalMethod": "طريقة السحب",

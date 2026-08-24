@@ -1,5 +1,6 @@
 import 'package:hudhud_delivery/core/api/api_constants.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
+import 'package:hudhud_delivery/features/courier/utils/delivery_estimate.dart';
 
 class CourierDataProvider {
   final ApiService apiService;
@@ -7,9 +8,9 @@ class CourierDataProvider {
   CourierDataProvider({required this.apiService});
 
   /// POST /api/services/delivery/estimate
-  /// Payload: package_type, package_weight, pickup_latitude, pickup_longitude,
-  /// dropoff_latitude, dropoff_longitude, vehicle_type, service_type,
-  /// optional scheduled_pickup (ISO-8601 with timezone offset).
+  /// Payload: package_type, package_weight, pickup_location, pickup_latitude,
+  /// pickup_longitude, dropoff_latitude, dropoff_longitude, vehicle_type,
+  /// service_type, optional scheduled_pickup (ISO-8601 with timezone offset).
   Future<Map<String, dynamic>> estimateDelivery({
     required String packageType,
     required double packageWeight,
@@ -19,26 +20,57 @@ class CourierDataProvider {
     required double dropoffLongitude,
     required String vehicleType,
     required String serviceType,
+    String? pickupLocation,
     String? scheduledPickup,
   }) async {
     try {
-      final Map<String, dynamic> estimateData = {
-        'package_type': packageType,
-        'package_weight': packageWeight,
-        'pickup_latitude': pickupLatitude,
-        'pickup_longitude': pickupLongitude,
-        'dropoff_latitude': dropoffLatitude,
-        'dropoff_longitude': dropoffLongitude,
-        'vehicle_type': vehicleType,
-        'service_type': serviceType,
-      };
-      if (scheduledPickup != null && scheduledPickup.isNotEmpty) {
-        estimateData['scheduled_pickup'] = scheduledPickup;
-      }
+      final estimateData = buildDeliveryEstimateRequestBody(
+        packageType: packageType,
+        packageWeight: packageWeight,
+        pickupLatitude: pickupLatitude,
+        pickupLongitude: pickupLongitude,
+        dropoffLatitude: dropoffLatitude,
+        dropoffLongitude: dropoffLongitude,
+        vehicleType: vehicleType,
+        serviceType: serviceType,
+        pickupLocation: pickupLocation,
+        scheduledPickup: scheduledPickup,
+      );
 
       final response = await apiService.post(
         '${ApiConstants.baseUrl}${ApiConstants.deliveryEstimate}',
         data: estimateData,
+      );
+
+      return {
+        'statusCode': response.statusCode,
+        'data': response.data,
+        'errorMessage': null,
+      };
+    } on ApiException catch (apiException) {
+      return {
+        'statusCode': apiException.statusCode,
+        'data': apiException.data,
+        'errorMessage': apiException.message,
+      };
+    } on Exception catch (e) {
+      return {'statusCode': 500, 'data': null, 'errorMessage': e.toString()};
+    }
+  }
+
+  /// GET /api/services/delivery/service-areas
+  Future<Map<String, dynamic>> getDeliveryServiceAreas({
+    String? pickupLocation,
+  }) async {
+    try {
+      final query = <String, dynamic>{};
+      final pickup = pickupLocation?.trim();
+      if (pickup != null && pickup.isNotEmpty) {
+        query['pickup_location'] = pickup;
+      }
+      final response = await apiService.get(
+        '${ApiConstants.baseUrl}${ApiConstants.deliveryServiceAreas}',
+        queryParameters: query.isEmpty ? null : query,
       );
 
       return {

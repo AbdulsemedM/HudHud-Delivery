@@ -15,6 +15,7 @@ import 'package:hudhud_delivery/features/courier/data/repository/courier_reposit
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
 import 'package:hudhud_delivery/features/courier/presentation/widgets/delivery_estimate_banner.dart';
 import 'package:hudhud_delivery/features/courier/presentation/widgets/nearby_driver_markers.dart';
+import 'package:hudhud_delivery/features/courier/utils/courier_vehicle_display.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_estimate.dart';
 import 'package:hudhud_delivery/features/courier/utils/nearby_drivers_poller.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
@@ -33,12 +34,13 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
   late final CourierRepository _courierRepository;
   late final NearbyDriversPoller _nearbyPoller;
   Timer? _estimateDebounce;
+  Timer? _serviceAreaDebounce;
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _timeController = TextEditingController();
   String _pickupLocation = '';
   String _deliveryLocation = '';
   bool _pickupResolveFailed = false;
-  String _selectedVehicle = 'motorcycle'; // motorcycle only (car/van disabled for now)
+  String? _selectedVehicle;
   String _timePeriod = 'pm'; // am or pm
   /// Default map center (Addis Ababa) — same as taxi / instant until GPS resolves.
   LatLng _currentPosition = const LatLng(9.0222, 38.7468);
@@ -54,10 +56,14 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
   int? _estimatedDuration;
   String _estimatedCurrency = 'ETB';
   String? _quotedScheduledPickup;
+  bool _isLoadingServiceArea = false;
+  List<String> _supportedVehicleTypes = const [];
 
   bool get _canFetchEstimate =>
       _pickupPosition != null &&
       _deliveryPosition != null &&
+      _supportedVehicleTypes.isNotEmpty &&
+      _selectedVehicle != null &&
       _dateController.text.isNotEmpty &&
       _timeController.text.isNotEmpty &&
       _parseScheduledDateTime() != null;
@@ -104,11 +110,12 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
 
   void _syncNearbyDrivers() {
     final pickup = _pickupPosition;
-    if (pickup == null) return;
+    final vehicle = _selectedVehicle;
+    if (pickup == null || vehicle == null) return;
     _nearbyPoller.setTarget(
       latitude: pickup.latitude,
       longitude: pickup.longitude,
-      vehicleType: mapCourierVehicleType(_selectedVehicle),
+      vehicleType: mapCourierVehicleType(vehicle),
     );
   }
 
@@ -123,10 +130,56 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
   @override
   void dispose() {
     _estimateDebounce?.cancel();
+    _serviceAreaDebounce?.cancel();
     _nearbyPoller.dispose();
     _dateController.dispose();
     _timeController.dispose();
     super.dispose();
+  }
+
+  void _scheduleServiceAreaFetch() {
+    _serviceAreaDebounce?.cancel();
+    if (_pickupLocation.trim().isEmpty) {
+      setState(() {
+        _isLoadingServiceArea = false;
+        _supportedVehicleTypes = const [];
+        _selectedVehicle = null;
+      });
+      return;
+    }
+    _serviceAreaDebounce = Timer(
+      const Duration(milliseconds: 300),
+      _fetchServiceArea,
+    );
+  }
+
+  Future<void> _fetchServiceArea({bool quoteAfter = true}) async {
+    final pickup = _pickupLocation.trim();
+    if (pickup.isEmpty) return;
+
+    setState(() {
+      _isLoadingServiceArea = true;
+    });
+
+    final result = await _courierRepository.getDeliveryServiceAreas(
+      pickupLocation: pickup,
+    );
+    if (!mounted) return;
+
+    final rawTypes = result['success'] == true
+        ? List<String>.from(result['supportedVehicleTypes'] as List? ?? const [])
+        : const <String>[];
+    final applied = applyCourierSupportedVehicleTypes(
+      supportedVehicleTypes: rawTypes,
+      selectedVehicleType: _selectedVehicle,
+    );
+    setState(() {
+      _isLoadingServiceArea = false;
+      _supportedVehicleTypes = applied.types;
+      _selectedVehicle = applied.selected;
+    });
+    _syncNearbyDrivers();
+    if (quoteAfter) _scheduleEstimateFetch();
   }
 
   void _scheduleEstimateFetch() {
@@ -149,7 +202,11 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
   }
 
   Future<void> _fetchEstimate() async {
-    if (_pickupPosition == null || _deliveryPosition == null) return;
+    if (_pickupPosition == null ||
+        _deliveryPosition == null ||
+        _selectedVehicle == null) {
+      return;
+    }
 
     final scheduled = _parseScheduledDateTime();
     if (scheduled == null) return;
@@ -168,8 +225,9 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
       pickupLongitude: _pickupPosition!.longitude,
       dropoffLatitude: _deliveryPosition!.latitude,
       dropoffLongitude: _deliveryPosition!.longitude,
-      vehicleType: mapCourierVehicleType(_selectedVehicle),
+      vehicleType: mapCourierVehicleType(_selectedVehicle!),
       serviceType: deliveryServiceType(isInstantDelivery: false),
+      pickupLocation: _pickupLocation,
       scheduledPickup: scheduledPickup,
     );
 
@@ -191,7 +249,11 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
         }
       } else {
         final error = result['error'] as ApiErrorResult?;
-        if (error?.hasScheduledPickupValidation == true) {
+        if (error?.isPickupServiceAreaUnavailable == true) {
+          _estimateError = context.l10n.pickupOutsideDeliveryServiceArea;
+        } else if (error?.isCityVehicleNotSupported == true) {
+          _estimateError = result['message'] as String?;
+        } else if (error?.hasScheduledPickupValidation == true) {
           _estimateError = context.l10n.chooseValidFuturePickup;
         } else if (error?.isRouteDistanceError == true) {
           _estimateError = context.l10n.refreshQuoteRouteDistance;
@@ -204,6 +266,16 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
         _quotedScheduledPickup = null;
       }
     });
+    if ((result['error'] as ApiErrorResult?)?.isPickupServiceAreaUnavailable ==
+        true) {
+      setState(() {
+        _supportedVehicleTypes = const [];
+        _selectedVehicle = null;
+      });
+    } else if ((result['error'] as ApiErrorResult?)?.isCityVehicleNotSupported ==
+        true) {
+      await _fetchServiceArea(quoteAfter: false);
+    }
   }
 
   Future<void> _getCurrentLocation() async {
@@ -234,6 +306,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
             gmaps.CameraUpdate.newLatLngZoom(_toG(latLng), 15.0),
           );
           _syncNearbyDrivers();
+          _scheduleServiceAreaFetch();
         }
       } else {
         if (mounted) {
@@ -291,6 +364,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
           );
         }
         _syncNearbyDrivers();
+        _scheduleServiceAreaFetch();
       }
     }
   }
@@ -362,7 +436,10 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
             gmaps.CameraUpdate.newLatLngZoom(_toG(point), 15.0),
           );
         }
-        if (isPickup) _syncNearbyDrivers();
+        if (isPickup) {
+          _syncNearbyDrivers();
+          _scheduleServiceAreaFetch();
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -836,53 +913,50 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                                         ),
                                   ),
                                   const SizedBox(height: 12),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: _VehicleTypeOption(
-                                          icon: Icons.pedal_bike,
-                                          label: l10n.vehicleMotorcycle,
-                                          isSelected: _selectedVehicle ==
-                                              'motorcycle',
-                                          onTap: () {
-                                            setState(() {
-                                              _selectedVehicle = 'motorcycle';
-                                            });
-                                            _scheduleEstimateFetch();
-                                            _syncNearbyDrivers();
-                                          },
+                                  if (_pickupLocation.isNotEmpty &&
+                                      !_isLoadingServiceArea &&
+                                      _supportedVehicleTypes.isEmpty)
+                                    Padding(
+                                      padding: const EdgeInsets.only(bottom: 12),
+                                      child: Text(
+                                        l10n.pickupOutsideDeliveryServiceArea,
+                                        style: TextStyle(
+                                          color: colorScheme.error,
+                                          fontWeight: FontWeight.w600,
                                         ),
                                       ),
-                                      // const SizedBox(width: 12),
-                                      // Expanded(
-                                      //   child: _VehicleTypeOption(
-                                      //     icon: Icons.directions_car,
-                                      //     label: l10n.vehicleCar,
-                                      //     isSelected:
-                                      //         _selectedVehicle == 'car',
-                                      //     onTap: () {
-                                      //       setState(() {
-                                      //         _selectedVehicle = 'car';
-                                      //       });
-                                      //     },
-                                      //   ),
-                                      // ),
-                                      // const SizedBox(width: 12),
-                                      // Expanded(
-                                      //   child: _VehicleTypeOption(
-                                      //     icon: Icons.airport_shuttle,
-                                      //     label: l10n.vehicleVan,
-                                      //     isSelected:
-                                      //         _selectedVehicle == 'van',
-                                      //     onTap: () {
-                                      //       setState(() {
-                                      //         _selectedVehicle = 'van';
-                                      //       });
-                                      //     },
-                                      //   ),
-                                      // ),
-                                    ],
-                                  ),
+                                    ),
+                                  if (_supportedVehicleTypes.isNotEmpty)
+                                    Wrap(
+                                      spacing: 12,
+                                      runSpacing: 12,
+                                      children: [
+                                        for (final vehicleId
+                                            in _supportedVehicleTypes)
+                                          SizedBox(
+                                            width: 110,
+                                            child: _VehicleTypeOption(
+                                              icon: courierVehicleIcon(
+                                                vehicleId,
+                                              ),
+                                              label: courierVehicleLabel(
+                                                vehicleId,
+                                                l10n,
+                                              ),
+                                              isSelected:
+                                                  _selectedVehicle ==
+                                                      vehicleId,
+                                              onTap: () {
+                                                setState(() {
+                                                  _selectedVehicle = vehicleId;
+                                                });
+                                                _scheduleEstimateFetch();
+                                                _syncNearbyDrivers();
+                                              },
+                                            ),
+                                          ),
+                                      ],
+                                    ),
                                   DeliveryEstimateBanner(
                                     isVisible: _canFetchEstimate ||
                                         _isLoadingEstimate ||
@@ -908,6 +982,19 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                                             SnackBar(
                                               content: Text(l10n
                                                   .selectPickupAndDelivery),
+                                              backgroundColor:
+                                                  colorScheme.error,
+                                            ),
+                                          );
+                                          return;
+                                        }
+                                        if (_supportedVehicleTypes.isEmpty ||
+                                            _selectedVehicle == null) {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                              content: Text(l10n
+                                                  .pickupOutsideDeliveryServiceArea),
                                               backgroundColor:
                                                   colorScheme.error,
                                             ),
@@ -968,7 +1055,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                                               deliveryPosition:
                                                   _deliveryPosition,
                                               selectedVehicle:
-                                                  _selectedVehicle,
+                                                  _selectedVehicle!,
                                               isInstantDelivery: false,
                                               scheduledPickup:
                                                   scheduledDateTime,

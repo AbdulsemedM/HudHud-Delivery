@@ -1044,13 +1044,45 @@ class AppLocalizationsAm extends AppLocalizations {
   String get deliveryLocationLabel => 'የማስረከቢያ ቦታ';
 
   @override
-  String get vehicleMotorcycle => 'ብስክሌት';
+  String get vehicleMotorcycle => 'በሞተርሳይክል ማድረሻ';
 
   @override
-  String get vehicleCar => 'መኪና';
+  String get vehicleCar => 'በመኪና ማድረሻ';
 
   @override
-  String get vehicleVan => 'ቫን';
+  String get vehicleVan => 'ፈጣን ጭነት';
+
+  @override
+  String get vehicleBajaj => 'በባጃጅ ማድረሻ';
+
+  @override
+  String get vehiclePickup => 'በፒካፕ ማድረሻ';
+
+  @override
+  String get pickupOutsideDeliveryServiceArea =>
+      'የመውሰጃው አድራሻ ከሁድሁድ የተዋቀረ የማድረሻ አገልግሎት ክልል ውጭ ነው።';
+
+  @override
+  String get selectAvailableVehicleType => 'ከሚገኙት የተሽከርካሪ ዓይነቶች አንዱን ይምረጡ';
+
+  @override
+  String get sendAPackageTitle => 'ጥቅል ላክ';
+
+  @override
+  String get courierDeliveryAddressPlaceholder => 'የማድረሻ አድራሻ';
+
+  @override
+  String get addInfoAboutDelivery => 'ስለ ማድረሻው መረጃ ጨምር';
+
+  @override
+  String courierEstimateFromPrice(String currency, String amount) {
+    return 'ከ $currency $amount';
+  }
+
+  @override
+  String courierEstimateMinutes(int minutes) {
+    return '$minutes ደቂቃ';
+  }
 
   @override
   String get fromWallet => 'ከዋሌት';

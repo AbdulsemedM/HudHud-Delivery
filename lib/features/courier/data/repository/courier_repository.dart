@@ -4,6 +4,7 @@ import '../../utils/delivery_estimate.dart';
 import '../data_provider/courier_data_provider.dart';
 import '../models/create_delivery_result.dart';
 import '../models/delivery_live_tracking.dart';
+import '../models/delivery_service_area.dart';
 import '../models/nearby_drivers_result.dart';
 
 class CourierRepository {
@@ -23,6 +24,7 @@ class CourierRepository {
     required double dropoffLongitude,
     required String vehicleType,
     required String serviceType,
+    String? pickupLocation,
     String? scheduledPickup,
   }) async {
     try {
@@ -35,6 +37,7 @@ class CourierRepository {
         dropoffLongitude: dropoffLongitude,
         vehicleType: vehicleType,
         serviceType: serviceType,
+        pickupLocation: pickupLocation,
         scheduledPickup: scheduledPickup,
       );
 
@@ -59,6 +62,7 @@ class CourierRepository {
           'timezone': estimate.timezone,
           'nightHoursStart': estimate.nightHoursStart,
           'nightHoursEnd': estimate.nightHoursEnd,
+          'vehicleType': estimate.vehicleType,
           'scheduledPickup': scheduledPickup,
           'data': rawData,
           'message': 'Estimate retrieved successfully',
@@ -91,6 +95,50 @@ class CourierRepository {
         'estimatedCost': null,
         'data': null,
         'message': errorMessage,
+      };
+    }
+  }
+
+  /// GET /api/services/delivery/service-areas for a pickup address.
+  Future<Map<String, dynamic>> getDeliveryServiceAreas({
+    String? pickupLocation,
+  }) async {
+    try {
+      final response = await courierDataProvider.getDeliveryServiceAreas(
+        pickupLocation: pickupLocation,
+      );
+      final statusCode = response['statusCode'] as int?;
+      if (statusCode == 200 || statusCode == 201) {
+        final lookup = parseDeliveryServiceAreaLookup(response['data']);
+        return {
+          'success': true,
+          'lookup': lookup,
+          'supportedVehicleTypes': lookup.supportedVehicleTypes,
+          'data': response['data'],
+          'message': null,
+        };
+      }
+      final parsed = parseApiErrorResult(
+        response['data'],
+        statusCode: statusCode,
+        fallback: response['errorMessage']?.toString() ??
+            'Error looking up delivery service area',
+      );
+      return {
+        'success': false,
+        'lookup': null,
+        'supportedVehicleTypes': const <String>[],
+        'data': response['data'],
+        'message': parsed.displayMessage,
+        'error': parsed,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'lookup': null,
+        'supportedVehicleTypes': const <String>[],
+        'data': null,
+        'message': _cleanErrorMessage(e.toString()),
       };
     }
   }

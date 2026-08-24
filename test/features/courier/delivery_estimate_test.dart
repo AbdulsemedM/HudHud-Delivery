@@ -31,8 +31,87 @@ void main() {
       expect(mapCourierVehicleType('motorcycle'), 'motorbike');
     });
 
+    test('passes through API vehicle types', () {
+      expect(mapCourierVehicleType('motorbike'), 'motorbike');
+      expect(mapCourierVehicleType('car'), 'car');
+      expect(mapCourierVehicleType('bajaj'), 'bajaj');
+      expect(mapCourierVehicleType('pickup'), 'pickup');
+    });
+
     test('passes through unknown values', () {
       expect(mapCourierVehicleType('truck'), 'truck');
+    });
+  });
+
+  group('applyCourierSupportedVehicleTypes', () {
+    test('keeps current selection when still supported', () {
+      final result = applyCourierSupportedVehicleTypes(
+        supportedVehicleTypes: const ['motorbike', 'car'],
+        selectedVehicleType: 'car',
+      );
+      expect(result.types, ['motorbike', 'car']);
+      expect(result.selected, 'car');
+    });
+
+    test('selects first type when current is unsupported', () {
+      final result = applyCourierSupportedVehicleTypes(
+        supportedVehicleTypes: const ['bajaj', 'pickup'],
+        selectedVehicleType: 'motorbike',
+      );
+      expect(result.selected, 'bajaj');
+    });
+
+    test('returns null selection when types are empty', () {
+      final result = applyCourierSupportedVehicleTypes(
+        supportedVehicleTypes: const [],
+        selectedVehicleType: 'motorbike',
+      );
+      expect(result.types, isEmpty);
+      expect(result.selected, isNull);
+    });
+
+    test('normalizes legacy motorcycle UI id', () {
+      final result = applyCourierSupportedVehicleTypes(
+        supportedVehicleTypes: const ['motorbike', 'car'],
+        selectedVehicleType: 'motorcycle',
+      );
+      expect(result.selected, 'motorbike');
+    });
+  });
+
+  group('buildDeliveryEstimateRequestBody', () {
+    test('includes pickup_location when provided', () {
+      final body = buildDeliveryEstimateRequestBody(
+        packageType: 'parcel',
+        packageWeight: 1.0,
+        pickupLatitude: 8.9806,
+        pickupLongitude: 38.7578,
+        dropoffLatitude: 8.9956,
+        dropoffLongitude: 38.7894,
+        vehicleType: 'bajaj',
+        serviceType: 'standard',
+        pickupLocation: 'Bole, Addis Ababa',
+      );
+
+      expect(body['pickup_location'], 'Bole, Addis Ababa');
+      expect(body['vehicle_type'], 'bajaj');
+      expect(body.containsKey('scheduled_pickup'), isFalse);
+    });
+
+    test('omits pickup_location when blank', () {
+      final body = buildDeliveryEstimateRequestBody(
+        packageType: 'other',
+        packageWeight: 1.0,
+        pickupLatitude: 1,
+        pickupLongitude: 2,
+        dropoffLatitude: 3,
+        dropoffLongitude: 4,
+        vehicleType: 'motorbike',
+        serviceType: 'same_day',
+        pickupLocation: '   ',
+      );
+
+      expect(body.containsKey('pickup_location'), isFalse);
     });
   });
 
@@ -65,6 +144,7 @@ void main() {
         'package_type': 'document',
         'service_type': 'express',
         'currency': 'ETB',
+        'vehicle_type': 'bicycle',
       });
 
       expect(estimate.isValid, isTrue);
@@ -78,6 +158,7 @@ void main() {
       expect(estimate.weightCharge, 6.0);
       expect(estimate.timeBandName, isNull);
       expect(estimate.hasTimeBandSurcharge, isFalse);
+      expect(estimate.vehicleType, 'bicycle');
     });
 
     test('parses night time-band pricing from the handoff sample', () {

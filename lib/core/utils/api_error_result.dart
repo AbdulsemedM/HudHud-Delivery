@@ -15,6 +15,8 @@ const Set<String> kKnownApiErrorCodes = {
   'AUTH_ACCOUNT_LOCKED',
   'IDEMPOTENCY_CONFLICT',
   'DELIVERY_PAYMENT_RETRY_FAILED',
+  'CITY_VEHICLE_NOT_SUPPORTED',
+  'PICKUP_SERVICE_AREA_UNAVAILABLE',
 };
 
 /// Structured parse of Laravel-style / payment API error envelopes.
@@ -86,6 +88,13 @@ class ApiErrorResult {
     }
     return false;
   }
+
+  /// Pickup city does not support the requested vehicle type (422).
+  bool get isCityVehicleNotSupported => code == 'CITY_VEHICLE_NOT_SUPPORTED';
+
+  /// Pickup is not in an enabled configured delivery service area (422).
+  bool get isPickupServiceAreaUnavailable =>
+      code == 'PICKUP_SERVICE_AREA_UNAVAILABLE';
 
   /// Validation failed specifically on `scheduled_pickup`.
   bool get hasScheduledPickupValidation =>

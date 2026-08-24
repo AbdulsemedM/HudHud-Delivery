@@ -16,7 +16,7 @@ String deliveryServiceType({required bool isInstantDelivery}) {
   return isInstantDelivery ? 'same_day' : 'standard';
 }
 
-/// Maps UI vehicle id to API `vehicle_type`.
+/// Maps legacy UI vehicle ids to API `vehicle_type`. API values pass through.
 String mapCourierVehicleType(String vehicle) {
   const mapping = {
     'motorcycle': 'motorbike',
@@ -24,6 +24,84 @@ String mapCourierVehicleType(String vehicle) {
     'van': 'van',
   };
   return mapping[vehicle] ?? vehicle;
+}
+
+/// Aligns the current selection with server-returned vehicle types.
+({List<String> types, String? selected}) applyCourierSupportedVehicleTypes({
+  required List<String> supportedVehicleTypes,
+  String? selectedVehicleType,
+}) {
+  final types = supportedVehicleTypes
+      .map((e) => mapCourierVehicleType(e.trim()))
+      .where((e) => e.isNotEmpty)
+      .toList();
+  final current = selectedVehicleType == null || selectedVehicleType.isEmpty
+      ? null
+      : mapCourierVehicleType(selectedVehicleType);
+  final selected = current != null && types.contains(current)
+      ? current
+      : (types.isEmpty ? null : types.first);
+  return (types: types, selected: selected);
+}
+
+/// JSON body for POST /api/services/delivery/estimate.
+Map<String, dynamic> buildDeliveryEstimateRequestBody({
+  required String packageType,
+  required double packageWeight,
+  required double pickupLatitude,
+  required double pickupLongitude,
+  required double dropoffLatitude,
+  required double dropoffLongitude,
+  required String vehicleType,
+  required String serviceType,
+  String? pickupLocation,
+  String? scheduledPickup,
+}) {
+  final body = <String, dynamic>{
+    'package_type': packageType,
+    'package_weight': packageWeight,
+    'pickup_latitude': pickupLatitude,
+    'pickup_longitude': pickupLongitude,
+    'dropoff_latitude': dropoffLatitude,
+    'dropoff_longitude': dropoffLongitude,
+    'vehicle_type': vehicleType,
+    'service_type': serviceType,
+  };
+  final pickup = pickupLocation?.trim();
+  if (pickup != null && pickup.isNotEmpty) {
+    body['pickup_location'] = pickup;
+  }
+  if (scheduledPickup != null && scheduledPickup.isNotEmpty) {
+    body['scheduled_pickup'] = scheduledPickup;
+  }
+  return body;
+}
+
+/// Builds a [DeliveryEstimate] from [CourierRepository.estimateDelivery] output.
+DeliveryEstimate? deliveryEstimateFromRepositoryResult(
+  Map<String, dynamic> result,
+) {
+  if (result['success'] != true) return null;
+  final estimate = DeliveryEstimate(
+    estimatedCost: result['estimatedCost'] as double?,
+    estimatedDistance: result['estimatedDistance'] as double?,
+    estimatedDuration: result['estimatedDuration'] as int?,
+    currency: result['currency'] as String? ?? 'ETB',
+    baseDeliveryFee: result['baseDeliveryFee'] as double?,
+    distanceRate: result['distanceRate'] as double?,
+    freeDistance: result['freeDistance'] as double?,
+    weightCharge: result['weightCharge'] as double?,
+    timeBandName: result['timeBandName'] as String?,
+    timeBandMultiplier: result['timeBandMultiplier'] as double?,
+    timeBandSurchargeRate: result['timeBandSurchargeRate'] as double?,
+    timeBandSurcharge: result['timeBandSurcharge'] as double?,
+    evaluatedPickupAt: result['evaluatedPickupAt'] as String?,
+    timezone: result['timezone'] as String?,
+    nightHoursStart: result['nightHoursStart'] as int?,
+    nightHoursEnd: result['nightHoursEnd'] as int?,
+    vehicleType: result['vehicleType'] as String?,
+  );
+  return estimate.isValid ? estimate : null;
 }
 
 /// Formats a picker wall-clock time as Africa/Addis_Ababa ISO-8601 with fixed +03:00.
@@ -59,6 +137,7 @@ class DeliveryEstimate {
     this.timezone,
     this.nightHoursStart,
     this.nightHoursEnd,
+    this.vehicleType,
   });
 
   final double? estimatedCost;
@@ -79,6 +158,9 @@ class DeliveryEstimate {
   final String? timezone;
   final int? nightHoursStart;
   final int? nightHoursEnd;
+
+  /// From API `vehicle_type` (e.g. `bicycle`, `motorbike`). Never infer locally.
+  final String? vehicleType;
 
   bool get isValid => estimatedCost != null;
 
@@ -127,6 +209,7 @@ DeliveryEstimate parseDeliveryEstimate(dynamic rawData) {
     timezone: timeBand?['timezone']?.toString(),
     nightHoursStart: _parseInt(nightHours?['start']),
     nightHoursEnd: _parseInt(nightHours?['end']),
+    vehicleType: data['vehicle_type']?.toString(),
   );
 }
 

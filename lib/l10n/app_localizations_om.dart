@@ -1073,13 +1073,45 @@ class AppLocalizationsOm extends AppLocalizations {
   String get deliveryLocationLabel => 'Bakka Geejjibaa';
 
   @override
-  String get vehicleMotorcycle => 'Biskiletii';
+  String get vehicleMotorcycle => 'Geejjibaa moto';
 
   @override
-  String get vehicleCar => 'Konkolaataa';
+  String get vehicleCar => 'Geejjibaa konkolaataa';
 
   @override
-  String get vehicleVan => 'Vaan';
+  String get vehicleVan => 'Fe\'umsa hatattamaa';
+
+  @override
+  String get vehicleBajaj => 'Geejjibaa bajaj';
+
+  @override
+  String get vehiclePickup => 'Geejjibaa pickup';
+
+  @override
+  String get pickupOutsideDeliveryServiceArea =>
+      'Bakki fuudhaa naannoo tajaajila geessisaa HudHud qindaa\'e ala.';
+
+  @override
+  String get selectAvailableVehicleType => 'Gosa konkolaataa jiru filadhu';
+
+  @override
+  String get sendAPackageTitle => 'PAAKEEJII ERGI';
+
+  @override
+  String get courierDeliveryAddressPlaceholder => 'Teessoo geessisaa';
+
+  @override
+  String get addInfoAboutDelivery => 'Odeeffannoo geessisaa dabali';
+
+  @override
+  String courierEstimateFromPrice(String currency, String amount) {
+    return '$currency $amount irraa';
+  }
+
+  @override
+  String courierEstimateMinutes(int minutes) {
+    return 'daq $minutes';
+  }
 
   @override
   String get fromWallet => 'Wallet irraa';

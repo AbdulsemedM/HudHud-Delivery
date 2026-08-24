@@ -14,6 +14,7 @@ import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data
 import 'package:hudhud_delivery/features/courier/data/models/create_delivery_result.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
+import 'package:hudhud_delivery/features/courier/utils/courier_vehicle_display.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_estimate.dart';
 import 'package:hudhud_delivery/features/courier/utils/courier_home_refresh.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_payment_helper.dart';
@@ -80,16 +81,17 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
   late final CourierRepository _courierRepository;
   late final PaymentRepository _paymentRepository;
   late final WalletRepository _walletRepository;
+  late String _selectedVehicle;
+  List<String> _supportedVehicleTypes = const [];
   gmaps.GoogleMapController? _mapController;
 
   bool _isLoadingEstimate = true;
   bool _isLoadingRequest = false;
   WalletBalance? _walletBalance;
-  bool _isLoadingWalletBalance = false;
-  String? _walletBalanceError;
   double? _estimatedCost;
   String _estimatedCurrency = 'ETB';
   String? _estimateError;
+
   /// Exact `scheduled_pickup` string used for the last successful quote.
   String? _quotedScheduledPickup;
   List<LatLng>? _routePolylinePoints;
@@ -97,12 +99,21 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
 
   /// After create succeeds, keep delivery so pay can retry without re-creating.
   CreateDeliveryResult? _pendingCreatedDelivery;
+
   /// Reused only for safe retries of the same logical payment attempt.
   String? _paymentIdempotencyKey;
+
+  late String _paymentType;
+  Map<String, dynamic> _paymentDetails = {};
 
   @override
   void initState() {
     super.initState();
+    _selectedVehicle = mapCourierVehicleType(widget.selectedVehicle);
+    _paymentType = isOfflineDeliveryPayment(widget.paymentType)
+        ? 'wallet'
+        : widget.paymentType;
+    _paymentDetails = Map<String, dynamic>.from(widget.paymentDetails ?? {});
     _courierRepository = CourierRepository(
       courierDataProvider: CourierDataProvider(
         apiService: ApiService.instance,
@@ -120,9 +131,6 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
     );
     _fetchEstimate();
     _loadMapsAvailability();
-    if (widget.paymentType == 'wallet') {
-      _fetchWalletBalance();
-    }
     if (widget.pickupPosition != null && widget.deliveryPosition != null) {
       _fetchRouteDirections();
     }
@@ -137,7 +145,9 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
   }
 
   Future<void> _fetchRouteDirections() async {
-    if (widget.pickupPosition == null || widget.deliveryPosition == null) return;
+    if (widget.pickupPosition == null || widget.deliveryPosition == null) {
+      return;
+    }
     final result = await GoogleDirectionsService.getDirections(
       originLat: widget.pickupPosition!.latitude,
       originLng: widget.pickupPosition!.longitude,
@@ -201,38 +211,21 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
       _estimatedCost != null &&
       (widget.scheduledPickup == null || _quotedScheduledPickup != null);
 
-  bool get _isWalletPayment => widget.paymentType == 'wallet';
+  bool get _isWalletPayment => _paymentType == 'wallet';
 
   Future<void> _fetchWalletBalance() async {
-    setState(() {
-      _isLoadingWalletBalance = true;
-      _walletBalanceError = null;
-    });
     try {
       final balance = await _walletRepository.getBalance();
       if (!mounted) return;
       setState(() {
         _walletBalance = balance;
-        _isLoadingWalletBalance = false;
       });
     } catch (_) {
       if (!mounted) return;
       setState(() {
         _walletBalance = null;
-        _isLoadingWalletBalance = false;
-        _walletBalanceError = 'Could not load wallet balance';
       });
     }
-  }
-
-  String? get _walletBalanceLabel {
-    if (!_isWalletPayment) return null;
-    if (_isLoadingWalletBalance) return 'Loading balance...';
-    if (_walletBalanceError != null) return _walletBalanceError;
-    if (_walletBalance != null) {
-      return '${_walletBalance!.currency} ${_walletBalance!.balance.toStringAsFixed(2)}';
-    }
-    return null;
   }
 
   double _topUpAmountForError(ApiErrorResult error) {
@@ -293,7 +286,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
           deliveryLocation: widget.deliveryLocation,
           pickupPosition: widget.pickupPosition,
           deliveryPosition: widget.deliveryPosition,
-          selectedVehicle: widget.selectedVehicle,
+          selectedVehicle: _selectedVehicle,
           itemType: widget.itemType,
           quantity: widget.quantity,
           whoPays: widget.whoPays,
@@ -320,8 +313,10 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
 
   String _mapPaymentMethod(String paymentType) {
     // paymentType is already the API id from fetched payment methods
-    if (paymentType.isNotEmpty) return paymentType;
-    return 'cash';
+    if (paymentType.isNotEmpty && !isOfflineDeliveryPayment(paymentType)) {
+      return paymentType;
+    }
+    return 'wallet';
   }
 
   /// Formats DateTime for API as Africa/Addis_Ababa with fixed +03:00.
@@ -354,9 +349,10 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
       pickupLongitude: widget.pickupPosition!.longitude,
       dropoffLatitude: widget.deliveryPosition!.latitude,
       dropoffLongitude: widget.deliveryPosition!.longitude,
-      vehicleType: mapCourierVehicleType(widget.selectedVehicle),
+      vehicleType: mapCourierVehicleType(_selectedVehicle),
       serviceType:
           deliveryServiceType(isInstantDelivery: widget.isInstantDelivery),
+      pickupLocation: widget.pickupLocation,
       scheduledPickup: scheduledPickup,
     );
 
@@ -369,9 +365,8 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
           _quotedScheduledPickup = scheduledPickup != null
               ? (result['scheduledPickup'] as String? ?? scheduledPickup)
               : null;
-          _estimateError = _estimatedCost == null
-              ? 'Estimate did not include a cost'
-              : null;
+          _estimateError =
+              _estimatedCost == null ? 'Estimate did not include a cost' : null;
           if (_estimateError != null) {
             _quotedScheduledPickup = null;
           }
@@ -379,6 +374,10 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
           final error = result['error'] as ApiErrorResult?;
           if (error?.hasScheduledPickupValidation == true) {
             _estimateError = context.l10n.chooseValidFuturePickup;
+          } else if (error?.isPickupServiceAreaUnavailable == true) {
+            _estimateError = context.l10n.pickupOutsideDeliveryServiceArea;
+          } else if (error?.isCityVehicleNotSupported == true) {
+            _estimateError = result['message'] as String?;
           } else if (error?.isRouteDistanceError == true) {
             _estimateError = context.l10n.refreshQuoteRouteDistance;
           } else {
@@ -387,6 +386,110 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
           _estimatedCost = null;
           _quotedScheduledPickup = null;
         }
+      });
+      if ((result['error'] as ApiErrorResult?)?.isPickupServiceAreaUnavailable ==
+          true) {
+        await _handlePickupServiceAreaUnavailable();
+      } else if ((result['error'] as ApiErrorResult?)
+              ?.isCityVehicleNotSupported ==
+          true) {
+        await _handleCityVehicleNotSupported();
+      }
+    }
+  }
+
+  Future<void> _handlePickupServiceAreaUnavailable() async {
+    if (!mounted) return;
+    setState(() {
+      _supportedVehicleTypes = const [];
+      _estimateError = context.l10n.pickupOutsideDeliveryServiceArea;
+      _estimatedCost = null;
+      _quotedScheduledPickup = null;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(context.l10n.pickupOutsideDeliveryServiceArea),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+
+  Future<void> _handleCityVehicleNotSupported() async {
+    final result = await _courierRepository.getDeliveryServiceAreas(
+      pickupLocation: widget.pickupLocation,
+    );
+    if (!mounted) return;
+
+    final rawTypes = result['success'] == true
+        ? List<String>.from(result['supportedVehicleTypes'] as List? ?? const [])
+        : const <String>[];
+    final applied = applyCourierSupportedVehicleTypes(
+      supportedVehicleTypes: rawTypes,
+      selectedVehicleType: _selectedVehicle,
+    );
+    setState(() {
+      _supportedVehicleTypes = applied.types;
+      if (applied.selected != null) {
+        _selectedVehicle = applied.selected!;
+      }
+    });
+
+    if (applied.types.isEmpty) {
+      setState(() {
+        _estimateError = context.l10n.pickupOutsideDeliveryServiceArea;
+        _estimatedCost = null;
+        _quotedScheduledPickup = null;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.l10n.pickupOutsideDeliveryServiceArea),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return;
+    }
+
+    await _promptSupportedVehicleSelection();
+    if (mounted) await _fetchEstimate();
+  }
+
+  Future<void> _promptSupportedVehicleSelection() async {
+    if (_supportedVehicleTypes.isEmpty) return;
+    final l10n = context.l10n;
+    final chosen = await showModalBottomSheet<String>(
+      context: context,
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: Text(
+                  l10n.selectAvailableVehicleType,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+              for (final type in _supportedVehicleTypes)
+                ListTile(
+                  leading: Icon(courierVehicleIcon(type)),
+                  title: Text(courierVehicleLabel(type, l10n)),
+                  selected: type == _selectedVehicle,
+                  onTap: () => Navigator.pop(sheetContext, type),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+    if (chosen != null && mounted) {
+      setState(() {
+        _selectedVehicle = chosen;
       });
     }
   }
@@ -441,12 +544,12 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
           'dropoff_location': widget.deliveryLocation,
           'dropoff_latitude': widget.deliveryPosition?.latitude ?? 0,
           'dropoff_longitude': widget.deliveryPosition?.longitude ?? 0,
-          'vehicle_type': mapCourierVehicleType(widget.selectedVehicle),
+          'vehicle_type': mapCourierVehicleType(_selectedVehicle),
           'service_type':
               deliveryServiceType(isInstantDelivery: widget.isInstantDelivery),
           'scheduled_pickup': scheduledPickup,
           'scheduled_delivery': scheduledDelivery,
-          'payment_method': _mapPaymentMethod(widget.paymentType),
+          'payment_method': _mapPaymentMethod(_paymentType),
           'requires_signature': false,
           'insurance_required': false,
           'special_instructions': '',
@@ -474,8 +577,8 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
         };
 
         final paymentPhone = normalizePaymentPhone(
-          widget.paymentDetails?['phone']?.toString(),
-          widget.paymentType,
+          _paymentDetails['phone']?.toString(),
+          _paymentType,
         );
         if (paymentPhone.isNotEmpty) {
           requestData['payment_phone'] = paymentPhone;
@@ -491,7 +594,16 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
           setState(() => _isLoadingRequest = false);
           final error = result['error'] as ApiErrorResult?;
           if (error?.isInsufficientBalance == true) {
+            await _fetchWalletBalance();
             await _showInsufficientBalanceDialog(error!);
+            return;
+          }
+          if (error?.isCityVehicleNotSupported == true) {
+            await _handleCityVehicleNotSupported();
+            return;
+          }
+          if (error?.isPickupServiceAreaUnavailable == true) {
+            await _handlePickupServiceAreaUnavailable();
             return;
           }
           if (error?.hasScheduledPickupValidation == true) {
@@ -608,7 +720,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
         return;
       }
 
-      if (isOfflineDeliveryPayment(widget.paymentType)) {
+      if (isOfflineDeliveryPayment(_paymentType)) {
         if (!mounted) return;
         setState(() => _isLoadingRequest = false);
         _pendingCreatedDelivery = null;
@@ -625,10 +737,10 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
       final paymentResult = await initiateDeliveryPayment(
         repo: _paymentRepository,
         packageDeliveryId: delivery.deliveryId,
-        paymentMethodCode: widget.paymentType,
+        paymentMethodCode: _paymentType,
         amount: amount,
         currency: currency,
-        paymentDetails: widget.paymentDetails,
+        paymentDetails: _paymentDetails,
         idempotencyKey: _paymentIdempotencyKey,
       );
 
@@ -656,11 +768,11 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                     deliveryLocation: widget.deliveryLocation,
                     pickupPosition: widget.pickupPosition,
                     deliveryPosition: widget.deliveryPosition,
-                    selectedVehicle: widget.selectedVehicle,
+                    selectedVehicle: _selectedVehicle,
                     itemType: widget.itemType,
                     quantity: widget.quantity,
                     whoPays: widget.whoPays,
-                    paymentType: widget.paymentType,
+                    paymentType: _paymentType,
                     recipientName: widget.recipientName,
                     recipientPhone: widget.recipientPhone,
                     packageImagePath: widget.packageImagePath,
@@ -799,7 +911,8 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
       child: Builder(
         builder: (context) {
           LatLng mapCenter = const LatLng(9.0222, 38.7468);
-          if (widget.pickupPosition != null && widget.deliveryPosition != null) {
+          if (widget.pickupPosition != null &&
+              widget.deliveryPosition != null) {
             mapCenter = LatLng(
               (widget.pickupPosition!.latitude +
                       widget.deliveryPosition!.latitude) /
@@ -934,8 +1047,9 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                                           children: [
                                             _DetailRow(
                                               icon: Icons.location_on,
-                                              iconColor:
-                                                  Theme.of(context).colorScheme.error,
+                                              iconColor: Theme.of(context)
+                                                  .colorScheme
+                                                  .error,
                                               label: 'Pickup Location',
                                               value: widget.pickupLocation,
                                             ),
@@ -972,8 +1086,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                                             ),
                                             const SizedBox(height: 12),
                                             _DetailRow(
-                                              label:
-                                                  'Recipient contact number',
+                                              label: 'Recipient contact number',
                                               value: widget.recipientPhone,
                                             ),
                                           ],
@@ -986,98 +1099,63 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
-                                            Row(
-                                              children: [
-                                                Expanded(
-                                                  child: _DetailRow(
-                                                    label: 'Payment',
-                                                    value: widget.paymentType,
-                                                  ),
-                                                ),
-                                                Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.end,
-                                                  children: [
-                                                    Text(
-                                                      'Estimated fee',
-                                                      style: theme
-                                                          .textTheme.bodySmall
-                                                          ?.copyWith(
-                                                        color:
-                                                            HomeColors.textMuted,
+                                            Text(
+                                              'Estimated fee',
+                                              style: theme.textTheme.bodySmall
+                                                  ?.copyWith(
+                                                color: HomeColors.textMuted,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            _isLoadingEstimate
+                                                ? Shimmer.fromColors(
+                                                    baseColor: HomeColors
+                                                        .surfaceElevated,
+                                                    highlightColor: HomeColors
+                                                        .surfaceElevated
+                                                        .withValues(alpha: 0.6),
+                                                    child: Container(
+                                                      width: 80,
+                                                      height: 24,
+                                                      decoration:
+                                                          BoxDecoration(
+                                                        color: Colors.white,
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(4),
                                                       ),
                                                     ),
-                                                    const SizedBox(height: 4),
-                                                    _isLoadingEstimate
-                                                        ? Shimmer.fromColors(
-                                                            baseColor: HomeColors
-                                                                .surfaceElevated,
-                                                            highlightColor:
-                                                                HomeColors
-                                                                    .surfaceElevated
-                                                                    .withValues(
-                                                                        alpha:
-                                                                            0.6),
-                                                            child: Container(
-                                                              width: 80,
-                                                              height: 24,
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                color:
-                                                                    Colors.white,
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            4),
-                                                              ),
-                                                            ),
-                                                          )
-                                                        : Text(
-                                                            estimatedFeeText,
-                                                            style: theme
-                                                                .textTheme
-                                                                .titleLarge
-                                                                ?.copyWith(
-                                                              fontWeight:
-                                                                  FontWeight.w700,
-                                                              color: HomeColors
-                                                                  .violet,
-                                                            ),
-                                                          ),
-                                                    if (_estimateError != null)
-                                                      Padding(
-                                                        padding:
-                                                            const EdgeInsets.only(
-                                                                top: 4),
-                                                        child: Text(
-                                                          _estimateError!,
-                                                          style: theme
-                                                              .textTheme.bodySmall
-                                                              ?.copyWith(
-                                                            color: AppColors
-                                                                .errorColor,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                  ],
+                                                  )
+                                                : Text(
+                                                    estimatedFeeText,
+                                                    style: theme
+                                                        .textTheme.titleLarge
+                                                        ?.copyWith(
+                                                      fontWeight:
+                                                          FontWeight.w700,
+                                                      color: HomeColors.violet,
+                                                    ),
+                                                  ),
+                                            if (_estimateError != null)
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    top: 4),
+                                                child: Text(
+                                                  _estimateError!,
+                                                  style: theme
+                                                      .textTheme.bodySmall
+                                                      ?.copyWith(
+                                                    color:
+                                                        AppColors.errorColor,
+                                                  ),
                                                 ),
-                                              ],
-                                            ),
-                                            if (_isWalletPayment &&
-                                                _walletBalanceLabel != null) ...[
-                                              const SizedBox(height: 12),
-                                              _DetailRow(
-                                                label: 'Wallet balance',
-                                                value: _walletBalanceLabel!,
                                               ),
-                                            ],
                                           ],
                                         ),
                                       ),
                                       const SizedBox(height: AppColors.spaceLG),
                                       TextButton(
-                                        onPressed: () =>
-                                            Navigator.pop(context),
+                                        onPressed: () => Navigator.pop(context),
                                         child: const Text(
                                           'Edit Details',
                                           style: TextStyle(
@@ -1087,8 +1165,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                                           ),
                                         ),
                                       ),
-                                      const SizedBox(
-                                          height: AppColors.spaceMD),
+                                      const SizedBox(height: AppColors.spaceMD),
                                       SizedBox(
                                         width: double.infinity,
                                         height: AppColors.buttonHeightMD,
@@ -1098,8 +1175,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                                               ? null
                                               : _createDeliveryRequest,
                                           style: ElevatedButton.styleFrom(
-                                            backgroundColor:
-                                                HomeColors.violet,
+                                            backgroundColor: HomeColors.violet,
                                             foregroundColor: Colors.white,
                                             shape: RoundedRectangleBorder(
                                               borderRadius:
@@ -1121,8 +1197,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                                                   'Look for Courier',
                                                   style: TextStyle(
                                                     fontSize: 16,
-                                                    fontWeight:
-                                                        FontWeight.w600,
+                                                    fontWeight: FontWeight.w600,
                                                   ),
                                                 ),
                                         ),

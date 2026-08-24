@@ -2087,20 +2087,74 @@ abstract class AppLocalizations {
   /// No description provided for @vehicleMotorcycle.
   ///
   /// In en, this message translates to:
-  /// **'Bicycle'**
+  /// **'Delivery by moto'**
   String get vehicleMotorcycle;
 
   /// No description provided for @vehicleCar.
   ///
   /// In en, this message translates to:
-  /// **'Car'**
+  /// **'Delivery by car'**
   String get vehicleCar;
 
   /// No description provided for @vehicleVan.
   ///
   /// In en, this message translates to:
-  /// **'Van'**
+  /// **'Express Cargo'**
   String get vehicleVan;
+
+  /// No description provided for @vehicleBajaj.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery by bajaj'**
+  String get vehicleBajaj;
+
+  /// No description provided for @vehiclePickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery by pickup'**
+  String get vehiclePickup;
+
+  /// No description provided for @pickupOutsideDeliveryServiceArea.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup is outside HudHud’s configured delivery service areas.'**
+  String get pickupOutsideDeliveryServiceArea;
+
+  /// No description provided for @selectAvailableVehicleType.
+  ///
+  /// In en, this message translates to:
+  /// **'Select an available vehicle type'**
+  String get selectAvailableVehicleType;
+
+  /// No description provided for @sendAPackageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'SEND A PACKAGE'**
+  String get sendAPackageTitle;
+
+  /// No description provided for @courierDeliveryAddressPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery address'**
+  String get courierDeliveryAddressPlaceholder;
+
+  /// No description provided for @addInfoAboutDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Add info about delivery'**
+  String get addInfoAboutDelivery;
+
+  /// No description provided for @courierEstimateFromPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'from {currency} {amount}'**
+  String courierEstimateFromPrice(String currency, String amount);
+
+  /// No description provided for @courierEstimateMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String courierEstimateMinutes(int minutes);
 
   /// No description provided for @fromWallet.
   ///

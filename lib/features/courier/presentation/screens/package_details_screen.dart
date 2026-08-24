@@ -234,7 +234,7 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
           scheduledPickup: widget.scheduledPickup,
           scheduledDelivery: widget.scheduledDelivery,
           whoPays: 'recipient',
-          paymentType: 'cash_on_delivery',
+          paymentType: 'wallet',
           senderPhone: senderPhone,
           recipientName: _recipientNameController.text,
           recipientPhone: _recipientPhoneController.text,

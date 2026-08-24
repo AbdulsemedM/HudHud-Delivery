@@ -1057,13 +1057,45 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deliveryLocationLabel => 'Delivery Location';
 
   @override
-  String get vehicleMotorcycle => 'Bicycle';
+  String get vehicleMotorcycle => 'Delivery by moto';
 
   @override
-  String get vehicleCar => 'Car';
+  String get vehicleCar => 'Delivery by car';
 
   @override
-  String get vehicleVan => 'Van';
+  String get vehicleVan => 'Express Cargo';
+
+  @override
+  String get vehicleBajaj => 'Delivery by bajaj';
+
+  @override
+  String get vehiclePickup => 'Delivery by pickup';
+
+  @override
+  String get pickupOutsideDeliveryServiceArea =>
+      'Pickup is outside HudHud’s configured delivery service areas.';
+
+  @override
+  String get selectAvailableVehicleType => 'Select an available vehicle type';
+
+  @override
+  String get sendAPackageTitle => 'SEND A PACKAGE';
+
+  @override
+  String get courierDeliveryAddressPlaceholder => 'Delivery address';
+
+  @override
+  String get addInfoAboutDelivery => 'Add info about delivery';
+
+  @override
+  String courierEstimateFromPrice(String currency, String amount) {
+    return 'from $currency $amount';
+  }
+
+  @override
+  String courierEstimateMinutes(int minutes) {
+    return '$minutes min';
+  }
 
   @override
   String get fromWallet => 'From Wallet';
