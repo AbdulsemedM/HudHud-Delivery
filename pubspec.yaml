@@ -2,7 +2,7 @@ name: hudhud_delivery
 description: "A new Flutter project."
 publish_to: "none"
 
-version: 0.0.1+2
+version: 1.0.2+25
 
 environment:
   sdk: ">=3.1.0 <4.0.0"
@@ -16,6 +16,8 @@ dependencies:
   # State Management
   provider: ^6.1.1
   equatable: ^2.0.5
+  bloc: ^8.1.4
+  meta: ^1.16.0
 
   # Local Storage (SQLite)
   sqflite: ^2.4.2
@@ -24,8 +26,18 @@ dependencies:
   # HTTP Client
   dio: ^5.4.0
 
+  # URLs (support mailto / tel)
+  url_launcher: ^6.3.1
+  # Hosted payment page (Waafi HPP)
+  webview_flutter: ^4.10.0
+  # Share sheet / platform share
+  share_plus: ^10.1.4
+  # Network reachability
+  connectivity_plus: ^6.1.1
+
   # Secure Storage
   flutter_secure_storage: ^9.0.0
+  local_auth: ^2.3.0
 
   # Shared Preferences
   shared_preferences: ^2.2.2
@@ -33,10 +45,11 @@ dependencies:
   font_awesome_flutter: ^10.6.0
   intl: ^0.20.2
   intl_phone_field: ^3.2.0
-  google_nav_bar: ^5.0.7
   lottie: ^3.1.3
   country_picker: ^2.0.27
+  image_picker: ^1.1.2
   device_info_plus: ^10.1.0
+  package_info_plus: ^8.1.2
 
   # Location Services
   permission_handler: ^12.0.1
@@ -55,6 +68,22 @@ dependencies:
   # UI Components
   cupertino_icons: ^1.0.2
   shimmer: ^3.0.0
+  google_sign_in: ^7.2.0
+  file_picker: ^8.1.7
+  record: ^6.2.1
+  just_audio: ^0.9.42
+  audio_session: ^0.1.25
+  cached_network_image: ^3.4.1
+  flutter_linkify: ^6.0.0
+  shorebird_code_push: ^2.0.7
+  firebase_remote_config: ^5.5.0
+  tutorial_coach_mark: ^1.3.3
+  flutter_dotenv: ^6.0.1
+
+dependency_overrides:
+  # Local Flutter SDK is Dart 3.11; 0.8.13+18+ requires Dart 3.12.
+  # Stay on +16 to also avoid 0.8.13+17 Kotlin Pigeon / javac breakage.
+  image_picker_android: 0.8.13+16
 
 dev_dependencies:
   flutter_test:
@@ -78,7 +107,11 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/
+    - assets/images/home_service_tabs/
     - assets/animations/
+    - assets/sound/
+    - .env
+    - shorebird.yaml
 
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a

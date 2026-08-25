@@ -6,9 +6,7 @@ class CheckoutDataProvider {
   CheckoutDataProvider({required this.apiService});
 
   /// POST /api/customer/orders
-  /// Payload: vendor_id, items [{product_id, quantity}], tax_amount, discount_amount,
-  /// delivery_address, delivery_location, delivery_latitude, delivery_longitude,
-  /// payment_method, service_type, notes
+  /// Nested delivery_address (docs) plus flat delivery_* fields (live API validation).
   Future<Map<String, dynamic>> createOrder({
     required int vendorId,
     required List<Map<String, dynamic>> items,
@@ -21,20 +19,40 @@ class CheckoutDataProvider {
     required String paymentMethod,
     String serviceType = 'delivery',
     String? notes,
+    String? couponCode,
   }) async {
     try {
       final Map<String, dynamic> orderData = {
-        'vendor_id': vendorId,
-        'items': items,
-        'tax_amount': taxAmount,
-        'discount_amount': discountAmount,
-        'delivery_address': deliveryAddress,
-        'delivery_location': deliveryLocation,
+        'items': items
+            .map((item) {
+              final mapped = <String, dynamic>{
+                'product_id': item['product_id'],
+                'quantity': item['quantity'],
+              };
+              final variantId = item['variant_id'];
+              if (variantId != null) {
+                final parsed = variantId is int
+                    ? variantId
+                    : int.tryParse(variantId.toString());
+                if (parsed != null && parsed > 0) {
+                  mapped['variant_id'] = parsed;
+                }
+              }
+              return mapped;
+            })
+            .toList(),
+        'delivery_address': {
+          'latitude': deliveryLatitude,
+          'longitude': deliveryLongitude,
+          'address': deliveryAddress,
+        },
+        // Live API still requires these flat fields (422 if omitted).
+        'delivery_location': deliveryLocation.isNotEmpty
+            ? deliveryLocation
+            : deliveryAddress,
         'delivery_latitude': deliveryLatitude,
         'delivery_longitude': deliveryLongitude,
         'payment_method': paymentMethod,
-        'service_type': serviceType,
-        if (notes != null && notes.isNotEmpty) 'notes': notes,
       };
 
       final response = await apiService.post(
@@ -59,9 +77,64 @@ class CheckoutDataProvider {
     }
   }
 
+  Future<Map<String, dynamic>> validateCoupon({
+    required String code,
+    required double orderAmount,
+    required int vendorId,
+    String serviceType = 'restaurant',
+  }) async {
+    try {
+      final response = await apiService.post(
+        '${ApiConstants.baseUrl}${ApiConstants.validateCoupon}',
+        data: {
+          'code': code,
+          'order_amount': orderAmount,
+          'vendor_id': vendorId,
+          'service_type': serviceType,
+        },
+      );
+
+      return {
+        'statusCode': response.statusCode,
+        'data': response.data,
+        'errorMessage': null,
+      };
+    } on ApiException catch (apiException) {
+      return {
+        'statusCode': apiException.statusCode,
+        'data': apiException.data,
+        'errorMessage': _extractApiErrorMessage(apiException),
+      };
+    } on Exception catch (e) {
+      return {
+        'statusCode': 500,
+        'data': null,
+        'errorMessage': e.toString(),
+      };
+    }
+  }
+
   String _extractApiErrorMessage(ApiException apiException) {
     final rawData = apiException.data;
     if (rawData is Map<String, dynamic>) {
+      final messageField = rawData['message'];
+      if (messageField is Map<String, dynamic>) {
+        final couponErrors = messageField['coupon_code'];
+        if (couponErrors is List && couponErrors.isNotEmpty) {
+          return couponErrors.first.toString();
+        }
+
+        for (final entry in messageField.entries) {
+          final value = entry.value;
+          if (value is List && value.isNotEmpty) {
+            return value.first.toString();
+          }
+          if (value != null && value.toString().isNotEmpty) {
+            return value.toString();
+          }
+        }
+      }
+
       final errors = rawData['errors'];
       if (errors is Map<String, dynamic> && errors.isNotEmpty) {
         final messages = <String>[];

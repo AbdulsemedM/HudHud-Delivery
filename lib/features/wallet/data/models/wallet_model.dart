@@ -43,6 +43,11 @@ class WalletModel {
 
   double get balanceAmount => double.tryParse(balance) ?? 0.0;
 
+  String get dropdownLabel => '$name ($currency)';
+
+  String get dropdownLabelWithBalance =>
+      '$name ($currency ${balanceAmount.toStringAsFixed(2)})';
+
   Map<String, dynamic> toJson() => {
         'id': id,
         'user_id': userId,

@@ -1,8 +1,10 @@
 import 'package:equatable/equatable.dart';
+import 'package:hudhud_delivery/core/utils/media_url_util.dart';
 
 class VendorModel extends Equatable {
   final int id;
-  /// User ID of the vendor (use this for product APIs like by-vendor/{user_id}).
+
+  /// Linked user account id (not used for vendor product APIs).
   final int? userId;
   final String name;
   final String email;
@@ -58,7 +60,7 @@ class VendorModel extends Equatable {
     this.socialType,
     required this.language,
     required this.timezone,
-    required     this.referralCode,
+    required this.referralCode,
     this.deletedAt,
     required this.createdAt,
     required this.updatedAt,
@@ -95,61 +97,63 @@ class VendorModel extends Equatable {
       name: json['name']?.toString() ?? '',
       email: json['email']?.toString() ?? '',
       phone: json['phone']?.toString() ?? '',
-      emailVerifiedAt: json['email_verified_at'] != null 
-          ? DateTime.parse(json['email_verified_at']) 
+      emailVerifiedAt: json['email_verified_at'] != null
+          ? DateTime.parse(json['email_verified_at'])
           : null,
-      phoneVerifiedAt: json['phone_verified_at'] != null 
-          ? DateTime.parse(json['phone_verified_at']) 
+      phoneVerifiedAt: json['phone_verified_at'] != null
+          ? DateTime.parse(json['phone_verified_at'])
           : null,
       type: json['type']?.toString() ?? 'vendor',
       status: json['status']?.toString() ?? 'active',
-      avatar: json['avatar']?.toString() ?? json['avatar_url']?.toString() ?? '',
+      avatar:
+          json['avatar']?.toString() ?? json['avatar_url']?.toString() ?? '',
       deviceToken: json['device_token'],
       emailVerificationCode: json['email_verification_code'],
       phoneVerificationCode: json['phone_verification_code'],
-      lastLoginAt: json['last_login_at'] != null 
-          ? DateTime.parse(json['last_login_at']) 
+      lastLoginAt: json['last_login_at'] != null
+          ? DateTime.parse(json['last_login_at'])
           : null,
       lastLoginIp: json['last_login_ip'],
-      dateOfBirth: json['date_of_birth'] != null 
-          ? DateTime.parse(json['date_of_birth']) 
+      dateOfBirth: json['date_of_birth'] != null
+          ? DateTime.parse(json['date_of_birth'])
           : null,
       gender: json['gender'],
       socialType: json['social_type'],
       language: json['language']?.toString() ?? 'en',
       timezone: json['timezone']?.toString() ?? 'UTC',
       referralCode: json['referral_code']?.toString() ?? '',
-      deletedAt: json['deleted_at'] != null 
-          ? DateTime.parse(json['deleted_at']) 
+      deletedAt: json['deleted_at'] != null
+          ? DateTime.parse(json['deleted_at'])
           : null,
-      createdAt: DateTime.tryParse(json['created_at']?.toString() ?? '') ?? DateTime.now(),
-      updatedAt: DateTime.tryParse(json['updated_at']?.toString() ?? '') ?? DateTime.now(),
+      createdAt: DateTime.tryParse(json['created_at']?.toString() ?? '') ??
+          DateTime.now(),
+      updatedAt: DateTime.tryParse(json['updated_at']?.toString() ?? '') ??
+          DateTime.now(),
     );
   }
 
   /// Parses a vendor from the vendors list API (/api/vendors).
-  /// Uses shop_name as name and logo_path / logo_urls as avatar.
+  /// Uses shop_name as name and prefers logo_urls.original over logo_path
+  /// (logo_path often points at a broken medium conversion URL).
   factory VendorModel.fromVendorListJson(Map<String, dynamic> json) {
-    final logoPath = json['logo_path']?.toString();
-    final logoUrls = json['logo_urls'];
-    String avatar = logoPath ?? '';
-    if (avatar.isEmpty && logoUrls is Map) {
-      final urls = logoUrls as Map<String, dynamic>;
-      avatar = urls['medium']?.toString() ??
-          urls['small']?.toString() ??
-          urls['thumb']?.toString() ??
-          urls['original']?.toString() ??
-          '';
-    }
-    final bannerPath = json['banner_path']?.toString();
-    final bannerUrls = json['banner_urls'];
-    String? banner = bannerPath?.isNotEmpty == true ? bannerPath : null;
-    if (banner == null && bannerUrls is Map) {
-      final urls = bannerUrls as Map<String, dynamic>;
-      banner = urls['medium']?.toString() ?? urls['small']?.toString() ?? urls['thumb']?.toString();
-    }
-    final createdAt = DateTime.tryParse(json['created_at']?.toString() ?? '') ?? DateTime.now();
-    final updatedAt = DateTime.tryParse(json['updated_at']?.toString() ?? '') ?? DateTime.now();
+    final logoUrls = json['logo_urls'] is Map
+        ? Map<dynamic, dynamic>.from(json['logo_urls'] as Map)
+        : null;
+    final avatar = resolveVendorMediaUrl(
+      path: json['logo_path']?.toString(),
+      urls: logoUrls,
+    );
+    final bannerUrls = json['banner_urls'] is Map
+        ? Map<dynamic, dynamic>.from(json['banner_urls'] as Map)
+        : null;
+    final banner = resolveVendorMediaUrl(
+      path: json['banner_path']?.toString(),
+      urls: bannerUrls,
+    );
+    final createdAt = DateTime.tryParse(json['created_at']?.toString() ?? '') ??
+        DateTime.now();
+    final updatedAt = DateTime.tryParse(json['updated_at']?.toString() ?? '') ??
+        DateTime.now();
     return VendorModel(
       id: _parseInt(json['id']),
       userId: _parseUserId(json),
@@ -179,7 +183,7 @@ class VendorModel extends Equatable {
       cuisineType: json['cuisine_type']?.toString(),
       openingTime: _formatTime(json['opening_time']?.toString()),
       closingTime: _formatTime(json['closing_time']?.toString()),
-      bannerPath: banner,
+      bannerPath: banner.isNotEmpty ? banner : null,
     );
   }
 
@@ -191,7 +195,7 @@ class VendorModel extends Equatable {
     final h = int.tryParse(parts[0]) ?? 0;
     final m = parts.length > 1 ? int.tryParse(parts[1]) ?? 0 : 0;
     if (h == 0 && m == 0 && time == '00:00:00') return 'Midnight';
-    if (h == 12) return '${h}:${m.toString().padLeft(2, '0')} PM';
+    if (h == 12) return '$h:${m.toString().padLeft(2, '0')} PM';
     if (h > 12) return '${h - 12}:${m.toString().padLeft(2, '0')} PM';
     return '${h == 0 ? 12 : h}:${m.toString().padLeft(2, '0')} AM';
   }
@@ -228,9 +232,6 @@ class VendorModel extends Equatable {
   bool get isActive => status == 'active';
   bool get isEmailVerified => emailVerifiedAt != null;
   bool get isPhoneVerified => phoneVerifiedAt != null;
-
-  /// ID to use for vendor product APIs (prefer user_id when available).
-  int get productApiId => userId ?? id;
 
   @override
   List<Object?> get props => [

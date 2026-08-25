@@ -1,4 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/utils/avatar_util.dart';
+import 'package:hudhud_delivery/core/widgets/status_chip.dart';
+import 'package:hudhud_delivery/core/widgets/user_avatar.dart';
+import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
+import 'package:hudhud_delivery/models/user_model.dart';
 import '../../data/models/order_model.dart';
 import 'package:intl/intl.dart';
 
@@ -13,18 +21,10 @@ class StoryRing extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(2), // Border width
-      decoration: const BoxDecoration(
+      padding: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
         shape: BoxShape.circle,
-        gradient: LinearGradient(
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
-          colors: [
-            Colors.purple,
-            Colors.pink,
-            Colors.orange,
-          ],
-        ),
+        border: Border.all(color: HomeColors.violet, width: 2),
       ),
       child: child,
     );
@@ -32,11 +32,13 @@ class StoryRing extends StatelessWidget {
 }
 
 class OrdersHeader extends StatelessWidget {
-  final VoidCallback onFilterTap;
+  final VoidCallback? onFilterTap;
+  final UserModel? user;
 
   const OrdersHeader({
     super.key,
-    required this.onFilterTap,
+    this.onFilterTap,
+    this.user,
   });
 
   @override
@@ -44,23 +46,27 @@ class OrdersHeader extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Row(
-          children: [
-            StoryRing(
-              child: CircleAvatar(
-                radius: 20,
-                backgroundColor: Colors.white,
-                backgroundImage: AssetImage('assets/images/profile.png'),
-              ),
-            ),
-          ],
-        ),
-        IconButton(
-          icon: const Icon(
-            Icons.notifications_outlined,
-            color: Colors.black,
+        StoryRing(
+          child: UserAvatar(
+            radius: 20,
+            imageUrl: getDisplayAvatarUrl(user),
           ),
-          onPressed: () {},
+        ),
+        Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: HomeColors.surfaceOf(context),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: HomeColors.borderOf(context)),
+          ),
+          child: IconButton(
+            icon: Icon(
+              Icons.notifications_outlined,
+              color: HomeColors.textPrimaryOf(context),
+            ),
+            onPressed: () {},
+          ),
         ),
       ],
     );
@@ -68,37 +74,101 @@ class OrdersHeader extends StatelessWidget {
 }
 
 class OrdersTitle extends StatelessWidget {
-  final VoidCallback onFilterTap;
+  const OrdersTitle({super.key});
 
-  const OrdersTitle({
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Text(
+      l10n.orders,
+      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: HomeColors.textPrimaryOf(context),
+          ),
+    );
+  }
+}
+
+class OrderFilterChips extends StatelessWidget {
+  final String? selectedStatus;
+  final ValueChanged<String?> onFilterChanged;
+
+  const OrderFilterChips({
     super.key,
-    required this.onFilterTap,
+    required this.selectedStatus,
+    required this.onFilterChanged,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        const Text(
-          'My Orders',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        TextButton(
-          onPressed: onFilterTap,
-          child: const Text(
-            'Filter',
-            style: TextStyle(
-              color: Colors.orange,
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
+    final l10n = context.l10n;
+    final filters = <String?, String>{
+      null: l10n.orders,
+      'pending': l10n.orderStatusPending,
+      'confirmed': l10n.orderStatusConfirmed,
+      'on_the_way': l10n.orderStatusOutForDelivery,
+      'delivered': l10n.orderStatusDelivered,
+      'cancelled': l10n.orderStatusCancelled,
+    };
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: filters.entries.map((entry) {
+          final selected = selectedStatus == entry.key;
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: FilterChip(
+              label: Text(entry.value),
+              selected: selected,
+              onSelected: (_) => onFilterChanged(entry.key),
+              showCheckmark: false,
+              labelStyle: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: selected ? AppColors.lightOnPrimary : HomeColors.textMutedOf(context),
+              ),
+              backgroundColor: HomeColors.surfaceOf(context),
+              selectedColor: HomeColors.violet,
+              side: BorderSide(
+                color: selected ? HomeColors.violet : HomeColors.borderOf(context),
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppColors.radiusFull),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+
+class OrdersShimmer extends StatelessWidget {
+  const OrdersShimmer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final baseColor = HomeColors.surfaceOf(context);
+    final highlightColor = HomeColors.surfaceElevatedOf(context);
+
+    return Column(
+      children: List.generate(4, (index) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Shimmer.fromColors(
+            baseColor: baseColor,
+            highlightColor: highlightColor,
+            child: Container(
+              height: 88,
+              decoration: BoxDecoration(
+                color: baseColor,
+                borderRadius: BorderRadius.circular(AppColors.radiusLG),
+              ),
             ),
           ),
-        ),
-      ],
+        );
+      }),
     );
   }
 }
@@ -121,39 +191,35 @@ class OrderItem extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12),
+        color: HomeColors.surfaceOf(context),
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        border: Border.all(color: HomeColors.borderOf(context)),
       ),
       child: Row(
         children: [
-          Image.asset(
-            'assets/images/car_icon.png',
-            width: 40,
-            height: 40,
-            color: Colors.grey[600],
+          Icon(
+            Icons.local_shipping_outlined,
+            color: HomeColors.textMutedOf(context),
           ),
           const SizedBox(width: 16),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '$distance KMs',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
+          Text(
+            '$distance KMs',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: HomeColors.textPrimaryOf(context),
+            ),
           ),
           const Spacer(),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                'ETB $amount',
-                style: const TextStyle(
+                amount,
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
+                  color: HomeColors.textPrimaryOf(context),
                 ),
               ),
               const SizedBox(height: 4),
@@ -161,7 +227,7 @@ class OrderItem extends StatelessWidget {
                 dateTime,
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.grey[600],
+                  color: HomeColors.textMutedOf(context),
                 ),
               ),
             ],
@@ -182,245 +248,119 @@ class OrderItemCard extends StatelessWidget {
     required this.onTap,
   });
 
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return Colors.orange;
-      case 'confirmed':
-        return Colors.blue;
-      case 'preparing':
-        return Colors.purple;
-      case 'on_the_way':
-        return Colors.indigo;
-      case 'delivered':
-        return Colors.green;
-      case 'cancelled':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
-  }
-
   IconData _getStatusIcon(String status) {
     switch (status.toLowerCase()) {
       case 'pending':
-        return Icons.schedule;
+        return Icons.schedule_rounded;
       case 'confirmed':
-        return Icons.check_circle_outline;
+        return Icons.check_circle_outline_rounded;
       case 'preparing':
-        return Icons.restaurant;
+        return Icons.restaurant_rounded;
       case 'on_the_way':
-        return Icons.delivery_dining;
+        return Icons.delivery_dining_rounded;
       case 'delivered':
-        return Icons.check_circle;
+        return Icons.check_circle_rounded;
       case 'cancelled':
-        return Icons.cancel;
+        return Icons.cancel_rounded;
       default:
-        return Icons.info;
+        return Icons.receipt_long_rounded;
     }
   }
 
   String _formatDate(DateTime dateTime) {
     final now = DateTime.now();
     final difference = now.difference(dateTime);
-    
+
     if (difference.inDays == 0) {
       return DateFormat('HH:mm').format(dateTime);
     } else if (difference.inDays == 1) {
-      return 'Yesterday';
+      return DateFormat('MMM dd').format(dateTime);
     } else if (difference.inDays < 7) {
       return DateFormat('EEEE').format(dateTime);
     } else {
-      return DateFormat('MMM dd').format(dateTime);
+      return DateFormat('MMM dd, yyyy').format(dateTime);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = _getStatusColor(order.status);
-    final statusIcon = _getStatusIcon(order.status);
-    
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+    final statusColor = StatusChip.colorForStatus(order.status);
+    final amount =
+        'ETB ${double.tryParse(order.totalAmount)?.toStringAsFixed(2) ?? order.totalAmount}';
+
+    return Material(
+      color: HomeColors.surfaceOf(context),
+      borderRadius: BorderRadius.circular(AppColors.radiusLG),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        child: Container(
+          padding: const EdgeInsets.all(AppColors.spaceMD),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppColors.radiusLG),
+            border: Border.all(color: HomeColors.borderOf(context)),
+          ),
+          child: Row(
             children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: statusColor.withOpacity(0.3),
-                        width: 1,
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  _getStatusIcon(order.status),
+                  color: statusColor,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '#${order.orderNumber}',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                        color: HomeColors.textPrimaryOf(context),
                       ),
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          statusIcon,
-                          size: 16,
-                          color: statusColor,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          order.status.replaceAll('_', ' ').toUpperCase(),
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: statusColor,
-                          ),
-                        ),
-                      ],
+                    const SizedBox(height: 2),
+                    Text(
+                      order.vendor.name,
+                      style: TextStyle(
+                        color: HomeColors.textSecondaryOf(context),
+                        fontSize: 12,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                  const Spacer(),
+                    const SizedBox(height: 2),
+                    Text(
+                      _formatDate(order.createdAt),
+                      style: TextStyle(
+                        color: HomeColors.textMutedOf(context),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  StatusChip(status: order.status),
+                  const SizedBox(height: 8),
                   Text(
-                    'Order #${order.orderNumber}',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.grey[600],
+                    amount,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                      color: HomeColors.orange,
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              ...[
-              Row(
-                children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: order.vendor.logo != null
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.network(
-                              order.vendor.logo!,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Icon(
-                                  Icons.store,
-                                  color: Colors.grey[400],
-                                );
-                              },
-                            ),
-                          )
-                        : Icon(
-                            Icons.store,
-                            color: Colors.grey[400],
-                          ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          order.vendor.name,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '${order.items.length} item${order.items.length > 1 ? 's' : ''}',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-            ],
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _formatDate(order.createdAt),
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                        ...[
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.location_on_outlined,
-                              size: 16,
-                              color: Colors.grey[500],
-                            ),
-                            const SizedBox(width: 4),
-                            Expanded(
-                              child: Text(
-                                order.deliveryAddress,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey[500],
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                      ],
-                    ),
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        'ETB ${double.tryParse(order.totalAmount)?.toStringAsFixed(2) ?? order.totalAmount}',
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      if ((double.tryParse(order.deliveryFee) ?? 0) > 0) ...[
-                        const SizedBox(height: 2),
-                        Text(
-                          '+ ETB ${double.tryParse(order.deliveryFee)?.toStringAsFixed(2) ?? order.deliveryFee} delivery',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ],
                   ),
                 ],
               ),

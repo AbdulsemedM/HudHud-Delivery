@@ -1,4 +1,4 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
+// ignore_for_file: public_member_api_docs, sort_constructors_first, non_constant_identifier_names
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -31,6 +31,9 @@ class CategoriesProductsModel {
   final String? formatted_original_price;
   final bool? is_on_discount;
   final int? discount_percentage;
+  final bool? is_available;
+  final String? status;
+  final bool? is_featured;
   CategoriesProductsModel({
     this.id,
     this.vendor_id,
@@ -59,7 +62,24 @@ class CategoriesProductsModel {
     this.formatted_original_price,
     this.is_on_discount,
     this.discount_percentage,
+    this.is_available,
+    this.status,
+    this.is_featured,
   });
+
+  /// Whether the product can be added to cart (API: is_available + active status).
+  bool get canOrder =>
+      is_available != false && (status == null || status == 'active');
+
+  static bool _parseBool(dynamic value, {required bool fallback}) {
+    if (value == null) return fallback;
+    if (value is bool) return value;
+    if (value is int) return value != 0;
+    final s = value.toString().toLowerCase();
+    if (s == 'true' || s == '1') return true;
+    if (s == 'false' || s == '0') return false;
+    return fallback;
+  }
 
   CategoriesProductsModel copyWith({
     int? id,
@@ -89,6 +109,9 @@ class CategoriesProductsModel {
     String? formatted_original_price,
     bool? is_on_discount,
     int? discount_percentage,
+    bool? is_available,
+    String? status,
+    bool? is_featured,
   }) {
     return CategoriesProductsModel(
       id: id ?? this.id,
@@ -118,6 +141,9 @@ class CategoriesProductsModel {
       formatted_original_price: formatted_original_price ?? this.formatted_original_price,
       is_on_discount: is_on_discount ?? this.is_on_discount,
       discount_percentage: discount_percentage ?? this.discount_percentage,
+      is_available: is_available ?? this.is_available,
+      status: status ?? this.status,
+      is_featured: is_featured ?? this.is_featured,
     );
   }
 
@@ -150,7 +176,28 @@ class CategoriesProductsModel {
       'formatted_original_price': formatted_original_price,
       'is_on_discount': is_on_discount,
       'discount_percentage': discount_percentage,
+      'is_available': is_available,
+      'status': status,
+      'is_featured': is_featured,
     };
+  }
+
+  static Map<String, dynamic>? _parseOptions(dynamic value) {
+    if (value == null) return null;
+    if (value is Map) {
+      return Map<String, dynamic>.from(value);
+    }
+    return null;
+  }
+
+  static List<String>? _parseStringList(dynamic value) {
+    if (value == null || value is! List) return null;
+    final items = value
+        .where((e) => e != null)
+        .map((e) => e.toString())
+        .where((s) => s.isNotEmpty)
+        .toList();
+    return items.isEmpty ? null : items;
   }
 
   /// Parses gallery_images from API: list of { original, thumb, small, medium, large, webp } -> list of URLs.
@@ -172,28 +219,31 @@ class CategoriesProductsModel {
       category_id: map['category_id'] != null ? (map['category_id'] is String ? int.tryParse(map['category_id']) : map['category_id'] as int) : null,
       name: map['name'] != null ? map['name'] as String : null,
       description: map['description'] != null ? map['description'] as String : null,
-      price: map['price'] != null ? map['price'].toString() : null,
-      discount_price: map['discount_price'] != null ? map['discount_price'].toString() : null,
-      cost_price: map['cost_price'] != null ? map['cost_price'].toString() : null,
+      price: map['price']?.toString(),
+      discount_price: map['discount_price']?.toString(),
+      cost_price: map['cost_price']?.toString(),
       quantity: map['quantity'] != null ? (map['quantity'] is String ? int.tryParse(map['quantity']) : map['quantity'] as int) : null,
-      sku: map['sku'] != null ? map['sku'] as String : null,
-      barcode: map['barcode'] != null ? map['barcode'] as String : null,
+      sku: map['sku']?.toString(),
+      barcode: map['barcode']?.toString(),
       image_path: (map['image_path'] ?? (map['main_image'] is Map ? (map['main_image'] as Map)['medium'] : null))?.toString(),
       gallery_images: _parseGalleryImages(map['gallery_images']),
-      ingredients: map['ingredients'] != null ? List<String>.from(map['ingredients']) : null,
-      allergens: map['allergens'] != null ? List<String>.from(map['allergens']) : null,
+      ingredients: _parseStringList(map['ingredients']),
+      allergens: _parseStringList(map['allergens']),
       protein: map['nutrition_facts'] != null && map['nutrition_facts']['protein'] != null ? map['nutrition_facts']['protein'].toString() : null,
       calories: map['nutrition_facts'] != null && map['nutrition_facts']['calories'] != null ? (map['nutrition_facts']['calories'] is String ? int.tryParse(map['nutrition_facts']['calories']) : map['nutrition_facts']['calories'] as int) : null,
       preparation_time: map['preparation_time'] != null ? (map['preparation_time'] is String ? int.tryParse(map['preparation_time']) : map['preparation_time'] as int) : null,
-      options: map['options'] != null ? Map<String, dynamic>.from(map['options']) : null,
-      addons: map['addons'] != null ? List<String>.from(map['addons']) : null,
+      options: _parseOptions(map['options']),
+      addons: _parseStringList(map['addons']),
       min_selection: map['min_selection'] != null ? (map['min_selection'] is String ? int.tryParse(map['min_selection']) : map['min_selection'] as int) : null,
       max_selection: map['max_selection'] != null ? (map['max_selection'] is String ? int.tryParse(map['max_selection']) : map['max_selection'] as int) : null,
       current_price: map['current_price']?.toString(),
       formatted_price: map['formatted_price']?.toString(),
       formatted_original_price: map['formatted_original_price']?.toString(),
-      is_on_discount: map['is_on_discount'] as bool?,
+      is_on_discount: _parseBool(map['is_on_discount'], fallback: false),
       discount_percentage: map['discount_percentage'] != null ? (map['discount_percentage'] is String ? int.tryParse(map['discount_percentage']) : map['discount_percentage'] as int) : null,
+      is_available: _parseBool(map['is_available'], fallback: true),
+      status: map['status']?.toString(),
+      is_featured: _parseBool(map['is_featured'], fallback: false),
     );
   }
 
@@ -237,7 +287,10 @@ class CategoriesProductsModel {
       other.formatted_price == formatted_price &&
       other.formatted_original_price == formatted_original_price &&
       other.is_on_discount == is_on_discount &&
-      other.discount_percentage == discount_percentage;
+      other.discount_percentage == discount_percentage &&
+      other.is_available == is_available &&
+      other.status == status &&
+      other.is_featured == is_featured;
   }
 
   @override
@@ -268,6 +321,9 @@ class CategoriesProductsModel {
       formatted_price.hashCode ^
       formatted_original_price.hashCode ^
       is_on_discount.hashCode ^
-      discount_percentage.hashCode;
+      discount_percentage.hashCode ^
+      is_available.hashCode ^
+      status.hashCode ^
+      is_featured.hashCode;
   }
 }

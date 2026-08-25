@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:country_picker/country_picker.dart';
+import 'package:hudhud_delivery/core/widgets/user_avatar.dart';
+import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
 
 class ProfileImagePicker extends StatelessWidget {
-  final String imageUrl;
+  final String? networkImageUrl;
+  final String? localImagePath;
   final VoidCallback onImageTap;
 
   const ProfileImagePicker({
     super.key,
-    required this.imageUrl,
+    this.networkImageUrl,
+    this.localImagePath,
     required this.onImageTap,
   });
 
@@ -17,23 +20,25 @@ class ProfileImagePicker extends StatelessWidget {
       onTap: onImageTap,
       child: Stack(
         children: [
-          CircleAvatar(
+          UserAvatar(
             radius: 40,
-            backgroundImage: AssetImage(imageUrl),
+            imageUrl: networkImageUrl,
+            localImagePath: localImagePath,
           ),
           Positioned(
             bottom: 0,
             right: 0,
             child: Container(
-              padding: const EdgeInsets.all(4),
-              decoration: const BoxDecoration(
-                color: Colors.white,
+              padding: EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: AuthScreenColors.surfaceOf(context),
                 shape: BoxShape.circle,
+                border: Border.all(color: AuthScreenColors.surfaceBorderOf(context)),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.camera_alt,
                 size: 20,
-                color: Colors.black54,
+                color: AuthScreenColors.textMutedOf(context),
               ),
             ),
           ),
@@ -45,16 +50,14 @@ class ProfileImagePicker extends StatelessWidget {
 
 class ProfileTextField extends StatelessWidget {
   final String label;
-  final String value;
-  final ValueChanged<String> onChanged;
+  final TextEditingController controller;
   final bool readOnly;
   final TextInputType keyboardType;
 
   const ProfileTextField({
     super.key,
     required this.label,
-    required this.value,
-    required this.onChanged,
+    required this.controller,
     this.readOnly = false,
     this.keyboardType = TextInputType.text,
   });
@@ -68,123 +71,30 @@ class ProfileTextField extends StatelessWidget {
           label,
           style: TextStyle(
             fontSize: 14,
-            color: Colors.grey[600],
+            color: AuthScreenColors.textSecondaryOf(context),
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: Colors.grey[100],
+            color: AuthScreenColors.surfaceOf(context),
             borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AuthScreenColors.surfaceBorderOf(context)),
           ),
-          child: TextField(
-            controller: TextEditingController(text: value),
-            onChanged: onChanged,
+          child: TextFormField(
+            controller: controller,
             readOnly: readOnly,
             keyboardType: keyboardType,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: AuthScreenColors.textPrimaryOf(context),
+            ),
             decoration: const InputDecoration(
               border: InputBorder.none,
               contentPadding: EdgeInsets.symmetric(
                 horizontal: 16,
                 vertical: 12,
-              ),
-            ),
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class PhoneNumberField extends StatelessWidget {
-  final String countryCode;
-  final String number;
-  final ValueChanged<String> onNumberChanged;
-  final ValueChanged<Country> onCountryChanged;
-
-  const PhoneNumberField({
-    super.key,
-    required this.countryCode,
-    required this.number,
-    required this.onNumberChanged,
-    required this.onCountryChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        // Country Code Selector
-        GestureDetector(
-          onTap: () {
-            showCountryPicker(
-              context: context,
-              showPhoneCode: true,
-              onSelect: onCountryChanged,
-              countryListTheme: CountryListThemeData(
-                borderRadius: BorderRadius.circular(12),
-                inputDecoration: InputDecoration(
-                  hintText: 'Search country',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                ),
-              ),
-            );
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: [
-                Text(
-                  countryCode,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const Icon(
-                  Icons.arrow_drop_down,
-                  color: Colors.black54,
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(width: 8),
-        // Phone Number Field
-        Expanded(
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: TextField(
-              controller: TextEditingController(text: number),
-              onChanged: onNumberChanged,
-              keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-              ),
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
               ),
             ),
           ),
@@ -195,33 +105,55 @@ class PhoneNumberField extends StatelessWidget {
 }
 
 class UpdateButton extends StatelessWidget {
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
+  final bool isLoading;
 
   const UpdateButton({
     super.key,
     required this.onPressed,
+    this.isLoading = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF4A148C),
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          gradient: const LinearGradient(
+            colors: AuthScreenColors.signInGradient,
           ),
         ),
-        child: const Text(
-          'Update',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+        child: ElevatedButton(
+          onPressed: isLoading ? null : onPressed,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.transparent,
+            shadowColor: Colors.transparent,
+            foregroundColor: Colors.white,
+            disabledForegroundColor: Colors.white70,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
+          child: isLoading
+              ? const SizedBox(
+                  height: 22,
+                  width: 22,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : const Text(
+                  'Update',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
         ),
       ),
     );

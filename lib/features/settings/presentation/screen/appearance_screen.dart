@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:hudhud_delivery/controllers/theme_controller.dart';
+import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
+import 'package:hudhud_delivery/features/settings/presentation/widgets/profile_dark_page.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
 
 class AppearanceScreen extends StatelessWidget {
@@ -9,24 +11,21 @@ class AppearanceScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeController = Provider.of<ThemeController>(context);
-    final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.settingsAppearance),
-      ),
+    return ProfileDarkPage(
+      title: l10n.settingsAppearance,
       body: ListView(
+        padding: EdgeInsets.all(16),
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
-            child: Text(
-              l10n.appearanceChooseTheme,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
+          Text(
+            l10n.appearanceChooseTheme,
+            style: TextStyle(
+              color: AuthScreenColors.textSecondaryOf(context),
+              fontSize: 15,
             ),
           ),
+          SizedBox(height: 16),
           _AppearanceOption(
             icon: Icons.dark_mode,
             title: l10n.themeDark,
@@ -71,35 +70,69 @@ class _AppearanceOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return ListTile(
-      leading: Icon(
-        icon,
-        color: isSelected
-            ? theme.colorScheme.primary
-            : theme.colorScheme.onSurfaceVariant,
-      ),
-      title: Text(
-        title,
-        style: TextStyle(
-          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-          color: theme.colorScheme.onSurface,
+    return Padding(
+      padding: EdgeInsets.only(bottom: 12),
+      child: Material(
+        color: AuthScreenColors.surfaceOf(context),
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isSelected
+                    ? AuthScreenColors.orange
+                    : AuthScreenColors.surfaceBorderOf(context),
+                width: isSelected ? 2 : 1,
+              ),
+              color: isSelected
+                  ? AuthScreenColors.orange.withValues(alpha: 0.08)
+                  : null,
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  icon,
+                  color: isSelected
+                      ? AuthScreenColors.orange
+                      : AuthScreenColors.textMutedOf(context),
+                ),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontWeight:
+                              isSelected ? FontWeight.w600 : FontWeight.normal,
+                          color: AuthScreenColors.textPrimaryOf(context),
+                        ),
+                      ),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: AuthScreenColors.textSecondaryOf(context),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (isSelected)
+                  const Icon(
+                    Icons.check_circle,
+                    color: AuthScreenColors.orange,
+                  ),
+              ],
+            ),
+          ),
         ),
       ),
-      subtitle: Text(
-        subtitle,
-        style: theme.textTheme.bodySmall?.copyWith(
-          color: theme.colorScheme.onSurfaceVariant,
-        ),
-      ),
-      trailing: isSelected
-          ? Icon(
-              Icons.check_circle,
-              color: theme.colorScheme.primary,
-            )
-          : null,
-      onTap: onTap,
     );
   }
 }

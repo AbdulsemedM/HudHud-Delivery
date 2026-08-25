@@ -2,14 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/theme/service_tab_palette.dart';
+import 'package:hudhud_delivery/core/widgets/status_chip.dart';
 import 'package:hudhud_delivery/features/handyman/data/data_provider/handyman_data_provider.dart';
 import 'package:hudhud_delivery/features/handyman/data/models/service_request_model.dart';
 import 'package:hudhud_delivery/features/handyman/data/repository/handyman_repository.dart';
+import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
+import 'package:hudhud_delivery/features/home/presentation/widgets/home_widget.dart';
+import 'package:lottie/lottie.dart';
 import 'create_handyman_request_screen.dart';
 import 'service_request_details_screen.dart';
 
+const Color _handymanBlue = ServiceTabPalette.handyman;
+
 class HandymanScreen extends StatefulWidget {
-  const HandymanScreen({super.key});
+  const HandymanScreen({super.key, this.embedded = false});
+
+  /// When true (embedded in home service tabs), hides [AppBar] and back button.
+  final bool embedded;
 
   @override
   State<HandymanScreen> createState() => _HandymanScreenState();
@@ -52,81 +62,69 @@ class _HandymanScreenState extends State<HandymanScreen> {
     });
   }
 
-  String _formatDate(String? value) {
-    if (value == null || value.isEmpty) return '—';
-    try {
-      final dt = DateTime.tryParse(value);
-      if (dt != null) {
-        return '${dt.day}/${dt.month}/${dt.year} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
-      }
-    } catch (_) {}
-    return value;
-  }
-
-  Color _statusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return AppColors.pending;
-      case 'completed':
-        return AppColors.successColor;
-      case 'cancelled':
-        return AppColors.errorColor;
-      case 'in_progress':
-      case 'accepted':
-        return AppColors.infoColor;
-      default:
-        return AppColors.lightTextSecondary;
-    }
+  Color _cardBorder(BuildContext context) {
+    if (widget.embedded) return HomeColors.border;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? AppColors.darkBorder : AppColors.lightBorder;
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final borderColor = _cardBorder(context);
+    final embedded = widget.embedded;
+    final bg = embedded ? HomeColors.backgroundOf(context) : theme.scaffoldBackgroundColor;
+    final onSurface = embedded ? HomeColors.textPrimaryOf(context) : colorScheme.onSurface;
+
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
+      backgroundColor: bg,
+      appBar: embedded
+          ? null
+          : AppBar(
         title: Text(
           l10n.handymanServicesTitle,
-          style: TextStyle(
+          style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
-            fontSize: 18,
-            color: theme.colorScheme.onSurface,
+            color: colorScheme.onSurface,
           ),
         ),
-        backgroundColor: theme.colorScheme.surface,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-          color: theme.colorScheme.onSurface,
+          color: colorScheme.onSurface,
           onPressed: () => Navigator.pop(context),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(
-            color: theme.dividerColor.withOpacity(0.5),
+            color: colorScheme.outlineVariant.withValues(alpha: 0.5),
             height: 1,
           ),
         ),
       ),
       body: RefreshIndicator(
+        color: embedded ? _handymanBlue : AppColors.primaryColor,
         onRefresh: _fetchRequests,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppColors.spaceMD),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 l10n.handymanWhatToDo,
-                style: TextStyle(
-                  fontSize: 18,
+                style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.onSurface,
+                  color: onSurface,
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppColors.spaceMD),
               _CreateRequestCard(
+                borderColor: borderColor,
+                embedded: embedded,
                 onTap: () async {
                   final created = await Navigator.push<bool>(
                     context,
@@ -139,103 +137,34 @@ class _HandymanScreenState extends State<HandymanScreen> {
                   }
                 },
               ),
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    l10n.handymanMyRequests,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
+              const SizedBox(height: AppColors.spaceLG),
+              Text(
+                l10n.handymanMyRequests,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: onSurface,
+                ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppColors.spaceMD),
               if (_isLoading)
-                const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(24),
-                    child: CircularProgressIndicator(),
-                  ),
-                )
+                const ShimmerListView(itemCount: 3)
               else if (_error != null)
-                Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    children: [
-                      Text(
-                        _error!,
-                        style: TextStyle(
-                          color: theme.colorScheme.onSurfaceVariant,
-                          fontSize: 14,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 12),
-                      TextButton(
-                        onPressed: _fetchRequests,
-                        child: Text(
-                          l10n.actionRetry,
-                          style: TextStyle(color: AppColors.primaryColor),
-                        ),
-                      ),
-                    ],
-                  ),
+                _HandymanErrorState(
+                  message: _error!,
+                  borderColor: borderColor,
+                  embedded: embedded,
+                  onRetry: _fetchRequests,
                 )
               else if (_requests.isEmpty)
-                Container(
-                  width: double.infinity,
-                  margin: const EdgeInsets.symmetric(vertical: 8),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 40,
-                  ),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surface,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: theme.colorScheme.shadow.withOpacity(0.08),
-                        spreadRadius: 1,
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.handyman_rounded,
-                        size: 48,
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        l10n.handymanNoRequestsYet,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: theme.colorScheme.onSurface,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        l10n.handymanNoRequestsSubtitle,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
+                _HandymanEmptyState(
+                  borderColor: borderColor,
+                  embedded: embedded,
                 )
               else
                 ..._requests.map((req) => _RequestCard(
                       request: req,
+                      borderColor: borderColor,
+                      embedded: embedded,
                       onTap: () async {
                         await Navigator.push(
                           context,
@@ -246,8 +175,6 @@ class _HandymanScreenState extends State<HandymanScreen> {
                         );
                         _fetchRequests();
                       },
-                      formatDate: _formatDate,
-                      statusColor: _statusColor,
                     )),
             ],
           ),
@@ -259,63 +186,226 @@ class _HandymanScreenState extends State<HandymanScreen> {
 
 class _CreateRequestCard extends StatelessWidget {
   final VoidCallback onTap;
+  final Color borderColor;
+  final bool embedded;
 
-  const _CreateRequestCard({required this.onTap});
+  const _CreateRequestCard({
+    required this.onTap,
+    required this.borderColor,
+    this.embedded = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
-    final primaryColor = theme.colorScheme.primary;
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: primaryColor.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: GestureDetector(
+    final colorScheme = theme.colorScheme;
+    final accent = embedded ? _handymanBlue : AppColors.primaryColor;
+    final surface = embedded ? HomeColors.surfaceElevatedOf(context) : colorScheme.surface;
+    final titleColor = embedded ? HomeColors.textPrimaryOf(context) : colorScheme.onSurface;
+    final subtitleColor =
+        embedded ? HomeColors.textMutedOf(context) : colorScheme.onSurfaceVariant;
+
+    return Material(
+      color: surface,
+      borderRadius: BorderRadius.circular(AppColors.radiusLG),
+      child: InkWell(
         onTap: onTap,
-        child: Row(
-          children: [
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        child: Container(
+          padding: const EdgeInsets.all(AppColors.spaceMD),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppColors.radiusLG),
+            border: Border.all(color: accent.withValues(alpha: 0.4)),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                accent.withValues(alpha: embedded ? 0.16 : 0.08),
+                accent.withValues(alpha: embedded ? 0.06 : 0.03),
+              ],
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(AppColors.spaceMD),
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(AppColors.radiusMD),
+                ),
+                child: Icon(
+                  Icons.add_circle_outline_rounded,
+                  color: accent,
+                  size: 32,
+                ),
+              ),
+              const SizedBox(width: AppColors.spaceMD),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.handymanCreateNewRequest,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: titleColor,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      l10n.handymanCreateRequestSubtitle,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: subtitleColor,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 16,
+                color: accent.withValues(alpha: 0.8),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HandymanEmptyState extends StatelessWidget {
+  final Color borderColor;
+  final bool embedded;
+
+  const _HandymanEmptyState({
+    required this.borderColor,
+    this.embedded = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final surface = embedded ? HomeColors.surfaceOf(context) : colorScheme.surface;
+    final titleColor = embedded ? HomeColors.textPrimaryOf(context) : colorScheme.onSurface;
+    final subtitleColor =
+        embedded ? HomeColors.textMutedOf(context) : colorScheme.onSurfaceVariant;
+    final iconColor = embedded ? _handymanBlue : colorScheme.onSurfaceVariant;
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(vertical: AppColors.spaceSM),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppColors.spaceXL,
+        vertical: AppColors.spaceXL,
+      ),
+      decoration: BoxDecoration(
+        color: surface,
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        border: Border.all(color: borderColor),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (embedded)
             Container(
-              padding: const EdgeInsets.all(12),
+              width: 88,
+              height: 88,
               decoration: BoxDecoration(
-                color: primaryColor.withOpacity(0.25),
-                borderRadius: BorderRadius.circular(8),
+                shape: BoxShape.circle,
+                color: _handymanBlue.withValues(alpha: 0.14),
               ),
               child: Icon(
-                Icons.add_circle_outline_rounded,
-                color: primaryColor,
-                size: 32,
+                Icons.handyman_rounded,
+                size: 44,
+                color: iconColor,
+              ),
+            )
+          else
+            Lottie.asset(
+              'assets/animations/browse.json',
+              width: 160,
+              errorBuilder: (_, __, ___) => Icon(
+                Icons.handyman_rounded,
+                size: 64,
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.handymanCreateNewRequest,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    l10n.handymanCreateRequestSubtitle,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: theme.colorScheme.onSurfaceVariant,
-                      height: 1.4,
-                    ),
-                  ),
-                ],
-              ),
+          const SizedBox(height: AppColors.spaceMD),
+          Text(
+            l10n.handymanNoRequestsYet,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: titleColor,
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: AppColors.spaceSM),
+          Text(
+            l10n.handymanNoRequestsSubtitle,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: subtitleColor,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HandymanErrorState extends StatelessWidget {
+  final String message;
+  final Color borderColor;
+  final VoidCallback onRetry;
+  final bool embedded;
+
+  const _HandymanErrorState({
+    required this.message,
+    required this.borderColor,
+    required this.onRetry,
+    this.embedded = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final surface = embedded ? HomeColors.surfaceOf(context) : colorScheme.surface;
+    final muted =
+        embedded ? HomeColors.textMutedOf(context) : colorScheme.onSurfaceVariant;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppColors.spaceLG),
+      decoration: BoxDecoration(
+        color: surface,
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        border: Border.all(color: borderColor),
+      ),
+      child: Column(
+        children: [
+          Icon(Icons.wifi_off_rounded, size: 48, color: muted),
+          const SizedBox(height: AppColors.spaceMD),
+          Text(
+            message,
+            style: theme.textTheme.bodyMedium?.copyWith(color: muted),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppColors.spaceMD),
+          TextButton.icon(
+            onPressed: onRetry,
+            icon: const Icon(Icons.refresh_rounded),
+            label: Text(l10n.actionRetry),
+            style: TextButton.styleFrom(
+              foregroundColor: embedded ? _handymanBlue : null,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -324,118 +414,148 @@ class _CreateRequestCard extends StatelessWidget {
 class _RequestCard extends StatelessWidget {
   final ServiceRequestModel request;
   final VoidCallback onTap;
-  final String Function(String?) formatDate;
-  final Color Function(String) statusColor;
+  final Color borderColor;
+  final bool embedded;
 
   const _RequestCard({
     required this.request,
     required this.onTap,
-    required this.formatDate,
-    required this.statusColor,
+    required this.borderColor,
+    this.embedded = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: theme.colorScheme.shadow.withOpacity(0.08),
-              spreadRadius: 1,
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+    final colorScheme = theme.colorScheme;
+    final accent = embedded ? _handymanBlue : AppColors.primaryColor;
+    final surface = embedded ? HomeColors.surfaceOf(context) : colorScheme.surface;
+    final titleColor = embedded ? HomeColors.textPrimaryOf(context) : colorScheme.onSurface;
+    final muted =
+        embedded ? HomeColors.textMutedOf(context) : colorScheme.onSurfaceVariant;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppColors.spaceMD),
+      child: Material(
+        color: surface,
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppColors.radiusLG),
+          child: Container(
+            padding: const EdgeInsets.all(AppColors.spaceMD),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppColors.radiusLG),
+              border: Border.all(color: borderColor),
             ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Text(
-                    request.title,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.successColor,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: accent.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(AppColors.radiusMD),
+                      ),
+                      child: Icon(
+                        Icons.handyman_rounded,
+                        color: accent,
+                        size: 22,
+                      ),
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                    const SizedBox(width: AppColors.spaceMD),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            request.title,
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: titleColor,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            request.description,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: muted,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: AppColors.spaceSM),
+                    StatusChip(status: request.status),
+                  ],
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: statusColor(request.status),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    request.status.replaceAll('_', ' ').toUpperCase(),
-                    style: TextStyle(
-                      color: theme.colorScheme.onPrimary,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
+                const SizedBox(height: AppColors.spaceMD),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.location_on_outlined,
+                      size: 16,
+                      color: muted,
                     ),
-                  ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        request.location,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: muted,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppColors.spaceMD),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      request.formattedEstimatedCost ?? '\u2014',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: accent,
+                      ),
+                    ),
+                    if (request.quotesCount > 0)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: embedded
+                              ? HomeColors.surfaceElevatedOf(context)
+                              : colorScheme.surfaceContainerHighest,
+                          borderRadius:
+                              BorderRadius.circular(AppColors.radiusFull),
+                        ),
+                        child: Text(
+                          l10n.handymanQuoteCount(request.quotesCount),
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: muted,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              request.description,
-              style: TextStyle(fontSize: 14, color: theme.colorScheme.onSurfaceVariant),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(Icons.location_on, size: 16, color: theme.colorScheme.onSurfaceVariant),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    request.location,
-                    style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  request.formattedEstimatedCost ?? '—',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
-                if (request.quotesCount > 0)
-                  Text(
-                    l10n.handymanQuoteCount(request.quotesCount),
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-              ],
-            ),
-          ],
+          ),
         ),
       ),
     );

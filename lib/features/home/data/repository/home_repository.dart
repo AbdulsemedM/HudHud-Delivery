@@ -4,7 +4,10 @@ import '../data_provider/home_data_provider.dart';
 
 class HomeRepository {
   final HomeDataProvider homeDataProvider;
-  HomeRepository({required this.homeDataProvider});
+
+  HomeRepository({
+    required this.homeDataProvider,
+  });
 
   Future<List<CategoryModel>> getCategories() async {
     final response = await homeDataProvider.getCategories();

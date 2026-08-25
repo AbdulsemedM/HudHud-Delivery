@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
+import 'package:hudhud_delivery/core/theme/system_ui_style.dart';
+import 'package:hudhud_delivery/features/settings/presentation/screen/notifications_screen.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
-import 'package:hudhud_delivery/features/delivery/presentation/screens/all_categories_screen.dart';
-import 'package:hudhud_delivery/features/orders/data/models/order_model.dart';
-import 'package:hudhud_delivery/features/orders/bloc/orders_bloc.dart';
-import 'package:hudhud_delivery/features/orders/data/repositories/orders_repository.dart';
-import 'package:hudhud_delivery/features/orders/presentation/screen/order_details_screen.dart';
-import 'package:hudhud_delivery/features/orders/presentation/screen/orders_screen.dart';
-import 'package:hudhud_delivery/features/handyman/presentation/screens/handyman_screen.dart';
+// import 'package:hudhud_delivery/features/delivery/presentation/screens/all_categories_screen.dart';
+// import 'package:hudhud_delivery/features/handyman/presentation/screens/handyman_screen.dart';
+import 'package:hudhud_delivery/features/courier/presentation/screens/courier_screen.dart';
+// import 'package:hudhud_delivery/features/taxi/presentation/screens/taxi_screen.dart';
+import '../widgets/home_service_tab_bar.dart';
+import '../widgets/service_coming_soon_screen.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/app/services/custom_location_service.dart';
 import 'package:hudhud_delivery/app/services/geocoding_service.dart';
@@ -17,33 +18,37 @@ import 'package:hudhud_delivery/app/services/saved_location_service.dart';
 import 'package:hudhud_delivery/app/services/startup_location_service.dart';
 import 'package:hudhud_delivery/models/user_model.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
-import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/controllers/service_accent_controller.dart';
 import 'package:hudhud_delivery/core/utils/snackbar_util.dart';
+import 'package:hudhud_delivery/features/settings/presentation/widgets/auth_feedback.dart';
 import '../../bloc/home_bloc.dart';
 import '../widgets/home_widget.dart';
 import '../../data/repository/home_repository.dart';
 import '../../data/data_provider/home_data_provider.dart';
-import 'location_search_screen.dart';
+import 'package:hudhud_delivery/features/addresses/data/addresses_data_provider.dart';
+import 'package:hudhud_delivery/features/addresses/data/addresses_repository.dart';
+import 'package:hudhud_delivery/core/widgets/verify_phone_dialog.dart';
+import 'package:hudhud_delivery/features/login/utils/phone_enrollment_navigation.dart';
+import 'package:hudhud_delivery/features/addresses/presentation/widgets/delivery_address_selector.dart';
+import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
+import 'package:hudhud_delivery/features/home/data/marketing_offers_prompt_prefs.dart';
+import 'package:hudhud_delivery/features/onboarding_tour/presentation/onboarding_tour_controller.dart';
+import 'package:hudhud_delivery/features/onboarding_tour/presentation/onboarding_tour_keys.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({
-    super.key,
-    this.onSwitchToTab,
-  });
+  /// Incremented whenever the user selects the Home tab (including first open).
+  final ValueNotifier<int> homeTabActivation;
 
-  final void Function(int index)? onSwitchToTab;
+  const HomeScreen({super.key, required this.homeTabActivation});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class HomeScreenWrapper extends StatelessWidget {
-  const HomeScreenWrapper({
-    super.key,
-    this.onSwitchToTab,
-  });
+  final ValueNotifier<int> homeTabActivation;
 
-  final void Function(int index)? onSwitchToTab;
+  const HomeScreenWrapper({super.key, required this.homeTabActivation});
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +60,7 @@ class HomeScreenWrapper extends StatelessWidget {
           ),
         ),
       )..add(GetCategoriesEvent()),
-      child: HomeScreen(onSwitchToTab: onSwitchToTab),
+      child: HomeScreen(homeTabActivation: homeTabActivation),
     );
   }
 }
@@ -63,25 +68,91 @@ class HomeScreenWrapper extends StatelessWidget {
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final AuthService _authService = AuthService();
 
+  /// Survives Home being disposed when leaving the tab (dashboard is not an IndexedStack).
+  static bool _marketingOffersCheckedThisProcess = false;
+
+  bool _syncedServiceAccent = false;
+
   UserModel? _currentUser;
   String _currentLocation = '';
   bool _isLoadingLocation = true;
 
-  List<OrderModel> _availableOrders = [];
-  bool _ordersLoading = true;
-  String? _ordersError;
+  HomeServiceMode _serviceMode = HomeServiceMode.courier;
+
+  bool _verificationPromptOpen = false;
+  bool _verifyBannerDismissed = false;
+  bool _launchPromptSequenceStarted = false;
+  bool _launchPromptSequenceComplete = false;
+
+  final OnboardingTourKeys _tourKeys = OnboardingTourKeys();
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    widget.homeTabActivation.addListener(_onHomeTabActivation);
+    OnboardingTourController.replaySignal.addListener(_onReplayTourRequested);
     _loadUserData();
     _requestLocationAndUpdate(resumeRefresh: false);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadAvailableOrders());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _runLaunchPromptSequence());
+  }
+
+  Future<void> _runLaunchPromptSequence() async {
+    if (_launchPromptSequenceStarted) return;
+    _launchPromptSequenceStarted = true;
+    try {
+      if (!mounted) return;
+      await OnboardingTourController.maybeStart(
+        context: context,
+        keys: _tourKeys,
+      );
+      if (!mounted) return;
+      await _loadUserData();
+      if (!mounted) return;
+      await _tryShowVerificationPrompt();
+      if (!mounted) return;
+      await _tryShowMarketingOffersPrompt();
+    } finally {
+      _launchPromptSequenceComplete = true;
+    }
+  }
+
+  void _maybeStartOnboardingTour() {
+    if (!mounted) return;
+    OnboardingTourController.maybeStart(
+      context: context,
+      keys: _tourKeys,
+    );
+  }
+
+  void _onReplayTourRequested() {
+    if (!mounted) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeStartOnboardingTour());
+  }
+
+  void _onHomeTabActivation() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      if (!_launchPromptSequenceComplete) return;
+      await _loadUserData();
+      if (!mounted) return;
+      await _tryShowVerificationPrompt();
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_syncedServiceAccent) {
+      _syncedServiceAccent = true;
+      context.read<ServiceAccentController>().updateHomeServiceMode(_serviceMode);
+    }
   }
 
   @override
   void dispose() {
+    widget.homeTabActivation.removeListener(_onHomeTabActivation);
+    OnboardingTourController.replaySignal.removeListener(_onReplayTourRequested);
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -93,64 +164,80 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
-  Future<void> _loadAvailableOrders() async {
-    final repo = context.read<OrdersRepository>();
-    setState(() {
-      _ordersLoading = true;
-      _ordersError = null;
-    });
-    try {
-      final orders = await repo.fetchAvailableOrders();
-      if (mounted) {
-        setState(() {
-          _availableOrders = orders;
-          _ordersLoading = false;
-          _ordersError = null;
-        });
-        _showDealsModalIfEmpty();
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _availableOrders = [];
-          _ordersLoading = false;
-          _ordersError = e.toString();
-        });
-      }
-    }
-  }
-
-  void _showDealsModalIfEmpty() {
-    if (!_ordersLoading && _availableOrders.isEmpty && mounted) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        _showDealsModal(context);
-      });
-    }
-  }
-
-  void _showDealsModal(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (context) => DealsModal(
-        onClaim: () {
-          Navigator.of(context).pop();
-          // Handle claim deal
-        },
-        onDismiss: () => Navigator.of(context).pop(),
-      ),
-    );
-  }
-
   Future<void> _loadUserData() async {
-    // Fetch fresh profile from API to get updated verification status; fallback to stored user
-    final user = await _authService.getUserProfile() ??
+    // Always hit the API after login / tab return so verification + name stay current.
+    final user = await _authService.getUserProfile(forceRefresh: true) ??
         await _authService.getStoredUser();
     if (mounted) {
       setState(() {
         _currentUser = user;
       });
+    }
+  }
+
+  /// At most once per process, and only every third eligible app open.
+  Future<void> _tryShowMarketingOffersPrompt() async {
+    if (!mounted) return;
+    if (_marketingOffersCheckedThisProcess) return;
+    _marketingOffersCheckedThisProcess = true;
+    if (!context.read<ServiceAccentController>().isOnHomeTab) return;
+    final u = _currentUser;
+    if (u == null) return;
+    if (u.marketingConsent) return;
+    if (!await MarketingOffersPromptPrefs.shouldShowThisLaunch()) return;
+    if (!mounted) return;
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) => MarketingOffersPromptDialog(
+        onNotNow: () => Navigator.of(ctx).pop(),
+        onAccept: () async {
+          try {
+            final updated = await _authService.updateMarketingConsent(true);
+            if (!mounted) return;
+            setState(() => _currentUser = updated);
+            if (ctx.mounted) Navigator.of(ctx).pop();
+          } on ApiException catch (e) {
+            if (mounted) AuthSnackBar.error(context, e.message);
+          } catch (e) {
+            if (mounted) AuthSnackBar.error(context, e.toString());
+          }
+        },
+      ),
+    );
+  }
+
+  /// Shows when Home tab is selected and email or phone still needs verification.
+  Future<void> _tryShowVerificationPrompt() async {
+    if (!mounted) return;
+    if (!context.read<ServiceAccentController>().isOnHomeTab) return;
+    final u = _currentUser;
+    if (u == null) return;
+    if (u.isEmailVerified && u.isPhoneVerified) return;
+    if (_verificationPromptOpen) return;
+
+    _verificationPromptOpen = true;
+    try {
+      await showDialog<void>(
+        context: context,
+        barrierDismissible: true,
+        builder: (ctx) => AccountVerificationPromptDialog(
+          user: u,
+          onDismiss: () => Navigator.of(ctx).pop(),
+          onVerifyEmail: () {
+            Navigator.of(ctx).pop();
+            _openVerifyEmailFlow();
+          },
+          onVerifyPhone: () {
+            Navigator.of(ctx).pop();
+            _openVerifyPhoneFlow();
+          },
+        ),
+      );
+    } finally {
+      if (mounted) {
+        _verificationPromptOpen = false;
+      }
     }
   }
 
@@ -161,6 +248,24 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       setState(() {
         _isLoadingLocation = true;
       });
+
+      if (_authService.isLoggedIn) {
+        try {
+          final repo = AddressesRepository(
+            addressesDataProvider: AddressesDataProvider(
+              apiService: ApiService.instance,
+            ),
+          );
+          final def = await repo.getDefaultAddress();
+          if (def != null && mounted) {
+            setState(() {
+              _currentLocation = def.displayText;
+              _isLoadingLocation = false;
+            });
+            return;
+          }
+        } catch (_) {}
+      }
 
       // On resume: check if user just granted permission in Settings, then re-fetch.
       if (resumeRefresh) {
@@ -273,17 +378,56 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
+  void _openNotifications() async {
+    if (!context.mounted) return;
+    _pushNotificationsScreen();
+  }
+
+  void _pushNotificationsScreen() {
+    Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (context) => BlocProvider(
+          create: (_) => createNotificationsBloc(),
+          child: const NotificationsScreen(),
+        ),
+      ),
+    );
+  }
+
+  void _openLocationSearch() {
+    showDeliveryAddressPicker(
+      context: context,
+      currentAddress: _currentLocation,
+      onAddressChanged: ({
+        required String address,
+        double? latitude,
+        double? longitude,
+      }) {
+        setState(() => _currentLocation = address);
+      },
+    );
+  }
+
   Future<void> _openVerifyPhoneFlow() async {
     final user = _currentUser;
-    if (user?.phone == null || user!.phone!.isEmpty) return;
+    if (user?.phone == null || user!.phone!.isEmpty) {
+      final enrolled = await openPhoneEnrollmentGate(context);
+      if (enrolled && mounted) {
+        await _loadUserData();
+        if (mounted) {
+          SnackbarUtil.showSuccess(
+            context,
+            context.l10n.phoneVerifiedSuccess,
+          );
+        }
+      }
+      return;
+    }
 
-    final result = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => _VerifyPhoneDialog(
-        phone: user.phone!,
-        authService: _authService,
-      ),
+    final result = await showVerifyPhoneDialog(
+      context,
+      phone: user.phone!,
+      authService: _authService,
     );
     if (result == true && mounted) {
       await _loadUserData();
@@ -297,218 +441,73 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final showVerify = _currentUser != null &&
+        !_verifyBannerDismissed &&
+        (!_currentUser!.isEmailVerified || !_currentUser!.isPhoneVerified);
 
-    return Scaffold(
-      backgroundColor: colorScheme.background,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              UserProfileHeader(
-                name: _currentUser?.name ?? l10n.userDefault,
-                location: _currentLocation,
-                isLoadingLocation: _isLoadingLocation,
-                user: _currentUser,
-                onLocationTap: () async {
-                  final result = await Navigator.push<Map<String, dynamic>>(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => LocationSearchScreen(
-                        currentLocation: _currentLocation,
-                      ),
+    return Theme(
+      data: HomeColors.themeFor(context),
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: systemUiOverlayFor(context),
+        child: Scaffold(
+          backgroundColor: HomeColors.backgroundOf(context),
+          body: SafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+                  child: UserProfileHeader(
+                    name: _currentUser?.name ?? l10n.userDefault,
+                    location: _currentLocation,
+                    isLoadingLocation: _isLoadingLocation,
+                    user: _currentUser,
+                    locationKey: _tourKeys.locationKey,
+                    notificationsKey: _tourKeys.notificationsKey,
+                    onLocationTap: _openLocationSearch,
+                    onNotificationsTap: _openNotifications,
+                  ),
+                ),
+                if (showVerify) ...[
+                  const SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: VerificationStatusCard(
+                      user: _currentUser!,
+                      onVerifyEmail: _openVerifyEmailFlow,
+                      onVerifyPhone: _openVerifyPhoneFlow,
+                      onDismiss: () =>
+                          setState(() => _verifyBannerDismissed = true),
                     ),
-                  );
-
-                  if (result != null && result['address'] != null) {
-                    final address = result['address'] as String;
-                    final latitude = (result['latitude'] as num?)?.toDouble();
-                    final longitude = (result['longitude'] as num?)?.toDouble();
-                    if (latitude != null && longitude != null) {
-                      await SavedLocationService.saveLocationData(
-                        address: address,
-                        latitude: latitude,
-                        longitude: longitude,
-                      );
-                    } else {
-                      await SavedLocationService.saveAddress(address);
-                    }
-                    if (mounted) {
-                      setState(() {
-                        _currentLocation = address;
-                      });
-                    }
-                  }
-                },
-              ),
-              if (_currentUser != null) ...[
-                const SizedBox(height: 12),
-                VerificationStatusCard(
-                  user: _currentUser!,
-                  onVerifyEmail: _openVerifyEmailFlow,
-                  onVerifyPhone: _openVerifyPhoneFlow,
+                  ),
+                ],
+                const SizedBox(height: 10),
+                HomeServiceTabBar(
+                  selected: _serviceMode,
+                  tourKeys: _tourKeys,
+                  onSelected: (mode) {
+                    setState(() => _serviceMode = mode);
+                    context
+                        .read<ServiceAccentController>()
+                        .updateHomeServiceMode(mode);
+                  },
+                ),
+                Expanded(
+                  child: IndexedStack(
+                    index: _serviceMode.index,
+                    children: const [
+                      CourierScreen(),
+                      // AllCategoriesScreen(embedded: true), // TODO: restore when Food & Groceries launches
+                      ServiceComingSoonScreen(mode: HomeServiceMode.foodGroceries),
+                      // TaxiScreen(), // TODO: restore when Taxi launches
+                      ServiceComingSoonScreen(mode: HomeServiceMode.taxi),
+                      // HandymanScreen(embedded: true), // TODO: restore when Handyman launches
+                      ServiceComingSoonScreen(mode: HomeServiceMode.handyman),
+                    ],
+                  ),
                 ),
               ],
-              const SizedBox(height: 16),
-              // What would you like to do section
-              Text(
-                l10n.handymanWhatToDo,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 16),
-              // Service Cards Grid
-              GridView.count(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisCount: 2,
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
-                childAspectRatio: 1.3,
-                children: [
-                  ServiceCard(
-                    title: l10n.featureFoodGroceries,
-                    subtitle: l10n.featureFoodGroceriesDesc,
-                    icon: Icons.shopping_bag_rounded,
-                    color: AppColors.primaryColor,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const AllCategoriesScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  ServiceCard(
-                    title: l10n.featureCourierTitle,
-                    subtitle: l10n.featureCourierDesc,
-                    icon: Icons.local_shipping_rounded,
-                    color: AppColors.primaryColor,
-                    onTap: () {
-                      widget.onSwitchToTab?.call(1);
-                    },
-                  ),
-                  ServiceCard(
-                    title: l10n.featureTaxiTitle,
-                    subtitle: l10n.featureTaxiDesc,
-                    icon: Icons.local_taxi_rounded,
-                    color: AppColors.primaryColor,
-                    onTap: () {
-                      widget.onSwitchToTab?.call(3);
-                    },
-                  ),
-                  ServiceCard(
-                    title: l10n.featureHandymanTitle,
-                    subtitle: l10n.featureHandymanDesc,
-                    icon: Icons.handyman_rounded,
-                    color: AppColors.primaryColor,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const HandymanScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              const AppFeaturesCard(),
-              const SizedBox(height: 24),
-              // History Section (Available Orders)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    l10n.history,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const OrdersScreen(),
-                        ),
-                      );
-                    },
-                    child: Text(
-                      l10n.actionViewAll,
-                      style: TextStyle(
-                        color: AppColors.primaryColor,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              // History Items from API
-              if (_ordersLoading)
-                const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(24.0),
-                    child: CircularProgressIndicator(),
-                  ),
-                )
-              else if (_ordersError != null)
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(
-                    l10n.failedToLoadOrders(_ordersError!),
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontSize: 14,
-                    ),
-                  ),
-                )
-              else if (_availableOrders.isEmpty)
-                OrderHistoryEmptyState(
-                  onBrowseTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const AllCategoriesScreen(),
-                      ),
-                    );
-                  },
-                )
-              else
-                ..._availableOrders.map((order) {
-                  final dateStr =
-                      DateFormat('d MMMM yyyy, h:mma').format(order.createdAt);
-                  return HistoryItem(
-                    orderId: order.orderNumber,
-                    recipient: order.customer?.name ?? order.vendor.name,
-                    location: order.deliveryAddress,
-                    dateTime: dateStr,
-                    status: order.statusDisplayName,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => BlocProvider(
-                            create: (context) => OrdersBloc(
-                              ordersRepository:
-                                  context.read<OrdersRepository>(),
-                            ),
-                            child: OrderDetailsScreen(orderId: order.id),
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                }),
-            ],
+            ),
           ),
         ),
       ),
@@ -589,14 +588,14 @@ class _VerifyEmailDialogState extends State<_VerifyEmailDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Verify Email'),
+      title: Text(context.l10n.verifyEmailDialogTitle),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'We sent a verification code to ${widget.email}. Enter it below.',
+              context.l10n.verifyEmailBody(widget.email),
               style: TextStyle(color: Colors.grey[700], fontSize: 14),
             ),
             const SizedBox(height: 16),
@@ -604,10 +603,10 @@ class _VerifyEmailDialogState extends State<_VerifyEmailDialog> {
               controller: _codeController,
               keyboardType: TextInputType.number,
               maxLength: 6,
-              decoration: const InputDecoration(
-                labelText: 'Verification code',
-                hintText: 'e.g. 111248',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: context.l10n.verificationCodeLabel,
+                hintText: context.l10n.verificationCodeHintExample,
+                border: const OutlineInputBorder(),
                 counterText: '',
               ),
               onChanged: (_) => setState(() => _errorMessage = null),
@@ -629,7 +628,9 @@ class _VerifyEmailDialogState extends State<_VerifyEmailDialog> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.email_outlined, size: 18),
-              label: Text(_isSending ? 'Sending...' : 'Resend code'),
+              label: Text(_isSending
+                  ? context.l10n.actionSending
+                  : context.l10n.forgotPasswordResend),
             ),
           ],
         ),
@@ -637,7 +638,7 @@ class _VerifyEmailDialogState extends State<_VerifyEmailDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
-          child: const Text('Cancel'),
+          child: Text(context.l10n.actionCancel),
         ),
         FilledButton(
           onPressed: _isVerifying ? null : _verify,
@@ -647,146 +648,7 @@ class _VerifyEmailDialogState extends State<_VerifyEmailDialog> {
                   height: 20,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Text('Verify'),
-        ),
-      ],
-    );
-  }
-}
-
-class _VerifyPhoneDialog extends StatefulWidget {
-  final String phone;
-  final AuthService authService;
-
-  const _VerifyPhoneDialog({
-    required this.phone,
-    required this.authService,
-  });
-
-  @override
-  State<_VerifyPhoneDialog> createState() => _VerifyPhoneDialogState();
-}
-
-class _VerifyPhoneDialogState extends State<_VerifyPhoneDialog> {
-  final _codeController = TextEditingController();
-  bool _isSending = false;
-  bool _isVerifying = false;
-  String? _errorMessage;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _sendCode());
-  }
-
-  @override
-  void dispose() {
-    _codeController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _sendCode() async {
-    setState(() {
-      _isSending = true;
-      _errorMessage = null;
-    });
-    final result =
-        await widget.authService.sendPhoneVerificationCode(widget.phone);
-    if (!mounted) return;
-    setState(() => _isSending = false);
-    if (result['success'] == true) {
-      SnackbarUtil.showSuccess(
-          context, result['message'] ?? 'Code sent to your phone.');
-    } else {
-      setState(() => _errorMessage = result['message']);
-    }
-  }
-
-  Future<void> _verify() async {
-    final code = _codeController.text.trim();
-    if (code.isEmpty) {
-      setState(() => _errorMessage = 'Enter the verification code');
-      return;
-    }
-    setState(() {
-      _isVerifying = true;
-      _errorMessage = null;
-    });
-    final result = await widget.authService.verifyPhone(
-      phone: widget.phone,
-      code: code,
-    );
-    if (!mounted) return;
-    setState(() => _isVerifying = false);
-    if (result['success'] == true) {
-      Navigator.of(context).pop(true);
-    } else {
-      setState(() => _errorMessage = result['message']);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Verify Phone'),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'We sent a verification code to ${widget.phone}. Enter it below.',
-              style: TextStyle(color: Colors.grey[700], fontSize: 14),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _codeController,
-              keyboardType: TextInputType.number,
-              maxLength: 6,
-              decoration: const InputDecoration(
-                labelText: 'Verification code',
-                hintText: 'e.g. 056869',
-                border: OutlineInputBorder(),
-                counterText: '',
-              ),
-              onChanged: (_) => setState(() => _errorMessage = null),
-            ),
-            if (_errorMessage != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                _errorMessage!,
-                style: const TextStyle(color: Colors.red, fontSize: 12),
-              ),
-            ],
-            const SizedBox(height: 12),
-            OutlinedButton.icon(
-              onPressed: _isSending ? null : _sendCode,
-              icon: _isSending
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.sms_outlined, size: 18),
-              label: Text(_isSending ? 'Sending...' : 'Resend code'),
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(false),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          onPressed: _isVerifying ? null : _verify,
-          child: _isVerifying
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Text('Verify'),
+              : Text(context.l10n.actionVerify),
         ),
       ],
     );

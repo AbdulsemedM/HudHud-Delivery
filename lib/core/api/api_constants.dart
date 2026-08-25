@@ -1,6 +1,8 @@
+import 'package:hudhud_delivery/app/config/app_env.dart';
+
 class ApiConstants {
-  // Base URL
-  static const String baseUrl = 'https://hudapi.mbitrix.com/api/';
+  /// Resolved from root `.env` (`BASE_URL`) only.
+  static String get baseUrl => ApiEnv.baseUrl;
 
   // Timeout values (in milliseconds)
   static const int connectTimeout = 30000; // 30 seconds
@@ -13,20 +15,75 @@ class ApiConstants {
   static const String register = 'register';
   static const String logout = '$auth/logout';
   static const String refreshToken = '$auth/refresh';
-  /// POST — returns same shape as [login] (token, user, optional refresh_token).
-  /// Coordinate path with backend if it differs.
-  static const String guest = '$auth/guest';
-  static const String forgotPassword = '$auth/forgot-password';
-  static const String resetPassword = '$auth/reset-password';
+
+  /// POST body: `id_token`, optional `user_type`, optional device metadata.
+  static const String googleLogin = '$auth/google-login';
+  /// Authenticated phone enrollment (Sanctum). Do not add to [unauthenticatedAuthPaths].
+  static const String phoneEnrollmentStatus = '$auth/phone-enrollment/status';
+  static const String phoneEnrollmentRequest = '$auth/phone-enrollment/request';
+  static const String phoneEnrollmentVerify = '$auth/phone-enrollment/verify';
+  /// Password reset OTP flow (unauthenticated): POST `/api/password/...`
+  static const String passwordResetOtp = 'password/reset-otp';
+  static const String passwordVerifyOtp = 'password/verify-otp';
+  static const String passwordResendOtp = 'password/resend-otp';
+  static const String passwordResetWithToken = 'password/reset-with-token';
+
+  /// Session-creation / public auth paths — never attach Bearer or clear session on 401.
+  static const List<String> unauthenticatedAuthPaths = [
+    login,
+    register,
+    googleLogin,
+    passwordResetOtp,
+    passwordVerifyOtp,
+    passwordResendOtp,
+    passwordResetWithToken,
+  ];
+
+  /// Whether [path] is a session-creation or other unauthenticated auth endpoint.
+  ///
+  /// Accepts relative Dio paths (`auth/google-login`), absolute (`/api/auth/google-login`),
+  /// or full URLs.
+  static bool isUnauthenticatedAuthPath(String? path) {
+    if (path == null || path.isEmpty) return false;
+    var normalized = path.trim();
+    final uri = Uri.tryParse(normalized);
+    if (uri != null && uri.hasScheme) {
+      normalized = uri.path;
+    }
+    final q = normalized.indexOf('?');
+    if (q >= 0) normalized = normalized.substring(0, q);
+    normalized = normalized.replaceAll('\\', '/');
+    while (normalized.startsWith('/')) {
+      normalized = normalized.substring(1);
+    }
+    if (normalized.startsWith('api/')) {
+      normalized = normalized.substring(4);
+    }
+    normalized = normalized.toLowerCase();
+    for (final candidate in unauthenticatedAuthPaths) {
+      final c = candidate.startsWith('/') ? candidate.substring(1) : candidate;
+      if (normalized == c.toLowerCase() ||
+          normalized.endsWith('/${c.toLowerCase()}')) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   // FCM endpoints
   static const String fcmToken = 'fcm/token';
+  /// DELETE body: `token`, optional `device_id`.
+  static const String fcmTokenDelete = 'fcm/token';
 
   // User endpoints
   static const String users = '/users';
   static const String profile =
       'profile'; // GET /api/profile returns user object at root
-  static const String updateProfile = '$users/profile';
+  /// PUT JSON: marketing_consent, promotional_offers, marketing_emails.
+  static const String profileNotificationPreferences =
+      'profile/notification-preferences';
+  /// POST multipart: name, email, phone, optional avatar file.
+  static const String updateProfile = 'update-profile';
   static const String changePassword = '$users/change-password';
   static const String updatePassword = 'update-password';
   static const String sendEmailVerification = 'send-email-verification';
@@ -34,11 +91,6 @@ class ApiConstants {
   static const String sendPhoneVerificationCode =
       'send-phone-verification-code';
   static const String verifyPhone = 'verify-phone';
-
-  // Restaurant endpoints
-  static const String restaurants = '/restaurants';
-  static const String restaurantDetails = '$restaurants/{id}';
-  static const String restaurantMenu = '$restaurants/{id}/menu';
 
   // Order endpoints (GET /api/orders fetches all orders)
   static const String orders = 'orders';
@@ -63,45 +115,92 @@ class ApiConstants {
   static const String payments = '/payments';
   static const String paymentMethods = 'payment-methods';
   static const String processPayment = '$payments/process';
+  static const String paymentsInitiate = 'payments/initiate';
+  /// GET /api/payments/{id}/status
+  static const String paymentsStatus = 'payments/{id}/status';
+
+  // Service convenience payment endpoints
+  static const String paymentsServiceWallet = 'payments/service/wallet';
+  static const String paymentsServiceWaafipay = 'payments/service/waafipay';
+  static const String paymentsServiceEdahab = 'payments/service/edahab';
+  static const String paymentsServiceSahay = 'payments/service/sahay';
+  static const String paymentsServiceEbirr = 'payments/service/ebirr';
 
   // Wallet endpoints
   static const String wallets = 'wallets';
   static const String walletDetails = '$wallets/{id}';
   static const String wallet = 'wallet';
-  static const String walletBalance = '$wallet/balance';
+  static const String walletBalance = wallet;
   static const String walletTransactions = '$wallet/transactions';
+  static const String walletTopup = '$wallet/topup';
   static const String walletAddFunds = '$wallet/add-funds';
   static const String walletWithdraw = '$wallet/withdraw';
 
   // Categories endpoints (requires auth token)
   static const String categories = 'categories';
+  static const String products = 'products';
   static const String productDetails = 'products/{id}';
+  static const String popularProducts = 'popular/products';
 
   // Vendors endpoints
   static const String vendors = 'vendors';
-  /// Path param is vendor's user_id (from /api/vendors list).
-  static const String vendorProducts = 'vendor/products/by-vendor/{id}';
+
+  // Public (unauthenticated) catalog endpoints
+  static const String publicProducts = 'public/products';
+  static const String publicProductDetails = 'public/products/{id}';
+  static const String publicProductsFeatured = 'public/products/featured';
+  static const String publicPopularProducts = 'public/popular/products';
+  static const String publicSearch = 'public/search';
+  static const String publicCategories = 'public/categories';
+  static const String publicCategoryProducts = 'public/categories/{id}/products';
+  static const String publicVendors = 'public/vendors';
+  static const String publicVendorProducts = 'public/vendors/{id}/products';
+  static const String publicBranches = 'public/branches';
+  static const String publicBranchesNearby = 'public/branches/nearby';
 
   // Notifications endpoints (GET /api/notifications, GET /api/notifications/{id})
   static const String notificationsList = 'notifications';
   static const String notificationDetails = 'notifications/{id}';
+  static const String notificationsRead = 'notifications/read';
+  static const String notificationsReadAll = 'notifications/read-all';
 
   // Service types endpoints
   static const String serviceTypes = 'service-types';
+  static const String validateCoupon = 'coupons/validate';
 
   // Courier delivery endpoints
   static const String deliveryEstimate = 'services/delivery/estimate';
+  /// GET /api/services/delivery/service-areas?pickup_location=
+  static const String deliveryServiceAreas = 'services/delivery/service-areas';
   static const String deliveryRequest = 'services/delivery/request';
+  /// Customer cancel: POST /api/services/delivery/cancel
+  static const String deliveryCancel = 'services/delivery/cancel';
+  /// Retry unpaid payment: POST /api/services/delivery/{id}/retry-payment
+  static const String deliveryRetryPayment =
+      'services/delivery/{id}/retry-payment';
+  static const String deliveryConfirmReceipt =
+      'services/delivery/{id}/confirm-receipt';
+  static const String deliveryRate = 'services/delivery/{id}/rate';
 
   // Ride/Taxi endpoints
   static const String rideEstimate = 'services/ride/estimate';
   static const String rideRequest = 'services/ride/request';
-  static const String rideAvailableVehicles = 'services/ride/available-vehicles';
+  static const String rideAvailableVehicles =
+      'services/ride/available-vehicles';
   static const String userRidesActive = 'user/rides/active';
+  /// Legacy driver cancel path (kept for compatibility).
+  static const String rideCancel = 'driver/services/ride/cancel';
+  /// Customer cancel: POST /api/services/ride/cancel (ride_id in body)
+  static const String rideCancelById = 'services/ride/cancel';
   static const String deliveryTrack = 'services/delivery/track/{id}';
   static const String userDeliveries = 'user/deliveries';
   static const String userDeliveryDetails = 'user/deliveries/{id}';
   static const String userDeliveriesActive = 'user/deliveries/active';
+  /// GET /api/customer/nearby-drivers — anonymous pre-booking markers.
+  static const String customerNearbyDrivers = 'customer/nearby-drivers';
+  /// GET /api/customer/deliveries/{id}/live-tracking
+  static const String customerDeliveryLiveTracking =
+      'customer/deliveries/{id}/live-tracking';
 
   // Handyman / Service requests
   static const String customerServiceRequests = 'customer/services/requests';
@@ -116,6 +215,61 @@ class ApiConstants {
   static const String customerHandymen = 'customer/services/handymen/{id}';
   static const String customerServiceRequestRate =
       'customer/service-requests/{id}/rate';
+
+  // Chat endpoints
+  static const String chatConversations = 'chat/conversations';
+  static const String chatConversationDetails = 'chat/conversations/{id}';
+  static const String chatConversationMessages =
+      'chat/conversations/{id}/messages';
+  static const String chatConversationRead = 'chat/conversations/{id}/read';
+  static const String chatConversationRejoin = 'chat/conversations/{id}/rejoin';
+  static const String chatUnreadCount = 'chat/unread-count';
+  static const String chatOrder = 'chat/order/{orderId}';
+  static const String chatSupport = 'chat/support';
+  static const String chatRide = 'chat/ride/{rideId}';
+  static const String chatMessage = 'chat/messages/{id}';
+
+  // Package delivery chat endpoints (preferred /chat/ prefix)
+  static const String packageDeliveryUnreadCount =
+      'chat/package-delivery/unread-count';
+  static const String packageDeliveryConversations =
+      'chat/package-delivery/conversations';
+  static const String packageDeliveryConversation =
+      'chat/package-delivery/{deliveryId}/conversation';
+  static const String packageDeliveryRead =
+      'chat/package-delivery/{deliveryId}/mark-read';
+  static const String packageDeliveryMessage =
+      'chat/package-delivery/{deliveryId}/messages';
+  static const String packageDeliveryRejoin =
+      'chat/package-delivery/{deliveryId}/rejoin';
+
+  // SOS endpoints
+  static const String sosTrigger = 'sos/trigger';
+  static const String sosHistory = 'sos/history';
+  static const String sosContacts = 'sos/contacts';
+  static const String sosContactDetails = 'sos/contacts/{id}';
+
+  // Wishlist endpoints
+  static const String wishlist = 'wishlist';
+  static const String wishlistAdd = 'wishlist/add';
+  static const String wishlistItem = 'wishlist/{id}';
+  static const String wishlistItemNotes = 'wishlist/{id}/notes';
+  static const String wishlistBulkRemove = 'wishlist/bulk-remove';
+  static const String wishlistShare = 'wishlist/share';
+  static const String wishlistPriceDrops = 'wishlist/price-drops';
+
+  // Tips endpoints
+  static const String tipsRates = 'tips/rates';
+  static const String tipsCalculate = 'tips/calculate';
+  static const String tipsAdd = 'tips/add';
+  static const String tipsHistory = 'tips/history';
+
+  // Address endpoints
+  static const String addresses = 'addresses';
+  static const String addressDetails = 'addresses/{id}';
+  static const String addressSetDefault = 'addresses/{id}/set-default';
+  static const String addressesDefault = 'addresses-default';
+  static const String addressesBulkDelete = 'addresses/bulk/delete';
 
   // Settings endpoints
   static const String settings = '/settings';

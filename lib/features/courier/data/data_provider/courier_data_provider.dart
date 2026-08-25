@@ -1,5 +1,6 @@
 import 'package:hudhud_delivery/core/api/api_constants.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
+import 'package:hudhud_delivery/features/courier/utils/delivery_estimate.dart';
 
 class CourierDataProvider {
   final ApiService apiService;
@@ -7,8 +8,9 @@ class CourierDataProvider {
   CourierDataProvider({required this.apiService});
 
   /// POST /api/services/delivery/estimate
-  /// Payload: package_type, package_weight, pickup_latitude, pickup_longitude,
-  /// dropoff_latitude, dropoff_longitude, vehicle_type, service_type
+  /// Payload: package_type, package_weight, pickup_location, pickup_latitude,
+  /// pickup_longitude, dropoff_latitude, dropoff_longitude, vehicle_type,
+  /// service_type, optional scheduled_pickup (ISO-8601 with timezone offset).
   Future<Map<String, dynamic>> estimateDelivery({
     required String packageType,
     required double packageWeight,
@@ -18,18 +20,22 @@ class CourierDataProvider {
     required double dropoffLongitude,
     required String vehicleType,
     required String serviceType,
+    String? pickupLocation,
+    String? scheduledPickup,
   }) async {
     try {
-      final Map<String, dynamic> estimateData = {
-        'package_type': packageType,
-        'package_weight': packageWeight,
-        'pickup_latitude': pickupLatitude,
-        'pickup_longitude': pickupLongitude,
-        'dropoff_latitude': dropoffLatitude,
-        'dropoff_longitude': dropoffLongitude,
-        'vehicle_type': vehicleType,
-        'service_type': serviceType,
-      };
+      final estimateData = buildDeliveryEstimateRequestBody(
+        packageType: packageType,
+        packageWeight: packageWeight,
+        pickupLatitude: pickupLatitude,
+        pickupLongitude: pickupLongitude,
+        dropoffLatitude: dropoffLatitude,
+        dropoffLongitude: dropoffLongitude,
+        vehicleType: vehicleType,
+        serviceType: serviceType,
+        pickupLocation: pickupLocation,
+        scheduledPickup: scheduledPickup,
+      );
 
       final response = await apiService.post(
         '${ApiConstants.baseUrl}${ApiConstants.deliveryEstimate}',
@@ -44,7 +50,38 @@ class CourierDataProvider {
     } on ApiException catch (apiException) {
       return {
         'statusCode': apiException.statusCode,
-        'data': null,
+        'data': apiException.data,
+        'errorMessage': apiException.message,
+      };
+    } on Exception catch (e) {
+      return {'statusCode': 500, 'data': null, 'errorMessage': e.toString()};
+    }
+  }
+
+  /// GET /api/services/delivery/service-areas
+  Future<Map<String, dynamic>> getDeliveryServiceAreas({
+    String? pickupLocation,
+  }) async {
+    try {
+      final query = <String, dynamic>{};
+      final pickup = pickupLocation?.trim();
+      if (pickup != null && pickup.isNotEmpty) {
+        query['pickup_location'] = pickup;
+      }
+      final response = await apiService.get(
+        '${ApiConstants.baseUrl}${ApiConstants.deliveryServiceAreas}',
+        queryParameters: query.isEmpty ? null : query,
+      );
+
+      return {
+        'statusCode': response.statusCode,
+        'data': response.data,
+        'errorMessage': null,
+      };
+    } on ApiException catch (apiException) {
+      return {
+        'statusCode': apiException.statusCode,
+        'data': apiException.data,
         'errorMessage': apiException.message,
       };
     } on Exception catch (e) {
@@ -71,7 +108,7 @@ class CourierDataProvider {
     } on ApiException catch (apiException) {
       return {
         'statusCode': apiException.statusCode,
-        'data': null,
+        'data': apiException.data,
         'errorMessage': apiException.message,
       };
     } on Exception catch (e) {
@@ -150,6 +187,66 @@ class CourierDataProvider {
     }
   }
 
+  /// GET /api/customer/nearby-drivers — anonymous markers near pickup.
+  Future<Map<String, dynamic>> getNearbyDrivers({
+    required double latitude,
+    required double longitude,
+    int? radius,
+    String? vehicleType,
+  }) async {
+    try {
+      final query = <String, dynamic>{
+        'latitude': latitude,
+        'longitude': longitude,
+        if (radius != null) 'radius': radius,
+        if (vehicleType != null && vehicleType.isNotEmpty)
+          'vehicle_type': vehicleType,
+      };
+      final response = await apiService.get(
+        '${ApiConstants.baseUrl}${ApiConstants.customerNearbyDrivers}',
+        queryParameters: query,
+      );
+
+      return {
+        'statusCode': response.statusCode,
+        'data': response.data,
+        'errorMessage': null,
+      };
+    } on ApiException catch (apiException) {
+      return {
+        'statusCode': apiException.statusCode,
+        'data': apiException.data,
+        'errorMessage': apiException.message,
+      };
+    } on Exception catch (e) {
+      return {'statusCode': 500, 'data': null, 'errorMessage': e.toString()};
+    }
+  }
+
+  /// GET /api/customer/deliveries/{id}/live-tracking
+  Future<Map<String, dynamic>> getDeliveryLiveTracking(int deliveryId) async {
+    try {
+      final url = ApiConstants.baseUrl +
+          ApiConstants.customerDeliveryLiveTracking
+              .replaceAll('{id}', deliveryId.toString());
+      final response = await apiService.get(url);
+
+      return {
+        'statusCode': response.statusCode,
+        'data': response.data,
+        'errorMessage': null,
+      };
+    } on ApiException catch (apiException) {
+      return {
+        'statusCode': apiException.statusCode,
+        'data': apiException.data,
+        'errorMessage': apiException.message,
+      };
+    } on Exception catch (e) {
+      return {'statusCode': 500, 'data': null, 'errorMessage': e.toString()};
+    }
+  }
+
   /// GET /api/user/deliveries/active - fetches user's active delivery (if any)
   Future<Map<String, dynamic>> getUserActiveDelivery() async {
     try {
@@ -166,6 +263,136 @@ class CourierDataProvider {
       return {
         'statusCode': apiException.statusCode,
         'data': null,
+        'errorMessage': apiException.message,
+      };
+    } on Exception catch (e) {
+      return {'statusCode': 500, 'data': null, 'errorMessage': e.toString()};
+    }
+  }
+
+  /// POST /api/services/delivery/cancel — cancel a package delivery (customer).
+  Future<Map<String, dynamic>> cancelDelivery({
+    required int deliveryId,
+    String cancellationReason = 'Changed my mind',
+  }) async {
+    try {
+      final response = await apiService.post(
+        '${ApiConstants.baseUrl}${ApiConstants.deliveryCancel}',
+        data: {
+          'delivery_id': deliveryId,
+          'cancellation_reason': cancellationReason,
+          'cancelled_by': 'user',
+        },
+      );
+
+      return {
+        'statusCode': response.statusCode,
+        'data': response.data,
+        'errorMessage': null,
+      };
+    } on ApiException catch (apiException) {
+      return {
+        'statusCode': apiException.statusCode,
+        'data': null,
+        'errorMessage': apiException.message,
+      };
+    } on Exception catch (e) {
+      return {'statusCode': 500, 'data': null, 'errorMessage': e.toString()};
+    }
+  }
+
+  /// POST /api/services/delivery/{id}/confirm-receipt
+  Future<Map<String, dynamic>> confirmDeliveryReceipt(int deliveryId) async {
+    try {
+      final path = ApiConstants.deliveryConfirmReceipt.replaceAll(
+        '{id}',
+        deliveryId.toString(),
+      );
+      final response = await apiService.post('${ApiConstants.baseUrl}$path');
+
+      return {
+        'statusCode': response.statusCode,
+        'data': response.data,
+        'errorMessage': null,
+      };
+    } on ApiException catch (apiException) {
+      return {
+        'statusCode': apiException.statusCode,
+        'data': apiException.data,
+        'errorMessage': apiException.message,
+      };
+    } on Exception catch (e) {
+      return {'statusCode': 500, 'data': null, 'errorMessage': e.toString()};
+    }
+  }
+
+  /// POST /api/services/delivery/{id}/rate
+  Future<Map<String, dynamic>> rateDelivery({
+    required int deliveryId,
+    required int rating,
+    String? comment,
+  }) async {
+    try {
+      final path = ApiConstants.deliveryRate.replaceAll(
+        '{id}',
+        deliveryId.toString(),
+      );
+      final body = <String, dynamic>{
+        'rating': rating,
+        if (comment != null && comment.isNotEmpty) 'comment': comment,
+      };
+      final response = await apiService.post(
+        '${ApiConstants.baseUrl}$path',
+        data: body,
+      );
+
+      return {
+        'statusCode': response.statusCode,
+        'data': response.data,
+        'errorMessage': null,
+      };
+    } on ApiException catch (apiException) {
+      return {
+        'statusCode': apiException.statusCode,
+        'data': apiException.data,
+        'errorMessage': apiException.message,
+      };
+    } on Exception catch (e) {
+      return {'statusCode': 500, 'data': null, 'errorMessage': e.toString()};
+    }
+  }
+
+  /// POST /api/services/delivery/{id}/retry-payment
+  Future<Map<String, dynamic>> retryPayment({
+    required int deliveryId,
+    required String paymentMethod,
+    String? paymentPhone,
+  }) async {
+    try {
+      final path = ApiConstants.deliveryRetryPayment.replaceAll(
+        '{id}',
+        deliveryId.toString(),
+      );
+      final body = <String, dynamic>{
+        'payment_method': paymentMethod,
+      };
+      if (paymentPhone != null && paymentPhone.isNotEmpty) {
+        body['payment_phone'] = paymentPhone;
+      }
+      final response = await apiService.post(
+        '${ApiConstants.baseUrl}$path',
+        data: body,
+      );
+
+      return {
+        'statusCode': response.statusCode,
+        'data': response.data,
+        'errorMessage': null,
+      };
+    } on ApiException catch (apiException) {
+      return {
+        'statusCode': apiException.statusCode,
+        'data': apiException.data,
         'errorMessage': apiException.message,
       };
     } on Exception catch (e) {

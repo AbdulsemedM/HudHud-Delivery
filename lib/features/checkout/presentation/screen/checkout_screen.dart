@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../app/services/cart_service.dart';
 import '../../../../app/services/location_service.dart';
 import '../../../../app/services/saved_location_service.dart';
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/api/api_service.dart';
-import '../../bloc/checkout_bloc.dart';
+import '../../../home/presentation/screen/map_location_screen.dart';
+import '../../../payment/bloc/payment_bloc.dart';
+import '../../../payment/data/data_provider/payment_data_provider.dart';
+import '../../../payment/data/repository/payment_repository.dart';
+import '../../../payment/model/payment_initiate_result.dart';
+import '../../../payment/presentation/screen/payment_initiate_result_screen.dart';
+import '../../../payment/presentation/widgets/payment_details_form.dart';
 import '../../data/data_provider/checkout_data_provider.dart';
 import '../../data/repository/checkout_repository.dart';
 import '../widgets/checkout_widgets.dart';
-import '../../../home/presentation/screen/map_location_screen.dart';
 
 class CheckoutScreen extends StatefulWidget {
   final List<Map<String, dynamic>> cartItems;
@@ -26,20 +33,93 @@ class CheckoutScreen extends StatefulWidget {
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
   final TextEditingController _notesController = TextEditingController();
+  final CartService _cart = CartService();
+  late List<Map<String, dynamic>> _cartItems;
   double _tipAmount = 0.0;
   String _deliveryAddress = 'Loading address...';
   double? _deliveryLatitude;
   double? _deliveryLongitude;
   String? _selectedPaymentMethod;
+  List<Map<String, dynamic>> _paymentMethods = List.from(
+    kDefaultAllowedPaymentMethods,
+  );
+  bool _loadingMethods = true;
+  Map<String, dynamic> _paymentDetails = {};
+  String _ebirrProvider = 'kaafi';
+  bool _useHpp = false;
 
   @override
   void initState() {
     super.initState();
+    _cartItems = widget.cartItems
+        .map((item) => Map<String, dynamic>.from(item))
+        .toList();
     _loadDeliveryAddress();
   }
 
+  String _productId(Map<String, dynamic> item) {
+    final id = item['productId'] ?? item['product_id'] ?? item['id'];
+    return id?.toString() ?? '';
+  }
+
+  int _quantityOf(Map<String, dynamic> item) {
+    final quantity = item['quantity'];
+    if (quantity is int) return quantity;
+    return int.tryParse(quantity?.toString() ?? '') ?? 1;
+  }
+
+  double get _subtotal {
+    return _cartItems.fold<double>(0, (sum, item) {
+      final price = (item['price'] ?? 0.0).toDouble();
+      return sum + price * _quantityOf(item);
+    });
+  }
+
+  void _syncSharedCart(String productId, int quantity) {
+    if (_cart.productFor(productId) != null) {
+      _cart.setQuantity(productId, quantity);
+    }
+  }
+
+  void _incrementItem(String productId) {
+    final index = _cartItems.indexWhere((item) => _productId(item) == productId);
+    if (index < 0) return;
+    setState(() {
+      final next = _quantityOf(_cartItems[index]) + 1;
+      _cartItems[index]['quantity'] = next;
+      _syncSharedCart(productId, next);
+    });
+  }
+
+  void _decrementItem(String productId) {
+    final index = _cartItems.indexWhere((item) => _productId(item) == productId);
+    if (index < 0) return;
+    final current = _quantityOf(_cartItems[index]);
+    if (current <= 1) {
+      _removeItem(productId);
+      return;
+    }
+    setState(() {
+      final next = current - 1;
+      _cartItems[index]['quantity'] = next;
+      _syncSharedCart(productId, next);
+    });
+  }
+
+  void _removeItem(String productId) {
+    setState(() {
+      _cartItems.removeWhere((item) => _productId(item) == productId);
+      _syncSharedCart(productId, 0);
+    });
+    if (_cartItems.isEmpty && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.cartEmpty)),
+      );
+      Navigator.of(context).pop();
+    }
+  }
+
   Future<void> _loadDeliveryAddress() async {
-    // 1. Try saved address
     final saved = await SavedLocationService.getSavedLocationData();
     final savedAddress = saved?['address'] as String?;
     if (savedAddress != null && savedAddress.isNotEmpty) {
@@ -52,7 +132,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       }
       return;
     }
-    // 2. Fallback to current GPS location
     try {
       final position = await LocationService.getCurrentPosition();
       final current = await LocationService.getCurrentLocationAddress();
@@ -75,33 +154,29 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
   }
 
-  /// Vendor ID from first cart item's product (all items in a category are typically from same vendor)
-  int get _vendorId {
-    final first = widget.cartItems.isNotEmpty ? widget.cartItems.first : null;
-    if (first == null) return 7;
+  int? get _vendorId {
+    if (_cartItems.isEmpty) return null;
+    final first = _cartItems.first;
     final vid = first['vendor_id'];
     if (vid is int) return vid;
-    if (vid != null) return int.tryParse(vid.toString()) ?? 7;
-    return 7;
+    if (vid != null) return int.tryParse(vid.toString());
+    return null;
   }
 
-  double get _total {
-    return widget.subtotal + _tipAmount;
-  }
+  double get _total => _subtotal + _tipAmount;
 
   void _onPromoCodeApplied(String promoCode) {
-    // Handle promo code logic here
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Promo code "$promoCode" applied'),
+            content: Text(context.l10n.promoCodeApplied(promoCode)),
         backgroundColor: AppColors.primaryColor,
       ),
     );
   }
 
   void _onChangeAddress() async {
-    // Navigate to map location screen
-    final Map<String, dynamic>? result = await Navigator.push<Map<String, dynamic>>(
+    final Map<String, dynamic>? result =
+        await Navigator.push<Map<String, dynamic>>(
       context,
       MaterialPageRoute(
         builder: (context) => MapLocationScreen(
@@ -110,7 +185,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       ),
     );
 
-    // Update address if user selected a new one
     final newAddress = result?['address'] as String?;
     final latitude = (result?['latitude'] as num?)?.toDouble();
     final longitude = (result?['longitude'] as num?)?.toDouble();
@@ -135,7 +209,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Address updated to: $newAddress'),
+            content: Text(context.l10n.addressUpdatedTo(newAddress)),
             backgroundColor: AppColors.primaryColor,
           ),
         );
@@ -144,7 +218,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   void _onConfirmOrder(BuildContext blocContext) {
-    final List<Map<String, dynamic>> orderItems = widget.cartItems
+    final List<Map<String, dynamic>> orderItems = _cartItems
         .map((item) {
           final productId =
               item['productId'] ?? item['product_id'] ?? item['id'];
@@ -155,15 +229,24 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           final qty = quantity is int
               ? quantity
               : int.tryParse(quantity.toString()) ?? 1;
-          return {'product_id': pid, 'quantity': qty};
+          final variantRaw =
+              item['variant_id'] ?? item['variantId'] ?? item['variant'];
+          final variantId = variantRaw is int
+              ? variantRaw
+              : int.tryParse(variantRaw?.toString() ?? '');
+          return {
+            'product_id': pid,
+            'quantity': qty,
+            if (variantId != null && variantId > 0) 'variant_id': variantId,
+          };
         })
         .where((e) => (e['product_id'] as int) > 0)
         .toList();
 
     if (orderItems.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please add valid products to your cart'),
+        SnackBar(
+          content: Text(context.l10n.addValidProductsToCart),
           backgroundColor: Colors.red,
         ),
       );
@@ -172,8 +255,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
     if (_deliveryLatitude == null || _deliveryLongitude == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please choose a delivery location from the map'),
+        SnackBar(
+          content: Text(context.l10n.chooseDeliveryLocationFromMap),
           backgroundColor: Colors.red,
         ),
       );
@@ -182,224 +265,332 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
     if (_selectedPaymentMethod == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select a payment method'),
+        SnackBar(
+          content: Text(context.l10n.paymentSelectMethodFirst),
           backgroundColor: Colors.red,
         ),
       );
       return;
     }
 
-    blocContext.read<CheckoutBloc>().add(
-          CreateOrderEvent(
-            vendorId: _vendorId,
-            items: orderItems,
-            taxAmount: 0.0,
-            discountAmount: 0.0,
-            deliveryAddress: _deliveryAddress,
-            deliveryLocation: _deliveryAddress,
-            deliveryLatitude: _deliveryLatitude!,
-            deliveryLongitude: _deliveryLongitude!,
+    if (!isAllowedPaymentMethodCode(_selectedPaymentMethod)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.paymentMethodUnavailable),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (paymentMethodNeedsDetailsForm(_selectedPaymentMethod)) {
+      final phoneError = validatePaymentPhone(
+        _paymentDetails['phone']?.toString(),
+        _selectedPaymentMethod!,
+      );
+      if (phoneError != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(phoneError), backgroundColor: Colors.red),
+        );
+        return;
+      }
+      if (_selectedPaymentMethod == 'ebirr') {
+        final provider = _paymentDetails['provider']?.toString();
+        if (provider != 'kaafi' && provider != 'coop') {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(context.l10n.selectEbirrProvider),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
+      }
+    }
+
+    final vendorId = _vendorId;
+    if (vendorId == null || vendorId <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.unableToDetermineStore),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final initiateDetails = buildInitiatePaymentDetails(
+      paymentMethodCode: _selectedPaymentMethod!,
+      collectedDetails: _paymentDetails,
+      orderId: 0,
+    );
+
+    blocContext.read<PaymentBloc>().add(
+          ProcessPaymentEvent(
             paymentMethod: _selectedPaymentMethod!,
-            notes: _notesController.text.trim().isEmpty
-                ? null
-                : _notesController.text.trim(),
+            amount: _total,
+            orderId: '0',
+            paymentDetails: {
+              ...initiateDetails,
+              'order_details': {
+                'vendor_id': vendorId,
+                'items': orderItems,
+                'tax_amount': 0.0,
+                'discount_amount': 0.0,
+                'delivery_address': _deliveryAddress,
+                'delivery_location': _deliveryAddress,
+                'delivery_latitude': _deliveryLatitude!,
+                'delivery_longitude': _deliveryLongitude!,
+                'service_type': 'delivery',
+                'notes': _notesController.text.trim().isEmpty
+                    ? null
+                    : _notesController.text.trim(),
+                'subtotal': _subtotal,
+              },
+            },
           ),
         );
   }
 
-  void _showOrderSuccessDialog(BuildContext ctx, Map<String, dynamic> orderData) {
-    final orderId = orderData['id']?.toString() ?? '—';
-    showDialog(
-      context: ctx,
-      barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        contentPadding: const EdgeInsets.all(24),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 72,
-              height: 72,
-              decoration: BoxDecoration(
-                color: AppColors.primaryColor.withOpacity(0.12),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.check_circle,
-                color: AppColors.primaryColor,
-                size: 44,
-              ),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'Order Placed!',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Order #$orderId has been placed successfully.',
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 14, color: Colors.grey),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryColor,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                onPressed: () {
-                  Navigator.of(ctx).pop(); // close dialog
-                  Navigator.of(ctx).pop(); // leave checkout
-                },
-                child: const Text(
-                  'Done',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+  int get _itemCount {
+    return _cartItems.fold<int>(
+      0,
+      (sum, item) => sum + _quantityOf(item),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => CheckoutBloc(
+      create: (context) => PaymentBloc(
+        paymentRepository: PaymentRepository(
+          paymentDataProvider: PaymentDataProvider(
+            apiService: ApiService.instance,
+          ),
+        ),
         checkoutRepository: CheckoutRepository(
           checkoutDataProvider: CheckoutDataProvider(
             apiService: ApiService.instance,
           ),
         ),
-      ),
+      )..add(const GetPaymentMethodsEvent()),
       child: Builder(
         builder: (blocContext) => Scaffold(
-        backgroundColor: Theme.of(context).brightness == Brightness.dark
-            ? AppColors.darkBackground
-            : Colors.grey[50],
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).brightness == Brightness.dark
-              ? AppColors.darkSurface
-              : Colors.white,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(
-              Icons.arrow_back,
-              color: AppColors.lightTextPrimary,
-            ),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          title: const Text(
-            'Checkout',
-            style: TextStyle(
-              color: AppColors.lightTextPrimary,
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          centerTitle: true,
-        ),
-        body: BlocListener<CheckoutBloc, CheckoutState>(
-          listener: (context, state) {
-            if (state is OrderCreatedSuccess) {
-              _showOrderSuccessDialog(context, state.orderData);
-            } else if (state is CheckoutError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: Colors.red,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          extendBodyBehindAppBar: true,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            surfaceTintColor: Colors.transparent,
+            leading: Padding(
+              padding: const EdgeInsets.only(left: 4),
+              child: IconButton(
+                style: IconButton.styleFrom(
+                  backgroundColor: AppColors.lightOnPrimary.withValues(alpha: 0.2),
                 ),
+                icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                    color: AppColors.lightOnPrimary, size: 18),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ),
+            title: const Text(
+              'Checkout',
+              style: TextStyle(
+                color: AppColors.lightOnPrimary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            centerTitle: true,
+          ),
+          bottomNavigationBar: BlocBuilder<PaymentBloc, PaymentState>(
+            builder: (context, state) {
+              return CheckoutBottomBar(
+                total: _total,
+                isLoading: state is PaymentLoading,
+                onConfirm: () => _onConfirmOrder(blocContext),
               );
-            }
-          },
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Products Section
-                Text(
-                  'Products',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? AppColors.darkOnSurface
-                        : AppColors.lightTextPrimary,
+            },
+          ),
+          body: BlocListener<PaymentBloc, PaymentState>(
+            listener: (context, state) {
+              if (state is PaymentMethodsLoaded) {
+                setState(() {
+                  _paymentMethods = state.paymentMethods.isNotEmpty
+                      ? state.paymentMethods
+                      : List.from(kDefaultAllowedPaymentMethods);
+                  _loadingMethods = false;
+                  if (_selectedPaymentMethod != null &&
+                      !_paymentMethods.any(
+                        (m) => m['id'] == _selectedPaymentMethod,
+                      )) {
+                    _selectedPaymentMethod = null;
+                    _paymentDetails = {};
+                  }
+                });
+              } else if (state is PaymentInitiated) {
+                CartService().clear();
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (_) => PaymentInitiateResultScreen(
+                      result: state.result,
+                      orderId: state.orderId,
+                    ),
+                  ),
+                );
+              } else if (state is PaymentSuccess) {
+                CartService().clear();
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (_) => PaymentInitiateResultScreen(
+                      result: PaymentInitiateResult(
+                        isSuccess: true,
+                        uiMode: PaymentInitiateUiMode.success,
+                        status: 'completed',
+                        message: state.message,
+                        transactionId: state.transactionId,
+                      ),
+                      orderId: state.transactionId,
+                    ),
+                  ),
+                );
+              } else if (state is PaymentFailure) {
+                if (_loadingMethods) {
+                  setState(() {
+                    _loadingMethods = false;
+                    _paymentMethods =
+                        List.from(kDefaultAllowedPaymentMethods);
+                  });
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(state.error),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
+            },
+            child: CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(
+                  child: CheckoutHeroHeader(
+                    itemCount: _itemCount,
+                    subtotal: _subtotal,
                   ),
                 ),
-                const SizedBox(height: 12),
-                ...widget.cartItems.map((item) {
-                  return CheckoutProductCard(
-                    productName: item['name'] ?? 'Unknown Product',
-                    productImage: item['image'] ?? '',
-                    quantity: item['quantity'] ?? 1,
-                    price: (item['price'] ?? 0.0).toDouble(),
-                  );
-                }).toList(),
-
-                // Delivery Address Section
-                DeliveryAddressSection(
-                  currentAddress: _deliveryAddress,
-                  onChangeAddress: _onChangeAddress,
-                ),
-
-                // Notes Section
-                NotesSection(
-                  notesController: _notesController,
-                ),
-
-                // Tip Section
-                TipSection(
-                  currentTip: _tipAmount,
-                  onTipChanged: (value) {
-                    setState(() {
-                      _tipAmount = value;
-                    });
-                  },
-                ),
-
-                // Promo Code Section
-                PromoCodeSection(
-                  onPromoCodeApplied: _onPromoCodeApplied,
-                ),
-
-                // Payment Method Grid
-                PaymentMethodGridSection(
-                  selectedId: _selectedPaymentMethod,
-                  onSelected: (id) => setState(() => _selectedPaymentMethod = id),
-                ),
-
-                // Order Summary Section
-                OrderSummarySection(
-                  subtotal: widget.subtotal,
-                  tipAmount: _tipAmount,
-                  total: _total,
-                ),
-
-                // Confirm Order Button
-                BlocBuilder<CheckoutBloc, CheckoutState>(
-                  builder: (context, state) {
-                    return ConfirmOrderButton(
-                      onPressed: () => _onConfirmOrder(blocContext),
-                      isLoading: state is CheckoutLoading,
-                    );
-                  },
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+                  sliver: SliverList(
+                    delegate: SliverChildListDelegate([
+                      CheckoutSectionCard(
+                        icon: Icons.shopping_basket_outlined,
+                        title: 'Your items',
+                        subtitle:
+                            '${_cartItems.length} product${_cartItems.length == 1 ? '' : 's'} in cart',
+                        child: Column(
+                          children: _cartItems.map((item) {
+                            final productId = _productId(item);
+                            return CheckoutProductCard(
+                              productId: productId,
+                              productName:
+                                  item['name'] ?? 'Unknown Product',
+                              productImage: item['image'] ?? '',
+                              quantity: _quantityOf(item),
+                              price: (item['price'] ?? 0.0).toDouble(),
+                              onIncrement: () => _incrementItem(productId),
+                              onDecrement: () => _decrementItem(productId),
+                              onRemove: () => _removeItem(productId),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                      CheckoutSectionCard(
+                        icon: Icons.location_on_outlined,
+                        title: 'Delivery',
+                        subtitle: 'Where should we bring your order?',
+                        child: DeliveryAddressSection(
+                          currentAddress: _deliveryAddress,
+                          onChangeAddress: _onChangeAddress,
+                        ),
+                      ),
+                      CheckoutSectionCard(
+                        icon: Icons.edit_note_outlined,
+                        title: 'Order notes',
+                        subtitle: 'Optional — help us find you faster',
+                        child: NotesSection(
+                          notesController: _notesController,
+                        ),
+                      ),
+                      CheckoutSectionCard(
+                        icon: Icons.volunteer_activism_outlined,
+                        title: 'Tip your rider',
+                        subtitle: 'Show appreciation for great service',
+                        accentColor: AppColors.secondaryColor,
+                        child: TipSection(
+                          currentTip: _tipAmount,
+                          onTipChanged: (value) {
+                            setState(() => _tipAmount = value);
+                          },
+                        ),
+                      ),
+                      CheckoutSectionCard(
+                        icon: Icons.local_offer_outlined,
+                        title: 'Promo code',
+                        child: PromoCodeSection(
+                          onPromoCodeApplied: _onPromoCodeApplied,
+                        ),
+                      ),
+                      CheckoutSectionCard(
+                        icon: Icons.account_balance_wallet_outlined,
+                        title: 'Payment method',
+                        subtitle: 'Choose how you want to pay',
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            PaymentMethodGridSection(
+                              selectedId: _selectedPaymentMethod,
+                              methods: _paymentMethods,
+                              isLoading: _loadingMethods,
+                              onSelected: (id) => setState(() {
+                                _selectedPaymentMethod = id;
+                                _paymentDetails = {};
+                                _useHpp = false;
+                                _ebirrProvider = 'kaafi';
+                              }),
+                            ),
+                            if (_selectedPaymentMethod != null)
+                              PaymentDetailsForm(
+                                key: ValueKey(_selectedPaymentMethod),
+                                paymentMethodCode: _selectedPaymentMethod!,
+                                ebirrProvider: _ebirrProvider,
+                                useHpp: _useHpp,
+                                onEbirrProviderChanged: (v) =>
+                                    setState(() => _ebirrProvider = v),
+                                onUseHppChanged: (v) =>
+                                    setState(() => _useHpp = v),
+                                onChanged: (details) {
+                                  _paymentDetails = details;
+                                },
+                              ),
+                          ],
+                        ),
+                      ),
+                      CheckoutSectionCard(
+                        icon: Icons.receipt_outlined,
+                        title: 'Order summary',
+                        child: OrderSummarySection(
+                          subtotal: _subtotal,
+                          tipAmount: _tipAmount,
+                          total: _total,
+                        ),
+                      ),
+                    ]),
+                  ),
                 ),
               ],
             ),
           ),
         ),
-      ),
       ),
     );
   }

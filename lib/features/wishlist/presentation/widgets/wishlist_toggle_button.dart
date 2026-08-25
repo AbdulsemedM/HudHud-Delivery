@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/features/categories/model/categories_products_model.dart';
 import 'package:hudhud_delivery/features/wishlist/bloc/wishlist_bloc.dart';
-import 'package:hudhud_delivery/features/wishlist/data/wishlist_repository.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
 
 class WishlistToggleButton extends StatefulWidget {
@@ -24,11 +23,9 @@ class WishlistToggleButton extends StatefulWidget {
 
 class _WishlistToggleButtonState extends State<WishlistToggleButton> {
   final AuthService _auth = AuthService();
-  final WishlistRepository _repo = WishlistRepository();
 
   int? _userId;
   bool _loading = true;
-  bool _localWishlisted = false;
 
   @override
   void initState() {
@@ -38,27 +35,18 @@ class _WishlistToggleButtonState extends State<WishlistToggleButton> {
 
   Future<void> _bootstrap() async {
     final user = await _auth.getStoredUser();
+    if (!mounted) return;
     final userId = user?.id;
-    final productId = widget.product.id;
-    if (!mounted) return;
-
-    if (userId == null || productId == null) {
-      setState(() {
-        _userId = userId;
-        _loading = false;
-        _localWishlisted = false;
-      });
-      return;
-    }
-
-    final isSaved =
-        await _repo.isWishlisted(userId: userId, productId: productId);
-    if (!mounted) return;
     setState(() {
       _userId = userId;
       _loading = false;
-      _localWishlisted = isSaved;
     });
+    if (userId != null) {
+      final bloc = context.read<WishlistBloc>();
+      if (bloc.state is! WishlistLoaded) {
+        bloc.add(LoadWishlistEvent(userId: userId));
+      }
+    }
   }
 
   void _toggle() {
@@ -70,7 +58,7 @@ class _WishlistToggleButtonState extends State<WishlistToggleButton> {
     final state = bloc.state;
     final wasWishlisted = state is WishlistLoaded
         ? state.wishlistedProductIds.contains(productId)
-        : _localWishlisted;
+        : false;
 
     bloc.add(ToggleWishlistEvent(userId: userId, product: widget.product));
 
@@ -95,11 +83,9 @@ class _WishlistToggleButtonState extends State<WishlistToggleButton> {
 
     return BlocBuilder<WishlistBloc, WishlistState>(
       builder: (context, state) {
-        bool isWishlisted;
+        bool isWishlisted = false;
         if (productId != null && state is WishlistLoaded) {
           isWishlisted = state.wishlistedProductIds.contains(productId);
-        } else {
-          isWishlisted = _localWishlisted;
         }
 
         final muted = widget.color ??

@@ -18,7 +18,10 @@ class CategoriesListResult {
 
 class CategoriesRepository {
   final CategoriesDataProvider categoriesDataProvider;
-  CategoriesRepository({required this.categoriesDataProvider});
+
+  CategoriesRepository({
+    required this.categoriesDataProvider,
+  });
 
   /// Fetches paginated categories list from /api/categories?page=.
   /// Returns list of categories; pagination info in [CategoriesListResult].
@@ -27,7 +30,9 @@ class CategoriesRepository {
       final response = await categoriesDataProvider.getCategories(page: page);
       if (response['statusCode'] == 200) {
         final data = response['data'];
-        if (data == null) return CategoriesListResult(items: [], currentPage: page, lastPage: page);
+        if (data == null) {
+          return CategoriesListResult(items: [], currentPage: page, lastPage: page);
+        }
         List<dynamic> list;
         int currentPage = page;
         int lastPage = page;
@@ -37,11 +42,17 @@ class CategoriesRepository {
           dynamic inner = data['data'];
           if (inner is List) {
             list = inner;
-            currentPage = (data['current_page'] is int) ? data['current_page'] as int : (int.tryParse(data['current_page']?.toString() ?? '') ?? page);
-            lastPage = (data['last_page'] is int) ? data['last_page'] as int : (int.tryParse(data['last_page']?.toString() ?? '') ?? page);
+            currentPage = (data['current_page'] is int)
+                ? data['current_page'] as int
+                : (int.tryParse(data['current_page']?.toString() ?? '') ?? page);
+            lastPage = (data['last_page'] is int)
+                ? data['last_page'] as int
+                : (int.tryParse(data['last_page']?.toString() ?? '') ?? page);
           } else if (inner is Map<String, dynamic>) {
             list = (inner['data'] is List) ? inner['data'] as List : [];
-            currentPage = (inner['current_page'] is int) ? inner['current_page'] as int : page;
+            currentPage = (inner['current_page'] is int)
+                ? inner['current_page'] as int
+                : page;
             lastPage = (inner['last_page'] is int) ? inner['last_page'] as int : page;
           } else {
             list = [];
@@ -50,9 +61,14 @@ class CategoriesRepository {
           list = [];
         }
         final items = list
-            .map((e) => CategoryTreeModel.fromJson(Map<String, dynamic>.from(e as Map)))
+            .map((e) =>
+                CategoryTreeModel.fromJson(Map<String, dynamic>.from(e as Map)))
             .toList();
-        return CategoriesListResult(items: items, currentPage: currentPage, lastPage: lastPage);
+        return CategoriesListResult(
+          items: items,
+          currentPage: currentPage,
+          lastPage: lastPage,
+        );
       }
       final errorMessage = response['errorMessage'] ?? 'Error fetching categories';
       throw Exception(_cleanErrorMessage(errorMessage));
@@ -84,33 +100,6 @@ class CategoriesRepository {
     }
   }
 
-  Future<List<CategoriesProductsModel>> getCategoriesProducts(
-      {required int categoryId}) async {
-    try {
-      final response = await categoriesDataProvider.getCategoriesProducts(
-        categoryId: categoryId,
-      );
-      if (response['statusCode'] == 200) {
-        final body = response['data'] as Map<String, dynamic>?;
-        final paginated = body?['data'] as Map<String, dynamic>?;
-        final list = paginated?['data'] as List?;
-        if (list == null) return [];
-        return list
-            .map((e) => CategoriesProductsModel.fromMap(e as Map<String, dynamic>))
-            .toList();
-      } else {
-        String errorMessage =
-            response['errorMessage'] ?? " Error Fetching products";
-        errorMessage = _cleanErrorMessage(errorMessage);
-        throw Exception(errorMessage);
-      }
-    } catch (e) {
-      String errorMessage = e.toString();
-      errorMessage = _cleanErrorMessage(errorMessage);
-      throw Exception(errorMessage);
-    }
-  }
-
   /// GET /api/products/{id}
   Future<CategoriesProductsModel?> getProductById(int productId) async {
     try {
@@ -136,7 +125,6 @@ class CategoriesRepository {
   }
 
   String _cleanErrorMessage(String message) {
-    // Remove various prefixes that might appear
     if (message.startsWith('Exception: ')) {
       message = message.substring(11);
     }

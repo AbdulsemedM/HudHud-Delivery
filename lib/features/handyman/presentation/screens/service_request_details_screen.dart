@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/widgets/status_chip.dart';
 import 'package:hudhud_delivery/features/handyman/data/data_provider/handyman_data_provider.dart';
 import 'package:hudhud_delivery/features/handyman/data/models/service_request_model.dart';
 import 'package:hudhud_delivery/features/handyman/data/repository/handyman_repository.dart';
@@ -61,20 +62,9 @@ class _ServiceRequestDetailsScreenState extends State<ServiceRequestDetailsScree
     return value;
   }
 
-  Color _statusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return AppColors.pending;
-      case 'completed':
-        return AppColors.successColor;
-      case 'cancelled':
-        return AppColors.errorColor;
-      case 'in_progress':
-      case 'accepted':
-        return AppColors.infoColor;
-      default:
-        return AppColors.lightTextSecondary;
-    }
+  Color _cardBorder(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? AppColors.darkBorder : AppColors.lightBorder;
   }
 
   Future<void> _cancelRequest() async {
@@ -82,6 +72,9 @@ class _ServiceRequestDetailsScreenState extends State<ServiceRequestDetailsScree
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        ),
         title: Text(l10n.handymanDialogCancelRequestTitle),
         content: Text(l10n.handymanDialogCancelRequestMessage),
         actions: [
@@ -155,125 +148,176 @@ class _ServiceRequestDetailsScreenState extends State<ServiceRequestDetailsScree
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final l10n = context.l10n;
+    final borderColor = _cardBorder(context);
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           _request.title,
-          style: TextStyle(
+          style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
-            fontSize: 18,
-            color: theme.colorScheme.onSurface,
+            color: colorScheme.onSurface,
           ),
           overflow: TextOverflow.ellipsis,
         ),
-        backgroundColor: theme.colorScheme.surface,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-          color: theme.colorScheme.onSurface,
+          color: colorScheme.onSurface,
           onPressed: () => Navigator.pop(context),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(
-            color: theme.dividerColor.withOpacity(0.5),
+            color: colorScheme.outlineVariant.withValues(alpha: 0.5),
             height: 1,
           ),
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppColors.spaceMD),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            StatusChip(status: _request.status),
+            const SizedBox(height: AppColors.spaceMD),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              width: double.infinity,
+              padding: const EdgeInsets.all(AppColors.spaceMD),
               decoration: BoxDecoration(
-                color: _statusColor(_request.status),
-                borderRadius: BorderRadius.circular(8),
+                color: colorScheme.surface,
+                borderRadius: BorderRadius.circular(AppColors.radiusLG),
+                border: Border.all(color: borderColor),
               ),
-              child: Text(
-                _request.status.replaceAll('_', ' ').toUpperCase(),
-                style: TextStyle(
-                  color: theme.brightness == Brightness.dark
-                      ? theme.colorScheme.onSurface
-                      : theme.colorScheme.surface,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _request.description,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurface,
+                      height: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: AppColors.spaceMD),
+                  _DetailRow(
+                    icon: Icons.location_on_outlined,
+                    label: l10n.labelLocation,
+                    value: _request.location,
+                  ),
+                  _DetailRow(
+                    icon: Icons.schedule_rounded,
+                    label: l10n.handymanLabelScheduled,
+                    value: _formatDate(_request.scheduledAt),
+                  ),
+                  _DetailRow(
+                    icon: Icons.payments_outlined,
+                    label: l10n.labelEstimatedCost,
+                    value: _request.formattedEstimatedCost ?? '—',
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              _request.description,
-              style: TextStyle(
-                fontSize: 15,
-                color: theme.colorScheme.onSurface,
-                height: 1.5,
-              ),
-            ),
-            const SizedBox(height: 20),
-            _DetailRow(
-              icon: Icons.location_on,
-              label: l10n.labelLocation,
-              value: _request.location,
-            ),
-            _DetailRow(
-              icon: Icons.schedule,
-              label: l10n.handymanLabelScheduled,
-              value: _formatDate(_request.scheduledAt),
-            ),
-            _DetailRow(
-              icon: Icons.attach_money,
-              label: l10n.labelEstimatedCost,
-              value: _request.formattedEstimatedCost ?? '—',
             ),
             if (_request.requirements != null) ...[
-              const SizedBox(height: 8),
-              Text(l10n.handymanSectionRequirements, style: const TextStyle(fontWeight: FontWeight.w600)),
-              const SizedBox(height: 4),
-              if (_request.requirements!.skills.isNotEmpty)
-                Wrap(
-                  spacing: 8,
-                  children: _request.requirements!.skills
-                      .map((s) => Chip(label: Text(_localizedSkillLabel(l10n, s))))
-                      .toList(),
+              const SizedBox(height: AppColors.spaceMD),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(AppColors.spaceMD),
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  borderRadius: BorderRadius.circular(AppColors.radiusLG),
+                  border: Border.all(color: borderColor),
                 ),
-              if (_request.requirements!.tools.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Text(
-                  l10n.handymanToolsLine(_request.requirements!.tools.join(', ')),
-                  style: TextStyle(fontSize: 14, color: theme.colorScheme.onSurfaceVariant),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.handymanSectionRequirements,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: AppColors.spaceSM),
+                    if (_request.requirements!.skills.isNotEmpty)
+                      Wrap(
+                        spacing: AppColors.spaceSM,
+                        runSpacing: AppColors.spaceSM,
+                        children: _request.requirements!.skills
+                            .map(
+                              (s) => Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primaryColor
+                                      .withValues(alpha: 0.1),
+                                  borderRadius:
+                                      BorderRadius.circular(AppColors.radiusFull),
+                                  border: Border.all(
+                                    color: AppColors.primaryColor
+                                        .withValues(alpha: 0.25),
+                                  ),
+                                ),
+                                child: Text(
+                                  _localizedSkillLabel(l10n, s),
+                                  style: theme.textTheme.labelMedium?.copyWith(
+                                    color: AppColors.primaryColor,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                      ),
+                    if (_request.requirements!.tools.isNotEmpty) ...[
+                      const SizedBox(height: AppColors.spaceSM),
+                      Text(
+                        l10n.handymanToolsLine(
+                          _request.requirements!.tools.join(', '),
+                        ),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                    if (_request.requirements!.estimatedHours != null)
+                      Text(
+                        l10n.handymanEstHoursLine(
+                          '${_request.requirements!.estimatedHours}',
+                        ),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                  ],
                 ),
-              ],
-              if (_request.requirements!.estimatedHours != null)
-                Text(
-                  l10n.handymanEstHoursLine('${_request.requirements!.estimatedHours}'),
-                  style: TextStyle(fontSize: 14, color: theme.colorScheme.onSurfaceVariant),
-                ),
+              ),
             ],
-            const SizedBox(height: 24),
+            const SizedBox(height: AppColors.spaceLG),
             if (_request.isPending) ...[
               if (_request.quotesCount > 0)
                 SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton.icon(
+                  child: FilledButton.icon(
                     onPressed: _openQuotes,
-                    icon: const Icon(Icons.receipt_long),
+                    icon: const Icon(Icons.receipt_long_rounded),
                     label: Text(l10n.handymanViewQuotesCta(_request.quotesCount)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: theme.colorScheme.primary,
-                      foregroundColor: theme.colorScheme.onPrimary,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.primaryColor,
+                      foregroundColor: colorScheme.onPrimary,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(AppColors.radiusLG),
                       ),
                     ),
                   ),
                 ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppColors.spaceMD),
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
@@ -282,10 +326,12 @@ class _ServiceRequestDetailsScreenState extends State<ServiceRequestDetailsScree
                   label: Text(l10n.handymanCancelRequest),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.errorColor,
-                    side: const BorderSide(color: AppColors.errorColor),
+                    side: BorderSide(
+                      color: AppColors.errorColor.withValues(alpha: 0.5),
+                    ),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(AppColors.radiusLG),
                     ),
                   ),
                 ),
@@ -294,16 +340,16 @@ class _ServiceRequestDetailsScreenState extends State<ServiceRequestDetailsScree
             if (_request.isCompleted) ...[
               SizedBox(
                 width: double.infinity,
-                child: ElevatedButton.icon(
+                child: FilledButton.icon(
                   onPressed: _rateService,
-                  icon: const Icon(Icons.star),
+                  icon: const Icon(Icons.star_rounded),
                   label: Text(l10n.handymanRateServiceTitle),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.colorScheme.primary,
-                    foregroundColor: theme.colorScheme.onPrimary,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.primaryColor,
+                    foregroundColor: colorScheme.onPrimary,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(AppColors.radiusLG),
                     ),
                   ),
                 ),
@@ -311,19 +357,37 @@ class _ServiceRequestDetailsScreenState extends State<ServiceRequestDetailsScree
             ],
             if (_request.provider != null &&
                 _request.provider!['id'] != null) ...[
-              const SizedBox(height: 16),
-              const Divider(),
-              const SizedBox(height: 8),
-              ListTile(
-                leading: const CircleAvatar(
-                  child: Icon(Icons.person),
+              const SizedBox(height: AppColors.spaceMD),
+              Container(
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  borderRadius: BorderRadius.circular(AppColors.radiusLG),
+                  border: Border.all(color: borderColor),
                 ),
-                title: Text(
-                  _request.provider!['name']?.toString() ?? l10n.handymanProviderFallback,
-                ),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 14),
-                onTap: () => _openHandyman(
-                  _request.provider!['id'] as int,
+                child: ListTile(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppColors.radiusLG),
+                  ),
+                  leading: CircleAvatar(
+                    backgroundColor:
+                        AppColors.primaryColor.withValues(alpha: 0.12),
+                    child: const Icon(
+                      Icons.person_rounded,
+                      color: AppColors.primaryColor,
+                    ),
+                  ),
+                  title: Text(
+                    _request.provider!['name']?.toString() ??
+                        l10n.handymanProviderFallback,
+                  ),
+                  trailing: Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 14,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  onTap: () => _openHandyman(
+                    _request.provider!['id'] as int,
+                  ),
                 ),
               ),
             ],
@@ -348,31 +412,39 @@ class _DetailRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: AppColors.spaceMD),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 20, color: theme.colorScheme.onSurfaceVariant),
-          const SizedBox(width: 12),
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: AppColors.primaryColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(AppColors.radiusMD),
+            ),
+            child: Icon(icon, size: 18, color: AppColors.primaryColor),
+          ),
+          const SizedBox(width: AppColors.spaceMD),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   label,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: theme.colorScheme.onSurfaceVariant,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   value,
-                  style: TextStyle(
-                    fontSize: 15,
+                  style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w500,
-                    color: theme.colorScheme.onSurface,
+                    color: colorScheme.onSurface,
                   ),
                 ),
               ],

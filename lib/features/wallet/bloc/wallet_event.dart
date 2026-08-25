@@ -7,68 +7,61 @@ sealed class WalletEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-final class FetchWalletsEvent extends WalletEvent {
-  final int page;
-
-  const FetchWalletsEvent({this.page = 1});
-  @override
-  List<Object?> get props => [page];
-}
-
-final class FetchWalletEvent extends WalletEvent {
-  final int walletId;
-
-  const FetchWalletEvent({required this.walletId});
-  @override
-  List<Object?> get props => [walletId];
+final class FetchBalanceEvent extends WalletEvent {
+  const FetchBalanceEvent();
 }
 
 final class FetchTransactionsEvent extends WalletEvent {
   final int page;
+  final int limit;
 
-  const FetchTransactionsEvent({this.page = 1});
+  const FetchTransactionsEvent({this.page = 1, this.limit = 20});
   @override
-  List<Object?> get props => [page];
+  List<Object?> get props => [page, limit];
 }
 
 final class AddFundsEvent extends WalletEvent {
   final double amount;
-  final String method;
+  final String paymentMethodCode;
   final String currency;
-  final int? payerId;
-  final int? walletId;
   final Map<String, dynamic>? paymentDetails;
+  final String? idempotencyKey;
 
   const AddFundsEvent({
     required this.amount,
-    required this.method,
+    required this.paymentMethodCode,
     required this.currency,
-    this.payerId,
-    this.walletId,
     this.paymentDetails,
+    this.idempotencyKey,
   });
   @override
   List<Object?> get props =>
-      [amount, method, currency, payerId, walletId, paymentDetails];
+      [amount, paymentMethodCode, currency, paymentDetails, idempotencyKey];
 }
 
 final class WithdrawFundsEvent extends WalletEvent {
   final double amount;
-  final String method;
+  final String paymentMethodCode;
   final String currency;
   final int walletId;
-  final int? payerId;
   final Map<String, dynamic>? paymentDetails;
+  final String? idempotencyKey;
 
   const WithdrawFundsEvent({
     required this.amount,
-    required this.method,
+    required this.paymentMethodCode,
     required this.currency,
     required this.walletId,
-    this.payerId,
     this.paymentDetails,
+    this.idempotencyKey,
   });
   @override
-  List<Object?> get props =>
-      [amount, method, currency, walletId, payerId, paymentDetails];
+  List<Object?> get props => [
+        amount,
+        paymentMethodCode,
+        currency,
+        walletId,
+        paymentDetails,
+        idempotencyKey,
+      ];
 }

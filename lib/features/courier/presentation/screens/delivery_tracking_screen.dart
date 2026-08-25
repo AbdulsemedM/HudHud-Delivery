@@ -1,11 +1,26 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
+import 'package:lottie/lottie.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/app/services/google_directions_service.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/widgets/status_chip.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
+import 'package:hudhud_delivery/features/courier/data/models/delivery_live_tracking.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
+import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
+import 'package:hudhud_delivery/features/courier/presentation/widgets/driver_contact_card.dart';
+import 'package:hudhud_delivery/features/courier/presentation/widgets/nearby_driver_markers.dart';
+import 'package:hudhud_delivery/features/courier/utils/delivery_notification.dart';
+import 'package:hudhud_delivery/features/courier/utils/delivery_status.dart';
+import 'package:hudhud_delivery/features/chat/utils/chat_navigation.dart';
+import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
+import '../../../home/presentation/widgets/home_widget.dart';
 
 class DeliveryTrackingScreen extends StatefulWidget {
   final int? deliveryId;
@@ -46,11 +61,20 @@ class DeliveryTrackingScreen extends StatefulWidget {
 class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
   gmaps.GoogleMapController? _mapController;
   LatLng? _vehiclePosition;
+  Timer? _pollTimer;
+  gmaps.BitmapDescriptor? _deliveryGuyIcon;
 
   Map<String, dynamic>? _trackData;
+  DeliveryLiveTracking? _liveTracking;
+  GeoPoint? _retainedDriverPoint;
+  bool _trackingAvailable = false;
+  bool _stopPolling = false;
+  int _pollIntervalSeconds = 7;
   bool _isLoadingTrack = true;
   String? _trackError;
   List<LatLng>? _routePolylinePoints;
+  GeoPoint? _lastRouteOrigin;
+  GeoPoint? _lastRouteDestination;
 
   late final CourierRepository _courierRepository;
 
@@ -62,36 +86,148 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
         apiService: ApiService.instance,
       ),
     );
+    _loadDeliveryGuyIcon();
 
-    // Calculate vehicle position (somewhere along the route)
     if (widget.pickupPosition != null && widget.deliveryPosition != null) {
-      _vehiclePosition = LatLng(
-        widget.pickupPosition!.latitude +
-            (widget.deliveryPosition!.latitude -
-                    widget.pickupPosition!.latitude) *
-                0.3,
-        widget.pickupPosition!.longitude +
-            (widget.deliveryPosition!.longitude -
-                    widget.pickupPosition!.longitude) *
-                0.3,
+      _fetchRouteDirections(
+        origin: GeoPoint(
+          latitude: widget.pickupPosition!.latitude,
+          longitude: widget.pickupPosition!.longitude,
+        ),
+        destination: GeoPoint(
+          latitude: widget.deliveryPosition!.latitude,
+          longitude: widget.deliveryPosition!.longitude,
+        ),
       );
-      _fetchRouteDirections();
     }
 
     if (widget.deliveryId != null) {
       _fetchTrackData();
+      _startPollTimer();
     } else {
       _isLoadingTrack = false;
     }
   }
 
-  Future<void> _fetchRouteDirections() async {
-    if (widget.pickupPosition == null || widget.deliveryPosition == null) return;
+  Future<void> _loadDeliveryGuyIcon() async {
+    final icon = await loadDeliveryGuyMapIcon();
+    if (!mounted || icon == null) return;
+    setState(() => _deliveryGuyIcon = icon);
+  }
+
+  void _startPollTimer() {
+    _pollTimer?.cancel();
+    if (_stopPolling) return;
+    _pollTimer = Timer.periodic(
+      Duration(seconds: _pollIntervalSeconds),
+      (_) => _fetchTrackData(),
+    );
+  }
+
+  @override
+  void dispose() {
+    _pollTimer?.cancel();
+    super.dispose();
+  }
+
+  LatLng? _parseDriverLocation(Map<String, dynamic>? data) {
+    if (data == null) return null;
+
+    LatLng? fromCoords(dynamic lat, dynamic lng) {
+      final latitude = double.tryParse(lat?.toString() ?? '');
+      final longitude = double.tryParse(lng?.toString() ?? '');
+      if (latitude == null || longitude == null) return null;
+      return LatLng(latitude, longitude);
+    }
+
+    final direct = fromCoords(
+      data['current_latitude'] ?? data['driver_latitude'] ?? data['latitude'],
+      data['current_longitude'] ?? data['driver_longitude'] ?? data['longitude'],
+    );
+    if (direct != null) return direct;
+
+    final driverLocation = data['driver_location'];
+    if (driverLocation is Map) {
+      final nested = fromCoords(
+        driverLocation['latitude'] ?? driverLocation['lat'],
+        driverLocation['longitude'] ?? driverLocation['lng'],
+      );
+      if (nested != null) return nested;
+    }
+
+    final driver = data['driver'];
+    if (driver is Map) {
+      return fromCoords(
+        driver['latitude'] ?? driver['lat'] ?? driver['current_latitude'],
+        driver['longitude'] ?? driver['lng'] ?? driver['current_longitude'],
+      );
+    }
+    return null;
+  }
+
+  Future<void> _messageDriver() async {
+    final deliveryId = widget.deliveryId;
+    if (deliveryId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.chatMissingDeliveryId),
+        ),
+      );
+      return;
+    }
+    await openPackageDeliveryChat(context, deliveryId);
+  }
+
+  String? _driverPhone() {
+    final livePhone = _liveTracking?.driver?.phone?.trim();
+    if (livePhone != null && livePhone.isNotEmpty) return livePhone;
+
+    final driver = _trackData?['driver'];
+    if (driver is Map) {
+      final phone = driver['phone']?.toString().trim();
+      if (phone != null && phone.isNotEmpty) return phone;
+    }
+    return null;
+  }
+
+  Future<void> _callDriver() async {
+    final phone = _driverPhone();
+    if (phone == null || phone.isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Driver phone number is unavailable')),
+      );
+      return;
+    }
+    final uri = Uri(scheme: 'tel', path: phone);
+    final launched =
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!launched && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open the phone dialer')),
+      );
+    }
+  }
+
+  Future<void> _fetchRouteDirections({
+    required GeoPoint origin,
+    required GeoPoint destination,
+  }) async {
+    final same = _lastRouteOrigin != null &&
+        _lastRouteDestination != null &&
+        _lastRouteOrigin!.latitude == origin.latitude &&
+        _lastRouteOrigin!.longitude == origin.longitude &&
+        _lastRouteDestination!.latitude == destination.latitude &&
+        _lastRouteDestination!.longitude == destination.longitude;
+    if (same && _routePolylinePoints != null) return;
+
+    _lastRouteOrigin = origin;
+    _lastRouteDestination = destination;
     final result = await GoogleDirectionsService.getDirections(
-      originLat: widget.pickupPosition!.latitude,
-      originLng: widget.pickupPosition!.longitude,
-      destLat: widget.deliveryPosition!.latitude,
-      destLng: widget.deliveryPosition!.longitude,
+      originLat: origin.latitude,
+      originLng: origin.longitude,
+      destLat: destination.latitude,
+      destLng: destination.longitude,
     );
     if (!mounted) return;
     setState(() {
@@ -128,58 +264,132 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
   }
 
   Future<void> _fetchTrackData() async {
-    if (widget.deliveryId == null) return;
+    if (widget.deliveryId == null || _stopPolling) return;
     try {
+      final liveResult =
+          await _courierRepository.getDeliveryLiveTracking(widget.deliveryId!);
+      if (!mounted) return;
+
+      if (liveResult['notFound'] == true) {
+        _stopPolling = true;
+        _pollTimer?.cancel();
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context);
+        }
+        return;
+      }
+
+      if (liveResult['success'] == true) {
+        final live = liveResult['tracking'] as DeliveryLiveTracking?;
+        await _applyLiveTracking(live);
+        return;
+      }
+
       final result =
           await _courierRepository.getDeliveryTrack(widget.deliveryId!);
-      if (mounted) {
-        setState(() {
-          _isLoadingTrack = false;
-          if (result['success'] == true) {
-            _trackData = result['data'] as Map<String, dynamic>?;
-            _trackError = null;
-          } else {
-            _trackData = null;
-            _trackError = result['message'] as String?;
+      if (!mounted) return;
+      setState(() {
+        _isLoadingTrack = false;
+        if (result['success'] == true) {
+          _trackData = result['data'] as Map<String, dynamic>?;
+          final parsed = _parseDriverLocation(_trackData);
+          if (parsed != null) {
+            _vehiclePosition = parsed;
+            _retainedDriverPoint = GeoPoint(
+              latitude: parsed.latitude,
+              longitude: parsed.longitude,
+            );
           }
-        });
-      }
+          if (_trackData?['driver'] != null) {
+            _trackingAvailable = true;
+          }
+          _trackError = null;
+        } else {
+          _trackError = result['message'] as String?;
+        }
+      });
     } catch (e) {
       if (mounted) {
         setState(() {
           _isLoadingTrack = false;
-          _trackData = null;
           _trackError = 'Failed to load tracking';
         });
       }
     }
   }
 
-  String _formatTimestamp(dynamic value) {
-    if (value == null) return '—';
-    final str = value.toString();
-    try {
-      final dt = DateTime.tryParse(str);
-      if (dt != null) {
-        return '${dt.day} ${_monthName(dt.month)} ${dt.year}, '
-            '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
-      }
-    } catch (_) {}
-    return str;
-  }
+  Future<void> _applyLiveTracking(DeliveryLiveTracking? live) async {
+    if (live == null || !mounted) return;
 
-  String _monthName(int month) {
-    const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
-    ];
-    return months[month - 1];
+    final retained = retainDriverLocation(
+      previous: _retainedDriverPoint,
+      incoming: live.driverLocation,
+    );
+    final nextPoll = live.pollAfterSeconds < 1 ? 7 : live.pollAfterSeconds;
+    final intervalChanged = nextPoll != _pollIntervalSeconds;
+    _pollIntervalSeconds = nextPoll;
+
+    final terminal = isDeliveryTerminalStatus(live.status);
+    if (terminal) {
+      _stopPolling = true;
+      _pollTimer?.cancel();
+    }
+
+    setState(() {
+      _isLoadingTrack = false;
+      _liveTracking = live;
+      _trackingAvailable = live.trackingAvailable;
+      _retainedDriverPoint = retained;
+      if (retained != null) {
+        _vehiclePosition = LatLng(retained.latitude, retained.longitude);
+      }
+      _trackError = null;
+      _trackData = {
+        ...?_trackData,
+        'status': live.status,
+        if (live.trackingAvailable && live.driver != null)
+          'driver': {
+            'id': live.driver!.id,
+            'name': live.driver!.name,
+            'phone': live.driver!.phone,
+            'vehicle_type': live.driver!.vehicleType,
+            'vehicle_color': live.driver!.vehicleColor,
+            'vehicle_plate_number': live.driver!.vehiclePlateNumber,
+            'rating': live.driver!.rating,
+          }
+        else
+          'driver': null,
+        'estimated_arrival_minutes': live.estimatedArrivalMinutes,
+      };
+    });
+
+    if (intervalChanged && !_stopPolling) {
+      _startPollTimer();
+    }
+
+    final origin = live.routeOrigin ?? retained;
+    GeoPoint? destination = live.routeDestination ?? live.destination;
+    if (destination == null) {
+      final label = live.effectiveDestinationLabel;
+      final fallback = label == 'dropoff'
+          ? widget.deliveryPosition
+          : widget.pickupPosition;
+      if (fallback != null) {
+        destination = GeoPoint(
+          latitude: fallback.latitude,
+          longitude: fallback.longitude,
+        );
+      }
+    }
+    if (origin != null && destination != null) {
+      await _fetchRouteDirections(origin: origin, destination: destination);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     // Calculate center point for map
-    LatLng mapCenter = const LatLng(37.7749, -122.4194); // Default
+    LatLng mapCenter = const LatLng(9.0222, 38.7468);
     if (widget.pickupPosition != null && widget.deliveryPosition != null) {
       mapCenter = LatLng(
         (widget.pickupPosition!.latitude + widget.deliveryPosition!.latitude) / 2,
@@ -208,9 +418,10 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
         gmaps.Marker(
           markerId: const gmaps.MarkerId('vehicle'),
           position: _toG(_vehiclePosition!),
-          icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-            gmaps.BitmapDescriptor.hueViolet,
-          ),
+          icon: _deliveryGuyIcon ??
+              gmaps.BitmapDescriptor.defaultMarkerWithHue(
+                gmaps.BitmapDescriptor.hueViolet,
+              ),
         ),
       );
     }
@@ -227,362 +438,344 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
     }
 
     Set<gmaps.Polyline> polylines = {};
-    if (widget.pickupPosition != null && widget.deliveryPosition != null) {
+    final routeStart = _lastRouteOrigin != null
+        ? LatLng(_lastRouteOrigin!.latitude, _lastRouteOrigin!.longitude)
+        : _vehiclePosition ?? widget.pickupPosition;
+    final routeEnd = _lastRouteDestination != null
+        ? LatLng(
+            _lastRouteDestination!.latitude,
+            _lastRouteDestination!.longitude,
+          )
+        : (_liveTracking?.effectiveDestinationLabel == 'dropoff'
+            ? widget.deliveryPosition
+            : widget.pickupPosition ?? widget.deliveryPosition);
+    if (routeStart != null && routeEnd != null) {
       polylines.add(
         gmaps.Polyline(
           polylineId: const gmaps.PolylineId('route'),
           points: _routePolylinePoints != null && _routePolylinePoints!.length >= 2
               ? _routePolylinePoints!.map(_toG).toList()
-              : [_toG(widget.pickupPosition!), _toG(widget.deliveryPosition!)],
-          color: AppColors.primaryColor,
+              : [_toG(routeStart), _toG(routeEnd)],
+          color: HomeColors.violet,
           width: 4,
         ),
       );
     }
 
-    final colorScheme = Theme.of(context).colorScheme;
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: Stack(
-        children: [
-          gmaps.GoogleMap(
-            initialCameraPosition: gmaps.CameraPosition(
-              target: _toG(mapCenter),
-              zoom: 13.0,
-            ),
-            markers: markers,
-            polylines: polylines,
-            onMapCreated: (controller) {
-              _mapController = controller;
-              _fitBounds();
-            },
-          ),
-          // Back button
-          Positioned(
-            top: 40,
-            left: 16,
-            child: Container(
-              decoration: BoxDecoration(
-                color: colorScheme.surface,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: colorScheme.shadow.withOpacity(0.2),
-                    blurRadius: 4,
+    final statusText = resolveDeliveryStatusLabel(
+      _trackData,
+      fallback: 'in_progress',
+    );
+    return CourierTheme.wrap(
+      context,
+      child: Builder(
+        builder: (context) {
+          final borderColor = HomeColors.borderOf(context);
+          return Scaffold(
+            backgroundColor: HomeColors.backgroundOf(context),
+            body: Stack(
+              children: [
+                gmaps.GoogleMap(
+                  initialCameraPosition: gmaps.CameraPosition(
+                    target: _toG(mapCenter),
+                    zoom: 13.0,
                   ),
-                ],
-              ),
-              child: IconButton(
-                icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ),
-          ),
-          // Status badge
-          Positioned(
-            top: 40,
-            right: 16,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: AppColors.primaryColor,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 4,
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
+                  markers: markers,
+                  polylines: polylines,
+                  onMapCreated: (controller) {
+                    _mapController = controller;
+                    _fitBounds();
+                  },
+                ),
+                // Back button
+                Positioned(
+                  top: 40,
+                  left: 16,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: HomeColors.surfaceElevatedOf(context),
                       shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.25),
+                          blurRadius: 4,
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    _trackData?['current_status']?.toString() ??
-                        _trackData?['status']?.toString() ??
-                        'Delivery in progress',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
+                    child: IconButton(
+                      icon: Icon(Icons.arrow_back,
+                          color: HomeColors.textPrimaryOf(context)),
+                      onPressed: () => Navigator.pop(context),
                     ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          // Bottom Sheet Modal
-          DraggableScrollableSheet(
-            initialChildSize: 0.5,
-            minChildSize: 0.35,
-            maxChildSize: 0.85,
-            builder: (context, scrollController) {
-              return Container(
-                decoration: BoxDecoration(
-                  color: colorScheme.surface,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
                   ),
                 ),
-                child: Column(
-                  children: [
-                    // Drag handle
-                    Container(
-                      margin: const EdgeInsets.only(top: 8),
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: colorScheme.outlineVariant,
-                        borderRadius: BorderRadius.circular(2),
+                // Status badge
+                Positioned(
+                  top: 40,
+                  right: 16,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: HomeColors.surfaceElevatedOf(context),
+                      borderRadius: BorderRadius.circular(AppColors.radiusFull),
+                      border: Border.all(color: borderColor),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.15),
+                          blurRadius: 4,
+                        ),
+                      ],
+                    ),
+                    child: StatusChip(status: statusText),
+                  ),
+                ),
+                if (!_isLoadingTrack &&
+                    _trackError == null &&
+                    !_trackingAvailable)
+                  Positioned(
+                    top: 96,
+                    left: 16,
+                    right: 16,
+                    child: Material(
+                      color: HomeColors.surfaceElevatedOf(context).withValues(alpha: 0.95),
+                      borderRadius: BorderRadius.circular(AppColors.radiusLG),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
+                        child: Text(
+                          _liveTracking?.message ??
+                              context.l10n.courierFindingNearestDrivers,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: HomeColors.textPrimaryOf(context),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                     ),
-                    // Current Status Banner
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      color: AppColors.primaryColor,
-                      child: Row(
+                  ),
+                // Bottom Sheet Modal
+                DraggableScrollableSheet(
+                  initialChildSize: 0.5,
+                  minChildSize: 0.35,
+                  maxChildSize: 0.85,
+                  builder: (context, scrollController) {
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: HomeColors.surfaceOf(context),
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(AppColors.radiusLG),
+                          topRight: Radius.circular(AppColors.radiusLG),
+                        ),
+                        border: Border(
+                          top: BorderSide(color: borderColor),
+                          left: BorderSide(color: borderColor),
+                          right: BorderSide(color: borderColor),
+                        ),
+                      ),
+                      child: Column(
                         children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                          // Drag handle
+                          Container(
+                            margin: const EdgeInsets.only(top: 8),
+                            width: 40,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: HomeColors.borderOf(context),
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                          // Current Status Banner
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(AppColors.spaceMD),
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  HomeColors.violet,
+                                  Color(0xFF6F56E8),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(AppColors.radiusLG),
+                              ),
+                            ),
+                            child: Row(
                               children: [
-                                Text(
-                                  (_trackData?['pickup_location']
-                                              ?.toString() ??
-                                          widget.pickupLocation)
-                                      .length >
-                                      30
-                                      ? '${(_trackData?['pickup_location']?.toString() ?? widget.pickupLocation).substring(0, 30)}...'
-                                      : (_trackData?['pickup_location']
-                                              ?.toString() ??
-                                          widget.pickupLocation),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        (_trackData?['pickup_location']
+                                                        ?.toString() ??
+                                                    widget.pickupLocation)
+                                                .length >
+                                            30
+                                            ? '${(_trackData?['pickup_location']?.toString() ?? widget.pickupLocation).substring(0, 30)}...'
+                                            : (_trackData?['pickup_location']
+                                                    ?.toString() ??
+                                                widget.pickupLocation),
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        resolveDeliveryStatus(_trackData) ??
+                                            _trackData?[
+                                                    'estimated_delivery_time']
+                                                ?.toString() ??
+                                            'Delivery in progress',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  _trackData?['current_status']?.toString() ??
-                                      _trackData?['estimated_delivery_time']
-                                          ?.toString() ??
-                                      'Delivery in progress',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color:
+                                        Colors.white.withValues(alpha: 0.2),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: IconButton(
+                                    icon: const Icon(Icons.send,
+                                        color: Colors.white),
+                                    onPressed: () {
+                                      // TODO: Implement send action
+                                    },
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              shape: BoxShape.circle,
-                            ),
-                            child: IconButton(
-                              icon: const Icon(Icons.send, color: Colors.white),
-                              onPressed: () {
-                                // TODO: Implement send action
-                              },
-                            ),
+                          // Content
+                          Expanded(
+                            child: _isLoadingTrack
+                                ? const Padding(
+                                    padding:
+                                        EdgeInsets.all(AppColors.spaceMD),
+                                    child: ShimmerListView(itemCount: 3),
+                                  )
+                                : _trackError != null
+                                    ? Center(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(24),
+                                          child: Text(
+                                            _trackError!,
+                                            style: TextStyle(
+                                              color: HomeColors.textMutedOf(context),
+                                              fontSize: 14,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                      )
+                                    : SingleChildScrollView(
+                                        controller: scrollController,
+                                        padding: const EdgeInsets.all(20),
+                                        child: Column(
+                                          children: [
+                                            // Driver Information (only when driver assigned)
+                                            if (_trackingAvailable &&
+                                                (_liveTracking?.driver !=
+                                                        null ||
+                                                    _trackData?['driver'] !=
+                                                        null)) ...[
+                                              DriverContactCard(
+                                                driverName: _liveTracking
+                                                        ?.driver?.name ??
+                                                    (_trackData!['driver']
+                                                            is Map<String,
+                                                                dynamic>
+                                                        ? ((_trackData![
+                                                                        'driver']
+                                                                    as Map<
+                                                                        String,
+                                                                        dynamic>)[
+                                                                'name']
+                                                            ?.toString() ??
+                                                            'Driver')
+                                                        : _trackData!['driver']
+                                                            .toString()),
+                                                details: [
+                                                  _liveTracking?.driver
+                                                      ?.vehiclePlateNumber,
+                                                  _driverPhone(),
+                                                ].whereType<String>().where((s) => s.isNotEmpty).join(' · '),
+                                                borderColor: borderColor,
+                                                onCall: _driverPhone() != null
+                                                    ? _callDriver
+                                                    : null,
+                                                onMessage: _messageDriver,
+                                              ),
+                                              const SizedBox(height: 16),
+                                            ],
+                                            // Review Order
+                                            _ReviewOrderCard(
+                                              courierNumber: _trackData?[
+                                                          'tracking_number']
+                                                      ?.toString() ??
+                                                  (widget.deliveryId != null
+                                                      ? '#DEL-${widget.deliveryId}'
+                                                      : '—'),
+                                              from: _trackData?[
+                                                          'pickup_location']
+                                                      ?.toString() ??
+                                                  widget.pickupLocation,
+                                              to: _trackData?[
+                                                          'dropoff_location']
+                                                      ?.toString() ??
+                                                  widget.deliveryLocation,
+                                              createdDate: _trackData?['created_at']
+                                                      ?.toString() ??
+                                                  '—',
+                                              borderColor: borderColor,
+                                            ),
+                                            const SizedBox(height: 16),
+                                            // Tracking Order (timeline from API)
+                                            _TrackingOrderCard(
+                                              timeline: _trackData?[
+                                                          'timeline'] !=
+                                                      null
+                                                  ? List<
+                                                      Map<String,
+                                                          dynamic>>.from(
+                                                      (_trackData![
+                                                                  'timeline']
+                                                              as List)
+                                                          .map((e) => e is Map<
+                                                                  String,
+                                                                  dynamic>
+                                                              ? e
+                                                              : <String,
+                                                                  dynamic>{}))
+                                                  : null,
+                                              borderColor: borderColor,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                           ),
                         ],
                       ),
-                    ),
-                    // Content
-                    Expanded(
-                      child: _isLoadingTrack
-                          ? const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(24),
-                                child: CircularProgressIndicator(),
-                              ),
-                            )
-                          : _trackError != null
-                              ? Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(24),
-                                    child: Text(
-                                      _trackError!,
-                                      style: TextStyle(
-                                        color: colorScheme.onSurfaceVariant,
-                                        fontSize: 14,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-                                )
-                              : SingleChildScrollView(
-                              controller: scrollController,
-                              padding: const EdgeInsets.all(20),
-                              child: Column(
-                                children: [
-                                  // Driver Information (only when driver assigned)
-                                  if (_trackData?['driver'] != null) ...[
-                                    _DriverCard(
-                                      driverName: _trackData!['driver']
-                                              is Map<String, dynamic>
-                                          ? ((_trackData!['driver']
-                                                      as Map<String, dynamic>)[
-                                                  'name']
-                                              ?.toString() ??
-                                              'Driver')
-                                          : _trackData!['driver'].toString(),
-                                      onCall: () {
-                                        // TODO: Implement call
-                                      },
-                                      onMessage: () {
-                                        // TODO: Implement message
-                                      },
-                                    ),
-                                    const SizedBox(height: 16),
-                                  ],
-                                  // Review Order
-                                  _ReviewOrderCard(
-                                    courierNumber: _trackData?[
-                                                'tracking_number']
-                                            ?.toString() ??
-                                        (widget.deliveryId != null
-                                            ? '#DEL-${widget.deliveryId}'
-                                            : '—'),
-                                    from: _trackData?['pickup_location']
-                                            ?.toString() ??
-                                        widget.pickupLocation,
-                                    to: _trackData?['dropoff_location']
-                                            ?.toString() ??
-                                        widget.deliveryLocation,
-                                    createdDate: _formatTimestamp(
-                                        _trackData?['last_updated']),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  // Tracking Order (timeline from API)
-                                  _TrackingOrderCard(
-                                    timeline: _trackData?['timeline'] != null
-                                        ? List<Map<String, dynamic>>.from(
-                                            (_trackData!['timeline'] as List)
-                                                .map((e) => e
-                                                    is Map<String, dynamic>
-                                                    ? e
-                                                    : <String, dynamic>{}))
-                                        : null,
-                                  ),
-                                ],
-                              ),
-                            ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _DriverCard extends StatelessWidget {
-  final String driverName;
-  final VoidCallback onCall;
-  final VoidCallback onMessage;
-
-  const _DriverCard({
-    required this.driverName,
-    required this.onCall,
-    required this.onMessage,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.shadow.withOpacity(0.06),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // Profile Picture
-          CircleAvatar(
-            radius: 30,
-            backgroundColor: colorScheme.surfaceContainerHighest,
-            child: Icon(
-              Icons.person,
-              size: 30,
-              color: colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(width: 16),
-          // Driver Info
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  driverName,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Driver',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
+                    );
+                  },
                 ),
               ],
             ),
-          ),
-          // Action Buttons
-          IconButton(
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.chat_bubble_outline, size: 20, color: colorScheme.onSurface),
-            ),
-            onPressed: onMessage,
-          ),
-          const SizedBox(width: 8),
-          IconButton(
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.phone, size: 20, color: colorScheme.onSurface),
-            ),
-            onPressed: onCall,
-          ),
-        ],
+          );
+        },
       ),
     );
   }
@@ -593,29 +786,24 @@ class _ReviewOrderCard extends StatelessWidget {
   final String from;
   final String to;
   final String createdDate;
+  final Color borderColor;
 
   const _ReviewOrderCard({
     required this.courierNumber,
     required this.from,
     required this.to,
     required this.createdDate,
+    required this.borderColor,
   });
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppColors.spaceMD),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.shadow.withOpacity(0.06),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: HomeColors.surfaceElevatedOf(context),
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        border: Border.all(color: borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -625,7 +813,7 @@ class _ReviewOrderCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: colorScheme.onSurface,
+              color: HomeColors.textPrimaryOf(context),
             ),
           ),
           const SizedBox(height: 16),
@@ -650,8 +838,9 @@ class _ReviewOrderCard extends StatelessWidget {
 
 class _TrackingOrderCard extends StatelessWidget {
   final List<Map<String, dynamic>>? timeline;
+  final Color borderColor;
 
-  const _TrackingOrderCard({this.timeline});
+  const _TrackingOrderCard({this.timeline, required this.borderColor});
 
   String _formatTimestamp(dynamic value) {
     if (value == null) return '—';
@@ -673,39 +862,36 @@ class _TrackingOrderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = timeline ?? [];
-    final colorScheme = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppColors.spaceMD),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.shadow.withOpacity(0.06),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: HomeColors.surfaceElevatedOf(context),
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        border: Border.all(color: borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Tracking Order',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: colorScheme.onSurface,
-            ),
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: HomeColors.textPrimaryOf(context),
+                ),
           ),
           const SizedBox(height: 16),
           if (items.isEmpty)
-            Text(
-              'No tracking updates yet',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
-              ),
+            Column(
+              children: [
+                Lottie.asset('assets/animations/browse.json', width: 120),
+                const SizedBox(height: 8),
+                Text(
+                  'No tracking updates yet',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: HomeColors.textMutedOf(context),
+                      ),
+                ),
+              ],
             )
           else
             ...items.asMap().entries.map((entry) {
@@ -746,9 +932,9 @@ class _TrackingItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color dotColor = Colors.grey[400]!;
-    if (isActive) dotColor = AppColors.primaryColor;
-    if (isCompleted) dotColor = Colors.green;
+    Color dotColor = HomeColors.textMutedOf(context);
+    if (isActive) dotColor = HomeColors.violet;
+    if (isCompleted) dotColor = AppColors.delivered;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -768,19 +954,17 @@ class _TrackingItem extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-                  color: const Color(0xFF2C3E50),
-                ),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                      color: HomeColors.textPrimaryOf(context),
+                    ),
               ),
               const SizedBox(height: 4),
               Text(
                 date,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                ),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: HomeColors.textMutedOf(context),
+                    ),
               ),
             ],
           ),
@@ -808,20 +992,18 @@ class _DetailItem extends StatelessWidget {
           width: 100,
           child: Text(
             label,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey[600],
-            ),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: HomeColors.textMutedOf(context),
+                ),
           ),
         ),
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: Color(0xFF2C3E50),
-            ),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                  color: HomeColors.textPrimaryOf(context),
+                ),
           ),
         ),
       ],

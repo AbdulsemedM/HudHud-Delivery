@@ -1,7 +1,12 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import '../../../core/api/api_service.dart';
+import '../../../core/utils/payment_idempotency.dart';
+import '../../checkout/data/models/create_order_result.dart';
 import '../../checkout/data/repository/checkout_repository.dart';
 import '../data/repository/payment_repository.dart';
+import '../model/payment_initiate_result.dart';
+import '../presentation/widgets/payment_details_form.dart';
 
 // Events
 abstract class PaymentEvent extends Equatable {
@@ -61,6 +66,19 @@ class PaymentSuccess extends PaymentState {
   List<Object?> get props => [transactionId, message];
 }
 
+class PaymentInitiated extends PaymentState {
+  final PaymentInitiateResult result;
+  final String orderId;
+
+  const PaymentInitiated({
+    required this.result,
+    required this.orderId,
+  });
+
+  @override
+  List<Object?> get props => [result, orderId];
+}
+
 class PaymentFailure extends PaymentState {
   final String error;
 
@@ -101,11 +119,10 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
       final orderDetails =
           event.paymentDetails?['order_details'] as Map<String, dynamic>?;
       if (orderDetails == null) {
-        emit(PaymentFailure(error: 'Order details missing'));
+        emit(const PaymentFailure(error: 'Order details missing'));
         return;
       }
 
-      // 1. Create order via POST /api/customer/orders
       final orderResult = await checkoutRepository.createOrder(
         vendorId: orderDetails['vendor_id'] as int,
         items: List<Map<String, dynamic>>.from(orderDetails['items'] as List),
@@ -132,23 +149,64 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
         return;
       }
 
-      final createdOrderId =
-          orderResult['data']?['id']?.toString() ?? event.orderId;
-
-      // 2. Process payment
-      final result = await paymentRepository.processPayment(
-        paymentMethod: event.paymentMethod,
-        amount: event.amount,
-        orderId: createdOrderId,
-        paymentDetails: event.paymentDetails,
+      final fallbackId = int.tryParse(event.orderId) ?? 0;
+      final created = parseCreateOrderResponse(
+        orderResult['data'],
+        fallbackOrderId: fallbackId,
       );
 
-      emit(PaymentSuccess(
-        transactionId: result['transaction_id'] ?? createdOrderId,
-        message: result['message'] ?? 'Order placed successfully',
-      ));
+      if (!created.isValid) {
+        emit(const PaymentFailure(error: 'Invalid order id from create order'));
+        return;
+      }
+
+      final currency = created.currency ?? 'ETB';
+      final amount = created.totalAmount ?? event.amount;
+
+      final collectedDetails = Map<String, dynamic>.from(
+        (event.paymentDetails ?? {})..remove('order_details'),
+      );
+      final initiateDetails = buildInitiatePaymentDetails(
+        paymentMethodCode: event.paymentMethod,
+        collectedDetails: collectedDetails,
+        orderId: created.orderId,
+      );
+
+      try {
+        final raw = await paymentRepository.initiatePayment(
+          paymentMethodCode: event.paymentMethod,
+          type: 'order',
+          orderId: created.orderId,
+          amount: amount,
+          currency: currency,
+          paymentDetails: initiateDetails,
+          idempotencyKey: createPaymentIdempotencyKey(
+            type: 'order',
+            entityId: created.orderId,
+          ),
+        );
+
+        final result = PaymentInitiateResult.fromJson(raw);
+        if (!result.isSuccess) {
+          emit(PaymentFailure(
+            error:
+                '${result.message ?? 'Payment initiation failed'} (order #${created.orderId} was created)',
+          ));
+          return;
+        }
+
+        emit(PaymentInitiated(
+          result: result,
+          orderId: created.orderId.toString(),
+        ));
+      } catch (e) {
+        emit(PaymentFailure(
+          error:
+              '${userFacingApiError(e)} Order #${created.orderId} was already created — avoid checking out again (duplicate order).',
+        ));
+      }
     } catch (e) {
-      emit(PaymentFailure(error: e.toString()));
+      emit(PaymentFailure(error: userFacingApiError(e)));
     }
   }
 
@@ -161,7 +219,7 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
       final paymentMethods = await paymentRepository.getPaymentMethods();
       emit(PaymentMethodsLoaded(paymentMethods: paymentMethods));
     } catch (e) {
-      emit(PaymentFailure(error: e.toString()));
+      emit(PaymentFailure(error: userFacingApiError(e)));
     }
   }
 }

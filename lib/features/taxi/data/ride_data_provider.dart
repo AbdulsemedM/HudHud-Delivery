@@ -1,8 +1,18 @@
+import 'package:dio/dio.dart';
 import 'package:hudhud_delivery/core/api/api_constants.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 
 class RideDataProvider {
   final ApiService apiService = ApiService.instance;
+
+  Map<String, dynamic> _errorResult(ApiException apiException) {
+    return {
+      'statusCode': apiException.statusCode,
+      'data': apiException.data,
+      'errorMessage': apiException.message,
+      'code': apiException.code,
+    };
+  }
 
   /// POST /api/services/ride/estimate
   /// Returns estimated distance, duration, and fare for a ride
@@ -35,20 +45,22 @@ class RideDataProvider {
         'statusCode': response.statusCode,
         'data': response.data,
         'errorMessage': null,
+        'code': null,
       };
     } on ApiException catch (apiException) {
-      return {
-        'statusCode': apiException.statusCode,
-        'data': null,
-        'errorMessage': apiException.message,
-      };
+      return _errorResult(apiException);
     } on Exception catch (e) {
-      return {'statusCode': 500, 'data': null, 'errorMessage': e.toString()};
+      return {
+        'statusCode': 500,
+        'data': null,
+        'errorMessage': e.toString(),
+        'code': null,
+      };
     }
   }
 
   /// POST /api/services/ride/request
-  /// Creates a ride request
+  /// Creates a ride request with nested pickup/dropoff locations.
   Future<Map<String, dynamic>> requestRide({
     required String pickupLocation,
     required double pickupLatitude,
@@ -69,10 +81,19 @@ class RideDataProvider {
   }) async {
     try {
       final Map<String, dynamic> requestData = {
-        'pickup_location': pickupLocation,
+        'pickup_location': {
+          'latitude': pickupLatitude,
+          'longitude': pickupLongitude,
+          'address': pickupLocation,
+        },
+        'dropoff_location': {
+          'latitude': dropoffLatitude,
+          'longitude': dropoffLongitude,
+          'address': dropoffLocation,
+        },
+        // Legacy flat fields for backends that still expect them.
         'pickup_latitude': pickupLatitude,
         'pickup_longitude': pickupLongitude,
-        'dropoff_location': dropoffLocation,
         'dropoff_latitude': dropoffLatitude,
         'dropoff_longitude': dropoffLongitude,
         'vehicle_type': vehicleType,
@@ -96,15 +117,17 @@ class RideDataProvider {
         'statusCode': response.statusCode,
         'data': response.data,
         'errorMessage': null,
+        'code': null,
       };
     } on ApiException catch (apiException) {
-      return {
-        'statusCode': apiException.statusCode,
-        'data': null,
-        'errorMessage': apiException.message,
-      };
+      return _errorResult(apiException);
     } on Exception catch (e) {
-      return {'statusCode': 500, 'data': null, 'errorMessage': e.toString()};
+      return {
+        'statusCode': 500,
+        'data': null,
+        'errorMessage': e.toString(),
+        'code': null,
+      };
     }
   }
 
@@ -131,39 +154,92 @@ class RideDataProvider {
         'statusCode': response.statusCode,
         'data': response.data,
         'errorMessage': null,
+        'code': null,
       };
     } on ApiException catch (apiException) {
-      return {
-        'statusCode': apiException.statusCode,
-        'data': null,
-        'errorMessage': apiException.message,
-      };
+      return _errorResult(apiException);
     } on Exception catch (e) {
-      return {'statusCode': 500, 'data': null, 'errorMessage': e.toString()};
+      return {
+        'statusCode': 500,
+        'data': null,
+        'errorMessage': e.toString(),
+        'code': null,
+      };
     }
   }
 
-  /// GET /api/user/rides/active
-  /// Returns the user's active ride (if any)
-  Future<Map<String, dynamic>> getActiveRide() async {
+  /// POST /api/services/ride/cancel
+  /// Cancels a ride request (customer side). Send ride_id in the body.
+  Future<Map<String, dynamic>> cancelRide({
+    required int rideId,
+    String cancellationReason = 'Changed my mind',
+  }) async {
     try {
-      final response = await apiService.get(
-        '${ApiConstants.baseUrl}${ApiConstants.userRidesActive}',
+      final response = await apiService.post(
+        '${ApiConstants.baseUrl}${ApiConstants.rideCancelById}',
+        data: {
+          'ride_id': rideId,
+          'cancellation_reason': cancellationReason,
+          'cancelled_by': 'user',
+        },
       );
 
       return {
         'statusCode': response.statusCode,
         'data': response.data,
         'errorMessage': null,
+        'code': null,
       };
     } on ApiException catch (apiException) {
-      return {
-        'statusCode': apiException.statusCode,
-        'data': null,
-        'errorMessage': apiException.message,
-      };
+      return _errorResult(apiException);
     } on Exception catch (e) {
-      return {'statusCode': 500, 'data': null, 'errorMessage': e.toString()};
+      return {
+        'statusCode': 500,
+        'data': null,
+        'errorMessage': e.toString(),
+        'code': null,
+      };
+    }
+  }
+
+  /// GET /api/user/rides/active
+  /// Returns the user's active ride (if any).
+  /// A 404 ("No active ride found") is treated as a normal empty result,
+  /// not a Dio error, so debug logs stay quiet for that expected case.
+  Future<Map<String, dynamic>> getActiveRide() async {
+    try {
+      final response = await apiService.get(
+        '${ApiConstants.baseUrl}${ApiConstants.userRidesActive}',
+        options: Options(
+          validateStatus: (status) =>
+              status != null && (status < 300 || status == 404),
+        ),
+      );
+
+      if (response.statusCode == 404) {
+        return {
+          'statusCode': 404,
+          'data': null,
+          'errorMessage': null,
+          'code': null,
+        };
+      }
+
+      return {
+        'statusCode': response.statusCode,
+        'data': response.data,
+        'errorMessage': null,
+        'code': null,
+      };
+    } on ApiException catch (apiException) {
+      return _errorResult(apiException);
+    } on Exception catch (e) {
+      return {
+        'statusCode': 500,
+        'data': null,
+        'errorMessage': e.toString(),
+        'code': null,
+      };
     }
   }
 }

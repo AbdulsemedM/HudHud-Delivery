@@ -18,10 +18,12 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
           event.phone,
           event.password,
           event.confirmPassword,
+          referralCode: event.referralCode,
         );
         emit(SignupSuccess());
       } catch (e) {
-        emit(SignupFailure(e.toString()));
+        final message = e is String ? e : e.toString();
+        emit(SignupFailure(message));
       }
     });
   }

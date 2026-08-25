@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
-import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
+import 'package:hudhud_delivery/features/settings/presentation/widgets/profile_dark_page.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -39,7 +40,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         newPassword.isEmpty ||
         confirmPassword.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Please fill all fields'),
           backgroundColor: Colors.red,
         ),
@@ -48,7 +49,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     }
     if (newPassword != confirmPassword) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Passwords do not match'),
           backgroundColor: Colors.red,
         ),
@@ -66,7 +67,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     setState(() => _isChangingPassword = false);
 
     if (result['success'] == true) {
-      Navigator.pop(context, result['message'] ?? 'Password updated successfully');
+      Navigator.pop(
+        context,
+        result['message'] ?? 'Password updated successfully',
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -79,24 +83,19 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Change Password'),
-      ),
+    return ProfileDarkPage(
+      title: 'Change Password',
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'Update your account password',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(color: AuthScreenColors.textSecondaryOf(context)),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               _PasswordField(
                 label: 'Current Password',
                 hint: 'Enter current password',
@@ -108,7 +107,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   });
                 },
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               _PasswordField(
                 label: 'New Password',
                 hint: 'Enter new password',
@@ -120,7 +119,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   });
                 },
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               _PasswordField(
                 label: 'Confirm New Password',
                 hint: 'Re-enter new password',
@@ -135,28 +134,31 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               const Spacer(),
               SizedBox(
                 width: double.infinity,
-                height: 50,
+                height: 48,
                 child: ElevatedButton(
                   onPressed: _isChangingPassword ? null : _submitChangePassword,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryColor,
+                    backgroundColor: AuthScreenColors.orange,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                   ),
                   child: _isChangingPassword
-                      ? const SizedBox(
+                      ? SizedBox(
                           width: 24,
                           height: 24,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(
+                                  Theme.of(context).colorScheme.onPrimary,
+                                ),
                           ),
                         )
-                      : const Text(
+                      : Text(
                           'Update Password',
                           style: TextStyle(
-                            color: Colors.white,
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
@@ -193,41 +195,47 @@ class _PasswordField extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 14,
+          style: TextStyle(
+            color: AuthScreenColors.textPrimaryOf(context),
             fontWeight: FontWeight.w500,
-            color: Color(0xFF2C3E50),
+            fontSize: 13,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         TextField(
           controller: controller,
           obscureText: obscureText,
+          style: TextStyle(color: AuthScreenColors.textPrimaryOf(context)),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TextStyle(color: Colors.grey[600]),
+            hintStyle: TextStyle(color: AuthScreenColors.textSecondaryOf(context)),
+            filled: true,
+            fillColor: AuthScreenColors.surfaceOf(context),
             suffixIcon: IconButton(
               icon: Icon(
                 obscureText ? Icons.visibility_off : Icons.visibility,
-                color: Colors.grey[600],
+                color: AuthScreenColors.textMutedOf(context),
               ),
               onPressed: onToggleVisibility,
             ),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey[300]!),
+              borderRadius: BorderRadius.circular(16),
+              borderSide:
+                  BorderSide(color: AuthScreenColors.surfaceBorderOf(context)),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey[300]!),
+              borderRadius: BorderRadius.circular(16),
+              borderSide:
+                  BorderSide(color: AuthScreenColors.surfaceBorderOf(context)),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.primaryColor),
+              borderRadius: BorderRadius.circular(16),
+              borderSide:
+                  const BorderSide(color: AuthScreenColors.orange, width: 2),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
-              vertical: 12,
+              vertical: 14,
             ),
           ),
         ),

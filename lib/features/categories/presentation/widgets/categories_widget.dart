@@ -2,7 +2,9 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../home/presentation/theme/home_colors.dart';
 import '../../model/categories_products_model.dart';
 import '../../../wishlist/presentation/widgets/wishlist_toggle_button.dart';
 
@@ -59,9 +61,9 @@ class CategoryDetailHeader extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withOpacity(0.15),
-                    Colors.black.withOpacity(0.4),
-                    Colors.black.withOpacity(0.82),
+                    Colors.black.withValues(alpha: 0.15),
+                    Colors.black.withValues(alpha: 0.4),
+                    Colors.black.withValues(alpha: 0.82),
                   ],
                 ),
               ),
@@ -76,7 +78,7 @@ class CategoryDetailHeader extends StatelessWidget {
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
                 child: Material(
-                  color: Colors.white.withOpacity(0.25),
+                  color: Colors.white.withValues(alpha: 0.25),
                   borderRadius: BorderRadius.circular(24),
                   child: InkWell(
                     onTap: onBack,
@@ -113,7 +115,7 @@ class CategoryDetailHeader extends StatelessWidget {
                       border: Border.all(color: Colors.white, width: 2.5),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
+                          color: Colors.black.withValues(alpha: 0.2),
                           blurRadius: 12,
                           offset: const Offset(0, 4),
                         ),
@@ -170,7 +172,7 @@ class CategoryDetailHeader extends StatelessWidget {
                               Icon(
                                 Icons.inventory_2_outlined,
                                 size: 16,
-                                color: Colors.white.withOpacity(0.95),
+                                color: Colors.white.withValues(alpha: 0.95),
                               ),
                               const SizedBox(width: 6),
                               Text(
@@ -178,7 +180,7 @@ class CategoryDetailHeader extends StatelessWidget {
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w500,
-                                  color: Colors.white.withOpacity(0.95),
+                                  color: Colors.white.withValues(alpha: 0.95),
                                 ),
                               ),
                             ],
@@ -190,7 +192,7 @@ class CategoryDetailHeader extends StatelessWidget {
                             description!,
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.white.withOpacity(0.9),
+                              color: Colors.white.withValues(alpha: 0.9),
                               height: 1.35,
                             ),
                             maxLines: 2,
@@ -215,7 +217,7 @@ class CategoryDetailHeader extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              AppColors.primaryColor.withOpacity(0.92),
+              AppColors.primaryColor.withValues(alpha: 0.92),
               AppColors.primaryColor,
               AppColors.primaryDarkColor,
             ],
@@ -224,7 +226,7 @@ class CategoryDetailHeader extends StatelessWidget {
       );
 
   Widget _iconPlaceholder() => Container(
-        color: Colors.white.withOpacity(0.3),
+        color: Colors.white.withValues(alpha: 0.3),
         child: const Icon(
           Icons.category_rounded,
           size: 32,
@@ -309,13 +311,14 @@ class ProductDetailsModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: HomeColors.surfaceOf(context),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: colorScheme.onSurface.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, -5),
           ),
@@ -380,6 +383,33 @@ class ProductDetailsModal extends StatelessWidget {
                     ),
                   ),
                 const SizedBox(height: 16),
+
+                if (!product.canOrder) ...[
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade200,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.block, size: 18, color: Colors.grey[700]),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Currently unavailable',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[800],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
 
                 // Product Name
                 Text(
@@ -479,8 +509,8 @@ class ProductDetailsModal extends StatelessWidget {
                               Text('${product.calories}',
                                   style: const TextStyle(
                                       fontWeight: FontWeight.bold)),
-                              const Text('Calories',
-                                  style: TextStyle(fontSize: 12)),
+                              Text(context.l10n.calories,
+                                  style: const TextStyle(fontSize: 12)),
                             ],
                           ),
                         if (product.protein != null)
@@ -492,8 +522,8 @@ class ProductDetailsModal extends StatelessWidget {
                               Text('${product.protein}g',
                                   style: const TextStyle(
                                       fontWeight: FontWeight.bold)),
-                              const Text('Protein',
-                                  style: TextStyle(fontSize: 12)),
+                              Text(context.l10n.protein,
+                                  style: const TextStyle(fontSize: 12)),
                             ],
                           ),
                       ],
@@ -648,10 +678,10 @@ class ProductDetailsModal extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Close',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: colorScheme.onSecondary,
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
@@ -789,7 +819,7 @@ class VegFoodToggle extends StatelessWidget {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: Colors.orange,
+            activeThumbColor: Colors.orange,
           ),
         ],
       ),
@@ -817,10 +847,10 @@ class ProductFilters extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          const Row(
             children: [
               Icon(Icons.tune_rounded, size: 20, color: AppColors.primaryColor),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Text(
                 'Filter',
                 style: TextStyle(
@@ -861,7 +891,7 @@ class ProductFilters extends StatelessWidget {
                     boxShadow: isSelected
                         ? [
                             BoxShadow(
-                              color: AppColors.primaryColor.withOpacity(0.3),
+                              color: AppColors.primaryColor.withValues(alpha: 0.3),
                               spreadRadius: 1,
                               blurRadius: 4,
                               offset: const Offset(0, 2),
@@ -943,16 +973,19 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final canOrder = product.canOrder;
     return GestureDetector(
       onTap: onTap,
-      child: Container(
+      child: Opacity(
+        opacity: canOrder ? 1 : 0.65,
+        child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
+              color: Colors.grey.withValues(alpha: 0.1),
               spreadRadius: 1,
               blurRadius: 4,
               offset: const Offset(0, 2),
@@ -963,22 +996,57 @@ class ProductCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Product Image
-            Container(
+            Stack(
+              children: [
+                Container(
               height: 120,
               width: double.infinity,
               decoration: BoxDecoration(
                 borderRadius:
                     const BorderRadius.vertical(top: Radius.circular(12)),
-                image: DecorationImage(
-                  image: product.image_path != null &&
-                          product.image_path!.isNotEmpty
-                      ? (product.image_path!.startsWith('http')
-                          ? NetworkImage(product.image_path!) as ImageProvider
-                          : AssetImage(product.image_path!))
-                      : const AssetImage('assets/images/cook_nature.jpg'),
-                  fit: BoxFit.cover,
-                ),
+                color: Colors.grey[200],
+                image: product.image_path != null &&
+                        product.image_path!.isNotEmpty
+                    ? DecorationImage(
+                        image: product.image_path!.startsWith('http')
+                            ? NetworkImage(product.image_path!) as ImageProvider
+                            : AssetImage(product.image_path!),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
               ),
+              child: product.image_path == null || product.image_path!.isEmpty
+                  ? const Center(
+                      child: Icon(
+                        Icons.shopping_bag_outlined,
+                        size: 40,
+                        color: Colors.grey,
+                      ),
+                    )
+                  : null,
+            ),
+                if (!canOrder)
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.65),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: const Text(
+                        'Unavailable',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
 
             // Product Info
@@ -1049,11 +1117,13 @@ class ProductCard extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF4A148C),
+                          color: canOrder
+                              ? const Color(0xFF4A148C)
+                              : Colors.grey.shade400,
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Icon(
-                          Icons.add,
+                        child: Icon(
+                          canOrder ? Icons.add : Icons.block,
                           color: Colors.white,
                           size: 20,
                         ),
@@ -1065,6 +1135,7 @@ class ProductCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }
@@ -1104,9 +1175,12 @@ class ProductItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final canOrder = product?.canOrder ?? true;
     return GestureDetector(
         onTap: onTap,
-        child: Container(
+        child: Opacity(
+          opacity: canOrder ? 1 : 0.6,
+          child: Container(
           padding: const EdgeInsets.all(16),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1118,6 +1192,8 @@ class ProductItem extends StatelessWidget {
                   width: 80,
                   height: 80,
                   fit: BoxFit.cover,
+                  color: canOrder ? null : Colors.grey,
+                  colorBlendMode: canOrder ? null : BlendMode.saturation,
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
                       width: 80,
@@ -1148,6 +1224,17 @@ class ProductItem extends StatelessWidget {
                         color: Colors.grey[600],
                       ),
                     ),
+                    if (!canOrder) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        'Unavailable',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1203,17 +1290,21 @@ class ProductItem extends StatelessWidget {
                         const SizedBox(width: 4),
                         if (!isAdded)
                           TextButton(
-                            onPressed: onAddPressed,
+                            onPressed: canOrder ? onAddPressed : null,
                             style: TextButton.styleFrom(
-                              backgroundColor: const Color(0xFFFFEEE5),
+                              backgroundColor: canOrder
+                                  ? const Color(0xFFFFEEE5)
+                                  : Colors.grey.shade200,
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 16, vertical: 8),
+                              disabledForegroundColor: Colors.grey,
                             ),
-                            child: const Text(
-                              'ADD',
+                            child: Text(
+                              canOrder ? 'ADD' : 'UNAVAILABLE',
                               style: TextStyle(
-                                color: Colors.orange,
+                                color: canOrder ? Colors.orange : Colors.grey,
                                 fontWeight: FontWeight.bold,
+                                fontSize: canOrder ? null : 11,
                               ),
                             ),
                           )
@@ -1243,7 +1334,8 @@ class ProductItem extends StatelessWidget {
                                 ),
                                 IconButton(
                                   icon: const Icon(Icons.add, size: 16),
-                                  onPressed: onIncrementPressed,
+                                  onPressed:
+                                      canOrder ? onIncrementPressed : null,
                                   padding: EdgeInsets.zero,
                                   constraints: const BoxConstraints(
                                     minWidth: 32,
@@ -1279,6 +1371,7 @@ class ProductItem extends StatelessWidget {
               ),
             ],
           ),
+        ),
         ));
   }
 }

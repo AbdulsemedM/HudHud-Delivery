@@ -1,24 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
-import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/utils/payment_idempotency.dart';
 import 'package:hudhud_delivery/features/payment/data/data_provider/payment_data_provider.dart';
 import 'package:hudhud_delivery/features/payment/data/repository/payment_repository.dart';
+import 'package:hudhud_delivery/features/payment/model/payment_initiate_result.dart';
+import 'package:hudhud_delivery/features/payment/presentation/screen/payment_initiate_result_screen.dart';
+import 'package:hudhud_delivery/features/payment/presentation/widgets/payment_details_form.dart';
+import 'package:hudhud_delivery/features/settings/presentation/widgets/profile_dark_page.dart';
 import 'package:hudhud_delivery/features/wallet/bloc/wallet_bloc.dart';
-import 'package:hudhud_delivery/features/wallet/data/models/wallet_model.dart';
 import 'package:hudhud_delivery/features/wallet/data/providers/wallet_data_provider.dart';
 import 'package:hudhud_delivery/features/wallet/data/repositories/wallet_repository.dart';
+import 'package:hudhud_delivery/features/wallet/presentation/widgets/wallet_funding_form.dart';
+import 'package:hudhud_delivery/features/wallet/utils/wallet_funding_methods.dart';
 
 class WithdrawFundsScreen extends StatefulWidget {
-  final List<WalletModel> wallets;
   final String defaultCurrency;
+  final int? walletId;
 
   const WithdrawFundsScreen({
     super.key,
-    required this.wallets,
     this.defaultCurrency = 'ETB',
+    this.walletId,
   });
 
   @override
@@ -29,17 +34,20 @@ class _WithdrawFundsScreenState extends State<WithdrawFundsScreen> {
   final _amountController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  List<Map<String, dynamic>> _paymentMethods = [];
+  List<Map<String, dynamic>> _paymentMethods =
+      List.from(kDefaultWalletFundingMethods);
   bool _isLoadingPaymentMethods = true;
-  WalletModel? _selectedWallet;
   String? _selectedMethodId;
-  bool _showCardDetails = false;
-  final _transactionIdController = TextEditingController();
-  final _cardLastFourController = TextEditingController();
-  final _cardBrandController = TextEditingController();
+  Map<String, dynamic> _paymentDetails = {};
+  String _ebirrProvider = 'kaafi';
+  bool _useHpp = false;
+  String? _idempotencyKey;
+  int? _walletId;
+  bool _resolvingWalletId = false;
 
   late final WalletRepository _walletRepository;
   late final PaymentRepository _paymentRepository;
+  late final WalletBloc _walletBloc;
 
   @override
   void initState() {
@@ -50,324 +58,252 @@ class _WithdrawFundsScreenState extends State<WithdrawFundsScreen> {
     _paymentRepository = PaymentRepository(
       paymentDataProvider: PaymentDataProvider(apiService: ApiService.instance),
     );
+    _walletBloc = WalletBloc(walletRepository: _walletRepository);
+    _walletId = widget.walletId;
+    _amountController.addListener(_invalidateIdempotencyKey);
     _fetchPaymentMethods();
-    if (widget.wallets.isNotEmpty && _selectedWallet == null) {
-      _selectedWallet = widget.wallets.first;
+    if (_walletId == null) {
+      _resolveWalletId();
+    }
+  }
+
+  void _applyAmount(double amount) {
+    _amountController.text = amount == amount.roundToDouble()
+        ? amount.toStringAsFixed(0)
+        : amount.toStringAsFixed(2);
+  }
+
+  Future<void> _resolveWalletId() async {
+    setState(() => _resolvingWalletId = true);
+    try {
+      final balance = await _walletRepository.getBalance();
+      if (!mounted) return;
+      setState(() {
+        _walletId = balance.id;
+        _resolvingWalletId = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _resolvingWalletId = false);
     }
   }
 
   Future<void> _fetchPaymentMethods() async {
     try {
       final methods = await _paymentRepository.getPaymentMethods();
-      if (mounted) {
-        setState(() {
-          _paymentMethods = methods;
-          _isLoadingPaymentMethods = false;
-          if (methods.isNotEmpty && _selectedMethodId == null) {
-            _selectedMethodId = methods.first['id'] as String?;
-            _showCardDetails = _selectedMethodId == 'card';
-          }
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _paymentMethods = filterWalletFundingMethods(methods);
+        _isLoadingPaymentMethods = false;
+        if (_selectedMethodId == null && _paymentMethods.isNotEmpty) {
+          _selectedMethodId = _paymentMethods.first['id'] as String?;
+        }
+      });
     } catch (_) {
-      if (mounted) {
-        setState(() {
-          _paymentMethods = [];
-          _isLoadingPaymentMethods = false;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _paymentMethods = List.from(kDefaultWalletFundingMethods);
+        _isLoadingPaymentMethods = false;
+      });
     }
   }
 
   @override
   void dispose() {
+    _walletBloc.close();
     _amountController.dispose();
-    _transactionIdController.dispose();
-    _cardLastFourController.dispose();
-    _cardBrandController.dispose();
     super.dispose();
   }
 
-  String get _currency => 'ETB';
+  void _invalidateIdempotencyKey() {
+    _idempotencyKey = null;
+  }
 
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final colorScheme = Theme.of(context).colorScheme;
-    if (widget.wallets.isEmpty) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text(l10n.withdrawFundsTitle),
-          backgroundColor: AppColors.primaryColor,
-          foregroundColor: Colors.white,
-        ),
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Text(
-              l10n.walletNoWalletsForWithdraw,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: colorScheme.onSurfaceVariant,
-                fontSize: 16,
-              ),
-            ),
-          ),
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+    final method = _selectedMethodId;
+    if (method == null || method.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.selectWithdrawalMethodPrompt),
+          backgroundColor: Colors.red,
         ),
       );
+      return;
     }
 
-    return BlocProvider(
-      create: (_) => WalletBloc(
-        walletRepository: _walletRepository,
-      ),
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(l10n.withdrawFundsTitle),
-          backgroundColor: AppColors.primaryColor,
-          foregroundColor: Colors.white,
+    if (_walletId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Wallet is unavailable. Please try again.'),
+          backgroundColor: Colors.red,
         ),
-        body: BlocConsumer<WalletBloc, WalletState>(
-          listener: (context, state) {
-            if (state is WithdrawFundsSuccess) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: Colors.green.shade700,
-                ),
-              );
-              Navigator.of(context).pop(true);
-            } else if (state is WithdrawFundsError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: Theme.of(context).colorScheme.error,
-                ),
-              );
-            }
-          },
-          builder: (context, state) {
-            final isLoading = state is WithdrawFundsLoading;
+      );
+      await _resolveWalletId();
+      return;
+    }
 
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const SizedBox(height: 16),
-                    DropdownButtonFormField<WalletModel>(
-                      value: _selectedWallet,
-                      decoration: InputDecoration(
-                        labelText: l10n.fromWallet,
-                        border: const OutlineInputBorder(),
-                      ),
-                      items: widget.wallets
-                          .map((w) => DropdownMenuItem(
-                                value: w,
-                                child: Text(
-                                    '${w.name} (${w.currency} ${w.balance})'),
-                              ))
-                          .toList(),
-                      onChanged: (w) => setState(() => _selectedWallet = w),
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _amountController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      decoration: InputDecoration(
-                        labelText: l10n.amount,
-                        hintText: l10n.enterWithdrawAmount,
-                        border: const OutlineInputBorder(),
-                        prefixText: ' ',
-                      ),
-                      validator: (v) {
-                        if (v == null || v.isEmpty) return l10n.enterAmount;
-                        final amount = double.tryParse(v);
-                        if (amount == null || amount <= 0) {
-                          return l10n.validationEnterValidAmount;
-                        }
-                        if (_selectedWallet != null &&
-                            amount > _selectedWallet!.balanceAmount) {
-                          return l10n.validationAmountExceedsWalletBalance;
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    if (_isLoadingPaymentMethods)
-                      const Center(
-                        child: Padding(
-                          padding: EdgeInsets.all(24),
-                          child: CircularProgressIndicator(),
-                        ),
-                      )
-                    else if (_paymentMethods.isEmpty)
-                      Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Text(
-                          l10n.walletNoPaymentMethods,
-                          style: TextStyle(color: colorScheme.onSurfaceVariant),
-                        ),
-                      )
-                    else ...[
-                      DropdownButtonFormField<String>(
-                        value: _selectedMethodId,
-                        decoration: InputDecoration(
-                          labelText: l10n.withdrawalMethod,
-                          border: const OutlineInputBorder(),
-                        ),
-                        items: _paymentMethods
-                            .map((m) => DropdownMenuItem(
-                                  value: m['id'] as String?,
-                                  child: Text(m['name'] as String? ?? ''),
-                                ))
-                            .toList(),
-                        onChanged: (id) => setState(() {
-                          _selectedMethodId = id;
-                          _showCardDetails = id == 'card';
-                        }),
-                      ),
-                      if (_showCardDetails) ...[
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _transactionIdController,
-                          decoration: InputDecoration(
-                            labelText: l10n.transactionId,
-                            hintText: l10n.transactionIdHint,
-                            border: const OutlineInputBorder(),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: _cardLastFourController,
-                          decoration: InputDecoration(
-                            labelText: l10n.cardLast4,
-                            hintText: l10n.cardLast4Hint,
-                            border: const OutlineInputBorder(),
-                          ),
-                          keyboardType: TextInputType.number,
-                          maxLength: 4,
-                        ),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: _cardBrandController,
-                          decoration: InputDecoration(
-                            labelText: l10n.cardBrand,
-                            hintText: l10n.cardBrandHint,
-                            border: const OutlineInputBorder(),
-                          ),
-                        ),
-                      ],
-                    ],
-                    const SizedBox(height: 32),
-                    ElevatedButton(
-                      onPressed: isLoading ? null : _submit,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryColor,
-                        foregroundColor: colorScheme.onPrimary,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      child: isLoading
-                          ? SizedBox(
-                              height: 24,
-                              width: 24,
-                              child: CircularProgressIndicator(
-                                color: colorScheme.onPrimary,
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : Text(l10n.withdrawAction),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
+    if (paymentMethodNeedsDetailsForm(method)) {
+      final phoneError = validatePaymentPhone(
+        _paymentDetails['phone']?.toString(),
+        method,
+      );
+      if (phoneError != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(phoneError), backgroundColor: Colors.red),
+        );
+        return;
+      }
+    }
+
+    final amount = double.tryParse(_amountController.text.trim()) ?? 0;
+    final details = buildInitiatePaymentDetails(
+      paymentMethodCode: method,
+      collectedDetails: _paymentDetails,
+      orderId: 0,
+    );
+
+    _idempotencyKey ??= createWalletIdempotencyKey(operation: 'withdraw');
+
+    _walletBloc.add(WithdrawFundsEvent(
+      amount: amount,
+      paymentMethodCode: method,
+      currency: widget.defaultCurrency,
+      walletId: _walletId!,
+      paymentDetails: details,
+      idempotencyKey: _idempotencyKey,
+    ));
+  }
+
+  Future<void> _handlePaymentResult(Map<String, dynamic> envelope) async {
+    final result = PaymentInitiateResult.fromJson(envelope);
+    if (!result.isSuccess &&
+        result.uiMode == PaymentInitiateUiMode.failure &&
+        result.paymentId == null) {
+      return;
+    }
+    if (!mounted) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => PaymentInitiateResultScreen(
+          result: result,
+          orderId: 'wallet-withdraw',
         ),
       ),
     );
   }
 
-  Future<void> _submitWithdraw({
-    required double amount,
-    required String method,
-    required String currency,
-    required int walletId,
-    Map<String, dynamic>? paymentDetails,
-  }) async {
-    int? payerId;
-    try {
-      final user = await AuthService().getUserProfile();
-      payerId = user?.id;
-    } catch (_) {}
-
-    if (!mounted) return;
-    context.read<WalletBloc>().add(
-          WithdrawFundsEvent(
-            amount: amount,
-            method: method,
-            currency: currency,
-            walletId: walletId,
-            payerId: payerId,
-            paymentDetails:
-                paymentDetails != null && paymentDetails.isNotEmpty
-                    ? paymentDetails
-                    : null,
-          ),
-        );
+  String _successSnackMessage(WithdrawFundsSuccess state) {
+    if (state.message.isNotEmpty) return state.message;
+    switch (state.phase) {
+      case WalletWithdrawPhase.approved:
+        return 'Withdrawal completed';
+      case WalletWithdrawPhase.rejected:
+        return 'Withdrawal was rejected';
+      case WalletWithdrawPhase.pending:
+        return 'Withdrawal is pending approval';
+      case WalletWithdrawPhase.submitted:
+      case WalletWithdrawPhase.idle:
+      case WalletWithdrawPhase.failed:
+        return 'Withdrawal request submitted';
+    }
   }
 
-  void _submit() {
-    if (!_formKey.currentState!.validate()) return;
-    final colorScheme = Theme.of(context).colorScheme;
-    if (_selectedWallet == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.selectWalletPrompt),
-          backgroundColor: colorScheme.error,
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
+    return BlocProvider.value(
+      value: _walletBloc,
+      child: ProfileDarkPage(
+        title: l10n.withdrawFundsTitle,
+        body: BlocConsumer<WalletBloc, WalletState>(
+          listener: (context, state) async {
+            if (state is WithdrawFundsSuccess) {
+              _invalidateIdempotencyKey();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(_successSnackMessage(state)),
+                  backgroundColor: AppColors.successColor,
+                ),
+              );
+              await _handlePaymentResult(state.initiateEnvelope);
+              if (context.mounted) Navigator.of(context).pop(true);
+            } else if (state is WithdrawFundsError) {
+              if (!isTransientPaymentNetworkError(state.message)) {
+                _invalidateIdempotencyKey();
+              }
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          },
+          builder: (context, state) {
+            final isLoading =
+                state is WithdrawFundsLoading || _resolvingWalletId;
+            return Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: WalletFundingFormBody(
+                      amountController: _amountController,
+                      currency: widget.defaultCurrency,
+                      amountHint: l10n.enterWithdrawAmount,
+                      amountValidator: (v) {
+                        if (v == null || v.isEmpty) {
+                          return l10n.enterAmount;
+                        }
+                        final amount = double.tryParse(v);
+                        if (amount == null || amount <= 0) {
+                          return l10n.validationEnterValidAmount;
+                        }
+                        return null;
+                      },
+                      onQuickAmountSelected: (amount) {
+                        setState(() {
+                          _invalidateIdempotencyKey();
+                          _applyAmount(amount);
+                        });
+                      },
+                      methodSectionTitle: l10n.withdrawalMethod,
+                      methods: _paymentMethods,
+                      selectedMethodId: _selectedMethodId,
+                      isLoadingMethods: _isLoadingPaymentMethods,
+                      emptyMethodsMessage: l10n.walletNoPaymentMethods,
+                      onMethodSelected: (id) {
+                        setState(() {
+                          _invalidateIdempotencyKey();
+                          _selectedMethodId = id;
+                          _paymentDetails = {};
+                          _useHpp = false;
+                          _ebirrProvider = 'kaafi';
+                        });
+                      },
+                      ebirrProvider: _ebirrProvider,
+                      useHpp: _useHpp,
+                      onEbirrProviderChanged: (v) =>
+                          setState(() => _ebirrProvider = v),
+                      onUseHppChanged: (v) => setState(() => _useHpp = v),
+                      onPaymentDetailsChanged: (details) {
+                        _paymentDetails = details;
+                      },
+                    ),
+                  ),
+                  WalletFundingSubmitBar(
+                    label: l10n.withdrawAction,
+                    isLoading: isLoading,
+                    onPressed: _submit,
+                  ),
+                ],
+              ),
+            );
+          },
         ),
-      );
-      return;
-    }
-    if (_selectedMethodId == null || _selectedMethodId!.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.selectWithdrawalMethodPrompt),
-          backgroundColor: colorScheme.error,
-        ),
-      );
-      return;
-    }
-
-    final amount = double.tryParse(_amountController.text) ?? 0;
-    if (amount <= 0) return;
-
-    Map<String, dynamic>? paymentDetails;
-    if (_showCardDetails &&
-        (_transactionIdController.text.isNotEmpty ||
-            _cardLastFourController.text.isNotEmpty)) {
-      paymentDetails = {};
-      if (_transactionIdController.text.isNotEmpty) {
-        paymentDetails['transaction_id'] = _transactionIdController.text;
-      }
-      if (_cardLastFourController.text.isNotEmpty) {
-        paymentDetails['card_last_four'] = _cardLastFourController.text;
-      }
-      if (_cardBrandController.text.isNotEmpty) {
-        paymentDetails['card_brand'] = _cardBrandController.text;
-      }
-    }
-
-    _submitWithdraw(
-      amount: amount,
-      method: _selectedMethodId!,
-      currency: _currency,
-      walletId: _selectedWallet!.id,
-      paymentDetails: paymentDetails,
+      ),
     );
   }
 }

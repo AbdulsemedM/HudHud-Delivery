@@ -5,7 +5,10 @@ import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/handyman/data/data_provider/handyman_data_provider.dart';
 import 'package:hudhud_delivery/features/handyman/data/models/service_quote_model.dart';
 import 'package:hudhud_delivery/features/handyman/data/repository/handyman_repository.dart';
+import 'package:hudhud_delivery/features/home/presentation/widgets/home_widget.dart';
+import 'package:lottie/lottie.dart';
 import 'handyman_details_screen.dart';
+import 'service_payment_screen.dart';
 
 class ServiceQuotesScreen extends StatefulWidget {
   final int requestId;
@@ -59,6 +62,9 @@ class _ServiceQuotesScreenState extends State<ServiceQuotesScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        ),
         title: Text(l10n.handymanAcceptQuoteTitle),
         content: Text(
           l10n.handymanAcceptQuoteMessage(
@@ -95,6 +101,34 @@ class _ServiceQuotesScreenState extends State<ServiceQuotesScreen> {
           backgroundColor: AppColors.successColor,
         ),
       );
+
+      final amount = double.tryParse(
+            quote.amount.replaceAll(RegExp(r'[^0-9.]'), ''),
+          ) ??
+          0;
+      if (amount <= 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.l10n.invalidQuoteAmount),
+            backgroundColor: Colors.red,
+          ),
+        );
+        Navigator.pop(context, true);
+        return;
+      }
+
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ServicePaymentScreen(
+            serviceRequestId: widget.requestId,
+            amount: amount,
+            currency: 'ETB',
+          ),
+        ),
+      );
+
+      if (!mounted) return;
       Navigator.pop(context, true);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -111,6 +145,9 @@ class _ServiceQuotesScreenState extends State<ServiceQuotesScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        ),
         title: Text(l10n.handymanRejectQuoteTitle),
         content: Text(
           l10n.handymanRejectQuoteMessage(quote.handymanName),
@@ -155,121 +192,146 @@ class _ServiceQuotesScreenState extends State<ServiceQuotesScreen> {
     }
   }
 
+  Color _cardBorder(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? AppColors.darkBorder : AppColors.lightBorder;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final l10n = context.l10n;
+    final borderColor = _cardBorder(context);
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           l10n.handymanQuotesTitle,
-          style: TextStyle(
+          style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
-            fontSize: 18,
-            color: theme.colorScheme.onSurface,
+            color: colorScheme.onSurface,
           ),
         ),
-        backgroundColor: theme.colorScheme.surface,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-          color: theme.colorScheme.onSurface,
+          color: colorScheme.onSurface,
           onPressed: () => Navigator.pop(context),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(
-            color: theme.dividerColor.withOpacity(0.5),
+            color: colorScheme.outlineVariant.withValues(alpha: 0.5),
             height: 1,
           ),
         ),
       ),
       body: RefreshIndicator(
+        color: AppColors.primaryColor,
         onRefresh: _fetchQuotes,
         child: _isLoading
-            ? const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(24),
-                  child: CircularProgressIndicator(),
-                ),
+            ? const SingleChildScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.all(AppColors.spaceMD),
+                child: ShimmerListView(itemCount: 3),
               )
             : _error != null
-                ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            _error!,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: theme.colorScheme.onSurfaceVariant,
-                              fontSize: 14,
+                ? ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.5,
+                        child: Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(AppColors.spaceLG),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.wifi_off_rounded,
+                                  size: 48,
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                                const SizedBox(height: AppColors.spaceMD),
+                                Text(
+                                  _error!,
+                                  textAlign: TextAlign.center,
+                                  style: theme.textTheme.bodyMedium,
+                                ),
+                                const SizedBox(height: AppColors.spaceMD),
+                                TextButton.icon(
+                                  onPressed: _fetchQuotes,
+                                  icon: const Icon(Icons.refresh_rounded),
+                                  label: Text(l10n.actionRetry),
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(height: 12),
-                          TextButton(
-                            onPressed: _fetchQuotes,
-                            child: Text(
-                              l10n.actionRetry,
-                              style: TextStyle(color: AppColors.primaryColor),
+                        ),
+                      ),
+                    ],
+                  )
+                : _quotes.isEmpty
+                    ? ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: [
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.6,
+                            child: Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(AppColors.spaceLG),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Lottie.asset(
+                                      'assets/animations/browse.json',
+                                      width: 180,
+                                      errorBuilder: (_, __, ___) => Icon(
+                                        Icons.receipt_long_outlined,
+                                        size: 64,
+                                        color: colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                    const SizedBox(height: AppColors.spaceMD),
+                                    Text(
+                                      l10n.handymanNoQuotesYet,
+                                      style: theme.textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    const SizedBox(height: AppColors.spaceSM),
+                                    Text(
+                                      l10n.handymanNoQuotesSubtitle,
+                                      style: theme.textTheme.bodySmall?.copyWith(
+                                        color: colorScheme.onSurfaceVariant,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
                           ),
                         ],
-                      ),
-                    ),
-                  )
-                : _quotes.isEmpty
-                    ? Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(24),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.receipt_long_outlined,
-                                size: 64,
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                l10n.handymanNoQuotesYet,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: theme.colorScheme.onSurface,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                l10n.handymanNoQuotesSubtitle,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ),
-                        ),
                       )
                     : ListView.builder(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(AppColors.spaceMD),
                         itemCount: _quotes.length,
                         itemBuilder: (context, index) {
                           final quote = _quotes[index];
                           return _QuoteCard(
                             quote: quote,
+                            borderColor: borderColor,
                             onAccept: () => _acceptQuote(quote),
                             onReject: () => _rejectQuote(quote),
                             onViewProfile: () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) =>
-                                      HandymanDetailsScreen(
+                                  builder: (context) => HandymanDetailsScreen(
                                     handymanId: quote.handymanId,
                                   ),
                                 ),
@@ -285,12 +347,14 @@ class _ServiceQuotesScreenState extends State<ServiceQuotesScreen> {
 
 class _QuoteCard extends StatelessWidget {
   final ServiceQuoteModel quote;
+  final Color borderColor;
   final VoidCallback onAccept;
   final VoidCallback onReject;
   final VoidCallback onViewProfile;
 
   const _QuoteCard({
     required this.quote,
+    required this.borderColor,
     required this.onAccept,
     required this.onReject,
     required this.onViewProfile,
@@ -299,71 +363,76 @@ class _QuoteCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final l10n = context.l10n;
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: AppColors.spaceMD),
+      padding: const EdgeInsets.all(AppColors.spaceMD),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: theme.colorScheme.shadow.withOpacity(0.08),
-            spreadRadius: 1,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        border: Border.all(color: borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Text(
-                  quote.handymanName,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.primary,
-                  ),
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: AppColors.primaryColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(AppColors.radiusMD),
+                ),
+                child: const Icon(
+                  Icons.person_rounded,
+                  color: AppColors.primaryColor,
                 ),
               ),
-            Text(
-              quote.formattedAmount ?? quote.amount,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: theme.colorScheme.primary,
+              const SizedBox(width: AppColors.spaceMD),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      quote.handymanName,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      quote.formattedAmount ?? quote.amount,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryColor,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
             ],
           ),
           if (quote.description != null && quote.description!.isNotEmpty) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: AppColors.spaceMD),
             Text(
               quote.description!,
-              style: TextStyle(
-                fontSize: 14,
-                color: theme.colorScheme.onSurfaceVariant,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
                 height: 1.4,
               ),
             ),
           ],
-          const SizedBox(height: 16),
+          const SizedBox(height: AppColors.spaceMD),
           Row(
             children: [
               TextButton(
                 onPressed: onViewProfile,
-                child: Text(
-                  l10n.handymanViewProfile,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
+                child: Text(l10n.handymanViewProfile),
               ),
               const Spacer(),
               if (quote.status == 'pending' && quote.isValid) ...[
@@ -371,16 +440,24 @@ class _QuoteCard extends StatelessWidget {
                   onPressed: onReject,
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.errorColor,
-                    side: const BorderSide(color: AppColors.errorColor),
+                    side: BorderSide(
+                      color: AppColors.errorColor.withValues(alpha: 0.5),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppColors.radiusLG),
+                    ),
                   ),
                   child: Text(l10n.actionReject),
                 ),
-                const SizedBox(width: 8),
-                ElevatedButton(
+                const SizedBox(width: AppColors.spaceSM),
+                FilledButton(
                   onPressed: onAccept,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.colorScheme.primary,
-                    foregroundColor: theme.colorScheme.onPrimary,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.primaryColor,
+                    foregroundColor: colorScheme.onPrimary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppColors.radiusLG),
+                    ),
                   ),
                   child: Text(l10n.actionAccept),
                 ),

@@ -6,6 +6,19 @@ A new Flutter project.
 
 The app uses Google Maps for location and delivery features. **You must add a Google Maps API key** or the map will not load. See **[MAPS_SETUP.md](MAPS_SETUP.md)** for step-by-step setup (Android and iOS). For key security and rotation, see [SECURITY.md](SECURITY.md).
 
+## OTA updates (Shorebird)
+
+Dart-only bug fixes can be shipped over the air with Shorebird. Store-required / native changes still go through Play Store and App Store. See **[docs/ota-updates.md](docs/ota-updates.md)** for patch vs store rules, CLI commands, staged tracks, Remote Config keys, and QA checklist.
+
+Quick commands:
+
+```bash
+shorebird release android   # store binary
+shorebird release ios
+shorebird patch android     # OTA Dart patch against an existing release
+shorebird patch ios
+```
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.

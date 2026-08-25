@@ -1,3 +1,93 @@
+import 'package:country_picker/country_picker.dart';
+
+/// Country dial code (e.g. `+251`) and national number for separate form fields.
+class PhoneDisplayParts {
+  const PhoneDisplayParts({
+    required this.countryDialCode,
+    required this.nationalNumber,
+  });
+
+  final String countryDialCode;
+  final String nationalNumber;
+}
+
+/// Default dial code when the stored phone cannot be parsed.
+const String kDefaultPhoneDialCode = '+251';
+
+/// Splits a stored phone into country code and national number for UI fields.
+///
+/// Handles `+251912345678`, `251912345678`, `254712345678`, and local `0912345678`.
+PhoneDisplayParts splitPhoneForDisplay(
+  String? phone, {
+  String defaultDialCode = kDefaultPhoneDialCode,
+}) {
+  final raw = phone?.trim() ?? '';
+  if (raw.isEmpty) {
+    return PhoneDisplayParts(
+      countryDialCode: defaultDialCode,
+      nationalNumber: '',
+    );
+  }
+
+  var digits = raw.replaceAll(RegExp(r'\D'), '');
+  if (digits.isEmpty) {
+    return PhoneDisplayParts(
+      countryDialCode: defaultDialCode,
+      nationalNumber: '',
+    );
+  }
+
+  // Local trunk prefix (e.g. 0912345678) — national only, default Ethiopia.
+  if (digits.startsWith('0') && digits.length >= 10) {
+    return PhoneDisplayParts(
+      countryDialCode: defaultDialCode,
+      nationalNumber: digits.substring(1),
+    );
+  }
+
+  final phoneCodes = CountryService()
+      .getAll()
+      .map((c) => c.phoneCode)
+      .where((c) => c.isNotEmpty)
+      .toSet()
+      .toList()
+    ..sort((a, b) => b.length.compareTo(a.length));
+
+  for (final code in phoneCodes) {
+    if (digits.startsWith(code) && digits.length > code.length) {
+      var national = digits.substring(code.length);
+      if (national.startsWith('0') && national.length > 1) {
+        national = national.substring(1);
+      }
+      return PhoneDisplayParts(
+        countryDialCode: '+$code',
+        nationalNumber: national,
+      );
+    }
+  }
+
+  return PhoneDisplayParts(
+    countryDialCode: defaultDialCode,
+    nationalNumber: digits,
+  );
+}
+
+/// Human-readable phone for read-only profile views.
+String formatPhoneForDisplay(String? phone) {
+  final parts = splitPhoneForDisplay(phone);
+  if (parts.nationalNumber.isEmpty) return '';
+  return '${parts.countryDialCode} ${parts.nationalNumber}';
+}
+
+/// Strips non-digits and a leading trunk `0` from the national number field.
+String cleanNationalPhoneDigits(String? value) {
+  var digits = (value ?? '').replaceAll(RegExp(r'\D'), '');
+  if (digits.startsWith('0') && digits.length > 1) {
+    digits = digits.substring(1);
+  }
+  return digits;
+}
+
 /// Normalizes a phone number to backend format: 251 + 9 digits (Ethiopian).
 /// Use for all API calls that send a phone number (register, verification, profile).
 ///

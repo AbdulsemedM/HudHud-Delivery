@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -8,6 +9,7 @@ import '../../core/api/api_constants.dart';
 import '../../core/utils/phone_util.dart';
 import '../../models/user_model.dart';
 import 'fcm_service.dart';
+import 'fcm_topic_service.dart';
 
 class AuthService {
   // Singleton pattern
@@ -37,18 +39,34 @@ class AuthService {
   UserModel? _currentUser;
   String? _currentToken;
   DateTime? _tokenExpiry;
+  bool _initialized = false;
+  Future<void>? _initializeFuture;
+  String? _lastRegisteredFcmKey;
 
   // Getters for current user and authentication state
   UserModel? get currentUser => _currentUser;
   bool get isLoggedIn => _currentUser != null && _currentToken != null;
   bool get hasValidToken => _currentToken != null && !_isTokenExpired();
 
-  // Initialize service - load cached data
+  // Initialize service - load cached data (idempotent).
   Future<void> initialize() async {
-    await _loadCachedData();
-    // Fire-and-forget: send FCM token when restoring session
-    if (_currentUser != null && hasValidToken) {
-      _sendFcmTokenToBackend();
+    if (_initialized) return;
+    _initializeFuture ??= _performInitialize();
+    await _initializeFuture;
+  }
+
+  Future<void> _performInitialize() async {
+    try {
+      await _loadCachedData();
+      // Fire-and-forget: send FCM token and subscribe to topics when restoring session
+      if (_currentUser != null && hasValidToken) {
+        _sendFcmTokenToBackend();
+        FcmTopicService().subscribeForCurrentUser();
+      }
+      _initialized = true;
+    } catch (e) {
+      _initializeFuture = null;
+      rethrow;
     }
   }
 
@@ -84,6 +102,9 @@ class AuthService {
 
   // Clear current session
   Future<void> _clearSession() async {
+    _initialized = false;
+    _initializeFuture = null;
+    _lastRegisteredFcmKey = null;
     _currentUser = null;
     _currentToken = null;
     _tokenExpiry = null;
@@ -123,6 +144,9 @@ class AuthService {
           Platform.isAndroid ? 'android' : (Platform.isIOS ? 'ios' : 'unknown');
       if (deviceType == 'unknown') return;
 
+      final registrationKey = '$userId:$deviceId:$fcmToken';
+      if (_lastRegisteredFcmKey == registrationKey) return;
+
       await _apiService.post(
         ApiConstants.fcmToken,
         data: {
@@ -132,9 +156,11 @@ class AuthService {
           'device_id': deviceId,
         },
       );
+      _lastRegisteredFcmKey = registrationKey;
     } catch (e) {
-      if (kDebugMode)
+      if (kDebugMode) {
         debugPrint('AuthService: sendFcmTokenToBackend failed: $e');
+      }
     }
   }
 
@@ -236,8 +262,9 @@ class AuthService {
         if (refreshToken != null) _storeRefreshToken(refreshToken),
       ]);
 
-      // Fire-and-forget: send FCM token to backend
+      // Fire-and-forget: send FCM token to backend and subscribe to topics
       _sendFcmTokenToBackend();
+      FcmTopicService().subscribeForCurrentUser();
     } catch (e) {
       // If storage fails, clear everything to maintain consistency
       await _clearSession();
@@ -283,6 +310,7 @@ class AuthService {
       _currentUser = user;
       await _storeUser(user);
       _sendFcmTokenToBackend();
+      FcmTopicService().subscribeForCurrentUser();
       return user;
     } on ApiException catch (e) {
       if (e.statusCode == 401) {
@@ -362,9 +390,45 @@ class AuthService {
     }
   }
 
+  /// Removes the FCM token from the backend. Fail-open; never throws.
+  Future<void> _removeFcmTokenFromBackend() async {
+    try {
+      final fcmToken = await FcmService().getToken();
+      if (fcmToken == null || fcmToken.isEmpty) return;
+
+      final deviceId = await _getDeviceId();
+      await _apiService.delete(
+        ApiConstants.fcmTokenDelete,
+        data: {
+          'token': fcmToken,
+          if (deviceId != null && deviceId.isNotEmpty) 'device_id': deviceId,
+        },
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('AuthService: removeFcmTokenFromBackend failed: $e');
+      }
+    }
+  }
+
+  Future<void> _cleanupFcmOnLogout() async {
+    _lastRegisteredFcmKey = null;
+    await FcmTopicService().unsubscribeAll();
+    await _removeFcmTokenFromBackend();
+    try {
+      await FcmService().deleteToken();
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('AuthService: FCM deleteToken failed: $e');
+      }
+    }
+  }
+
   // Logout user
   Future<Map<String, dynamic>> logout() async {
     try {
+      await _cleanupFcmOnLogout();
+
       // Call logout endpoint if we have a valid token
       if (_currentToken != null) {
         await _apiService.post(ApiConstants.logout);
@@ -407,10 +471,14 @@ class AuthService {
 
       if (response.statusCode == 200 && response.data != null) {
         final data = response.data as Map<String, dynamic>;
-        // API returns { success: true, data: { ...user } } or { user: { ... } }
-        final userMap =
-            (data['data'] ?? data['user'] ?? data) as Map<String, dynamic>;
-        // Preserve permissions from login if profile API doesn't return them
+        var userMap = UserModel.userMapFromApiEnvelope(data);
+        if (userMap == null &&
+            (data['id'] != null ||
+                data['email'] != null ||
+                data['name'] != null)) {
+          userMap = Map<String, dynamic>.from(data);
+        }
+        if (userMap == null) return null;
         if (userMap['permissions'] == null && _currentUser?.permissions != null) {
           userMap['permissions'] = _currentUser!.permissions;
         }
@@ -433,15 +501,15 @@ class AuthService {
     }
   }
 
-  // Update user profile with enhanced validation
+  // Update user profile — POST /api/update-profile (multipart form-data)
   Future<Map<String, dynamic>> updateProfile({
     String? name,
     String? email,
     String? phone,
     String? address,
+    String? avatarPath,
   }) async {
     try {
-      // Check authentication
       if (!isLoggedIn) {
         return {
           'success': false,
@@ -449,7 +517,6 @@ class AuthService {
         };
       }
 
-      // Check token validity and refresh if needed
       if (!hasValidToken) {
         final refreshed = await refreshToken();
         if (!refreshed) {
@@ -461,36 +528,83 @@ class AuthService {
         }
       }
 
-      // Prepare update data
-      final updateData = <String, dynamic>{};
-      if (name != null && name.trim().isNotEmpty)
-        updateData['name'] = name.trim();
-      if (email != null && email.trim().isNotEmpty)
-        updateData['email'] = email.trim();
-      if (phone != null && phone.trim().isNotEmpty)
-        updateData['phone'] = normalizePhoneToBackend(phone);
-      if (address != null && address.trim().isNotEmpty)
-        updateData['address'] = address.trim();
+      final previousEmail =
+          _currentUser?.email?.trim().toLowerCase();
+      final previousPhone = _currentUser?.phone != null
+          ? normalizePhoneToBackend(_currentUser!.phone)
+          : null;
 
-      if (updateData.isEmpty) {
+      final formData = FormData();
+      var hasField = false;
+
+      if (name != null && name.trim().isNotEmpty) {
+        formData.fields.add(MapEntry('name', name.trim()));
+        hasField = true;
+      }
+      if (email != null && email.trim().isNotEmpty) {
+        formData.fields.add(MapEntry('email', email.trim()));
+        hasField = true;
+      }
+      if (phone != null && phone.trim().isNotEmpty) {
+        formData.fields.add(
+          MapEntry('phone', normalizePhoneToBackend(phone)),
+        );
+        hasField = true;
+      }
+      if (address != null && address.trim().isNotEmpty) {
+        formData.fields.add(MapEntry('address', address.trim()));
+        hasField = true;
+      }
+      if (avatarPath != null && avatarPath.isNotEmpty) {
+        final file = File(avatarPath);
+        if (await file.exists()) {
+          formData.files.add(
+            MapEntry(
+              'avatar',
+              await MultipartFile.fromFile(
+                avatarPath,
+                filename: avatarPath.split(Platform.pathSeparator).last,
+              ),
+            ),
+          );
+          hasField = true;
+        }
+      }
+
+      if (!hasField) {
         return {
           'success': false,
           'message': 'No valid data provided for update',
         };
       }
 
-      final response = await _apiService.put(
+      final response = await _apiService.post(
         ApiConstants.updateProfile,
-        data: updateData,
+        data: formData,
       );
 
-      if (response.statusCode == 200 && response.data != null) {
+      final status = response.statusCode ?? 0;
+      if ((status == 200 || status == 201) && response.data != null) {
         final responseData = response.data as Map<String, dynamic>;
+        final userMap = UserModel.userMapFromApiEnvelope(responseData);
+        if (responseData['success'] == true && userMap != null) {
+          if (userMap['permissions'] == null &&
+              _currentUser?.permissions != null) {
+            userMap['permissions'] = _currentUser!.permissions;
+          }
+          final user = UserModel.fromMap(userMap);
 
-        if (responseData['user'] != null) {
-          final user = UserModel.fromMap(responseData);
+          final newEmail = user.email?.trim().toLowerCase();
+          final newPhone =
+              user.phone != null ? normalizePhoneToBackend(user.phone) : null;
+          final emailOrPhoneChanged =
+              (previousEmail != null &&
+                  newEmail != null &&
+                  previousEmail != newEmail) ||
+              (previousPhone != null &&
+                  newPhone != null &&
+                  previousPhone != newPhone);
 
-          // Update cached user and store
           _currentUser = user;
           await _storeUser(user);
 
@@ -498,17 +612,22 @@ class AuthService {
             'success': true,
             'user': user,
             'message':
-                responseData['message'] ?? 'Profile updated successfully',
+                responseData['message']?.toString() ??
+                    'Profile updated successfully',
+            'emailOrPhoneChanged': emailOrPhoneChanged,
           };
         }
       }
 
+      final responseData = response.data;
+      final message = responseData is Map
+          ? responseData['message']?.toString()
+          : null;
       return {
         'success': false,
-        'message': 'Failed to update profile',
+        'message': message ?? 'Failed to update profile',
       };
     } on ApiException catch (e) {
-      // Handle unauthorized access
       if (e.statusCode == 401) {
         await _clearSession();
         return {
@@ -581,39 +700,6 @@ class AuthService {
       return {
         'success': false,
         'message': 'An unexpected error occurred while changing password',
-      };
-    }
-  }
-
-  // Forgot password
-  Future<Map<String, dynamic>> forgotPassword(String email) async {
-    try {
-      final response = await _apiService.post(
-        ApiConstants.forgotPassword,
-        data: {'email': email},
-      );
-
-      if (response.statusCode == 200) {
-        final data = response.data as Map<String, dynamic>;
-        return {
-          'success': true,
-          'message': data['message'] ?? 'Reset email sent successfully',
-        };
-      }
-
-      return {
-        'success': false,
-        'message': 'Failed to send reset email',
-      };
-    } on ApiException catch (e) {
-      return {
-        'success': false,
-        'message': e.message,
-      };
-    } catch (e) {
-      return {
-        'success': false,
-        'message': 'An unexpected error occurred while sending reset email',
       };
     }
   }
@@ -785,45 +871,6 @@ class AuthService {
     }
   }
 
-  // Reset password
-  Future<Map<String, dynamic>> resetPassword({
-    required String token,
-    required String newPassword,
-  }) async {
-    try {
-      final response = await _apiService.post(
-        ApiConstants.resetPassword,
-        data: {
-          'token': token,
-          'password': newPassword,
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final data = response.data as Map<String, dynamic>;
-        return {
-          'success': true,
-          'message': data['message'] ?? 'Password reset successfully',
-        };
-      }
-
-      return {
-        'success': false,
-        'message': 'Failed to reset password',
-      };
-    } on ApiException catch (e) {
-      return {
-        'success': false,
-        'message': e.message,
-      };
-    } catch (e) {
-      return {
-        'success': false,
-        'message': 'An unexpected error occurred while resetting password',
-      };
-    }
-  }
-
   // Enhanced refresh token with better error handling
   Future<bool> refreshToken() async {
     try {
@@ -977,6 +1024,41 @@ class AuthService {
     await _storeUser(user);
   }
 
+  /// PUT /api/profile/notification-preferences. All three flags share [consented].
+  Future<UserModel> updateMarketingConsent(bool consented) async {
+    final current = _currentUser;
+    if (current == null) {
+      throw ApiException('Not signed in', statusCode: 401);
+    }
+
+    final response = await _apiService.put(
+      ApiConstants.profileNotificationPreferences,
+      data: {
+        'marketing_consent': consented,
+        'promotional_offers': consented,
+        'marketing_emails': consented,
+      },
+    );
+
+    var value = consented;
+    final body = response.data;
+    if (body is Map) {
+      final map = Map<String, dynamic>.from(body);
+      final data = map['data'];
+      if (data is Map) {
+        value = UserModel.parseMarketingConsent(
+          Map<String, dynamic>.from(data),
+        );
+      } else {
+        value = UserModel.parseMarketingConsent(map);
+      }
+    }
+
+    final updated = current.copyWith(marketingConsent: value);
+    await updateCurrentUser(updated);
+    return updated;
+  }
+
   // Store user session data from external sources (e.g., signup)
   Future<void> storeUserSession({
     required UserModel user,
@@ -992,9 +1074,15 @@ class AuthService {
     );
   }
 
-  // Clear all stored data
+  // Clear session data only (preserves biometric credential storage).
   Future<void> clearAllData() async {
-    await _storage.deleteAll();
+    await Future.wait([
+      _storage.delete(key: _tokenKey),
+      _storage.delete(key: _refreshTokenKey),
+      _storage.delete(key: _userKey),
+      _storage.delete(key: _tokenExpiryKey),
+      _storage.delete(key: _lastLoginKey),
+    ]);
     _currentUser = null;
     _currentToken = null;
     _tokenExpiry = null;

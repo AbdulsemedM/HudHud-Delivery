@@ -1,17 +1,21 @@
-import 'package:hudhud_delivery/features/categories/model/categories_products_model.dart';
 import 'package:hudhud_delivery/features/orders/data/models/vendor_model.dart';
 
 import '../data_provider/vendors_data_provider.dart';
 
 class VendorsRepository {
   final VendorsDataProvider vendorsDataProvider;
-  VendorsRepository({required this.vendorsDataProvider});
+
+  VendorsRepository({
+    required this.vendorsDataProvider,
+  });
 
   /// GET /api/vendors?page=
   Future<List<VendorModel>> getVendors({int page = 1}) async {
     final response = await vendorsDataProvider.getVendors(page: page);
     if (response['statusCode'] != 200) {
-      throw Exception(_clean(response['errorMessage']?.toString() ?? 'Error fetching vendors'));
+      throw Exception(
+        _clean(response['errorMessage']?.toString() ?? 'Error fetching vendors'),
+      );
     }
     final data = response['data'];
     if (data == null) return [];
@@ -31,37 +35,8 @@ class VendorsRepository {
       list = [];
     }
     return list
-        .map((e) => VendorModel.fromVendorListJson(Map<String, dynamic>.from(e as Map)))
-        .toList();
-  }
-
-  /// GET /api/vendor/products/by-vendor/{user_id}
-  /// [vendorUserId] is the vendor's user_id from the vendors list (e.g. 7, 8, 9).
-  Future<List<CategoriesProductsModel>> getVendorProducts(int vendorUserId) async {
-    final response = await vendorsDataProvider.getVendorProducts(vendorUserId);
-    if (response['statusCode'] != 200) {
-      throw Exception(_clean(response['errorMessage']?.toString() ?? 'Error fetching vendor products'));
-    }
-    final data = response['data'];
-    if (data == null) return [];
-    List<dynamic> list;
-    // Products endpoint may return a raw array of product objects.
-    if (data is List) {
-      list = data;
-    } else if (data is Map<String, dynamic>) {
-      final inner = data['data'];
-      if (inner is List) {
-        list = inner;
-      } else if (inner is Map<String, dynamic> && inner['data'] is List) {
-        list = inner['data'] as List;
-      } else {
-        list = [];
-      }
-    } else {
-      list = [];
-    }
-    return list
-        .map((e) => CategoriesProductsModel.fromMap(Map<String, dynamic>.from(e as Map)))
+        .map((e) =>
+            VendorModel.fromVendorListJson(Map<String, dynamic>.from(e as Map)))
         .toList();
   }
 

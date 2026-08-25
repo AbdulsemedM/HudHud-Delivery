@@ -47,7 +47,7 @@ class CustomSnackbar extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -115,36 +115,37 @@ class CustomSnackbar extends StatelessWidget {
   }
 
   Map<String, Color> _getColorsForType() {
+    const onColored = AppColors.lightOnPrimary;
     switch (type) {
       case SnackbarType.success:
         return {
           'background': AppColors.successColor,
-          'text': Colors.white,
-          'icon': Colors.white,
+          'text': onColored,
+          'icon': onColored,
         };
       case SnackbarType.error:
         return {
           'background': AppColors.errorColor,
-          'text': Colors.white,
-          'icon': Colors.white,
+          'text': onColored,
+          'icon': onColored,
         };
       case SnackbarType.warning:
         return {
           'background': AppColors.warningColor,
-          'text': Colors.white,
-          'icon': Colors.white,
+          'text': onColored,
+          'icon': onColored,
         };
       case SnackbarType.info:
         return {
           'background': AppColors.infoColor,
-          'text': Colors.white,
-          'icon': Colors.white,
+          'text': onColored,
+          'icon': onColored,
         };
       case SnackbarType.custom:
       return {
           'background': AppColors.primaryColor,
-          'text': Colors.white,
-          'icon': Colors.white,
+          'text': onColored,
+          'icon': onColored,
         };
     }
   }
@@ -295,7 +296,7 @@ class CustomSnackbar extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -308,7 +309,7 @@ class CustomSnackbar extends StatelessWidget {
               height: 20,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                valueColor: AlwaysStoppedAnimation<Color>(AppColors.lightOnPrimary),
               ),
             ),
             const SizedBox(width: 12),
@@ -316,7 +317,7 @@ class CustomSnackbar extends StatelessWidget {
               child: Text(
                 message,
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: AppColors.lightOnPrimary,
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),

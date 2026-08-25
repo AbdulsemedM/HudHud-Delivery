@@ -40,6 +40,24 @@ class SavedLocationService {
     } catch (_) {}
   }
 
+  /// Sync from a server address model display text + coordinates.
+  static Future<void> syncFromAddress({
+    required String address,
+    double? latitude,
+    double? longitude,
+  }) async {
+    if (address.isEmpty) return;
+    if (latitude != null && longitude != null) {
+      await saveLocationData(
+        address: address,
+        latitude: latitude,
+        longitude: longitude,
+      );
+    } else {
+      await saveAddress(address);
+    }
+  }
+
   /// Returns saved address with coordinates when available.
   static Future<Map<String, dynamic>?> getSavedLocationData() async {
     try {

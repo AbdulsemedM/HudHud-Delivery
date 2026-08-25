@@ -9,6 +9,8 @@ class DioClient {
   static DioClient? _instance;
   late Dio _dio;
   void Function()? _onUnauthorized;
+  bool _handlingUnauthorized = false;
+  bool _unauthorizedRedirectScheduled = false;
 
   DioClient._internal() : _onUnauthorized = null {
     _dio = Dio();
@@ -29,25 +31,25 @@ class DioClient {
   void _setupDio() {
     _dio.options = BaseOptions(
       baseUrl: ApiConstants.baseUrl,
-      connectTimeout: Duration(milliseconds: ApiConstants.connectTimeout),
-      receiveTimeout: Duration(milliseconds: ApiConstants.receiveTimeout),
-      sendTimeout: Duration(milliseconds: ApiConstants.sendTimeout),
+      connectTimeout: const Duration(milliseconds: ApiConstants.connectTimeout),
+      receiveTimeout: const Duration(milliseconds: ApiConstants.receiveTimeout),
+      sendTimeout: const Duration(milliseconds: ApiConstants.sendTimeout),
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
     );
 
-    // Add interceptors
-    if (kDebugMode) {
-      _dio.interceptors.add(LoggerInterceptor());
-    }
-
-    // Add auth interceptor
+    // Auth first so debug logs see the final Authorization header.
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          // Add auth token if available
+          // Session-creation endpoints must not send an old HudHud Bearer token.
+          if (ApiConstants.isUnauthenticatedAuthPath(options.path)) {
+            options.headers.remove('Authorization');
+            handler.next(options);
+            return;
+          }
           final token = await _getAuthToken();
           if (token != null) {
             options.headers['Authorization'] = 'Bearer $token';
@@ -55,15 +57,20 @@ class DioClient {
           handler.next(options);
         },
         onError: (error, handler) async {
-          // Handle token refresh logic here if needed
-          if (error.response?.statusCode == 401) {
-            // Token expired, handle refresh or logout
+          final path = error.requestOptions.path;
+          final isSessionCreation =
+              ApiConstants.isUnauthenticatedAuthPath(path);
+          if (error.response?.statusCode == 401 && !isSessionCreation) {
             await _handleUnauthorized();
           }
           handler.next(error);
         },
       ),
     );
+
+    if (kDebugMode) {
+      _dio.interceptors.add(LoggerInterceptor());
+    }
   }
 
   Future<String?> _getAuthToken() async {
@@ -72,35 +79,48 @@ class DioClient {
       return await authService.getStoredToken();
     } catch (e) {
       if (kDebugMode) {
-        print('Error retrieving auth token: $e');
+        debugPrint('Error retrieving auth token: $e');
       }
       return null;
     }
   }
 
+  void _scheduleUnauthorizedRedirect() {
+    if (_unauthorizedRedirectScheduled) return;
+    _unauthorizedRedirectScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _unauthorizedRedirectScheduled = false;
+      _onUnauthorized?.call();
+    });
+  }
+
   Future<void> _handleUnauthorized() async {
+    if (_handlingUnauthorized) return;
+    _handlingUnauthorized = true;
     try {
       final authService = AuthService();
-      
+
       // Try to refresh the token first
       final refreshed = await authService.refreshToken();
-      
+
       if (!refreshed) {
         // If refresh fails, clear the session
         await authService.clearAllData();
-        
+
         if (kDebugMode) {
-          print('Token refresh failed, session cleared');
+          debugPrint('Token refresh failed, session cleared');
         }
-        WidgetsBinding.instance.addPostFrameCallback((_) => _onUnauthorized?.call());
+        _scheduleUnauthorizedRedirect();
       }
     } catch (e) {
       if (kDebugMode) {
-        print('Error handling unauthorized access: $e');
+        debugPrint('Error handling unauthorized access: $e');
       }
       final authService = AuthService();
       await authService.clearAllData();
-      WidgetsBinding.instance.addPostFrameCallback((_) => _onUnauthorized?.call());
+      _scheduleUnauthorizedRedirect();
+    } finally {
+      _handlingUnauthorized = false;
     }
   }
 

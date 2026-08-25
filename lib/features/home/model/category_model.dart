@@ -1,4 +1,4 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
+// ignore_for_file: public_member_api_docs, sort_constructors_first, non_constant_identifier_names
 import 'dart:convert';
 
 class CategoryModel {
@@ -69,12 +69,19 @@ class CategoryModel {
 
   factory CategoryModel.fromMap(Map<String, dynamic> map) {
     final meta = map['meta'] is Map ? map['meta'] as Map<String, dynamic> : null;
+    final images = map['images'] is Map
+        ? Map<String, dynamic>.from(map['images'] as Map)
+        : null;
+    final original = images?['original']?.toString();
+    final imagePath = map['image_path']?.toString();
     return CategoryModel(
       id: map['id'] != null ? map['id'] as int : null,
       name: map['name'] != null ? map['name'] as String : null,
       slug: map['slug'] != null ? map['slug'] as String : null,
       description: map['description'] != null ? map['description'] as String : null,
-      image_path: map['image_path'] != null ? map['image_path'] as String : null,
+      image_path: (original != null && original.isNotEmpty)
+          ? original
+          : imagePath,
       position: map['position'] != null ? map['position'] as int : null,
       is_active: map['is_active'] != null ? map['is_active'] as bool : null,
       is_featured: map['is_featured'] != null ? map['is_featured'] as bool : null,

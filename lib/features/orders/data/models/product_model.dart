@@ -29,8 +29,8 @@ class ProductModel extends Equatable {
   final int maxSelection;
   final DateTime createdAt;
   final DateTime updatedAt;
-  final CategoryModel category;
-  final VendorModel vendor;
+  final CategoryModel? category;
+  final VendorModel? vendor;
 
   const ProductModel({
     required this.id,
@@ -59,41 +59,102 @@ class ProductModel extends Equatable {
     required this.maxSelection,
     required this.createdAt,
     required this.updatedAt,
-    required this.category,
-    required this.vendor,
+    this.category,
+    this.vendor,
   });
 
+  static int _parseInt(dynamic v, {int fallback = 0}) {
+    if (v == null) return fallback;
+    if (v is int) return v;
+    return int.tryParse(v.toString()) ?? fallback;
+  }
+
+  static bool _parseBool(dynamic v, {bool fallback = false}) {
+    if (v == null) return fallback;
+    if (v is bool) return v;
+    if (v is int) return v != 0;
+    final s = v.toString().toLowerCase();
+    if (s == 'true' || s == '1') return true;
+    if (s == 'false' || s == '0') return false;
+    return fallback;
+  }
+
+  static Map<String, dynamic> _parseOptions(dynamic value) {
+    if (value is Map) return Map<String, dynamic>.from(value);
+    return {};
+  }
+
+  static List<String> _parseStringList(dynamic value) {
+    if (value is! List) return [];
+    return value
+        .where((e) => e != null)
+        .map((e) => e.toString())
+        .where((s) => s.isNotEmpty)
+        .toList();
+  }
+
+  static String _imageFromJson(Map<String, dynamic> json) {
+    final path = json['image_path']?.toString();
+    if (path != null && path.isNotEmpty) return path;
+    final mainImage = json['main_image'];
+    if (mainImage is Map) {
+      return mainImage['medium']?.toString() ??
+          mainImage['thumb']?.toString() ??
+          mainImage['original']?.toString() ??
+          '';
+    }
+    return '';
+  }
+
   factory ProductModel.fromJson(Map<String, dynamic> json) {
+    final categoryRaw = json['category'];
+    final vendorRaw = json['vendor'];
+
     return ProductModel(
-      id: json['id'],
-      vendorId: json['vendor_id'],
-      categoryId: json['category_id'],
-      name: json['name'],
-      description: json['description'],
-      price: json['price'],
-      discountPrice: json['discount_price'],
-      costPrice: json['cost_price'],
-      quantity: json['quantity'],
-      sku: json['sku'],
-      barcode: json['barcode'],
-      imagePath: json['image_path'],
-      galleryImages: List<String>.from(json['gallery_images'] ?? []),
-      ingredients: List<String>.from(json['ingredients'] ?? []),
-      allergens: List<String>.from(json['allergens'] ?? []),
-      nutritionFacts: Map<String, dynamic>.from(json['nutrition_facts'] ?? {}),
-      preparationTime: json['preparation_time'],
-      isFeatured: json['is_featured'],
-      isAvailable: json['is_available'],
-      status: json['status'],
-      options: Map<String, dynamic>.from(json['options'] ?? {}),
-      addons: List<String>.from(json['addons'] ?? []),
-      minSelection: json['min_selection'],
-      maxSelection: json['max_selection'],
-      createdAt: DateTime.parse(json['created_at']),
-      updatedAt: DateTime.parse(json['updated_at']),
-      category: CategoryModel.fromJson(json['category']),
-      vendor: VendorModel.fromJson(json['vendor']),
+      id: _parseInt(json['id']),
+      vendorId: _parseInt(json['vendor_id']),
+      categoryId: _parseInt(json['category_id']),
+      name: json['name']?.toString() ?? '',
+      description: json['description']?.toString() ?? '',
+      price: json['price']?.toString() ?? '0',
+      discountPrice: json['discount_price']?.toString(),
+      costPrice: json['cost_price']?.toString() ?? '0',
+      quantity: _parseInt(json['quantity']),
+      sku: json['sku']?.toString() ?? '',
+      barcode: json['barcode']?.toString() ?? '',
+      imagePath: _imageFromJson(json),
+      galleryImages: _parseStringList(json['gallery_images']),
+      ingredients: _parseStringList(json['ingredients']),
+      allergens: _parseStringList(json['allergens']),
+      nutritionFacts: json['nutrition_facts'] is Map
+          ? Map<String, dynamic>.from(json['nutrition_facts'] as Map)
+          : {},
+      preparationTime: _parseInt(json['preparation_time']),
+      isFeatured: _parseBool(json['is_featured']),
+      isAvailable: _parseBool(json['is_available'], fallback: true),
+      status: json['status']?.toString() ?? 'active',
+      options: _parseOptions(json['options']),
+      addons: _parseStringList(json['addons']),
+      minSelection: _parseInt(json['min_selection']),
+      maxSelection: _parseInt(json['max_selection']),
+      createdAt: DateTime.tryParse(json['created_at']?.toString() ?? '') ??
+          DateTime.now(),
+      updatedAt: DateTime.tryParse(json['updated_at']?.toString() ?? '') ??
+          DateTime.now(),
+      category: categoryRaw is Map
+          ? CategoryModel.fromJson(Map<String, dynamic>.from(categoryRaw))
+          : null,
+      vendor: vendorRaw is Map
+          ? _parseVendor(Map<String, dynamic>.from(vendorRaw))
+          : null,
     );
+  }
+
+  static VendorModel _parseVendor(Map<String, dynamic> map) {
+    if (map['shop_name'] != null) {
+      return VendorModel.fromVendorListJson(map);
+    }
+    return VendorModel.fromJson(map);
   }
 
   Map<String, dynamic> toJson() {
@@ -124,16 +185,16 @@ class ProductModel extends Equatable {
       'max_selection': maxSelection,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
-      'category': category.toJson(),
-      'vendor': vendor.toJson(),
+      if (category != null) 'category': category!.toJson(),
+      if (vendor != null) 'vendor': vendor!.toJson(),
     };
   }
 
   // Helper methods
   bool get hasDiscount => discountPrice != null && discountPrice!.isNotEmpty;
-  
+
   String get displayPrice => hasDiscount ? discountPrice! : price;
-  
+
   String get formattedPrice {
     if (hasDiscount) {
       return 'ETB $discountPrice (was ETB $price)';

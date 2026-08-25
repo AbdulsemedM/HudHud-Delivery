@@ -28,32 +28,90 @@
   "navWallet": "የኪስ ቦርሳ",
   "navTaxi": "ታክሲ",
   "navProfile": "መገለጫ",
+  "navOrderHistory": "የትዕዛዝ ታሪክ",
   "settingsProfile": "መገለጫ",
   "settingsAccount": "መለያ",
   "settingsPreferences": "ምርጫዎች",
   "settingsSupport": "ድጋፍ",
+  "settingsContactEmail": "የኢሜይል ድጋፍ",
+  "offlineNoConnection": "የበይነመረብ ግንኙነት የለም",
+  "orderIdCopied": "የትዕዛዝ መለያ ተገልብጧል",
+  "orderShareSubject": "የሁድሁድ ትዕዛዝ",
   "settingsPersonalDetails": "የግል ዝርዝሮች",
   "settingsAppearance": "መልክ",
   "appearanceChooseTheme": "የእርስዎን ተመራጭ ገጽታ ይምረጡ",
   "settingsChangePassword": "የይለፍ ቃል ቀይር",
+  "settingsBiometricLogin": "ባዮሜትሪክ መግቢያ",
+  "settingsBiometricLoginSubtitle": "በዚህ መሣሪያ ላይ በጣት አሻራ ወይም Face ID በፍጥነት ይግቡ",
+  "settingsBiometricSubtitleEnabled": "በርቷል — ለመግባት ጣት አሻራ ወይም Face ID ይጠቀሙ",
+  "settingsBiometricSubtitleOffReady": "ጠፍቷል — በማንኛውም ጊዜ ያብሩ",
+  "settingsBiometricSubtitleSignInOnce": "ለማንቃት አንዴ ይግቡ",
+  "biometricAuthReason": "ለመቀጠል ማንነትዎን ያረጋግጡ",
+  "biometricEnableEnterPassword": "ባዮሜትሪክ መግቢያን ለማንቃት የይለፍ ቃልዎን ያስገቡ",
+  "biometricNotAvailable": "ባዮሜትሪክ መግቢያ በዚህ መሣሪያ ላይ አይገኝም",
+  "biometricNoCredentials": "የተቀመጠ መግቢያ የለም። በመጀመሪያ በይለፍ ቃል ይግቡ።",
+  "biometricLoginFailed": "ባዮሜትሪክ መግቢያ አልተሳካም። እንደገና ይሞክሩ ወይም የይለፍ ቃል ይጠቀሙ።",
+  "biometricEnabledSuccess": "ባዮሜትሪክ መግቢያ ተነቅቷል",
+  "biometricDisabledSuccess": "ባዮሜትሪክ መግቢያ ተዘግቷል",
+  "biometricOptInTitle": "ባዮሜትሪክ መግቢያ ይንቃ?",
+  "biometricOptInMessage": "በሚቀጥለው ጊዜ በፍጥነት ለመግባት ጣት አሻራ ወይም Face ID ይጠቀሙ።",
+  "biometricOptInEnable": "አንቃ",
+  "biometricOptInNotNow": "አሁን አይደለም",
+  "loginBiometricButtonSemantics": "በባዮሜትሪክ ይግቡ",
+  "loginBiometricOrDivider": "ወይም በባዮሜትሪክ ይግቡ",
   "settingsNotifications": "ማሳወቂያዎች",
+  "settingsMarketingOffers": "የሁድሁድ ቅናሾችን እና ዝማኔዎችን ተቀበል",
+  "settingsMarketingOffersSubtitle": "አማራጭ። በፑሽ፣ በኤስኤምኤስ ወይም በኢሜይል ልናቀርብ እንችላለን። በማንኛውም ጊዜ ማጥፋት ይችላሉ።",
   "settingsSmsNotifications": "የኤስኤምኤስ ማሳወቂያዎች",
   "settingsWishlist": "የምኞት ዝርዝር",
-  "wishlistEmptyTitle": "No saved items yet",
-  "wishlistEmptySubtitle": "Save products you love — tap the heart on a product to add it here.",
-  "wishlistAddedSnack": "Added to wishlist",
-  "wishlistRemovedSnack": "Removed from wishlist",
-  "wishlistSignInTitle": "Sign in to use your wishlist",
-  "wishlistSignInSubtitle": "Your saved items are stored on this device when you are logged in.",
-  "wishlistLoadError": "Could not load wishlist",
-  "wishlistTooltipAdd": "Add to wishlist",
-  "wishlistTooltipRemove": "Remove from wishlist",
+  "wishlistEmptyTitle": "ገና የተቀመጡ ንጥሎች የሉም",
+  "wishlistEmptySubtitle": "የሚወዷቸውን ምርቶች ያስቀምጡ — ልብ ላይ መታ በማድረግ እዚህ ያክሉ።",
+  "wishlistAddedSnack": "ወደ የምኞት ዝርዝር ታክሏል",
+  "wishlistRemovedSnack": "ከየምኞት ዝርዝር ተወግዷል",
+  "wishlistSignInTitle": "የምኞት ዝርዝርዎን ለመጠቀም ይግቡ",
+  "wishlistSignInSubtitle": "የተቀመጡ ንጥሎችዎ በዚህ መሳሪያ ላይ ሲገቡ ይከማቻሉ።",
+  "wishlistLoadError": "የምኞት ዝርዝር መጫን አልተቻለም",
+  "wishlistTooltipAdd": "ወደ የምኞት ዝርዝር አክል",
+  "wishlistTooltipRemove": "ከየምኞት ዝርዝር አስወግድ",
   "settingsTermsConditions": "ውሎች እና ሁኔታዎች",
   "settingsFaqs": "የሚጠየቁ ጥያቄዎች",
   "settingsHelpDesk": "የእገዛ ዴስክ",
   "settingsLogOut": "ውጣ",
   "settingsVersion": "ስሪት 1.0",
   "settingsLanguage": "ቋንቋ",
+  "profileEdit": "አርም",
+  "profileCoupons": "ኩፖኖች",
+  "profileWallet": "ዋሌት",
+  "profileMenuProfile": "መገለጫ",
+  "profileMenuAddresses": "አድራሻዎች",
+  "profileMenuFavorites": "የሚወዱ",
+  "profileMenuMessages": "መልዕክቶች",
+  "profileMenuAccountSettings": "የመለያ ቅንብሮች",
+  "settingsGeneralPreferences": "አጠቃላይ ምርጫዎች",
+  "settingsDeliveryPreferences": "የማድረሻ ምርጫዎች",
+  "settingsAppSettings": "የመተግበሪያ ቅንብሮች",
+  "profileCouponsComingSoon": "ኩፖኖች ገና አይገኙም።",
+  "profileTermsOfUse": "የመጠቀሚያ ውሎች",
+  "profilePrivacyPolicy": "የግላዊነት ፖሊሲ",
+  "profileCopyright": "© {year} HudHud Delivery. መብቱ በህግ የተጠበቀ ነው።",
+  "@profileCopyright": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "profileVersionFormatted": "ስሪት {version} (ህንፃ {buildNumber})",
+  "@profileVersionFormatted": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "buildNumber": {
+        "type": "String"
+      }
+    }
+  },
   "logoutTitle": "ውጣ",
   "logoutMessage": "እርግጠኛ ነህ መውጣት ትፈልጋለህ?",
   "logoutError": "በመውጣት ጊዜ ስህተት፦ {error}",
@@ -137,6 +195,9 @@
   "codeSentPhoneDefault": "ኮድ ወደ ስልክዎ ተልኳል።",
   "emailVerifiedSuccess": "ኢሜል በተሳካ ሁኔታ ተረጋግጧል!",
   "phoneVerifiedSuccess": "ስልክ ቁጥር በተሳካ ሁኔታ ተረጋግጧል!",
+  "accountVerificationBannerTitle": "መለያዎን ያረጋግጡ",
+  "accountVerificationEmailSubtitle": "ደረሰኞች እና ዝመናዎች ለኢሜይልዎ ያረጋግጡ።",
+  "accountVerificationPhoneSubtitle": "ለደህንነት እና ድጋፍ ስልክዎን ያረጋግጡ።",
   "failedToLoadOrders": "ትዕዛዞችን መጫን አልተሳካም፦ {error}",
   "@failedToLoadOrders": {
     "placeholders": {
@@ -154,6 +215,7 @@
   "homeHandyman": "ሃንዲማን",
   "homeHandymanSubtitle": "በቤት ውስጥ ለተለመዱ አገልግሎቶች ምቹ የሆኑ ወንዶችን ይጠይቁ።",
   "history": "ታሪክ",
+  "showMore": "ተጨማሪ አሳይ",
   "featuresSectionTitle": "በሁድሁድ ምን ማድረግ ትችላለህ",
   "featureFoodGroceries": "ምግብ እና ሸቀጣ ሸቀጦች",
   "featureFoodGroceriesDesc": "ከሚወዷቸው አቅራቢዎች ይዘዙ።",
@@ -170,6 +232,7 @@
   "courierNoHistory": "የመላኪያ ታሪክ የለም።",
   "courierHistoryEmptySubtitle": "ያለፈው መላኪያዎችህ እዚህ ይታያሉ",
   "courierInstantTitle": "ፈጣን ማድረስ",
+  "courierAddDelivery": "ማድረሻ ጨምር",
   "courierInstantSubtitle": "መልእክተኛ ጥቅልዎን ብቻ ይወስዳል እና ወዲያውኑ ያቀርባል።",
   "courierScheduleTitle": "መርሐግብር ማስረከብ",
   "courierScheduleSubtitle": "መልእክተኛ በተገለጸው ቀን እና ሰዓት ለመውሰድ ይመጣል።",
@@ -185,15 +248,33 @@
   "inProgress": "በሂደት ላይ",
   "loginTitle": "ይግቡ",
   "loginSubtitle": "እባክህ መለያህን እና ሁሉንም ያሉትን አገልግሎቶች ለመድረስ ምስክርነትህን አስገባ",
+  "brandTagline": "መላኪያ፣ በደንብ የደረሰ",
+  "splashTagline": "ከተማዎ፣ የደረሰ",
+  "splashStatus": "ነገሮችን እያንቀሳቀስን ነው…",
+  "homeTabFood": "ምግብ",
+  "homeTabCourier": "መልእክተኛ",
+  "homeTabTaxi": "ታክሲ",
+  "homeTabHandyman": "የቤት ሰራተኛ",
+  "homeSearchHint": "ምርቶችን በሁሉም ቦታ ይፈልጉ",
   "loginContinueAsGuest": "እንደ እንግዳ ይቀጥሉ",
   "labelEmailOrPhone": "ኢሜል አድራሻ ወይም ስልክ ቁጥር",
+  "loginTabEmail": "ኢሜል",
+  "loginTabPhone": "ስልክ",
+  "loginTabEmailSemantics": "በኢሜል ይግቡ",
+  "loginTabPhoneSemantics": "በስልክ ይግቡ",
+  "labelEmail": "ኢሜል",
+  "hintEmail": "ለምሳሌ JohnDoe@gmail.com",
+  "hintPhoneNational": "912 345 678",
+  "validationPhoneRequired": "እባክዎ ስልክ ቁጥርዎን ያስገቡ",
+  "validationPhoneInvalid": "እባክዎ ትክክለኛ ስልክ ቁጥር ያስገቡ",
   "hintEmailPhone": "ለምሳሌ. JohnDoe@gmail.com",
   "labelPassword": "የይለፍ ቃል",
   "hintPassword": "የይለፍ ቃል አስገባ",
   "validationEmailOrPhoneRequired": "እባክዎ ኢሜልዎን ወይም ስልክ ቁጥርዎን ያስገቡ",
   "validationEmailOrPhoneInvalid": "እባክዎ የሚሰራ ኢሜይል ወይም ስልክ ቁጥር ያስገቡ",
   "validationPasswordRequired": "እባክህ የይለፍ ቃልህን አስገባ",
-  "validationPasswordMin": "የይለፍ ቃል ቢያንስ 8 ቁምፊዎች መሆን አለበት።",
+  "validationPasswordMin": "የይለፍ ቃል ቢያንስ 6 ቁምፊዎች መሆን አለበት።",
+  "validationPasswordComplexity": "የይለፍ ቃል ትልቅ፣ ትንሽ፣ ቁጥር እና ልዩ ቁምፊ ሊኖረው ይገባል",
   "validationEmailRequired": "እባክህ ኢሜልህን አስገባ",
   "validationEmailInvalid": "እባክህን ትክክለኛ ኢሜል አስገባ",
   "mainDemoTitle": "ሁድሁድ መላኪያ ማሳያ",
@@ -214,7 +295,7 @@
       }
     }
   },
-  "welcomeTitle": "ወደ ሁድሁድ ማቅረቢያ እንኳን በደህና መጡ!",
+  "welcomeTitle": "እንኳን ደህና መጡ",
   "welcomeBody": "ይህ ንጹህ አርክቴክቸር በብጁ አዝራሮች፣ መክሰስ እና የገጽታ መቀያየርን የሚያሳይ ማሳያ ነው።",
   "currentThemeLabel": "የአሁኑ ጭብጥ፡ {mode}",
   "@currentThemeLabel": {
@@ -360,7 +441,7 @@
   "transactionId": "የግብይት መታወቂያ",
   "transactionIdHint": "ከክፍያ መግቢያ",
   "cardLast4": "የመጨረሻው ካርድ 4 አሃዞች",
-  "cardLast4Hint": "4242",
+  "cardLast4Hint": "ለምሳሌ 4242",
   "cardBrand": "የካርድ ብራንድ",
   "cardBrandHint": "ቪዛ, ማስተር ካርድ",
   "addFundsTitle": "ገንዘቦችን ያክሉ",
@@ -374,9 +455,29 @@
   "categoryMore": "ተጨማሪ",
   "pickupLocationLabel": "የመውሰጃ ቦታ",
   "deliveryLocationLabel": "የማስረከቢያ ቦታ",
-  "vehicleMotorcycle": "ሞተርሳይክል",
-  "vehicleCar": "መኪና",
-  "vehicleVan": "ቫን",
+  "vehicleMotorcycle": "በሞተርሳይክል ማድረሻ",
+  "vehicleCar": "በመኪና ማድረሻ",
+  "vehicleVan": "ፈጣን ጭነት",
+  "vehicleBajaj": "በባጃጅ ማድረሻ",
+  "vehiclePickup": "በፒካፕ ማድረሻ",
+  "pickupOutsideDeliveryServiceArea": "የመውሰጃው አድራሻ ከሁድሁድ የተዋቀረ የማድረሻ አገልግሎት ክልል ውጭ ነው።",
+  "selectAvailableVehicleType": "ከሚገኙት የተሽከርካሪ ዓይነቶች አንዱን ይምረጡ",
+  "sendAPackageTitle": "ጥቅል ላክ",
+  "courierDeliveryAddressPlaceholder": "የማድረሻ አድራሻ",
+  "addInfoAboutDelivery": "ስለ ማድረሻው መረጃ ጨምር",
+  "courierEstimateFromPrice": "ከ {currency} {amount}",
+  "@courierEstimateFromPrice": {
+    "placeholders": {
+      "currency": {"type": "String"},
+      "amount": {"type": "String"}
+    }
+  },
+  "courierEstimateMinutes": "{minutes} ደቂቃ",
+  "@courierEstimateMinutes": {
+    "placeholders": {
+      "minutes": {"type": "int"}
+    }
+  },
   "fromWallet": "ከዋሌት",
   "enterWithdrawAmount": "ለማውጣት መጠን ያስገቡ",
   "withdrawalMethod": "የማስወገጃ ዘዴ",
@@ -435,7 +536,7 @@
   "selectWalletPrompt": "መተዳየሪያ ምረጥ",
   "selectWithdrawalMethodPrompt": "የመውጣት ዘዴ ምረጥ",
   "walletDefaultTransactionLabel": "ግብይት",
-  "walletTypeCurrency": "{type} • {currency}",
+  "walletTypeCurrency": "{type} · {currency}",
   "@walletTypeCurrency": {
     "placeholders": {
       "type": {
@@ -471,6 +572,21 @@
   "emailAddress": "የኢሜል አድራሻ",
   "dateOfBirth": "የተወለደበት ቀን",
   "referralCode": "የማጣቀሻ ኮድ",
+  "referralCodeOptional": "የማጣቀሻ ኮድ — አማራጭ",
+  "hintReferralCode": "UCZXSD3O",
+  "signupTitle": "መለያዎን ይፍጠሩ",
+  "signupSubtitle": "ከከተማዎ ውስጥ ካሉ ንግዶች ለመዘዝ ሁድሁድን ይቀላቀሉ።",
+  "hintCreatePassword": "የይለፍ ቃል ይፍጠሩ",
+  "hintReenterPassword": "የይለፍ ቃልዎን እንደገና ያስገቡ",
+  "passwordStrengthHint": "6+ ቁምፊዎችን ይጠቀሙ",
+  "signupAcceptTermsPrefix": "የሁድሁድን ",
+  "signupTermsLink": "ውሎች እና ሁኔታዎች",
+  "signupConsentDataPrefix": "ውሂቤ በሚመለከተው ",
+  "signupDataProtectionLink": "የውሂብ ጥበቃ ሕግ",
+  "alreadyHaveAccount": "መለያ አለዎት? ",
+  "createAccount": "መለያ ፍጠር",
+  "signupFormIncomplete": "እባክዎ ሁሉንም አስፈላጊ መስኮች ይሙሉ",
+  "signupAcceptLegalRequired": "እባክዎ ውሎቹን እና የውሂብ ጥበቃ ፈቃድን ይቀበሉ",
   "searchQuestions": "ጥያቄ ፈልግ",
   "whereTo": "ወዴት?",
   "taxiCurrentLocation": "ወቅታዊ ቦታ",
@@ -497,7 +613,7 @@
       }
     }
   },
-  "taxiBrandHudHud": "HUDHUD",
+  "taxiBrandHudHud": "ሁድሁድ",
   "taxiBrandDelivery": " ማድረስ",
   "taxiDistanceKm": "{distance} ኪ.ሜ",
   "@taxiDistanceKm": {
@@ -515,7 +631,7 @@
   "taxiStatusActiveRide": "ንቁ ጉዞ",
   "taxiPickup": "መውሰጃ",
   "taxiDestination": "መድረሻ",
-  "taxiFareAmount": "ETB {amount}",
+  "taxiFareAmount": "ብር {amount}",
   "@taxiFareAmount": {
     "placeholders": {
       "amount": {
@@ -605,20 +721,20 @@
   "noEmailAvailableShort": "ምንም ኢሜይል የለም።",
   "addMoney": "ገንዘብ ጨምር",
   "sendMoney": "ገንዘብ ላክ",
-  "exitAppTitle": "Exit App",
-  "exitAppMessage": "Are you sure you want to exit the app?",
-  "actionExit": "Exit",
-  "loginNoAccountPrompt": "Don't have an account? ",
-  "loginOrContinueWith": "or continue with",
-  "continueWithGoogle": "Continue with Google",
-  "actionSignUp": "Sign Up",
-  "paymentScreenTitle": "Payment",
-  "paymentChooseMethodHeading": "Choose Payment Method",
-  "paymentEthiopianOptionsSubtitle": "Select your preferred Ethiopian payment option",
-  "paymentLoadMethodsError": "Failed to load payment methods",
-  "paymentSelectMethodFirst": "Please select a payment method",
-  "paymentMethodUnavailable": "Selected payment method is no longer available",
-  "paymentFailedWithError": "Payment failed: {error}",
+  "exitAppTitle": "ከመተግበሪያው ውጣ",
+  "exitAppMessage": "እርግጠኛ ነዎት ከመተግበሪያው ለመውጣት?",
+  "actionExit": "ውጣ",
+  "loginNoAccountPrompt": "መለያ የለዎትም? ",
+  "loginOrContinueWith": "ወይም በ",
+  "continueWithGoogle": "በጉግል ቀጥል",
+  "actionSignUp": "ተመዝገብ",
+  "paymentScreenTitle": "ክፍያ",
+  "paymentChooseMethodHeading": "የክፍያ ዘዴ ይምረጡ",
+  "paymentEthiopianOptionsSubtitle": "የሚወዱትን የኢትዮጵያ ክፍያ ይምረጡ",
+  "paymentLoadMethodsError": "የክፍያ ዘዴዎችን መጫን አልተቻለም",
+  "paymentSelectMethodFirst": "እባክዎ የክፍያ ዘዴ ይምረጡ",
+  "paymentMethodUnavailable": "የተመረጠው የክፍያ ዘዴ አይገኝም",
+  "paymentFailedWithError": "ክፍያ አልተሳካም፡ {error}",
   "@paymentFailedWithError": {
     "placeholders": {
       "error": {
@@ -626,7 +742,7 @@
       }
     }
   },
-  "paymentPayAmountBr": "Pay {amount} Br",
+  "paymentPayAmountBr": "{amount} ብር ይክፈሉ",
   "@paymentPayAmountBr": {
     "placeholders": {
       "amount": {
@@ -634,8 +750,8 @@
       }
     }
   },
-  "paymentSuccessTitle": "Payment Successful!",
-  "paymentTransactionIdLabel": "Transaction ID: {id}",
+  "paymentSuccessTitle": "ክፍያ ተሳክቷል!",
+  "paymentTransactionIdLabel": "የግብይት መለያ፡ {id}",
   "@paymentTransactionIdLabel": {
     "placeholders": {
       "id": {
@@ -643,22 +759,22 @@
       }
     }
   },
-  "continueShopping": "Continue Shopping",
-  "viewOrder": "View Order",
-  "handymanServicesTitle": "Handyman Services",
-  "handymanWhatToDo": "What would you like to do?",
-  "handymanMyRequests": "My Requests",
-  "handymanNoRequestsYet": "No service requests yet",
-  "handymanNoRequestsSubtitle": "Create a request to get quotes from handymen",
-  "handymanCreateNewRequest": "Create New Request",
-  "handymanCreateRequestSubtitle": "Describe your repair or maintenance need and get quotes from handymen.",
-  "instantDeliveryTitle": "Instant Delivery",
-  "tapToSelectPickup": "Tap to select pickup location",
-  "tapToSelectDelivery": "Tap to select delivery location",
-  "vehicleType": "Vehicle Type",
-  "selectPickupAndDelivery": "Please select both pickup and delivery locations",
-  "actionContinue": "Continue",
-  "errorGettingAddress": "Error getting address: {error}",
+  "continueShopping": "ግዢውን ቀጥል",
+  "viewOrder": "ትዕዛዝ ይመልከቱ",
+  "handymanServicesTitle": "የአካል ሰራተኛ አገልግሎቶች",
+  "handymanWhatToDo": "ምን ማድረግ ይፈልጋሉ?",
+  "handymanMyRequests": "የእኔ ጥያቄዎች",
+  "handymanNoRequestsYet": "ገና የአገልግሎት ጥያቄ የለም",
+  "handymanNoRequestsSubtitle": "ከአካል ሰራተኞች ጥቅስ ለማግኘት ጥያቄ ይፍጠሩ",
+  "handymanCreateNewRequest": "አዲስ ጥያቄ ፍጠር",
+  "handymanCreateRequestSubtitle": "የጥገና ወይም የጥገና ፍላጎትዎን ይግለጹ እና ከአካል ሰራተኞች ጥቅስ ያግኙ።",
+  "instantDeliveryTitle": "ፈጣን ማድረሻ",
+  "tapToSelectPickup": "የመውሰድ ቦታ ለመምረጥ መታ ያድርጉ",
+  "tapToSelectDelivery": "የማድረሻ ቦታ ለመምረጥ መታ ያድርጉ",
+  "vehicleType": "የተሽከርካሪ አይነት",
+  "selectPickupAndDelivery": "እባክዎ የመውሰድ እና የማድረሻ ቦታዎችን ይምረጡ",
+  "actionContinue": "ቀጥል",
+  "errorGettingAddress": "አድራሻ ማግኘት ስህተት፡ {error}",
   "@errorGettingAddress": {
     "placeholders": {
       "error": {
@@ -666,17 +782,17 @@
       }
     }
   },
-  "googleMapsIosMissingKey": "Google Maps is not configured on iOS. Add GOOGLE_MAPS_API_KEY and restart the app.",
-  "dealsModalTitle": "Deals on deals",
-  "dealsModalSubtitle": "Get upto 50% off on your first Courier delivery fee!",
-  "dealsModalClaim": "Claim",
-  "dealsModalClose": "Maybe later",
-  "orderHistoryEmptyTitle": "No orders yet",
-  "orderHistoryEmptySubtitle": "Browse categories to place your first order.",
-  "orderHistoryEmptyHint": "Your order history will appear here once you place an order",
-  "browseDelivery": "Browse Delivery",
-  "browseCategories": "Browse categories",
-  "handymanQuoteCount": "{count} quote(s)",
+  "googleMapsIosMissingKey": "ጉግል ካርታ በ iOS ላይ አልተዋቀረም። GOOGLE_MAPS_API_KEY ያክሉ እና መተግበሪያውን እንደገና ያስጀምሩ።",
+  "dealsModalTitle": "ቅናሾች ላይ ቅናሾች",
+  "dealsModalSubtitle": "በመጀመሪያው የኩሪየር የማድረሻ ክፍያ ላይ እስከ 50% ቅናሽ!",
+  "dealsModalClaim": "ያግኙ",
+  "dealsModalClose": "ቆይ በል",
+  "orderHistoryEmptyTitle": "ገና ትዕዛዝ የለም",
+  "orderHistoryEmptySubtitle": "የመጀመሪያ ትዕዛዝዎን ለመስጠት ምድቦችን ያስሱ።",
+  "orderHistoryEmptyHint": "ትዕዛዝ ከመጣዎ በኋላ ታሪክዎ እዚህ ይታያል",
+  "browseDelivery": "ማድረሻን ያስሱ",
+  "browseCategories": "ምድቦችን ያስሱ",
+  "handymanQuoteCount": "{count} ጥቅስ(ዎች)",
   "@handymanQuoteCount": {
     "placeholders": {
       "count": {
@@ -684,9 +800,9 @@
       }
     }
   },
-  "orderDetailsLoadingMessage": "Loading order details...",
-  "orderDetailsLoadErrorTitle": "Error loading order details",
-  "orderAppBarTitle": "Order #{orderNumber}",
+  "orderDetailsLoadingMessage": "የትዕዛዝ ዝርዝር በመጫን ላይ...",
+  "orderDetailsLoadErrorTitle": "የትዕዛዝ ዝርዝር መጫን ስህተት",
+  "orderAppBarTitle": "ትዕዛዝ #{orderNumber}",
   "@orderAppBarTitle": {
     "placeholders": {
       "orderNumber": {
@@ -694,11 +810,11 @@
       }
     }
   },
-  "paymentSummaryTitle": "Payment Summary",
-  "paymentSubtotalLabel": "Subtotal",
-  "paymentTotalAmountLabel": "Total Amount",
-  "paymentProcessingTitle": "Processing Payment",
-  "paymentProcessingMessage": "Please wait while we process your payment via {method}...",
+  "paymentSummaryTitle": "የክፍያ ማጠቃለያ",
+  "paymentSubtotalLabel": "ንዑስ ድምር",
+  "paymentTotalAmountLabel": "ጠቅላላ መጠን",
+  "paymentProcessingTitle": "ክፍያ በሂደት ላይ",
+  "paymentProcessingMessage": "ክፍያዎ በ {method} እየተሰራ ነው፣ እባክዎ ይጠብቁ...",
   "@paymentProcessingMessage": {
     "placeholders": {
       "method": {
@@ -706,7 +822,7 @@
       }
     }
   },
-  "courierRecipientLine": "Recipient: {name}",
+  "courierRecipientLine": "ተቀባይ፡ {name}",
   "@courierRecipientLine": {
     "placeholders": {
       "name": {
@@ -714,19 +830,19 @@
       }
     }
   },
-  "courierTrackDeliveryCta": "Track delivery",
-  "courierDeliveryStatusInProgress": "In progress",
-  "labelDate": "Date",
-  "hintDateFormat": "DD/MM/YYYY",
-  "labelTime": "Time",
-  "hintTimeFormat": "HH:MM",
-  "meridiemAm": "am",
-  "meridiemPm": "pm",
+  "courierTrackDeliveryCta": "መላክን ይከታተሉ",
+  "courierDeliveryStatusInProgress": "በሂደት ላይ",
+  "labelDate": "ቀን",
+  "hintDateFormat": "ቀን/ወር/ዓመት",
+  "labelTime": "ሰዓት",
+  "hintTimeFormat": "ሰዓት:ደቂቃ",
+  "meridiemAm": "ጥዋት",
+  "meridiemPm": "ከሰዓት",
   "scheduleSelectDateTime": "እባክዎ ለመላኪያ ቀን እና ሰዓት ይምረጡ",
   "scheduleInvalidDateTime": "የቀን ወይም ሰዓት ቅደም ተከተል ተቀባይ አይደለም",
-  "servicesScreenTitle": "Our Services",
-  "servicesWhatCanWeHelp": "What can we help you with?",
-  "servicesAvailableCount": "{count} services available",
+  "servicesScreenTitle": "አገልግሎታችን",
+  "servicesWhatCanWeHelp": "በምን ልንረዳዎ?",
+  "servicesAvailableCount": "{count} አገልግሎቶች ይገኛሉ",
   "@servicesAvailableCount": {
     "placeholders": {
       "count": {
@@ -734,45 +850,45 @@
       }
     }
   },
-  "servicesErrorTitle": "Something went wrong",
-  "servicesEmptyTitle": "No services yet",
-  "servicesEmptySubtitle": "Check back later for new services",
-  "handymanNewRequestTitle": "New Service Request",
-  "validationHandymanSelectLocation": "Please select a location",
-  "validationHandymanSelectDateTime": "Please select date and time",
-  "validationHandymanSelectSkill": "Please select at least one skill",
-  "handymanRequestCreatedToast": "Request created",
-  "handymanRequestCreateFailed": "Failed to create request",
-  "labelTitle": "Title",
-  "hintTitleHandymanExample": "e.g. Fix leaking faucet",
-  "validationTitleRequired": "Title is required",
-  "validationDescriptionRequired": "Description is required",
-  "hintDescribeRepair": "Describe the repair or maintenance needed",
-  "handymanTapToSelectLocation": "Tap to select location",
-  "labelScheduledDateTime": "Scheduled Date & Time",
-  "selectDateAndTime": "Select date and time",
-  "labelEstimatedCostOptional": "Estimated Cost (optional)",
-  "hintCostExample": "e.g. 100",
-  "handymanSkillsNeeded": "Skills needed",
-  "handymanSkillPlumbing": "Plumbing",
-  "handymanSkillElectrical": "Electrical",
-  "handymanSkillCarpentry": "Carpentry",
-  "handymanSkillPainting": "Painting",
-  "handymanSkillGeneral": "General",
-  "labelToolsCommaSeparated": "Tools needed (comma-separated)",
-  "hintToolsHandymanExample": "e.g. wrench set, plumber's tape",
-  "labelEstimatedHoursOptional": "Estimated hours (optional)",
-  "hintHoursExample": "e.g. 2",
-  "handymanCreateRequestCta": "Create Request",
-  "handymanDialogCancelRequestTitle": "Cancel Request",
-  "handymanDialogCancelRequestMessage": "Are you sure you want to cancel this service request?",
-  "actionNo": "No",
-  "actionYesCancel": "Yes, Cancel",
-  "handymanRequestCancelled": "Request cancelled",
-  "handymanCancelFailed": "Failed to cancel",
-  "handymanLabelScheduled": "Scheduled",
-  "handymanSectionRequirements": "Requirements",
-  "handymanToolsLine": "Tools: {tools}",
+  "servicesErrorTitle": "አንድ ነገር ተሳስቷል",
+  "servicesEmptyTitle": "ገና አገልግሎት የለም",
+  "servicesEmptySubtitle": "አዲስ አገልግሎቶችን በኋላ ይመለከቱ",
+  "handymanNewRequestTitle": "አዲስ የአገልግሎት ጥያቄ",
+  "validationHandymanSelectLocation": "እባክዎ ቦታ ይምረጡ",
+  "validationHandymanSelectDateTime": "እባክዎ ቀን እና ሰዓት ይምረጡ",
+  "validationHandymanSelectSkill": "እባክዎ ቢያንስ አንድ ክህሎት ይምረጡ",
+  "handymanRequestCreatedToast": "ጥያቄ ተፈጥሯል",
+  "handymanRequestCreateFailed": "ጥያቄ መፍጠር አልተሳካም",
+  "labelTitle": "ርዕስ",
+  "hintTitleHandymanExample": "ለምሳሌ ተንሸራተት ቧንቧ ማስተካከል",
+  "validationTitleRequired": "ርዕስ ያስፈልጋል",
+  "validationDescriptionRequired": "መግለጫ ያስፈልጋል",
+  "hintDescribeRepair": "የጥገና ወይም የጥገና ፍላጎት ይግለጹ",
+  "handymanTapToSelectLocation": "ቦታ ለመምረጥ መታ ያድርጉ",
+  "labelScheduledDateTime": "የታሰበ ቀን እና ሰዓት",
+  "selectDateAndTime": "ቀን እና ሰዓት ይምረጡ",
+  "labelEstimatedCostOptional": "ግምት ወጪ (አማራጭ)",
+  "hintCostExample": "ለምሳሌ 100",
+  "handymanSkillsNeeded": "የሚፈለጉ ክህሎቶች",
+  "handymanSkillPlumbing": "ቧንቧ",
+  "handymanSkillElectrical": "ኤሌክትሪክ",
+  "handymanSkillCarpentry": "አናሳ",
+  "handymanSkillPainting": "ቀለም ስያት",
+  "handymanSkillGeneral": "አጠቃላይ",
+  "labelToolsCommaSeparated": "የሚፈለጉ መሳሪያዎች (በነጠላ መለያ የተለዩ)",
+  "hintToolsHandymanExample": "ለምሳሌ የማንኪያ ስብስብ፣ የቧንቧ ቴፕ",
+  "labelEstimatedHoursOptional": "ግምት ሰዓታት (አማራጭ)",
+  "hintHoursExample": "ለምሳሌ 2",
+  "handymanCreateRequestCta": "ጥያቄ ፍጠር",
+  "handymanDialogCancelRequestTitle": "ጥያቄ ሰርዝ",
+  "handymanDialogCancelRequestMessage": "ይህን የአገልግሎት ጥያቄ ለመሰረዝ እርግጠኛ ነዎት?",
+  "actionNo": "አይ",
+  "actionYesCancel": "አዎ፣ ሰርዝ",
+  "handymanRequestCancelled": "ጥያቄ ተሰርዟል",
+  "handymanCancelFailed": "መሰረዝ አልተሳካም",
+  "handymanLabelScheduled": "ታሪክ ተይዟል",
+  "handymanSectionRequirements": "መስፈርቶች",
+  "handymanToolsLine": "መሳሪያዎች፡ {tools}",
   "@handymanToolsLine": {
     "placeholders": {
       "tools": {
@@ -780,7 +896,7 @@
       }
     }
   },
-  "handymanEstHoursLine": "Est. hours: {hours}",
+  "handymanEstHoursLine": "ግምት ሰዓታት፡ {hours}",
   "@handymanEstHoursLine": {
     "placeholders": {
       "hours": {
@@ -788,7 +904,7 @@
       }
     }
   },
-  "handymanViewQuotesCta": "View {count} quote(s)",
+  "handymanViewQuotesCta": "{count} ጥቅስ(ዎች) ይመልከቱ",
   "@handymanViewQuotesCta": {
     "placeholders": {
       "count": {
@@ -796,12 +912,12 @@
       }
     }
   },
-  "handymanCancelRequest": "Cancel Request",
-  "handymanRateServiceTitle": "Rate Service",
-  "handymanProviderFallback": "Provider",
-  "handymanQuotesTitle": "Quotes",
-  "handymanAcceptQuoteTitle": "Accept Quote",
-  "handymanAcceptQuoteMessage": "Accept {amount} from {name}?",
+  "handymanCancelRequest": "ጥያቄ ሰርዝ",
+  "handymanRateServiceTitle": "አገልግሎት ደረጃ ስጥ",
+  "handymanProviderFallback": "አቅራቢ",
+  "handymanQuotesTitle": "ጥቅሶች",
+  "handymanAcceptQuoteTitle": "ጥቅስ ተቀበል",
+  "handymanAcceptQuoteMessage": "{amount} ከ {name} ተቀበል?",
   "@handymanAcceptQuoteMessage": {
     "placeholders": {
       "amount": {
@@ -812,12 +928,12 @@
       }
     }
   },
-  "actionAccept": "Accept",
-  "actionReject": "Reject",
-  "handymanQuoteAccepted": "Quote accepted",
-  "handymanAcceptQuoteFailed": "Failed to accept",
-  "handymanRejectQuoteTitle": "Reject Quote",
-  "handymanRejectQuoteMessage": "Reject quote from {name}?",
+  "actionAccept": "ተቀበል",
+  "actionReject": "አትቀበል",
+  "handymanQuoteAccepted": "ጥቅስ ተቀበለ",
+  "handymanAcceptQuoteFailed": "መቀበል አልተሳካም",
+  "handymanRejectQuoteTitle": "ጥቅስ ቀርብ",
+  "handymanRejectQuoteMessage": "ከ {name} ጥቅስ ቀርብ?",
   "@handymanRejectQuoteMessage": {
     "placeholders": {
       "name": {
@@ -825,25 +941,25 @@
       }
     }
   },
-  "handymanQuoteRejected": "Quote rejected",
-  "handymanRejectQuoteFailed": "Failed to reject",
-  "handymanNoQuotesYet": "No quotes yet",
-  "handymanNoQuotesSubtitle": "Handymen will send quotes soon",
-  "handymanViewProfile": "View Profile",
-  "handymanHowWasService": "How was the service?",
-  "handymanRateTheHandyman": "Rate the handyman",
-  "handymanCommentAboutOptional": "Comment about handyman (optional)",
-  "handymanRatingPublic": "Make my rating public",
-  "handymanSubmitRating": "Submit Rating",
-  "ratingThankYou": "Thank you for your rating!",
-  "ratingSubmitFailed": "Failed to submit rating",
-  "handymanNotFound": "Handyman not found",
-  "handymanProfileTitle": "Handyman Profile",
-  "handymanAbout": "About",
-  "handymanSkillsHeading": "Skills",
-  "handymanHourlyRateLabel": "Hourly Rate",
-  "handymanExperienceLabel": "Experience",
-  "handymanExperienceYears": "{years} years",
+  "handymanQuoteRejected": "ጥቅስ ተቀርቷል",
+  "handymanRejectQuoteFailed": "መቀርብ አልተሳካም",
+  "handymanNoQuotesYet": "ገና ጥቅስ የለም",
+  "handymanNoQuotesSubtitle": "አካል ሰራተኞች በቅርቡ ጥቅስ ይልካሉ",
+  "handymanViewProfile": "መገለጫ ይመልከቱ",
+  "handymanHowWasService": "አገልግሎቱ እንዴት ነበር?",
+  "handymanRateTheHandyman": "አካል ሰራተኛውን ደረጃ ስጥ",
+  "handymanCommentAboutOptional": "ስለ አካል ሰራተኛ (አማራጭ)",
+  "handymanRatingPublic": "ደረጃዬን ለህዝብ አድርገው",
+  "handymanSubmitRating": "ደረጃ አስገባ",
+  "ratingThankYou": "ለደረጃዎ እናመሰግናለን!",
+  "ratingSubmitFailed": "ደረጃ ማስገባት አልተሳካም",
+  "handymanNotFound": "አካል ሰራተኛ አልተገኘም",
+  "handymanProfileTitle": "የአካል ሰራተኛ መገለጫ",
+  "handymanAbout": "ስለ",
+  "handymanSkillsHeading": "ክህሎቶች",
+  "handymanHourlyRateLabel": "በሰዓት ዋጋ",
+  "handymanExperienceLabel": "ልምድ",
+  "handymanExperienceYears": "{years} ዓመት",
   "@handymanExperienceYears": {
     "placeholders": {
       "years": {
@@ -851,9 +967,411 @@
       }
     }
   },
-  "labelAddress": "Address",
-  "handymanStatsHeading": "Stats",
-  "handymanStatServices": "Services",
-  "handymanStatRating": "Rating",
-  "handymanStatResponse": "Response"
+  "labelAddress": "አድራሻ",
+  "handymanStatsHeading": "ስታቲስቲክስ",
+  "handymanStatServices": "አገልግሎቶች",
+  "handymanStatRating": "ደረጃ",
+  "handymanStatResponse": "ምላሽ",
+  "forgotPasswordLink": "የይለፍ ቃል ረሱ?",
+  "forgotPasswordRequestTitle": "የይለፍ ቃል ዳግም አስጀምር",
+  "forgotPasswordRequestSubtitle": "ኢሜይል ወይም ስልክ ቁጥርዎን ያስገቡ። 6-አሃዝ የማረጋገጫ ኮድ እንልክልዎታለን።",
+  "forgotPasswordSendCode": "ኮድ ላክ",
+  "forgotPasswordVerifyTitle": "የማረጋገጫ ኮድ ያስገቡ",
+  "forgotPasswordVerifySubtitle": "ኮድ ወደ {identifier} ላክን።",
+  "@forgotPasswordVerifySubtitle": {
+    "placeholders": {
+      "identifier": {
+        "type": "String"
+      }
+    }
+  },
+  "forgotPasswordOtpLabel": "6-አሃዝ ኮድ",
+  "forgotPasswordTimeRemaining": "የቀረ ጊዜ፡ {time}",
+  "@forgotPasswordTimeRemaining": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "forgotPasswordCodeExpired": "ኮዱ ጊዜው አልፏል። አዲስ ኮድ ለማግኘት እንደገና ላክ ይጫኑ።",
+  "forgotPasswordResend": "ኮድ እንደገና ላክ",
+  "forgotPasswordVerifyButton": "አረጋግጥ",
+  "forgotPasswordNewTitle": "አዲስ የይለፍ ቃል ይፍጠሩ",
+  "forgotPasswordNewSubtitle": "ቢያንስ 6 ቁምፊዎች ይጠቀሙ።",
+  "forgotPasswordLabelConfirmPassword": "የይለፍ ቃል አረጋግጥ",
+  "forgotPasswordHintConfirmPassword": "አዲሱን የይለፍ ቃል እንደገና ያስገቡ",
+  "forgotPasswordSaveButton": "የይለፍ ቃል አስቀምጥ",
+  "forgotPasswordSuccessMessage": "የይለፍ ቃል ተዘምኗል። አሁን መግባት ይችላሉ።",
+  "validationOtpLength": "6-አሃዝ ኮድ ያስገቡ",
+  "validationConfirmPasswordRequired": "እባክዎ የይለፍ ቃልዎን ያረጋግጡ",
+  "validationPasswordsDoNotMatch": "የይለፍ ቃሎች አይዛመዱም",
+  "addressesTitle": "የእኔ አድራሻዎች",
+  "addressesEmptyTitle": "የተቀመጡ አድራሻዎች የሉም",
+  "addressesEmptySubtitle": "ቻውና ማድረሻን ለማፋጠን አድራሻ ያክሉ።",
+  "addressesAdd": "አድራሻ ጨምር",
+  "addressesAddFromMap": "ከካርታ ምረጥ",
+  "addressesAddManual": "በእጅ አስገባ",
+  "addressesDefaultBadge": "ነባሪ",
+  "addressesSetDefault": "እንደ ነባሪ አድርገው",
+  "addressesEdit": "አርትዕ",
+  "addressesDeleteTitle": "አድራሻ ይሰርዝ?",
+  "addressesDeleteMessage": "ይህ አድራሻ ከመለያዎ ይወገዳል።",
+  "addressesBulkDeleteTitle": "የተመረጡ አድራሻዎች ይሰርዙ?",
+  "addressesBulkDeleteMessage": "{count} አድራሻ(ዎች) ይሰርዙ?",
+  "@addressesBulkDeleteMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addressesBulkDeleteForce": "ነባሪውን አድራሻም ሰርዝ",
+  "addressesSelect": "ምረጥ",
+  "addressesDeleteSelected": "የተመረጡትን ሰርዝ",
+  "addressesTypeHome": "ቤት",
+  "addressesTypeWork": "ስራ",
+  "addressesTypeOther": "ሌላ",
+  "addressFormAddTitle": "አድራሻ ጨምር",
+  "addressFormEditTitle": "አድራሻ አርትዕ",
+  "addressFormLine1": "የአድራሻ መስመር 1",
+  "addressFormLine2": "የአድራሻ መስመር 2 (አማራጭ)",
+  "addressFormCity": "ከተማ",
+  "addressFormState": "ክልል / ሥልጣን",
+  "addressFormPostalCode": "የፖስታ ኮድ",
+  "addressFormCountry": "ሀገር",
+  "addressFormLabel": "መለያ ስም",
+  "addressFormLandmark": "ምልክት ቦታ (አማራጭ)",
+  "addressFormType": "የአድራሻ አይነት",
+  "addressFormSetDefault": "እንደ ነባሪ አድራሻ አድርገው",
+  "addressFormPickOnMap": "ቦታን ከካርታ ምረጥ",
+  "addressFormRequired": "ይህ መስክ ያስፈልጋል",
+  "addressMapPickerTitle": "ቦታ ምረጥ",
+  "addressMapUseLocation": "ይህን ቦታ ተጠቀም",
+  "deliveryAddressTitle": "የማድረሻ አድራሻ",
+  "deliveryAddressChange": "ቀይር",
+  "deliveryAddressSaved": "የተቀመጡ አድራሻዎች",
+  "deliveryAddressPickMap": "ከካርታ ምረጥ",
+  "deliveryAddressAddNew": "አዲስ አድራሻ ጨምር",
+  "deliveryAddressSelectPrompt": "የማድረሻ አድራሻ ምረጥ",
+  "addressesSignInTitle": "አድራሻዎችን ለማስተዳደር ይግቡ",
+  "addressesSignInSubtitle": "በርካታ የማድረሻ አድራሻዎችን ያስቀምጡ እና ነባሪ ያዘጋጁ።",
+  "addressesLoadError": "አድራሻዎችን መጫን አልተቻለም",
+  "addressesCreatedSuccess": "አድራሻ ተቀምጧል",
+  "addressesUpdatedSuccess": "አድራሻ ተዘምኗል",
+  "addressesDeletedSuccess": "አድራሻ ተሰርዟል",
+  "chatTitle": "መልእክቶች",
+  "chatEmpty": "እስካሁን ውይይት የለም",
+  "chatEmptySubtitle": "ስለ ትዕዛዝ ይወያዩ ወይም ድጋፍን ያግኙ።",
+  "chatContactSupport": "ድጋፍን ያግኙ",
+  "chatViewOrders": "ትዕዛዞችን ይመልከቱ",
+  "chatSearchHint": "መልእክቶችን ይፈልጉ",
+  "chatTypeMessage": "መልእክት ይጻፉ…",
+  "chatSend": "ላክ",
+  "chatSupportSubject": "በምን ልንረዳዎ እንችላለን?",
+  "chatSupportSubjectHint": "አጭር ርዕስ",
+  "chatSupportTitle": "አዲስ የድጋፍ ውይይት",
+  "chatEdited": "ተስተካክሏል",
+  "chatDeleted": "ይህ መልእክት ተሰርዟል",
+  "chatSendFailed": "መልእክት መላክ አልተቻለም",
+  "chatOrderTitle": "የትዕዛዝ ውይይት",
+  "chatSupportChatTitle": "ድጋፍ",
+  "chatRideTitle": "የጉዞ ውይይት",
+  "chatAttachImage": "ጋለሪ",
+  "chatAttachFile": "ሰነድ",
+  "chatAttachAudio": "ድምጽ",
+  "chatShareLocation": "አካባቢ",
+  "chatEditingMessage": "መልእክት በማስተካከል ላይ",
+  "chatCopy": "ቅዳ",
+  "chatEdit": "አርትዕ",
+  "chatDelete": "ሰርዝ",
+  "chatRetry": "እንደገና ለመሞከር ይንኩ",
+  "chatOpenMaps": "በካርታ ክፈት",
+  "chatNewSupport": "አዲስ የድጋፍ ውይይት",
+  "chatTypeOrder": "ትዕዛዝ",
+  "chatTypeSupport": "ድጋፍ",
+  "chatTypeRide": "ጉዞ",
+  "chatOpenOrder": "ትዕዛዝ ይመልከቱ",
+  "chatRecording": "በመቅዳት ላይ…",
+  "chatSlideToCancel": "ለመሰረዝ ወደ ላይ ያንሸራትቱ",
+  "chatPhoto": "ፎቶ",
+  "chatVoiceMessage": "የድምጽ መልእክት",
+  "chatLocation": "አካባቢ",
+  "chatFile": "ፋይል",
+  "chatLoadError": "መልእክቶችን መጫን አልተቻለም",
+  "chatLeftConversation": "ይህን ውይይት ለቀዋል",
+  "chatRejoin": "እንደገና ይቀላቀሉ",
+  "chatCreateSupport": "ውይይት ጀምር",
+  "sosSettingsTitle": "ደህንነት እና SOS",
+  "sosEmergencyContacts": "የአደጋ ጊዜ እውቂያዎች",
+  "sosEmergencyContactsSubtitle": "SOS ሲያስነሱ የሚነገራቸው ሰዎች",
+  "sosHistory": "የSOS ታሪክ",
+  "sosHistorySubtitle": "ያለፉ ማንቂያዎችን ይመልከቱ",
+  "sosTrigger": "SOS አስነሳ",
+  "sosTriggerSubtitle": "ከአካባቢዎ ጋር የአደጋ ማንቂያ ይላኩ",
+  "sosTriggerConfirmTitle": "የSOS ማንቂያ ይላክ?",
+  "sosTriggerConfirmMessage": "የአደጋ ጊዜ እውቂያዎችዎ ከአሁኑ አካባቢዎ ጋር ይነገራሉ። በእውነተኛ አደጋ ብቻ ይጠቀሙ።",
+  "sosDescriptionHint": "ሁኔታዎን ይግለጹ (አማራጭ)",
+  "sosLocationRequired": "SOS ለመላክ አካባቢ ያስፈልጋል። እባክዎ የአካባቢ ፈቃድ ያንቁ።",
+  "sosContactAdded": "የአደጋ ጊዜ እውቂያ ታክሏል",
+  "sosContactUpdated": "የአደጋ ጊዜ እውቂያ ተዘምኗል",
+  "sosContactDeleted": "የአደጋ ጊዜ እውቂያ ተሰርዟል",
+  "sosTriggered": "የSOS ማንቂያ በተሳካ ሁኔታ ተልኳል",
+  "sosAddContact": "እውቂያ ጨምር",
+  "sosEditContact": "እውቂያ አርትዕ",
+  "sosNoContacts": "እስካሁን የአደጋ ጊዜ እውቂያ የለም",
+  "sosNoContactsSubtitle": "በአደጋ ጊዜ ሊነገረው የሚገባ ሰው ያክሉ።",
+  "sosNoHistory": "እስካሁን የSOS ማንቂያ የለም",
+  "sosName": "ሙሉ ስም",
+  "sosPhone": "ስልክ ቁጥር",
+  "sosEmail": "ኢሜይል (አማራጭ)",
+  "sosRelationship": "ግንኙነት",
+  "sosPrimaryContact": "ዋና እውቂያ",
+  "sosDeleteContact": "እውቂያ ሰርዝ",
+  "sosDeleteContactConfirm": "ይህን የአደጋ ጊዜ እውቂያ ያስወግዱ?",
+  "sosStatusActive": "ንቁ",
+  "sosStatusAll": "ሁሉም",
+  "sosCancel": "ሰርዝ",
+  "sosSendAlert": "ማንቂያ ላክ",
+  "sosSaving": "በማስቀመጥ ላይ…",
+  "guestBrowseBanner": "እንደ እንግዳ በመመልከት ላይ",
+  "guestBrowseSignIn": "ግባ",
+  "guestSignInRequiredTitle": "መግባት ያስፈልጋል",
+  "guestSignInRequiredMessage": "ይህን ባህሪ ለመጠቀም መለያ ይፍጠሩ ወይም ይግቡ።",
+  "guestSignInRequiredCheckout": "ትዕዛዝ ለመስጠት እና ክፍያ ለመጨረስ ይግቡ።",
+  "guestOrdersSignIn": "የትዕዛዝ ታሪክዎን ለማየት ይግቡ።",
+  "guestProfileSignIn": "መገለጫዎን እና ቅንብሮችን ለማግኘት ይግቡ።",
+  "guestServiceSignIn": "ይህን አገልግሎት ለመጠቀም ይግቡ።",
+  "courierSignInRequired": "ጥቅሎችን ለመላክ ይግቡ።",
+  "courierPhoneVerificationRequired": "ጥቅሎችን ከመላክዎ በፊት ስልክ ቁጥርዎን ያረጋግጡ።",
+  "wishlistNotesHint": "ማስታወሻ ጨምር (አማራጭ)",
+  "wishlistNotesUpdated": "ማስታወሻ ተዘምኗል",
+  "wishlistShareTitle": "የምኞት ዝርዝር አጋራ",
+  "wishlistShareSuccess": "የምኞት ዝርዝር በተሳካ ሁኔታ ተጋርቷል",
+  "wishlistPriceDropsTitle": "የዋጋ ቅናሽ",
+  "wishlistPriceDropsEmpty": "አሁን የዋጋ ቅናሽ የለም",
+  "wishlistMigrateError": "የተቀመጡ ንጥሎችን ወደ መለያዎ ማመሳሰል አልተቻለም",
+  "tipsTitle": "ጠቃሚ ገንዘብ",
+  "tipsAddTitle": "ጠቃሚ ገንዘብ ጨምር",
+  "tipsHistoryTitle": "የጠቃሚ ገንዘብ ታሪክ",
+  "tipsRecipientLabel": "ተቀባይ",
+  "tipsRecipientDriver": "ሹፌር",
+  "tipsRecipientVendor": "ምግብ ቤት",
+  "tipsRecipientBoth": "ሁለቱም",
+  "tipsCalculatedAmount": "መጠን: ETB {amount}",
+  "@tipsCalculatedAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "tipsSubmit": "ጠቃሚ ገንዘብ ላክ",
+  "tipsSuccess": "ጠቃሚ ገንዘብ በተሳካ ሁኔታ ተልኳል",
+  "tipsLoadError": "ጠቃሚ ገንዘብ መጫን አልተቻለም",
+  "tipsCardComingSoon": "የካርድ ክፍያ በቅርቡ",
+  "tipsAnonymous": "በስም አልባ ላክ",
+  "tipsMessageHint": "መልእክት ጨምር (አማራጭ)",
+  "tipsStatsTotal": "የተላኩ ጠቃሚ ገንዘቦች",
+  "tipsStatsAmount": "ጠቅላላ",
+  "tipsStatsAverage": "አማካይ",
+  "tipsHistoryEmpty": "እስካሁን ጠቃሚ ገንዘብ የለም",
+  "tipsPaymentWallet": "ዋሌት",
+  "tipsPaymentCard": "ካርድ",
+  "tipsStatusCompleted": "ተጠናቋል",
+  "tipsStatusAll": "ሁሉም",
+  "onboardingWelcomeTitle": "ወደ ሁድሁድ እንኳን ደህና መጡ!",
+  "onboardingWelcomeSubtitle": "ዛሬ ጥቅሎችን በከተማው ላይ ይላኩ — ምግብ፣ ጉዞ እና የቤት አገልግሎቶች በቅርቡ ይመጣሉ።",
+  "onboardingFoodTitle": "ምግብ እና ግሮሰሪ",
+  "onboardingFoodDescription": "በቅርቡ — ምግብ እና ግሮሰሪ ከአካባቢ ሱቆች በደቂቃዎች ውስጥ ይዘዙ።",
+  "onboardingCourierTitle": "መልእክተኛ",
+  "onboardingCourierDescription": "ጥቅሎችን በከተማው ላይ በፈጣን እና አስተማማኝ መላኪያ ይላኩ።",
+  "onboardingTaxiTitle": "ታክሲ",
+  "onboardingTaxiDescription": "በቅርቡ — በአንድ መታ በከተማው ውስጥ በማንኛውም ቦታ ጉዞ ይያዙ።",
+  "onboardingHandymanTitle": "የቤት ሰራተኛ",
+  "onboardingHandymanDescription": "በቅርቡ — ለጥገና እና የቤት አገልግሎቶች የታመኑ ባለሙያዎችን ይያዙ።",
+  "onboardingGetStarted": "ጀምር",
+  "onboardingSpotlightLocationTitle": "የመላኪያ አካባቢዎ",
+  "onboardingSpotlightLocationDescription": "ትዕዛዞች የሚደርሱበትን ቦታ ለማዘጋጀት ወይም ለመቀየር እዚህ ይንኩ።",
+  "onboardingSpotlightNotificationsTitle": "መረጃ ይቀበሉ",
+  "onboardingSpotlightNotificationsDescription": "የትዕዛዝ ዝመናዎችን፣ ቅናሾችን እና አስፈላጊ ማንቂያዎችን እዚህ ይመልከቱ።",
+  "onboardingSpotlightFoodTitle": "ምግብ እና ግሮሰሪ",
+  "onboardingSpotlightFoodDescription": "በቅርቡ — ምግብ እና አስፈላጊ ነገሮችን ለመዘዝ ሬስቶራንቶችን እና ሱቆችን ያስሱ።",
+  "onboardingSpotlightCourierTitle": "መልእክተኛ",
+  "onboardingSpotlightCourierDescription": "ጥቅሎችን እና ሰነዶችን በፍላጎት መውሰድ ይላኩ — አሁን ይገኛል።",
+  "onboardingSpotlightTaxiTitle": "ታክሲ",
+  "onboardingSpotlightTaxiDescription": "በቅርቡ — ጉዞ ይጠይቁ እና ሹፌርዎን በቀጥታ ይከታተሉ።",
+  "onboardingSpotlightHandymanTitle": "የቤት ሰራተኛ",
+  "onboardingSpotlightHandymanDescription": "በቅርቡ — ለቤት ጥገና እና ጥገና ችሎታ ያለው እርዳታ ያግኙ።",
+  "onboardingSpotlightDoneTitle": "ተዘጋጅተዋል!",
+  "onboardingSpotlightDoneDescription": "መልእክተኛ አሁን ዝግጁ ነው። ምግብ፣ ታክሲ እና የቤት ሰራተኛ በቅርቡ ይመጣሉ — በማንኛውም ጊዜ ትሮችን ይቀይሩ። ሁድሁድን ይደሰቱ!",
+  "onboardingDebugReplayTour": "የመነሻ ጉብኝት እንደገና አጫውት (debug)",
+  "serviceComingSoonBadge": "በቅርቡ",
+  "foodComingSoonTitle": "ጣፋጭ ነገር እየተዘጋጀ ነው",
+  "foodComingSoonSubtitle": "ግሮሰሪ እና ምግብ ከሚወዷቸው ሻጮች — በቅርቡ ይጀምራል።",
+  "foodComingSoonTeaser1": "ትኩስ ግሮሰሪ",
+  "foodComingSoonTeaser2": "የአካባቢ ተመራጮች",
+  "taxiComingSoonTitle": "ቀጣይ ጉዞዎ ሊደርስ ነው",
+  "taxiComingSoonSubtitle": "በከተማው ውስጥ ተመጣጣኝ ጉዞዎች፣ በቅርቡ።",
+  "taxiComingSoonTeaser1": "ፈጣን መውሰድ",
+  "taxiComingSoonTeaser2": "ፍትሃዊ ዋጋ",
+  "handymanComingSoonTitle": "እርዳታ በመንገድ ላይ ነው",
+  "handymanComingSoonSubtitle": "ለቤት ጥገና የታመኑ ባለሙያዎች — የመጨረሻ ንክኪዎችን እያደረግን ነው።",
+  "handymanComingSoonTeaser1": "ችሎታ ያላቸው ባለሙያዎች",
+  "handymanComingSoonTeaser2": "የቤት ጥገና",
+  "ordersComingSoonTitle": "Your order hub is on the way",
+  "ordersComingSoonSubtitle": "Track every delivery, reorder in one tap, and keep receipts in one place — launching soon.",
+  "ordersComingSoonTeaser1": "Live tracking",
+  "ordersComingSoonTeaser2": "One-tap reorder",
+  "ordersComingSoonTeaser3": "Digital receipts",
+  "ordersComingSoonStep1": "Courier deliveries on Home — available now",
+  "ordersComingSoonStep2": "Unified order timeline across all services",
+  "ordersComingSoonStep3": "Smart reorder and saved favourites",
+  "ordersComingSoonCta": "Send a delivery now",
+  "ordersComingSoonFootnote": "Need a package delivered today? Use Courier on the Home tab.",
+  "pleaseEnterValidSenderPhone": "እባክዎ የላኪ ስልክ ቁጥር ትክክለኛ ያስገቡ (09xxxxxxxx)",
+  "trackingCodeCopied": "የመከታተያ ኮድ ተቀድቷል",
+  "chatMissingDeliveryId": "ውይይት መክፈት አልተቻለም። የመላኪያ መታወቂያ የለም።",
+  "waitForPriceEstimate": "ከመያዝዎ በፊት የዋጋ ግምት ይጠብቁ",
+  "invalidDeliveryId": "ከመፍጠር የመጣ የመላኪያ መታወቂያ ልክ አይደለም",
+  "timeBandPickupSurcharge": "{band} የመውሰጃ ተጨማሪ ክፍያ፦ {currency} {amount}",
+  "@timeBandPickupSurcharge": {
+    "placeholders": {
+      "band": {"type": "String"},
+      "currency": {"type": "String"},
+      "amount": {"type": "String"}
+    }
+  },
+  "chooseValidFuturePickup": "እባክዎ የሚቀጥል ትክክለኛ የመውሰጃ ቀን እና ሰዓት ይምረጡ።",
+  "refreshQuoteRouteDistance": "መንገዱን ማስላት አልተቻለም። እባክዎ ግምቱን ያድሱ እና እንደገና ይሞክሩ።",
+  "waitForEstimateBeforeContinue": "ከመቀጠልዎ በፊት የዋጋ ግምት ይጠብቁ",
+  "deliveryBookedWallet": "መላኪያ በዋሌት ክፍያ ተይዟል",
+  "cancelDeliveryTitle": "መላኪያ ሰርዝ",
+  "insufficientWalletBalance": "በቂ የዋሌት ቀሪ ሂሳብ የለም",
+  "topUpAmount": "{currency} {amount} ጨምር",
+  "@topUpAmount": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "loadMore": "ተጨማሪ ጫን",
+  "viewMap": "ካርታ ይመልከቱ",
+  "usePin": "ፒን ተጠቀም",
+  "copyOrderId": "የትዕዛዝ መታወቂያ ቅዳ",
+  "shareOrder": "ትዕዛዝ አጋራ",
+  "cartEmpty": "ጋሪዎ ባዶ ነው",
+  "promoCodeApplied": "የቅናሽ ኮድ \"{promoCode}\" ተተግብሯል",
+  "@promoCodeApplied": {
+    "placeholders": {
+      "promoCode": {
+        "type": "String"
+      }
+    }
+  },
+  "addressUpdatedTo": "አድራሻ ወደ {address} ተዘምኗል",
+  "@addressUpdatedTo": {
+    "placeholders": {
+      "address": {
+        "type": "String"
+      }
+    }
+  },
+  "addValidProductsToCart": "እባክዎ ልክ የሆኑ ምርቶችን ወደ ጋሪዎ ያክሉ",
+  "chooseDeliveryLocationFromMap": "እባክዎ ከካርታው የመላኪያ አካባቢ ይምረጡ",
+  "selectEbirrProvider": "እባክዎ የኢብር አቅራቢ ይምረጡ",
+  "unableToDetermineStore": "ለዚህ ትዕዛዝ ሱቁን መለየት አልተቻለም",
+  "gallery": "ጋለሪ",
+  "camera": "ካሜራ",
+  "photoPermissionRequired": "የካሜራ ወይም የፎቶ ፈቃድ ያስፈልጋል",
+  "couldNotOpenPhotoPicker": "የፎቶ መምረጫ መክፈት አልተቻለም: {error}",
+  "@couldNotOpenPhotoPicker": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "pleaseEnterYourName": "እባክዎ ስምዎን ያስገቡ",
+  "updateFromStore": "ከሱቅ ያዘምኑ",
+  "softUpdateTitle": "አዲስ ስሪት አለ",
+  "softUpdateMessage": "እርስዎ በ {currentVersion} ላይ ነዎት። ስሪት {latestVersion} በሱቁ ላይ ይገኛል።",
+  "@softUpdateMessage": {
+    "placeholders": {
+      "currentVersion": {
+        "type": "String"
+      },
+      "latestVersion": {
+        "type": "String"
+      }
+    }
+  },
+  "updateLater": "በኋላ",
+  "openPaymentPage": "የክፍያ ገጽ ክፈት",
+  "paymentRefreshFailed": "የክፍያ ሁኔታ ማደስ አልተቻለም",
+  "searchProductsTitle": "ምርቶችን ይፈልጉ",
+  "calories": "ካሎሪ",
+  "protein": "ፕሮቲን",
+  "actionChange": "ቀይር",
+  "productUnavailable": "ይህ ምርት በአሁኑ ጊዜ አይገኝም",
+  "cancelTripTitle": "ጉዞ ሰርዝ",
+  "cancelTripConfirm": "እርግጠኛ ነዎት ይህን ጉዞ መሰረዝ ይፈልጋሉ?",
+  "unableToCancelRide": "ጉዞን መሰረዝ አልተቻለም። የጉዞ መታወቂያ የለም።",
+  "invalidQuoteAmount": "ለክፍያ ልክ ያልሆነ የዋጋ ግምት",
+  "noOrdersYetStore": "እስካሁን ትዕዛዝ የለም",
+  "retryPaymentTitle": "ክፍያን እንደገና ሞክር",
+  "retryPaymentSubtitle": "ለመቀጠል የክፍያ ዘዴ ይምረጡ",
+  "deliveryBookedWalletBalance": "መላኪያ ተይዟል። የዋሌት ቀሪ ሂሳብ: {currency} {balance}",
+  "@deliveryBookedWalletBalance": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      },
+      "balance": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelDeliveryConfirm": "እርግጠኛ ነዎት ይህን መላኪያ መሰረዝ ይፈልጋሉ?",
+  "cancelDeliveryConfirmRefund": "እርግጠኛ ነዎት ይህን መላኪያ መሰረዝ ይፈልጋሉ? የተረጋገጠ ክፍያ ወደ ዋሌትዎ ይመለሳል።",
+  "cancelOrder": "ትዕዛዝ ሰርዝ",
+  "courierFindingNearestDrivers": "Finding the nearest available drivers",
+  "courierFindingNearestDriversSubtitle": "We are finding the nearest available driver. Live driver location appears only after acceptance.",
+  "courierDriverLocationUpdating": "Driver location is updating",
+  "phoneEnrollmentTitle": "Add your phone number",
+  "phoneEnrollmentSubtitle": "We need a verified mobile number for deliveries, wallet, and account security.",
+  "phoneEnrollmentOtpTitle": "Verify your phone",
+  "phoneEnrollmentOtpSubtitle": "Enter the 6-digit code sent to {phone}.",
+  "@phoneEnrollmentOtpSubtitle": {
+    "placeholders": {
+      "phone": {"type": "String"}
+    }
+  },
+  "phoneEnrollmentSendCode": "Send code",
+  "phoneEnrollmentVerify": "Verify",
+  "phoneEnrollmentResend": "Resend code",
+  "phoneEnrollmentResendIn": "Resend in {seconds}s",
+  "@phoneEnrollmentResendIn": {
+    "placeholders": {
+      "seconds": {"type": "int"}
+    }
+  },
+  "phoneEnrollmentContactSupport": "Contact support",
+  "phoneEnrollmentSignOut": "Sign out",
+  "phoneEnrollmentChangeNumber": "Change phone number",
+  "phoneEnrollmentRetry": "Try again",
+  "phoneEnrollmentPhoneInvalid": "Enter a valid Ethiopian mobile number.",
+  "phoneEnrollmentPhoneInUse": "This number is already linked to another HudHud account.",
+  "phoneEnrollmentChangeRequiresSupport": "This verified number can only be changed with support help.",
+  "phoneEnrollmentCooldown": "Please wait before requesting another code.",
+  "phoneEnrollmentRateLimited": "Too many attempts. Please try again later.",
+  "phoneEnrollmentDeliveryFailed": "We could not send the SMS. Please try again.",
+  "phoneEnrollmentNotPending": "Request a new verification code to continue.",
+  "phoneEnrollmentCodeExpired": "This code has expired. Request a new one.",
+  "phoneEnrollmentCodeInvalid": "That code is incorrect. Please try again.",
+  "phoneEnrollmentGenericError": "Something went wrong. Please try again."
 }

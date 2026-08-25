@@ -1,27 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/utils/avatar_util.dart';
+import 'package:hudhud_delivery/core/widgets/user_avatar.dart';
 import 'package:hudhud_delivery/features/orders/presentation/widgets/orders_widget.dart';
+import 'package:hudhud_delivery/models/user_model.dart';
 
 class SettingsHeader extends StatelessWidget {
-  const SettingsHeader({super.key});
+  final UserModel? user;
+
+  const SettingsHeader({super.key, this.user});
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const StoryRing(
-          child: CircleAvatar(
-            radius: 25,
-            backgroundImage: AssetImage('assets/images/profile.png'),
+        Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: AppColors.primaryColor, width: 2),
+          ),
+          child: UserAvatar(
+            radius: 22,
+            imageUrl: getDisplayAvatarUrl(user),
           ),
         ),
-        IconButton(
-          icon: const Icon(
-            Icons.notifications_outlined,
-            color: Colors.black,
-            size: 28,
+        Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFF4F4F4),
+            borderRadius: BorderRadius.circular(12),
           ),
-          onPressed: () {},
+          child: IconButton(
+            icon: Icon(Icons.notifications_outlined, color: colorScheme.onSurface),
+            onPressed: () {},
+          ),
         ),
       ],
     );
@@ -33,6 +49,7 @@ class AccountSettingsSection extends StatelessWidget {
   final String name;
   final String phone;
   final String email;
+  final UserModel? user;
 
   const AccountSettingsSection({
     super.key,
@@ -40,32 +57,27 @@ class AccountSettingsSection extends StatelessWidget {
     required this.name,
     required this.phone,
     required this.email,
+    this.user,
   });
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'Account Settings',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
+            Text(
+              name,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
-            TextButton(
+            IconButton(
               onPressed: onEditTap,
-              child: const Text(
-                'Edit',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 16,
-                ),
-              ),
+              icon: const Icon(Icons.edit_outlined, color: AppColors.primaryColor),
             ),
           ],
         ),
@@ -73,15 +85,16 @@ class AccountSettingsSection extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.grey[50],
-            borderRadius: BorderRadius.circular(12),
+            color: colorScheme.surface,
+            borderRadius: BorderRadius.circular(AppColors.radiusLG),
+            border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
           ),
           child: Row(
             children: [
-              const StoryRing(
-                child: CircleAvatar(
-                  radius: 30,
-                  backgroundImage: AssetImage('assets/images/profile.png'),
+              StoryRing(
+                child: UserAvatar(
+                  radius: 28,
+                  imageUrl: getDisplayAvatarUrl(user),
                 ),
               ),
               const SizedBox(width: 16),
@@ -101,7 +114,7 @@ class AccountSettingsSection extends StatelessWidget {
                       phone,
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey[600],
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -110,14 +123,17 @@ class AccountSettingsSection extends StatelessWidget {
                         Icon(
                           Icons.mail_outline,
                           size: 16,
-                          color: Colors.grey[600],
+                          color: colorScheme.onSurfaceVariant,
                         ),
                         const SizedBox(width: 8),
-                        Text(
-                          email,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[600],
+                        Expanded(
+                          child: Text(
+                            email,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
@@ -150,20 +166,14 @@ class SettingsSection extends StatelessWidget {
       children: [
         Text(
           title,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-          ),
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
         ),
         const SizedBox(height: 16),
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.grey[50],
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            children: items,
-          ),
+        Card(
+          margin: EdgeInsets.zero,
+          child: Column(children: items),
         ),
       ],
     );
@@ -184,34 +194,30 @@ class SettingsItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              size: 24,
-              color: Colors.grey[700],
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            Icon(
-              Icons.chevron_right,
-              color: Colors.grey[400],
-            ),
-          ],
+    return ListTile(
+      dense: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      leading: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: AppColors.primaryColor.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(icon, color: AppColors.primaryColor, size: 20),
+      ),
+      title: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.w500,
         ),
       ),
+      trailing: Icon(
+        Icons.chevron_right,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
+      onTap: onTap,
     );
   }
 }
@@ -234,47 +240,30 @@ class ThemeToggleItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onToggle,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              size: 24,
-              color: Colors.grey[700],
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Switch(
-              value: isDarkMode,
-              onChanged: (value) => onToggle(),
-              activeColor: const Color(0xFF3498DB),
-            ),
-          ],
+    final colorScheme = Theme.of(context).colorScheme;
+    return ListTile(
+      dense: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      leading: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: AppColors.primaryColor.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(10),
         ),
+        child: Icon(icon, color: AppColors.primaryColor, size: 20),
       ),
+      title: Text(title),
+      subtitle: Text(
+        subtitle,
+        style: TextStyle(color: colorScheme.onSurfaceVariant),
+      ),
+      trailing: Switch(
+        value: isDarkMode,
+        onChanged: (_) => onToggle(),
+        activeThumbColor: AppColors.primaryColor,
+      ),
+      onTap: onToggle,
     );
   }
 }

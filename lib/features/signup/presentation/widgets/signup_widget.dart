@@ -1,36 +1,43 @@
+import 'package:country_picker/country_picker.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../screen/verify_contact_screen.dart';
-import '../../bloc/signup_bloc.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
+import 'package:hudhud_delivery/core/utils/phone_util.dart';
+import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
+import 'package:hudhud_delivery/features/login/presentation/widgets/auth_field_decoration.dart';
+import 'package:hudhud_delivery/features/login/presentation/widgets/auth_gradient_button.dart';
+import 'package:hudhud_delivery/features/login/presentation/widgets/auth_phone_number_field.dart';
+import 'package:hudhud_delivery/features/settings/presentation/screen/terms_conditions_screen.dart';
+import 'package:hudhud_delivery/features/signup/bloc/signup_bloc.dart';
+import 'package:hudhud_delivery/features/signup/presentation/screen/verify_contact_screen.dart';
+import 'package:hudhud_delivery/l10n/app_localizations.dart';
 
 class SignupTitle extends StatelessWidget {
   const SignupTitle({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
+    final l10n = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Sign Up',
+          l10n.signupTitle,
           style: TextStyle(
             fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: isDark ? cs.onSurface : const Color(0xFF2C3E50),
-            letterSpacing: 0.5,
+            fontWeight: FontWeight.w700,
+            color: AuthScreenColors.textPrimaryOf(context),
+            height: 1.2,
           ),
         ),
         const SizedBox(height: 8),
         Text(
-          'Create your account and proceed to access all the Businesses offered to you',
+          l10n.signupSubtitle,
           style: TextStyle(
-            fontSize: 13,
-            color: isDark ? cs.onSurfaceVariant : Colors.grey[600],
-            height: 1.4,
+            color: AuthScreenColors.textSecondaryOf(context),
+            fontSize: 14,
+            height: 1.45,
           ),
         ),
       ],
@@ -42,10 +49,9 @@ class SignupForm extends StatefulWidget {
   const SignupForm({super.key});
 
   @override
-  _SignupFormState createState() => _SignupFormState();
+  State<SignupForm> createState() => SignupFormState();
 }
 
-// Create the form with the global key
 Widget createSignupForm() {
   return SignupForm(key: signupFormKey);
 }
@@ -57,6 +63,7 @@ class SignupFormData {
   final String password;
   final String confirmPassword;
   final String phoneNumber;
+  final String? referralCode;
 
   SignupFormData({
     required this.firstName,
@@ -65,13 +72,13 @@ class SignupFormData {
     required this.password,
     required this.confirmPassword,
     required this.phoneNumber,
+    this.referralCode,
   });
 }
 
-// Global key to access form state
-final GlobalKey<_SignupFormState> signupFormKey = GlobalKey<_SignupFormState>();
+final GlobalKey<SignupFormState> signupFormKey = GlobalKey<SignupFormState>();
 
-class _SignupFormState extends State<SignupForm> {
+class SignupFormState extends State<SignupForm> {
   final _formKey = GlobalKey<FormState>();
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
@@ -79,43 +86,35 @@ class _SignupFormState extends State<SignupForm> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _phoneController = TextEditingController();
-  String _phoneNumber = '';
+  final _referralController = TextEditingController();
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
   bool _termsAccepted = false;
   bool _dataProtectionAccepted = false;
+  String _dialCode = kDefaultPhoneDialCode;
+  String _countryIso = 'ET';
+  late final TapGestureRecognizer _termsTap;
+  late final TapGestureRecognizer _privacyTap;
 
-  // Ethiopian phone number validation
-  String? validateAndFormatPhoneNumber(String input) {
-    // Remove all whitespace and trim
-    input = input.trim().replaceAll(RegExp(r'\s+'), '');
-
-    // Must only contain digits
-    if (!RegExp(r'^\d+$').hasMatch(input)) {
-      return null;
-    }
-
-    // Remove starting '0' if present
-    if (input.startsWith('0')) {
-      input = input.substring(1);
-    }
-
-    // Check if it starts with valid Ethiopian prefixes and has correct length
-    if ((input.startsWith('9') || input.startsWith('7')) && input.length == 9) {
-      return input; // Valid and cleaned
-    }
-
-    return null; // Invalid
+  @override
+  void initState() {
+    super.initState();
+    _termsTap = TapGestureRecognizer()..onTap = _openTerms;
+    _privacyTap = TapGestureRecognizer()..onTap = _openTerms;
   }
 
   SignupFormData getFormData() {
+    final referral = _referralController.text.trim();
     return SignupFormData(
       firstName: _firstNameController.text.trim(),
       lastName: _lastNameController.text.trim(),
       email: _emailController.text.trim(),
       password: _passwordController.text.trim(),
       confirmPassword: _confirmPasswordController.text.trim(),
-      phoneNumber: _phoneNumber.isNotEmpty ? _phoneNumber : _phoneController.text.trim(),
+      phoneNumber: normalizePhoneToBackend(
+        '$_dialCode${cleanNationalPhoneDigits(_phoneController.text)}',
+      ),
+      referralCode: referral.isEmpty ? null : referral,
     );
   }
 
@@ -127,95 +126,66 @@ class _SignupFormState extends State<SignupForm> {
     return _termsAccepted && _dataProtectionAccepted;
   }
 
+  int _passwordStrengthScore(String password) {
+    if (password.isEmpty) return 0;
+    var score = 0;
+    if (password.length >= 6) score++;
+    if (password.contains(RegExp(r'[A-Z]')) &&
+        password.contains(RegExp(r'[a-z]'))) {
+      score++;
+    }
+    if (password.contains(RegExp(r'[0-9]'))) score++;
+    if (password.contains(RegExp(r'[!@#\$%^&*(),.?":{}|<>_\-+=\[\]\\;/]'))) {
+      score++;
+    }
+    return score.clamp(0, 4);
+  }
+
   @override
   void dispose() {
+    _termsTap.dispose();
+    _privacyTap.dispose();
     _firstNameController.dispose();
     _lastNameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     _phoneController.dispose();
+    _referralController.dispose();
     super.dispose();
   }
 
-  TextStyle _signupLabelStyle(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    return TextStyle(
-      fontSize: 13,
-      color: isDark ? theme.colorScheme.onSurfaceVariant : Colors.grey[700],
-      fontWeight: FontWeight.w500,
+  Widget _buildLabel(String label) {
+    return Text(
+      label,
+      style: TextStyle(
+        fontSize: 13,
+        color: AuthScreenColors.textSecondaryOf(context),
+        fontWeight: FontWeight.w500,
+      ),
     );
   }
 
-  TextStyle _signupFieldTextStyle(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    return TextStyle(
-      color: isDark ? theme.colorScheme.onSurface : Colors.grey[800],
-      fontSize: 14,
-    );
-  }
-
-  InputDecoration _signupFieldDecoration(
-    BuildContext context, {
-    required String hintText,
-    Widget? suffixIcon,
-  }) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
-    final fieldFill =
-        isDark ? cs.surfaceContainerHighest : Colors.grey[50]!;
-    final borderColor =
-        isDark ? cs.outline.withValues(alpha: 0.45) : Colors.grey[200]!;
-    final hintColor = isDark
-        ? cs.onSurfaceVariant.withValues(alpha: 0.75)
-        : Colors.grey[400]!;
-
-    return InputDecoration(
-      hintText: hintText,
-      hintStyle: TextStyle(
-        color: hintColor,
-        fontSize: 14,
+  void _openTerms() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => const TermsConditionsScreen(),
       ),
-      suffixIcon: suffixIcon,
-      filled: true,
-      fillColor: fieldFill,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: borderColor),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: AppColors.primaryColor, width: 2),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.red, width: 2),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.red, width: 2),
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
-    final iconMuted =
-        isDark ? cs.onSurfaceVariant : Colors.grey[600]!;
-    final checkboxBodyStyle = TextStyle(
+    final l10n = context.l10n;
+    final checkboxStyle = TextStyle(
+      color: AuthScreenColors.textMutedOf(context),
       fontSize: 13,
-      color: isDark ? cs.onSurfaceVariant : Colors.grey[700],
+      height: 1.4,
+    );
+    const linkStyle = TextStyle(
+      color: AuthScreenColors.orange,
+      fontWeight: FontWeight.w600,
+      fontSize: 13,
       height: 1.4,
     );
 
@@ -224,29 +194,26 @@ class _SignupFormState extends State<SignupForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // First Name and Last Name in a Row
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // First Name Field
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'First name',
-                      style: _signupLabelStyle(context),
-                    ),
+                    _buildLabel(l10n.firstName),
                     const SizedBox(height: 6),
                     TextFormField(
                       controller: _firstNameController,
-                      decoration: _signupFieldDecoration(
-                        context,
-                        hintText: 'Eg. John',
+                      textCapitalization: TextCapitalization.words,
+                      style: TextStyle(
+                        color: AuthScreenColors.textPrimaryOf(context),
+                        fontSize: 15,
                       ),
-                      style: _signupFieldTextStyle(context),
+                      decoration: authFieldDecoration(context, hint: l10n.hintFirstName),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'First name is required';
+                          return l10n.pleaseEnterRecipientName;
                         }
                         return null;
                       },
@@ -254,27 +221,24 @@ class _SignupFormState extends State<SignupForm> {
                   ],
                 ),
               ),
-              const SizedBox(width: 16),
-              // Last Name Field
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Last name',
-                      style: _signupLabelStyle(context),
-                    ),
+                    _buildLabel(l10n.lastName),
                     const SizedBox(height: 6),
                     TextFormField(
                       controller: _lastNameController,
-                      decoration: _signupFieldDecoration(
-                        context,
-                        hintText: 'Eg. Doe',
+                      textCapitalization: TextCapitalization.words,
+                      style: TextStyle(
+                        color: AuthScreenColors.textPrimaryOf(context),
+                        fontSize: 15,
                       ),
-                      style: _signupFieldTextStyle(context),
+                      decoration: authFieldDecoration(context, hint: l10n.hintLastName),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Last name is required';
+                          return l10n.pleaseEnterRecipientName;
                         }
                         return null;
                       },
@@ -285,211 +249,208 @@ class _SignupFormState extends State<SignupForm> {
             ],
           ),
           const SizedBox(height: 16),
-
-          // Email Field
-          Text(
-            'Email address',
-            style: _signupLabelStyle(context),
-          ),
+          _buildLabel(l10n.emailAddress),
           const SizedBox(height: 6),
           TextFormField(
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
-            decoration: _signupFieldDecoration(
-              context,
-              hintText: 'Eg. JohnDoe@gmail.com',
+            autofillHints: const [AutofillHints.email],
+            style: TextStyle(
+              color: AuthScreenColors.textPrimaryOf(context),
+              fontSize: 15,
             ),
-            style: _signupFieldTextStyle(context),
+            decoration: authFieldDecoration(
+              context,
+              hint: l10n.hintEmailExample,
+              prefixIcon: Icon(
+                Icons.mail_outline_rounded,
+                color: AuthScreenColors.textSecondaryOf(context),
+                size: 20,
+              ),
+            ),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
-                return 'Email is required';
+                return l10n.validationEmailRequired;
               }
-              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                return 'Please enter a valid email address';
+              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                  .hasMatch(value.trim())) {
+                return l10n.validationEmailInvalid;
               }
               return null;
             },
           ),
           const SizedBox(height: 16),
-
-          // Phone Number Field
-          Text(
-            'Phone number',
-            style: _signupLabelStyle(context),
+          _buildLabel(l10n.phoneNumber),
+          const SizedBox(height: 6),
+          AuthPhoneNumberField(
+            countryCode: _dialCode,
+            countryIsoCode: _countryIso,
+            numberController: _phoneController,
+            hintText: l10n.hintPhoneNational,
+            onCountryChanged: (Country country) {
+              setState(() {
+                _dialCode = '+${country.phoneCode}';
+                _countryIso = country.countryCode;
+              });
+            },
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return l10n.validationPhoneRequired;
+              }
+              final digits = cleanNationalPhoneDigits(value);
+              if (digits.length < 8 || digits.length > 12) {
+                return l10n.validationPhoneInvalid;
+              }
+              return null;
+            },
           ),
+          const SizedBox(height: 16),
+          _buildLabel(l10n.referralCodeOptional),
           const SizedBox(height: 6),
           TextFormField(
-            controller: _phoneController,
-            keyboardType: TextInputType.phone,
-            decoration: _signupFieldDecoration(
-              context,
-              hintText: 'Eg. 0712345678',
+            controller: _referralController,
+            textCapitalization: TextCapitalization.characters,
+            style: TextStyle(
+              color: AuthScreenColors.textPrimaryOf(context),
+              fontSize: 15,
             ),
-            style: _signupFieldTextStyle(context),
-            onChanged: (value) {
-              _phoneNumber = value;
-            },
-            validator: (value) {
-              if (value == null || value.trim().isEmpty) {
-                return 'Phone number is required';
-              }
-              return null;
-            },
+            decoration: authFieldDecoration(context, hint: l10n.hintReferralCode),
           ),
           const SizedBox(height: 16),
-
-          // Password Field
-          Text(
-            'Password',
-            style: _signupLabelStyle(context),
-          ),
+          _buildLabel(l10n.labelPassword),
           const SizedBox(height: 6),
           TextFormField(
             controller: _passwordController,
             obscureText: !_isPasswordVisible,
-            decoration: _signupFieldDecoration(
+            onChanged: (_) => setState(() {}),
+            style: TextStyle(
+              color: AuthScreenColors.textPrimaryOf(context),
+              fontSize: 15,
+            ),
+            decoration: authFieldDecoration(
               context,
-              hintText: 'Enter password',
+              hint: l10n.hintCreatePassword,
+              prefixIcon: Icon(
+                Icons.lock_outline_rounded,
+                color: AuthScreenColors.textSecondaryOf(context),
+                size: 20,
+              ),
               suffixIcon: IconButton(
                 icon: Icon(
-                  _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                  color: iconMuted,
+                  _isPasswordVisible
+                      ? Icons.visibility_rounded
+                      : Icons.visibility_off_rounded,
+                  color: AuthScreenColors.textSecondaryOf(context),
                 ),
                 onPressed: () {
-                  setState(() {
-                    _isPasswordVisible = !_isPasswordVisible;
-                  });
+                  setState(() => _isPasswordVisible = !_isPasswordVisible);
                 },
               ),
             ),
-            style: _signupFieldTextStyle(context),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
-                return 'Password is required';
+                return l10n.validationPasswordRequired;
               }
-              if (value.length < 8) {
-                return 'Password must be at least 8 characters';
+              if (value.length < 6) {
+                return l10n.validationPasswordMin;
               }
               return null;
             },
           ),
-          const SizedBox(height: 16),
-
-          // Confirm Password Field
-          Text(
-            'Confirm Password',
-            style: _signupLabelStyle(context),
+          const SizedBox(height: 10),
+          _PasswordStrengthMeter(
+            score: _passwordStrengthScore(_passwordController.text),
           ),
+          const SizedBox(height: 6),
+          Text(
+            l10n.passwordStrengthHint,
+            style: TextStyle(
+              color: AuthScreenColors.textSecondaryOf(context),
+              fontSize: 12,
+            ),
+          ),
+          const SizedBox(height: 16),
+          _buildLabel(l10n.confirmNewPassword),
           const SizedBox(height: 6),
           TextFormField(
             controller: _confirmPasswordController,
             obscureText: !_isConfirmPasswordVisible,
-            decoration: _signupFieldDecoration(
+            style: TextStyle(
+              color: AuthScreenColors.textPrimaryOf(context),
+              fontSize: 15,
+            ),
+            decoration: authFieldDecoration(
               context,
-              hintText: 'Enter password',
+              hint: l10n.hintReenterPassword,
+              prefixIcon: Icon(
+                Icons.lock_outline_rounded,
+                color: AuthScreenColors.textSecondaryOf(context),
+                size: 20,
+              ),
               suffixIcon: IconButton(
                 icon: Icon(
-                  _isConfirmPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                  color: iconMuted,
+                  _isConfirmPasswordVisible
+                      ? Icons.visibility_rounded
+                      : Icons.visibility_off_rounded,
+                  color: AuthScreenColors.textSecondaryOf(context),
                 ),
                 onPressed: () {
-                  setState(() {
-                    _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
-                  });
+                  setState(
+                    () =>
+                        _isConfirmPasswordVisible = !_isConfirmPasswordVisible,
+                  );
                 },
               ),
             ),
-            style: _signupFieldTextStyle(context),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
-                return 'Please confirm your password';
+                return l10n.validationPasswordRequired;
               }
               if (value != _passwordController.text) {
-                return 'Passwords do not match';
+                return l10n.validationPasswordsDoNotMatch;
               }
               return null;
             },
           ),
           const SizedBox(height: 20),
-
-          // Terms & Conditions Checkbox
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Checkbox(
-                value: _termsAccepted,
-                onChanged: (value) {
-                  setState(() {
-                    _termsAccepted = value ?? false;
-                  });
-                },
-                activeColor: AppColors.primaryColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: RichText(
-                    text: TextSpan(
-                      style: checkboxBodyStyle,
-                      children: [
-                        TextSpan(text: "I have read and accepted "),
-                        TextSpan(
-                          text: "Hudhud's Terms & Conditions",
-                          style: TextStyle(
-                            color: AppColors.primaryColor,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
+          _SignupCheckboxRow(
+            value: _termsAccepted,
+            onChanged: (value) {
+              setState(() => _termsAccepted = value ?? false);
+            },
+            child: Text.rich(
+              TextSpan(
+                style: checkboxStyle,
+                children: [
+                  TextSpan(text: l10n.signupAcceptTermsPrefix),
+                  TextSpan(
+                    text: l10n.signupTermsLink,
+                    style: linkStyle,
+                    recognizer: _termsTap,
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
           const SizedBox(height: 8),
-
-          // Data Protection Checkbox
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Checkbox(
-                value: _dataProtectionAccepted,
-                onChanged: (value) {
-                  setState(() {
-                    _dataProtectionAccepted = value ?? false;
-                  });
-                },
-                activeColor: AppColors.primaryColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: RichText(
-                    text: TextSpan(
-                      style: checkboxBodyStyle,
-                      children: [
-                        TextSpan(text: "I consent to the collection and processing of my personal data in accordance with the applicable "),
-                        TextSpan(
-                          text: "Data Protection",
-                          style: TextStyle(
-                            color: AppColors.primaryColor,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        TextSpan(text: " laws."),
-                      ],
-                    ),
+          _SignupCheckboxRow(
+            value: _dataProtectionAccepted,
+            onChanged: (value) {
+              setState(() => _dataProtectionAccepted = value ?? false);
+            },
+            child: Text.rich(
+              TextSpan(
+                style: checkboxStyle,
+                children: [
+                  TextSpan(text: l10n.signupConsentDataPrefix),
+                  TextSpan(
+                    text: l10n.signupDataProtectionLink,
+                    style: linkStyle,
+                    recognizer: _privacyTap,
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
         ],
       ),
@@ -497,36 +458,101 @@ class _SignupFormState extends State<SignupForm> {
   }
 }
 
-class SignupButton extends StatelessWidget {
-  const SignupButton({super.key});
+class _PasswordStrengthMeter extends StatelessWidget {
+  const _PasswordStrengthMeter({required this.score});
 
-  void _handleSignup(BuildContext context) {
+  final int score;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: List.generate(4, (index) {
+        final filled = index < score;
+        return Expanded(
+          child: Container(
+            height: 4,
+            margin: EdgeInsets.only(right: index == 3 ? 0 : 6),
+            decoration: BoxDecoration(
+              color: filled
+                  ? AuthScreenColors.lavender
+                  : AuthScreenColors.surfaceBorderOf(context),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+        );
+      }),
+    );
+  }
+}
+
+class _SignupCheckboxRow extends StatelessWidget {
+  final bool value;
+  final ValueChanged<bool?> onChanged;
+  final Widget child;
+
+  const _SignupCheckboxRow({
+    required this.value,
+    required this.onChanged,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 24,
+          height: 24,
+          child: Checkbox(
+            value: value,
+            onChanged: onChanged,
+            activeColor: AuthScreenColors.orange,
+            checkColor: Colors.black,
+            side: BorderSide(
+              color: AuthScreenColors.textSecondaryOf(context),
+              width: 1.4,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(5),
+            ),
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            visualDensity: VisualDensity.compact,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(child: child),
+      ],
+    );
+  }
+}
+
+class SignupButton extends StatelessWidget {
+  final bool resumeAfterAuth;
+
+  const SignupButton({super.key, this.resumeAfterAuth = false});
+
+  void _handleSignup(BuildContext context, AppLocalizations l10n) {
     final formState = signupFormKey.currentState;
     if (formState == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill in all required fields'),
-          backgroundColor: Colors.red,
+        SnackBar(
+          content: Text(l10n.signupFormIncomplete),
+          backgroundColor: AuthScreenColors.orange,
         ),
       );
       return;
     }
 
     if (!formState.isFormValid()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill in all required fields'),
-          backgroundColor: Colors.red,
-        ),
-      );
       return;
     }
 
     if (!formState.areCheckboxesAccepted()) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please accept the Terms & Conditions and Data Protection consent'),
-          backgroundColor: Colors.red,
+        SnackBar(
+          content: Text(l10n.signupAcceptLegalRequired),
+          backgroundColor: AuthScreenColors.orange,
         ),
       );
       return;
@@ -534,40 +560,52 @@ class SignupButton extends StatelessWidget {
 
     final formData = formState.getFormData();
 
-    // Trigger signup event
     context.read<SignupBloc>().add(
           SignupFormSubmitted(
             '${formData.firstName} ${formData.lastName}',
             formData.email,
             formData.phoneNumber,
             formData.password,
-            formData.password, // confirmPassword same as password
+            formData.password,
+            formData.referralCode,
           ),
         );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return BlocListener<SignupBloc, SignupState>(
       listener: (context, state) {
         if (state is SignupSuccess) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Account created successfully!'),
-              backgroundColor: Colors.green,
-            ),
-          );
-          // Navigate to combined email + phone verification screen
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const VerifyContactScreen()),
-            (route) => false,
-          );
+          if (resumeAfterAuth) {
+            Navigator.push<bool>(
+              context,
+              MaterialPageRoute<bool>(
+                builder: (context) => const VerifyContactScreen(
+                  resumeAfterAuth: true,
+                ),
+              ),
+            ).then((verified) {
+              if (verified == true && context.mounted) {
+                Navigator.pop(context, true);
+              }
+            });
+          } else {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const VerifyContactScreen(),
+              ),
+              (route) => false,
+            );
+          }
         } else if (state is SignupFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.message),
-              backgroundColor: Colors.red,
+              backgroundColor: const Color(0xFFEF5350),
             ),
           );
         }
@@ -575,36 +613,10 @@ class SignupButton extends StatelessWidget {
       child: BlocBuilder<SignupBloc, SignupState>(
         builder: (context, state) {
           final isLoading = state is SignupLoading;
-          return SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: ElevatedButton(
-              onPressed: isLoading ? null : () => _handleSignup(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 0,
-              ),
-              child: isLoading
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
-                      ),
-                    )
-                  : const Text(
-                      'Sign Up',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-            ),
+          return AuthGradientButton(
+            label: l10n.createAccount,
+            loading: isLoading,
+            onPressed: isLoading ? null : () => _handleSignup(context, l10n),
           );
         },
       ),

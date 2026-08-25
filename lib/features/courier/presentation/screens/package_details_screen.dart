@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:hudhud_delivery/core/api/api_service.dart';
+import 'package:hudhud_delivery/app/services/auth_service.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
-import 'package:hudhud_delivery/features/payment/data/data_provider/payment_data_provider.dart';
-import 'package:hudhud_delivery/features/payment/data/repository/payment_repository.dart';
+import 'package:hudhud_delivery/core/utils/phone_util.dart';
+import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
+import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:latlong2/latlong.dart';
 import 'confirm_details_screen.dart';
 
@@ -33,7 +35,7 @@ class PackageDetailsScreen extends StatefulWidget {
 }
 
 class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
-  final TextEditingController _itemTypeController = TextEditingController();
+  String? _itemType;
   final TextEditingController _quantityController = TextEditingController();
   final TextEditingController _packageWeightController =
       TextEditingController();
@@ -43,14 +45,11 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
       TextEditingController();
   final TextEditingController _recipientPhoneController =
       TextEditingController();
+  final TextEditingController _senderPhoneController = TextEditingController();
 
-  String _whoPays = 'me'; // 'me' or 'recipient'
-  String? _paymentType; // API id (e.g. 'wallet', 'card')
   String? _packageImagePath;
-
-  List<Map<String, dynamic>> _paymentMethods = [];
-  bool _isLoadingPaymentMethods = true;
-  String? _paymentMethodsError;
+  bool _senderManuallyCleared = false;
+  String _lastSenderText = '';
 
   final List<String> _itemTypes = [
     'Electronics/Gadgets',
@@ -61,58 +60,54 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
     'Other'
   ];
 
-  late final PaymentRepository _paymentRepository;
-
   @override
   void initState() {
     super.initState();
-    _paymentRepository = PaymentRepository(
-      paymentDataProvider: PaymentDataProvider(
-        apiService: ApiService.instance,
-      ),
-    );
-    _fetchPaymentMethods();
+    _quantityController.text = '1';
+    _packageWeightController.text = '1';
+    _senderPhoneController.addListener(_onSenderPhoneChanged);
+    _prefillSenderPhone();
   }
 
-  Future<void> _fetchPaymentMethods() async {
-    try {
-      final methods = await _paymentRepository.getPaymentMethods();
-      if (mounted) {
-        setState(() {
-          _paymentMethods = methods;
-          _isLoadingPaymentMethods = false;
-          _paymentMethodsError = null;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _paymentMethods = [];
-          _isLoadingPaymentMethods = false;
-          _paymentMethodsError = 'Failed to load payment methods';
-        });
-      }
+  String _localPhoneDisplay(String? phone) {
+    final parts = splitPhoneForDisplay(phone);
+    if (parts.nationalNumber.isEmpty) {
+      return (phone ?? '').replaceAll(RegExp(r'\D'), '');
     }
+    return '0${parts.nationalNumber}';
   }
 
-  String? _getSelectedPaymentName() {
-    if (_paymentType == null) return null;
-    for (final method in _paymentMethods) {
-      if (method['id'] == _paymentType) {
-        return method['name'] as String?;
-      }
+  void _onSenderPhoneChanged() {
+    final current = _senderPhoneController.text.trim();
+    if (_lastSenderText.isNotEmpty && current.isEmpty) {
+      _senderManuallyCleared = true;
     }
-    return _paymentType;
+    _lastSenderText = current;
+  }
+
+  Future<void> _prefillSenderPhone() async {
+    final user = await AuthService().getStoredUser();
+    final phone = user?.phone?.trim() ?? '';
+    if (phone.isEmpty || !mounted) return;
+    final display = _localPhoneDisplay(phone);
+    if (display.isEmpty) return;
+    setState(() {
+      if (_senderPhoneController.text.trim().isEmpty &&
+          !_senderManuallyCleared) {
+        _senderPhoneController.text = display;
+      }
+    });
   }
 
   @override
   void dispose() {
-    _itemTypeController.dispose();
     _quantityController.dispose();
     _packageWeightController.dispose();
     _packageDescriptionController.dispose();
     _recipientNameController.dispose();
     _recipientPhoneController.dispose();
+    _senderPhoneController.removeListener(_onSenderPhoneChanged);
+    _senderPhoneController.dispose();
     super.dispose();
   }
 
@@ -120,17 +115,50 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
     // TODO: Implement image picker
     // For now, just show a message
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Image picker will be implemented'),
+      SnackBar(
+        content: Text(context.l10n.imagePickerTodo),
+      ),
+    );
+  }
+
+  InputDecoration _fieldDecoration({
+    required String labelText,
+    required Color fieldFill,
+    required Color outline,
+    String? hintText,
+  }) {
+    return InputDecoration(
+      labelText: labelText,
+      hintText: hintText,
+      labelStyle: TextStyle(
+        fontSize: 14,
+        color: HomeColors.textPrimaryOf(context),
+      ),
+      hintStyle: hintText != null
+          ? TextStyle(color: HomeColors.textMutedOf(context))
+          : null,
+      filled: true,
+      fillColor: fieldFill,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        borderSide: BorderSide(color: outline),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        borderSide: BorderSide(color: outline),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        borderSide: const BorderSide(color: HomeColors.violet),
       ),
     );
   }
 
   void _navigateToConfirm() {
-    if (_itemTypeController.text.isEmpty) {
+    if (_itemType == null || _itemType!.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select item type'),
+        SnackBar(
+          content: Text(context.l10n.pleaseSelectItemType),
           backgroundColor: Colors.red,
         ),
       );
@@ -139,8 +167,8 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
 
     if (_quantityController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter quantity'),
+        SnackBar(
+          content: Text(context.l10n.pleaseEnterQuantity),
           backgroundColor: Colors.red,
         ),
       );
@@ -150,18 +178,19 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
     final weight = double.tryParse(_packageWeightController.text);
     if (weight == null || weight <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter a valid package weight (kg)'),
+        SnackBar(
+          content: Text(context.l10n.pleaseEnterValidWeight),
           backgroundColor: Colors.red,
         ),
       );
       return;
     }
 
-    if (_paymentType == null || _paymentType!.isEmpty) {
+    final senderPhone = normalizePhoneToBackend(_senderPhoneController.text);
+    if (!RegExp(r'^2519\d{8}$').hasMatch(senderPhone)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select payment type'),
+        SnackBar(
+          content: Text(context.l10n.pleaseEnterValidSenderPhone),
           backgroundColor: Colors.red,
         ),
       );
@@ -170,8 +199,8 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
 
     if (_recipientNameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter recipient name'),
+        SnackBar(
+          content: Text(context.l10n.pleaseEnterRecipientName),
           backgroundColor: Colors.red,
         ),
       );
@@ -180,8 +209,8 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
 
     if (_recipientPhoneController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter recipient phone number'),
+        SnackBar(
+          content: Text(context.l10n.pleaseEnterRecipientPhone),
           backgroundColor: Colors.red,
         ),
       );
@@ -197,15 +226,16 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
           pickupPosition: widget.pickupPosition,
           deliveryPosition: widget.deliveryPosition,
           selectedVehicle: widget.selectedVehicle,
-          itemType: _itemTypeController.text,
+          itemType: _itemType!,
           quantity: _quantityController.text,
           packageWeight: weight,
           packageDescription: _packageDescriptionController.text.trim(),
           isInstantDelivery: widget.isInstantDelivery,
           scheduledPickup: widget.scheduledPickup,
           scheduledDelivery: widget.scheduledDelivery,
-          whoPays: _whoPays,
-          paymentType: _paymentType!,
+          whoPays: 'recipient',
+          paymentType: 'cash_on_delivery',
+          senderPhone: senderPhone,
           recipientName: _recipientNameController.text,
           recipientPhone: _recipientPhoneController.text,
           packageImagePath: _packageImagePath,
@@ -216,507 +246,264 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final outline = colorScheme.outlineVariant;
-    final fieldFill = colorScheme.surfaceContainerHighest;
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: colorScheme.surface,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          'What are you sending',
-          style: TextStyle(
-            color: colorScheme.onSurface,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // What are you sending section
-                    Text(
-                      'What are you sending',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // Item Type
-                    GestureDetector(
-                      onTap: () {
-                        showModalBottomSheet(
-                          context: context,
-                          builder: (context) => Container(
-                            padding: const EdgeInsets.all(20),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: _itemTypes.map((type) {
-                                return ListTile(
-                                  title: Text(type),
-                                  onTap: () {
-                                    setState(() {
-                                      _itemTypeController.text = type;
-                                    });
-                                    Navigator.pop(context);
-                                  },
-                                );
-                              }).toList(),
-                            ),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: fieldFill,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: outline),
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                _itemTypeController.text.isEmpty
-                                    ? 'Select type of item (e.g. gadget, document)'
-                                    : _itemTypeController.text,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: _itemTypeController.text.isEmpty
-                                      ? colorScheme.outline
-                                      : colorScheme.onSurface,
-                                ),
-                              ),
-                            ),
-                            Icon(Icons.keyboard_arrow_down,
-                                color: colorScheme.outline),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // Quantity
-                    TextFormField(
-                      controller: _quantityController,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: 'Quantity',
-                        labelStyle: TextStyle(
-                          fontSize: 14,
-                          color: colorScheme.onSurface,
-                        ),
-                        filled: true,
-                        fillColor: fieldFill,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: outline),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: outline),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: AppColors.primaryColor),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // Package Weight (kg)
-                    TextFormField(
-                      controller: _packageWeightController,
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
-                      decoration: InputDecoration(
-                        labelText: 'Package Weight (kg)',
-                        labelStyle: TextStyle(
-                          fontSize: 14,
-                          color: colorScheme.onSurface,
-                        ),
-                        filled: true,
-                        fillColor: fieldFill,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: outline),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: outline),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: AppColors.primaryColor),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // Package Description (optional)
-                    TextFormField(
-                      controller: _packageDescriptionController,
-                      maxLines: 2,
-                      decoration: InputDecoration(
-                        labelText: 'Package Description (optional)',
-                        labelStyle: TextStyle(
-                          fontSize: 14,
-                          color: colorScheme.onSurface,
-                        ),
-                        filled: true,
-                        fillColor: fieldFill,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: outline),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: outline),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: AppColors.primaryColor),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    // Select who pays
-                    Text(
-                      'Select who pays',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _RadioOption(
-                            label: 'Me',
-                            isSelected: _whoPays == 'me',
-                            onTap: () {
-                              setState(() {
-                                _whoPays = 'me';
-                              });
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _RadioOption(
-                            label: 'Recipient',
-                            isSelected: _whoPays == 'recipient',
-                            onTap: () {
-                              setState(() {
-                                _whoPays = 'recipient';
-                              });
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    // Payment type
-                    Text(
-                      'Payment type',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    GestureDetector(
-                      onTap: _isLoadingPaymentMethods
-                          ? null
-                          : () {
-                              showModalBottomSheet(
-                                context: context,
-                                builder: (context) => Container(
-                                  padding: const EdgeInsets.all(20),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: _paymentMethods.map((method) {
-                                      final id = method['id'] as String?;
-                                      final name =
-                                          method['name'] as String? ?? id ?? '';
-                                      return ListTile(
-                                        title: Text(name),
-                                        onTap: () {
-                                          setState(() {
-                                            _paymentType = id;
-                                          });
-                                          Navigator.pop(context);
-                                        },
-                                      );
-                                    }).toList(),
-                                  ),
-                                ),
-                              );
-                            },
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: fieldFill,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: outline),
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: _isLoadingPaymentMethods
-                                  ? Text(
-                                      'Loading payment methods...',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: colorScheme.outline,
-                                      ),
-                                    )
-                                  : Text(
-                                      _paymentMethodsError ??
-                                          _getSelectedPaymentName() ??
-                                          'Select payment type',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: _paymentType == null
-                                            ? colorScheme.outline
-                                            : colorScheme.onSurface,
-                                      ),
-                                    ),
-                            ),
-                            Icon(Icons.keyboard_arrow_down,
-                                color: colorScheme.outline),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    // Recipient Information
-                    Text(
-                      'Recipient Information',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // Recipient Name
-                    TextFormField(
-                      controller: _recipientNameController,
-                      decoration: InputDecoration(
-                        labelText: 'Recipient Names',
-                        labelStyle: TextStyle(
-                          fontSize: 14,
-                          color: colorScheme.onSurface,
-                        ),
-                        filled: true,
-                        fillColor: fieldFill,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: outline),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: outline),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: AppColors.primaryColor),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // Recipient Phone
-                    TextFormField(
-                      controller: _recipientPhoneController,
-                      keyboardType: TextInputType.phone,
-                      decoration: InputDecoration(
-                        labelText: 'Recipient contact number',
-                        labelStyle: TextStyle(
-                          fontSize: 14,
-                          color: colorScheme.onSurface,
-                        ),
-                        filled: true,
-                        fillColor: fieldFill,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: outline),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: outline),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: AppColors.primaryColor),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    // Take a picture of the package
-                    GestureDetector(
-                      onTap: _takePicture,
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: fieldFill,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: outline,
-                            style: BorderStyle.solid,
-                            width: 2,
-                          ),
-                        ),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.camera_alt,
-                              size: 48,
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              'Take a picture of the package',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: colorScheme.onSurfaceVariant,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 100), // Space for bottom button
-                  ],
+    return CourierTheme.wrap(
+      context,
+      child: Builder(
+        builder: (context) {
+          final theme = Theme.of(context);
+          final borderColor = HomeColors.borderOf(context);
+          final outline = HomeColors.borderOf(context);
+          final fieldFill = HomeColors.surfaceElevatedOf(context);
+          return Scaffold(
+            backgroundColor: HomeColors.backgroundOf(context),
+            appBar: AppBar(
+              backgroundColor: HomeColors.surfaceOf(context),
+              elevation: 0,
+              surfaceTintColor: Colors.transparent,
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back, color: HomeColors.textPrimaryOf(context)),
+                onPressed: () => Navigator.pop(context),
+              ),
+              title: Text(
+                'What are you sending',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: HomeColors.textPrimaryOf(context),
                 ),
               ),
+              centerTitle: true,
             ),
-            // Continue Button
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: colorScheme.surface,
-                boxShadow: [
-                  BoxShadow(
-                    color: colorScheme.shadow.withOpacity(0.08),
-                    blurRadius: 10,
-                    offset: const Offset(0, -2),
+            body: SafeArea(
+              child: Column(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'What are you sending',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: HomeColors.textPrimaryOf(context),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          DropdownButtonFormField<String>(
+                            initialValue: _itemType,
+                            isExpanded: true,
+                            dropdownColor: HomeColors.surfaceOf(context),
+                            icon: Icon(
+                              Icons.keyboard_arrow_down,
+                              color: HomeColors.textMutedOf(context),
+                            ),
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: HomeColors.textPrimaryOf(context),
+                            ),
+                            decoration: _fieldDecoration(
+                              labelText: 'What are you sending',
+                              hintText:
+                                  'Select type of item (e.g. gadget, document)',
+                              fieldFill: fieldFill,
+                              outline: outline,
+                            ),
+                            hint: Text(
+                              'Select type of item (e.g. gadget, document)',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: HomeColors.textMutedOf(context),
+                              ),
+                            ),
+                            items: _itemTypes
+                                .map(
+                                  (type) => DropdownMenuItem<String>(
+                                    value: type,
+                                    child: Text(type),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (value) {
+                              setState(() => _itemType = value);
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: TextFormField(
+                                  controller: _quantityController,
+                                  keyboardType: TextInputType.number,
+                                  style: TextStyle(
+                                      color: HomeColors.textPrimaryOf(context)),
+                                  decoration: _fieldDecoration(
+                                    labelText: 'Quantity',
+                                    fieldFill: fieldFill,
+                                    outline: outline,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: TextFormField(
+                                  controller: _packageWeightController,
+                                  keyboardType:
+                                      const TextInputType.numberWithOptions(
+                                          decimal: true),
+                                  style: TextStyle(
+                                      color: HomeColors.textPrimaryOf(context)),
+                                  decoration: _fieldDecoration(
+                                    labelText: 'Weight (kg)',
+                                    fieldFill: fieldFill,
+                                    outline: outline,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: _packageDescriptionController,
+                            maxLines: 2,
+                            style: TextStyle(color: HomeColors.textPrimaryOf(context)),
+                            decoration: _fieldDecoration(
+                              labelText: 'Package Description (optional)',
+                              fieldFill: fieldFill,
+                              outline: outline,
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          Text(
+                            'Sender Information',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: HomeColors.textPrimaryOf(context),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: _senderPhoneController,
+                            keyboardType: TextInputType.phone,
+                            style: TextStyle(color: HomeColors.textPrimaryOf(context)),
+                            decoration: _fieldDecoration(
+                              labelText: 'Sender phone (09xxxxxxxx)',
+                              hintText: '0912345678',
+                              fieldFill: fieldFill,
+                              outline: outline,
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          Text(
+                            'Recipient Information',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: HomeColors.textPrimaryOf(context),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: _recipientNameController,
+                            style: TextStyle(color: HomeColors.textPrimaryOf(context)),
+                            decoration: _fieldDecoration(
+                              labelText: 'Recipient Names',
+                              fieldFill: fieldFill,
+                              outline: outline,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: _recipientPhoneController,
+                            keyboardType: TextInputType.phone,
+                            style: TextStyle(color: HomeColors.textPrimaryOf(context)),
+                            decoration: _fieldDecoration(
+                              labelText: 'Recipient contact number',
+                              fieldFill: fieldFill,
+                              outline: outline,
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          GestureDetector(
+                            onTap: _takePicture,
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                color: fieldFill,
+                                borderRadius:
+                                    BorderRadius.circular(AppColors.radiusLG),
+                                border: Border.all(
+                                  color: outline,
+                                  style: BorderStyle.solid,
+                                  width: 2,
+                                ),
+                              ),
+                              child: Column(
+                                children: [
+                                  Icon(
+                                    Icons.camera_alt,
+                                    size: 48,
+                                    color: HomeColors.textMutedOf(context),
+                                  ),
+                                  SizedBox(height: 12),
+                                  Text(
+                                    'Take a picture of the package',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: HomeColors.textMutedOf(context),
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 100),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(AppColors.spaceMD),
+                    decoration: BoxDecoration(
+                      color: HomeColors.surfaceOf(context),
+                      border: Border(top: BorderSide(color: borderColor)),
+                    ),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: _navigateToConfirm,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: HomeColors.violet,
+                          foregroundColor: Theme.of(context).colorScheme.onSecondary,
+                          minimumSize: const Size(
+                              double.infinity, AppColors.buttonHeightMD),
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.circular(AppColors.radiusLG),
+                          ),
+                        ),
+                        child: const Text(
+                          'Continue',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
-              child: SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: _navigateToConfirm,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text(
-                    'Continue',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _RadioOption extends StatelessWidget {
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _RadioOption({
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final outline = colorScheme.outlineVariant;
-    final fieldFill = colorScheme.surfaceContainerHighest;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primaryColor.withOpacity(0.1)
-              : fieldFill,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? AppColors.primaryColor : outline,
-            width: isSelected ? 2 : 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 20,
-              height: 20,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color:
-                      isSelected ? AppColors.primaryColor : colorScheme.outline,
-                  width: 2,
-                ),
-                color: isSelected ? AppColors.primaryColor : Colors.transparent,
-              ),
-              child: isSelected
-                  ? const Center(
-                      child: Icon(
-                        Icons.check,
-                        size: 12,
-                        color: Colors.white,
-                      ),
-                    )
-                  : null,
-            ),
-            const SizedBox(width: 12),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                color: isSelected
-                    ? AppColors.primaryColor
-                    : colorScheme.onSurface,
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

@@ -1,12 +1,26 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
+import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/app/services/location_service.dart';
 import 'package:hudhud_delivery/app/services/geocoding_service.dart';
 import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
+import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
+import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
+import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
+import 'package:hudhud_delivery/features/courier/presentation/widgets/courier_vehicle_estimate_card.dart';
+import 'package:hudhud_delivery/features/courier/presentation/widgets/nearby_driver_markers.dart';
+import 'package:hudhud_delivery/features/courier/presentation/widgets/send_package_location_row.dart';
+import 'package:hudhud_delivery/features/courier/utils/courier_vehicle_display.dart';
+import 'package:hudhud_delivery/features/courier/utils/delivery_estimate.dart';
+import 'package:hudhud_delivery/features/courier/utils/fetch_courier_vehicle_estimates.dart';
+import 'package:hudhud_delivery/features/courier/utils/nearby_drivers_poller.dart';
+import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import '../../../home/presentation/screen/location_search_screen.dart';
 import 'package_details_screen.dart';
 
@@ -19,10 +33,14 @@ class InstantDeliveryScreen extends StatefulWidget {
 
 class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
   gmaps.GoogleMapController? _mapController;
+  late final CourierRepository _courierRepository;
+  late final NearbyDriversPoller _nearbyPoller;
+  Timer? _estimateDebounce;
+  Timer? _serviceAreaDebounce;
   String _pickupLocation = '';
   String _deliveryLocation = '';
   bool _pickupResolveFailed = false;
-  String _selectedVehicle = 'motorcycle'; // motorcycle, car, van
+  String? _selectedVehicle;
   /// Default map center (Addis Ababa) — same as taxi / location flows until GPS resolves.
   LatLng _currentPosition = const LatLng(9.0222, 38.7468);
   LatLng? _pickupPosition;
@@ -30,6 +48,13 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
   bool _isLoadingLocation = true;
   List<LatLng>? _routePolylinePoints;
   bool? _hasGoogleMapsApiKey;
+  bool _isLoadingEstimate = false;
+  bool _isLoadingServiceArea = false;
+  Map<String, DeliveryEstimate> _vehicleEstimates = {};
+  List<String> _supportedVehicleTypes = const [];
+
+  bool get _canFetchEstimate =>
+      _pickupPosition != null && _deliveryPosition != null;
 
   static gmaps.LatLng _toG(LatLng p) => gmaps.LatLng(p.latitude, p.longitude);
 
@@ -50,8 +75,170 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
   @override
   void initState() {
     super.initState();
+    _courierRepository = CourierRepository(
+      courierDataProvider: CourierDataProvider(
+        apiService: ApiService.instance,
+      ),
+    );
+    _nearbyPoller = NearbyDriversPoller(
+      repository: _courierRepository,
+      onUpdate: () {
+        if (mounted) setState(() {});
+      },
+    );
     _loadMapsAvailability();
     _getCurrentLocation();
+  }
+
+  void _syncNearbyDrivers() {
+    final pickup = _pickupPosition;
+    final vehicle = _selectedVehicle;
+    if (pickup == null || vehicle == null) return;
+    _nearbyPoller.setTarget(
+      latitude: pickup.latitude,
+      longitude: pickup.longitude,
+      vehicleType: mapCourierVehicleType(vehicle),
+    );
+  }
+
+  @override
+  void dispose() {
+    _estimateDebounce?.cancel();
+    _serviceAreaDebounce?.cancel();
+    _nearbyPoller.dispose();
+    super.dispose();
+  }
+
+  void _scheduleServiceAreaFetch() {
+    _serviceAreaDebounce?.cancel();
+    if (_pickupLocation.trim().isEmpty) {
+      setState(() {
+        _isLoadingServiceArea = false;
+        _supportedVehicleTypes = const [];
+        _selectedVehicle = null;
+        _vehicleEstimates = {};
+      });
+      return;
+    }
+    _serviceAreaDebounce = Timer(
+      const Duration(milliseconds: 300),
+      _fetchServiceArea,
+    );
+  }
+
+  Future<void> _fetchServiceArea({bool quoteAfter = true}) async {
+    final pickup = _pickupLocation.trim();
+    if (pickup.isEmpty) return;
+
+    setState(() {
+      _isLoadingServiceArea = true;
+    });
+
+    final result = await _courierRepository.getDeliveryServiceAreas(
+      pickupLocation: pickup,
+    );
+    if (!mounted) return;
+
+    final rawTypes = result['success'] == true
+        ? List<String>.from(result['supportedVehicleTypes'] as List? ?? const [])
+        : const <String>[];
+    final applied = applyCourierSupportedVehicleTypes(
+      supportedVehicleTypes: rawTypes,
+      selectedVehicleType: _selectedVehicle,
+    );
+    setState(() {
+      _isLoadingServiceArea = false;
+      _supportedVehicleTypes = applied.types;
+      _selectedVehicle = applied.selected;
+    });
+    _syncNearbyDrivers();
+    if (quoteAfter) _scheduleEstimateFetch();
+  }
+
+  void _scheduleEstimateFetch() {
+    _estimateDebounce?.cancel();
+    if (!_canFetchEstimate || _supportedVehicleTypes.isEmpty) {
+      setState(() {
+        _isLoadingEstimate = false;
+        _vehicleEstimates = {};
+      });
+      return;
+    }
+    _estimateDebounce = Timer(
+      const Duration(milliseconds: 300),
+      _fetchEstimate,
+    );
+  }
+
+  Future<void> _fetchEstimate() async {
+    if (_pickupPosition == null ||
+        _deliveryPosition == null ||
+        _supportedVehicleTypes.isEmpty) {
+      return;
+    }
+
+    setState(() {
+      _isLoadingEstimate = true;
+    });
+
+    var cityVehicleUnsupported = false;
+    var pickupAreaUnavailable = false;
+    final result = await fetchCourierEstimatesForVehicles(
+      vehicleIds: _supportedVehicleTypes,
+      estimateForVehicle: (vehicleId) async {
+        final raw = await _courierRepository.estimateDelivery(
+          packageType: kCourierEstimatePlaceholderPackageType,
+          packageWeight: kCourierEstimatePlaceholderWeightKg,
+          pickupLatitude: _pickupPosition!.latitude,
+          pickupLongitude: _pickupPosition!.longitude,
+          dropoffLatitude: _deliveryPosition!.latitude,
+          dropoffLongitude: _deliveryPosition!.longitude,
+          vehicleType: mapCourierVehicleType(vehicleId),
+          serviceType: deliveryServiceType(isInstantDelivery: true),
+          pickupLocation: _pickupLocation,
+        );
+        final error = raw['error'] as ApiErrorResult?;
+        if (error?.isCityVehicleNotSupported == true) {
+          cityVehicleUnsupported = true;
+        }
+        if (error?.isPickupServiceAreaUnavailable == true) {
+          pickupAreaUnavailable = true;
+        }
+        return raw;
+      },
+    );
+
+    if (!mounted) return;
+    setState(() {
+      _isLoadingEstimate = false;
+      _vehicleEstimates = result.byVehicle;
+    });
+    if (pickupAreaUnavailable) {
+      setState(() {
+        _supportedVehicleTypes = const [];
+        _selectedVehicle = null;
+        _vehicleEstimates = {};
+      });
+      return;
+    }
+    if (cityVehicleUnsupported) {
+      await _fetchServiceArea(quoteAfter: false);
+      return;
+    }
+    _syncNearbyDrivers();
+  }
+
+  int? _etaMinutesFor(String vehicleId) {
+    if (vehicleId == _selectedVehicle) {
+      int? nearest;
+      for (final driver in _nearbyPoller.result.drivers) {
+        final minutes = driver.estimatedPickupMinutes;
+        if (minutes == null) continue;
+        if (nearest == null || minutes < nearest) nearest = minutes;
+      }
+      if (nearest != null) return nearest;
+    }
+    return _vehicleEstimates[vehicleId]?.estimatedDuration;
   }
 
   Future<void> _loadMapsAvailability() async {
@@ -68,12 +255,10 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
     });
 
     try {
-      // Get current position coordinates
       final position = await LocationService.getCurrentPosition();
       if (position != null) {
         final latLng = LatLng(position.latitude, position.longitude);
 
-        // Get address from coordinates
         final address = await GeocodingService.getAddressFromLatLng(
           position.latitude,
           position.longitude,
@@ -82,16 +267,17 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
         if (mounted) {
           setState(() {
             _currentPosition = latLng;
-            _pickupPosition = latLng; // Set initial pickup position
+            _pickupPosition = latLng;
             _pickupLocation = address;
             _pickupResolveFailed = false;
             _isLoadingLocation = false;
           });
 
-          // Move map to current location
           _mapController?.moveCamera(
             gmaps.CameraUpdate.newLatLngZoom(_toG(latLng), 15.0),
           );
+          _syncNearbyDrivers();
+          _scheduleServiceAreaFetch();
         }
       } else {
         if (mounted) {
@@ -117,8 +303,11 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
     final result = await Navigator.push<Map<String, dynamic>>(
       context,
       MaterialPageRoute(
-        builder: (context) => LocationSearchScreen(
-          currentLocation: _pickupLocation,
+        builder: (context) => CourierTheme.wrap(
+          context,
+          child: LocationSearchScreen(
+            currentLocation: _pickupLocation,
+          ),
         ),
       ),
     );
@@ -135,15 +324,18 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
           _routePolylinePoints = null;
         });
 
-        // Adjust map view to show both locations if both are set
         if (_pickupPosition != null && _deliveryPosition != null) {
           _fetchRouteDirections();
           _fitBounds();
+          _scheduleEstimateFetch();
         } else {
+          _scheduleEstimateFetch();
           _mapController?.moveCamera(
             gmaps.CameraUpdate.newLatLngZoom(_toG(coordinates), 15.0),
           );
         }
+        _syncNearbyDrivers();
+        _scheduleServiceAreaFetch();
       }
     }
   }
@@ -152,8 +344,11 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
     final result = await Navigator.push<Map<String, dynamic>>(
       context,
       MaterialPageRoute(
-        builder: (context) => LocationSearchScreen(
-          currentLocation: _pickupLocation,
+        builder: (context) => CourierTheme.wrap(
+          context,
+          child: LocationSearchScreen(
+            currentLocation: _pickupLocation,
+          ),
         ),
       ),
     );
@@ -169,11 +364,12 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
           _routePolylinePoints = null;
         });
 
-        // Adjust map view to show both locations if both are set
         if (_pickupPosition != null && _deliveryPosition != null) {
           _fetchRouteDirections();
           _fitBounds();
+          _scheduleEstimateFetch();
         } else {
+          _scheduleEstimateFetch();
           _mapController?.moveCamera(
             gmaps.CameraUpdate.newLatLngZoom(_toG(coordinates), 15.0),
           );
@@ -184,275 +380,265 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final topPad = MediaQuery.paddingOf(context).top;
-    final screenHeight = MediaQuery.of(context).size.height;
-    const initialSheetSize = 0.5;
-    final mapHeight = screenHeight * (1 - initialSheetSize);
+    return CourierTheme.wrap(
+      context,
+      child: Builder(
+        builder: (context) {
+          final l10n = context.l10n;
+          final theme = Theme.of(context);
+          final topPad = MediaQuery.paddingOf(context).top;
+          const initialSheetSize = 0.5;
 
-    return Scaffold(
-      backgroundColor: colorScheme.surface,
-      body: Stack(
-        children: [
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            height: mapHeight,
-            child: _buildMapOrFallback(context),
-          ),
-          // Back button
-          Positioned(
-            top: topPad + 8,
-            left: 16,
-            child: Container(
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHigh,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: colorScheme.shadow.withValues(alpha: 0.15),
-                    blurRadius: 4,
-                  ),
-                ],
-              ),
-              child: IconButton(
-                icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ),
-          ),
-          // Recenter on current GPS — matches taxi / delivery map UX
-          Positioned(
-            top: topPad + 8,
-            right: 16,
-            child: FloatingActionButton(
-              heroTag: 'instant_delivery_my_location',
-              mini: true,
-              backgroundColor: colorScheme.surfaceContainerHigh,
-              onPressed: () async {
-                await _getCurrentLocation();
-                if (_pickupPosition != null && mounted) {
-                  _mapController?.moveCamera(
-                    gmaps.CameraUpdate.newLatLngZoom(
-                      _toG(_pickupPosition!),
-                      15,
+          return Scaffold(
+            backgroundColor: HomeColors.backgroundOf(context),
+            body: Stack(
+              children: [
+                Positioned.fill(
+                  child: _buildMapOrFallback(context),
+                ),
+                Positioned(
+                  top: topPad + 8,
+                  left: 16,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: HomeColors.surfaceElevatedOf(context),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.25),
+                          blurRadius: 4,
+                        ),
+                      ],
                     ),
-                  );
-                }
-              },
-              child: Icon(
-                Icons.my_location,
-                color: _isLoadingLocation
-                    ? colorScheme.onSurfaceVariant
-                    : colorScheme.primary,
-              ),
-            ),
-          ),
-          // Bottom Sheet Modal
-          DraggableScrollableSheet(
-            initialChildSize: 0.5,
-            minChildSize: 0.3,
-            maxChildSize: 0.85,
-            builder: (context, scrollController) {
-              return Container(
-                decoration: BoxDecoration(
-                  color: colorScheme.surface,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
+                    child: IconButton(
+                      icon: Icon(Icons.arrow_back,
+                          color: HomeColors.textPrimaryOf(context)),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
                   ),
                 ),
-                child: Column(
-                  children: [
-                    // Drag handle
-                    Container(
-                      margin: const EdgeInsets.only(top: 8),
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: colorScheme.outlineVariant,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
+                Positioned(
+                  top: topPad + 8,
+                  right: 16,
+                  child: FloatingActionButton(
+                    heroTag: 'instant_delivery_my_location',
+                    mini: true,
+                    backgroundColor: HomeColors.surfaceElevatedOf(context),
+                    onPressed: () async {
+                      await _getCurrentLocation();
+                      if (_pickupPosition != null && mounted) {
+                        _mapController?.moveCamera(
+                          gmaps.CameraUpdate.newLatLngZoom(
+                            _toG(_pickupPosition!),
+                            15,
+                          ),
+                        );
+                      }
+                    },
+                    child: Icon(
+                      Icons.my_location,
+                      color: _isLoadingLocation
+                          ? HomeColors.textMutedOf(context)
+                          : HomeColors.violet,
                     ),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        controller: scrollController,
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              l10n.courierInstantTitle,
-                              style: theme.textTheme.headlineSmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: colorScheme.onSurface,
-                                  ) ??
-                                  TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                    color: colorScheme.onSurface,
-                                  ),
+                  ),
+                ),
+                DraggableScrollableSheet(
+                  initialChildSize: initialSheetSize,
+                  minChildSize: 0.38,
+                  maxChildSize: 0.85,
+                  builder: (context, scrollController) {
+                    final pickupText = _isLoadingLocation
+                        ? l10n.locationGetting
+                        : (_pickupResolveFailed
+                            ? l10n.locationUnable
+                            : (_pickupLocation.isEmpty
+                                ? l10n.tapToSelectPickup
+                                : _pickupLocation));
+                    final dropoffEmpty = _deliveryLocation.isEmpty;
+                    final canContinue = _pickupLocation.isNotEmpty &&
+                        _deliveryLocation.isNotEmpty &&
+                        _supportedVehicleTypes.isNotEmpty &&
+                        _selectedVehicle != null;
+                    final bottomInset = MediaQuery.paddingOf(context).bottom;
+
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: HomeColors.surfaceOf(context),
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(AppColors.radiusLG),
+                          topRight: Radius.circular(AppColors.radiusLG),
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          Container(
+                            margin: const EdgeInsets.only(top: 8),
+                            width: 40,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: HomeColors.borderOf(context),
+                              borderRadius: BorderRadius.circular(2),
                             ),
-                            const SizedBox(height: 24),
-                            // Pickup Location (user can select)
-                            _LocationField(
-                              label: l10n.pickupLocationLabel,
-                              value: _isLoadingLocation
-                                  ? l10n.locationGetting
-                                  : (_pickupResolveFailed
-                                      ? l10n.locationUnable
-                                      : (_pickupLocation.isEmpty
-                                          ? l10n.tapToSelectPickup
-                                          : _pickupLocation)),
-                              icon: Icons.location_on,
-                              iconColor: colorScheme.error,
-                              isReadOnly: false,
-                              onTap: _selectPickupLocation,
-                            ),
-                            const SizedBox(height: 16),
-                            // Delivery Location (user can select)
-                            _LocationField(
-                              label: l10n.deliveryLocationLabel,
-                              value: _deliveryLocation.isEmpty
-                                  ? l10n.tapToSelectDelivery
-                                  : _deliveryLocation,
-                              icon: Icons.location_on,
-                              iconColor: colorScheme.primary,
-                              isReadOnly: false,
-                              onTap: _selectDeliveryLocation,
-                            ),
-                            const SizedBox(height: 24),
-                            // Vehicle Type
-                            Text(
-                              l10n.vehicleType,
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: colorScheme.onSurface,
-                                  ) ??
-                                  TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: colorScheme.onSurface,
-                                  ),
-                            ),
-                            const SizedBox(height: 12),
-                            Row(
+                          ),
+                          Expanded(
+                            child: ListView(
+                              controller: scrollController,
+                              padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
                               children: [
-                                Expanded(
-                                  child: _VehicleTypeOption(
-                                    icon: Icons.two_wheeler,
-                                    label: l10n.vehicleMotorcycle,
-                                    isSelected:
-                                        _selectedVehicle == 'motorcycle',
-                                    onTap: () {
-                                      setState(() {
-                                        _selectedVehicle = 'motorcycle';
-                                      });
-                                    },
-                                  ),
+                                Text(
+                                  l10n.sendAPackageTitle,
+                                  style: theme.textTheme.titleLarge?.copyWith(
+                                        fontWeight: FontWeight.w800,
+                                        color: HomeColors.textPrimaryOf(context),
+                                        letterSpacing: 0.4,
+                                      ) ??
+                                      TextStyle(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.w800,
+                                        color: HomeColors.textPrimaryOf(context),
+                                      ),
                                 ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: _VehicleTypeOption(
-                                    icon: Icons.directions_car,
-                                    label: l10n.vehicleCar,
-                                    isSelected: _selectedVehicle == 'car',
-                                    onTap: () {
-                                      setState(() {
-                                        _selectedVehicle = 'car';
-                                      });
-                                    },
-                                  ),
+                                const SizedBox(height: 8),
+                                SendPackageLocationRow(
+                                  icon: Icons.place,
+                                  text: pickupText,
+                                  isPlaceholder: _pickupLocation.isEmpty,
+                                  onTap: _selectPickupLocation,
                                 ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: _VehicleTypeOption(
-                                    icon: Icons.airport_shuttle,
-                                    label: l10n.vehicleVan,
-                                    isSelected: _selectedVehicle == 'van',
-                                    onTap: () {
-                                      setState(() {
-                                        _selectedVehicle = 'van';
-                                      });
-                                    },
-                                  ),
+                                SendPackageLocationRow(
+                                  icon: Icons.flag,
+                                  text: dropoffEmpty
+                                      ? l10n.courierDeliveryAddressPlaceholder
+                                      : _deliveryLocation,
+                                  isPlaceholder: dropoffEmpty,
+                                  onTap: _selectDeliveryLocation,
                                 ),
+                                const SizedBox(height: 16),
+                                if (_pickupLocation.isNotEmpty &&
+                                    !_isLoadingServiceArea &&
+                                    _supportedVehicleTypes.isEmpty) ...[
+                                  Text(
+                                    l10n.pickupOutsideDeliveryServiceArea,
+                                    style: TextStyle(
+                                      color: Theme.of(context).colorScheme.error,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                ],
+                                if (_supportedVehicleTypes.isNotEmpty)
+                                  SizedBox(
+                                    height: 148,
+                                    child: ListView.separated(
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount: _supportedVehicleTypes.length,
+                                      separatorBuilder: (_, __) =>
+                                          const SizedBox(width: 10),
+                                      itemBuilder: (context, index) {
+                                        final vehicleId =
+                                            _supportedVehicleTypes[index];
+                                        return CourierVehicleEstimateCard(
+                                          icon: courierVehicleIcon(vehicleId),
+                                          label: courierVehicleLabel(
+                                            vehicleId,
+                                            l10n,
+                                          ),
+                                          isSelected:
+                                              _selectedVehicle == vehicleId,
+                                          isLoading: (_isLoadingEstimate ||
+                                                  _isLoadingServiceArea) &&
+                                              _canFetchEstimate,
+                                          estimate:
+                                              _vehicleEstimates[vehicleId],
+                                          etaMinutes: _isLoadingEstimate
+                                              ? null
+                                              : _etaMinutesFor(vehicleId),
+                                          onTap: () {
+                                            setState(() {
+                                              _selectedVehicle = vehicleId;
+                                            });
+                                            _syncNearbyDrivers();
+                                          },
+                                        );
+                                      },
+                                    ),
+                                  ),
                               ],
                             ),
-                            const SizedBox(height: 32),
-                            // Continue Button
-                            SizedBox(
+                          ),
+                          Padding(
+                            padding: EdgeInsets.fromLTRB(
+                              20,
+                              8,
+                              20,
+                              12 + bottomInset,
+                            ),
+                            child: SizedBox(
                               width: double.infinity,
                               height: 50,
                               child: ElevatedButton(
-                                onPressed: () {
-                                  if (_pickupLocation.isEmpty ||
-                                      _deliveryLocation.isEmpty) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                            l10n.selectPickupAndDelivery),
-                                        backgroundColor:
-                                            colorScheme.error,
-                                      ),
-                                    );
-                                    return;
-                                  }
-
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          PackageDetailsScreen(
-                                        pickupLocation: _pickupLocation,
-                                        deliveryLocation: _deliveryLocation,
-                                        pickupPosition: _pickupPosition,
-                                        deliveryPosition: _deliveryPosition,
-                                        selectedVehicle: _selectedVehicle,
-                                        isInstantDelivery: true,
-                                        scheduledPickup: null,
-                                        scheduledDelivery: null,
-                                      ),
-                                    ),
-                                  );
-                                },
+                                onPressed: canContinue
+                                    ? () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                PackageDetailsScreen(
+                                              pickupLocation: _pickupLocation,
+                                              deliveryLocation:
+                                                  _deliveryLocation,
+                                              pickupPosition: _pickupPosition,
+                                              deliveryPosition:
+                                                  _deliveryPosition,
+                                              selectedVehicle:
+                                                  _selectedVehicle!,
+                                              isInstantDelivery: true,
+                                              scheduledPickup: null,
+                                              scheduledDelivery: null,
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    : null,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primaryColor,
-                                  foregroundColor: colorScheme.onPrimary,
+                                  backgroundColor: HomeColors.violet,
+                                  foregroundColor: Theme.of(context).colorScheme.onSecondary,
+                                  disabledBackgroundColor:
+                                      HomeColors.surfaceElevatedOf(context),
+                                  disabledForegroundColor:
+                                      HomeColors.textMutedOf(context),
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                                    borderRadius: BorderRadius.circular(
+                                      AppColors.radiusLG,
+                                    ),
                                   ),
                                 ),
                                 child: Text(
-                                  l10n.actionContinue,
+                                  l10n.addInfoAboutDelivery,
                                   style: const TextStyle(
                                     fontSize: 16,
-                                    fontWeight: FontWeight.w600,
+                                    fontWeight: FontWeight.w700,
                                   ),
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 20),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
+                    );
+                  },
                 ),
-              );
-            },
-          ),
-        ],
+              ],
+            ),
+          );
+        },
       ),
     );
   }
 
   Future<void> _handleMapTap(LatLng point, bool isPickup) async {
     try {
-      // Get address from tapped location
       final address = await GeocodingService.getAddressFromLatLng(
         point.latitude,
         point.longitude,
@@ -470,18 +656,22 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
           _routePolylinePoints = null;
         });
 
-        // Adjust map view to show both locations if both are set
         if (_pickupPosition != null && _deliveryPosition != null) {
           _fetchRouteDirections();
           _fitBounds();
+          _scheduleEstimateFetch();
         } else {
+          _scheduleEstimateFetch();
           _mapController?.moveCamera(
             gmaps.CameraUpdate.newLatLngZoom(_toG(point), 15.0),
           );
         }
+        if (isPickup) {
+          _syncNearbyDrivers();
+          _scheduleServiceAreaFetch();
+        }
       }
     } catch (e) {
-      // Handle error
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -566,194 +756,110 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
   Widget _buildMapOrFallback(BuildContext context) {
     final theme = Theme.of(context);
     if (_hasGoogleMapsApiKey == null) {
-      return const Center(child: CircularProgressIndicator());
+      return ColoredBox(
+        color: HomeColors.backgroundOf(context),
+        child: Center(
+          child: CircularProgressIndicator(color: HomeColors.violet),
+        ),
+      );
     }
     if (_hasGoogleMapsApiKey == false) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Text(
-            context.l10n.taxiGoogleMapsNotConfigured,
-            textAlign: TextAlign.center,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurface,
+      return ColoredBox(
+        color: HomeColors.backgroundOf(context),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(
+              context.l10n.taxiGoogleMapsNotConfigured,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: HomeColors.textPrimaryOf(context),
+              ),
             ),
           ),
         ),
       );
     }
 
-    return gmaps.GoogleMap(
-      initialCameraPosition: gmaps.CameraPosition(
-        target: _toG(_currentPosition),
-        zoom: 15.0,
-      ),
-      myLocationEnabled: true,
-      myLocationButtonEnabled: false,
-      mapType: gmaps.MapType.normal,
-      markers: {
-        if (_pickupPosition != null)
-          gmaps.Marker(
-            markerId: const gmaps.MarkerId('pickup'),
-            position: _toG(_pickupPosition!),
-            icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-              gmaps.BitmapDescriptor.hueAzure,
-            ),
+    final privacy = _nearbyPoller.result.privacyMessage;
+    return Stack(
+      children: [
+        gmaps.GoogleMap(
+          initialCameraPosition: gmaps.CameraPosition(
+            target: _toG(_currentPosition),
+            zoom: 15.0,
           ),
-        if (_deliveryPosition != null)
-          gmaps.Marker(
-            markerId: const gmaps.MarkerId('delivery'),
-            position: _toG(_deliveryPosition!),
-            icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-              gmaps.BitmapDescriptor.hueRed,
-            ),
-          ),
-      },
-      polylines: _pickupPosition != null && _deliveryPosition != null
-          ? {
-              gmaps.Polyline(
-                polylineId: const gmaps.PolylineId('route'),
-                points: _routePolylinePoints != null && _routePolylinePoints!.length >= 2
-                    ? _routePolylinePoints!.map(_toG).toList()
-                    : [_toG(_pickupPosition!), _toG(_deliveryPosition!)],
-                color: AppColors.primaryColor,
-                width: 3,
+          myLocationEnabled: true,
+          myLocationButtonEnabled: false,
+          mapType: gmaps.MapType.normal,
+          markers: {
+            if (_pickupPosition != null)
+              gmaps.Marker(
+                markerId: const gmaps.MarkerId('pickup'),
+                position: _toG(_pickupPosition!),
+                icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+                  gmaps.BitmapDescriptor.hueAzure,
+                ),
               ),
+            if (_deliveryPosition != null)
+              gmaps.Marker(
+                markerId: const gmaps.MarkerId('delivery'),
+                position: _toG(_deliveryPosition!),
+                icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+                  gmaps.BitmapDescriptor.hueRed,
+                ),
+              ),
+            ...nearbyDriverMapMarkers(_nearbyPoller.result.drivers),
+          },
+          polylines: _pickupPosition != null && _deliveryPosition != null
+              ? {
+                  gmaps.Polyline(
+                    polylineId: const gmaps.PolylineId('route'),
+                    points: _routePolylinePoints != null &&
+                            _routePolylinePoints!.length >= 2
+                        ? _routePolylinePoints!.map(_toG).toList()
+                        : [_toG(_pickupPosition!), _toG(_deliveryPosition!)],
+                    color: HomeColors.violet,
+                    width: 3,
+                  ),
+                }
+              : {},
+          onMapCreated: (controller) {
+            _mapController = controller;
+            if (!_isLoadingLocation) {
+              controller.moveCamera(
+                gmaps.CameraUpdate.newLatLngZoom(_toG(_currentPosition), 15),
+              );
             }
-          : {},
-      onMapCreated: (controller) {
-        _mapController = controller;
-        if (!_isLoadingLocation) {
-          controller.moveCamera(
-            gmaps.CameraUpdate.newLatLngZoom(_toG(_currentPosition), 15),
-          );
-        }
-      },
-      onTap: (point) {
-        _showLocationSelectionDialog(LatLng(point.latitude, point.longitude));
-      },
-    );
-  }
-}
-
-class _LocationField extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
-  final Color iconColor;
-  final bool isReadOnly;
-  final VoidCallback onTap;
-
-  const _LocationField({
-    required this.label,
-    required this.value,
-    required this.icon,
-    required this.iconColor,
-    this.isReadOnly = false,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: colorScheme.outlineVariant),
+          },
+          onTap: (point) {
+            _showLocationSelectionDialog(
+              LatLng(point.latitude, point.longitude),
+            );
+          },
         ),
-        child: Row(
-          children: [
-            Icon(icon, color: iconColor, size: 24),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
+        if (privacy != null && privacy.isNotEmpty)
+          Positioned(
+            left: 12,
+            right: 12,
+            bottom: 12,
+            child: Material(
+              color: HomeColors.surfaceElevatedOf(context).withValues(alpha: 0.92),
+              borderRadius: BorderRadius.circular(8),
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: Text(
+                  privacy,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: HomeColors.textMutedOf(context),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    value,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: colorScheme.onSurface,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
-            if (!isReadOnly)
-              Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _VehicleTypeOption extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _VehicleTypeOption({
-    required this.icon,
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primaryColor.withValues(alpha: 0.12)
-              : colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? AppColors.primaryColor : colorScheme.outlineVariant,
-            width: isSelected ? 2 : 1,
           ),
-        ),
-        child: Column(
-          children: [
-            Icon(
-              icon,
-              size: 32,
-              color: isSelected
-                  ? AppColors.primaryColor
-                  : colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                color: isSelected
-                    ? AppColors.primaryColor
-                    : colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
-      ),
+      ],
     );
   }
 }

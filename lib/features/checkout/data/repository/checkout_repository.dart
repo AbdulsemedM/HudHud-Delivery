@@ -16,6 +16,7 @@ class CheckoutRepository {
     required String paymentMethod,
     String serviceType = 'delivery',
     String? notes,
+    String? couponCode,
   }) async {
     try {
       final response = await checkoutDataProvider.createOrder(
@@ -30,6 +31,7 @@ class CheckoutRepository {
         paymentMethod: paymentMethod,
         serviceType: serviceType,
         notes: notes,
+        couponCode: couponCode,
       );
 
       if (response['statusCode'] == 200 || response['statusCode'] == 201) {
@@ -81,8 +83,14 @@ class CheckoutRepository {
       final response = await checkoutDataProvider.getOrderHistory();
 
       if (response['statusCode'] == 200) {
-        final List<dynamic> orders = response['data']['data'] ?? [];
-        return orders;
+        final body = response['data'];
+        if (body is! Map<String, dynamic>) return [];
+        final inner = body['data'];
+        if (inner is List) return inner;
+        if (inner is Map<String, dynamic> && inner['data'] is List) {
+          return inner['data'] as List<dynamic>;
+        }
+        return [];
       } else {
         String errorMessage =
             response['errorMessage'] ?? 'Error fetching order history';
@@ -93,6 +101,37 @@ class CheckoutRepository {
       String errorMessage = e.toString();
       errorMessage = _cleanErrorMessage(errorMessage);
       throw Exception(errorMessage);
+    }
+  }
+
+  Future<Map<String, dynamic>> validateCoupon({
+    required String code,
+    required double orderAmount,
+    required int vendorId,
+    String serviceType = 'restaurant',
+  }) async {
+    try {
+      final response = await checkoutDataProvider.validateCoupon(
+        code: code,
+        orderAmount: orderAmount,
+        vendorId: vendorId,
+        serviceType: serviceType,
+      );
+
+      if (response['statusCode'] == 200 || response['statusCode'] == 201) {
+        return {
+          'success': true,
+          'data': response['data'],
+          'message': response['data']?['message'] ?? 'Coupon is valid!',
+        };
+      }
+
+      String errorMessage = response['errorMessage'] ?? 'Invalid coupon';
+      errorMessage = _cleanErrorMessage(errorMessage);
+      return {'success': false, 'data': null, 'message': errorMessage};
+    } catch (e) {
+      String errorMessage = _cleanErrorMessage(e.toString());
+      return {'success': false, 'data': null, 'message': errorMessage};
     }
   }
 

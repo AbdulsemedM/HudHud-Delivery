@@ -28,25 +28,4 @@ class VendorsDataProvider {
     }
   }
 
-  /// GET /api/vendor/products/by-vendor/{user_id}
-  /// [vendorUserId] must be the vendor's user_id from the vendors list API (not the shop id).
-  Future<Map<String, dynamic>> getVendorProducts(int vendorUserId) async {
-    try {
-      final path = ApiConstants.vendorProducts.replaceAll('{id}', vendorUserId.toString());
-      final response = await apiService.get('${ApiConstants.baseUrl}$path');
-      return {
-        'statusCode': response.statusCode,
-        'data': response.data,
-        'errorMessage': null,
-      };
-    } on ApiException catch (e) {
-      return {
-        'statusCode': e.statusCode,
-        'data': null,
-        'errorMessage': e.message,
-      };
-    } on Exception catch (e) {
-      return {'statusCode': 500, 'data': null, 'errorMessage': e.toString()};
-    }
-  }
 }

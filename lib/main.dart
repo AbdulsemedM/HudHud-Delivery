@@ -1,41 +1,65 @@
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
+import 'dart:io';
+
+import 'core/api/dio_client.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'features/wishlist/bloc/wishlist_bloc.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:hudhud_delivery/core/l10n/fallback_localizations.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
 import 'package:hudhud_delivery/features/splash/presentation/screen/splash_screen.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
-
-import 'features/wishlist/bloc/wishlist_bloc.dart';
 
 // Core imports
 import 'core/theme/app_theme.dart';
 import 'core/api/api_service.dart';
-import 'core/api/dio_client.dart';
-import 'core/utils/snackbar_util.dart';
-import 'core/utils/button_util.dart';
+import 'core/theme/service_tab_palette.dart';
+import 'app/config/app_env.dart';
 
 // Controllers
+import 'controllers/auth_controller.dart';
 import 'controllers/theme_controller.dart';
 import 'controllers/locale_controller.dart';
-import 'controllers/auth_controller.dart';
+import 'controllers/service_accent_controller.dart';
 
 // Services
-import 'app/services/auth_service.dart';
 import 'app/services/fcm_service.dart';
+import 'app/services/auth_service.dart';
+import 'app/services/remote_config_service.dart';
+import 'app/navigation/app_navigator.dart';
+import 'app/navigation/fcm_notification_router.dart';
 
 // Orders feature
 import 'features/orders/data/providers/orders_data_provider.dart';
 import 'features/orders/data/repositories/orders_repository.dart';
 
 // Widgets
-import 'app/widgets/primary_button.dart';
-import 'app/widgets/secondary_button.dart';
+import 'app/widgets/app_connectivity_banner.dart';
+import 'app/widgets/ota_lifecycle_binder.dart';
+import 'package:image_picker_android/image_picker_android.dart';
+import 'package:image_picker_platform_interface/image_picker_platform_interface.dart';
+
+void _configureAndroidPhotoPicker() {
+  if (!Platform.isAndroid) return;
+  final impl = ImagePickerPlatform.instance;
+  if (impl is ImagePickerAndroid) {
+    impl.useAndroidPhotoPicker = true;
+  }
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  _configureAndroidPhotoPicker();
+
+  // Env (BASE_URL, etc.) before any Dio / ApiService access.
+  await loadAppEnv();
+
+  // Must exist before FCM tap handlers so they can push routes.
+  final navigatorKey = GlobalKey<NavigatorState>();
+  AppNavigator.key = navigatorKey;
 
   // Initialize FCM (non-blocking: app starts even if Firebase/FCM fails)
   FcmService? fcmService;
@@ -43,7 +67,11 @@ void main() async {
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
     fcmService = await FcmService.initialize();
     fcmService.onNotificationTap = (message, {localPayload}) {
-      // Handle notification tap: navigate to order/screen using message?.data or localPayload
+      openNotificationFromFcm(
+        navigatorKey,
+        message: message,
+        localPayload: localPayload,
+      );
     };
     fcmService.onTokenRefresh = (token) async {
       final authService = AuthService();
@@ -54,6 +82,16 @@ void main() async {
   } catch (e, st) {
     if (kDebugMode) {
       debugPrint('FCM/Firebase init failed (app will run without push): $e');
+      debugPrint('$st');
+    }
+  }
+
+  // Remote Config (force-update + Shorebird kill switch). Fail-open.
+  try {
+    await RemoteConfigService.instance.initialize();
+  } catch (e, st) {
+    if (kDebugMode) {
+      debugPrint('Remote Config init failed: $e');
       debugPrint('$st');
     }
   }
@@ -71,9 +109,9 @@ void main() async {
   // Initialize auth service
   final authService = AuthService();
 
-  // Register 401 redirect to login
-  final navigatorKey = GlobalKey<NavigatorState>();
+  // Register 401 redirect to login (skip if login is already showing).
   DioClient.instance.setOnUnauthorized(() {
+    if (loginScreenIsActive) return;
     navigatorKey.currentState?.pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const LoginScreen()),
       (route) => false,
@@ -122,6 +160,7 @@ class _MyAppState extends State<MyApp> {
       providers: [
         ChangeNotifierProvider.value(value: widget.themeController),
         ChangeNotifierProvider.value(value: widget.localeController),
+        ChangeNotifierProvider(create: (_) => ServiceAccentController()),
         ChangeNotifierProvider(
           create: (_) => AuthController(),
         ),
@@ -133,24 +172,52 @@ class _MyAppState extends State<MyApp> {
             create: (_) => WishlistBloc(),
           ),
         ],
-        child: Consumer2<ThemeController, LocaleController>(
-          builder: (context, themeController, localeController, child) {
+        child: Consumer3<ThemeController, LocaleController,
+            ServiceAccentController>(
+          builder: (context, themeController, localeController,
+              serviceAccent, child) {
+            final seed =
+                ServiceTabPalette.seedFor(serviceAccent.homeServiceMode);
+            final themeLight = serviceAccent.shouldApplyServiceAccent
+                ? AppTheme.lightThemeWithSeed(seed)
+                : AppTheme.lightTheme;
+            final themeDark = serviceAccent.shouldApplyServiceAccent
+                ? AppTheme.darkThemeWithSeed(seed)
+                : AppTheme.darkTheme;
             return MaterialApp(
               navigatorKey: widget.navigatorKey,
               onGenerateTitle: (context) =>
                   AppLocalizations.of(context)!.appTitle,
               debugShowCheckedModeBanner: false,
-              theme: AppTheme.lightTheme,
-              darkTheme: AppTheme.darkTheme,
+              theme: themeLight,
+              darkTheme: themeDark,
               themeMode: themeController.themeMode,
               locale: localeController.locale,
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              localizationsDelegates: const [
+                AppLocalizations.delegate,
+                FallbackMaterialLocalizationsDelegate(),
+                FallbackCupertinoLocalizationsDelegate(),
+                GlobalWidgetsLocalizations.delegate,
+              ],
               supportedLocales: AppLocalizations.supportedLocales,
-              home: SplashScreen(),
+              localeListResolutionCallback: (locales, supported) {
+                final selected = localeController.locale;
+                for (final locale in supported) {
+                  if (locale.languageCode == selected.languageCode) {
+                    return selected;
+                  }
+                }
+                return const Locale('en');
+              },
+              home: const SplashScreen(),
               builder: (context, child) {
                 // Update system UI overlay style when theme changes
                 themeController.updateSystemUIOverlayStyle();
-                return child!;
+                return OtaLifecycleBinder(
+                  child: AppConnectivityBanner(
+                    child: child ?? const SizedBox.shrink(),
+                  ),
+                );
               },
             );
           },
@@ -160,596 +227,3 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-class SampleHomePage extends StatefulWidget {
-  const SampleHomePage({Key? key}) : super(key: key);
-
-  @override
-  State<SampleHomePage> createState() => _SampleHomePageState();
-}
-
-class _SampleHomePageState extends State<SampleHomePage> {
-  bool _isLoading = false;
-  int _counter = 0;
-
-  @override
-  Widget build(BuildContext context) {
-    final themeController = Provider.of<ThemeController>(context);
-    final authController = Provider.of<AuthController>(context);
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('HudHud Delivery Demo'),
-        actions: [
-          // Theme toggle button
-          IconButton(
-            icon: Icon(
-              themeController.isDarkMode ? Icons.light_mode : Icons.dark_mode,
-            ),
-            onPressed: () {
-              themeController.toggleTheme();
-              SnackbarUtil.showInfo(
-                context,
-                'Theme switched to ${themeController.themeModeDisplayName}',
-              );
-            },
-            tooltip: 'Toggle Theme',
-          ),
-          // Theme mode selector
-          PopupMenuButton<ThemeMode>(
-            icon: const Icon(Icons.palette),
-            onSelected: (ThemeMode mode) {
-              themeController.setThemeMode(mode);
-              SnackbarUtil.showSuccess(
-                context,
-                'Theme mode set to ${themeController.themeModeDisplayName}',
-              );
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: ThemeMode.system,
-                child: Row(
-                  children: [
-                    Icon(Icons.auto_mode),
-                    SizedBox(width: 8),
-                    Text('System'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: ThemeMode.light,
-                child: Row(
-                  children: [
-                    Icon(Icons.light_mode),
-                    SizedBox(width: 8),
-                    Text('Light'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: ThemeMode.dark,
-                child: Row(
-                  children: [
-                    Icon(Icons.dark_mode),
-                    SizedBox(width: 8),
-                    Text('Dark'),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Welcome Card
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Welcome to HudHud Delivery!',
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'This is a demo showcasing the clean architecture with custom buttons, snackbars, and theme switching.',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.info_outline,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Current theme: ${themeController.themeModeDisplayName}',
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Counter Section
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    Text(
-                      'Counter Demo',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      '$_counter',
-                      style: Theme.of(context).textTheme.displayMedium,
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        SecondaryButton(
-                          text: 'Decrease',
-                          icon: Icons.remove,
-                          isFullWidth: false,
-                          onPressed: () {
-                            setState(() {
-                              _counter--;
-                            });
-                            SnackbarUtil.showInfo(
-                                context, 'Counter decreased to $_counter');
-                          },
-                        ),
-                        PrimaryButton(
-                          text: 'Increase',
-                          icon: Icons.add,
-                          isFullWidth: false,
-                          onPressed: () {
-                            setState(() {
-                              _counter++;
-                            });
-                            SnackbarUtil.showSuccess(
-                                context, 'Counter increased to $_counter');
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Button Showcase
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      'Button Showcase',
-                      style: Theme.of(context).textTheme.titleLarge,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Primary Buttons
-                    PrimaryButton(
-                      text: 'Primary Button',
-                      onPressed: () => SnackbarUtil.showSuccess(
-                          context, 'Primary button pressed!'),
-                    ),
-                    const SizedBox(height: 12),
-
-                    PrimaryButtonLarge(
-                      text: 'Large Primary Button',
-                      icon: Icons.star,
-                      onPressed: () => SnackbarUtil.showInfo(
-                          context, 'Large primary button with icon pressed!'),
-                    ),
-                    const SizedBox(height: 12),
-
-                    Row(
-                      children: [
-                        Expanded(
-                          child: PrimaryButtonSmall(
-                            text: 'Small',
-                            isFullWidth: true,
-                            onPressed: () => SnackbarUtil.showWarning(
-                                context, 'Small button pressed!'),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        PrimaryButtonIcon(
-                          icon: Icons.favorite,
-                          onPressed: () => SnackbarUtil.showError(
-                              context, 'Icon button pressed!'),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 16),
-                    const Divider(),
-                    const SizedBox(height: 16),
-
-                    // Secondary Buttons
-                    SecondaryButton(
-                      text: 'Secondary Button',
-                      onPressed: () => SnackbarUtil.showInfo(
-                          context, 'Secondary button pressed!'),
-                    ),
-                    const SizedBox(height: 12),
-
-                    SecondaryButtonLarge(
-                      text: 'Large Secondary Button',
-                      icon: Icons.settings,
-                      onPressed: () => SnackbarUtil.showSuccess(
-                          context, 'Large secondary button pressed!'),
-                    ),
-                    const SizedBox(height: 12),
-
-                    Row(
-                      children: [
-                        Expanded(
-                          child: SecondaryButtonSmall(
-                            text: 'Small Secondary',
-                            isFullWidth: true,
-                            onPressed: () => SnackbarUtil.showWarning(
-                                context, 'Small secondary button pressed!'),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: GhostButton(
-                            text: 'Ghost Button',
-                            isFullWidth: true,
-                            onPressed: () => SnackbarUtil.showInfo(
-                                context, 'Ghost button pressed!'),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Snackbar Showcase
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      'Snackbar Showcase',
-                      style: Theme.of(context).textTheme.titleLarge,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 16),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        ElevatedButton.icon(
-                          onPressed: () => SnackbarUtil.showSuccess(
-                            context,
-                            'This is a success message!',
-                            action: SnackBarAction(
-                              label: 'UNDO',
-                              onPressed: () => SnackbarUtil.showInfo(
-                                  context, 'Undo action pressed'),
-                            ),
-                          ),
-                          icon: const Icon(Icons.check_circle),
-                          label: const Text('Success'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            foregroundColor: Colors.white,
-                          ),
-                        ),
-                        ElevatedButton.icon(
-                          onPressed: () => SnackbarUtil.showError(
-                            context,
-                            'This is an error message!',
-                          ),
-                          icon: const Icon(Icons.error),
-                          label: const Text('Error'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
-                            foregroundColor: Colors.white,
-                          ),
-                        ),
-                        ElevatedButton.icon(
-                          onPressed: () => SnackbarUtil.showWarning(
-                            context,
-                            'This is a warning message!',
-                          ),
-                          icon: const Icon(Icons.warning),
-                          label: const Text('Warning'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange,
-                            foregroundColor: Colors.white,
-                          ),
-                        ),
-                        ElevatedButton.icon(
-                          onPressed: () => SnackbarUtil.showInfo(
-                            context,
-                            'This is an info message!',
-                          ),
-                          icon: const Icon(Icons.info),
-                          label: const Text('Info'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
-                            foregroundColor: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton.icon(
-                              onPressed: () {
-                                SnackbarUtil.showLoading(
-                                    context, 'Loading data...');
-                                // Simulate loading
-                                Future.delayed(const Duration(seconds: 3), () {
-                                  SnackbarUtil.hideSnackbar(context);
-                                  SnackbarUtil.showSuccess(
-                                      context, 'Data loaded successfully!');
-                                });
-                              },
-                              icon: const Icon(Icons.download),
-                              label: const Text('Show Loading'),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton.icon(
-                              onPressed: () =>
-                                  SnackbarUtil.hideSnackbar(context),
-                              icon: const Icon(Icons.close),
-                              label: const Text('Hide Snackbar'),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // API Demo Section
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      'API Demo',
-                      style: Theme.of(context).textTheme.titleLarge,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 16),
-                    if (authController.isLoading)
-                      const Center(
-                        child: CircularProgressIndicator(),
-                      )
-                    else ...[
-                      PrimaryButton(
-                        text: 'Sample Login',
-                        icon: Icons.login,
-                        isLoading: _isLoading,
-                        onPressed: () async {
-                          setState(() {
-                            _isLoading = true;
-                          });
-
-                          try {
-                            // Sample login call
-                            await authController.login(
-                              'demo@example.com',
-                              'password123',
-                            );
-
-                            if (authController.currentUser != null) {
-                              SnackbarUtil.showSuccess(
-                                context,
-                                'Login successful! Welcome ${authController.currentUser!.name}',
-                              );
-                            }
-                          } catch (e) {
-                            SnackbarUtil.showError(
-                              context,
-                              'Login failed: ${e.toString()}',
-                            );
-                          } finally {
-                            setState(() {
-                              _isLoading = false;
-                            });
-                          }
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      SecondaryButton(
-                        text: 'Get User Profile',
-                        icon: Icons.person,
-                        onPressed: authController.currentUser == null
-                            ? null
-                            : () async {
-                                try {
-                                  await authController.refreshUserProfile();
-                                  SnackbarUtil.showSuccess(
-                                    context,
-                                    'Profile refreshed successfully!',
-                                  );
-                                } catch (e) {
-                                  SnackbarUtil.showError(
-                                    context,
-                                    'Failed to refresh profile: ${e.toString()}',
-                                  );
-                                }
-                              },
-                      ),
-                      if (authController.currentUser != null) ...[
-                        const SizedBox(height: 16),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surfaceVariant,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Current User:',
-                                style: Theme.of(context).textTheme.titleSmall,
-                              ),
-                              const SizedBox(height: 4),
-                              Text('Name: ${authController.currentUser!.name}'),
-                              Text(
-                                  'Email: ${authController.currentUser!.email}'),
-                              Text(
-                                  'Role: ${authController.currentUser!.permissions}'),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        SecondaryButton(
-                          text: 'Logout',
-                          icon: Icons.logout,
-                          onPressed: () async {
-                            await authController.logout();
-                            SnackbarUtil.showInfo(
-                                context, 'Logged out successfully!');
-                          },
-                        ),
-                      ],
-                    ],
-                    if (authController.errorMessage != null) ...[
-                      const SizedBox(height: 16),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.errorContainer,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          'Error: ${authController.errorMessage}',
-                          style: TextStyle(
-                            color:
-                                Theme.of(context).colorScheme.onErrorContainer,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Utility Buttons Demo
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      'Utility Buttons Demo',
-                      style: Theme.of(context).textTheme.titleLarge,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 16),
-                    ButtonUtil.primaryButton(
-                      text: 'Utility Primary Button',
-                      onPressed: () => SnackbarUtil.showSuccess(
-                          context, 'Utility primary button pressed!'),
-                    ),
-                    const SizedBox(height: 12),
-                    ButtonUtil.secondaryButton(
-                      text: 'Utility Secondary Button',
-                      onPressed: () => SnackbarUtil.showInfo(
-                          context, 'Utility secondary button pressed!'),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: SizedBox(
-                            width: double.infinity,
-                            child: ButtonUtil.textButton(
-                              text: 'Text Button',
-                              onPressed: () => SnackbarUtil.showWarning(
-                                  context, 'Text button pressed!'),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        ButtonUtil.iconButton(
-                          icon: Icons.share,
-                          onPressed: () => SnackbarUtil.showInfo(
-                              context, 'Share button pressed!'),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    ButtonUtil.gradientButton(
-                      text: 'Gradient Button',
-                      gradientColors: [Colors.purple, Colors.blue],
-                      onPressed: () => SnackbarUtil.showSuccess(
-                          context, 'Gradient button pressed!'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 32),
-          ],
-        ),
-      ),
-      floatingActionButton: ButtonUtil.floatingActionButton(
-        icon: Icons.refresh,
-        onPressed: () {
-          setState(() {
-            _counter = 0;
-          });
-          SnackbarUtil.showInfo(context, 'Counter reset!');
-        },
-      ),
-    );
-  }
-}

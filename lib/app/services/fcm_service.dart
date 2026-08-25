@@ -1,9 +1,12 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../../firebase_options.dart';
+import 'notification_sound_player.dart';
 
 /// Handles FCM initialization, token, and message callbacks (foreground, background, opened).
 class FcmService {
@@ -11,7 +14,8 @@ class FcmService {
   static final FcmService _instance = FcmService._();
   factory FcmService() => _instance;
 
-  static const String _channelId = 'hudhud_delivery_channel';
+  /// v2: system channel sound off; custom clip is played twice in Dart.
+  static const String _channelId = 'hudhud_delivery_channel_v2';
   static const String _channelName = 'HudHud Delivery';
 
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
@@ -88,7 +92,7 @@ class FcmService {
         _channelName,
         description: 'Notifications for HudHud Delivery',
         importance: Importance.high,
-        playSound: true,
+        playSound: false,
       );
       await _localNotifications
           .resolvePlatformSpecificImplementation<
@@ -124,7 +128,7 @@ class FcmService {
         .setForegroundNotificationPresentationOptions(
       alert: true,
       badge: true,
-      sound: true,
+      sound: false,
     );
   }
 
@@ -145,6 +149,8 @@ class FcmService {
   }
 
   Future<void> _handleForegroundMessage(RemoteMessage message) async {
+    await NotificationSoundPlayer.play();
+
     final notification = message.notification;
     if (notification == null) return;
 
@@ -154,22 +160,28 @@ class FcmService {
       channelDescription: 'Notifications for HudHud Delivery',
       importance: Importance.high,
       priority: Priority.high,
+      playSound: false,
     );
     const iosDetails = DarwinNotificationDetails(
       presentAlert: true,
       presentBadge: true,
-      presentSound: true,
+      presentSound: false,
     );
     const details = NotificationDetails(
       android: androidDetails,
       iOS: iosDetails,
     );
+    final dataJson = message.data.isEmpty
+        ? '{}'
+        : jsonEncode(
+            {for (final e in message.data.entries) e.key: e.value.toString()},
+          );
     await _localNotifications.show(
       message.hashCode,
       notification.title ?? 'Notification',
       notification.body,
       details,
-      payload: message.messageId,
+      payload: dataJson,
     );
   }
 
@@ -212,5 +224,6 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   } on FirebaseException catch (e) {
     if (!e.code.contains('duplicate-app')) rethrow;
   }
-  // Optional: handle data-only messages or update local state
+  WidgetsFlutterBinding.ensureInitialized();
+  await NotificationSoundPlayer.play();
 }

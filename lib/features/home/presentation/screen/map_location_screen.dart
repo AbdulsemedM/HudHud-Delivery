@@ -3,9 +3,12 @@ import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
 import 'package:hudhud_delivery/app/services/google_places_service.dart';
 import 'package:hudhud_delivery/app/models/place_result.dart';
+import 'package:hudhud_delivery/app/utils/human_readable_address.dart';
 import 'package:hudhud_delivery/app/services/custom_location_service.dart';
 import 'package:hudhud_delivery/app/services/startup_location_service.dart';
 import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
+import 'package:hudhud_delivery/core/widgets/centered_pin_map.dart';
 
 class MapLocationScreen extends StatefulWidget {
   final String? currentLocation;
@@ -33,6 +36,12 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
   bool? _hasGoogleMapsApiKey;
   // ignore: unused_field
   PlaceResult? _selectedPlace;
+
+  /// From map camera center (debounced); user can confirm without tapping a search marker.
+  PlaceResult? _centerPickPlace;
+
+  /// After programmatic [moveCamera], skip the next idle geocode from [CenteredPinMap].
+  bool _skipNextIdleGeocode = false;
 
   static gmaps.LatLng _toG(LatLng p) => gmaps.LatLng(p.latitude, p.longitude);
 
@@ -90,6 +99,7 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
           _markers = _markersForSearch(_searchResults);
         });
 
+        _skipNextIdleGeocode = true;
         _mapController?.moveCamera(
           gmaps.CameraUpdate.newLatLngZoom(_toG(newPosition), 15.0),
         );
@@ -103,7 +113,7 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
         });
       }
     } catch (e) {
-      print('Error getting current location: $e');
+      debugPrint('Error getting current location: $e');
       if (mounted) {
         setState(() {
           _awaitingFirstLocation = false;
@@ -124,8 +134,6 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
 
   Set<gmaps.Marker> _markersForSearch(List<PlaceResult> results) {
     return {
-      if (_userPosition != null)
-        _createCurrentLocationMarker(_userPosition!),
       ...results.map((place) => _createSearchMarker(place.coordinates, place)),
     };
   }
@@ -141,15 +149,6 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
     if (_userPosition != null) return 15.0;
     assert(_searchResults.isNotEmpty);
     return 12.0;
-  }
-
-  gmaps.Marker _createCurrentLocationMarker(LatLng position) {
-    return gmaps.Marker(
-      markerId: const gmaps.MarkerId('current'),
-      position: _toG(position),
-      icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(gmaps.BitmapDescriptor.hueAzure),
-      infoWindow: const gmaps.InfoWindow(title: 'Current location'),
-    );
   }
 
   gmaps.Marker _createSearchMarker(LatLng position, PlaceResult place) {
@@ -190,13 +189,14 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
             ...results.map((r) => r.coordinates),
           ];
           final bounds = _calculateBounds(points);
+          _skipNextIdleGeocode = true;
           _mapController?.moveCamera(
             gmaps.CameraUpdate.newLatLngBounds(bounds, 50),
           );
         }
       }
     } catch (e) {
-      print('Error searching places: $e');
+      debugPrint('Error searching places: $e');
     } finally {
       if (mounted) {
         setState(() {
@@ -230,11 +230,50 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
       _selectedPlace = place;
     });
 
+    _skipNextIdleGeocode = true;
     _mapController?.moveCamera(
       gmaps.CameraUpdate.newLatLngZoom(_toG(place.coordinates), 16.0),
     );
 
     _showPlaceDetails(place);
+  }
+
+  Future<void> _onMapCenterChanged(gmaps.LatLng g) async {
+    if (_skipNextIdleGeocode) {
+      _skipNextIdleGeocode = false;
+      return;
+    }
+    try {
+      final places = await GooglePlacesService.reverseGeocode(
+        g.latitude,
+        g.longitude,
+      );
+      if (!mounted || places.isEmpty) return;
+      final best = HumanReadableAddress.pickBestPlace(places);
+      if (best == null) return;
+      setState(() => _centerPickPlace = best);
+    } catch (_) {
+      // Non-fatal: user can still pick from search markers.
+    }
+  }
+
+  Future<void> _onMapTap(gmaps.LatLng g) async {
+    _searchFocusNode.unfocus();
+    _skipNextIdleGeocode = true;
+    await _mapController?.animateCamera(
+      gmaps.CameraUpdate.newLatLngZoom(g, 16.0),
+    );
+    try {
+      final places = await GooglePlacesService.reverseGeocode(
+        g.latitude,
+        g.longitude,
+      );
+      if (!mounted || places.isEmpty) return;
+      final best = HumanReadableAddress.pickBestPlace(places);
+      if (best == null) return;
+      setState(() => _centerPickPlace = best);
+      _showPlaceDetails(best);
+    } catch (_) {}
   }
 
   void _showPlaceDetails(PlaceResult place) {
@@ -260,7 +299,7 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: colorScheme.onSurface.withOpacity(0.22),
+                  color: colorScheme.onSurface.withValues(alpha: 0.22),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -271,7 +310,7 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.1),
+                    color: Colors.red.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
@@ -297,7 +336,7 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
                         place.displayName,
                         style: textTheme.bodyMedium?.copyWith(
                           fontSize: 14,
-                          color: colorScheme.onSurface.withOpacity(0.7),
+                          color: colorScheme.onSurface.withValues(alpha: 0.7),
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -331,9 +370,11 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
                       backgroundColor: Colors.orange,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
-                    child: const Text(
-                      'Select Location',
-                      style: TextStyle(color: Colors.white),
+                    child: Text(
+                      context.l10n.selectLocationTitle,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      ),
                     ),
                   ),
                 ),
@@ -360,9 +401,9 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: colorScheme.background,
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        title: const Text('Select Location'),
+        title: Text(context.l10n.selectLocationTitle),
         backgroundColor: colorScheme.surface,
         foregroundColor: colorScheme.onSurface,
         elevation: 0,
@@ -400,7 +441,7 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
                 hintText: 'Search for places...',
                 prefixIcon: Icon(
                   Icons.search,
-                  color: colorScheme.onSurface.withOpacity(0.65),
+                  color: colorScheme.onSurface.withValues(alpha: 0.65),
                 ),
                 suffixIcon: _isSearching
                     ? const SizedBox(
@@ -415,7 +456,7 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
                         ? IconButton(
                             icon: Icon(
                               Icons.clear,
-                              color: colorScheme.onSurface.withOpacity(0.65),
+                              color: colorScheme.onSurface.withValues(alpha: 0.65),
                             ),
                             onPressed: () {
                               _searchController.clear();
@@ -427,7 +468,7 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
-                    color: colorScheme.outline.withOpacity(0.35),
+                    color: colorScheme.outline.withValues(alpha: 0.35),
                   ),
                 ),
                 focusedBorder: OutlineInputBorder(
@@ -435,7 +476,7 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
                   borderSide: const BorderSide(color: Colors.orange),
                 ),
                 filled: true,
-                fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.4),
+                fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
               ),
               onChanged: (value) {
                 Future.delayed(const Duration(milliseconds: 500), () {
@@ -467,7 +508,7 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
           child: Text(
             'Google Maps is not configured on iOS yet. Add a Google Maps API key in iOS settings to use map selection.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: colorScheme.onSurface.withOpacity(0.75)),
+            style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.75)),
           ),
         ),
       );
@@ -485,7 +526,7 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
               Text(
                 'Getting your location…',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: colorScheme.onSurface.withOpacity(0.85)),
+                style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.85)),
               ),
             ],
           ),
@@ -504,20 +545,20 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
               Icon(
                 Icons.location_off_outlined,
                 size: 48,
-                color: colorScheme.onSurface.withOpacity(0.45),
+                color: colorScheme.onSurface.withValues(alpha: 0.45),
               ),
               const SizedBox(height: 16),
               Text(
                 _locationErrorMessage ??
                     'Turn on Location and allow access to show where you are on the map.',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: colorScheme.onSurface.withOpacity(0.85)),
+                style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.85)),
               ),
               const SizedBox(height: 20),
               FilledButton.icon(
                 onPressed: _getCurrentLocation,
                 icon: const Icon(Icons.refresh),
-                label: const Text('Try again'),
+                label: Text(context.l10n.actionTryAgain),
               ),
             ],
           ),
@@ -528,29 +569,69 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
     final target = _mapTarget();
     final zoom = _mapZoom();
 
-    return gmaps.GoogleMap(
-      key: ValueKey<String>(
-        '${_userPosition?.latitude},${_userPosition?.longitude},${_searchResults.length}',
-      ),
-      initialCameraPosition: gmaps.CameraPosition(
-        target: target,
-        zoom: zoom,
-      ),
-      markers: _markers,
-      myLocationEnabled: _hasUserFix,
-      myLocationButtonEnabled: false,
-      zoomControlsEnabled: false,
-      onMapCreated: (controller) {
-        _mapController = controller;
-        if (_userPosition != null) {
-          controller.moveCamera(
-            gmaps.CameraUpdate.newLatLngZoom(_toG(_userPosition!), 15.0),
-          );
-        }
-      },
-      onTap: (_) {
-        _searchFocusNode.unfocus();
-      },
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        CenteredPinMap(
+          key: ValueKey<String>(
+            '${_userPosition?.latitude},${_userPosition?.longitude},${_searchResults.length}',
+          ),
+          initialCameraPosition: gmaps.CameraPosition(
+            target: target,
+            zoom: zoom,
+          ),
+          markers: _markers,
+          myLocationEnabled: _hasUserFix,
+          myLocationButtonEnabled: false,
+          zoomControlsEnabled: false,
+          idleDebounce: const Duration(milliseconds: 400),
+          onCenterLatLngChanged: _onMapCenterChanged,
+          onMapCreated: (controller) {
+            _mapController = controller;
+            if (_userPosition != null) {
+              _skipNextIdleGeocode = true;
+              controller.moveCamera(
+                gmaps.CameraUpdate.newLatLngZoom(_toG(_userPosition!), 15.0),
+              );
+            }
+          },
+          onTap: _onMapTap,
+        ),
+        if (_centerPickPlace != null)
+          Positioned(
+            left: 16,
+            right: 16,
+            bottom: 16,
+            child: Material(
+              elevation: 6,
+              borderRadius: BorderRadius.circular(12),
+              color: colorScheme.surfaceContainerHigh,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        _centerPickPlace!.shortAddress,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: colorScheme.onSurface,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () =>
+                          _confirmLocation(_centerPickPlace!),
+                      child: Text(context.l10n.usePin),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

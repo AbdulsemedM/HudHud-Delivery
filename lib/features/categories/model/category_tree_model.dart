@@ -42,12 +42,25 @@ class CategoryTreeModel {
     this.children = const [],
   });
 
-  /// Best URL for list/grid (small/thumb). Falls back to imagePath then original.
+  /// Best URL for category tiles. Prefers the original image from the API.
   String? get displayImageUrl {
-    if (images?.small != null) return images!.small;
-    if (images?.thumb != null) return images!.thumb;
-    if (images?.original != null) return images!.original;
-    return imagePath;
+    if (images?.original != null && images!.original!.isNotEmpty) {
+      return images!.original;
+    }
+    if (imagePath != null && imagePath!.isNotEmpty) return imagePath;
+    if (images?.large != null && images!.large!.isNotEmpty) {
+      return images!.large;
+    }
+    if (images?.medium != null && images!.medium!.isNotEmpty) {
+      return images!.medium;
+    }
+    if (images?.small != null && images!.small!.isNotEmpty) {
+      return images!.small;
+    }
+    if (images?.thumb != null && images!.thumb!.isNotEmpty) {
+      return images!.thumb;
+    }
+    return null;
   }
 
   factory CategoryTreeModel.fromJson(Map<String, dynamic> json) {

@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:hudhud_delivery/main.dart';
 import 'package:hudhud_delivery/controllers/theme_controller.dart';
+import 'package:hudhud_delivery/controllers/locale_controller.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/features/orders/data/models/order_model.dart';
 import 'package:hudhud_delivery/features/orders/data/models/order_tracking_model.dart';
@@ -60,6 +61,7 @@ void main() {
   testWidgets('App initialization test', (WidgetTester tester) async {
     // Initialize required services for testing
     final themeController = ThemeController();
+    final localeController = LocaleController();
     final authService = AuthService();
     final ordersRepository = _TestOrdersRepository();
     final navigatorKey = GlobalKey<NavigatorState>();
@@ -67,6 +69,7 @@ void main() {
     // Build our app and trigger a frame.
     await tester.pumpWidget(MyApp(
       themeController: themeController,
+      localeController: localeController,
       authService: authService,
       ordersRepository: ordersRepository,
       navigatorKey: navigatorKey,

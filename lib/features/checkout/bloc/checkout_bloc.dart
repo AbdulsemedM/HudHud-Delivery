@@ -30,6 +30,8 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
         deliveryLatitude: event.deliveryLatitude,
         deliveryLongitude: event.deliveryLongitude,
         paymentMethod: event.paymentMethod,
+        couponCode: event.couponCode,
+        serviceType: event.serviceType,
         notes: event.notes,
       );
 

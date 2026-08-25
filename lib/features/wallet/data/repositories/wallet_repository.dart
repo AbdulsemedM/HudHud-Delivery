@@ -1,4 +1,5 @@
-import '../models/wallet_model.dart';
+import '../models/wallet_balance_model.dart';
+import '../models/wallet_transaction_model.dart';
 import '../providers/wallet_data_provider.dart';
 
 class WalletRepository {
@@ -6,54 +7,48 @@ class WalletRepository {
 
   WalletRepository({required this.walletDataProvider});
 
-  Future<WalletsResponse> getWallets({int page = 1, int perPage = 10}) async {
-    return walletDataProvider.getWallets(page: page, perPage: perPage);
-  }
-
-  Future<WalletModel?> getWallet(int id) async {
-    return walletDataProvider.getWallet(id);
+  Future<WalletBalance> getBalance() async {
+    return walletDataProvider.getBalance();
   }
 
   Future<WalletTransactionsResponse> getTransactions({
     int page = 1,
-    int perPage = 10,
+    int limit = 20,
   }) async {
-    return walletDataProvider.getTransactions(page: page, perPage: perPage);
+    return walletDataProvider.getTransactions(page: page, limit: limit);
   }
 
-  Future<AddFundsResponse> addFunds({
+  Future<WalletMutationResponse> topUp({
     required double amount,
-    required String method,
+    required String paymentMethodCode,
     required String currency,
-    int? payerId,
-    int? walletId,
     Map<String, dynamic>? paymentDetails,
+    String? idempotencyKey,
   }) async {
-    return walletDataProvider.addFunds(
+    return walletDataProvider.topUp(
       amount: amount,
-      method: method,
+      paymentMethodCode: paymentMethodCode,
       currency: currency,
-      payerId: payerId,
-      walletId: walletId,
       paymentDetails: paymentDetails,
+      idempotencyKey: idempotencyKey,
     );
   }
 
-  Future<WithdrawFundsResponse> withdraw({
+  Future<WalletMutationResponse> withdraw({
     required double amount,
-    required String method,
+    required String paymentMethodCode,
     required String currency,
     required int walletId,
-    int? payerId,
     Map<String, dynamic>? paymentDetails,
+    String? idempotencyKey,
   }) async {
     return walletDataProvider.withdraw(
       amount: amount,
-      method: method,
+      paymentMethodCode: paymentMethodCode,
       currency: currency,
       walletId: walletId,
-      payerId: payerId,
       paymentDetails: paymentDetails,
+      idempotencyKey: idempotencyKey,
     );
   }
 }

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   // Primary Colors
-  static const primaryColor = Color(0xFFFF5A00);
-  static const primaryDarkColor = Color.fromARGB(255, 205, 73, 1);
+  static const primaryColor = Color(0xFFF55905);
+  static const primaryDarkColor = Color.fromARGB(255, 196, 71, 4);
   // static const Color primaryColor = Color(0xFF2E7D32); // Green
-  static const Color primaryLightColor = Color.fromARGB(255, 247, 115, 44);
+  static const Color primaryLightColor = Color.fromARGB(255, 246, 113, 42);
 
   // Secondary Colors
   static const secondaryColor = Color(0xFF00adef);
@@ -133,4 +133,28 @@ class AppColors {
     Color(0xFF1A1A1A),
     Color(0xFF2D2D2D),
   ];
+
+  // Spacing system
+  static const double spaceXS = 4.0;
+  static const double spaceSM = 8.0;
+  static const double spaceMD = 16.0;
+  static const double spaceLG = 24.0;
+  static const double spaceXL = 32.0;
+  static const double spaceXXL = 48.0;
+
+  // Border radii
+  static const double radiusSM = 8.0;
+  static const double radiusMD = 12.0;
+  static const double radiusLG = 16.0;
+  static const double radiusXL = 24.0;
+  static const double radiusFull = 999.0;
+
+  // Button heights
+  static const double buttonHeightSM = 40.0;
+  static const double buttonHeightMD = 48.0;
+  static const double buttonHeightLG = 56.0;
+
+  // Glass/overlay surfaces
+  static const Color lightGlass = Color(0x0F000000);
+  static const Color darkGlass = Color(0x1AFFFFFF);
 }

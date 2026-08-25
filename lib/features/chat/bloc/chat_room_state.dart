@@ -1,0 +1,74 @@
+part of 'chat_room_bloc.dart';
+
+abstract class ChatRoomState {
+  const ChatRoomState();
+}
+
+class ChatRoomInitial extends ChatRoomState {
+  const ChatRoomInitial();
+}
+
+class ChatRoomLoading extends ChatRoomState {
+  const ChatRoomLoading();
+}
+
+class ChatRoomLoaded extends ChatRoomState {
+  final ChatConversationModel conversation;
+  final List<ChatMessageModel> messages;
+  final List<ChatParticipantModel> participants;
+  final bool isSending;
+  final bool isLoadingHistory;
+  final bool hasLeft;
+  final bool isRejoining;
+  final int? editingMessageId;
+  final String? editingDraft;
+  final int newMessagesWhileScrolledUp;
+
+  const ChatRoomLoaded({
+    required this.conversation,
+    required this.messages,
+    required this.participants,
+    this.isSending = false,
+    this.isLoadingHistory = false,
+    this.hasLeft = false,
+    this.isRejoining = false,
+    this.editingMessageId,
+    this.editingDraft,
+    this.newMessagesWhileScrolledUp = 0,
+  });
+
+  ChatRoomLoaded copyWith({
+    ChatConversationModel? conversation,
+    List<ChatMessageModel>? messages,
+    List<ChatParticipantModel>? participants,
+    bool? isSending,
+    bool? isLoadingHistory,
+    bool? hasLeft,
+    bool? isRejoining,
+    int? editingMessageId,
+    String? editingDraft,
+    int? newMessagesWhileScrolledUp,
+    bool clearEditing = false,
+  }) {
+    return ChatRoomLoaded(
+      conversation: conversation ?? this.conversation,
+      messages: messages ?? this.messages,
+      participants: participants ?? this.participants,
+      isSending: isSending ?? this.isSending,
+      isLoadingHistory: isLoadingHistory ?? this.isLoadingHistory,
+      hasLeft: hasLeft ?? this.hasLeft,
+      isRejoining: isRejoining ?? this.isRejoining,
+      editingMessageId:
+          clearEditing ? null : (editingMessageId ?? this.editingMessageId),
+      editingDraft: clearEditing ? null : (editingDraft ?? this.editingDraft),
+      newMessagesWhileScrolledUp:
+          newMessagesWhileScrolledUp ?? this.newMessagesWhileScrolledUp,
+    );
+  }
+}
+
+class ChatRoomFailure extends ChatRoomState {
+  final String message;
+
+  const ChatRoomFailure(this.message);
+}

@@ -1,5 +1,8 @@
+import 'package:dio/dio.dart';
+
 import '../../../../core/api/api_constants.dart';
 import '../../../../core/api/api_service.dart';
+import '../../utils/payment_methods_parser.dart';
 
 class PaymentDataProvider {
   final ApiService apiService;
@@ -13,45 +16,106 @@ class PaymentDataProvider {
     );
     final data = response.data;
 
-    if (data == null || data is! Map<String, dynamic>) {
+    if (data == null || data is! Map) {
       return [];
     }
 
-    final list = data['data'];
-    if (list == null || list is! List) {
-      return [];
+    final map = Map<String, dynamic>.from(data);
+    return parsePaymentMethodsList(map['data']);
+  }
+
+  Future<Map<String, dynamic>> initiatePayment({
+    required String paymentMethodCode,
+    required String type,
+    required double amount,
+    String? currency,
+    int? orderId,
+    int? rideId,
+    int? serviceRequestId,
+    int? packageDeliveryId,
+    Map<String, dynamic>? paymentDetails,
+    bool? isSandbox,
+    String? idempotencyKey,
+  }) async {
+    final body = <String, dynamic>{
+      'payment_method_code': paymentMethodCode,
+      'type': type,
+      'amount': amount,
+      'payment_details': paymentDetails ?? {},
+    };
+    if (currency != null && currency.isNotEmpty) {
+      body['currency'] = currency;
+    }
+    if (orderId != null) body['order_id'] = orderId;
+    if (rideId != null) body['ride_id'] = rideId;
+    if (serviceRequestId != null) {
+      body['service_request_id'] = serviceRequestId;
+    }
+    if (packageDeliveryId != null) {
+      body['package_delivery_id'] = packageDeliveryId;
+    }
+    if (isSandbox != null) body['is_sandbox'] = isSandbox;
+
+    final headers = <String, dynamic>{};
+    if (idempotencyKey != null && idempotencyKey.isNotEmpty) {
+      headers['Idempotency-Key'] = idempotencyKey;
     }
 
-    final List<Map<String, dynamic>> methods = [];
-    for (final item in list) {
-      if (item is Map<String, dynamic>) {
-        final isActive = item['is_active'] == true;
-        final code = item['code']?.toString();
-        final name = item['name']?.toString() ?? code ?? 'Unknown';
-        final description = item['description']?.toString() ?? 'Pay with $name';
-        final sortOrder =
-            int.tryParse(item['sort_order']?.toString() ?? '0') ?? 0;
+    // Provider gateways (eBirr/Waafi) often exceed the default 30s receive timeout.
+    // Rethrow ApiException / Dio errors so callers can branch (422, timeouts).
+    final response = await apiService.post(
+      '${ApiConstants.baseUrl}${ApiConstants.paymentsInitiate}',
+      data: body,
+      options: Options(
+        receiveTimeout: const Duration(minutes: 3),
+        sendTimeout: const Duration(minutes: 3),
+        headers: headers.isEmpty ? null : headers,
+      ),
+    );
+    final data = response.data;
+    if (data is Map) {
+      return Map<String, dynamic>.from(data);
+    }
+    return {'success': false, 'message': 'Invalid payment response'};
+  }
 
-        if (code != null && code.isNotEmpty) {
-          methods.add({
-            'id': code,
-            'name': name,
-            'description': description,
-            'icon': item['icon'],
-            'enabled': isActive,
-            '_sortOrder': sortOrder,
-          });
-        }
+  Future<Map<String, dynamic>> getPaymentStatus(int paymentId) async {
+    try {
+      final path = ApiConstants.paymentsStatus.replaceAll(
+        '{id}',
+        paymentId.toString(),
+      );
+      final response = await apiService.get(
+        '${ApiConstants.baseUrl}$path',
+      );
+      final data = response.data;
+      if (data is Map) {
+        return Map<String, dynamic>.from(data);
       }
+      return {'success': false, 'message': 'Invalid payment status response'};
+    } catch (e) {
+      throw Exception('Failed to fetch payment status: $e');
     }
+  }
 
-    methods.sort(
-        (a, b) => (a['_sortOrder'] as int).compareTo(b['_sortOrder'] as int));
-    for (final m in methods) {
-      m.remove('_sortOrder');
+  /// POST /api/payments/service/{wallet|waafipay|edahab|sahay|ebirr}
+  Future<Map<String, dynamic>> processServicePayment({
+    required String path,
+    required Map<String, dynamic> body,
+  }) async {
+    try {
+      final response = await apiService.post(
+        '${ApiConstants.baseUrl}$path',
+        data: body,
+      );
+      final data = response.data;
+      if (data is Map) {
+        return Map<String, dynamic>.from(data);
+      }
+      return {'success': false, 'message': 'Invalid service payment response'};
+    } catch (e) {
+      throw Exception('Failed to process service payment: $e');
     }
-
-    return methods;
   }
 
   Future<Map<String, dynamic>> processPayment({

@@ -29,11 +29,29 @@ final class FetchCategoriesListFailure extends CategoriesState {
   FetchCategoriesListFailure(this.errorMessage);
 }
 
-final class FetchCategoriesProductsLoading extends CategoriesState {}
+final class FetchCategoriesProductsLoading extends CategoriesState {
+  final bool isLoadingMore;
+  FetchCategoriesProductsLoading({this.isLoadingMore = false});
+}
 
 final class FetchCategoriesProductsSuccess extends CategoriesState {
   final List<CategoriesProductsModel> categoriesProducts;
-  FetchCategoriesProductsSuccess(this.categoriesProducts);
+  final int currentPage;
+  final int lastPage;
+  final bool hasMore;
+  final String? search;
+  final String? minPrice;
+  final String? maxPrice;
+
+  FetchCategoriesProductsSuccess({
+    required this.categoriesProducts,
+    required this.currentPage,
+    required this.lastPage,
+    required this.hasMore,
+    this.search,
+    this.minPrice,
+    this.maxPrice,
+  });
 }
 
 final class FetchCategoriesProductsFailure extends CategoriesState {

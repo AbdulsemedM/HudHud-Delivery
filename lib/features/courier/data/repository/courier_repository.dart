@@ -1,4 +1,11 @@
+import '../../../../core/utils/api_error_result.dart';
+import '../../../payment/model/payment_initiate_result.dart';
+import '../../utils/delivery_estimate.dart';
 import '../data_provider/courier_data_provider.dart';
+import '../models/create_delivery_result.dart';
+import '../models/delivery_live_tracking.dart';
+import '../models/delivery_service_area.dart';
+import '../models/nearby_drivers_result.dart';
 
 class CourierRepository {
   final CourierDataProvider courierDataProvider;
@@ -6,6 +13,8 @@ class CourierRepository {
   CourierRepository({required this.courierDataProvider});
 
   /// Estimate delivery cost. Returns estimated_distance, estimated_duration, estimated_cost.
+  /// Pass [scheduledPickup] (ISO-8601 with offset) for scheduled bookings so the
+  /// API prices against the requested Addis Ababa pickup time.
   Future<Map<String, dynamic>> estimateDelivery({
     required String packageType,
     required double packageWeight,
@@ -15,6 +24,8 @@ class CourierRepository {
     required double dropoffLongitude,
     required String vehicleType,
     required String serviceType,
+    String? pickupLocation,
+    String? scheduledPickup,
   }) async {
     try {
       final response = await courierDataProvider.estimateDelivery(
@@ -26,35 +37,52 @@ class CourierRepository {
         dropoffLongitude: dropoffLongitude,
         vehicleType: vehicleType,
         serviceType: serviceType,
+        pickupLocation: pickupLocation,
+        scheduledPickup: scheduledPickup,
       );
 
       if (response['statusCode'] == 200 || response['statusCode'] == 201) {
         final rawData = response['data'];
-        // Handle both direct response and wrapped in "data" key
-        final data = _extractEstimateData(rawData);
+        final estimate = parseDeliveryEstimate(rawData);
         return {
           'success': true,
-          'estimatedDistance': _parseDouble(data['estimated_distance']),
-          'estimatedDuration': _parseInt(data['estimated_duration']),
-          'estimatedCost': _parseDouble(data['estimated_cost']),
-          'currency': data['currency'] as String? ?? 'ETB',
-          'baseFare': _parseDouble(data['base_fare']),
-          'perKmRate': _parseDouble(data['per_km_rate']),
-          'weightCharge': _parseDouble(data['weight_charge']),
+          'estimatedDistance': estimate.estimatedDistance,
+          'estimatedDuration': estimate.estimatedDuration,
+          'estimatedCost': estimate.estimatedCost,
+          'currency': estimate.currency,
+          'baseDeliveryFee': estimate.baseDeliveryFee,
+          'distanceRate': estimate.distanceRate,
+          'freeDistance': estimate.freeDistance,
+          'weightCharge': estimate.weightCharge,
+          'timeBandName': estimate.timeBandName,
+          'timeBandMultiplier': estimate.timeBandMultiplier,
+          'timeBandSurchargeRate': estimate.timeBandSurchargeRate,
+          'timeBandSurcharge': estimate.timeBandSurcharge,
+          'evaluatedPickupAt': estimate.evaluatedPickupAt,
+          'timezone': estimate.timezone,
+          'nightHoursStart': estimate.nightHoursStart,
+          'nightHoursEnd': estimate.nightHoursEnd,
+          'vehicleType': estimate.vehicleType,
+          'scheduledPickup': scheduledPickup,
           'data': rawData,
           'message': 'Estimate retrieved successfully',
         };
       } else {
-        String errorMessage =
-            response['errorMessage'] ?? 'Error getting delivery estimate';
-        errorMessage = _cleanErrorMessage(errorMessage);
+        final statusCode = response['statusCode'] as int?;
+        final parsed = parseApiErrorResult(
+          response['data'],
+          statusCode: statusCode,
+          fallback: response['errorMessage']?.toString() ??
+              'Error getting delivery estimate',
+        );
         return {
           'success': false,
           'estimatedDistance': null,
           'estimatedDuration': null,
           'estimatedCost': null,
-          'data': null,
-          'message': errorMessage,
+          'data': response['data'],
+          'message': parsed.displayMessage,
+          'error': parsed,
         };
       }
     } catch (e) {
@@ -71,6 +99,50 @@ class CourierRepository {
     }
   }
 
+  /// GET /api/services/delivery/service-areas for a pickup address.
+  Future<Map<String, dynamic>> getDeliveryServiceAreas({
+    String? pickupLocation,
+  }) async {
+    try {
+      final response = await courierDataProvider.getDeliveryServiceAreas(
+        pickupLocation: pickupLocation,
+      );
+      final statusCode = response['statusCode'] as int?;
+      if (statusCode == 200 || statusCode == 201) {
+        final lookup = parseDeliveryServiceAreaLookup(response['data']);
+        return {
+          'success': true,
+          'lookup': lookup,
+          'supportedVehicleTypes': lookup.supportedVehicleTypes,
+          'data': response['data'],
+          'message': null,
+        };
+      }
+      final parsed = parseApiErrorResult(
+        response['data'],
+        statusCode: statusCode,
+        fallback: response['errorMessage']?.toString() ??
+            'Error looking up delivery service area',
+      );
+      return {
+        'success': false,
+        'lookup': null,
+        'supportedVehicleTypes': const <String>[],
+        'data': response['data'],
+        'message': parsed.displayMessage,
+        'error': parsed,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'lookup': null,
+        'supportedVehicleTypes': const <String>[],
+        'data': null,
+        'message': _cleanErrorMessage(e.toString()),
+      };
+    }
+  }
+
   /// Create delivery request. Returns order data on success.
   Future<Map<String, dynamic>> createDeliveryRequest({
     required Map<String, dynamic> requestData,
@@ -81,21 +153,29 @@ class CourierRepository {
 
       if (response['statusCode'] == 200 || response['statusCode'] == 201) {
         final data = response['data'];
+        final created = parseCreateDeliveryResponse(data);
         return {
           'success': true,
           'data': data,
-          'orderId': _extractOrderId(data),
+          'orderId': created.isValid ? created.deliveryId : _extractOrderId(data),
+          'created': created,
           'message': 'Delivery request created successfully',
         };
       } else {
-        String errorMessage =
-            response['errorMessage'] ?? 'Error creating delivery request';
-        errorMessage = _cleanErrorMessage(errorMessage);
+        final statusCode = response['statusCode'] as int?;
+        final parsed = parseApiErrorResult(
+          response['data'],
+          statusCode: statusCode,
+          fallback: response['errorMessage']?.toString() ??
+              'Error creating delivery request',
+        );
         return {
           'success': false,
-          'data': null,
+          'data': response['data'],
           'orderId': null,
-          'message': errorMessage
+          'created': null,
+          'message': parsed.displayMessage,
+          'error': parsed,
         };
       }
     } catch (e) {
@@ -105,6 +185,7 @@ class CourierRepository {
         'success': false,
         'data': null,
         'orderId': null,
+        'created': null,
         'message': errorMessage
       };
     }
@@ -152,6 +233,92 @@ class CourierRepository {
         'lastPage': 1,
         'total': 0,
         'message': errorMessage,
+      };
+    }
+  }
+
+  /// GET /api/customer/nearby-drivers. [retryable] is false on 422.
+  Future<Map<String, dynamic>> getNearbyDrivers({
+    required double latitude,
+    required double longitude,
+    int? radius,
+    String? vehicleType,
+  }) async {
+    try {
+      final response = await courierDataProvider.getNearbyDrivers(
+        latitude: latitude,
+        longitude: longitude,
+        radius: radius,
+        vehicleType: vehicleType,
+      );
+      final statusCode = response['statusCode'] as int?;
+      if (statusCode == 200) {
+        final parsed = parseNearbyDriversResponse(response['data']);
+        return {
+          'success': true,
+          'retryable': true,
+          'nearby': parsed,
+          'message': null,
+        };
+      }
+      final retryable = statusCode != 422;
+      return {
+        'success': false,
+        'retryable': retryable,
+        'nearby': null,
+        'message': _cleanErrorMessage(
+          response['errorMessage']?.toString() ?? 'Error fetching nearby drivers',
+        ),
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'retryable': true,
+        'nearby': null,
+        'message': _cleanErrorMessage(e.toString()),
+      };
+    }
+  }
+
+  /// GET /api/customer/deliveries/{id}/live-tracking. [notFound] is true on 404.
+  Future<Map<String, dynamic>> getDeliveryLiveTracking(int deliveryId) async {
+    try {
+      final response =
+          await courierDataProvider.getDeliveryLiveTracking(deliveryId);
+      final statusCode = response['statusCode'] as int?;
+      if (statusCode == 200) {
+        final parsed = parseDeliveryLiveTrackingResponse(response['data']);
+        return {
+          'success': true,
+          'notFound': false,
+          'tracking': parsed,
+          'message': null,
+        };
+      }
+      if (statusCode == 404) {
+        return {
+          'success': false,
+          'notFound': true,
+          'tracking': null,
+          'message': _cleanErrorMessage(
+            response['errorMessage']?.toString() ?? 'Tracking not found',
+          ),
+        };
+      }
+      return {
+        'success': false,
+        'notFound': false,
+        'tracking': null,
+        'message': _cleanErrorMessage(
+          response['errorMessage']?.toString() ?? 'Error fetching live tracking',
+        ),
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'notFound': false,
+        'tracking': null,
+        'message': _cleanErrorMessage(e.toString()),
       };
     }
   }
@@ -230,33 +397,181 @@ class CourierRepository {
     }
   }
 
-  /// Extracts estimate data - handles both direct response and wrapped in "data" key
-  Map<String, dynamic> _extractEstimateData(dynamic rawData) {
-    if (rawData is Map<String, dynamic>) {
-      if (rawData.containsKey('estimated_distance')) {
-        return rawData;
+  /// Retry unpaid payment via POST /api/services/delivery/{id}/retry-payment.
+  Future<Map<String, dynamic>> retryPayment({
+    required int deliveryId,
+    required String paymentMethod,
+    String? paymentPhone,
+  }) async {
+    try {
+      final response = await courierDataProvider.retryPayment(
+        deliveryId: deliveryId,
+        paymentMethod: paymentMethod,
+        paymentPhone: paymentPhone,
+      );
+
+      if (response['statusCode'] == 200 || response['statusCode'] == 201) {
+        final data = response['data'];
+        final envelope = _paymentEnvelope(data);
+        return {
+          'success': true,
+          'data': data,
+          'result': PaymentInitiateResult.fromJson(envelope),
+          'message': envelope['message']?.toString() ?? 'Payment retry started',
+        };
       }
-      final nested = rawData['data'];
-      if (nested is Map<String, dynamic>) {
-        return nested;
-      }
+
+      final parsed = parseApiErrorResult(
+        response['data'],
+        statusCode: response['statusCode'] as int?,
+        fallback: response['errorMessage']?.toString() ??
+            'Error retrying payment',
+      );
+      return {
+        'success': false,
+        'data': response['data'],
+        'result': null,
+        'message': parsed.displayMessage,
+        'error': parsed,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'data': null,
+        'result': null,
+        'message': _cleanErrorMessage(e.toString()),
+      };
     }
-    return {};
   }
 
-  double? _parseDouble(dynamic value) {
-    if (value == null) return null;
-    if (value is num) return value.toDouble();
-    if (value is String) return double.tryParse(value);
-    return null;
+  Map<String, dynamic> _paymentEnvelope(dynamic data) {
+    if (data is Map) {
+      final map = Map<String, dynamic>.from(data);
+      if (map.containsKey('success')) return map;
+      return {'success': true, 'data': map};
+    }
+    return {'success': true, 'data': <String, dynamic>{}};
   }
 
-  int? _parseInt(dynamic value) {
-    if (value == null) return null;
-    if (value is int) return value;
-    if (value is num) return value.toInt();
-    if (value is String) return int.tryParse(value);
-    return null;
+  /// Confirm package receipt via POST /api/services/delivery/{id}/confirm-receipt.
+  Future<Map<String, dynamic>> confirmDeliveryReceipt(int deliveryId) async {
+    try {
+      final response =
+          await courierDataProvider.confirmDeliveryReceipt(deliveryId);
+
+      if (response['statusCode'] == 200 || response['statusCode'] == 201) {
+        final data = response['data'];
+        String? message;
+        if (data is Map) {
+          message = data['message']?.toString();
+        }
+        return {
+          'success': true,
+          'data': data,
+          'message': message ?? 'Receipt confirmed successfully',
+        };
+      }
+
+      String errorMessage =
+          response['errorMessage'] ?? 'Error confirming receipt';
+      errorMessage = _cleanErrorMessage(errorMessage);
+      return {
+        'success': false,
+        'data': response['data'],
+        'message': errorMessage,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'data': null,
+        'message': _cleanErrorMessage(e.toString()),
+      };
+    }
+  }
+
+  /// Rate a package delivery via POST /api/services/delivery/{id}/rate.
+  Future<Map<String, dynamic>> rateDelivery({
+    required int deliveryId,
+    required int rating,
+    String? comment,
+  }) async {
+    try {
+      final response = await courierDataProvider.rateDelivery(
+        deliveryId: deliveryId,
+        rating: rating,
+        comment: comment,
+      );
+
+      if (response['statusCode'] == 200 || response['statusCode'] == 201) {
+        final data = response['data'];
+        String? message;
+        if (data is Map) {
+          message = data['message']?.toString();
+        }
+        return {
+          'success': true,
+          'data': data,
+          'message': message ?? 'Rating submitted successfully',
+        };
+      }
+
+      String errorMessage = response['errorMessage'] ?? 'Error submitting rating';
+      errorMessage = _cleanErrorMessage(errorMessage);
+      return {
+        'success': false,
+        'data': response['data'],
+        'message': errorMessage,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'data': null,
+        'message': _cleanErrorMessage(e.toString()),
+      };
+    }
+  }
+
+  /// Cancel a package delivery via POST /api/services/delivery/cancel.
+  Future<Map<String, dynamic>> cancelDelivery({
+    required int deliveryId,
+    String cancellationReason = 'Changed my mind',
+  }) async {
+    try {
+      final response = await courierDataProvider.cancelDelivery(
+        deliveryId: deliveryId,
+        cancellationReason: cancellationReason,
+      );
+
+      if (response['statusCode'] == 200) {
+        final data = response['data'];
+        String? message;
+        if (data is Map) {
+          message = data['message']?.toString();
+        }
+        return {
+          'success': true,
+          'data': data,
+          'message': message ?? 'Delivery cancelled successfully',
+        };
+      }
+
+      String errorMessage =
+          response['errorMessage'] ?? 'Error cancelling delivery';
+      errorMessage = _cleanErrorMessage(errorMessage);
+      return {
+        'success': false,
+        'data': null,
+        'message': errorMessage,
+      };
+    } catch (e) {
+      String errorMessage = e.toString();
+      errorMessage = _cleanErrorMessage(errorMessage);
+      return {
+        'success': false,
+        'data': null,
+        'message': errorMessage,
+      };
+    }
   }
 
   dynamic _extractOrderId(dynamic data) {

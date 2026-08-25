@@ -15,28 +15,49 @@ class OrdersResponseModel extends Equatable {
   });
 
   factory OrdersResponseModel.fromJson(Map<String, dynamic> json) {
-    // API returns: data[], total, current_page, total_pages, per_page (flat)
-    final cp = (json['current_page'] ?? 1) is int ? (json['current_page'] ?? 1) as int : int.tryParse((json['current_page'] ?? 1).toString()) ?? 1;
-    final pp = (json['per_page'] ?? 10) is int ? (json['per_page'] ?? 10) as int : int.tryParse((json['per_page'] ?? 10).toString()) ?? 10;
-    final tot = (json['total'] ?? 0) is int ? (json['total'] ?? 0) as int : int.tryParse((json['total'] ?? 0).toString()) ?? 0;
-    final paginationJson = json['pagination'] as Map<String, dynamic>? ??
+    // API: { success, data: { data: [], total, current_page, ... } } or flat page object
+    final payload = _unwrapOrdersPayload(json);
+    final cp = _parseInt(payload['current_page'], fallback: 1);
+    final pp = _parseInt(payload['per_page'], fallback: 10);
+    final tot = _parseInt(payload['total'], fallback: 0);
+    final paginationJson = payload['pagination'] as Map<String, dynamic>? ??
         {
           'current_page': cp,
-          'total_pages': json['total_pages'] ?? cp,
-          'last_page': json['total_pages'] ?? cp,
+          'total_pages': payload['total_pages'] ?? cp,
+          'last_page': payload['total_pages'] ?? cp,
           'per_page': pp,
           'total': tot,
-          'from': ((cp - 1) * pp + 1).clamp(1, tot),
-          'to': (cp * pp).clamp(0, tot),
+          'from': payload['from'],
+          'to': payload['to'],
         };
     return OrdersResponseModel(
-      success: true,
-      message: json['message'] ?? '',
-      data: (json['data'] as List<dynamic>? ?? [])
-          .map((orderJson) => OrderModel.fromJson(orderJson as Map<String, dynamic>))
-          .toList(),
+      success: payload['success'] == true || json['success'] == true,
+      message: (payload['message'] ?? json['message'] ?? '').toString(),
+      data: _parseOrdersList(payload['data']),
       pagination: PaginationModel.fromJson(paginationJson),
     );
+  }
+
+  static Map<String, dynamic> _unwrapOrdersPayload(Map<String, dynamic> json) {
+    final inner = json['data'];
+    if (inner is Map<String, dynamic> &&
+        (inner['data'] is List || inner.containsKey('total'))) {
+      return inner;
+    }
+    return json;
+  }
+
+  static List<OrderModel> _parseOrdersList(dynamic raw) {
+    if (raw is! List) return [];
+    return raw
+        .map((orderJson) =>
+            OrderModel.fromJson(orderJson as Map<String, dynamic>))
+        .toList();
+  }
+
+  static int _parseInt(dynamic value, {required int fallback}) {
+    if (value is int) return value;
+    return int.tryParse(value?.toString() ?? '') ?? fallback;
   }
 
   Map<String, dynamic> toJson() {
@@ -86,15 +107,15 @@ class PaginationModel extends Equatable {
     final lastPage = (json['last_page'] ?? json['total_pages'] ?? 1) is int
         ? (json['last_page'] ?? json['total_pages'] ?? 1) as int
         : int.tryParse((json['last_page'] ?? json['total_pages'] ?? 1).toString()) ?? 1;
-    final from = json['from'] ?? ((currentPage - 1) * perPage + 1).clamp(1, total);
-    final to = json['to'] ?? (currentPage * perPage).clamp(0, total);
+    final from = _parseBound(json['from'], currentPage, perPage, total, isFrom: true);
+    final to = _parseBound(json['to'], currentPage, perPage, total, isFrom: false);
     return PaginationModel(
       currentPage: currentPage,
       lastPage: lastPage,
       perPage: perPage,
       total: total,
-      from: from is int ? from : int.tryParse(from.toString()) ?? 0,
-      to: to is int ? to : int.tryParse(to.toString()) ?? 0,
+      from: from,
+      to: to,
       nextPageUrl: json['next_page_url']?.toString(),
       prevPageUrl: json['prev_page_url']?.toString(),
     );
@@ -115,6 +136,23 @@ class PaginationModel extends Equatable {
 
   bool get hasNextPage => nextPageUrl != null;
   bool get hasPrevPage => prevPageUrl != null;
+
+  static int _parseBound(
+    dynamic value,
+    int currentPage,
+    int perPage,
+    int total, {
+    required bool isFrom,
+  }) {
+    if (value != null) {
+      return value is int ? value : int.tryParse(value.toString()) ?? 0;
+    }
+    if (total <= 0) return 0;
+    if (isFrom) {
+      return ((currentPage - 1) * perPage + 1).clamp(1, total);
+    }
+    return (currentPage * perPage).clamp(0, total);
+  }
 
   @override
   List<Object?> get props => [

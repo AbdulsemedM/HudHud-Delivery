@@ -93,6 +93,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navProfile => 'Profile';
 
   @override
+  String get navOrderHistory => 'Order History';
+
+  @override
   String get settingsProfile => 'Profile';
 
   @override
@@ -103,6 +106,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsSupport => 'Support';
+
+  @override
+  String get settingsContactEmail => 'Email support';
+
+  @override
+  String get offlineNoConnection => 'No internet connection';
+
+  @override
+  String get orderIdCopied => 'Order ID copied';
+
+  @override
+  String get orderShareSubject => 'HudHud order';
 
   @override
   String get settingsPersonalDetails => 'Personal Details';
@@ -117,7 +132,75 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsChangePassword => 'Change Password';
 
   @override
+  String get settingsBiometricLogin => 'Biometric login';
+
+  @override
+  String get settingsBiometricLoginSubtitle =>
+      'Sign in quickly with fingerprint or Face ID on this device';
+
+  @override
+  String get settingsBiometricSubtitleEnabled =>
+      'On — use fingerprint or Face ID to sign in';
+
+  @override
+  String get settingsBiometricSubtitleOffReady => 'Off — turn on anytime';
+
+  @override
+  String get settingsBiometricSubtitleSignInOnce => 'Sign in once to enable';
+
+  @override
+  String get biometricAuthReason => 'Verify your identity to continue';
+
+  @override
+  String get biometricEnableEnterPassword =>
+      'Enter your password to enable biometric login';
+
+  @override
+  String get biometricNotAvailable =>
+      'Biometric login is not available on this device';
+
+  @override
+  String get biometricNoCredentials =>
+      'No saved login found. Sign in with your password first.';
+
+  @override
+  String get biometricLoginFailed =>
+      'Biometric sign-in failed. Try again or use your password.';
+
+  @override
+  String get biometricEnabledSuccess => 'Biometric login enabled';
+
+  @override
+  String get biometricDisabledSuccess => 'Biometric login disabled';
+
+  @override
+  String get biometricOptInTitle => 'Enable biometric login?';
+
+  @override
+  String get biometricOptInMessage =>
+      'Use fingerprint or Face ID to sign in faster next time.';
+
+  @override
+  String get biometricOptInEnable => 'Enable';
+
+  @override
+  String get biometricOptInNotNow => 'Not now';
+
+  @override
+  String get loginBiometricButtonSemantics => 'Sign in with biometrics';
+
+  @override
+  String get loginBiometricOrDivider => 'or sign in with biometrics';
+
+  @override
   String get settingsNotifications => 'Notifications';
+
+  @override
+  String get settingsMarketingOffers => 'Receive HudHud offers and updates';
+
+  @override
+  String get settingsMarketingOffersSubtitle =>
+      'Optional. We may send promotions by push, SMS, or email. You can turn this off at any time.';
 
   @override
   String get settingsSmsNotifications => 'SMS Notifications';
@@ -171,6 +254,58 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsLanguage => 'Language';
+
+  @override
+  String get profileEdit => 'Edit';
+
+  @override
+  String get profileCoupons => 'Coupons';
+
+  @override
+  String get profileWallet => 'Wallet';
+
+  @override
+  String get profileMenuProfile => 'Profile';
+
+  @override
+  String get profileMenuAddresses => 'Addresses';
+
+  @override
+  String get profileMenuFavorites => 'Favorites';
+
+  @override
+  String get profileMenuMessages => 'Messages';
+
+  @override
+  String get profileMenuAccountSettings => 'Account Settings';
+
+  @override
+  String get settingsGeneralPreferences => 'General Preferences';
+
+  @override
+  String get settingsDeliveryPreferences => 'Delivery Preferences';
+
+  @override
+  String get settingsAppSettings => 'App Settings';
+
+  @override
+  String get profileCouponsComingSoon => 'Coupons are not available yet.';
+
+  @override
+  String get profileTermsOfUse => 'Terms of Use';
+
+  @override
+  String get profilePrivacyPolicy => 'Privacy Policy';
+
+  @override
+  String profileCopyright(String year) {
+    return '© $year HudHud Delivery. All Rights Reserved.';
+  }
+
+  @override
+  String profileVersionFormatted(String version, String buildNumber) {
+    return 'Version $version (Build $buildNumber)';
+  }
 
   @override
   String get logoutTitle => 'Logout';
@@ -338,6 +473,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get phoneVerifiedSuccess => 'Phone number verified successfully!';
 
   @override
+  String get accountVerificationBannerTitle => 'Secure your account';
+
+  @override
+  String get accountVerificationEmailSubtitle =>
+      'Confirm your email for receipts and updates.';
+
+  @override
+  String get accountVerificationPhoneSubtitle =>
+      'Verify your phone for security and support.';
+
+  @override
   String failedToLoadOrders(String error) {
     return 'Failed to load orders: $error';
   }
@@ -371,6 +517,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get history => 'History';
+
+  @override
+  String get showMore => 'Show more';
 
   @override
   String get featuresSectionTitle => 'What you can do with HudHud';
@@ -422,6 +571,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get courierInstantTitle => 'Instant Delivery';
 
   @override
+  String get courierAddDelivery => 'Add Delivery';
+
+  @override
   String get courierInstantSubtitle =>
       'Courier takes only your package and delivers instantly.';
 
@@ -444,11 +596,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String get inProgress => 'In progress';
 
   @override
-  String get loginTitle => 'Sign In';
+  String get loginTitle => 'Sign in';
 
   @override
   String get loginSubtitle =>
-      'Please enter your credentials to access your account and all available services';
+      'Sign in to track your orders and get your next delivery moving.';
+
+  @override
+  String get brandTagline => 'DELIVERY, DELIVERED WELL';
+
+  @override
+  String get splashTagline => 'YOUR CITY, DELIVERED';
+
+  @override
+  String get splashStatus => 'Getting things moving…';
+
+  @override
+  String get homeTabFood => 'Food';
+
+  @override
+  String get homeTabCourier => 'Courier';
+
+  @override
+  String get homeTabTaxi => 'Taxi';
+
+  @override
+  String get homeTabHandyman => 'Handyman';
+
+  @override
+  String get homeSearchHint => 'Search products everywhere';
 
   @override
   String get loginContinueAsGuest => 'Continue as guest';
@@ -457,13 +633,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String get labelEmailOrPhone => 'Email address or Phone number';
 
   @override
+  String get loginTabEmail => 'Email';
+
+  @override
+  String get loginTabPhone => 'Phone';
+
+  @override
+  String get loginTabEmailSemantics => 'Sign in with email';
+
+  @override
+  String get loginTabPhoneSemantics => 'Sign in with phone';
+
+  @override
+  String get labelEmail => 'Email';
+
+  @override
+  String get hintEmail => 'Eg. JohnDoe@gmail.com';
+
+  @override
+  String get hintPhoneNational => '912 345 678';
+
+  @override
+  String get validationPhoneRequired => 'Please enter your phone number';
+
+  @override
+  String get validationPhoneInvalid => 'Please enter a valid phone number';
+
+  @override
   String get hintEmailPhone => 'Eg. JohnDoe@gmail.com';
 
   @override
   String get labelPassword => 'Password';
 
   @override
-  String get hintPassword => 'Enter password';
+  String get hintPassword => 'Enter your password';
 
   @override
   String get validationEmailOrPhoneRequired =>
@@ -477,7 +680,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get validationPasswordRequired => 'Please enter your password';
 
   @override
-  String get validationPasswordMin => 'Password must be at least 8 characters';
+  String get validationPasswordMin => 'Password must be at least 6 characters';
+
+  @override
+  String get validationPasswordComplexity =>
+      'Password must include uppercase, lowercase, a number, and a special character';
 
   @override
   String get validationEmailRequired => 'Please enter your email';
@@ -502,7 +709,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get welcomeTitle => 'Welcome to HudHud Delivery!';
+  String get welcomeTitle => 'Welcome back';
 
   @override
   String get welcomeBody =>
@@ -766,19 +973,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enterCustomTip => 'Enter custom tip amount';
 
   @override
-  String get hintFirstName => 'Eg. John';
+  String get hintFirstName => 'John';
 
   @override
-  String get hintLastName => 'Eg. Doe';
+  String get hintLastName => 'Doe';
 
   @override
-  String get hintEmailExample => 'Eg. JohnDoe@gmail.com';
+  String get hintEmailExample => 'name@example.com';
 
   @override
-  String get hintPhoneExample => 'Eg. 0712345678';
+  String get hintPhoneExample => '912 345 678';
 
   @override
-  String get hintEnterPassword => 'Enter password';
+  String get hintEnterPassword => 'Re-enter your password';
 
   @override
   String get pickupLocation => 'Pickup location';
@@ -850,13 +1057,45 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deliveryLocationLabel => 'Delivery Location';
 
   @override
-  String get vehicleMotorcycle => 'Motorcycle';
+  String get vehicleMotorcycle => 'Delivery by moto';
 
   @override
-  String get vehicleCar => 'Car';
+  String get vehicleCar => 'Delivery by car';
 
   @override
-  String get vehicleVan => 'Van';
+  String get vehicleVan => 'Express Cargo';
+
+  @override
+  String get vehicleBajaj => 'Delivery by bajaj';
+
+  @override
+  String get vehiclePickup => 'Delivery by pickup';
+
+  @override
+  String get pickupOutsideDeliveryServiceArea =>
+      'Pickup is outside HudHud’s configured delivery service areas.';
+
+  @override
+  String get selectAvailableVehicleType => 'Select an available vehicle type';
+
+  @override
+  String get sendAPackageTitle => 'SEND A PACKAGE';
+
+  @override
+  String get courierDeliveryAddressPlaceholder => 'Delivery address';
+
+  @override
+  String get addInfoAboutDelivery => 'Add info about delivery';
+
+  @override
+  String courierEstimateFromPrice(String currency, String amount) {
+    return 'from $currency $amount';
+  }
+
+  @override
+  String courierEstimateMinutes(int minutes) {
+    return '$minutes min';
+  }
 
   @override
   String get fromWallet => 'From Wallet';
@@ -1090,13 +1329,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newPassword => 'New Password';
 
   @override
-  String get confirmNewPassword => 'Confirm New Password';
+  String get confirmNewPassword => 'Confirm password';
 
   @override
-  String get firstName => 'First Name';
+  String get firstName => 'First name';
 
   @override
-  String get lastName => 'Last Name';
+  String get lastName => 'Last name';
 
   @override
   String get email => 'Email';
@@ -1115,6 +1354,54 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get referralCode => 'Referral code';
+
+  @override
+  String get referralCodeOptional => 'Referral code — optional';
+
+  @override
+  String get hintReferralCode => 'UCZXSD3O';
+
+  @override
+  String get signupTitle => 'Create your account';
+
+  @override
+  String get signupSubtitle =>
+      'Join Hudhud to order from every business in your city.';
+
+  @override
+  String get hintCreatePassword => 'Create a password';
+
+  @override
+  String get hintReenterPassword => 'Re-enter your password';
+
+  @override
+  String get passwordStrengthHint => 'Use 6+ characters';
+
+  @override
+  String get signupAcceptTermsPrefix => 'I\'ve read and accepted Hudhud\'s ';
+
+  @override
+  String get signupTermsLink => 'terms and conditions';
+
+  @override
+  String get signupConsentDataPrefix =>
+      'I consent to my data being processed under applicable ';
+
+  @override
+  String get signupDataProtectionLink => 'data protection laws';
+
+  @override
+  String get alreadyHaveAccount => 'Already have an account? ';
+
+  @override
+  String get createAccount => 'Create account';
+
+  @override
+  String get signupFormIncomplete => 'Please fill in all required fields';
+
+  @override
+  String get signupAcceptLegalRequired =>
+      'Please accept the terms and data protection consent';
 
   @override
   String get searchQuestions => 'Search question';
@@ -1825,4 +2112,1008 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get handymanStatResponse => 'Response';
+
+  @override
+  String get forgotPasswordLink => 'Forgot password?';
+
+  @override
+  String get forgotPasswordRequestTitle => 'Reset password';
+
+  @override
+  String get forgotPasswordRequestSubtitle =>
+      'Enter your email or phone number. We\'ll send a 6-digit verification code.';
+
+  @override
+  String get forgotPasswordSendCode => 'Send code';
+
+  @override
+  String get forgotPasswordVerifyTitle => 'Enter verification code';
+
+  @override
+  String forgotPasswordVerifySubtitle(String identifier) {
+    return 'We sent a code to $identifier.';
+  }
+
+  @override
+  String get forgotPasswordOtpLabel => '6-digit code';
+
+  @override
+  String forgotPasswordTimeRemaining(String time) {
+    return 'Time remaining: $time';
+  }
+
+  @override
+  String get forgotPasswordCodeExpired =>
+      'This code has expired. Tap resend for a new code.';
+
+  @override
+  String get forgotPasswordResend => 'Resend code';
+
+  @override
+  String get forgotPasswordVerifyButton => 'Verify';
+
+  @override
+  String get forgotPasswordNewTitle => 'Create new password';
+
+  @override
+  String get forgotPasswordNewSubtitle => 'Use at least 6 characters.';
+
+  @override
+  String get forgotPasswordLabelConfirmPassword => 'Confirm password';
+
+  @override
+  String get forgotPasswordHintConfirmPassword => 'Re-enter new password';
+
+  @override
+  String get forgotPasswordSaveButton => 'Save password';
+
+  @override
+  String get forgotPasswordSuccessMessage =>
+      'Password updated. You can sign in now.';
+
+  @override
+  String get validationOtpLength => 'Enter the 6-digit code';
+
+  @override
+  String get validationConfirmPasswordRequired =>
+      'Please confirm your password';
+
+  @override
+  String get validationPasswordsDoNotMatch => 'Passwords do not match';
+
+  @override
+  String get addressesTitle => 'My Addresses';
+
+  @override
+  String get addressesEmptyTitle => 'No saved addresses';
+
+  @override
+  String get addressesEmptySubtitle =>
+      'Add an address to speed up checkout and delivery.';
+
+  @override
+  String get addressesAdd => 'Add address';
+
+  @override
+  String get addressesAddFromMap => 'Pick on map';
+
+  @override
+  String get addressesAddManual => 'Enter manually';
+
+  @override
+  String get addressesDefaultBadge => 'Default';
+
+  @override
+  String get addressesSetDefault => 'Set as default';
+
+  @override
+  String get addressesEdit => 'Edit';
+
+  @override
+  String get addressesDeleteTitle => 'Delete address?';
+
+  @override
+  String get addressesDeleteMessage =>
+      'This address will be removed from your account.';
+
+  @override
+  String get addressesBulkDeleteTitle => 'Delete selected addresses?';
+
+  @override
+  String addressesBulkDeleteMessage(int count) {
+    return 'Delete $count address(es)?';
+  }
+
+  @override
+  String get addressesBulkDeleteForce => 'Also delete default address';
+
+  @override
+  String get addressesSelect => 'Select';
+
+  @override
+  String get addressesDeleteSelected => 'Delete selected';
+
+  @override
+  String get addressesTypeHome => 'Home';
+
+  @override
+  String get addressesTypeWork => 'Work';
+
+  @override
+  String get addressesTypeOther => 'Other';
+
+  @override
+  String get addressFormAddTitle => 'Add address';
+
+  @override
+  String get addressFormEditTitle => 'Edit address';
+
+  @override
+  String get addressFormLine1 => 'Address line 1';
+
+  @override
+  String get addressFormLine2 => 'Address line 2 (optional)';
+
+  @override
+  String get addressFormCity => 'City';
+
+  @override
+  String get addressFormState => 'State / region';
+
+  @override
+  String get addressFormPostalCode => 'Postal code';
+
+  @override
+  String get addressFormCountry => 'Country';
+
+  @override
+  String get addressFormLabel => 'Label';
+
+  @override
+  String get addressFormLandmark => 'Landmark (optional)';
+
+  @override
+  String get addressFormType => 'Address type';
+
+  @override
+  String get addressFormSetDefault => 'Set as default address';
+
+  @override
+  String get addressFormPickOnMap => 'Pick location on map';
+
+  @override
+  String get addressFormRequired => 'This field is required';
+
+  @override
+  String get addressMapPickerTitle => 'Pick location';
+
+  @override
+  String get addressMapUseLocation => 'Use this location';
+
+  @override
+  String get deliveryAddressTitle => 'Delivery address';
+
+  @override
+  String get deliveryAddressChange => 'Change';
+
+  @override
+  String get deliveryAddressSaved => 'Saved addresses';
+
+  @override
+  String get deliveryAddressPickMap => 'Pick on map';
+
+  @override
+  String get deliveryAddressAddNew => 'Add new address';
+
+  @override
+  String get deliveryAddressSelectPrompt => 'Select delivery address';
+
+  @override
+  String get addressesSignInTitle => 'Sign in to manage addresses';
+
+  @override
+  String get addressesSignInSubtitle =>
+      'Save multiple delivery addresses and set a default.';
+
+  @override
+  String get addressesLoadError => 'Could not load addresses';
+
+  @override
+  String get addressesCreatedSuccess => 'Address saved';
+
+  @override
+  String get addressesUpdatedSuccess => 'Address updated';
+
+  @override
+  String get addressesDeletedSuccess => 'Address deleted';
+
+  @override
+  String get chatTitle => 'Messages';
+
+  @override
+  String get chatEmpty => 'No conversations yet';
+
+  @override
+  String get chatEmptySubtitle =>
+      'Start chatting about an order or contact support.';
+
+  @override
+  String get chatContactSupport => 'Contact support';
+
+  @override
+  String get chatViewOrders => 'View orders';
+
+  @override
+  String get chatSearchHint => 'Search messages';
+
+  @override
+  String get chatTypeMessage => 'Type a message…';
+
+  @override
+  String get chatSend => 'Send';
+
+  @override
+  String get chatSupportSubject => 'What do you need help with?';
+
+  @override
+  String get chatSupportSubjectHint => 'Brief subject';
+
+  @override
+  String get chatSupportTitle => 'New support chat';
+
+  @override
+  String get chatEdited => 'edited';
+
+  @override
+  String get chatDeleted => 'This message was deleted';
+
+  @override
+  String get chatSendFailed => 'Couldn\'t send message';
+
+  @override
+  String get chatOrderTitle => 'Order chat';
+
+  @override
+  String get chatSupportChatTitle => 'Support';
+
+  @override
+  String get chatRideTitle => 'Ride chat';
+
+  @override
+  String get chatAttachImage => 'Gallery';
+
+  @override
+  String get chatAttachFile => 'Document';
+
+  @override
+  String get chatAttachAudio => 'Voice';
+
+  @override
+  String get chatShareLocation => 'Location';
+
+  @override
+  String get chatEditingMessage => 'Editing message';
+
+  @override
+  String get chatCopy => 'Copy';
+
+  @override
+  String get chatEdit => 'Edit';
+
+  @override
+  String get chatDelete => 'Delete';
+
+  @override
+  String get chatRetry => 'Tap to retry';
+
+  @override
+  String get chatOpenMaps => 'Open in Maps';
+
+  @override
+  String get chatNewSupport => 'New support chat';
+
+  @override
+  String get chatTypeOrder => 'Order';
+
+  @override
+  String get chatTypeSupport => 'Support';
+
+  @override
+  String get chatTypeRide => 'Ride';
+
+  @override
+  String get chatOpenOrder => 'View order';
+
+  @override
+  String get chatRecording => 'Recording…';
+
+  @override
+  String get chatSlideToCancel => 'Slide up to cancel';
+
+  @override
+  String get chatPhoto => 'Photo';
+
+  @override
+  String get chatVoiceMessage => 'Voice message';
+
+  @override
+  String get chatLocation => 'Location';
+
+  @override
+  String get chatFile => 'File';
+
+  @override
+  String get chatLoadError => 'Could not load messages';
+
+  @override
+  String get chatLeftConversation => 'You have left this conversation';
+
+  @override
+  String get chatRejoin => 'Rejoin';
+
+  @override
+  String get chatCreateSupport => 'Start chat';
+
+  @override
+  String get sosSettingsTitle => 'Safety & SOS';
+
+  @override
+  String get sosEmergencyContacts => 'Emergency contacts';
+
+  @override
+  String get sosEmergencyContactsSubtitle =>
+      'People notified when you trigger SOS';
+
+  @override
+  String get sosHistory => 'SOS history';
+
+  @override
+  String get sosHistorySubtitle => 'View past alerts';
+
+  @override
+  String get sosTrigger => 'Trigger SOS';
+
+  @override
+  String get sosTriggerSubtitle => 'Send an emergency alert with your location';
+
+  @override
+  String get sosTriggerConfirmTitle => 'Send SOS alert?';
+
+  @override
+  String get sosTriggerConfirmMessage =>
+      'Your emergency contacts will be notified with your current location. Only use in a real emergency.';
+
+  @override
+  String get sosDescriptionHint => 'Describe your situation (optional)';
+
+  @override
+  String get sosLocationRequired =>
+      'Location is required to send an SOS alert. Please enable location permissions.';
+
+  @override
+  String get sosContactAdded => 'Emergency contact added';
+
+  @override
+  String get sosContactUpdated => 'Emergency contact updated';
+
+  @override
+  String get sosContactDeleted => 'Emergency contact deleted';
+
+  @override
+  String get sosTriggered => 'SOS alert sent successfully';
+
+  @override
+  String get sosAddContact => 'Add contact';
+
+  @override
+  String get sosEditContact => 'Edit contact';
+
+  @override
+  String get sosNoContacts => 'No emergency contacts yet';
+
+  @override
+  String get sosNoContactsSubtitle =>
+      'Add someone who should be notified in an emergency.';
+
+  @override
+  String get sosNoHistory => 'No SOS alerts yet';
+
+  @override
+  String get sosName => 'Full name';
+
+  @override
+  String get sosPhone => 'Phone number';
+
+  @override
+  String get sosEmail => 'Email (optional)';
+
+  @override
+  String get sosRelationship => 'Relationship';
+
+  @override
+  String get sosPrimaryContact => 'Primary contact';
+
+  @override
+  String get sosDeleteContact => 'Delete contact';
+
+  @override
+  String get sosDeleteContactConfirm => 'Remove this emergency contact?';
+
+  @override
+  String get sosStatusActive => 'Active';
+
+  @override
+  String get sosStatusAll => 'All';
+
+  @override
+  String get sosCancel => 'Cancel';
+
+  @override
+  String get sosSendAlert => 'Send alert';
+
+  @override
+  String get sosSaving => 'Saving…';
+
+  @override
+  String get guestBrowseBanner => 'Browsing as guest';
+
+  @override
+  String get guestBrowseSignIn => 'Sign in';
+
+  @override
+  String get guestSignInRequiredTitle => 'Sign in required';
+
+  @override
+  String get guestSignInRequiredMessage =>
+      'Create an account or sign in to use this feature.';
+
+  @override
+  String get guestSignInRequiredCheckout =>
+      'Sign in to place orders and complete checkout.';
+
+  @override
+  String get guestOrdersSignIn => 'Sign in to view your order history.';
+
+  @override
+  String get guestProfileSignIn =>
+      'Sign in to access your profile and settings.';
+
+  @override
+  String get guestServiceSignIn => 'Sign in to use this service.';
+
+  @override
+  String get courierSignInRequired => 'Sign in to send packages.';
+
+  @override
+  String get courierPhoneVerificationRequired =>
+      'Verify your phone number before sending packages.';
+
+  @override
+  String get wishlistNotesHint => 'Add a note (optional)';
+
+  @override
+  String get wishlistNotesUpdated => 'Note updated';
+
+  @override
+  String get wishlistShareTitle => 'Share wishlist';
+
+  @override
+  String get wishlistShareSuccess => 'Wishlist shared successfully';
+
+  @override
+  String get wishlistPriceDropsTitle => 'Price drop';
+
+  @override
+  String get wishlistPriceDropsEmpty => 'No price drops right now';
+
+  @override
+  String get wishlistMigrateError =>
+      'Could not sync saved items to your account';
+
+  @override
+  String get tipsTitle => 'Tips';
+
+  @override
+  String get tipsAddTitle => 'Add a tip';
+
+  @override
+  String get tipsHistoryTitle => 'Tip history';
+
+  @override
+  String get tipsRecipientLabel => 'Tip recipient';
+
+  @override
+  String get tipsRecipientDriver => 'Driver';
+
+  @override
+  String get tipsRecipientVendor => 'Restaurant';
+
+  @override
+  String get tipsRecipientBoth => 'Both';
+
+  @override
+  String tipsCalculatedAmount(String amount) {
+    return 'Tip amount: ETB $amount';
+  }
+
+  @override
+  String get tipsSubmit => 'Send tip';
+
+  @override
+  String get tipsSuccess => 'Tip sent successfully';
+
+  @override
+  String get tipsLoadError => 'Could not load tips';
+
+  @override
+  String get tipsCardComingSoon => 'Card payments coming soon';
+
+  @override
+  String get tipsAnonymous => 'Send anonymously';
+
+  @override
+  String get tipsMessageHint => 'Add a message (optional)';
+
+  @override
+  String get tipsStatsTotal => 'Tips given';
+
+  @override
+  String get tipsStatsAmount => 'Total tipped';
+
+  @override
+  String get tipsStatsAverage => 'Average tip';
+
+  @override
+  String get tipsHistoryEmpty => 'No tips yet';
+
+  @override
+  String get tipsPaymentWallet => 'Wallet';
+
+  @override
+  String get tipsPaymentCard => 'Card';
+
+  @override
+  String get tipsStatusCompleted => 'Completed';
+
+  @override
+  String get tipsStatusAll => 'All';
+
+  @override
+  String get onboardingWelcomeTitle => 'Welcome to HudHud!';
+
+  @override
+  String get onboardingWelcomeSubtitle =>
+      'Send parcels across town today — food, rides, and home services are coming soon.';
+
+  @override
+  String get onboardingFoodTitle => 'Food & Groceries';
+
+  @override
+  String get onboardingFoodDescription =>
+      'Coming soon — order meals and groceries from local shops in minutes.';
+
+  @override
+  String get onboardingCourierTitle => 'Courier';
+
+  @override
+  String get onboardingCourierDescription =>
+      'Send packages across town with fast, reliable delivery.';
+
+  @override
+  String get onboardingTaxiTitle => 'Taxi';
+
+  @override
+  String get onboardingTaxiDescription =>
+      'Coming soon — book a ride anywhere in the city with a tap.';
+
+  @override
+  String get onboardingHandymanTitle => 'Handyman';
+
+  @override
+  String get onboardingHandymanDescription =>
+      'Coming soon — book trusted pros for repairs and home services.';
+
+  @override
+  String get onboardingGetStarted => 'Get Started';
+
+  @override
+  String get onboardingSpotlightLocationTitle => 'Your delivery location';
+
+  @override
+  String get onboardingSpotlightLocationDescription =>
+      'Tap here to set or change where orders should be delivered.';
+
+  @override
+  String get onboardingSpotlightNotificationsTitle => 'Stay in the loop';
+
+  @override
+  String get onboardingSpotlightNotificationsDescription =>
+      'Check order updates, offers, and important alerts here.';
+
+  @override
+  String get onboardingSpotlightFoodTitle => 'Food & Groceries';
+
+  @override
+  String get onboardingSpotlightFoodDescription =>
+      'Coming soon — browse restaurants and shops to order food and essentials.';
+
+  @override
+  String get onboardingSpotlightCourierTitle => 'Courier';
+
+  @override
+  String get onboardingSpotlightCourierDescription =>
+      'Send parcels and documents with on-demand pickup — available now.';
+
+  @override
+  String get onboardingSpotlightTaxiTitle => 'Taxi';
+
+  @override
+  String get onboardingSpotlightTaxiDescription =>
+      'Coming soon — request a ride and track your driver in real time.';
+
+  @override
+  String get onboardingSpotlightHandymanTitle => 'Handyman';
+
+  @override
+  String get onboardingSpotlightHandymanDescription =>
+      'Coming soon — find skilled help for home repairs and maintenance.';
+
+  @override
+  String get onboardingSpotlightDoneTitle => 'You\'re all set!';
+
+  @override
+  String get onboardingSpotlightDoneDescription =>
+      'Courier is ready now. Food, Taxi, and Handyman are coming soon — switch tabs anytime. Enjoy HudHud!';
+
+  @override
+  String get onboardingDebugReplayTour => 'Replay home tour (debug)';
+
+  @override
+  String get serviceComingSoonBadge => 'Coming Soon';
+
+  @override
+  String get foodComingSoonTitle => 'Something delicious is brewing';
+
+  @override
+  String get foodComingSoonSubtitle =>
+      'Groceries and meals from your favourite vendors — launching soon.';
+
+  @override
+  String get foodComingSoonTeaser1 => 'Fresh groceries';
+
+  @override
+  String get foodComingSoonTeaser2 => 'Local favourites';
+
+  @override
+  String get taxiComingSoonTitle => 'Your next ride is almost here';
+
+  @override
+  String get taxiComingSoonSubtitle =>
+      'Affordable trips across the city, just around the corner.';
+
+  @override
+  String get taxiComingSoonTeaser1 => 'Quick pickups';
+
+  @override
+  String get taxiComingSoonTeaser2 => 'Fair fares';
+
+  @override
+  String get handymanComingSoonTitle => 'Help is on its way';
+
+  @override
+  String get handymanComingSoonSubtitle =>
+      'Trusted handymen for home repairs — we are putting the finishing touches.';
+
+  @override
+  String get handymanComingSoonTeaser1 => 'Skilled pros';
+
+  @override
+  String get handymanComingSoonTeaser2 => 'Home repairs';
+
+  @override
+  String get ordersComingSoonTitle => 'Your order hub is on the way';
+
+  @override
+  String get ordersComingSoonSubtitle =>
+      'Track every delivery, reorder in one tap, and keep receipts in one place — launching soon.';
+
+  @override
+  String get ordersComingSoonTeaser1 => 'Live tracking';
+
+  @override
+  String get ordersComingSoonTeaser2 => 'One-tap reorder';
+
+  @override
+  String get ordersComingSoonTeaser3 => 'Digital receipts';
+
+  @override
+  String get ordersComingSoonStep1 =>
+      'Courier deliveries on Home — available now';
+
+  @override
+  String get ordersComingSoonStep2 =>
+      'Unified order timeline across all services';
+
+  @override
+  String get ordersComingSoonStep3 => 'Smart reorder and saved favourites';
+
+  @override
+  String get ordersComingSoonCta => 'Send a delivery now';
+
+  @override
+  String get ordersComingSoonFootnote =>
+      'Need a package delivered today? Use Courier on the Home tab.';
+
+  @override
+  String get pleaseEnterValidSenderPhone =>
+      'Please enter a valid sender phone (09xxxxxxxx)';
+
+  @override
+  String get trackingCodeCopied => 'Tracking code copied';
+
+  @override
+  String get chatMissingDeliveryId =>
+      'Unable to open chat. Missing delivery ID.';
+
+  @override
+  String get waitForPriceEstimate =>
+      'Wait for a server price estimate before booking';
+
+  @override
+  String get invalidDeliveryId => 'Invalid delivery id from create delivery';
+
+  @override
+  String timeBandPickupSurcharge(String band, String currency, String amount) {
+    return '$band pickup surcharge: $currency $amount';
+  }
+
+  @override
+  String get chooseValidFuturePickup =>
+      'Please choose a valid future pickup date and time.';
+
+  @override
+  String get refreshQuoteRouteDistance =>
+      'Unable to calculate the route. Please refresh the quote and try again.';
+
+  @override
+  String get waitForEstimateBeforeContinue =>
+      'Wait for a price estimate before continuing';
+
+  @override
+  String get deliveryBookedWallet => 'Delivery booked with wallet payment';
+
+  @override
+  String get cancelDeliveryTitle => 'Cancel delivery';
+
+  @override
+  String get insufficientWalletBalance => 'Insufficient wallet balance';
+
+  @override
+  String topUpAmount(String currency, String amount) {
+    return 'Top up $currency $amount';
+  }
+
+  @override
+  String get loadMore => 'Load more';
+
+  @override
+  String get viewMap => 'View Map';
+
+  @override
+  String get usePin => 'Use pin';
+
+  @override
+  String get copyOrderId => 'Copy order ID';
+
+  @override
+  String get shareOrder => 'Share order';
+
+  @override
+  String get cartEmpty => 'Your cart is empty';
+
+  @override
+  String promoCodeApplied(String promoCode) {
+    return 'Promo code \"$promoCode\" applied';
+  }
+
+  @override
+  String addressUpdatedTo(String address) {
+    return 'Address updated to: $address';
+  }
+
+  @override
+  String get addValidProductsToCart => 'Please add valid products to your cart';
+
+  @override
+  String get chooseDeliveryLocationFromMap =>
+      'Please choose a delivery location from the map';
+
+  @override
+  String get selectEbirrProvider => 'Please select an eBirr provider';
+
+  @override
+  String get unableToDetermineStore =>
+      'Unable to determine store for this order';
+
+  @override
+  String get gallery => 'Gallery';
+
+  @override
+  String get camera => 'Camera';
+
+  @override
+  String get photoPermissionRequired =>
+      'Camera or photo permission is required';
+
+  @override
+  String couldNotOpenPhotoPicker(String error) {
+    return 'Could not open photo picker: $error';
+  }
+
+  @override
+  String get pleaseEnterYourName => 'Please enter your name';
+
+  @override
+  String get updateFromStore => 'Update from store';
+
+  @override
+  String get softUpdateTitle => 'Update available';
+
+  @override
+  String softUpdateMessage(String currentVersion, String latestVersion) {
+    return 'You\'re on $currentVersion. Version $latestVersion is available on the store.';
+  }
+
+  @override
+  String get updateLater => 'Later';
+
+  @override
+  String get openPaymentPage => 'Open payment page';
+
+  @override
+  String get paymentRefreshFailed => 'Could not refresh payment status';
+
+  @override
+  String get searchProductsTitle => 'Search products';
+
+  @override
+  String get calories => 'Calories';
+
+  @override
+  String get protein => 'Protein';
+
+  @override
+  String get actionChange => 'Change';
+
+  @override
+  String get productUnavailable => 'This product is currently unavailable';
+
+  @override
+  String get cancelTripTitle => 'Cancel Trip';
+
+  @override
+  String get cancelTripConfirm => 'Are you sure you want to cancel this trip?';
+
+  @override
+  String get unableToCancelRide => 'Unable to cancel ride. Missing ride ID.';
+
+  @override
+  String get invalidQuoteAmount => 'Invalid quote amount for payment';
+
+  @override
+  String get noOrdersYetStore => 'No orders yet';
+
+  @override
+  String get retryPaymentTitle => 'Retry payment';
+
+  @override
+  String get retryPaymentSubtitle => 'Choose a payment method to continue';
+
+  @override
+  String deliveryBookedWalletBalance(String currency, String balance) {
+    return 'Delivery booked. Wallet balance: $currency $balance';
+  }
+
+  @override
+  String get cancelDeliveryConfirm =>
+      'Are you sure you want to cancel this delivery?';
+
+  @override
+  String get cancelDeliveryConfirmRefund =>
+      'Are you sure you want to cancel this delivery? Confirmed payment will be refunded to your wallet.';
+
+  @override
+  String get cancelOrder => 'Cancel order';
+
+  @override
+  String get courierFindingNearestDrivers =>
+      'Finding the nearest available drivers';
+
+  @override
+  String get courierFindingNearestDriversSubtitle =>
+      'We are finding the nearest available driver. Live driver location appears only after acceptance.';
+
+  @override
+  String get courierDriverLocationUpdating => 'Driver location is updating';
+
+  @override
+  String get phoneEnrollmentTitle => 'Add your phone number';
+
+  @override
+  String get phoneEnrollmentSubtitle =>
+      'We need a verified mobile number for deliveries, wallet, and account security.';
+
+  @override
+  String get phoneEnrollmentOtpTitle => 'Verify your phone';
+
+  @override
+  String phoneEnrollmentOtpSubtitle(String phone) {
+    return 'Enter the 6-digit code sent to $phone.';
+  }
+
+  @override
+  String get phoneEnrollmentSendCode => 'Send code';
+
+  @override
+  String get phoneEnrollmentVerify => 'Verify';
+
+  @override
+  String get phoneEnrollmentResend => 'Resend code';
+
+  @override
+  String phoneEnrollmentResendIn(int seconds) {
+    return 'Resend in ${seconds}s';
+  }
+
+  @override
+  String get phoneEnrollmentContactSupport => 'Contact support';
+
+  @override
+  String get phoneEnrollmentSignOut => 'Sign out';
+
+  @override
+  String get phoneEnrollmentChangeNumber => 'Change phone number';
+
+  @override
+  String get phoneEnrollmentRetry => 'Try again';
+
+  @override
+  String get phoneEnrollmentPhoneInvalid =>
+      'Enter a valid Ethiopian mobile number.';
+
+  @override
+  String get phoneEnrollmentPhoneInUse =>
+      'This number is already linked to another HudHud account.';
+
+  @override
+  String get phoneEnrollmentChangeRequiresSupport =>
+      'This verified number can only be changed with support help.';
+
+  @override
+  String get phoneEnrollmentCooldown =>
+      'Please wait before requesting another code.';
+
+  @override
+  String get phoneEnrollmentRateLimited =>
+      'Too many attempts. Please try again later.';
+
+  @override
+  String get phoneEnrollmentDeliveryFailed =>
+      'We could not send the SMS. Please try again.';
+
+  @override
+  String get phoneEnrollmentNotPending =>
+      'Request a new verification code to continue.';
+
+  @override
+  String get phoneEnrollmentCodeExpired =>
+      'This code has expired. Request a new one.';
+
+  @override
+  String get phoneEnrollmentCodeInvalid =>
+      'That code is incorrect. Please try again.';
+
+  @override
+  String get phoneEnrollmentGenericError =>
+      'Something went wrong. Please try again.';
 }

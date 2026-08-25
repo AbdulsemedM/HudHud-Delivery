@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../model/payment_initiate_result.dart';
 
 class PaymentMethodCard extends StatelessWidget {
   final String id;
@@ -27,20 +28,21 @@ class PaymentMethodCard extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     return Card(
-      elevation: isSelected ? 4 : 1,
+      elevation: 0,
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
         side: BorderSide(
           color: isSelected
               ? AppColors.primaryColor
-              : colorScheme.outline.withOpacity(0.35),
+              : colorScheme.outline.withValues(alpha: 0.35),
           width: isSelected ? 2 : 1,
         ),
       ),
+      color: colorScheme.surface,
       child: InkWell(
         onTap: enabled ? onTap : null,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -50,7 +52,7 @@ class PaymentMethodCard extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: _getPaymentMethodColor(id).withOpacity(0.1),
+                  color: _getPaymentMethodColor(id).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -72,7 +74,7 @@ class PaymentMethodCard extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                         color: enabled
                             ? colorScheme.onSurface
-                            : colorScheme.onSurface.withOpacity(0.5),
+                            : colorScheme.onSurface.withValues(alpha: 0.5),
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -81,8 +83,8 @@ class PaymentMethodCard extends StatelessWidget {
                       style: textTheme.bodyMedium?.copyWith(
                         fontSize: 14,
                         color: enabled
-                            ? colorScheme.onSurface.withOpacity(0.72)
-                            : colorScheme.onSurface.withOpacity(0.45),
+                            ? colorScheme.onSurface.withValues(alpha: 0.72)
+                            : colorScheme.onSurface.withValues(alpha: 0.45),
                       ),
                     ),
                   ],
@@ -99,7 +101,7 @@ class PaymentMethodCard extends StatelessWidget {
                   ),
                   child: const Icon(
                     Icons.check,
-                    color: Colors.white,
+                    color: AppColors.lightOnPrimary,
                     size: 16,
                   ),
                 ),
@@ -115,6 +117,9 @@ class PaymentMethodCard extends StatelessWidget {
 
   /// Shared icon lookup — also used by [PaymentMethodGridSection].
   static IconData iconForId(String id) {
+    if (isEbirrPaymentMethodCode(id)) {
+      return Icons.wallet;
+    }
     switch (id) {
       case 'wallet':
         return Icons.account_balance_wallet_rounded;
@@ -130,8 +135,6 @@ class PaymentMethodCard extends StatelessWidget {
         return Icons.payment;
       case 'cbe':
         return Icons.account_balance;
-      case 'ebirr':
-        return Icons.wallet;
       case 'edahab':
         return Icons.phone_android_rounded;
       case 'sahay':
@@ -147,6 +150,9 @@ class PaymentMethodCard extends StatelessWidget {
 
   /// Shared color lookup — also used by [PaymentMethodGridSection].
   static Color colorForId(String id) {
+    if (isEbirrPaymentMethodCode(id)) {
+      return const Color(0xFFFF9800);
+    }
     switch (id) {
       case 'wallet':
         return const Color(0xFF2196F3);
@@ -162,8 +168,6 @@ class PaymentMethodCard extends StatelessWidget {
         return const Color(0xFF4CAF50);
       case 'cbe':
         return const Color(0xFF2196F3);
-      case 'ebirr':
-        return const Color(0xFFFF9800);
       case 'edahab':
         return const Color(0xFF1E88E5);
       case 'sahay':
@@ -192,15 +196,19 @@ class PaymentSummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final textTheme = Theme.of(context).textTheme;
-    return Card(
-      elevation: 2,
-      margin: const EdgeInsets.all(16),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+    return Container(
+      margin: const EdgeInsets.all(AppColors.spaceMD),
+      padding: const EdgeInsets.all(AppColors.spaceMD),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        border: Border.all(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.darkBorder
+              : AppColors.lightBorder,
+        ),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
+      child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
@@ -221,7 +229,6 @@ class PaymentSummaryCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
     );
   }
 
@@ -246,7 +253,7 @@ class PaymentSummaryCard extends StatelessWidget {
               fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
               color: isTotal
                   ? colorScheme.onSurface
-                  : colorScheme.onSurface.withOpacity(0.72),
+                  : colorScheme.onSurface.withValues(alpha: 0.72),
             ),
           ),
           Text(
@@ -306,7 +313,7 @@ class PaymentProcessingDialog extends StatelessWidget {
               textAlign: TextAlign.center,
               style: textTheme.bodyMedium?.copyWith(
                 fontSize: 14,
-                color: colorScheme.onSurface.withOpacity(0.72),
+                color: colorScheme.onSurface.withValues(alpha: 0.72),
               ),
             ),
           ],

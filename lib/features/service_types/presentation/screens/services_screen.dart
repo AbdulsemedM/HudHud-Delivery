@@ -3,7 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
-import 'package:hudhud_delivery/features/handyman/presentation/screens/handyman_screen.dart';
+import 'package:hudhud_delivery/core/theme/service_tab_palette.dart';
+import 'package:hudhud_delivery/core/utils/snackbar_util.dart';
+// import 'package:hudhud_delivery/features/handyman/presentation/screens/handyman_screen.dart';
+import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
+import 'package:hudhud_delivery/features/home/presentation/widgets/service_coming_soon_screen.dart';
 import 'package:hudhud_delivery/features/service_types/bloc/service_types_bloc.dart';
 import 'package:hudhud_delivery/features/service_types/data/data_provider/service_types_data_provider.dart';
 import 'package:hudhud_delivery/features/service_types/data/repository/service_types_repository.dart';
@@ -96,7 +100,7 @@ class _ServicesScreenBody extends StatelessWidget {
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(
-            color: theme.dividerColor.withOpacity(0.5),
+            color: theme.dividerColor.withValues(alpha: 0.5),
             height: 1,
           ),
         ),
@@ -165,7 +169,7 @@ class _ServiceSkeleton extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: theme.colorScheme.shadow.withOpacity(0.04),
+            color: theme.colorScheme.shadow.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -225,10 +229,10 @@ class _ErrorState extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: AppColors.errorColor.withOpacity(0.08),
+                color: AppColors.errorColor.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.error_outline_rounded,
                 size: 48,
                 color: AppColors.errorColor,
@@ -291,7 +295,7 @@ class _EmptyState extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -406,9 +410,34 @@ class _ServiceCard extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const HandymanScreen(),
+                builder: (context) => Scaffold(
+                  backgroundColor: HomeColors.backgroundOf(context),
+                  appBar: AppBar(
+                    backgroundColor: HomeColors.backgroundOf(context),
+                    foregroundColor: HomeColors.textPrimaryOf(context),
+                    title: Text(context.l10n.homeTabHandyman),
+                  ),
+                  body: const ServiceComingSoonScreen(
+                    mode: HomeServiceMode.handyman,
+                  ),
+                ),
               ),
             );
+            return;
+          }
+          if (service.code == 'grocery' || service.code == 'food') {
+            SnackbarUtil.showComingSoon(
+              context,
+              context.l10n.foodComingSoonSubtitle,
+            );
+            return;
+          }
+          if (service.code == 'taxi') {
+            SnackbarUtil.showComingSoon(
+              context,
+              context.l10n.taxiComingSoonSubtitle,
+            );
+            return;
           }
           // TODO: other services
         },
@@ -419,7 +448,7 @@ class _ServiceCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: theme.shadowColor.withOpacity(isDark ? 0.35 : 0.06),
+                color: theme.shadowColor.withValues(alpha: isDark ? 0.35 : 0.06),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -510,8 +539,8 @@ class _IconPlaceholder extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            color.withOpacity(0.2),
-            color.withOpacity(0.08),
+            color.withValues(alpha: 0.2),
+            color.withValues(alpha: 0.08),
           ],
         ),
         borderRadius: BorderRadius.circular(14),

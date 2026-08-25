@@ -1,30 +1,158 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:lottie/lottie.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
+import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
+import 'package:hudhud_delivery/core/widgets/theme_toggle_button.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/avatar_util.dart';
+import '../../../../core/widgets/user_avatar.dart';
 import '../../../../models/user_model.dart';
 
-/// Card showing email and phone verification status with optional Verify buttons.
-class VerificationStatusCard extends StatelessWidget {
+/// Shown on app open when a signed-in user has not opted into marketing offers.
+class MarketingOffersPromptDialog extends StatefulWidget {
+  final Future<void> Function() onAccept;
+  final VoidCallback onNotNow;
+
+  const MarketingOffersPromptDialog({
+    super.key,
+    required this.onAccept,
+    required this.onNotNow,
+  });
+
+  @override
+  State<MarketingOffersPromptDialog> createState() =>
+      _MarketingOffersPromptDialogState();
+}
+
+class _MarketingOffersPromptDialogState extends State<MarketingOffersPromptDialog> {
+  bool _busy = false;
+
+  Future<void> _accept() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      await widget.onAccept();
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      title: Text(l10n.settingsMarketingOffers),
+      content: Text(
+        l10n.settingsMarketingOffersSubtitle,
+        style: theme.textTheme.bodyMedium,
+      ),
+      actions: [
+        TextButton(
+          onPressed: _busy ? null : widget.onNotNow,
+          child: Text(l10n.dealsModalClose),
+        ),
+        FilledButton(
+          onPressed: _busy ? null : _accept,
+          child: _busy
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : Text(l10n.actionOk),
+        ),
+      ],
+    );
+  }
+}
+
+/// Shown when the user lands on the Home tab and email or phone is not verified.
+class AccountVerificationPromptDialog extends StatelessWidget {
   final UserModel user;
+  final VoidCallback onDismiss;
   final VoidCallback onVerifyEmail;
   final VoidCallback onVerifyPhone;
 
-  const VerificationStatusCard({
+  const AccountVerificationPromptDialog({
     super.key,
     required this.user,
+    required this.onDismiss,
     required this.onVerifyEmail,
     required this.onVerifyPhone,
   });
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final needEmail = !user.isEmailVerified;
+    final needPhone = !user.isPhoneVerified;
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      title: Text(l10n.accountVerificationBannerTitle),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (needEmail) ...[
+              Text(
+                l10n.accountVerificationEmailSubtitle,
+                style: theme.textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 12),
+              FilledButton.icon(
+                onPressed: onVerifyEmail,
+                icon: const Icon(Icons.mark_email_read_outlined, size: 20),
+                label: Text(l10n.verifyEmail),
+              ),
+              if (needPhone) const SizedBox(height: 16),
+            ],
+            if (needPhone) ...[
+              Text(
+                l10n.accountVerificationPhoneSubtitle,
+                style: theme.textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 12),
+              FilledButton.icon(
+                onPressed: onVerifyPhone,
+                icon: const Icon(Icons.phone_android_outlined, size: 20),
+                label: Text(l10n.verifyPhone),
+              ),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: onDismiss,
+          child: Text(l10n.dealsModalClose),
+        ),
+      ],
+    );
+  }
+}
+
+class VerificationStatusCard extends StatelessWidget {
+  final UserModel user;
+  final VoidCallback onVerifyEmail;
+  final VoidCallback onVerifyPhone;
+  final VoidCallback? onDismiss;
+
+  const VerificationStatusCard({
+    super.key,
+    required this.user,
+    required this.onVerifyEmail,
+    required this.onVerifyPhone,
+    this.onDismiss,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final emailVerified = user.isEmailVerified;
     final phoneVerified = user.isPhoneVerified;
 
@@ -32,71 +160,82 @@ class VerificationStatusCard extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
+    final needEmail = !emailVerified;
+    final message = needEmail
+        ? l10n.accountVerificationEmailSubtitle
+        : l10n.accountVerificationPhoneSubtitle;
+    final onVerify = needEmail ? onVerifyEmail : onVerifyPhone;
+    final cta = needEmail ? l10n.verifyEmail : l10n.verifyPhone;
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      padding: const EdgeInsets.fromLTRB(14, 12, 8, 12),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            spreadRadius: 1,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: HomeColors.surfaceOf(context),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: const Color(0xFFFFD600).withValues(alpha: 0.35),
+        ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Text(
-            'Verification status',
-            style: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+          const Icon(
+            Icons.verified_user_outlined,
+            color: Color(0xFFFFD600),
+            size: 22,
           ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              if (!emailVerified)
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed: onVerifyEmail,
-                    icon: const Icon(Icons.mark_email_read_outlined, size: 18),
-                    label: const Text('Verify Email'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.primaryColor,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 10),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  message,
+                  style: TextStyle(
+                    color: HomeColors.textSecondaryOf(context),
+                    fontSize: 13,
+                    height: 1.3,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                GestureDetector(
+                  onTap: onVerify,
+                  child: Text(
+                    cta,
+                    style: const TextStyle(
+                      color: HomeColors.orange,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
                     ),
                   ),
                 ),
-              if (!emailVerified && !phoneVerified) const SizedBox(width: 12),
-              if (!phoneVerified)
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed: onVerifyPhone,
-                    icon: const Icon(Icons.phone_android_outlined, size: 18),
-                    label: const Text('Verify Phone'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.primaryColor,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                    ),
-                  ),
-                ),
-            ],
+              ],
+            ),
           ),
+          if (onDismiss != null)
+            IconButton(
+              onPressed: onDismiss,
+              visualDensity: VisualDensity.compact,
+              icon: Icon(
+                Icons.close,
+                size: 18,
+                color: HomeColors.textMutedOf(context),
+              ),
+            ),
         ],
       ),
     );
   }
 }
 
-class UserProfileHeader extends StatelessWidget {
+class UserProfileHeader extends StatefulWidget {
   final String name;
   final String location;
   final bool isLoadingLocation;
   final VoidCallback onLocationTap;
+  final VoidCallback onNotificationsTap;
   final UserModel? user;
+  final GlobalKey? locationKey;
+  final GlobalKey? notificationsKey;
 
   const UserProfileHeader({
     super.key,
@@ -104,363 +243,201 @@ class UserProfileHeader extends StatelessWidget {
     required this.location,
     this.isLoadingLocation = false,
     required this.onLocationTap,
+    required this.onNotificationsTap,
     this.user,
+    this.locationKey,
+    this.notificationsKey,
   });
+
+  @override
+  State<UserProfileHeader> createState() => _UserProfileHeaderState();
+}
+
+class _UserProfileHeaderState extends State<UserProfileHeader>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _chevronController;
+
+  @override
+  void initState() {
+    super.initState();
+    _chevronController = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+  }
+
+  @override
+  void dispose() {
+    _chevronController.dispose();
+    super.dispose();
+  }
+
+  String get _initial {
+    final name = widget.name.trim();
+    if (name.isEmpty) return '?';
+    return name[0].toUpperCase();
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final avatarUrl = getDisplayAvatarUrl(widget.user);
+
     return Row(
       children: [
-        // Location section
+        Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: HomeColors.violet.withValues(alpha: 0.75),
+              width: 2,
+            ),
+          ),
+          child: ClipOval(
+            child: avatarUrl != null && avatarUrl.isNotEmpty
+                ? UserAvatar(
+                    radius: 22,
+                    imageUrl: avatarUrl,
+                    backgroundColor: HomeColors.surfaceElevatedOf(context),
+                  )
+                : Container(
+                    color: HomeColors.surfaceElevatedOf(context),
+                    alignment: Alignment.center,
+                    child: Text(
+                      _initial,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: HomeColors.textPrimaryOf(context),
+                      ),
+                    ),
+                  ),
+          ),
+        ),
+        const SizedBox(width: 12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Icon(
-                    Icons.location_on,
-                    color: AppColors.primaryColor,
-                    size: 18,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    l10n.yourLocation,
-                    style: textTheme.bodySmall?.copyWith(
-                      fontSize: 12,
-                      color: colorScheme.onSurface.withOpacity(0.7),
-                    ),
-                  ),
-                ],
+              Text(
+                widget.name,
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                  color: HomeColors.textPrimaryOf(context),
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 4),
-              GestureDetector(
-                onTap: onLocationTap,
-                child: Row(
-                  children: [
-                    Flexible(
-                      child: isLoadingLocation
-                          ? SizedBox(
-                              width: 12,
-                              height: 12,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  AppColors.primaryColor,
+              KeyedSubtree(
+                key: widget.locationKey,
+                child: GestureDetector(
+                  onTap: () {
+                    _chevronController.forward(from: 0).then((_) {
+                      _chevronController.reverse();
+                    });
+                    widget.onLocationTap();
+                  },
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.location_on_rounded,
+                        color: HomeColors.orange,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: widget.isLoadingLocation
+                            ? const SizedBox(
+                                width: 12,
+                                height: 12,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: HomeColors.orange,
                                 ),
+                              )
+                            : Text(
+                                widget.location.isEmpty
+                                    ? l10n.yourLocation
+                                    : widget.location,
+                                style: const TextStyle(
+                                  color: HomeColors.orange,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
                               ),
-                            )
-                          : Text(
-                              location,
-                              style: TextStyle(
-                                color: AppColors.primaryColor,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            ),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(
-                      Icons.arrow_drop_down,
-                      color: AppColors.primaryColor,
-                      size: 18,
-                    ),
-                  ],
+                      ),
+                      RotationTransition(
+                        turns: Tween<double>(begin: 0, end: 0.5)
+                            .animate(_chevronController),
+                        child: const Icon(
+                          Icons.chevron_right_rounded,
+                          color: HomeColors.orange,
+                          size: 18,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
           ),
         ),
-        // Profile picture and notification
-        Row(
-          children: [
-            CircleAvatar(
-              radius: 20,
-              backgroundColor: AppColors.primaryColor,
-              backgroundImage: getDisplayAvatarUrl(user) != null
-                  ? NetworkImage(getDisplayAvatarUrl(user)!)
-                  : const AssetImage('assets/images/profile.png')
-                      as ImageProvider,
-            ),
-            const SizedBox(width: 12),
-            IconButton(
-              icon: Icon(
-                Icons.notifications_outlined,
-                color: colorScheme.onSurface,
+        const SizedBox(width: 8),
+        Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: HomeColors.surfaceOf(context),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: HomeColors.surfaceElevatedOf(context)),
+          ),
+          child: ThemeToggleIconButton(
+            iconColor: HomeColors.textPrimaryOf(context),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Container(
+          key: widget.notificationsKey,
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: HomeColors.surfaceOf(context),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: HomeColors.surfaceElevatedOf(context)),
+          ),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              IconButton(
+                icon: Icon(
+                  Icons.notifications_outlined,
+                  color: HomeColors.textPrimaryOf(context),
+                  size: 22,
+                ),
+                onPressed: widget.onNotificationsTap,
               ),
-              onPressed: () {},
-            ),
-          ],
+              Positioned(
+                top: 10,
+                right: 10,
+                child: Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    color: HomeColors.orange,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ],
-    );
-  }
-}
-
-/// Data for one service in the sliding cards.
-class _ServiceItem {
-  final String title;
-  final String description;
-  final IconData icon;
-  final Color color;
-
-  const _ServiceItem({
-    required this.title,
-    required this.description,
-    required this.icon,
-    required this.color,
-  });
-}
-
-/// Sliding cards that each showcase a different HudHud service, with a one-time section slide-in.
-class AppFeaturesCard extends StatefulWidget {
-  const AppFeaturesCard({super.key});
-
-  @override
-  State<AppFeaturesCard> createState() => _AppFeaturesCardState();
-}
-
-class _AppFeaturesCardState extends State<AppFeaturesCard>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<Offset> _slideAnimation;
-  late Animation<double> _fadeAnimation;
-  final PageController _pageController = PageController(viewportFraction: 0.88);
-  int _currentPage = 0;
-
-  static final List<_ServiceItem> _services = [
-    _ServiceItem(
-      title: 'Food & groceries',
-      description: 'Order from your favourite vendors.',
-      icon: Icons.shopping_bag_rounded,
-      color: AppColors.primaryColor,
-    ),
-    _ServiceItem(
-      title: 'Courier',
-      description: 'Pickup and drop-off.',
-      icon: Icons.local_shipping_rounded,
-      color: Colors.purple,
-    ),
-    _ServiceItem(
-      title: 'Taxi',
-      description: 'Request a ride anywhere.',
-      icon: Icons.local_taxi_rounded,
-      color: Colors.amber.shade700,
-    ),
-    _ServiceItem(
-      title: 'Handyman',
-      description: 'Home services on demand.',
-      icon: Icons.handyman_rounded,
-      color: Colors.green.shade700,
-    ),
-    _ServiceItem(
-      title: 'Track orders',
-      description: 'Real-time delivery status.',
-      icon: Icons.location_on_rounded,
-      color: AppColors.secondaryColor,
-    ),
-  ];
-
-  Timer? _autoSlideTimer;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 480),
-      vsync: this,
-    );
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0.2, 0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutCubic,
-    ));
-    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
-    );
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _controller.forward();
-      _startAutoSlide();
-    });
-  }
-
-  void _startAutoSlide() {
-    _autoSlideTimer?.cancel();
-    _autoSlideTimer = Timer.periodic(const Duration(seconds: 3), (_) {
-      if (!mounted) return;
-      final next = (_currentPage + 1) % _services.length;
-      _pageController.animateToPage(
-        next,
-        duration: const Duration(milliseconds: 350),
-        curve: Curves.easeInOut,
-      );
-    });
-  }
-
-  @override
-  void dispose() {
-    _autoSlideTimer?.cancel();
-    _pageController.dispose();
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    return SlideTransition(
-      position: _slideAnimation,
-      child: FadeTransition(
-        opacity: _fadeAnimation,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 4, bottom: 12),
-              child: Text(
-                'What you can do with HudHud',
-                style: textTheme.titleMedium?.copyWith(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            SizedBox(
-              height: 80,
-              child: PageView.builder(
-                controller: _pageController,
-                onPageChanged: (index) {
-                  setState(() => _currentPage = index);
-                },
-                itemCount: _services.length,
-                itemBuilder: (context, index) {
-                  final service = _services[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: _ServiceFeatureCard(
-                      title: service.title,
-                      description: service.description,
-                      icon: service.icon,
-                      color: service.color,
-                    ),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                _services.length,
-                (index) => AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  margin: const EdgeInsets.symmetric(horizontal: 2),
-                  width: _currentPage == index ? 16 : 6,
-                  height: 6,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(3),
-                    color: _currentPage == index
-                        ? _services[index].color
-                        : colorScheme.onSurface.withOpacity(0.25),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Compact, colorful slide card for the carousel.
-class _ServiceFeatureCard extends StatelessWidget {
-  final String title;
-  final String description;
-  final IconData icon;
-  final Color color;
-
-  const _ServiceFeatureCard({
-    required this.title,
-    required this.description,
-    required this.icon,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            color.withOpacity(0.2),
-            color.withOpacity(0.08),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.4), width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.2),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.25),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, size: 22, color: color),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: color,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  description,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: colorScheme.onSurface.withOpacity(0.75),
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-          Icon(Icons.chevron_right_rounded, size: 20, color: color.withOpacity(0.8)),
-        ],
-      ),
     );
   }
 }
@@ -504,7 +481,7 @@ class OrderTrackingCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Hello ${riderName}',
+                    'Hello $riderName',
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 14,
@@ -554,7 +531,7 @@ class OrderTrackingCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: const Text('View Map'),
+              child: Text(context.l10n.viewMap),
             ),
           ),
         ],
@@ -594,10 +571,10 @@ class ServiceCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: colorScheme.surface,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: colorScheme.outline.withOpacity(0.28), width: 1),
+            border: Border.all(color: colorScheme.outline.withValues(alpha: 0.28), width: 1),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.08),
+                color: Colors.black.withValues(alpha: 0.08),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -610,7 +587,7 @@ class ServiceCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryColor.withOpacity(0.1),
+                  color: AppColors.primaryColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(icon, color: AppColors.primaryColor, size: 22),
@@ -630,120 +607,11 @@ class ServiceCard extends StatelessWidget {
                   subtitle,
                   style: textTheme.bodySmall?.copyWith(
                     fontSize: 11,
-                    color: colorScheme.onSurface.withOpacity(0.7),
+                    color: colorScheme.onSurface.withValues(alpha: 0.7),
                     height: 1.3,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// Deals Modal - shown as advertising when order history is empty
-class DealsModal extends StatelessWidget {
-  final VoidCallback onClaim;
-  final VoidCallback onDismiss;
-
-  const DealsModal({
-    super.key,
-    required this.onClaim,
-    required this.onDismiss,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 400),
-          decoration: const BoxDecoration(
-            color: Color(0xFFFF5A00), // #FF5A00
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Close button
-              Align(
-                alignment: Alignment.topRight,
-                child: IconButton(
-                  icon: const Icon(Icons.close, color: Colors.white, size: 24),
-                  onPressed: onDismiss,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Left section - Visual
-                    SizedBox(
-                      width: 100,
-                      height: 100,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.asset(
-                          'assets/images/ChatGPT Image Jun 6, 2025, 09_19_43 PM 1.png',
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    // Right section - Text and button
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            l10n.dealsModalTitle,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            l10n.dealsModalSubtitle,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          ElevatedButton(
-                            onPressed: onClaim,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: AppColors.primaryColor,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 10),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            child: Text(
-                              l10n.dealsModalClaim,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
                 ),
               ),
             ],
@@ -773,7 +641,7 @@ class OrderHistoryEmptyState extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             spreadRadius: 1,
             blurRadius: 4,
             offset: const Offset(0, 2),
@@ -786,13 +654,13 @@ class OrderHistoryEmptyState extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: colorScheme.onSurface.withOpacity(0.12),
+              color: colorScheme.onSurface.withValues(alpha: 0.12),
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.receipt_long_outlined,
               size: 48,
-              color: colorScheme.onSurface.withOpacity(0.55),
+              color: colorScheme.onSurface.withValues(alpha: 0.55),
             ),
           ),
           const SizedBox(height: 20),
@@ -819,7 +687,7 @@ class OrderHistoryEmptyState extends StatelessWidget {
                 onPressed: onBrowseTap,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryColor,
-                  foregroundColor: Colors.white,
+                  foregroundColor: Theme.of(context).colorScheme.onSecondary,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -909,10 +777,10 @@ class HistoryItem extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          // Motorcycle icon and location with "Drop off"
+          // Bicycle icon and location with "Drop off"
           Row(
             children: [
-              // Motorcycle icon (light blue outline)
+              // Bicycle icon (light blue outline)
               Container(
                 width: 20,
                 height: 20,
@@ -924,18 +792,18 @@ class HistoryItem extends StatelessWidget {
                   ),
                   borderRadius: BorderRadius.circular(4),
                 ),
-                child: Icon(
-                  Icons.two_wheeler,
+                child: const Icon(
+                  Icons.pedal_bike,
                   size: 12,
-                  color: const Color(0xFF64B5F6), // Light blue
+                  color: Color(0xFF64B5F6), // Light blue
                 ),
               ),
               const SizedBox(width: 8),
               // Location pin icon in green
-              Icon(
+              const Icon(
                 Icons.location_on,
                 size: 16,
-                color: const Color(0xFF4CAF50), // Green
+                color: Color(0xFF4CAF50), // Green
               ),
               const SizedBox(width: 4),
               Text(
@@ -1156,6 +1024,76 @@ class SeeAllServicesCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class ShimmerListView extends StatelessWidget {
+  final int itemCount;
+
+  const ShimmerListView({super.key, this.itemCount = 3});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseColor = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0);
+    final highlightColor =
+        isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF5F5F5);
+
+    return Column(
+      children: List.generate(itemCount, (index) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: AppColors.spaceMD),
+          child: Shimmer.fromColors(
+            baseColor: baseColor,
+            highlightColor: highlightColor,
+            child: Container(
+              height: 88,
+              decoration: BoxDecoration(
+                color: baseColor,
+                borderRadius: BorderRadius.circular(AppColors.radiusLG),
+              ),
+            ),
+          ),
+        );
+      }),
+    );
+  }
+}
+
+class SectionHeader extends StatelessWidget {
+  final String title;
+  final String actionLabel;
+  final VoidCallback? onAction;
+
+  const SectionHeader({
+    super.key,
+    required this.title,
+    required this.actionLabel,
+    this.onAction,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text(
+          title,
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+        ),
+        const Spacer(),
+        if (onAction != null)
+          TextButton(
+            onPressed: onAction,
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.primaryColor,
+              textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+            ),
+            child: Text(actionLabel),
+          ),
+      ],
     );
   }
 }

@@ -1,0 +1,148 @@
+# Creates a Shorebird patch against an existing release version.
+# The target release must already exist in Shorebird for that platform.
+#
+# Triggers:
+#   - workflow_dispatch with release_version (+ platform, track)
+#   - push tag hotfix-<version> e.g. hotfix-1.0.0+11
+#
+# Example CLI equivalent:
+#   shorebird patch android --release-version=1.0.0+11 --track=staging
+
+name: Shorebird Patch
+
+on:
+  push:
+    tags:
+      - 'hotfix-*'
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: Existing Shorebird release version (e.g. 1.0.0+11)
+        required: true
+        type: string
+      platform:
+        description: Platform to patch
+        required: true
+        default: both
+        type: choice
+        options:
+          - android
+          - ios
+          - both
+      track:
+        description: Shorebird track (stable, staging, beta, …)
+        required: true
+        default: stable
+        type: string
+
+env:
+  SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    outputs:
+      release_version: ${{ steps.version.outputs.release_version }}
+      platform: ${{ steps.version.outputs.platform }}
+      track: ${{ steps.version.outputs.track }}
+    steps:
+      - name: Resolve version / platform / track
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            VERSION="${{ inputs.release_version }}"
+            PLATFORM="${{ inputs.platform }}"
+            TRACK="${{ inputs.track }}"
+          else
+            # Tag format: hotfix-1.0.0+11
+            REF="${GITHUB_REF_NAME}"
+            VERSION="${REF#hotfix-}"
+            PLATFORM="both"
+            TRACK="stable"
+          fi
+          if [[ -z "${VERSION}" || "${VERSION}" == "${GITHUB_REF_NAME:-}" && "${{ github.event_name }}" != "workflow_dispatch" && "${VERSION}" == "hotfix-"* ]]; then
+            echo "Could not resolve release version from tag ${GITHUB_REF_NAME:-}"
+            exit 1
+          fi
+          if [[ -z "${VERSION}" ]]; then
+            echo "release_version is required"
+            exit 1
+          fi
+          echo "release_version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "platform=${PLATFORM}" >> "$GITHUB_OUTPUT"
+          echo "track=${TRACK}" >> "$GITHUB_OUTPUT"
+          echo "Resolved release_version=${VERSION} platform=${PLATFORM} track=${TRACK}"
+
+  patch-android:
+    needs: resolve
+    if: needs.resolve.outputs.platform == 'android' || needs.resolve.outputs.platform == 'both'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Shorebird
+        uses: shorebirdtech/setup-shorebird@v1
+        with:
+          cache: true
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Verify release exists
+        run: |
+          set -euo pipefail
+          VERSION="${{ needs.resolve.outputs.release_version }}"
+          echo "Patching Android release version: ${VERSION}"
+          shorebird releases list | tee /tmp/releases.txt
+          grep -F "${VERSION}" /tmp/releases.txt
+
+      - name: Shorebird patch Android
+        uses: shorebirdtech/shorebird-patch@v1
+        with:
+          platform: android
+          args: >-
+            --release-version=${{ needs.resolve.outputs.release_version }}
+            --track=${{ needs.resolve.outputs.track }}
+            --no-confirm
+
+  patch-ios:
+    needs: resolve
+    if: needs.resolve.outputs.platform == 'ios' || needs.resolve.outputs.platform == 'both'
+    runs-on: macos-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Shorebird
+        uses: shorebirdtech/setup-shorebird@v1
+        with:
+          cache: true
+
+      - name: Verify release exists
+        run: |
+          set -euo pipefail
+          VERSION="${{ needs.resolve.outputs.release_version }}"
+          echo "Patching iOS release version: ${VERSION}"
+          shorebird releases list | tee /tmp/releases.txt
+          grep -F "${VERSION}" /tmp/releases.txt
+
+      - name: Shorebird patch iOS
+        uses: shorebirdtech/shorebird-patch@v1
+        with:
+          platform: ios
+          args: >-
+            --release-version=${{ needs.resolve.outputs.release_version }}
+            --track=${{ needs.resolve.outputs.track }}
+            --no-confirm

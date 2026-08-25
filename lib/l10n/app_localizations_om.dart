@@ -48,7 +48,7 @@ class AppLocalizationsOm extends AppLocalizations {
   String get actionResend => 'Koodii Irra Deebiin Ergaa';
 
   @override
-  String get actionUndo => 'UNDO';
+  String get actionUndo => 'Deebisi';
 
   @override
   String get actionOpenSettings => 'Sajoo Bani';
@@ -72,7 +72,7 @@ class AppLocalizationsOm extends AppLocalizations {
   String get actionSending => 'Ergaa...';
 
   @override
-  String get actionSignIn => 'Sign In';
+  String get actionSignIn => 'Seeni';
 
   @override
   String get actionLogOut => 'Ba\'i';
@@ -93,6 +93,9 @@ class AppLocalizationsOm extends AppLocalizations {
   String get navProfile => 'Ibsama';
 
   @override
+  String get navOrderHistory => 'Seenaa Ajajaa';
+
+  @override
   String get settingsProfile => 'Ibsama';
 
   @override
@@ -103,6 +106,18 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get settingsSupport => 'Deeggarsa';
+
+  @override
+  String get settingsContactEmail => 'Deeggarsa iimeelii';
+
+  @override
+  String get offlineNoConnection => 'Cimdaan interneetii hin jiru';
+
+  @override
+  String get orderIdCopied => 'ID ajajaa garagalame';
+
+  @override
+  String get orderShareSubject => 'Ajaja HudHud';
 
   @override
   String get settingsPersonalDetails => 'Odeeffannoo Dhuunfaa';
@@ -117,7 +132,80 @@ class AppLocalizationsOm extends AppLocalizations {
   String get settingsChangePassword => 'Jecha Darbii Jijjiiri';
 
   @override
+  String get settingsBiometricLogin => 'Seensa baayomeetirikii';
+
+  @override
+  String get settingsBiometricLoginSubtitle =>
+      'Meeshaa kana irratti asharaa qubaa yookiin Face ID fayyadamuun saffisaan seeni';
+
+  @override
+  String get settingsBiometricSubtitleEnabled =>
+      'Banaa — asharaa qubaa yookiin Face ID fayyadamuun seeni';
+
+  @override
+  String get settingsBiometricSubtitleOffReady =>
+      'Cufame — yeroo barbaadde bani';
+
+  @override
+  String get settingsBiometricSubtitleSignInOnce =>
+      'Tokko seeni akka dandeessiftu';
+
+  @override
+  String get biometricAuthReason => 'Itti fufuuf eenyummaa kee mirkaneessi';
+
+  @override
+  String get biometricEnableEnterPassword =>
+      'Seensa baayomeetirikii dandeessisuuf jecha darbii kee galchi';
+
+  @override
+  String get biometricNotAvailable =>
+      'Seensi baayomeetirikii meeshaa kana irratti hin jiru';
+
+  @override
+  String get biometricNoCredentials =>
+      'Seensi kuufame hin jiru. Dura jecha darbiitiin seeni.';
+
+  @override
+  String get biometricLoginFailed =>
+      'Seensi baayomeetirikii hin milkoofne. Irra deebi\'ii yookiin jecha darbii fayyadami.';
+
+  @override
+  String get biometricEnabledSuccess => 'Seensi baayomeetirikii dandeessifame';
+
+  @override
+  String get biometricDisabledSuccess => 'Seensi baayomeetirikii cufame';
+
+  @override
+  String get biometricOptInTitle => 'Seensa baayomeetirikii dandeessisi?';
+
+  @override
+  String get biometricOptInMessage =>
+      'Yeroo itti aanutti saffisaan seenuuf asharaa qubaa yookiin Face ID fayyadami.';
+
+  @override
+  String get biometricOptInEnable => 'Dandeessisi';
+
+  @override
+  String get biometricOptInNotNow => 'Amma miti';
+
+  @override
+  String get loginBiometricButtonSemantics =>
+      'Baayomeetirikii fayyadamuun seeni';
+
+  @override
+  String get loginBiometricOrDivider =>
+      'yookiin baayomeetirikii fayyadamuun seeni';
+
+  @override
   String get settingsNotifications => 'Beeksisa';
+
+  @override
+  String get settingsMarketingOffers =>
+      'Dhiyeessii fi haaromsa HudHud fudhadhu';
+
+  @override
+  String get settingsMarketingOffersSubtitle =>
+      'Filannoo. Beeksisa, SMS ykn iimeeliin dhiyeessii erguu dandeenya. Yeroo kamiyyuu cufuu dandeessa.';
 
   @override
   String get settingsSmsNotifications => 'Beeksisa Ergaa gabaabaa';
@@ -126,33 +214,32 @@ class AppLocalizationsOm extends AppLocalizations {
   String get settingsWishlist => 'Tarree hawwii';
 
   @override
-  String get wishlistEmptyTitle => 'No saved items yet';
+  String get wishlistEmptyTitle => 'Ammallee wanti kuufame hin jiru';
 
   @override
-  String get wishlistEmptySubtitle =>
-      'Save products you love — tap the heart on a product to add it here.';
+  String get wishlistEmptySubtitle => 'Meeshaalee jaallattan asitti kuusi.';
 
   @override
-  String get wishlistAddedSnack => 'Added to wishlist';
+  String get wishlistAddedSnack => 'Gara tarree hawwiitti dabalame';
 
   @override
-  String get wishlistRemovedSnack => 'Removed from wishlist';
+  String get wishlistRemovedSnack => 'Tarree hawwii irraa haqame';
 
   @override
-  String get wishlistSignInTitle => 'Sign in to use your wishlist';
+  String get wishlistSignInTitle => 'Tarree hawwii kee fayyadamuuf seeni';
 
   @override
   String get wishlistSignInSubtitle =>
-      'Your saved items are stored on this device when you are logged in.';
+      'Meeshaaleen kuufaman meeshaa kana irratti yeroo seentan kuufamu.';
 
   @override
-  String get wishlistLoadError => 'Could not load wishlist';
+  String get wishlistLoadError => 'Tarree hawwii fe\'uu hin dandeenye';
 
   @override
-  String get wishlistTooltipAdd => 'Add to wishlist';
+  String get wishlistTooltipAdd => 'Gara tarree hawwiitti dabali';
 
   @override
-  String get wishlistTooltipRemove => 'Remove from wishlist';
+  String get wishlistTooltipRemove => 'Tarree hawwii irraa haqi';
 
   @override
   String get settingsTermsConditions => 'Haalawwanii fi Dambiiwwan';
@@ -164,13 +251,65 @@ class AppLocalizationsOm extends AppLocalizations {
   String get settingsHelpDesk => 'Deeskii Gargaarsaa';
 
   @override
-  String get settingsLogOut => 'Log Out';
+  String get settingsLogOut => 'Ba\'i';
 
   @override
   String get settingsVersion => 'Vershinii 1.0';
 
   @override
   String get settingsLanguage => 'Afaan';
+
+  @override
+  String get profileEdit => 'Gulaali';
+
+  @override
+  String get profileCoupons => 'Kuupoonota';
+
+  @override
+  String get profileWallet => 'Walleetii';
+
+  @override
+  String get profileMenuProfile => 'Profaayilii';
+
+  @override
+  String get profileMenuAddresses => 'Teessoo';
+
+  @override
+  String get profileMenuFavorites => 'Jaallatamoo';
+
+  @override
+  String get profileMenuMessages => 'Ergaawwan';
+
+  @override
+  String get profileMenuAccountSettings => 'Qindaa\'ina Herrega';
+
+  @override
+  String get settingsGeneralPreferences => 'Filannoo Waliigalaa';
+
+  @override
+  String get settingsDeliveryPreferences => 'Filannoo Geejjibaa';
+
+  @override
+  String get settingsAppSettings => 'Qindaa\'ina App';
+
+  @override
+  String get profileCouponsComingSoon => 'Kuupoononni ammallee hin jiran.';
+
+  @override
+  String get profileTermsOfUse => 'Seera Itti Fayyadamaa';
+
+  @override
+  String get profilePrivacyPolicy => 'Imaammata Dhuunfaa';
+
+  @override
+  String profileCopyright(String year) {
+    return '© $year HudHud Delivery. Mirgi hundi seeraan kan eegame.';
+  }
+
+  @override
+  String profileVersionFormatted(String version, String buildNumber) {
+    return 'Vershinii $version (Ijaarsa $buildNumber)';
+  }
 
   @override
   String get logoutTitle => 'Ba\'i';
@@ -181,7 +320,7 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String logoutError(String error) {
-    return 'Dogoggora yeroo ba\'uu: $error .';
+    return 'Dogoggora yeroo ba\'uu: $error';
   }
 
   @override
@@ -211,7 +350,7 @@ class AppLocalizationsOm extends AppLocalizations {
   String get languageEnglish => 'Afaan Ingilizii';
 
   @override
-  String get languageAmharic => 'ማርኛ (Afaan Amaaraa) .';
+  String get languageAmharic => 'Afaan Amaaraa';
 
   @override
   String get languageOromo => 'Afaan Oromoo';
@@ -220,7 +359,7 @@ class AppLocalizationsOm extends AppLocalizations {
   String get languageSomali => 'Afaan Somaalee';
 
   @override
-  String get languageArabic => 'العربية (Afaan Arabaa) .';
+  String get languageArabic => 'Afaan Arabaa';
 
   @override
   String get greetingGoodMorning => 'Akkam bulte';
@@ -238,7 +377,7 @@ class AppLocalizationsOm extends AppLocalizations {
   String get userDefault => 'Fayyadamaa';
 
   @override
-  String get emDash => '— .';
+  String get emDash => '—';
 
   @override
   String get locationGetting => 'Bakka argachuu...';
@@ -343,8 +482,19 @@ class AppLocalizationsOm extends AppLocalizations {
       'Lakkoofsi bilbilaa milkaa\'inaan mirkanaa\'eera!';
 
   @override
+  String get accountVerificationBannerTitle => 'Herrega kee mirkaneessi';
+
+  @override
+  String get accountVerificationEmailSubtitle =>
+      'Iimeelii kee mirkaneessi tajaajila guutuu argachuuf.';
+
+  @override
+  String get accountVerificationPhoneSubtitle =>
+      'Lakkoofsa bilbilaa kee mirkaneessi tajaajila guutuu argachuuf.';
+
+  @override
   String failedToLoadOrders(String error) {
-    return 'Ajajoota fe\'uu hin dandeenye: $error .';
+    return 'Ajajoota fe\'uu hin dandeenye: $error';
   }
 
   @override
@@ -377,6 +527,9 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get history => 'Seenaa';
+
+  @override
+  String get showMore => 'Dabalataan agarsiisi';
 
   @override
   String get featuresSectionTitle => 'HudHud waliin maal gochuu dandeessu';
@@ -429,6 +582,9 @@ class AppLocalizationsOm extends AppLocalizations {
   String get courierInstantTitle => 'Geejjibaa Battalaa';
 
   @override
+  String get courierAddDelivery => 'Geejjibaa dabali';
+
+  @override
   String get courierInstantSubtitle =>
       'Courier paakeejii keessan qofa fudhatee battalumatti geessa.';
 
@@ -458,10 +614,62 @@ class AppLocalizationsOm extends AppLocalizations {
       'Maaloo akkaawuntii keessanii fi tajaajiloota jiran hunda argachuuf ragaa keessan galchaa';
 
   @override
+  String get brandTagline => 'GEEJJIBAA, SIRRIITTI GEEESSIFAME';
+
+  @override
+  String get splashTagline => 'MAGAALAA KEE, GEESSIFAME';
+
+  @override
+  String get splashStatus => 'Waan tokko sochoosuu jirra…';
+
+  @override
+  String get homeTabFood => 'Nyaata';
+
+  @override
+  String get homeTabCourier => 'Ergamaa';
+
+  @override
+  String get homeTabTaxi => 'Taaksii';
+
+  @override
+  String get homeTabHandyman => 'Hojjetaa mana';
+
+  @override
+  String get homeSearchHint => 'Oomishaalee bakka hundatti barbaadi';
+
+  @override
   String get loginContinueAsGuest => 'Akka keessummaa itti fufi';
 
   @override
   String get labelEmailOrPhone => 'Teessoo imeelii ykn Lakkoofsa bilbilaa';
+
+  @override
+  String get loginTabEmail => 'Iimeelii';
+
+  @override
+  String get loginTabPhone => 'Bilbila';
+
+  @override
+  String get loginTabEmailSemantics => 'Iimeeliin seeni';
+
+  @override
+  String get loginTabPhoneSemantics => 'Bilbilaan seeni';
+
+  @override
+  String get labelEmail => 'Iimeelii';
+
+  @override
+  String get hintEmail => 'Fakkeenya: JohnDoe@gmail.com';
+
+  @override
+  String get hintPhoneNational => '912 345 678';
+
+  @override
+  String get validationPhoneRequired => 'Maaloo lakkoofsa bilbilaa kee galchi';
+
+  @override
+  String get validationPhoneInvalid =>
+      'Maaloo lakkoofsa bilbilaa sirrii galchi';
 
   @override
   String get hintEmailPhone => 'Fkn. JohnDoe@gmail.com irraa argattu';
@@ -485,7 +693,11 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get validationPasswordMin =>
-      'Jechi icciitii yoo xiqqaate arfiilee 8 ta\'uu qaba';
+      'Jechi icciitii yoo xiqqaate arfiilee 6 ta\'uu qaba';
+
+  @override
+  String get validationPasswordComplexity =>
+      'Jecha icciitii keessatti qubee guddaa, qubee xiqqaa, lakkoofsa, fi arfiilee addaa qabaachuu qaba';
 
   @override
   String get validationEmailRequired => 'Mee email keessan galchaa';
@@ -511,7 +723,7 @@ class AppLocalizationsOm extends AppLocalizations {
   }
 
   @override
-  String get welcomeTitle => 'Baga gara HudHud Delivery dhuftan!';
+  String get welcomeTitle => 'Baga nagaan dhuftan';
 
   @override
   String get welcomeBody =>
@@ -609,7 +821,7 @@ class AppLocalizationsOm extends AppLocalizations {
   String get snackbarInfo => 'Kun ergaa info ti!';
 
   @override
-  String get snackbarInfoLabel => 'Info';
+  String get snackbarInfoLabel => 'Odeeffannoo';
 
   @override
   String get undoActionPressed => 'Tarkaanfiin duubatti deebisuu dhiibame';
@@ -627,7 +839,7 @@ class AppLocalizationsOm extends AppLocalizations {
   String get hideSnackbar => 'Snackbar dhoksi';
 
   @override
-  String get apiDemo => 'API Demo';
+  String get apiDemo => 'Fakkeenya API';
 
   @override
   String get sampleLogin => 'Fakkeenya Galmee';
@@ -639,7 +851,7 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String loginFailed(String error) {
-    return 'Galmeen hin milkoofne: $error .';
+    return 'Galmeen hin milkoofne: $error';
   }
 
   @override
@@ -650,7 +862,7 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String profileRefreshFailed(String error) {
-    return 'Profaayila haaromsuu hin dandeenye: $error .';
+    return 'Profaayila haaromsuu hin dandeenye: $error';
   }
 
   @override
@@ -670,7 +882,7 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String errorPrefix(String message) {
-    return 'Dogoggora: $message .';
+    return 'Dogoggora: $message';
   }
 
   @override
@@ -861,13 +1073,45 @@ class AppLocalizationsOm extends AppLocalizations {
   String get deliveryLocationLabel => 'Bakka Geejjibaa';
 
   @override
-  String get vehicleMotorcycle => 'Mootar Saayikilii';
+  String get vehicleMotorcycle => 'Geejjibaa moto';
 
   @override
-  String get vehicleCar => 'Konkolaataa';
+  String get vehicleCar => 'Geejjibaa konkolaataa';
 
   @override
-  String get vehicleVan => 'Vaan';
+  String get vehicleVan => 'Fe\'umsa hatattamaa';
+
+  @override
+  String get vehicleBajaj => 'Geejjibaa bajaj';
+
+  @override
+  String get vehiclePickup => 'Geejjibaa pickup';
+
+  @override
+  String get pickupOutsideDeliveryServiceArea =>
+      'Bakki fuudhaa naannoo tajaajila geessisaa HudHud qindaa\'e ala.';
+
+  @override
+  String get selectAvailableVehicleType => 'Gosa konkolaataa jiru filadhu';
+
+  @override
+  String get sendAPackageTitle => 'PAAKEEJII ERGI';
+
+  @override
+  String get courierDeliveryAddressPlaceholder => 'Teessoo geessisaa';
+
+  @override
+  String get addInfoAboutDelivery => 'Odeeffannoo geessisaa dabali';
+
+  @override
+  String courierEstimateFromPrice(String currency, String amount) {
+    return '$currency $amount irraa';
+  }
+
+  @override
+  String courierEstimateMinutes(int minutes) {
+    return 'daq $minutes';
+  }
 
   @override
   String get fromWallet => 'Wallet irraa';
@@ -900,20 +1144,19 @@ class AppLocalizationsOm extends AppLocalizations {
   String get scheduledDateTime => 'Guyyaa fi Sa\'aatii Beellamame';
 
   @override
-  String get estimatedCostOptional => 'Tilmaama Baasii (dirqama) .';
+  String get estimatedCostOptional => 'Tilmaama baasii (filannoo)';
 
   @override
   String get estimatedCostHint => 'fkn. 100 irratti';
 
   @override
-  String get toolsNeeded =>
-      'Meeshaalee barbaachisan (komaandiin adda baafaman) .';
+  String get toolsNeeded => 'Meeshaalee barbaachisan (komaa\'n adda baafaman)';
 
   @override
   String get toolsNeededHint => 'fkn. furtuu seet, teeppii pilaambaa';
 
   @override
-  String get estimatedHoursOptional => 'Sa\'aatii tilmaamame (dirqama) .';
+  String get estimatedHoursOptional => 'Sa\'aatii tilmaamame (filannoo)';
 
   @override
   String get estimatedHoursHint => 'fkn. 2. 2.';
@@ -949,10 +1192,10 @@ class AppLocalizationsOm extends AppLocalizations {
   String get quantity => 'Baay\'ina';
 
   @override
-  String get packageWeightKg => 'Ulfaatina Paakeejii (kg) .';
+  String get packageWeightKg => 'Ulfaatina paakeejii (kg)';
 
   @override
-  String get packageDescriptionOptional => 'Ibsa Paakeejii (dirqama) .';
+  String get packageDescriptionOptional => 'Ibsa paakeejii (filannoo)';
 
   @override
   String get me => 'Ana';
@@ -971,7 +1214,7 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get pleaseEnterValidWeight =>
-      'Maaloo ulfaatina paakeejii sirrii (kg) galchi .';
+      'Maaloo ulfaatina paakeejii sirrii (kg) galchi';
 
   @override
   String get pleaseSelectPaymentType => 'Mee gosa kaffaltii filadhaa';
@@ -1127,6 +1370,53 @@ class AppLocalizationsOm extends AppLocalizations {
   String get referralCode => 'Koodii rifaralaa';
 
   @override
+  String get referralCodeOptional => 'Koodii gargaarsaa — filannoo';
+
+  @override
+  String get hintReferralCode => 'UCZXSD3O';
+
+  @override
+  String get signupTitle => 'Herrega kee uumi';
+
+  @override
+  String get signupSubtitle =>
+      'Daldaltoota magaalaa keessaa ajajuuf HudHuditti makaa.';
+
+  @override
+  String get hintCreatePassword => 'Jecha icciitii uumi';
+
+  @override
+  String get hintReenterPassword => 'Jecha icciitii kee irra deebi\'ii galchi';
+
+  @override
+  String get passwordStrengthHint => 'Arfiilee 6+ fayyadami';
+
+  @override
+  String get signupAcceptTermsPrefix => 'Kan HudHud ';
+
+  @override
+  String get signupTermsLink => 'seeraa fi haalota';
+
+  @override
+  String get signupConsentDataPrefix => 'Daataa koo akka seera ';
+
+  @override
+  String get signupDataProtectionLink => 'eeggumsa daataa';
+
+  @override
+  String get alreadyHaveAccount => 'Duraanis herrega qabdaa? ';
+
+  @override
+  String get createAccount => 'Herrega uumi';
+
+  @override
+  String get signupFormIncomplete => 'Maaloo dirqama hunda guuti';
+
+  @override
+  String get signupAcceptLegalRequired =>
+      'Maaloo seeraa fi hayyama eeggumsa daataa fudhadhu';
+
+  @override
   String get searchQuestions => 'Gaaffii barbaacha';
 
   @override
@@ -1224,12 +1514,12 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String profileUpdateFailed(String error) {
-    return 'Profaayila haaromsuu hin dandeenye: $error .';
+    return 'Profaayila haaromsuu hin dandeenye: $error';
   }
 
   @override
   String profileLoadFailed(String error) {
-    return 'Profaayilii fe\'uu hin dandeenye: $error .';
+    return 'Profaayilii fe\'uu hin dandeenye: $error';
   }
 
   @override
@@ -1237,12 +1527,12 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String unexpectedCheckoutError(String error) {
-    return 'Dogoggorri hin eegamne uumame: $error .';
+    return 'Dogoggorri hin eegamne uumame: $error';
   }
 
   @override
   String failedOrderHistory(String error) {
-    return 'Seenaa ajaja fe\'uu hin dandeenye: $error .';
+    return 'Seenaa ajaja fe\'uu hin dandeenye: $error';
   }
 
   @override
@@ -1264,7 +1554,7 @@ class AppLocalizationsOm extends AppLocalizations {
   String get timelineDelivered => 'Qaqqabsiise';
 
   @override
-  String get addReviewOptional => 'Gamaaggama itti dabali (dirqama) .';
+  String get addReviewOptional => 'Gamaaggama itti dabali (filannoo)';
 
   @override
   String get pleaseSpecify => 'Mee ibsaa...';
@@ -1366,212 +1656,213 @@ class AppLocalizationsOm extends AppLocalizations {
   String get sendMoney => 'Maallaqa Ergaa';
 
   @override
-  String get exitAppTitle => 'Exit App';
+  String get exitAppTitle => 'App irraa bahi';
 
   @override
-  String get exitAppMessage => 'Are you sure you want to exit the app?';
+  String get exitAppMessage => 'Dhugumatti app irraa bahuu barbaaddaa?';
 
   @override
-  String get actionExit => 'Exit';
+  String get actionExit => 'Bahi';
 
   @override
-  String get loginNoAccountPrompt => 'Don\'t have an account? ';
+  String get loginNoAccountPrompt => 'Herrega hin qabduu? ';
 
   @override
-  String get loginOrContinueWith => 'or continue with';
+  String get loginOrContinueWith => 'yookiin itti fufi';
 
   @override
-  String get continueWithGoogle => 'Continue with Google';
+  String get continueWithGoogle => 'Google waliin itti fufi';
 
   @override
-  String get actionSignUp => 'Sign Up';
+  String get actionSignUp => 'Galmaa\'i';
 
   @override
-  String get paymentScreenTitle => 'Payment';
+  String get paymentScreenTitle => 'Kaffaltii';
 
   @override
-  String get paymentChooseMethodHeading => 'Choose Payment Method';
+  String get paymentChooseMethodHeading => 'Mala kaffaltii filadhu';
 
   @override
   String get paymentEthiopianOptionsSubtitle =>
-      'Select your preferred Ethiopian payment option';
+      'Filannoo kaffaltii Itoophiyaa jaallattu filadhu';
 
   @override
-  String get paymentLoadMethodsError => 'Failed to load payment methods';
+  String get paymentLoadMethodsError => 'Mala kaffaltii fe\'uu hin dandeenye';
 
   @override
-  String get paymentSelectMethodFirst => 'Please select a payment method';
+  String get paymentSelectMethodFirst => 'Maaloo mala kaffaltii filadhu';
 
   @override
   String get paymentMethodUnavailable =>
-      'Selected payment method is no longer available';
+      'Malli kaffaltii filatame amma hin jiru';
 
   @override
   String paymentFailedWithError(String error) {
-    return 'Payment failed: $error';
+    return 'Kaffaltiun hin milkoofne: $error';
   }
 
   @override
   String paymentPayAmountBr(String amount) {
-    return 'Pay $amount Br';
+    return '$amount Br kaffali';
   }
 
   @override
-  String get paymentSuccessTitle => 'Payment Successful!';
+  String get paymentSuccessTitle => 'Kaffaltiun milkaa\'eera!';
 
   @override
   String paymentTransactionIdLabel(String id) {
-    return 'Transaction ID: $id';
+    return 'ID daldalaa: $id';
   }
 
   @override
-  String get continueShopping => 'Continue Shopping';
+  String get continueShopping => 'Bittaa itti fufi';
 
   @override
-  String get viewOrder => 'View Order';
+  String get viewOrder => 'Ajaja ilaali';
 
   @override
-  String get handymanServicesTitle => 'Handyman Services';
+  String get handymanServicesTitle => 'Tajaajila hojjetaa mana';
 
   @override
-  String get handymanWhatToDo => 'What would you like to do?';
+  String get handymanWhatToDo => 'Maal gochuu barbaadda?';
 
   @override
-  String get handymanMyRequests => 'My Requests';
+  String get handymanMyRequests => 'Gaaffiiwwan koo';
 
   @override
-  String get handymanNoRequestsYet => 'No service requests yet';
+  String get handymanNoRequestsYet => 'Ammallee gaaffiin tajaajilaa hin jiru';
 
   @override
   String get handymanNoRequestsSubtitle =>
-      'Create a request to get quotes from handymen';
+      'Hojjettoota mana irraa tilmaama argachuuf gaaffii uumi';
 
   @override
-  String get handymanCreateNewRequest => 'Create New Request';
+  String get handymanCreateNewRequest => 'Gaaffii haaraa uumi';
 
   @override
   String get handymanCreateRequestSubtitle =>
-      'Describe your repair or maintenance need and get quotes from handymen.';
+      'Fedhii fooyya\'iinsaa yookiin kunuunsaa ibsi, tilmaama argadhu.';
 
   @override
-  String get instantDeliveryTitle => 'Instant Delivery';
+  String get instantDeliveryTitle => 'Geejjibaa hatattamaa';
 
   @override
-  String get tapToSelectPickup => 'Tap to select pickup location';
+  String get tapToSelectPickup => 'Bakka fudhannaa filachuuf tuqi';
 
   @override
-  String get tapToSelectDelivery => 'Tap to select delivery location';
+  String get tapToSelectDelivery => 'Bakka geessisaa filachuuf tuqi';
 
   @override
-  String get vehicleType => 'Vehicle Type';
+  String get vehicleType => 'Gosa konkolaataa';
 
   @override
   String get selectPickupAndDelivery =>
-      'Please select both pickup and delivery locations';
+      'Maaloo bakka fudhannaa fi geessisaa lamaanuu filadhu';
 
   @override
-  String get actionContinue => 'Continue';
+  String get actionContinue => 'Itti fufi';
 
   @override
   String errorGettingAddress(String error) {
-    return 'Error getting address: $error';
+    return 'Teessoo argachuu hin dandeenye: $error';
   }
 
   @override
   String get googleMapsIosMissingKey =>
-      'Google Maps is not configured on iOS. Add GOOGLE_MAPS_API_KEY and restart the app.';
+      'Google Maps iOS irratti hin qindaa\'ne. GOOGLE_MAPS_API_KEY galchi app irra deebi\'ii jalqabi.';
 
   @override
-  String get dealsModalTitle => 'Deals on deals';
+  String get dealsModalTitle => 'Gatii gadi bu\'aa';
 
   @override
   String get dealsModalSubtitle =>
-      'Get upto 50% off on your first Courier delivery fee!';
+      'Kaffaltii geejjibaa ergamaa jalqabaa irratti hanga 50% dhiisisii argadhu!';
 
   @override
-  String get dealsModalClaim => 'Claim';
+  String get dealsModalClaim => 'Fudhadhu';
 
   @override
-  String get dealsModalClose => 'Maybe later';
+  String get dealsModalClose => 'Booda';
 
   @override
-  String get orderHistoryEmptyTitle => 'No orders yet';
+  String get orderHistoryEmptyTitle => 'Ammallee ajajni hin jiru';
 
   @override
   String get orderHistoryEmptySubtitle =>
-      'Browse categories to place your first order.';
+      'Ajaja jalqabaa kaa\'uuf ramaddii ilaali.';
 
   @override
   String get orderHistoryEmptyHint =>
-      'Your order history will appear here once you place an order';
+      'Ajaja erga kaaatee booda seenaan ajajaa asitti mul\'ata';
 
   @override
-  String get browseDelivery => 'Browse Delivery';
+  String get browseDelivery => 'Geejjibaa ilaali';
 
   @override
-  String get browseCategories => 'Browse categories';
+  String get browseCategories => 'Ramaddii ilaali';
 
   @override
   String handymanQuoteCount(int count) {
-    return '$count quote(s)';
+    return 'Tilmaama $count';
   }
 
   @override
-  String get orderDetailsLoadingMessage => 'Loading order details...';
+  String get orderDetailsLoadingMessage => 'Bal\'ina ajajaa fe\'aa jira...';
 
   @override
-  String get orderDetailsLoadErrorTitle => 'Error loading order details';
+  String get orderDetailsLoadErrorTitle =>
+      'Bal\'ina ajajaa fe\'uu hin dandeenye';
 
   @override
   String orderAppBarTitle(String orderNumber) {
-    return 'Order #$orderNumber';
+    return 'Ajaja #$orderNumber';
   }
 
   @override
-  String get paymentSummaryTitle => 'Payment Summary';
+  String get paymentSummaryTitle => 'Guduunfaa kaffaltii';
 
   @override
-  String get paymentSubtotalLabel => 'Subtotal';
+  String get paymentSubtotalLabel => 'Walitti ida\'ame';
 
   @override
-  String get paymentTotalAmountLabel => 'Total Amount';
+  String get paymentTotalAmountLabel => 'Hanga waliigalaa';
 
   @override
-  String get paymentProcessingTitle => 'Processing Payment';
+  String get paymentProcessingTitle => 'Kaffaltii hojjechaa jira';
 
   @override
   String paymentProcessingMessage(String method) {
-    return 'Please wait while we process your payment via $method...';
+    return 'Kaffaltii kee ${method}tiin hojjechaa jirra, maaloo eegi...';
   }
 
   @override
   String courierRecipientLine(String name) {
-    return 'Recipient: $name';
+    return 'Fudhataa: $name';
   }
 
   @override
-  String get courierTrackDeliveryCta => 'Track delivery';
+  String get courierTrackDeliveryCta => 'Geejjibaa hordofi';
 
   @override
-  String get courierDeliveryStatusInProgress => 'In progress';
+  String get courierDeliveryStatusInProgress => 'Adeemsa irra';
 
   @override
-  String get labelDate => 'Date';
+  String get labelDate => 'Guyyaa';
 
   @override
   String get hintDateFormat => 'DD/MM/YYYY';
 
   @override
-  String get labelTime => 'Time';
+  String get labelTime => 'Yeroo';
 
   @override
   String get hintTimeFormat => 'HH:MM';
 
   @override
-  String get meridiemAm => 'am';
+  String get meridiemAm => 'ganama';
 
   @override
-  String get meridiemPm => 'pm';
+  String get meridiemPm => 'waaree booda';
 
   @override
   String get scheduleSelectDateTime =>
@@ -1582,259 +1873,1272 @@ class AppLocalizationsOm extends AppLocalizations {
       'Mallattoolee guyyaa ykn sa\'aatii dogoggora';
 
   @override
-  String get servicesScreenTitle => 'Our Services';
+  String get servicesScreenTitle => 'Tajaajiloota keenya';
 
   @override
-  String get servicesWhatCanWeHelp => 'What can we help you with?';
+  String get servicesWhatCanWeHelp => 'Maal si gargaaruu dandeenya?';
 
   @override
   String servicesAvailableCount(int count) {
-    return '$count services available';
+    return 'Tajaajiloota $count jiru';
   }
 
   @override
-  String get servicesErrorTitle => 'Something went wrong';
+  String get servicesErrorTitle => 'Wanti tokko dogoggoreera';
 
   @override
-  String get servicesEmptyTitle => 'No services yet';
+  String get servicesEmptyTitle => 'Ammallee tajaajilli hin jiru';
 
   @override
-  String get servicesEmptySubtitle => 'Check back later for new services';
+  String get servicesEmptySubtitle =>
+      'Tajaajila haaraaf booda deebi\'ii ilaali';
 
   @override
-  String get handymanNewRequestTitle => 'New Service Request';
+  String get handymanNewRequestTitle => 'Gaaffii tajaajilaa haaraa';
 
   @override
-  String get validationHandymanSelectLocation => 'Please select a location';
+  String get validationHandymanSelectLocation => 'Maaloo bakka filadhu';
 
   @override
-  String get validationHandymanSelectDateTime => 'Please select date and time';
+  String get validationHandymanSelectDateTime =>
+      'Maaloo guyyaa fi yeroo filadhu';
 
   @override
   String get validationHandymanSelectSkill =>
-      'Please select at least one skill';
+      'Maaloo yoo xiqqaate ogummaa tokko filadhu';
 
   @override
-  String get handymanRequestCreatedToast => 'Request created';
+  String get handymanRequestCreatedToast => 'Gaaffiin uumameera';
 
   @override
-  String get handymanRequestCreateFailed => 'Failed to create request';
+  String get handymanRequestCreateFailed => 'Gaaffii uumuu hin dandeenye';
 
   @override
-  String get labelTitle => 'Title';
+  String get labelTitle => 'Mata duree';
 
   @override
-  String get hintTitleHandymanExample => 'e.g. Fix leaking faucet';
+  String get hintTitleHandymanExample =>
+      'Fakkeenya: Fawusii dhangala\'u sirreessi';
 
   @override
-  String get validationTitleRequired => 'Title is required';
+  String get validationTitleRequired => 'Mata dureen dirqama';
 
   @override
-  String get validationDescriptionRequired => 'Description is required';
+  String get validationDescriptionRequired => 'Ibsi dirqama';
 
   @override
-  String get hintDescribeRepair => 'Describe the repair or maintenance needed';
+  String get hintDescribeRepair =>
+      'Fooyya\'iinsa yookiin kunuunsa barbaachisu ibsi';
 
   @override
-  String get handymanTapToSelectLocation => 'Tap to select location';
+  String get handymanTapToSelectLocation => 'Bakka filachuuf tuqi';
 
   @override
-  String get labelScheduledDateTime => 'Scheduled Date & Time';
+  String get labelScheduledDateTime => 'Guyyaa fi yeroo karoorfame';
 
   @override
-  String get selectDateAndTime => 'Select date and time';
+  String get selectDateAndTime => 'Guyyaa fi yeroo filadhu';
 
   @override
-  String get labelEstimatedCostOptional => 'Estimated Cost (optional)';
+  String get labelEstimatedCostOptional => 'Tilmaama baasii (filannoo)';
 
   @override
   String get hintCostExample => 'e.g. 100';
 
   @override
-  String get handymanSkillsNeeded => 'Skills needed';
+  String get handymanSkillsNeeded => 'Ogummaa barbaachisu';
 
   @override
-  String get handymanSkillPlumbing => 'Plumbing';
+  String get handymanSkillPlumbing => 'Bishaanii';
 
   @override
-  String get handymanSkillElectrical => 'Electrical';
+  String get handymanSkillElectrical => 'Elektirikii';
 
   @override
-  String get handymanSkillCarpentry => 'Carpentry';
+  String get handymanSkillCarpentry => 'Mucuca';
 
   @override
-  String get handymanSkillPainting => 'Painting';
+  String get handymanSkillPainting => 'Dibuu';
 
   @override
-  String get handymanSkillGeneral => 'General';
+  String get handymanSkillGeneral => 'Waliigala';
 
   @override
-  String get labelToolsCommaSeparated => 'Tools needed (comma-separated)';
+  String get labelToolsCommaSeparated => 'Meeshaalee barbaachisan (komaa\'n)';
 
   @override
-  String get hintToolsHandymanExample => 'e.g. wrench set, plumber\'s tape';
+  String get hintToolsHandymanExample => 'Fakkeenya: qawwee, teeppii bishaanii';
 
   @override
-  String get labelEstimatedHoursOptional => 'Estimated hours (optional)';
+  String get labelEstimatedHoursOptional => 'Sa\'aatii tilmaamame (filannoo)';
 
   @override
   String get hintHoursExample => 'e.g. 2';
 
   @override
-  String get handymanCreateRequestCta => 'Create Request';
+  String get handymanCreateRequestCta => 'Gaaffii uumi';
 
   @override
-  String get handymanDialogCancelRequestTitle => 'Cancel Request';
+  String get handymanDialogCancelRequestTitle => 'Gaaffii haqi';
 
   @override
   String get handymanDialogCancelRequestMessage =>
-      'Are you sure you want to cancel this service request?';
+      'Dhugumatti gaaffii tajaajilaa kana haquu barbaaddaa?';
 
   @override
-  String get actionNo => 'No';
+  String get actionNo => 'Lakki';
 
   @override
-  String get actionYesCancel => 'Yes, Cancel';
+  String get actionYesCancel => 'Eeyyee, haqi';
 
   @override
-  String get handymanRequestCancelled => 'Request cancelled';
+  String get handymanRequestCancelled => 'Gaaffiin haqameera';
 
   @override
-  String get handymanCancelFailed => 'Failed to cancel';
+  String get handymanCancelFailed => 'Haquu hin dandeenye';
 
   @override
-  String get handymanLabelScheduled => 'Scheduled';
+  String get handymanLabelScheduled => 'Karoorfame';
 
   @override
-  String get handymanSectionRequirements => 'Requirements';
+  String get handymanSectionRequirements => 'Barbaachisummaa';
 
   @override
   String handymanToolsLine(String tools) {
-    return 'Tools: $tools';
+    return 'Meeshaalee: $tools';
   }
 
   @override
   String handymanEstHoursLine(String hours) {
-    return 'Est. hours: $hours';
+    return 'Sa\'aatii tilmaamaa: $hours';
   }
 
   @override
   String handymanViewQuotesCta(int count) {
-    return 'View $count quote(s)';
+    return 'Tilmaama $count ilaali';
   }
 
   @override
-  String get handymanCancelRequest => 'Cancel Request';
+  String get handymanCancelRequest => 'Gaaffii haqi';
 
   @override
-  String get handymanRateServiceTitle => 'Rate Service';
+  String get handymanRateServiceTitle => 'Tajaajila madaali';
 
   @override
-  String get handymanProviderFallback => 'Provider';
+  String get handymanProviderFallback => 'Dhiyeessaa';
 
   @override
-  String get handymanQuotesTitle => 'Quotes';
+  String get handymanQuotesTitle => 'Tilmaamoota';
 
   @override
-  String get handymanAcceptQuoteTitle => 'Accept Quote';
+  String get handymanAcceptQuoteTitle => 'Tilmaama fudhadhu';
 
   @override
   String handymanAcceptQuoteMessage(String amount, String name) {
-    return 'Accept $amount from $name?';
+    return '$amount $name irraa fudhachuu?';
   }
 
   @override
-  String get actionAccept => 'Accept';
+  String get actionAccept => 'Fudhadhu';
 
   @override
-  String get actionReject => 'Reject';
+  String get actionReject => 'Didii';
 
   @override
-  String get handymanQuoteAccepted => 'Quote accepted';
+  String get handymanQuoteAccepted => 'Tilmaamni fudhatameera';
 
   @override
-  String get handymanAcceptQuoteFailed => 'Failed to accept';
+  String get handymanAcceptQuoteFailed => 'Fudhachuu hin dandeenye';
 
   @override
-  String get handymanRejectQuoteTitle => 'Reject Quote';
+  String get handymanRejectQuoteTitle => 'Tilmaama didi';
 
   @override
   String handymanRejectQuoteMessage(String name) {
-    return 'Reject quote from $name?';
+    return 'Tilmaama $name irraa diduu?';
   }
 
   @override
-  String get handymanQuoteRejected => 'Quote rejected';
+  String get handymanQuoteRejected => 'Tilmaamni didameera';
 
   @override
-  String get handymanRejectQuoteFailed => 'Failed to reject';
+  String get handymanRejectQuoteFailed => 'Diduu hin dandeenye';
 
   @override
-  String get handymanNoQuotesYet => 'No quotes yet';
+  String get handymanNoQuotesYet => 'Ammallee tilmaamni hin jiru';
 
   @override
-  String get handymanNoQuotesSubtitle => 'Handymen will send quotes soon';
+  String get handymanNoQuotesSubtitle =>
+      'Hojjettoonni mana tilmaama dafee ergu';
 
   @override
-  String get handymanViewProfile => 'View Profile';
+  String get handymanViewProfile => 'Profaayilii ilaali';
 
   @override
-  String get handymanHowWasService => 'How was the service?';
+  String get handymanHowWasService => 'Tajaajilli akkam ture?';
 
   @override
-  String get handymanRateTheHandyman => 'Rate the handyman';
+  String get handymanRateTheHandyman => 'Hojjetaa mana madaali';
 
   @override
-  String get handymanCommentAboutOptional =>
-      'Comment about handyman (optional)';
+  String get handymanCommentAboutOptional => 'Yaada hojjetaa mana (filannoo)';
 
   @override
-  String get handymanRatingPublic => 'Make my rating public';
+  String get handymanRatingPublic => 'Madaalli koo ummataaf haa mul\'atu';
 
   @override
-  String get handymanSubmitRating => 'Submit Rating';
+  String get handymanSubmitRating => 'Madaallii galchi';
 
   @override
-  String get ratingThankYou => 'Thank you for your rating!';
+  String get ratingThankYou => 'Madaallii keef galatoomi!';
 
   @override
-  String get ratingSubmitFailed => 'Failed to submit rating';
+  String get ratingSubmitFailed => 'Madaallii galchuu hin dandeenye';
 
   @override
-  String get handymanNotFound => 'Handyman not found';
+  String get handymanNotFound => 'Hojjetaan mana hin argamne';
 
   @override
-  String get handymanProfileTitle => 'Handyman Profile';
+  String get handymanProfileTitle => 'Profaayilii hojjetaa mana';
 
   @override
-  String get handymanAbout => 'About';
+  String get handymanAbout => 'Waa\'ee';
 
   @override
-  String get handymanSkillsHeading => 'Skills';
+  String get handymanSkillsHeading => 'Ogummaa';
 
   @override
-  String get handymanHourlyRateLabel => 'Hourly Rate';
+  String get handymanHourlyRateLabel => 'Gatii sa\'aatii';
 
   @override
-  String get handymanExperienceLabel => 'Experience';
+  String get handymanExperienceLabel => 'Muuxannoo';
 
   @override
   String handymanExperienceYears(String years) {
-    return '$years years';
+    return 'Waggaa $years';
   }
 
   @override
-  String get labelAddress => 'Address';
+  String get labelAddress => 'Teessoo';
 
   @override
-  String get handymanStatsHeading => 'Stats';
+  String get handymanStatsHeading => 'Istaatistikii';
 
   @override
-  String get handymanStatServices => 'Services';
+  String get handymanStatServices => 'Tajaajiloota';
 
   @override
-  String get handymanStatRating => 'Rating';
+  String get handymanStatRating => 'Madaallii';
 
   @override
-  String get handymanStatResponse => 'Response';
+  String get handymanStatResponse => 'Deebii';
+
+  @override
+  String get forgotPasswordLink => 'Jecha icciitii dagatteetta?';
+
+  @override
+  String get forgotPasswordRequestTitle => 'Jecha icciitii haaromsi';
+
+  @override
+  String get forgotPasswordRequestSubtitle =>
+      'Iimeelii yookiin lakkoofsa bilbilaa kee galchi. Koodii mirkaneessaa dijiitii 6 siif erginna.';
+
+  @override
+  String get forgotPasswordSendCode => 'Koodii ergi';
+
+  @override
+  String get forgotPasswordVerifyTitle => 'Koodii mirkaneessaa galchi';
+
+  @override
+  String forgotPasswordVerifySubtitle(String identifier) {
+    return 'Koodii gara $identifier erginneerra.';
+  }
+
+  @override
+  String get forgotPasswordOtpLabel => 'Koodii dijiitii 6';
+
+  @override
+  String forgotPasswordTimeRemaining(String time) {
+    return 'Yeroo hafe: $time';
+  }
+
+  @override
+  String get forgotPasswordCodeExpired =>
+      'Koodiin kun yeroon isaa darbeera. Koodii haaraaf irra deebi\'ii ergi tuqi.';
+
+  @override
+  String get forgotPasswordResend => 'Koodii irra deebi\'ii ergi';
+
+  @override
+  String get forgotPasswordVerifyButton => 'Mirkaneessi';
+
+  @override
+  String get forgotPasswordNewTitle => 'Jecha icciitii haaraa uumi';
+
+  @override
+  String get forgotPasswordNewSubtitle => 'Yoo xiqqaate arfiilee 6 fayyadami.';
+
+  @override
+  String get forgotPasswordLabelConfirmPassword => 'Jecha icciitii mirkaneessi';
+
+  @override
+  String get forgotPasswordHintConfirmPassword =>
+      'Jecha icciitii haaraa irra deebi\'ii galchi';
+
+  @override
+  String get forgotPasswordSaveButton => 'Jecha icciitii olkaa\'i';
+
+  @override
+  String get forgotPasswordSuccessMessage =>
+      'Jechi icciitii haaromfameera. Amma seenuu dandeessa.';
+
+  @override
+  String get validationOtpLength => 'Koodii dijiitii 6 galchi';
+
+  @override
+  String get validationConfirmPasswordRequired =>
+      'Maaloo jecha icciitii kee mirkaneessi';
+
+  @override
+  String get validationPasswordsDoNotMatch =>
+      'Jechoonni icciitii wal hin simne';
+
+  @override
+  String get addressesTitle => 'Teessoo Koo';
+
+  @override
+  String get addressesEmptyTitle => 'Teessoon hin kayyamne';
+
+  @override
+  String get addressesEmptySubtitle =>
+      'Teessoo dabaluu gurgurtaa fi geessituu saffisiisa.';
+
+  @override
+  String get addressesAdd => 'Teessoo dabaluu';
+
+  @override
+  String get addressesAddFromMap => 'Kaartaa irra filadhu';
+
+  @override
+  String get addressesAddManual => 'Harkaan galchi';
+
+  @override
+  String get addressesDefaultBadge => 'Baramaa';
+
+  @override
+  String get addressesSetDefault => 'Akka baramaatti kaa\'i';
+
+  @override
+  String get addressesEdit => 'Gulaali';
+
+  @override
+  String get addressesDeleteTitle => 'Teessoo haquu?';
+
+  @override
+  String get addressesDeleteMessage =>
+      'Teessoon kun herrega kee irraa ni haqama.';
+
+  @override
+  String get addressesBulkDeleteTitle => 'Teessoo filataman haquu?';
+
+  @override
+  String addressesBulkDeleteMessage(int count) {
+    return 'Teessoo $count haquu?';
+  }
+
+  @override
+  String get addressesBulkDeleteForce => 'Teessoo baramaa illee haqi';
+
+  @override
+  String get addressesSelect => 'Filadhu';
+
+  @override
+  String get addressesDeleteSelected => 'Filataman haqi';
+
+  @override
+  String get addressesTypeHome => 'Mana';
+
+  @override
+  String get addressesTypeWork => 'Hojii';
+
+  @override
+  String get addressesTypeOther => 'Kan biraa';
+
+  @override
+  String get addressFormAddTitle => 'Teessoo dabaluu';
+
+  @override
+  String get addressFormEditTitle => 'Teessoo gulaali';
+
+  @override
+  String get addressFormLine1 => 'Sarara teessoo 1';
+
+  @override
+  String get addressFormLine2 => 'Sarara teessoo 2 (filannoo)';
+
+  @override
+  String get addressFormCity => 'Magaalaa';
+
+  @override
+  String get addressFormState => 'Naannoo / gobolaa';
+
+  @override
+  String get addressFormPostalCode => 'Koodii poostaa';
+
+  @override
+  String get addressFormCountry => 'Biyya';
+
+  @override
+  String get addressFormLabel => 'Maqaa';
+
+  @override
+  String get addressFormLandmark => 'Mallattoo (filannoo)';
+
+  @override
+  String get addressFormType => 'Gosa teessoo';
+
+  @override
+  String get addressFormSetDefault => 'Akka teessoo baramaatti kaa\'i';
+
+  @override
+  String get addressFormPickOnMap => 'Bakka kaartaa irra filadhu';
+
+  @override
+  String get addressFormRequired => 'Dirreen kun barbaachisaa dha';
+
+  @override
+  String get addressMapPickerTitle => 'Bakka filadhu';
+
+  @override
+  String get addressMapUseLocation => 'Bakka kana fayyadami';
+
+  @override
+  String get deliveryAddressTitle => 'Teessoo geessituu';
+
+  @override
+  String get deliveryAddressChange => 'Jijjiiri';
+
+  @override
+  String get deliveryAddressSaved => 'Teessoo kayyamame';
+
+  @override
+  String get deliveryAddressPickMap => 'Kaartaa irra filadhu';
+
+  @override
+  String get deliveryAddressAddNew => 'Teessoo haaraa dabaluu';
+
+  @override
+  String get deliveryAddressSelectPrompt => 'Teessoo geessituu filadhu';
+
+  @override
+  String get addressesSignInTitle => 'Teessoo bulchuuf seeni';
+
+  @override
+  String get addressesSignInSubtitle =>
+      'Teessoo hedduu kayyadi, baramaa kaa\'i.';
+
+  @override
+  String get addressesLoadError => 'Teessoo fe\'uu hin dandeenye';
+
+  @override
+  String get addressesCreatedSuccess => 'Teessoon kayyamame';
+
+  @override
+  String get addressesUpdatedSuccess => 'Teessoon haaromfame';
+
+  @override
+  String get addressesDeletedSuccess => 'Teessoon haqame';
+
+  @override
+  String get chatTitle => 'Ergaawwan';
+
+  @override
+  String get chatEmpty => 'Ammallee haasaa hin jiru';
+
+  @override
+  String get chatEmptySubtitle =>
+      'Waa\'ee ajajaa haasofsi yookiin deeggarsa qunnami.';
+
+  @override
+  String get chatContactSupport => 'Deeggarsa qunnami';
+
+  @override
+  String get chatViewOrders => 'Ajajoota ilaali';
+
+  @override
+  String get chatSearchHint => 'Ergaawwan barbaadi';
+
+  @override
+  String get chatTypeMessage => 'Ergaa barreessi…';
+
+  @override
+  String get chatSend => 'Ergi';
+
+  @override
+  String get chatSupportSubject => 'Maal si gargaaruu dandeenya?';
+
+  @override
+  String get chatSupportSubjectHint => 'Mata duree gabaabaa';
+
+  @override
+  String get chatSupportTitle => 'Haasaa deeggarsaa haaraa';
+
+  @override
+  String get chatEdited => 'gulaalame';
+
+  @override
+  String get chatDeleted => 'Ergaan kun haqameera';
+
+  @override
+  String get chatSendFailed => 'Ergaa erguu hin dandeenye';
+
+  @override
+  String get chatOrderTitle => 'Haasaa ajajaa';
+
+  @override
+  String get chatSupportChatTitle => 'Deeggarsa';
+
+  @override
+  String get chatRideTitle => 'Haasaa imalaa';
+
+  @override
+  String get chatAttachImage => 'Kuusaa suuraa';
+
+  @override
+  String get chatAttachFile => 'Sanada';
+
+  @override
+  String get chatAttachAudio => 'Sagalee';
+
+  @override
+  String get chatShareLocation => 'Bakka';
+
+  @override
+  String get chatEditingMessage => 'Ergaa gulaalaa jira';
+
+  @override
+  String get chatCopy => 'Garagali';
+
+  @override
+  String get chatEdit => 'Gulaali';
+
+  @override
+  String get chatDelete => 'Haqi';
+
+  @override
+  String get chatRetry => 'Irra deebi\'uuf tuqi';
+
+  @override
+  String get chatOpenMaps => 'Kaartaa irratti bani';
+
+  @override
+  String get chatNewSupport => 'Haasaa deeggarsaa haaraa';
+
+  @override
+  String get chatTypeOrder => 'Ajaja';
+
+  @override
+  String get chatTypeSupport => 'Deeggarsa';
+
+  @override
+  String get chatTypeRide => 'Imala';
+
+  @override
+  String get chatOpenOrder => 'Ajaja ilaali';
+
+  @override
+  String get chatRecording => 'Waraabaa jira…';
+
+  @override
+  String get chatSlideToCancel => 'Haquuf ol maxxansi';
+
+  @override
+  String get chatPhoto => 'Suuraa';
+
+  @override
+  String get chatVoiceMessage => 'Ergaa sagalee';
+
+  @override
+  String get chatLocation => 'Bakka';
+
+  @override
+  String get chatFile => 'Faayila';
+
+  @override
+  String get chatLoadError => 'Ergaawwan fe\'uu hin dandeenye';
+
+  @override
+  String get chatLeftConversation => 'Mariin kanaa irraa bahteetta';
+
+  @override
+  String get chatRejoin => 'Deebi\'ii makaa';
+
+  @override
+  String get chatCreateSupport => 'Haasaa jalqabi';
+
+  @override
+  String get sosSettingsTitle => 'Nageenyaa fi SOS';
+
+  @override
+  String get sosEmergencyContacts => 'Quunnamtii balaa';
+
+  @override
+  String get sosEmergencyContactsSubtitle =>
+      'Namoonni SOS yeroo kaastu beeksisaman';
+
+  @override
+  String get sosHistory => 'Seenaa SOS';
+
+  @override
+  String get sosHistorySubtitle => 'Beeksisoota darban ilaali';
+
+  @override
+  String get sosTrigger => 'SOS kaasii';
+
+  @override
+  String get sosTriggerSubtitle => 'Bakka kee waliin beeksisa balaa ergi';
+
+  @override
+  String get sosTriggerConfirmTitle => 'Beeksisa SOS erguu?';
+
+  @override
+  String get sosTriggerConfirmMessage =>
+      'Quunnamtoonni balaa kee bakka amma jirtu waliin beeksisamu. Balaa dhugaa qofaatti fayyadami.';
+
+  @override
+  String get sosDescriptionHint => 'Haala kee ibsi (filannoo)';
+
+  @override
+  String get sosLocationRequired =>
+      'Beeksisa SOS erguuf bakki barbaachisa. Mee hayyama bakka banadhu.';
+
+  @override
+  String get sosContactAdded => 'Quunnamtiin balaa dabalameera';
+
+  @override
+  String get sosContactUpdated => 'Quunnamtiin balaa haaromfameera';
+
+  @override
+  String get sosContactDeleted => 'Quunnamtiin balaa haqameera';
+
+  @override
+  String get sosTriggered => 'Beeksisa SOS milkaa\'inaan ergame';
+
+  @override
+  String get sosAddContact => 'Quunnamtii dabali';
+
+  @override
+  String get sosEditContact => 'Quunnamtii gulaali';
+
+  @override
+  String get sosNoContacts => 'Ammallee quunnamtiin balaa hin jiru';
+
+  @override
+  String get sosNoContactsSubtitle =>
+      'Yeroo balaatti beeksisamuu qabu nama dabali.';
+
+  @override
+  String get sosNoHistory => 'Ammallee beeksisa SOS hin jiru';
+
+  @override
+  String get sosName => 'Maqaa guutuu';
+
+  @override
+  String get sosPhone => 'Lakkoofsa bilbilaa';
+
+  @override
+  String get sosEmail => 'Iimeelii (filannoo)';
+
+  @override
+  String get sosRelationship => 'Hariiroo';
+
+  @override
+  String get sosPrimaryContact => 'Quunnamtii ijoo';
+
+  @override
+  String get sosDeleteContact => 'Quunnamtii haqi';
+
+  @override
+  String get sosDeleteContactConfirm => 'Quunnamtii balaa kana haquu?';
+
+  @override
+  String get sosStatusActive => 'Hojiirra';
+
+  @override
+  String get sosStatusAll => 'Hunda';
+
+  @override
+  String get sosCancel => 'Haquu';
+
+  @override
+  String get sosSendAlert => 'Beeksisa ergi';
+
+  @override
+  String get sosSaving => 'Olkaa\'aa jira…';
+
+  @override
+  String get guestBrowseBanner => 'Akka keessummaatti ilaaluu';
+
+  @override
+  String get guestBrowseSignIn => 'Seeni';
+
+  @override
+  String get guestSignInRequiredTitle => 'Seenuun barbaachisa';
+
+  @override
+  String get guestSignInRequiredMessage =>
+      'Amala kana fayyadamuuf herrega uumi yookiin seeni.';
+
+  @override
+  String get guestSignInRequiredCheckout =>
+      'Ajaja kaa\'uu fi kaffaltii xumuruuf seeni.';
+
+  @override
+  String get guestOrdersSignIn => 'Seenaa ajajaa kee ilaaluuf seeni.';
+
+  @override
+  String get guestProfileSignIn => 'Profaayilii fi sajoo kee argachuuf seeni.';
+
+  @override
+  String get guestServiceSignIn => 'Tajaajila kana fayyadamuuf seeni.';
+
+  @override
+  String get courierSignInRequired => 'Paakeejii erguuf seeni.';
+
+  @override
+  String get courierPhoneVerificationRequired =>
+      'Paakeejii erguu dura lakkoofsa bilbilaa kee mirkaneessi.';
+
+  @override
+  String get wishlistNotesHint => 'Yaadannoo dabali (filannoo)';
+
+  @override
+  String get wishlistNotesUpdated => 'Yaadannoon haaromfame';
+
+  @override
+  String get wishlistShareTitle => 'Tarree hawwii qoodi';
+
+  @override
+  String get wishlistShareSuccess => 'Tarree hawwii milkaa\'inaan qoodame';
+
+  @override
+  String get wishlistPriceDropsTitle => 'Gadi bu\'iinsa gatii';
+
+  @override
+  String get wishlistPriceDropsEmpty => 'Amma gadi bu\'iinsa gatii hin jiru';
+
+  @override
+  String get wishlistMigrateError =>
+      'Meeshaalee kuufaman herrega keetti wal simsiisuu hin dandeenye';
+
+  @override
+  String get tipsTitle => 'Gorsa';
+
+  @override
+  String get tipsAddTitle => 'Gorsa dabali';
+
+  @override
+  String get tipsHistoryTitle => 'Seenaa gorsaa';
+
+  @override
+  String get tipsRecipientLabel => 'Fudhataa gorsaa';
+
+  @override
+  String get tipsRecipientDriver => 'Konkolaachisaa';
+
+  @override
+  String get tipsRecipientVendor => 'Mana nyaataa';
+
+  @override
+  String get tipsRecipientBoth => 'Lamaanuu';
+
+  @override
+  String tipsCalculatedAmount(String amount) {
+    return 'Hanga gorsaa: ETB $amount';
+  }
+
+  @override
+  String get tipsSubmit => 'Gorsa ergi';
+
+  @override
+  String get tipsSuccess => 'Gorsaan milkaa\'inaan ergame';
+
+  @override
+  String get tipsLoadError => 'Gorsa fe\'uu hin dandeenye';
+
+  @override
+  String get tipsCardComingSoon => 'Kaffaltiin kaardii dhiyootti dhufa';
+
+  @override
+  String get tipsAnonymous => 'Maqaa malee ergi';
+
+  @override
+  String get tipsMessageHint => 'Ergaa dabali (filannoo)';
+
+  @override
+  String get tipsStatsTotal => 'Gorsoota kenname';
+
+  @override
+  String get tipsStatsAmount => 'Ida\'ama';
+
+  @override
+  String get tipsStatsAverage => 'Giddu galeessa';
+
+  @override
+  String get tipsHistoryEmpty => 'Ammallee gorsi hin jiru';
+
+  @override
+  String get tipsPaymentWallet => 'Boorsaa';
+
+  @override
+  String get tipsPaymentCard => 'Kaardii';
+
+  @override
+  String get tipsStatusCompleted => 'Xumurame';
+
+  @override
+  String get tipsStatusAll => 'Hunda';
+
+  @override
+  String get onboardingWelcomeTitle => 'Baga gara HudHud dhuftan!';
+
+  @override
+  String get onboardingWelcomeSubtitle =>
+      'Har\'a paakeejii magaalaa keessatti ergi — nyaanni, imalli fi tajaajilli mana dhiyootti dhufa.';
+
+  @override
+  String get onboardingFoodTitle => 'Nyaataa fi groosarii';
+
+  @override
+  String get onboardingFoodDescription =>
+      'Dhiyootti — nyaataa fi groosarii suuqota naannoo irraa daqiiqaa keessatti ajaji.';
+
+  @override
+  String get onboardingCourierTitle => 'Ergamaa';
+
+  @override
+  String get onboardingCourierDescription =>
+      'Paakeejii magaalaa keessatti geejjibaa saffisaa fi amanamaa ta\'een ergi.';
+
+  @override
+  String get onboardingTaxiTitle => 'Taaksii';
+
+  @override
+  String get onboardingTaxiDescription =>
+      'Dhiyootti — tuqaa tokkoon bakka kamiyyuu magaalaa keessatti imala qabadhu.';
+
+  @override
+  String get onboardingHandymanTitle => 'Hojjetaa mana';
+
+  @override
+  String get onboardingHandymanDescription =>
+      'Dhiyootti — fooyya\'iinsaa fi tajaajila manaaf ogeessota amanamoo qabadhu.';
+
+  @override
+  String get onboardingGetStarted => 'Jalqabi';
+
+  @override
+  String get onboardingSpotlightLocationTitle => 'Bakka geejjibaa kee';
+
+  @override
+  String get onboardingSpotlightLocationDescription =>
+      'Ajajni eessatti akka geessifamu mijeessuuf yookiin jijjiiruuf as tuqi.';
+
+  @override
+  String get onboardingSpotlightNotificationsTitle => 'Odeeffannoo argadhu';
+
+  @override
+  String get onboardingSpotlightNotificationsDescription =>
+      'Haaromsa ajajaa, dhiyeessii fi beeksisoota barbaachisoo asitti ilaali.';
+
+  @override
+  String get onboardingSpotlightFoodTitle => 'Nyaataa fi groosarii';
+
+  @override
+  String get onboardingSpotlightFoodDescription =>
+      'Dhiyootti — nyaataa fi meeshaalee barbaachisoo ajajuuf mana nyaataa fi suuqota ilaali.';
+
+  @override
+  String get onboardingSpotlightCourierTitle => 'Ergamaa';
+
+  @override
+  String get onboardingSpotlightCourierDescription =>
+      'Paakeejii fi sanadoota fudhannaa yeroo barbaadameen ergi — amma jira.';
+
+  @override
+  String get onboardingSpotlightTaxiTitle => 'Taaksii';
+
+  @override
+  String get onboardingSpotlightTaxiDescription =>
+      'Dhiyootti — imala gaafadhu konkolaachisaa kee yeroo dhugaa hordofi.';
+
+  @override
+  String get onboardingSpotlightHandymanTitle => 'Hojjetaa mana';
+
+  @override
+  String get onboardingSpotlightHandymanDescription =>
+      'Dhiyootti — fooyya\'iinsa manaaf gargaarsa ogeessaa argadhu.';
+
+  @override
+  String get onboardingSpotlightDoneTitle => 'Qophaa\'eetta!';
+
+  @override
+  String get onboardingSpotlightDoneDescription =>
+      'Ergamaan amma qophaa\'eera. Nyaanni, taaksiin fi hojjetaan mana dhiyootti dhufa — yeroo kamiyyuu tab jijjiiri. HudHuditti gammadi!';
+
+  @override
+  String get onboardingDebugReplayTour =>
+      'Daawwannaa mana irra deebi\'ii taphachiisi (debug)';
+
+  @override
+  String get serviceComingSoonBadge => 'Dhiyootti';
+
+  @override
+  String get foodComingSoonTitle => 'Wanti mi\'aawaan qophaa\'aa jira';
+
+  @override
+  String get foodComingSoonSubtitle =>
+      'Groosarii fi nyaanni gurgurtoota jaallattan irraa — dhiyootti eegala.';
+
+  @override
+  String get foodComingSoonTeaser1 => 'Groosarii haaraa';
+
+  @override
+  String get foodComingSoonTeaser2 => 'Jaallatamoo naannoo';
+
+  @override
+  String get taxiComingSoonTitle => 'Imalli kee itti aanu dhihoo dha';
+
+  @override
+  String get taxiComingSoonSubtitle =>
+      'Imalloota gatii madaalawaa magaalaa keessatti, dhiyootti.';
+
+  @override
+  String get taxiComingSoonTeaser1 => 'Fudhannaa saffisaa';
+
+  @override
+  String get taxiComingSoonTeaser2 => 'Gatii qajeelaa';
+
+  @override
+  String get handymanComingSoonTitle => 'Gargaarsi karaa irra jira';
+
+  @override
+  String get handymanComingSoonSubtitle =>
+      'Ogeessota amanamoo fooyya\'iinsa manaaf — tuqaa xumuraa irratti jirra.';
+
+  @override
+  String get handymanComingSoonTeaser1 => 'Ogeessota ogummaa qaban';
+
+  @override
+  String get handymanComingSoonTeaser2 => 'Fooyya\'iinsa mana';
+
+  @override
+  String get ordersComingSoonTitle => 'Your order hub is on the way';
+
+  @override
+  String get ordersComingSoonSubtitle =>
+      'Track every delivery, reorder in one tap, and keep receipts in one place — launching soon.';
+
+  @override
+  String get ordersComingSoonTeaser1 => 'Live tracking';
+
+  @override
+  String get ordersComingSoonTeaser2 => 'One-tap reorder';
+
+  @override
+  String get ordersComingSoonTeaser3 => 'Digital receipts';
+
+  @override
+  String get ordersComingSoonStep1 =>
+      'Courier deliveries on Home — available now';
+
+  @override
+  String get ordersComingSoonStep2 =>
+      'Unified order timeline across all services';
+
+  @override
+  String get ordersComingSoonStep3 => 'Smart reorder and saved favourites';
+
+  @override
+  String get ordersComingSoonCta => 'Send a delivery now';
+
+  @override
+  String get ordersComingSoonFootnote =>
+      'Need a package delivered today? Use Courier on the Home tab.';
+
+  @override
+  String get pleaseEnterValidSenderPhone =>
+      'Maaloo lakkoofsa bilbilaa ergituu sirrii galchi (09xxxxxxxx)';
+
+  @override
+  String get trackingCodeCopied => 'Koodiin hordoffii garagalameera';
+
+  @override
+  String get chatMissingDeliveryId =>
+      'Haasaa banuu hin dandeenye. ID geejjibaa hin jiru.';
+
+  @override
+  String get waitForPriceEstimate =>
+      'Ajajuu dura tilmaama gatii servernii eegi';
+
+  @override
+  String get invalidDeliveryId => 'ID geejjibaa uumame sirrii miti';
+
+  @override
+  String timeBandPickupSurcharge(String band, String currency, String amount) {
+    return 'Kaffaltii fudhatinsa $band: $currency $amount';
+  }
+
+  @override
+  String get chooseValidFuturePickup =>
+      'Maalifiiduu fi sa\'aatii fudhatinsa gara fuulduraa ta\'e sirrii ta\'e filadhu.';
+
+  @override
+  String get refreshQuoteRouteDistance =>
+      'Karaa shallaguun hin dandeenye. Tilmaama haaromsuun deebi\'ii yaali.';
+
+  @override
+  String get waitForEstimateBeforeContinue =>
+      'Itti fufuu dura tilmaama gatii eegi';
+
+  @override
+  String get deliveryBookedWallet =>
+      'Geejjibaan kaffaltii boorsaa tiin qabameera';
+
+  @override
+  String get cancelDeliveryTitle => 'Geejjibaa haqi';
+
+  @override
+  String get insufficientWalletBalance => 'Hanga boorsaa gahaa hin jiru';
+
+  @override
+  String topUpAmount(String currency, String amount) {
+    return '$currency $amount dabali';
+  }
+
+  @override
+  String get loadMore => 'Dabalata fe\'i';
+
+  @override
+  String get viewMap => 'Kaartaa ilaali';
+
+  @override
+  String get usePin => 'Piinii fayyadami';
+
+  @override
+  String get copyOrderId => 'ID ajajaa garagali';
+
+  @override
+  String get shareOrder => 'Ajaja qoodi';
+
+  @override
+  String get cartEmpty => 'Gaariin kee duwwaa dha';
+
+  @override
+  String promoCodeApplied(String promoCode) {
+    return 'Koodiin gatii gadi bu\'aa \"$promoCode\" hojiirra ooleera';
+  }
+
+  @override
+  String addressUpdatedTo(String address) {
+    return 'Teessoon gara ${address}tti haaromfameera';
+  }
+
+  @override
+  String get addValidProductsToCart =>
+      'Maaloo oomishaalee sirrii gara gaarii keetti dabali';
+
+  @override
+  String get chooseDeliveryLocationFromMap =>
+      'Maaloo bakka geessisaa kaartaa irraa filadhu';
+
+  @override
+  String get selectEbirrProvider => 'Maaloo dhiyeessaa eBirr filadhu';
+
+  @override
+  String get unableToDetermineStore =>
+      'Suuqii ajaja kanaaf adda baasuu hin dandeenye';
+
+  @override
+  String get gallery => 'Kuusaa suuraa';
+
+  @override
+  String get camera => 'Kaameeraa';
+
+  @override
+  String get photoPermissionRequired =>
+      'Hayyamni kaameeraa yookiin suuraa barbaachisa';
+
+  @override
+  String couldNotOpenPhotoPicker(String error) {
+    return 'Filataa suuraa banuu hin dandeenye: $error';
+  }
+
+  @override
+  String get pleaseEnterYourName => 'Maaloo maqaa kee galchi';
+
+  @override
+  String get updateFromStore => 'Suuqii irraa haaromsi';
+
+  @override
+  String get softUpdateTitle => 'Fooyya\'inni jira';
+
+  @override
+  String softUpdateMessage(String currentVersion, String latestVersion) {
+    return 'Vershiinii $currentVersion fayyadamtaa. Vershiinii $latestVersion suuqii irratti argama.';
+  }
+
+  @override
+  String get updateLater => 'Booda';
+
+  @override
+  String get openPaymentPage => 'Fuula kaffaltii bani';
+
+  @override
+  String get paymentRefreshFailed => 'Haala kaffaltii haaromsuu hin dandeenye';
+
+  @override
+  String get searchProductsTitle => 'Oomishaalee barbaadi';
+
+  @override
+  String get calories => 'Kaaloorii';
+
+  @override
+  String get protein => 'Pirootiinii';
+
+  @override
+  String get actionChange => 'Jijjiiri';
+
+  @override
+  String get productUnavailable => 'Oomishni kun amma hin argamu';
+
+  @override
+  String get cancelTripTitle => 'Imala haqi';
+
+  @override
+  String get cancelTripConfirm => 'Dhugumatti imala kana haquu barbaaddaa?';
+
+  @override
+  String get unableToCancelRide =>
+      'Imala haquu hin dandeenye. ID imalaa hin jiru.';
+
+  @override
+  String get invalidQuoteAmount => 'Hanga tilmaamaa kaffaltiiif sirrii miti';
+
+  @override
+  String get noOrdersYetStore => 'Ammallee ajajni hin jiru';
+
+  @override
+  String get retryPaymentTitle => 'Kaffaltii irra deebi\'ii yaali';
+
+  @override
+  String get retryPaymentSubtitle => 'Itti fufuuf mala kaffaltii filadhu';
+
+  @override
+  String deliveryBookedWalletBalance(String currency, String balance) {
+    return 'Geejjibaan qabameera. Hanga boorsaa: $currency $balance';
+  }
+
+  @override
+  String get cancelDeliveryConfirm =>
+      'Dhugumatti geejjibaa kana haquu barbaaddaa?';
+
+  @override
+  String get cancelDeliveryConfirmRefund =>
+      'Dhugumatti geejjibaa kana haquu barbaaddaa? Kaffaltiun mirkanaa\'e gara boorsaa keetti deebi\'a.';
+
+  @override
+  String get cancelOrder => 'Ajaja haqi';
+
+  @override
+  String get courierFindingNearestDrivers =>
+      'Finding the nearest available drivers';
+
+  @override
+  String get courierFindingNearestDriversSubtitle =>
+      'We are finding the nearest available driver. Live driver location appears only after acceptance.';
+
+  @override
+  String get courierDriverLocationUpdating => 'Driver location is updating';
+
+  @override
+  String get phoneEnrollmentTitle => 'Add your phone number';
+
+  @override
+  String get phoneEnrollmentSubtitle =>
+      'We need a verified mobile number for deliveries, wallet, and account security.';
+
+  @override
+  String get phoneEnrollmentOtpTitle => 'Verify your phone';
+
+  @override
+  String phoneEnrollmentOtpSubtitle(String phone) {
+    return 'Enter the 6-digit code sent to $phone.';
+  }
+
+  @override
+  String get phoneEnrollmentSendCode => 'Send code';
+
+  @override
+  String get phoneEnrollmentVerify => 'Verify';
+
+  @override
+  String get phoneEnrollmentResend => 'Resend code';
+
+  @override
+  String phoneEnrollmentResendIn(int seconds) {
+    return 'Resend in ${seconds}s';
+  }
+
+  @override
+  String get phoneEnrollmentContactSupport => 'Contact support';
+
+  @override
+  String get phoneEnrollmentSignOut => 'Sign out';
+
+  @override
+  String get phoneEnrollmentChangeNumber => 'Change phone number';
+
+  @override
+  String get phoneEnrollmentRetry => 'Try again';
+
+  @override
+  String get phoneEnrollmentPhoneInvalid =>
+      'Enter a valid Ethiopian mobile number.';
+
+  @override
+  String get phoneEnrollmentPhoneInUse =>
+      'This number is already linked to another HudHud account.';
+
+  @override
+  String get phoneEnrollmentChangeRequiresSupport =>
+      'This verified number can only be changed with support help.';
+
+  @override
+  String get phoneEnrollmentCooldown =>
+      'Please wait before requesting another code.';
+
+  @override
+  String get phoneEnrollmentRateLimited =>
+      'Too many attempts. Please try again later.';
+
+  @override
+  String get phoneEnrollmentDeliveryFailed =>
+      'We could not send the SMS. Please try again.';
+
+  @override
+  String get phoneEnrollmentNotPending =>
+      'Request a new verification code to continue.';
+
+  @override
+  String get phoneEnrollmentCodeExpired =>
+      'This code has expired. Request a new one.';
+
+  @override
+  String get phoneEnrollmentCodeInvalid =>
+      'That code is incorrect. Please try again.';
+
+  @override
+  String get phoneEnrollmentGenericError =>
+      'Something went wrong. Please try again.';
 }

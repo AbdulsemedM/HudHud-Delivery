@@ -3,7 +3,6 @@ import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/handyman/data/data_provider/handyman_data_provider.dart';
-// import 'package:hudhud_delivery/features/handyman/data/models/service_request_model.dart';
 import 'package:hudhud_delivery/features/handyman/data/repository/handyman_repository.dart';
 import 'package:hudhud_delivery/features/home/presentation/screen/location_search_screen.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
@@ -79,6 +78,41 @@ class _CreateHandymanRequestScreenState
     _toolsController.dispose();
     _estimatedHoursController.dispose();
     super.dispose();
+  }
+
+  Color _cardBorder(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? AppColors.darkBorder : AppColors.lightBorder;
+  }
+
+  InputDecoration _inputDecoration(
+    BuildContext context, {
+    required String labelText,
+    String? hintText,
+    Widget? suffixIcon,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final borderColor = _cardBorder(context);
+
+    return InputDecoration(
+      labelText: labelText,
+      hintText: hintText,
+      suffixIcon: suffixIcon,
+      filled: true,
+      fillColor: colorScheme.surface,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        borderSide: BorderSide(color: borderColor),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        borderSide: BorderSide(color: borderColor),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        borderSide: const BorderSide(color: AppColors.primaryColor, width: 1.5),
+      ),
+    );
   }
 
   Future<void> _selectLocation() async {
@@ -244,32 +278,51 @@ class _CreateHandymanRequestScreenState
     }
   }
 
+  Widget _sectionCard(BuildContext context, {required List<Widget> children}) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppColors.spaceMD),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        border: Border.all(color: _cardBorder(context)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: children,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final borderColor = _cardBorder(context);
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           l10n.handymanNewRequestTitle,
-          style: TextStyle(
+          style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
-            fontSize: 18,
-            color: theme.colorScheme.onSurface,
+            color: colorScheme.onSurface,
           ),
         ),
-        backgroundColor: theme.colorScheme.surface,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-          color: theme.colorScheme.onSurface,
+          color: colorScheme.onSurface,
           onPressed: () => Navigator.pop(context),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(
-            color: theme.dividerColor.withOpacity(0.5),
+            color: colorScheme.outlineVariant.withValues(alpha: 0.5),
             height: 1,
           ),
         ),
@@ -277,124 +330,158 @@ class _CreateHandymanRequestScreenState
       body: Form(
         key: _formKey,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppColors.spaceMD),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TextFormField(
-                controller: _titleController,
-                decoration: InputDecoration(
-                  labelText: l10n.labelTitle,
-                  hintText: l10n.hintTitleHandymanExample,
-                  border: const OutlineInputBorder(),
-                ),
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? l10n.validationTitleRequired : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _descriptionController,
-                decoration: InputDecoration(
-                  labelText: l10n.labelDescription,
-                  hintText: l10n.hintDescribeRepair,
-                  border: const OutlineInputBorder(),
-                  alignLabelWithHint: true,
-                ),
-                maxLines: 3,
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? l10n.validationDescriptionRequired : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _locationController,
-                readOnly: true,
-                decoration: InputDecoration(
-                  labelText: l10n.labelLocation,
-                  hintText: l10n.handymanTapToSelectLocation,
-                  border: const OutlineInputBorder(),
-                  suffixIcon: const Icon(Icons.search),
-                ),
-                onTap: _selectLocation,
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? l10n.validationHandymanSelectLocation : null,
-              ),
-              const SizedBox(height: 16),
-              InkWell(
-                onTap: _selectDate,
-                child: InputDecorator(
-                  decoration: InputDecoration(
-                    labelText: l10n.labelScheduledDateTime,
-                    border: const OutlineInputBorder(),
-                    suffixIcon: const Icon(Icons.calendar_today),
+              _sectionCard(
+                context,
+                children: [
+                  TextFormField(
+                    controller: _titleController,
+                    decoration: _inputDecoration(
+                      context,
+                      labelText: l10n.labelTitle,
+                      hintText: l10n.hintTitleHandymanExample,
+                    ),
+                    validator: (v) =>
+                        (v == null || v.trim().isEmpty) ? l10n.validationTitleRequired : null,
                   ),
-                  child: Text(
-                    _scheduledAt != null
-                        ? '${_scheduledAt!.day}/${_scheduledAt!.month}/${_scheduledAt!.year} ${_scheduledAt!.hour.toString().padLeft(2, '0')}:${_scheduledAt!.minute.toString().padLeft(2, '0')}'
-                        : l10n.selectDateAndTime,
-                    style: TextStyle(
-                      color: _scheduledAt != null
-                          ? theme.colorScheme.onSurface
-                          : theme.colorScheme.onSurfaceVariant,
+                  const SizedBox(height: AppColors.spaceMD),
+                  TextFormField(
+                    controller: _descriptionController,
+                    decoration: _inputDecoration(
+                      context,
+                      labelText: l10n.labelDescription,
+                      hintText: l10n.hintDescribeRepair,
+                    ).copyWith(alignLabelWithHint: true),
+                    maxLines: 3,
+                    validator: (v) =>
+                        (v == null || v.trim().isEmpty) ? l10n.validationDescriptionRequired : null,
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppColors.spaceMD),
+              _sectionCard(
+                context,
+                children: [
+                  TextFormField(
+                    controller: _locationController,
+                    readOnly: true,
+                    decoration: _inputDecoration(
+                      context,
+                      labelText: l10n.labelLocation,
+                      hintText: l10n.handymanTapToSelectLocation,
+                      suffixIcon: const Icon(Icons.search_rounded),
+                    ),
+                    onTap: _selectLocation,
+                    validator: (v) =>
+                        (v == null || v.trim().isEmpty) ? l10n.validationHandymanSelectLocation : null,
+                  ),
+                  const SizedBox(height: AppColors.spaceMD),
+                  InkWell(
+                    onTap: _selectDate,
+                    borderRadius: BorderRadius.circular(AppColors.radiusLG),
+                    child: InputDecorator(
+                      decoration: _inputDecoration(
+                        context,
+                        labelText: l10n.labelScheduledDateTime,
+                        suffixIcon: const Icon(Icons.calendar_today_rounded),
+                      ),
+                      child: Text(
+                        _scheduledAt != null
+                            ? '${_scheduledAt!.day}/${_scheduledAt!.month}/${_scheduledAt!.year} ${_scheduledAt!.hour.toString().padLeft(2, '0')}:${_scheduledAt!.minute.toString().padLeft(2, '0')}'
+                            : l10n.selectDateAndTime,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: _scheduledAt != null
+                              ? colorScheme.onSurface
+                              : colorScheme.onSurfaceVariant,
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                ],
               ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _estimatedCostController,
-                decoration: InputDecoration(
-                  labelText: l10n.labelEstimatedCostOptional,
-                  hintText: l10n.hintCostExample,
-                  border: const OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.number,
+              const SizedBox(height: AppColors.spaceMD),
+              _sectionCard(
+                context,
+                children: [
+                  TextFormField(
+                    controller: _estimatedCostController,
+                    decoration: _inputDecoration(
+                      context,
+                      labelText: l10n.labelEstimatedCostOptional,
+                      hintText: l10n.hintCostExample,
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                  const SizedBox(height: AppColors.spaceMD),
+                  Text(
+                    l10n.handymanSkillsNeeded,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: AppColors.spaceSM),
+                  Wrap(
+                    spacing: AppColors.spaceSM,
+                    runSpacing: AppColors.spaceSM,
+                    children: _skillOptions.map((skill) {
+                      final selected = _selectedSkills.contains(skill);
+                      return FilterChip(
+                        label: Text(_skillDisplay(l10n, skill)),
+                        selected: selected,
+                        onSelected: (_) => _toggleSkill(skill),
+                        showCheckmark: false,
+                        labelStyle: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: selected
+                              ? colorScheme.onPrimary
+                              : colorScheme.onSurfaceVariant,
+                        ),
+                        backgroundColor: colorScheme.surface,
+                        selectedColor: AppColors.primaryColor,
+                        side: BorderSide(
+                          color: selected ? AppColors.primaryColor : borderColor,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(AppColors.radiusFull),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: AppColors.spaceMD),
+                  TextFormField(
+                    controller: _toolsController,
+                    decoration: _inputDecoration(
+                      context,
+                      labelText: l10n.labelToolsCommaSeparated,
+                      hintText: l10n.hintToolsHandymanExample,
+                    ),
+                  ),
+                  const SizedBox(height: AppColors.spaceMD),
+                  TextFormField(
+                    controller: _estimatedHoursController,
+                    decoration: _inputDecoration(
+                      context,
+                      labelText: l10n.labelEstimatedHoursOptional,
+                      hintText: l10n.hintHoursExample,
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
-              Text(l10n.handymanSkillsNeeded, style: const TextStyle(fontWeight: FontWeight.w500)),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: _skillOptions.map((skill) {
-                  final selected = _selectedSkills.contains(skill);
-                  return FilterChip(
-                    label: Text(_skillDisplay(l10n, skill)),
-                    selected: selected,
-                    onSelected: (_) => _toggleSkill(skill),
-                    selectedColor: AppColors.primaryColor.withOpacity(0.3),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _toolsController,
-                decoration: InputDecoration(
-                  labelText: l10n.labelToolsCommaSeparated,
-                  hintText: l10n.hintToolsHandymanExample,
-                  border: const OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _estimatedHoursController,
-                decoration: InputDecoration(
-                  labelText: l10n.labelEstimatedHoursOptional,
-                  hintText: l10n.hintHoursExample,
-                  border: const OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppColors.spaceLG),
               SizedBox(
                 width: double.infinity,
-                child: ElevatedButton(
+                height: AppColors.buttonHeightMD,
+                child: FilledButton(
                   onPressed: _isSubmitting ? null : _submit,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.colorScheme.primary,
-                    foregroundColor: theme.colorScheme.onPrimary,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.primaryColor,
+                    foregroundColor: colorScheme.onPrimary,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(AppColors.radiusLG),
                     ),
                   ),
                   child: _isSubmitting
@@ -403,7 +490,9 @@ class _CreateHandymanRequestScreenState
                           width: 24,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.onPrimary),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              colorScheme.onPrimary,
+                            ),
                           ),
                         )
                       : Text(l10n.handymanCreateRequestCta),
