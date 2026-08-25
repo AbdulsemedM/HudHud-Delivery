@@ -76,7 +76,7 @@ class _HandymanDetailsScreenState extends State<HandymanDetailsScreen> {
 
   Color _cardBorder(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return isDark ? AppColors.darkBorder : const Color(0xFFEEEEEE);
+    return isDark ? AppColors.darkBorder : AppColors.lightBorder;
   }
 
   @override
@@ -381,9 +381,10 @@ class _HandymanDetailsShimmer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final baseColor = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0);
+    final baseColor =
+        isDark ? AppColors.darkSurfaceVariant : AppColors.lightBorder;
     final highlightColor =
-        isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF5F5F5);
+        isDark ? AppColors.darkBorder : AppColors.lightInputFill;
 
     return Padding(
       padding: const EdgeInsets.all(AppColors.spaceMD),

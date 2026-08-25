@@ -23,7 +23,7 @@ class WalletFundingSubmitBar extends StatelessWidget {
     return SafeArea(
       top: false,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+        padding: EdgeInsets.fromLTRB(20, 8, 20, 16),
         child: SizedBox(
           width: double.infinity,
           height: AppColors.buttonHeightMD,
@@ -31,7 +31,7 @@ class WalletFundingSubmitBar extends StatelessWidget {
             onPressed: isLoading ? null : onPressed,
             style: ElevatedButton.styleFrom(
               backgroundColor: AuthScreenColors.orange,
-              foregroundColor: Colors.white,
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
               disabledBackgroundColor:
                   AuthScreenColors.orange.withValues(alpha: 0.4),
               elevation: 0,
@@ -40,17 +40,17 @@ class WalletFundingSubmitBar extends StatelessWidget {
               ),
             ),
             child: isLoading
-                ? const SizedBox(
+                ? SizedBox(
                     width: 22,
                     height: 22,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onPrimary,
                     ),
                   )
                 : Text(
                     label,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 16,
                     ),
@@ -104,24 +104,24 @@ class WalletFundingFormBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+      padding: EdgeInsets.fromLTRB(20, 12, 20, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Amount',
             style: TextStyle(
-              color: AuthScreenColors.textPrimary,
+              color: AuthScreenColors.textPrimaryOf(context),
               fontWeight: FontWeight.w600,
               fontSize: 15,
             ),
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
           TextFormField(
             controller: amountController,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            style: const TextStyle(
-              color: AuthScreenColors.textPrimary,
+            keyboardType: TextInputType.numberWithOptions(decimal: true),
+            style: TextStyle(
+              color: AuthScreenColors.textPrimaryOf(context),
               fontSize: 22,
               fontWeight: FontWeight.w600,
             ),
@@ -131,15 +131,15 @@ class WalletFundingFormBody extends StatelessWidget {
             decoration: InputDecoration(
               hintText: amountHint,
               suffixText: currency,
-              suffixStyle: const TextStyle(
-                color: AuthScreenColors.textMuted,
+              suffixStyle: TextStyle(
+                color: AuthScreenColors.textMutedOf(context),
                 fontWeight: FontWeight.w600,
               ),
             ),
             validator: amountValidator,
           ),
           if (onQuickAmountSelected != null) ...[
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Wrap(
               spacing: 8,
               runSpacing: 8,
@@ -150,9 +150,9 @@ class WalletFundingFormBody extends StatelessWidget {
                 return OutlinedButton(
                   onPressed: () => onQuickAmountSelected!(amount),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: AuthScreenColors.textPrimary,
-                    side: const BorderSide(color: AuthScreenColors.surfaceBorder),
-                    padding: const EdgeInsets.symmetric(
+                    foregroundColor: AuthScreenColors.textPrimaryOf(context),
+                    side: BorderSide(color: AuthScreenColors.surfaceBorderOf(context)),
+                    padding: EdgeInsets.symmetric(
                       horizontal: 14,
                       vertical: 8,
                     ),
@@ -167,18 +167,18 @@ class WalletFundingFormBody extends StatelessWidget {
               }).toList(),
             ),
           ],
-          const SizedBox(height: 28),
+          SizedBox(height: 28),
           Text(
             methodSectionTitle,
-            style: const TextStyle(
-              color: AuthScreenColors.textPrimary,
+            style: TextStyle(
+              color: AuthScreenColors.textPrimaryOf(context),
               fontWeight: FontWeight.w600,
               fontSize: 15,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           if (isLoadingMethods)
-            const Padding(
+            Padding(
               padding: EdgeInsets.symmetric(vertical: 20),
               child: Center(
                 child: CircularProgressIndicator(
@@ -190,7 +190,7 @@ class WalletFundingFormBody extends StatelessWidget {
           else if (methods.isEmpty)
             Text(
               emptyMethodsMessage ?? 'No payment methods available',
-              style: const TextStyle(color: AuthScreenColors.textSecondary),
+              style: TextStyle(color: AuthScreenColors.textSecondaryOf(context)),
             )
           else
             ...methods.map((method) {
@@ -198,7 +198,7 @@ class WalletFundingFormBody extends StatelessWidget {
               final name = method['name']?.toString() ?? id;
               final selected = selectedMethodId == id;
               return Padding(
-                padding: const EdgeInsets.only(bottom: 8),
+                padding: EdgeInsets.only(bottom: 8),
                 child: ListTile(
                   onTap: id.isEmpty ? null : () => onMethodSelected(id),
                   selected: selected,
@@ -209,18 +209,18 @@ class WalletFundingFormBody extends StatelessWidget {
                     side: BorderSide(
                       color: selected
                           ? AuthScreenColors.orange
-                          : AuthScreenColors.surfaceBorder,
+                          : AuthScreenColors.surfaceBorderOf(context),
                     ),
                   ),
-                  tileColor: AuthScreenColors.surface,
-                  contentPadding: const EdgeInsets.symmetric(
+                  tileColor: AuthScreenColors.surfaceOf(context),
+                  contentPadding: EdgeInsets.symmetric(
                     horizontal: 14,
                     vertical: 2,
                   ),
                   title: Text(
                     name,
                     style: TextStyle(
-                      color: AuthScreenColors.textPrimary,
+                      color: AuthScreenColors.textPrimaryOf(context),
                       fontWeight:
                           selected ? FontWeight.w600 : FontWeight.w500,
                     ),
@@ -229,7 +229,7 @@ class WalletFundingFormBody extends StatelessWidget {
                     selected ? Icons.check_circle : Icons.circle_outlined,
                     color: selected
                         ? AuthScreenColors.orange
-                        : AuthScreenColors.textSecondary,
+                        : AuthScreenColors.textSecondaryOf(context),
                     size: 22,
                   ),
                 ),

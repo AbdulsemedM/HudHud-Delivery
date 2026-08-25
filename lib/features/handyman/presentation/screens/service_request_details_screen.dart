@@ -64,7 +64,7 @@ class _ServiceRequestDetailsScreenState extends State<ServiceRequestDetailsScree
 
   Color _cardBorder(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return isDark ? AppColors.darkBorder : const Color(0xFFEEEEEE);
+    return isDark ? AppColors.darkBorder : AppColors.lightBorder;
   }
 
   Future<void> _cancelRequest() async {

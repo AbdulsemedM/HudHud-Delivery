@@ -47,24 +47,24 @@ class _AddressesListScreenState extends State<AddressesListScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             Container(
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: AuthScreenColors.surfaceBorder,
+                color: AuthScreenColors.surfaceBorderOf(context),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             ListTile(
-              leading: const Icon(
+              leading: Icon(
                 Icons.map_outlined,
                 color: AuthScreenColors.orange,
               ),
               title: Text(
                 l10n.addressesAddFromMap,
-                style: const TextStyle(color: AuthScreenColors.textPrimary),
+                style: TextStyle(color: AuthScreenColors.textPrimaryOf(context)),
               ),
               onTap: () async {
                 Navigator.pop(ctx);
@@ -90,13 +90,13 @@ class _AddressesListScreenState extends State<AddressesListScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(
+              leading: Icon(
                 Icons.edit_outlined,
                 color: AuthScreenColors.orange,
               ),
               title: Text(
                 l10n.addressesAddManual,
-                style: const TextStyle(color: AuthScreenColors.textPrimary),
+                style: TextStyle(color: AuthScreenColors.textPrimaryOf(context)),
               ),
               onTap: () async {
                 Navigator.pop(ctx);
@@ -111,7 +111,7 @@ class _AddressesListScreenState extends State<AddressesListScreen> {
                 );
               },
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
           ],
         ),
       ),
@@ -154,13 +154,13 @@ class _AddressesListScreenState extends State<AddressesListScreen> {
             children: [
               Text(l10n.addressesBulkDeleteMessage(ids.length)),
               if (hasDefault) ...[
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
                 CheckboxListTile(
                   contentPadding: EdgeInsets.zero,
                   activeColor: AuthScreenColors.orange,
                   title: Text(
                     l10n.addressesBulkDeleteForce,
-                    style: const TextStyle(color: AuthScreenColors.textPrimary),
+                    style: TextStyle(color: AuthScreenColors.textPrimaryOf(context)),
                   ),
                   value: force,
                   onChanged: (v) => setDialogState(() => force = v ?? false),
@@ -197,7 +197,7 @@ class _AddressesListScreenState extends State<AddressesListScreen> {
     if (_isLoggedIn == null) {
       return ProfileDarkPage(
         title: l10n.addressesTitle,
-        body: const Center(
+        body: Center(
           child: CircularProgressIndicator(color: AuthScreenColors.orange),
         ),
       );
@@ -208,30 +208,30 @@ class _AddressesListScreenState extends State<AddressesListScreen> {
         title: l10n.addressesTitle,
         body: Center(
           child: Padding(
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.all(24),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   l10n.addressesSignInTitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
-                    color: AuthScreenColors.textPrimary,
+                    color: AuthScreenColors.textPrimaryOf(context),
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 Text(
                   l10n.addressesSignInSubtitle,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(color: AuthScreenColors.textSecondary),
+                  style: TextStyle(color: AuthScreenColors.textSecondaryOf(context)),
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
                 FilledButton(
                   style: FilledButton.styleFrom(
                     backgroundColor: AuthScreenColors.orange,
-                    foregroundColor: Colors.black,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
                   ),
                   onPressed: () {
                     Navigator.pushReplacement(
@@ -289,17 +289,17 @@ class _AddressesListBody extends StatelessWidget {
       actions: [
         BlocBuilder<AddressesBloc, AddressesState>(
           builder: (context, state) {
-            if (state is! AddressesLoaded) return const SizedBox.shrink();
+            if (state is! AddressesLoaded) return SizedBox.shrink();
             if (state.isSelectionMode) {
               return Row(
                 children: [
                   if (state.selectedIds.isNotEmpty)
                     IconButton(
-                      icon: const Icon(Icons.delete_outline),
+                      icon: Icon(Icons.delete_outline),
                       onPressed: () => onConfirmBulkDelete(state),
                     ),
                   IconButton(
-                    icon: const Icon(Icons.close),
+                    icon: Icon(Icons.close),
                     onPressed: () => context
                         .read<AddressesBloc>()
                         .add(const ExitSelectionModeEvent()),
@@ -308,7 +308,7 @@ class _AddressesListBody extends StatelessWidget {
               );
             }
             return IconButton(
-              icon: const Icon(Icons.checklist),
+              icon: Icon(Icons.checklist),
               tooltip: l10n.addressesSelect,
               onPressed: () => context
                   .read<AddressesBloc>()
@@ -320,13 +320,13 @@ class _AddressesListBody extends StatelessWidget {
       floatingActionButton: BlocBuilder<AddressesBloc, AddressesState>(
         builder: (context, state) {
           if (state is AddressesLoaded && state.isSelectionMode) {
-            return const SizedBox.shrink();
+            return SizedBox.shrink();
           }
           return FloatingActionButton.extended(
             onPressed: onAdd,
             backgroundColor: AuthScreenColors.orange,
-            foregroundColor: Colors.black,
-            icon: const Icon(Icons.add),
+            foregroundColor: Theme.of(context).colorScheme.onPrimary,
+            icon: Icon(Icons.add),
             label: Text(l10n.addressesAdd),
           );
         },
@@ -334,7 +334,7 @@ class _AddressesListBody extends StatelessWidget {
       body: BlocBuilder<AddressesBloc, AddressesState>(
         builder: (context, state) {
           if (state is AddressesLoading) {
-            return const Center(
+            return Center(
               child: CircularProgressIndicator(color: AuthScreenColors.orange),
             );
           }
@@ -345,19 +345,19 @@ class _AddressesListBody extends StatelessWidget {
                 children: [
                   Text(
                     l10n.addressesLoadError,
-                    style: const TextStyle(color: AuthScreenColors.textPrimary),
+                    style: TextStyle(color: AuthScreenColors.textPrimaryOf(context)),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   Text(
                     state.message,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(color: AuthScreenColors.textSecondary),
+                    style: TextStyle(color: AuthScreenColors.textSecondaryOf(context)),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   FilledButton(
                     style: FilledButton.styleFrom(
                       backgroundColor: AuthScreenColors.orange,
-                      foregroundColor: Colors.black,
+                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
                     ),
                     onPressed: () => context
                         .read<AddressesBloc>()
@@ -372,30 +372,30 @@ class _AddressesListBody extends StatelessWidget {
             if (state.addresses.isEmpty) {
               return Center(
                 child: Padding(
-                  padding: const EdgeInsets.all(24),
+                  padding: EdgeInsets.all(24),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.location_off_outlined,
                         size: 64,
-                        color: AuthScreenColors.textMuted,
+                        color: AuthScreenColors.textMutedOf(context),
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16),
                       Text(
                         l10n.addressesEmptyTitle,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w600,
-                          color: AuthScreenColors.textPrimary,
+                          color: AuthScreenColors.textPrimaryOf(context),
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8),
                       Text(
                         l10n.addressesEmptySubtitle,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: AuthScreenColors.textSecondary,
+                        style: TextStyle(
+                          color: AuthScreenColors.textSecondaryOf(context),
                         ),
                       ),
                     ],

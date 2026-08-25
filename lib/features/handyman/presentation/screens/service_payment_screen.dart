@@ -141,7 +141,7 @@ class _ServicePaymentScreenState extends State<ServicePaymentScreen> {
     final colorScheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
     final borderColor =
-        isDark ? const Color(0xFF2A2A2A) : const Color(0xFFEEEEEE);
+        isDark ? AppColors.darkBorder : AppColors.lightBorder;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -289,7 +289,7 @@ class _ServicePaymentScreenState extends State<ServicePaymentScreen> {
                   onPressed: _isPaying ? null : _onPay,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryColor,
-                    foregroundColor: Colors.white,
+                    foregroundColor: AppColors.lightOnPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppColors.radiusLG),
                     ),
@@ -300,7 +300,7 @@ class _ServicePaymentScreenState extends State<ServicePaymentScreen> {
                           height: 22,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: Colors.white,
+                            color: AppColors.lightOnPrimary,
                           ),
                         )
                       : const Text(

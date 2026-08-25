@@ -283,7 +283,7 @@ class _OrderTimelineCardState extends State<OrderTimelineCard>
         ? HomeColors.violet
         : colorScheme.surfaceContainerHighest;
     final iconColor =
-        step.isCompleted ? Colors.white : colorScheme.onSurfaceVariant;
+        step.isCompleted ? AppColors.lightOnPrimary : colorScheme.onSurfaceVariant;
 
     Widget circle = Container(
       width: 32,
@@ -1081,7 +1081,7 @@ class _CancelOrderDialogState extends State<CancelOrderDialog> {
               : null,
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.errorColor,
-            foregroundColor: Colors.white,
+            foregroundColor: AppColors.lightOnPrimary,
           ),
           child: Text(l10n.orderStatusCancelled),
         ),

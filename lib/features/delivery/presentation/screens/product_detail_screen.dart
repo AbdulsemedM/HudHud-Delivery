@@ -266,7 +266,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                             style: FilledButton.styleFrom(
                                               backgroundColor:
                                                   AppColors.primaryColor,
-                                              foregroundColor: Colors.white,
+                                              foregroundColor:
+                                                  AppColors.lightOnPrimary,
                                               shape: RoundedRectangleBorder(
                                                 borderRadius:
                                                     BorderRadius.circular(
@@ -359,13 +360,14 @@ class _CartCheckoutBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
         color: AppColors.primaryColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
+            color: isDark ? AppColors.darkShadow : AppColors.lightShadow,
             blurRadius: 10,
             offset: const Offset(0, -5),
           ),
@@ -375,13 +377,14 @@ class _CartCheckoutBar extends StatelessWidget {
         top: false,
         child: Row(
           children: [
-            const Icon(Icons.shopping_bag_outlined, color: Colors.white, size: 22),
+            const Icon(Icons.shopping_bag_outlined,
+                color: AppColors.lightOnPrimary, size: 22),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
                 'TOTAL ITEMS: $totalItems',
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: AppColors.lightOnPrimary,
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
@@ -393,7 +396,7 @@ class _CartCheckoutBar extends StatelessWidget {
             Text(
               'ETB${subtotal.toStringAsFixed(1)}',
               style: const TextStyle(
-                color: Colors.white,
+                color: AppColors.lightOnPrimary,
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
@@ -402,7 +405,7 @@ class _CartCheckoutBar extends StatelessWidget {
             TextButton(
               onPressed: onCheckout,
               style: TextButton.styleFrom(
-                backgroundColor: Colors.white,
+                backgroundColor: AppColors.lightSurface,
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 minimumSize: Size.zero,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -531,7 +534,7 @@ class _ProductErrorState extends StatelessWidget {
               label: Text(l10n.actionTryAgain),
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.primaryColor,
-                foregroundColor: Colors.white,
+                foregroundColor: AppColors.lightOnPrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppColors.radiusLG),
                 ),

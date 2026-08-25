@@ -34,9 +34,9 @@ class CourierHistoryEmptyState extends StatelessWidget {
         vertical: compact ? 28 : 36,
       ),
       decoration: BoxDecoration(
-        color: HomeColors.surface,
+        color: HomeColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(AppColors.radiusLG),
-        border: Border.all(color: HomeColors.border),
+        border: Border.all(color: HomeColors.borderOf(context)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -70,7 +70,7 @@ class CourierHistoryEmptyState extends StatelessWidget {
                     : theme.textTheme.titleMedium)
                 ?.copyWith(
               fontWeight: FontWeight.w700,
-              color: HomeColors.textPrimary,
+              color: HomeColors.textPrimaryOf(context),
             ),
           ),
           const SizedBox(height: 8),
@@ -78,7 +78,7 @@ class CourierHistoryEmptyState extends StatelessWidget {
             l10n.courierHistoryEmptySubtitle,
             textAlign: TextAlign.center,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: HomeColors.textMuted,
+              color: HomeColors.textMutedOf(context),
               height: 1.4,
             ),
           ),
@@ -94,7 +94,7 @@ class CourierHistoryEmptyState extends StatelessWidget {
                 ),
                 style: FilledButton.styleFrom(
                   backgroundColor: AuthScreenColors.orange,
-                  foregroundColor: Colors.white,
+                  foregroundColor: Theme.of(context).colorScheme.onSecondary,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),

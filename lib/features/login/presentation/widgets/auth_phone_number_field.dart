@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_field_decoration.dart';
 
-/// Phone input for dark auth screens: `ET +251` country chip + national number.
+/// Phone input for auth screens: country chip + national number.
 class AuthPhoneNumberField extends StatelessWidget {
   const AuthPhoneNumberField({
     super.key,
@@ -30,11 +30,11 @@ class AuthPhoneNumberField extends StatelessWidget {
       showPhoneCode: true,
       onSelect: onCountryChanged,
       countryListTheme: CountryListThemeData(
-        backgroundColor: AuthScreenColors.surface,
+        backgroundColor: AuthScreenColors.surfaceOf(context),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-        textStyle: const TextStyle(color: AuthScreenColors.textPrimary),
-        searchTextStyle: const TextStyle(color: AuthScreenColors.textPrimary),
-        inputDecoration: authFieldDecoration(hint: 'Search country'),
+        textStyle: TextStyle(color: AuthScreenColors.textPrimaryOf(context)),
+        searchTextStyle: TextStyle(color: AuthScreenColors.textPrimaryOf(context)),
+        inputDecoration: authFieldDecoration(context, hint: 'Search country'),
       ),
     );
   }
@@ -52,22 +52,22 @@ class AuthPhoneNumberField extends StatelessWidget {
           child: Container(
             height: 52,
             padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: authSurfaceBoxDecoration(),
+            decoration: authSurfaceBoxDecoration(context),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   '$iso $codeText',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: AuthScreenColors.textPrimary,
+                    color: AuthScreenColors.textPrimaryOf(context),
                   ),
                 ),
                 const SizedBox(width: 2),
-                const Icon(
+                Icon(
                   Icons.keyboard_arrow_down_rounded,
-                  color: AuthScreenColors.textSecondary,
+                  color: AuthScreenColors.textSecondaryOf(context),
                   size: 20,
                 ),
               ],
@@ -81,12 +81,12 @@ class AuthPhoneNumberField extends StatelessWidget {
             enabled: enabled,
             keyboardType: TextInputType.phone,
             validator: validator,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w500,
-              color: AuthScreenColors.textPrimary,
+              color: AuthScreenColors.textPrimaryOf(context),
             ),
-            decoration: authFieldDecoration(hint: hintText),
+            decoration: authFieldDecoration(context, hint: hintText),
           ),
         ),
       ],

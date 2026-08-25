@@ -16,7 +16,7 @@ class ChatMessagesShimmer extends StatelessWidget {
     final highlightColor =
         isDark ? scheme.surfaceContainerHighest : Colors.grey.shade100;
     final bubbleColor =
-        isDark ? scheme.surfaceContainerHighest : Colors.white;
+        isDark ? scheme.surfaceContainerHighest : scheme.surface;
     final sentBubbleColor = isDark
         ? scheme.primary.withValues(alpha: 0.35)
         : scheme.primary.withValues(alpha: 0.18);
@@ -83,7 +83,7 @@ class ChatRoomLoadingScaffold extends StatelessWidget {
     final highlightColor =
         isDark ? scheme.surfaceContainerHighest : Colors.grey.shade100;
     final placeholder =
-        isDark ? scheme.surfaceContainerHighest : Colors.white;
+        isDark ? scheme.surfaceContainerHighest : scheme.surface;
 
     return Scaffold(
       backgroundColor: chatTheme.wallpaper,

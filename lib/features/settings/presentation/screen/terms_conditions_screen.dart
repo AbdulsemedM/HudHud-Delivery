@@ -7,7 +7,7 @@ class TermsConditionsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const ProfileDarkPage(
+    return ProfileDarkPage(
       title: 'Terms & Conditions',
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),
@@ -59,28 +59,28 @@ class _LegalSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AuthScreenColors.surface,
+        color: AuthScreenColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AuthScreenColors.surfaceBorder),
+        border: Border.all(color: AuthScreenColors.surfaceBorderOf(context)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.w700,
               color: AuthScreenColors.orange,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           Text(
             content,
-            style: const TextStyle(
+            style: TextStyle(
               height: 1.6,
-              color: AuthScreenColors.textMuted,
+              color: AuthScreenColors.textMutedOf(context),
             ),
           ),
         ],

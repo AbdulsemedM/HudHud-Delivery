@@ -160,7 +160,7 @@ class _FAQsScreenState extends State<FAQsScreen> {
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
                                 color: isSelected
-                                    ? Colors.white
+                                    ? Theme.of(context).colorScheme.onPrimary
                                     : AppColors.primaryColor,
                               ),
                             ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hudhud_delivery/core/theme/system_ui_style.dart';
 import 'package:hudhud_delivery/features/settings/presentation/screen/notifications_screen.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 // import 'package:hudhud_delivery/features/delivery/presentation/screens/all_categories_screen.dart';
@@ -445,15 +446,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         (!_currentUser!.isEmailVerified || !_currentUser!.isPhoneVerified);
 
     return Theme(
-      data: HomeColors.darkTheme(Theme.of(context)),
+      data: HomeColors.themeFor(context),
       child: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: const SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent,
-          statusBarIconBrightness: Brightness.light,
-          statusBarBrightness: Brightness.dark,
-        ),
+        value: systemUiOverlayFor(context),
         child: Scaffold(
-          backgroundColor: HomeColors.background,
+          backgroundColor: HomeColors.backgroundOf(context),
           body: SafeArea(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,

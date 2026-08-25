@@ -470,9 +470,9 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
       context,
       child: Builder(
         builder: (context) {
-          const borderColor = HomeColors.border;
+          final borderColor = HomeColors.borderOf(context);
           return Scaffold(
-            backgroundColor: HomeColors.background,
+            backgroundColor: HomeColors.backgroundOf(context),
             body: Stack(
               children: [
                 gmaps.GoogleMap(
@@ -493,7 +493,7 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                   left: 16,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: HomeColors.surfaceElevated,
+                      color: HomeColors.surfaceElevatedOf(context),
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
@@ -503,8 +503,8 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                       ],
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.arrow_back,
-                          color: HomeColors.textPrimary),
+                      icon: Icon(Icons.arrow_back,
+                          color: HomeColors.textPrimaryOf(context)),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ),
@@ -517,7 +517,7 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                     decoration: BoxDecoration(
-                      color: HomeColors.surfaceElevated,
+                      color: HomeColors.surfaceElevatedOf(context),
                       borderRadius: BorderRadius.circular(AppColors.radiusFull),
                       border: Border.all(color: borderColor),
                       boxShadow: [
@@ -538,7 +538,7 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                     left: 16,
                     right: 16,
                     child: Material(
-                      color: HomeColors.surfaceElevated.withValues(alpha: 0.95),
+                      color: HomeColors.surfaceElevatedOf(context).withValues(alpha: 0.95),
                       borderRadius: BorderRadius.circular(AppColors.radiusLG),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
@@ -549,8 +549,8 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                           _liveTracking?.message ??
                               context.l10n.courierFindingNearestDrivers,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: HomeColors.textPrimary,
+                          style: TextStyle(
+                            color: HomeColors.textPrimaryOf(context),
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                           ),
@@ -565,8 +565,8 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                   maxChildSize: 0.85,
                   builder: (context, scrollController) {
                     return Container(
-                      decoration: const BoxDecoration(
-                        color: HomeColors.surface,
+                      decoration: BoxDecoration(
+                        color: HomeColors.surfaceOf(context),
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(AppColors.radiusLG),
                           topRight: Radius.circular(AppColors.radiusLG),
@@ -585,7 +585,7 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                             width: 40,
                             height: 4,
                             decoration: BoxDecoration(
-                              color: HomeColors.border,
+                              color: HomeColors.borderOf(context),
                               borderRadius: BorderRadius.circular(2),
                             ),
                           ),
@@ -673,8 +673,8 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                                           padding: const EdgeInsets.all(24),
                                           child: Text(
                                             _trackError!,
-                                            style: const TextStyle(
-                                              color: HomeColors.textMuted,
+                                            style: TextStyle(
+                                              color: HomeColors.textMutedOf(context),
                                               fontSize: 14,
                                             ),
                                             textAlign: TextAlign.center,
@@ -801,19 +801,19 @@ class _ReviewOrderCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppColors.spaceMD),
       decoration: BoxDecoration(
-        color: HomeColors.surfaceElevated,
+        color: HomeColors.surfaceElevatedOf(context),
         borderRadius: BorderRadius.circular(AppColors.radiusLG),
         border: Border.all(color: borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Review Order',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: HomeColors.textPrimary,
+              color: HomeColors.textPrimaryOf(context),
             ),
           ),
           const SizedBox(height: 16),
@@ -865,7 +865,7 @@ class _TrackingOrderCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppColors.spaceMD),
       decoration: BoxDecoration(
-        color: HomeColors.surfaceElevated,
+        color: HomeColors.surfaceElevatedOf(context),
         borderRadius: BorderRadius.circular(AppColors.radiusLG),
         border: Border.all(color: borderColor),
       ),
@@ -876,7 +876,7 @@ class _TrackingOrderCard extends StatelessWidget {
             'Tracking Order',
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: HomeColors.textPrimary,
+                  color: HomeColors.textPrimaryOf(context),
                 ),
           ),
           const SizedBox(height: 16),
@@ -888,7 +888,7 @@ class _TrackingOrderCard extends StatelessWidget {
                 Text(
                   'No tracking updates yet',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: HomeColors.textMuted,
+                        color: HomeColors.textMutedOf(context),
                       ),
                 ),
               ],
@@ -932,7 +932,7 @@ class _TrackingItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color dotColor = HomeColors.textMuted;
+    Color dotColor = HomeColors.textMutedOf(context);
     if (isActive) dotColor = HomeColors.violet;
     if (isCompleted) dotColor = AppColors.delivered;
 
@@ -956,14 +956,14 @@ class _TrackingItem extends StatelessWidget {
                 title,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-                      color: HomeColors.textPrimary,
+                      color: HomeColors.textPrimaryOf(context),
                     ),
               ),
               const SizedBox(height: 4),
               Text(
                 date,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: HomeColors.textMuted,
+                      color: HomeColors.textMutedOf(context),
                     ),
               ),
             ],
@@ -993,7 +993,7 @@ class _DetailItem extends StatelessWidget {
           child: Text(
             label,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: HomeColors.textMuted,
+                  color: HomeColors.textMutedOf(context),
                 ),
           ),
         ),
@@ -1002,7 +1002,7 @@ class _DetailItem extends StatelessWidget {
             value,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w500,
-                  color: HomeColors.textPrimary,
+                  color: HomeColors.textPrimaryOf(context),
                 ),
           ),
         ),

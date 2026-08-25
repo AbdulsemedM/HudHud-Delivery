@@ -96,19 +96,19 @@ class _RateDeliveryScreenState extends State<RateDeliveryScreen> {
     return CourierTheme.wrap(
       context,
       child: Scaffold(
-        backgroundColor: HomeColors.background,
+        backgroundColor: HomeColors.backgroundOf(context),
         appBar: AppBar(
-          backgroundColor: HomeColors.surface,
+          backgroundColor: HomeColors.surfaceOf(context),
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-            color: HomeColors.textPrimary,
+            icon: Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+            color: HomeColors.textPrimaryOf(context),
             onPressed: () => Navigator.pop(context),
           ),
-          title: const Text(
+          title: Text(
             'Rate delivery',
             style: TextStyle(
-              color: HomeColors.textPrimary,
+              color: HomeColors.textPrimaryOf(context),
               fontWeight: FontWeight.w600,
               fontSize: 17,
             ),
@@ -122,17 +122,17 @@ class _RateDeliveryScreenState extends State<RateDeliveryScreen> {
               Container(
                 padding: const EdgeInsets.all(AppColors.spaceMD),
                 decoration: BoxDecoration(
-                  color: HomeColors.surface,
+                  color: HomeColors.surfaceOf(context),
                   borderRadius: BorderRadius.circular(AppColors.radiusLG),
-                  border: Border.all(color: HomeColors.border),
+                  border: Border.all(color: HomeColors.borderOf(context)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'How was your delivery?',
                       style: TextStyle(
-                        color: HomeColors.textPrimary,
+                        color: HomeColors.textPrimaryOf(context),
                         fontWeight: FontWeight.w700,
                         fontSize: 18,
                       ),
@@ -140,8 +140,8 @@ class _RateDeliveryScreenState extends State<RateDeliveryScreen> {
                     const SizedBox(height: 8),
                     Text(
                       'Delivery #${widget.deliveryId}',
-                      style: const TextStyle(
-                        color: HomeColors.textSecondary,
+                      style: TextStyle(
+                        color: HomeColors.textSecondaryOf(context),
                         fontSize: 14,
                       ),
                     ),
@@ -153,16 +153,16 @@ class _RateDeliveryScreenState extends State<RateDeliveryScreen> {
                       decoration: InputDecoration(
                         labelText: 'Comment (optional)',
                         filled: true,
-                        fillColor: HomeColors.surfaceElevated,
+                        fillColor: HomeColors.surfaceElevatedOf(context),
                         border: OutlineInputBorder(
                           borderRadius:
                               BorderRadius.circular(AppColors.radiusLG),
-                          borderSide: const BorderSide(color: HomeColors.border),
+                          borderSide: BorderSide(color: HomeColors.borderOf(context)),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius:
                               BorderRadius.circular(AppColors.radiusLG),
-                          borderSide: const BorderSide(color: HomeColors.border),
+                          borderSide: BorderSide(color: HomeColors.borderOf(context)),
                         ),
                       ),
                       maxLines: 3,

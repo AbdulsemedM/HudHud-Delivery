@@ -55,36 +55,36 @@ class _SosHistoryBodyState extends State<_SosHistoryBody> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            padding: EdgeInsets.fromLTRB(16, 12, 16, 0),
             child: Row(
               children: [
                 ChoiceChip(
                   label: Text(l10n.sosStatusAll),
                   selected: _statusFilter == null,
                   selectedColor: AuthScreenColors.orange,
-                  checkmarkColor: Colors.black,
+                  checkmarkColor: Theme.of(context).colorScheme.onPrimary,
                   labelStyle: TextStyle(
                     color: _statusFilter == null
-                        ? Colors.black
-                        : AuthScreenColors.textPrimary,
+                        ? Theme.of(context).colorScheme.onPrimary
+                        : AuthScreenColors.textPrimaryOf(context),
                   ),
-                  backgroundColor: AuthScreenColors.surface,
-                  side: const BorderSide(color: AuthScreenColors.surfaceBorder),
+                  backgroundColor: AuthScreenColors.surfaceOf(context),
+                  side: BorderSide(color: AuthScreenColors.surfaceBorderOf(context)),
                   onSelected: (_) => _reload(status: null),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 ChoiceChip(
                   label: Text(l10n.sosStatusActive),
                   selected: _statusFilter == 'active',
                   selectedColor: AuthScreenColors.orange,
-                  checkmarkColor: Colors.black,
+                  checkmarkColor: Theme.of(context).colorScheme.onPrimary,
                   labelStyle: TextStyle(
                     color: _statusFilter == 'active'
-                        ? Colors.black
-                        : AuthScreenColors.textPrimary,
+                        ? Theme.of(context).colorScheme.onPrimary
+                        : AuthScreenColors.textPrimaryOf(context),
                   ),
-                  backgroundColor: AuthScreenColors.surface,
-                  side: const BorderSide(color: AuthScreenColors.surfaceBorder),
+                  backgroundColor: AuthScreenColors.surfaceOf(context),
+                  side: BorderSide(color: AuthScreenColors.surfaceBorderOf(context)),
                   onSelected: (_) => _reload(status: 'active'),
                 ),
               ],
@@ -101,7 +101,7 @@ class _SosHistoryBodyState extends State<_SosHistoryBody> {
               },
               builder: (context, state) {
                 if (state is SosLoading) {
-                  return const Center(child: CircularProgressIndicator());
+                  return Center(child: CircularProgressIndicator());
                 }
                 final history =
                     state is SosLoaded ? state.history : <SosAlertModel>[];
@@ -113,8 +113,8 @@ class _SosHistoryBodyState extends State<_SosHistoryBody> {
                   return Center(
                     child: Text(
                       l10n.sosNoHistory,
-                      style: const TextStyle(
-                        color: AuthScreenColors.textSecondary,
+                      style: TextStyle(
+                        color: AuthScreenColors.textSecondaryOf(context),
                       ),
                     ),
                   );
@@ -125,13 +125,13 @@ class _SosHistoryBodyState extends State<_SosHistoryBody> {
                     _reload(status: _statusFilter);
                   },
                   child: ListView.separated(
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.all(16),
                     itemCount: history.length + (hasMore ? 1 : 0),
-                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                    separatorBuilder: (_, __) => SizedBox(height: 8),
                     itemBuilder: (context, index) {
                       if (index == history.length) {
                         if (isLoadingMore) {
-                          return const Center(
+                          return Center(
                             child: Padding(
                               padding: EdgeInsets.all(16),
                               child: CircularProgressIndicator(),
@@ -141,17 +141,17 @@ class _SosHistoryBodyState extends State<_SosHistoryBody> {
                         context
                             .read<SosBloc>()
                             .add(const LoadMoreSosHistoryEvent());
-                        return const SizedBox.shrink();
+                        return SizedBox.shrink();
                       }
                       final alert = history[index];
                       return Material(
-                        color: AuthScreenColors.surface,
+                        color: AuthScreenColors.surfaceOf(context),
                         borderRadius: BorderRadius.circular(12),
                         child: ListTile(
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
-                            side: const BorderSide(
-                              color: AuthScreenColors.surfaceBorder,
+                            side: BorderSide(
+                              color: AuthScreenColors.surfaceBorderOf(context),
                             ),
                           ),
                           leading: const CircleAvatar(
@@ -163,8 +163,8 @@ class _SosHistoryBodyState extends State<_SosHistoryBody> {
                           ),
                           title: Text(
                             '${alert.alertType} · ${alert.status}',
-                            style: const TextStyle(
-                              color: AuthScreenColors.textPrimary,
+                            style: TextStyle(
+                              color: AuthScreenColors.textPrimaryOf(context),
                             ),
                           ),
                           subtitle: Column(
@@ -174,8 +174,8 @@ class _SosHistoryBodyState extends State<_SosHistoryBody> {
                                   alert.description!.isNotEmpty)
                                 Text(
                                   alert.description!,
-                                  style: const TextStyle(
-                                    color: AuthScreenColors.textSecondary,
+                                  style: TextStyle(
+                                    color: AuthScreenColors.textSecondaryOf(context),
                                   ),
                                 ),
                               if (alert.locationAddress != null)
@@ -183,21 +183,21 @@ class _SosHistoryBodyState extends State<_SosHistoryBody> {
                                   alert.locationAddress!,
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    color: AuthScreenColors.textMuted,
+                                  style: TextStyle(
+                                    color: AuthScreenColors.textMutedOf(context),
                                   ),
                                 ),
                               if (alert.orderNumber != null)
                                 Text(
                                   'Order: ${alert.orderNumber}',
-                                  style: const TextStyle(
-                                    color: AuthScreenColors.textSecondary,
+                                  style: TextStyle(
+                                    color: AuthScreenColors.textSecondaryOf(context),
                                   ),
                                 ),
                               Text(
                                 _formatDate(alert.createdAt),
-                                style: const TextStyle(
-                                  color: AuthScreenColors.textMuted,
+                                style: TextStyle(
+                                  color: AuthScreenColors.textMutedOf(context),
                                 ),
                               ),
                             ],

@@ -201,7 +201,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                       title: Text(
                         l10n.paymentScreenTitle,
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: AppColors.lightOnPrimary,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -219,14 +219,14 @@ class _PaymentScreenState extends State<PaymentScreen>
                         child: const Center(
                           child: Icon(
                             Icons.payment,
-                            color: Colors.white,
+                            color: AppColors.lightOnPrimary,
                             size: 48,
                           ),
                         ),
                       ),
                     ),
                     leading: IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Colors.white),
+                      icon: const Icon(Icons.arrow_back, color: AppColors.lightOnPrimary),
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ),
@@ -408,7 +408,8 @@ class _PaymentScreenState extends State<PaymentScreen>
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor:
                                                 AppColors.errorColor,
-                                            foregroundColor: Colors.white,
+                                            foregroundColor:
+                                                AppColors.lightOnPrimary,
                                           ),
                                           child: Text(l10n.actionRetry),
                                         ),
@@ -434,7 +435,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                 color: colorScheme.surface,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
+                    color: isDark ? AppColors.darkShadow : AppColors.lightShadow,
                     blurRadius: 10,
                     offset: const Offset(0, -5),
                   ),
@@ -449,7 +450,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                       : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryColor,
-                    foregroundColor: Colors.white,
+                    foregroundColor: AppColors.lightOnPrimary,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -553,7 +554,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primaryColor,
-                          foregroundColor: Colors.white,
+                          foregroundColor: AppColors.lightOnPrimary,
                         ),
                         child: Text(l10n.viewOrder),
                       ),
@@ -576,9 +577,9 @@ class _PaymentMethodsShimmer extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final baseColor =
-        isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0);
+        isDark ? AppColors.darkSurfaceVariant : AppColors.lightBorder;
     final highlightColor =
-        isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF5F5F5);
+        isDark ? AppColors.darkBorder : AppColors.lightInputFill;
     return Column(
       children: List.generate(4, (index) {
         return Padding(

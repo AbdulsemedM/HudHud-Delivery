@@ -56,14 +56,14 @@ class OrdersHeader extends StatelessWidget {
           width: 44,
           height: 44,
           decoration: BoxDecoration(
-            color: HomeColors.surface,
+            color: HomeColors.surfaceOf(context),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: HomeColors.border),
+            border: Border.all(color: HomeColors.borderOf(context)),
           ),
           child: IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.notifications_outlined,
-              color: HomeColors.textPrimary,
+              color: HomeColors.textPrimaryOf(context),
             ),
             onPressed: () {},
           ),
@@ -83,7 +83,7 @@ class OrdersTitle extends StatelessWidget {
       l10n.orders,
       style: Theme.of(context).textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w700,
-            color: HomeColors.textPrimary,
+            color: HomeColors.textPrimaryOf(context),
           ),
     );
   }
@@ -126,12 +126,12 @@ class OrderFilterChips extends StatelessWidget {
               labelStyle: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: selected ? Colors.white : HomeColors.textMuted,
+                color: selected ? AppColors.lightOnPrimary : HomeColors.textMutedOf(context),
               ),
-              backgroundColor: HomeColors.surface,
+              backgroundColor: HomeColors.surfaceOf(context),
               selectedColor: HomeColors.violet,
               side: BorderSide(
-                color: selected ? HomeColors.violet : HomeColors.border,
+                color: selected ? HomeColors.violet : HomeColors.borderOf(context),
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppColors.radiusFull),
@@ -149,8 +149,8 @@ class OrdersShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const baseColor = HomeColors.surface;
-    const highlightColor = HomeColors.surfaceElevated;
+    final baseColor = HomeColors.surfaceOf(context);
+    final highlightColor = HomeColors.surfaceElevatedOf(context);
 
     return Column(
       children: List.generate(4, (index) {
@@ -191,23 +191,23 @@ class OrderItem extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: HomeColors.surface,
+        color: HomeColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(AppColors.radiusLG),
-        border: Border.all(color: HomeColors.border),
+        border: Border.all(color: HomeColors.borderOf(context)),
       ),
       child: Row(
         children: [
-          const Icon(
+          Icon(
             Icons.local_shipping_outlined,
-            color: HomeColors.textMuted,
+            color: HomeColors.textMutedOf(context),
           ),
           const SizedBox(width: 16),
           Text(
             '$distance KMs',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
-              color: HomeColors.textPrimary,
+              color: HomeColors.textPrimaryOf(context),
             ),
           ),
           const Spacer(),
@@ -216,18 +216,18 @@ class OrderItem extends StatelessWidget {
             children: [
               Text(
                 amount,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: HomeColors.textPrimary,
+                  color: HomeColors.textPrimaryOf(context),
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 dateTime,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
-                  color: HomeColors.textMuted,
+                  color: HomeColors.textMutedOf(context),
                 ),
               ),
             ],
@@ -289,7 +289,7 @@ class OrderItemCard extends StatelessWidget {
         'ETB ${double.tryParse(order.totalAmount)?.toStringAsFixed(2) ?? order.totalAmount}';
 
     return Material(
-      color: HomeColors.surface,
+      color: HomeColors.surfaceOf(context),
       borderRadius: BorderRadius.circular(AppColors.radiusLG),
       child: InkWell(
         onTap: onTap,
@@ -298,7 +298,7 @@ class OrderItemCard extends StatelessWidget {
           padding: const EdgeInsets.all(AppColors.spaceMD),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppColors.radiusLG),
-            border: Border.all(color: HomeColors.border),
+            border: Border.all(color: HomeColors.borderOf(context)),
           ),
           child: Row(
             children: [
@@ -322,17 +322,17 @@ class OrderItemCard extends StatelessWidget {
                   children: [
                     Text(
                       '#${order.orderNumber}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 13,
-                        color: HomeColors.textPrimary,
+                        color: HomeColors.textPrimaryOf(context),
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       order.vendor.name,
-                      style: const TextStyle(
-                        color: HomeColors.textSecondary,
+                      style: TextStyle(
+                        color: HomeColors.textSecondaryOf(context),
                         fontSize: 12,
                       ),
                       maxLines: 1,

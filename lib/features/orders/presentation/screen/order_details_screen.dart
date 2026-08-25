@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/theme/system_ui_style.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import '../../bloc/orders_bloc.dart';
 import '../../data/models/order_model.dart';
@@ -27,23 +28,23 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   }
 
   ThemeData _homeTheme(BuildContext context) {
-    final base = HomeColors.darkTheme(Theme.of(context));
+    final base = HomeColors.themeFor(context);
     return base.copyWith(
       cardTheme: CardThemeData(
-        color: HomeColors.surface,
+        color: HomeColors.surfaceOf(context),
         elevation: 0,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppColors.radiusLG),
-          side: const BorderSide(color: HomeColors.border),
+          side: BorderSide(color: HomeColors.borderOf(context)),
         ),
       ),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: HomeColors.background,
-        foregroundColor: HomeColors.textPrimary,
+      appBarTheme: AppBarTheme(
+        backgroundColor: HomeColors.backgroundOf(context),
+        foregroundColor: HomeColors.textPrimaryOf(context),
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        iconTheme: IconThemeData(color: HomeColors.textPrimary),
+        iconTheme: IconThemeData(color: HomeColors.textPrimaryOf(context)),
       ),
     );
   }
@@ -53,13 +54,9 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     return Theme(
       data: _homeTheme(context),
       child: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: const SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent,
-          statusBarIconBrightness: Brightness.light,
-          statusBarBrightness: Brightness.dark,
-        ),
+        value: systemUiOverlayFor(context),
         child: Scaffold(
-          backgroundColor: HomeColors.background,
+          backgroundColor: HomeColors.backgroundOf(context),
           body: BlocConsumer<OrdersBloc, OrdersState>(
             listener: (context, state) {
               if (state is OrdersError) {
@@ -105,7 +102,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 return _buildErrorState(context, state.message);
               }
 
-              return const Center(
+              return Center(
                 child: CircularProgressIndicator(color: HomeColors.violet),
               );
             },
@@ -116,20 +113,20 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   }
 
   Widget _buildLoadingState(BuildContext context) {
-    const baseColor = HomeColors.surface;
-    const highlightColor = HomeColors.surfaceElevated;
+    final baseColor = HomeColors.surfaceOf(context);
+    final highlightColor = HomeColors.surfaceElevatedOf(context);
 
     return CustomScrollView(
       slivers: [
         SliverAppBar(
           pinned: true,
-          backgroundColor: HomeColors.background,
+          backgroundColor: HomeColors.backgroundOf(context),
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_rounded),
+            icon: Icon(Icons.arrow_back_rounded),
             onPressed: () => Navigator.of(context).pop(),
           ),
         ),
-        const SliverToBoxAdapter(
+        SliverToBoxAdapter(
           child: Padding(
             padding: EdgeInsets.all(16),
             child: _DetailsShimmer(
@@ -151,17 +148,17 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       slivers: [
         SliverAppBar(
           pinned: true,
-          backgroundColor: HomeColors.background,
+          backgroundColor: HomeColors.backgroundOf(context),
           surfaceTintColor: Colors.transparent,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_rounded),
+            icon: Icon(Icons.arrow_back_rounded),
             onPressed: () => Navigator.of(context).pop(),
           ),
           title: Text(
             context.l10n.orderAppBarTitle(order.orderNumber),
-            style: const TextStyle(
-              color: HomeColors.textPrimary,
+            style: TextStyle(
+              color: HomeColors.textPrimaryOf(context),
               fontSize: 18,
               fontWeight: FontWeight.w600,
             ),
@@ -169,7 +166,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
           actions: [
             if (order.canBeCancelled)
               IconButton(
-                icon: const Icon(
+                icon: Icon(
                   Icons.cancel_outlined,
                   color: AppColors.errorColor,
                 ),
@@ -179,7 +176,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
         ),
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.all(AppColors.spaceMD),
+            padding: EdgeInsets.all(AppColors.spaceMD),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -187,26 +184,26 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                   order: order,
                   trackingEstimatedTime: tracking?.estimatedTime,
                 ),
-                const SizedBox(height: AppColors.spaceMD),
+                SizedBox(height: AppColors.spaceMD),
                 if (tracking != null) ...[
                   OrderTrackingCard(tracking: tracking),
-                  const SizedBox(height: AppColors.spaceMD),
+                  SizedBox(height: AppColors.spaceMD),
                 ],
                 OrderTimelineCard(order: order),
-                const SizedBox(height: AppColors.spaceMD),
+                SizedBox(height: AppColors.spaceMD),
                 PackageInfoCard(order: order),
-                const SizedBox(height: AppColors.spaceMD),
+                SizedBox(height: AppColors.spaceMD),
                 DeliveryInfoCard(order: order),
-                const SizedBox(height: AppColors.spaceMD),
+                SizedBox(height: AppColors.spaceMD),
                 PaymentInfoCard(order: order),
-                const SizedBox(height: AppColors.spaceMD),
+                SizedBox(height: AppColors.spaceMD),
                 VendorInfoCard(vendor: order.vendor),
-                const SizedBox(height: AppColors.spaceMD),
+                SizedBox(height: AppColors.spaceMD),
                 OrderItemsCard(items: order.items),
-                const SizedBox(height: AppColors.spaceMD),
+                SizedBox(height: AppColors.spaceMD),
                 OrderSummaryCard(order: order),
                 if (order.isDelivered) ...[
-                  const SizedBox(height: AppColors.spaceMD),
+                  SizedBox(height: AppColors.spaceMD),
                   RateOrderCard(
                     order: order,
                     onRate: (rating, review) {
@@ -220,7 +217,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                     },
                   ),
                 ],
-                const SizedBox(height: 100),
+                SizedBox(height: 100),
               ],
             ),
           ),
@@ -235,26 +232,26 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
+          Icon(
             Icons.wifi_off_rounded,
             size: 48,
-            color: HomeColors.textMuted,
+            color: HomeColors.textMutedOf(context),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           Text(
             l10n.orderDetailsLoadErrorTitle,
-            style: const TextStyle(
-              color: HomeColors.textPrimary,
+            style: TextStyle(
+              color: HomeColors.textPrimaryOf(context),
               fontWeight: FontWeight.w600,
               fontSize: 16,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
+            padding: EdgeInsets.symmetric(horizontal: 32),
             child: Text(
               message,
-              style: const TextStyle(color: HomeColors.textSecondary),
+              style: TextStyle(color: HomeColors.textSecondaryOf(context)),
               textAlign: TextAlign.center,
             ),
           ),

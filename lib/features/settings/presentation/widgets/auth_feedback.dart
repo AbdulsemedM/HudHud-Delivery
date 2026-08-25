@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
 
-/// Floating snackbars matching the always-dark Profile / auth chrome.
+/// Floating snackbars matching Profile / auth chrome in light and dark modes.
 class AuthSnackBar {
   AuthSnackBar._();
 
@@ -20,7 +20,7 @@ class AuthSnackBar {
         behavior: SnackBarBehavior.floating,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        margin: EdgeInsets.fromLTRB(16, 0, 16, 16),
         padding: EdgeInsets.zero,
         duration: duration,
         content: _AuthSnackBarBody(
@@ -87,14 +87,14 @@ class _AuthSnackBarBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      padding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: AuthScreenColors.surface,
+        color: AuthScreenColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AuthScreenColors.surfaceBorder),
+        border: Border.all(color: AuthScreenColors.surfaceBorderOf(context)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.35),
+            color: Colors.black.withValues(alpha: 0.15),
             blurRadius: 16,
             offset: const Offset(0, 6),
           ),
@@ -111,19 +111,19 @@ class _AuthSnackBarBody extends StatelessWidget {
             ),
             child: Icon(icon, color: accent, size: 20),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12),
           Expanded(
             child: Text(
               message,
-              style: const TextStyle(
-                color: AuthScreenColors.textPrimary,
+              style: TextStyle(
+                color: AuthScreenColors.textPrimaryOf(context),
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
             ),
           ),
           if (action != null) ...[
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             TextButton(
               onPressed: () {
                 ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -131,13 +131,13 @@ class _AuthSnackBarBody extends StatelessWidget {
               },
               style: TextButton.styleFrom(
                 foregroundColor: AuthScreenColors.orange,
-                padding: const EdgeInsets.symmetric(horizontal: 8),
+                padding: EdgeInsets.symmetric(horizontal: 8),
                 minimumSize: Size.zero,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
               child: Text(
                 action!.label,
-                style: const TextStyle(fontWeight: FontWeight.w700),
+                style: TextStyle(fontWeight: FontWeight.w700),
               ),
             ),
           ],
@@ -147,7 +147,7 @@ class _AuthSnackBarBody extends StatelessWidget {
   }
 }
 
-/// Dark AlertDialog + bottom sheet helpers for Profile chrome.
+/// AlertDialog + bottom sheet helpers for Profile chrome.
 class AuthModal {
   AuthModal._();
 
@@ -159,10 +159,10 @@ class AuthModal {
     return showDialog<T>(
       context: context,
       barrierDismissible: barrierDismissible,
-      barrierColor: Colors.black.withValues(alpha: 0.72),
+      barrierColor: Colors.black.withValues(alpha: 0.45),
       builder: (dialogContext) {
         return Theme(
-          data: AuthScreenColors.darkTheme(Theme.of(context)),
+          data: AuthScreenColors.themeFor(context),
           child: builder(dialogContext),
         );
       },
@@ -212,18 +212,22 @@ class AuthModal {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: isScrollControlled,
-      barrierColor: Colors.black.withValues(alpha: 0.72),
+      barrierColor: Colors.black.withValues(alpha: 0.45),
       builder: (sheetContext) {
         return Theme(
-          data: AuthScreenColors.darkTheme(Theme.of(context)),
+          data: AuthScreenColors.themeFor(context),
           child: Container(
-            decoration: const BoxDecoration(
-              color: AuthScreenColors.surface,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+            decoration: BoxDecoration(
+              color: AuthScreenColors.surfaceOf(context),
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(22)),
               border: Border(
-                top: BorderSide(color: AuthScreenColors.surfaceBorder),
-                left: BorderSide(color: AuthScreenColors.surfaceBorder),
-                right: BorderSide(color: AuthScreenColors.surfaceBorder),
+                top: BorderSide(
+                    color: AuthScreenColors.surfaceBorderOf(context)),
+                left: BorderSide(
+                    color: AuthScreenColors.surfaceBorderOf(context)),
+                right: BorderSide(
+                    color: AuthScreenColors.surfaceBorderOf(context)),
               ),
             ),
             child: builder(sheetContext),
@@ -249,35 +253,35 @@ class AuthAlertDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Theme(
-      data: AuthScreenColors.darkTheme(Theme.of(context)),
+      data: AuthScreenColors.themeFor(context),
       child: Dialog(
-        backgroundColor: AuthScreenColors.surface,
+        backgroundColor: AuthScreenColors.surfaceOf(context),
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        insetPadding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+        insetPadding: EdgeInsets.symmetric(horizontal: 28, vertical: 24),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(22),
-          side: const BorderSide(color: AuthScreenColors.surfaceBorder),
+          side: BorderSide(color: AuthScreenColors.surfaceBorderOf(context)),
         ),
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 22, 20, 16),
+          padding: EdgeInsets.fromLTRB(20, 22, 20, 16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
                 title,
-                style: const TextStyle(
-                  color: AuthScreenColors.textPrimary,
+                style: TextStyle(
+                  color: AuthScreenColors.textPrimaryOf(context),
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
                 ),
               ),
               if (content != null) ...[
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
                 DefaultTextStyle(
-                  style: const TextStyle(
-                    color: AuthScreenColors.textSecondary,
+                  style: TextStyle(
+                    color: AuthScreenColors.textSecondaryOf(context),
                     fontSize: 14,
                     height: 1.4,
                   ),
@@ -285,12 +289,12 @@ class AuthAlertDialog extends StatelessWidget {
                 ),
               ],
               if (actions.isNotEmpty) ...[
-                const SizedBox(height: 20),
+                SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     for (var i = 0; i < actions.length; i++) ...[
-                      if (i > 0) const SizedBox(width: 8),
+                      if (i > 0) SizedBox(width: 8),
                       actions[i],
                     ],
                   ],
@@ -326,7 +330,7 @@ class AuthDialogAction extends StatelessWidget {
       return TextButton(
         onPressed: enabled ? onPressed : null,
         style: TextButton.styleFrom(
-          foregroundColor: AuthScreenColors.textMuted,
+          foregroundColor: AuthScreenColors.textMutedOf(context),
         ),
         child: Text(label),
       );
@@ -337,7 +341,8 @@ class AuthDialogAction extends StatelessWidget {
       onPressed: enabled ? onPressed : null,
       style: FilledButton.styleFrom(
         backgroundColor: bg,
-        foregroundColor: destructive ? Colors.white : Colors.black,
+        foregroundColor:
+            destructive ? Colors.white : Theme.of(context).colorScheme.onPrimary,
         disabledBackgroundColor: bg.withValues(alpha: 0.35),
         shape: const StadiumBorder(),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),

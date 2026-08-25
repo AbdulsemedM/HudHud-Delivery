@@ -10,6 +10,7 @@ import 'package:hudhud_delivery/features/force_update/presentation/widgets/soft_
 import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
 import 'package:hudhud_delivery/features/login/presentation/screen/phone_enrollment_screen.dart';
 import 'package:hudhud_delivery/features/login/utils/phone_enrollment_gate.dart';
+import 'package:hudhud_delivery/core/theme/system_ui_style.dart';
 import 'package:hudhud_delivery/features/splash/presentation/theme/splash_colors.dart';
 import '../widgets/splash_widget.dart';
 
@@ -154,15 +155,11 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-        statusBarBrightness: Brightness.dark,
-        systemNavigationBarColor: SplashColors.bgOuter,
-        systemNavigationBarIconBrightness: Brightness.light,
+      value: systemUiOverlayFor(context).copyWith(
+        systemNavigationBarColor: SplashColors.bgOuterOf(context),
       ),
       child: Scaffold(
-        backgroundColor: SplashColors.bgDeep,
+        backgroundColor: SplashColors.bgDeepOf(context),
         body: SplashGlowBackground(
           child: SplashIntroContent(
             intro: _introController,

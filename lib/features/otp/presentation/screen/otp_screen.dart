@@ -81,7 +81,7 @@ class _OtpScreenState extends State<OtpScreen>
                       child: IconButton(
                         icon: const Icon(
                           Icons.arrow_back_rounded,
-                          color: Colors.white,
+                          color: AppColors.lightOnPrimary,
                         ),
                         onPressed: () => Navigator.of(context).pop(),
                       ),

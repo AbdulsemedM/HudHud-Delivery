@@ -21,10 +21,10 @@ class WalletHeader extends StatelessWidget {
               width: 2,
             ),
           ),
-          child: const CircleAvatar(
+          child: CircleAvatar(
             radius: 22,
-            backgroundColor: AuthScreenColors.surfaceBorder,
-            child: Icon(
+            backgroundColor: AuthScreenColors.surfaceBorderOf(context),
+            child: const Icon(
               Icons.account_balance_wallet_outlined,
               color: AuthScreenColors.orange,
             ),
@@ -34,14 +34,14 @@ class WalletHeader extends StatelessWidget {
           width: 44,
           height: 44,
           decoration: BoxDecoration(
-            color: AuthScreenColors.surface,
+            color: AuthScreenColors.surfaceOf(context),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AuthScreenColors.surfaceBorder),
+            border: Border.all(color: AuthScreenColors.surfaceBorderOf(context)),
           ),
           child: IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.notifications_outlined,
-              color: AuthScreenColors.textPrimary,
+              color: AuthScreenColors.textPrimaryOf(context),
             ),
             onPressed: () {},
           ),
@@ -66,7 +66,7 @@ class BalanceCard extends StatelessWidget {
     final l10n = context.l10n;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppColors.spaceLG),
+      padding: EdgeInsets.all(AppColors.spaceLG),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
@@ -86,10 +86,10 @@ class BalanceCard extends StatelessWidget {
               fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Text(
             balance,
-            style: const TextStyle(
+            style: TextStyle(
               color: Colors.white,
               fontSize: 36,
               fontWeight: FontWeight.w700,
@@ -97,7 +97,7 @@ class BalanceCard extends StatelessWidget {
             ),
           ),
           if (bottomActions != null) ...[
-            const SizedBox(height: AppColors.spaceLG),
+            SizedBox(height: AppColors.spaceLG),
             bottomActions!,
           ],
         ],
@@ -136,7 +136,7 @@ class WalletActionButton extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
           Text(
             label,
             style: TextStyle(
@@ -204,7 +204,7 @@ class WalletSelectorChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(right: 8),
+      padding: EdgeInsets.only(right: 8),
       child: FilterChip(
         label: Text(label),
         selected: selected,
@@ -213,14 +213,16 @@ class WalletSelectorChip extends StatelessWidget {
         labelStyle: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w600,
-          color: selected ? Colors.black : AuthScreenColors.textSecondary,
+          color: selected
+              ? Theme.of(context).colorScheme.onPrimary
+              : AuthScreenColors.textSecondaryOf(context),
         ),
-        backgroundColor: AuthScreenColors.surface,
+        backgroundColor: AuthScreenColors.surfaceOf(context),
         selectedColor: AuthScreenColors.orange,
         side: BorderSide(
           color: selected
               ? AuthScreenColors.orange
-              : AuthScreenColors.surfaceBorder,
+              : AuthScreenColors.surfaceBorderOf(context),
         ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppColors.radiusFull),

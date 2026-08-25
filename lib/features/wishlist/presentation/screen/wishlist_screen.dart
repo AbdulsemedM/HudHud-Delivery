@@ -115,9 +115,9 @@ class _WishlistScreenState extends State<WishlistScreen> {
               child: Container(
                 width: 40,
                 height: 4,
-                margin: const EdgeInsets.only(bottom: 16),
+                margin: EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
-                  color: AuthScreenColors.surfaceBorder,
+                  color: AuthScreenColors.surfaceBorderOf(context),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -129,12 +129,12 @@ class _WishlistScreenState extends State<WishlistScreen> {
                 hintText: l10n.wishlistNotesHint,
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             FilledButton(
               onPressed: () => Navigator.pop(ctx, true),
               style: FilledButton.styleFrom(
                 backgroundColor: AuthScreenColors.orange,
-                foregroundColor: Colors.black,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 shape: const StadiumBorder(),
               ),
               child: Text(l10n.actionSave),
@@ -163,7 +163,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
     if (_resolvingUser) {
       return ProfileDarkPage(
         title: l10n.settingsWishlist,
-        body: const Center(child: CircularProgressIndicator()),
+        body: Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -172,34 +172,34 @@ class _WishlistScreenState extends State<WishlistScreen> {
         title: l10n.settingsWishlist,
         body: Center(
           child: Padding(
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.all(24),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
+                Icon(
                   Icons.favorite_border,
                   size: 64,
-                  color: AuthScreenColors.textMuted,
+                  color: AuthScreenColors.textMutedOf(context),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
                 Text(
                   l10n.wishlistSignInTitle,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: AuthScreenColors.textPrimary,
+                  style: TextStyle(
+                    color: AuthScreenColors.textPrimaryOf(context),
                     fontWeight: FontWeight.w600,
                     fontSize: 16,
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 Text(
                   l10n.wishlistSignInSubtitle,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: AuthScreenColors.textSecondary,
+                  style: TextStyle(
+                    color: AuthScreenColors.textSecondaryOf(context),
                   ),
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
                 FilledButton(
                   onPressed: () {
                     Navigator.push(
@@ -211,7 +211,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                   },
                   style: FilledButton.styleFrom(
                     backgroundColor: AuthScreenColors.orange,
-                    foregroundColor: Colors.black,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
                   ),
                   child: Text(l10n.actionSignIn),
                 ),
@@ -253,12 +253,12 @@ class _WishlistScreenState extends State<WishlistScreen> {
         title: l10n.settingsWishlist,
         actions: [
           IconButton(
-            icon: const Icon(Icons.trending_down),
+            icon: Icon(Icons.trending_down),
             tooltip: l10n.wishlistPriceDropsTitle,
             onPressed: _checkPriceDrops,
           ),
           IconButton(
-            icon: const Icon(Icons.share_outlined),
+            icon: Icon(Icons.share_outlined),
             tooltip: l10n.wishlistShareTitle,
             onPressed: _showShareDialog,
           ),
@@ -266,32 +266,32 @@ class _WishlistScreenState extends State<WishlistScreen> {
         body: BlocBuilder<WishlistBloc, WishlistState>(
           builder: (context, state) {
             if (state is WishlistLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return Center(child: CircularProgressIndicator());
             }
             if (state is WishlistError) {
               return Center(
                 child: Padding(
-                  padding: const EdgeInsets.all(24),
+                  padding: EdgeInsets.all(24),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         l10n.wishlistLoadError,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: AuthScreenColors.textPrimary,
+                        style: TextStyle(
+                          color: AuthScreenColors.textPrimaryOf(context),
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8),
                       Text(
                         state.message,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: AuthScreenColors.textSecondary,
+                        style: TextStyle(
+                          color: AuthScreenColors.textSecondaryOf(context),
                           fontSize: 12,
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16),
                       FilledButton(
                         onPressed: () {
                           context.read<WishlistBloc>().add(
@@ -300,7 +300,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                         },
                         style: FilledButton.styleFrom(
                           backgroundColor: AuthScreenColors.orange,
-                          foregroundColor: Colors.black,
+                          foregroundColor: Theme.of(context).colorScheme.onPrimary,
                         ),
                         child: Text(l10n.actionRetry),
                       ),
@@ -310,7 +310,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
               );
             }
             if (state is! WishlistLoaded) {
-              return const SizedBox.shrink();
+              return SizedBox.shrink();
             }
             final items = state.items;
             if (items.isEmpty) {
@@ -323,31 +323,31 @@ class _WishlistScreenState extends State<WishlistScreen> {
                       height: MediaQuery.of(context).size.height * 0.5,
                       child: Center(
                         child: Padding(
-                          padding: const EdgeInsets.all(24),
+                          padding: EdgeInsets.all(24),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.favorite_border,
                                 size: 56,
-                                color: AuthScreenColors.textMuted,
+                                color: AuthScreenColors.textMutedOf(context),
                               ),
-                              const SizedBox(height: 16),
+                              SizedBox(height: 16),
                               Text(
                                 l10n.wishlistEmptyTitle,
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  color: AuthScreenColors.textPrimary,
+                                style: TextStyle(
+                                  color: AuthScreenColors.textPrimaryOf(context),
                                   fontWeight: FontWeight.w600,
                                   fontSize: 16,
                                 ),
                               ),
-                              const SizedBox(height: 8),
+                              SizedBox(height: 8),
                               Text(
                                 l10n.wishlistEmptySubtitle,
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  color: AuthScreenColors.textSecondary,
+                                style: TextStyle(
+                                  color: AuthScreenColors.textSecondaryOf(context),
                                 ),
                               ),
                             ],
@@ -363,18 +363,18 @@ class _WishlistScreenState extends State<WishlistScreen> {
             return RefreshIndicator(
               onRefresh: _onRefresh,
               child: ListView.builder(
-                padding: const EdgeInsets.symmetric(vertical: 8),
+                padding: EdgeInsets.symmetric(vertical: 8),
                 itemCount: items.length,
                 itemBuilder: (context, index) {
                   final item = items[index];
                   final product = item.product;
                   final pid = item.productId;
-                  if (pid <= 0) return const SizedBox.shrink();
+                  if (pid <= 0) return SizedBox.shrink();
 
                   return Material(
-                    color: AuthScreenColors.surface,
+                    color: AuthScreenColors.surfaceOf(context),
                     child: ListTile(
-                      contentPadding: const EdgeInsets.symmetric(
+                      contentPadding: EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 8,
                       ),
@@ -388,41 +388,41 @@ class _WishlistScreenState extends State<WishlistScreen> {
                         product?.name ?? '',
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: AuthScreenColors.textPrimary,
+                        style: TextStyle(
+                          color: AuthScreenColors.textPrimaryOf(context),
                           fontWeight: FontWeight.w600,
                           fontSize: 14,
                         ),
                       ),
                       subtitle: Padding(
-                        padding: const EdgeInsets.only(top: 4),
+                        padding: EdgeInsets.only(top: 4),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               _priceLabel(product),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: AuthScreenColors.orange,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
                             if (item.notes != null &&
                                 item.notes!.trim().isNotEmpty) ...[
-                              const SizedBox(height: 4),
+                              SizedBox(height: 4),
                               Text(
                                 item.notes!,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  color: AuthScreenColors.textSecondary,
+                                style: TextStyle(
+                                  color: AuthScreenColors.textSecondaryOf(context),
                                   fontSize: 12,
                                 ),
                               ),
                             ],
                             if (item.priceDrop?.hasDropped == true) ...[
-                              const SizedBox(height: 4),
+                              SizedBox(height: 4),
                               Container(
-                                padding: const EdgeInsets.symmetric(
+                                padding: EdgeInsets.symmetric(
                                   horizontal: 8,
                                   vertical: 2,
                                 ),
@@ -441,11 +441,11 @@ class _WishlistScreenState extends State<WishlistScreen> {
                               ),
                             ],
                             if (product != null && !product.canOrder) ...[
-                              const SizedBox(height: 4),
-                              const Text(
+                              SizedBox(height: 4),
+                              Text(
                                 'Unavailable',
                                 style: TextStyle(
-                                  color: AuthScreenColors.textMuted,
+                                  color: AuthScreenColors.textMutedOf(context),
                                   fontWeight: FontWeight.w600,
                                   fontSize: 11,
                                 ),
@@ -458,17 +458,17 @@ class _WishlistScreenState extends State<WishlistScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                            icon: const Icon(
+                            icon: Icon(
                               Icons.note_alt_outlined,
-                              color: AuthScreenColors.textMuted,
+                              color: AuthScreenColors.textMutedOf(context),
                             ),
                             tooltip: l10n.wishlistNotesHint,
                             onPressed: () => _showNotesSheet(item),
                           ),
                           IconButton(
-                            icon: const Icon(
+                            icon: Icon(
                               Icons.delete_outline,
-                              color: AuthScreenColors.textMuted,
+                              color: AuthScreenColors.textMutedOf(context),
                             ),
                             tooltip: l10n.actionDelete,
                             onPressed: () {
@@ -515,10 +515,10 @@ class _WishlistProductThumb extends StatelessWidget {
       return Container(
         width: size,
         height: size,
-        color: AuthScreenColors.surfaceBorder,
-        child: const Icon(
+        color: AuthScreenColors.surfaceBorderOf(context),
+        child: Icon(
           Icons.image_not_supported_outlined,
-          color: AuthScreenColors.textMuted,
+          color: AuthScreenColors.textMutedOf(context),
         ),
       );
     }
@@ -531,10 +531,10 @@ class _WishlistProductThumb extends StatelessWidget {
         errorBuilder: (_, __, ___) => Container(
           width: size,
           height: size,
-          color: AuthScreenColors.surfaceBorder,
-          child: const Icon(
+          color: AuthScreenColors.surfaceBorderOf(context),
+          child: Icon(
             Icons.broken_image_outlined,
-            color: AuthScreenColors.textMuted,
+            color: AuthScreenColors.textMutedOf(context),
           ),
         ),
       );
@@ -547,10 +547,10 @@ class _WishlistProductThumb extends StatelessWidget {
       errorBuilder: (_, __, ___) => Container(
         width: size,
         height: size,
-        color: AuthScreenColors.surfaceBorder,
-        child: const Icon(
+        color: AuthScreenColors.surfaceBorderOf(context),
+        child: Icon(
           Icons.broken_image_outlined,
-          color: AuthScreenColors.textMuted,
+          color: AuthScreenColors.textMutedOf(context),
         ),
       ),
     );

@@ -92,20 +92,20 @@ class _EmergencyContactFormScreenState
   InputDecoration _fieldDecoration(String label) {
     return InputDecoration(
       labelText: label,
-      labelStyle: const TextStyle(color: AuthScreenColors.textSecondary),
+      labelStyle: TextStyle(color: AuthScreenColors.textSecondaryOf(context)),
       filled: true,
-      fillColor: AuthScreenColors.surface,
+      fillColor: AuthScreenColors.surfaceOf(context),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: AuthScreenColors.surfaceBorder),
+        borderSide: BorderSide(color: AuthScreenColors.surfaceBorderOf(context)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: AuthScreenColors.surfaceBorder),
+        borderSide: BorderSide(color: AuthScreenColors.surfaceBorderOf(context)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: AuthScreenColors.orange, width: 1.5),
+        borderSide: BorderSide(color: AuthScreenColors.orange, width: 1.5),
       ),
     );
   }
@@ -137,16 +137,16 @@ class _EmergencyContactFormScreenState
             return Form(
               key: _formKey,
               child: ListView(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(16),
                 children: [
                   TextFormField(
                     controller: _nameController,
-                    style: const TextStyle(color: AuthScreenColors.textPrimary),
+                    style: TextStyle(color: AuthScreenColors.textPrimaryOf(context)),
                     decoration: _fieldDecoration(l10n.sosName),
                     validator: (v) =>
                         v == null || v.trim().isEmpty ? 'Required' : null,
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   PhoneNumberField(
                     countryCode: _countryCode,
                     numberController: _phoneController,
@@ -160,24 +160,24 @@ class _EmergencyContactFormScreenState
                     validator: (v) =>
                         v == null || v.trim().isEmpty ? 'Required' : null,
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
-                    style: const TextStyle(color: AuthScreenColors.textPrimary),
+                    style: TextStyle(color: AuthScreenColors.textPrimaryOf(context)),
                     decoration: _fieldDecoration(l10n.sosEmail),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   TextFormField(
                     controller: _relationshipController,
-                    style: const TextStyle(color: AuthScreenColors.textPrimary),
+                    style: TextStyle(color: AuthScreenColors.textPrimaryOf(context)),
                     decoration: _fieldDecoration(l10n.sosRelationship),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   SwitchListTile(
                     title: Text(
                       l10n.sosPrimaryContact,
-                      style: const TextStyle(color: AuthScreenColors.textPrimary),
+                      style: TextStyle(color: AuthScreenColors.textPrimaryOf(context)),
                     ),
                     activeThumbColor: AuthScreenColors.orange,
                     value: _isPrimary,
@@ -190,7 +190,7 @@ class _EmergencyContactFormScreenState
                     onPressed: isSubmitting ? null : _submit,
                     style: FilledButton.styleFrom(
                       backgroundColor: AuthScreenColors.orange,
-                      foregroundColor: Colors.black,
+                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
                     child: isSubmitting

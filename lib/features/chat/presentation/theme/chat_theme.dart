@@ -14,6 +14,8 @@ class ChatTheme {
   final TextStyle timestampStyle;
   final TextStyle dateHeaderStyle;
 
+  final Color sentTextColor;
+
   const ChatTheme({
     required this.isDark,
     required this.sentBubbleStart,
@@ -23,6 +25,7 @@ class ChatTheme {
     required this.composerBackground,
     required this.timestampColor,
     required this.unreadBadge,
+    required this.sentTextColor,
     required this.messageTextStyle,
     required this.timestampStyle,
     required this.dateHeaderStyle,
@@ -36,11 +39,12 @@ class ChatTheme {
         isDark: true,
         sentBubbleStart: AppColors.primaryColor.withValues(alpha: 0.85),
         sentBubbleEnd: AppColors.primaryDarkColor,
-        receivedBubble: const Color(0xFF2A2A2A),
-        wallpaper: const Color(0xFF0E0E0E),
-        composerBackground: const Color(0xFF151515).withValues(alpha: 0.92),
+        receivedBubble: AppColors.darkSurfaceVariant,
+        wallpaper: AppColors.darkBackground,
+        composerBackground: AppColors.darkCard.withValues(alpha: 0.92),
         timestampColor: AppColors.darkTextSecondary,
         unreadBadge: AppColors.secondaryColor,
+        sentTextColor: AppColors.lightOnPrimary,
         messageTextStyle: TextStyle(
           fontSize: 15.5,
           height: 1.35,
@@ -61,11 +65,12 @@ class ChatTheme {
       isDark: false,
       sentBubbleStart: AppColors.primaryColor,
       sentBubbleEnd: AppColors.primaryLightColor,
-      receivedBubble: const Color(0xFFF0F2F5),
+      receivedBubble: AppColors.lightInputFill,
       wallpaper: AppColors.lightBackground,
       composerBackground: AppColors.lightSurface.withValues(alpha: 0.95),
       timestampColor: AppColors.lightTextSecondary,
       unreadBadge: AppColors.secondaryColor,
+      sentTextColor: AppColors.lightOnPrimary,
       messageTextStyle: const TextStyle(
         fontSize: 15.5,
         height: 1.35,

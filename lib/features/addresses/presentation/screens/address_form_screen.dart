@@ -133,21 +133,21 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
   InputDecoration _decoration(String label) {
     return InputDecoration(
       labelText: label,
-      labelStyle: const TextStyle(color: AuthScreenColors.textSecondary),
+      labelStyle: TextStyle(color: AuthScreenColors.textSecondaryOf(context)),
       filled: true,
-      fillColor: AuthScreenColors.surface,
+      fillColor: AuthScreenColors.surfaceOf(context),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: AuthScreenColors.surfaceBorder),
+        borderSide: BorderSide(color: AuthScreenColors.surfaceBorderOf(context)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: AuthScreenColors.surfaceBorder),
+        borderSide: BorderSide(color: AuthScreenColors.surfaceBorderOf(context)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
         borderSide:
-            const BorderSide(color: AuthScreenColors.orange, width: 1.5),
+            BorderSide(color: AuthScreenColors.orange, width: 1.5),
       ),
     );
   }
@@ -181,18 +181,18 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
             return Form(
               key: _formKey,
               child: ListView(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(16),
                 children: [
                   OutlinedButton.icon(
                     onPressed: submitting ? null : _pickOnMap,
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AuthScreenColors.orange,
-                      side: const BorderSide(color: AuthScreenColors.orange),
+                      side: BorderSide(color: AuthScreenColors.orange),
                     ),
-                    icon: const Icon(Icons.map_outlined),
+                    icon: Icon(Icons.map_outlined),
                     label: Text(l10n.addressFormPickOnMap),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   _field(_line1, l10n.addressFormLine1, required: true),
                   _field(_line2, l10n.addressFormLine2),
                   _field(_city, l10n.addressFormCity, required: true),
@@ -200,11 +200,11 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
                   _field(_country, l10n.addressFormCountry, required: true),
                   _field(_label, l10n.addressFormLabel),
                   _field(_landmark, l10n.addressFormLandmark),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   DropdownButtonFormField<String>(
                     initialValue: _addressType,
-                    dropdownColor: AuthScreenColors.surface,
-                    style: const TextStyle(color: AuthScreenColors.textPrimary),
+                    dropdownColor: AuthScreenColors.surfaceOf(context),
+                    style: TextStyle(color: AuthScreenColors.textPrimaryOf(context)),
                     decoration: _decoration(l10n.addressFormType),
                     items: [
                       DropdownMenuItem(
@@ -229,7 +229,7 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
                   SwitchListTile(
                     title: Text(
                       l10n.addressFormSetDefault,
-                      style: const TextStyle(color: AuthScreenColors.textPrimary),
+                      style: TextStyle(color: AuthScreenColors.textPrimaryOf(context)),
                     ),
                     activeThumbColor: AuthScreenColors.orange,
                     value: _isDefault,
@@ -237,21 +237,21 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
                         ? null
                         : (v) => setState(() => _isDefault = v),
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
                   FilledButton(
                     style: FilledButton.styleFrom(
                       backgroundColor: AuthScreenColors.orange,
-                      foregroundColor: Colors.black,
+                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
                       minimumSize: const Size.fromHeight(48),
                     ),
                     onPressed: submitting ? null : _submit,
                     child: submitting
-                        ? const SizedBox(
+                        ? SizedBox(
                             height: 22,
                             width: 22,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: Colors.black,
+                              color: Theme.of(context).colorScheme.onPrimary,
                             ),
                           )
                         : Text(l10n.actionSave),
@@ -271,10 +271,10 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
     bool required = false,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.only(bottom: 12),
       child: TextFormField(
         controller: controller,
-        style: const TextStyle(color: AuthScreenColors.textPrimary),
+        style: TextStyle(color: AuthScreenColors.textPrimaryOf(context)),
         decoration: _decoration(label),
         validator: required
             ? (v) {

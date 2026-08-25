@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../home/presentation/theme/home_colors.dart';
 import '../../model/categories_products_model.dart';
 import '../../../wishlist/presentation/widgets/wishlist_toggle_button.dart';
 
@@ -310,13 +311,14 @@ class ProductDetailsModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: HomeColors.surfaceOf(context),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
+            color: colorScheme.onSurface.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, -5),
           ),
@@ -676,10 +678,10 @@ class ProductDetailsModal extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Close',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: colorScheme.onSecondary,
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),

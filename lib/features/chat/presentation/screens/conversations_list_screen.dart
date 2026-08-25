@@ -133,13 +133,13 @@ class _ConversationsListBodyState extends State<_ConversationsListBody>
             children: [
               Text(
                 l10n.chatTitle,
-                style: const TextStyle(
-                  color: AuthScreenColors.textPrimary,
+                style: TextStyle(
+                  color: AuthScreenColors.textPrimaryOf(context),
                   fontWeight: FontWeight.w600,
                 ),
               ),
               if (state is ConversationsLoaded && state.totalUnread > 0) ...[
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 ChatUnreadBadge(count: state.totalUnread),
               ],
             ],
@@ -177,39 +177,39 @@ class _ConversationsListBodyState extends State<_ConversationsListBody>
               }
             },
             backgroundColor: AuthScreenColors.orange,
-            foregroundColor: Colors.black,
-            icon: const Icon(Icons.support_agent_rounded),
+            foregroundColor: Theme.of(context).colorScheme.onPrimary,
+            icon: Icon(Icons.support_agent_rounded),
             label: Text(l10n.chatNewSupport),
           ),
           body: Column(
             children: [
               if (_showSearch)
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
                   child: TextField(
                     controller: _searchController,
-                    style: const TextStyle(color: AuthScreenColors.textPrimary),
+                    style: TextStyle(color: AuthScreenColors.textPrimaryOf(context)),
                     decoration: InputDecoration(
                       hintText: l10n.chatSearchHint,
-                      prefixIcon: const Icon(
+                      prefixIcon: Icon(
                         Icons.search,
-                        color: AuthScreenColors.textMuted,
+                        color: AuthScreenColors.textMutedOf(context),
                       ),
                       filled: true,
-                      fillColor: AuthScreenColors.surface,
+                      fillColor: AuthScreenColors.surfaceOf(context),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                          color: AuthScreenColors.surfaceBorder,
+                        borderSide: BorderSide(
+                          color: AuthScreenColors.surfaceBorderOf(context),
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
+                        borderSide: BorderSide(
                           color: AuthScreenColors.orange,
                           width: 1.5,
                         ),
@@ -243,16 +243,16 @@ class _ConversationsListBodyState extends State<_ConversationsListBody>
           children: [
             Text(
               state.message,
-              style: const TextStyle(color: AuthScreenColors.textPrimary),
+              style: TextStyle(color: AuthScreenColors.textPrimaryOf(context)),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             FilledButton(
               onPressed: () => context
                   .read<ConversationsBloc>()
                   .add(const LoadConversationsEvent()),
               style: FilledButton.styleFrom(
                 backgroundColor: AuthScreenColors.orange,
-                foregroundColor: Colors.black,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
               ),
               child: Text(l10n.actionTryAgain),
             ),
@@ -297,10 +297,10 @@ class _ConversationsListBodyState extends State<_ConversationsListBody>
         },
         child: ListView.separated(
           itemCount: state.filtered.length,
-          separatorBuilder: (_, __) => const Divider(
+          separatorBuilder: (_, __) => Divider(
             height: 1,
             indent: 86,
-            color: AuthScreenColors.surfaceBorder,
+            color: AuthScreenColors.surfaceBorderOf(context),
           ),
           itemBuilder: (context, index) {
             final c = state.filtered[index];
@@ -320,7 +320,7 @@ class _ConversationsListBodyState extends State<_ConversationsListBody>
         ),
       );
     }
-    return const SizedBox.shrink();
+    return SizedBox.shrink();
   }
 }
 
@@ -328,22 +328,22 @@ class _ShimmerList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: AuthScreenColors.surface,
-      highlightColor: AuthScreenColors.surfaceBorder,
+      baseColor: AuthScreenColors.surfaceOf(context),
+      highlightColor: AuthScreenColors.surfaceBorderOf(context),
       child: ListView.builder(
         itemCount: 8,
-        itemBuilder: (_, __) => const ListTile(
+        itemBuilder: (_, __) => ListTile(
           leading: CircleAvatar(
             radius: 28,
-            backgroundColor: AuthScreenColors.surfaceBorder,
+            backgroundColor: AuthScreenColors.surfaceBorderOf(context),
           ),
           title: SizedBox(
             height: 14,
-            child: ColoredBox(color: AuthScreenColors.surfaceBorder),
+            child: ColoredBox(color: AuthScreenColors.surfaceBorderOf(context)),
           ),
           subtitle: SizedBox(
             height: 12,
-            child: ColoredBox(color: AuthScreenColors.surfaceBorder),
+            child: ColoredBox(color: AuthScreenColors.surfaceBorderOf(context)),
           ),
         ),
       ),

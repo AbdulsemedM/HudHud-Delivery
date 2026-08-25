@@ -106,9 +106,9 @@ class _SignupScreenState extends State<SignupScreen> {
                     const SizedBox(height: 20),
                     Row(
                       children: [
-                        const Expanded(
+                        Expanded(
                           child: Divider(
-                            color: AuthScreenColors.textSecondary,
+                            color: AuthScreenColors.textSecondaryOf(context),
                             thickness: 0.6,
                           ),
                         ),
@@ -116,15 +116,15 @@ class _SignupScreenState extends State<SignupScreen> {
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                           child: Text(
                             l10n.loginOrContinueWith,
-                            style: const TextStyle(
-                              color: AuthScreenColors.textSecondary,
+                            style: TextStyle(
+                              color: AuthScreenColors.textSecondaryOf(context),
                               fontSize: 13,
                             ),
                           ),
                         ),
-                        const Expanded(
+                        Expanded(
                           child: Divider(
-                            color: AuthScreenColors.textSecondary,
+                            color: AuthScreenColors.textSecondaryOf(context),
                             thickness: 0.6,
                           ),
                         ),
@@ -152,17 +152,17 @@ class _SignupTopBar extends StatelessWidget {
     return Row(
       children: [
         Material(
-          color: AuthScreenColors.surface,
+          color: AuthScreenColors.surfaceOf(context),
           borderRadius: BorderRadius.circular(12),
           child: InkWell(
             onTap: () => Navigator.of(context).maybePop(),
             borderRadius: BorderRadius.circular(12),
-            child: const SizedBox(
+            child: SizedBox(
               width: 44,
               height: 44,
               child: Icon(
                 Icons.chevron_left_rounded,
-                color: AuthScreenColors.textPrimary,
+                color: AuthScreenColors.textPrimaryOf(context),
                 size: 28,
               ),
             ),
@@ -228,8 +228,8 @@ class _SignInPrompt extends StatelessWidget {
       onTap: onPressed,
       child: Text.rich(
         TextSpan(
-          style: const TextStyle(
-            color: AuthScreenColors.textMuted,
+          style: TextStyle(
+            color: AuthScreenColors.textMutedOf(context),
             fontSize: 14,
             height: 1.35,
           ),
@@ -267,14 +267,14 @@ class _GoogleSignInButton extends StatelessWidget {
                 ? null
                 : () => context.read<LoginBloc>().add(GoogleLoginRequested()),
             style: OutlinedButton.styleFrom(
-              side: const BorderSide(
-                color: AuthScreenColors.surfaceBorder,
+              side: BorderSide(
+                color: AuthScreenColors.surfaceBorderOf(context),
                 width: 1.25,
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
               ),
-              backgroundColor: AuthScreenColors.surface,
+              backgroundColor: AuthScreenColors.surfaceOf(context),
             ),
             child: loading
                 ? const SizedBox(
@@ -294,18 +294,18 @@ class _GoogleSignInButton extends StatelessWidget {
                         height: 20,
                         fit: BoxFit.contain,
                         errorBuilder: (context, error, stackTrace) {
-                          return const Icon(
+                          return Icon(
                             Icons.g_mobiledata,
                             size: 22,
-                            color: AuthScreenColors.textMuted,
+                            color: AuthScreenColors.textMutedOf(context),
                           );
                         },
                       ),
                       const SizedBox(width: 12),
                       Text(
                         l10n.continueWithGoogle,
-                        style: const TextStyle(
-                          color: AuthScreenColors.textPrimary,
+                        style: TextStyle(
+                          color: AuthScreenColors.textPrimaryOf(context),
                           fontSize: 15,
                           fontWeight: FontWeight.w500,
                         ),

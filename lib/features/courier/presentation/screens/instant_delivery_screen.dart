@@ -390,7 +390,7 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
           const initialSheetSize = 0.5;
 
           return Scaffold(
-            backgroundColor: HomeColors.background,
+            backgroundColor: HomeColors.backgroundOf(context),
             body: Stack(
               children: [
                 Positioned.fill(
@@ -401,7 +401,7 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                   left: 16,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: HomeColors.surfaceElevated,
+                      color: HomeColors.surfaceElevatedOf(context),
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
@@ -411,8 +411,8 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                       ],
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.arrow_back,
-                          color: HomeColors.textPrimary),
+                      icon: Icon(Icons.arrow_back,
+                          color: HomeColors.textPrimaryOf(context)),
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ),
@@ -423,7 +423,7 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                   child: FloatingActionButton(
                     heroTag: 'instant_delivery_my_location',
                     mini: true,
-                    backgroundColor: HomeColors.surfaceElevated,
+                    backgroundColor: HomeColors.surfaceElevatedOf(context),
                     onPressed: () async {
                       await _getCurrentLocation();
                       if (_pickupPosition != null && mounted) {
@@ -438,7 +438,7 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                     child: Icon(
                       Icons.my_location,
                       color: _isLoadingLocation
-                          ? HomeColors.textMuted
+                          ? HomeColors.textMutedOf(context)
                           : HomeColors.violet,
                     ),
                   ),
@@ -463,8 +463,8 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                     final bottomInset = MediaQuery.paddingOf(context).bottom;
 
                     return Container(
-                      decoration: const BoxDecoration(
-                        color: HomeColors.surface,
+                      decoration: BoxDecoration(
+                        color: HomeColors.surfaceOf(context),
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(AppColors.radiusLG),
                           topRight: Radius.circular(AppColors.radiusLG),
@@ -477,7 +477,7 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                             width: 40,
                             height: 4,
                             decoration: BoxDecoration(
-                              color: HomeColors.border,
+                              color: HomeColors.borderOf(context),
                               borderRadius: BorderRadius.circular(2),
                             ),
                           ),
@@ -490,13 +490,13 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                                   l10n.sendAPackageTitle,
                                   style: theme.textTheme.titleLarge?.copyWith(
                                         fontWeight: FontWeight.w800,
-                                        color: HomeColors.textPrimary,
+                                        color: HomeColors.textPrimaryOf(context),
                                         letterSpacing: 0.4,
                                       ) ??
-                                      const TextStyle(
+                                      TextStyle(
                                         fontSize: 22,
                                         fontWeight: FontWeight.w800,
-                                        color: HomeColors.textPrimary,
+                                        color: HomeColors.textPrimaryOf(context),
                                       ),
                                 ),
                                 const SizedBox(height: 8),
@@ -603,11 +603,11 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                                     : null,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: HomeColors.violet,
-                                  foregroundColor: Colors.white,
+                                  foregroundColor: Theme.of(context).colorScheme.onSecondary,
                                   disabledBackgroundColor:
-                                      HomeColors.surfaceElevated,
+                                      HomeColors.surfaceElevatedOf(context),
                                   disabledForegroundColor:
-                                      HomeColors.textMuted,
+                                      HomeColors.textMutedOf(context),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(
                                       AppColors.radiusLG,
@@ -756,8 +756,8 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
   Widget _buildMapOrFallback(BuildContext context) {
     final theme = Theme.of(context);
     if (_hasGoogleMapsApiKey == null) {
-      return const ColoredBox(
-        color: HomeColors.background,
+      return ColoredBox(
+        color: HomeColors.backgroundOf(context),
         child: Center(
           child: CircularProgressIndicator(color: HomeColors.violet),
         ),
@@ -765,7 +765,7 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
     }
     if (_hasGoogleMapsApiKey == false) {
       return ColoredBox(
-        color: HomeColors.background,
+        color: HomeColors.backgroundOf(context),
         child: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -773,7 +773,7 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
               context.l10n.taxiGoogleMapsNotConfigured,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: HomeColors.textPrimary,
+                color: HomeColors.textPrimaryOf(context),
               ),
             ),
           ),
@@ -844,7 +844,7 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
             right: 12,
             bottom: 12,
             child: Material(
-              color: HomeColors.surfaceElevated.withValues(alpha: 0.92),
+              color: HomeColors.surfaceElevatedOf(context).withValues(alpha: 0.92),
               borderRadius: BorderRadius.circular(8),
               child: Padding(
                 padding: const EdgeInsets.all(8),
@@ -853,7 +853,7 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: HomeColors.textMuted,
+                    color: HomeColors.textMutedOf(context),
                   ),
                 ),
               ),

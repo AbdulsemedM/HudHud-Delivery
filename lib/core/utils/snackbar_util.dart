@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
 import 'package:hudhud_delivery/features/settings/presentation/widgets/auth_feedback.dart';
 
@@ -13,7 +14,7 @@ class SnackbarUtil {
       context,
       message,
       icon: Icons.check_circle_rounded,
-      accent: const Color(0xFF4CAF50),
+      accent: AppColors.successColor,
       duration: duration,
       action: action,
     );
@@ -29,7 +30,7 @@ class SnackbarUtil {
       context,
       message,
       icon: Icons.error_outline_rounded,
-      accent: const Color(0xFFEF5350),
+      accent: AppColors.errorLightColor,
       duration: duration,
       action: action,
     );
@@ -136,9 +137,9 @@ class SnackbarUtil {
         content: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
-            color: backgroundColor ?? AuthScreenColors.surface,
+            color: AuthScreenColors.surfaceOf(context),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AuthScreenColors.surfaceBorder),
+            border: Border.all(color: AuthScreenColors.surfaceBorderOf(context)),
           ),
           child: content,
         ),

@@ -27,7 +27,7 @@ class SosTriggerButton extends StatelessWidget {
     return FilledButton.icon(
       style: FilledButton.styleFrom(
         backgroundColor: Theme.of(context).colorScheme.error,
-        foregroundColor: Colors.white,
+        foregroundColor: Theme.of(context).colorScheme.onError,
       ),
       onPressed: () => showSosTriggerDialog(context, orderId: orderId),
       icon: const Icon(Icons.sos),

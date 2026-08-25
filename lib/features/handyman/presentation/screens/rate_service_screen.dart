@@ -42,7 +42,7 @@ class _RateServiceScreenState extends State<RateServiceScreen> {
 
   Color _cardBorder(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return isDark ? AppColors.darkBorder : const Color(0xFFEEEEEE);
+    return isDark ? AppColors.darkBorder : AppColors.lightBorder;
   }
 
   InputDecoration _inputDecoration(BuildContext context, {

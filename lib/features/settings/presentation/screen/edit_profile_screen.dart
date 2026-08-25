@@ -108,12 +108,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         child: Wrap(
           children: [
             ListTile(
-              leading: const Icon(Icons.photo_library_outlined),
+              leading: Icon(Icons.photo_library_outlined),
             title: Text(ctx.l10n.gallery),
               onTap: () => Navigator.pop(ctx, ImageSource.gallery),
             ),
             ListTile(
-              leading: const Icon(Icons.camera_alt_outlined),
+              leading: Icon(Icons.camera_alt_outlined),
               title: Text(ctx.l10n.camera),
               onTap: () => Navigator.pop(ctx, ImageSource.camera),
             ),
@@ -215,9 +215,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return ProfileDarkPage(
       title: l10n.profileMenuAccountSettings,
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(16),
               child: Column(
                 children: [
                   Center(
@@ -229,25 +229,25 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       onImageTap: _pickAvatar,
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  SizedBox(height: 32),
                   ProfileTextField(
                     label: 'First Name',
                     controller: _firstNameController,
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   ProfileTextField(
                     label: 'Last Name',
                     controller: _lastNameController,
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Mobile Number',
                         style: TextStyle(
                           fontSize: 14,
-                          color: AuthScreenColors.textSecondary,
+                          color: AuthScreenColors.textSecondaryOf(context),
                         ),
                       ),
                       const SizedBox(height: 8),

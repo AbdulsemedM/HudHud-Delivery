@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
+import 'package:hudhud_delivery/core/theme/system_ui_style.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/orders/data/models/order_model.dart';
 import 'package:hudhud_delivery/features/sos/presentation/widgets/sos_trigger_button.dart';
@@ -40,7 +41,7 @@ class OrderDetailsSliverHeader extends StatelessWidget {
       scrolledUnderElevation: 2,
       backgroundColor: theme.colorScheme.surface,
       surfaceTintColor: Colors.transparent,
-      systemOverlayStyle: SystemUiOverlayStyle.light,
+      systemOverlayStyle: systemUiOverlayFor(context),
       leadingWidth: 52,
       leading: Padding(
         padding: const EdgeInsets.only(left: 8),
@@ -120,7 +121,7 @@ class _OrderDetailsHeroBackground extends StatelessWidget {
             height: 160,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.white.withValues(alpha: 0.08),
+              color: AppColors.lightOnPrimary.withValues(alpha: 0.08),
             ),
           ),
         ),
@@ -132,7 +133,7 @@ class _OrderDetailsHeroBackground extends StatelessWidget {
             height: 120,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.white.withValues(alpha: 0.06),
+              color: AppColors.lightOnPrimary.withValues(alpha: 0.06),
             ),
           ),
         ),
@@ -155,15 +156,15 @@ class _OrderDetailsHeroBackground extends StatelessWidget {
                           width: compact ? 44 : 52,
                           height: compact ? 44 : 52,
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.18),
+                            color: AppColors.lightOnPrimary.withValues(alpha: 0.18),
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.28),
+                              color: AppColors.lightOnPrimary.withValues(alpha: 0.28),
                             ),
                           ),
                           child: Icon(
                             Icons.receipt_long_rounded,
-                            color: Colors.white,
+                            color: AppColors.lightOnPrimary,
                             size: compact ? 24 : 28,
                           ),
                         ),
@@ -176,7 +177,7 @@ class _OrderDetailsHeroBackground extends StatelessWidget {
                               Text(
                                 l10n.orderAppBarTitle('').split('#').first.trim(),
                                 style: theme.textTheme.labelMedium?.copyWith(
-                                  color: Colors.white.withValues(alpha: 0.82),
+                                  color: AppColors.lightOnPrimary.withValues(alpha: 0.82),
                                   fontWeight: FontWeight.w500,
                                   letterSpacing: 0.4,
                                 ),
@@ -190,7 +191,7 @@ class _OrderDetailsHeroBackground extends StatelessWidget {
                                         ? theme.textTheme.titleMedium
                                         : theme.textTheme.titleLarge)
                                     ?.copyWith(
-                                  color: Colors.white,
+                                  color: AppColors.lightOnPrimary,
                                   fontWeight: FontWeight.w800,
                                   height: 1.15,
                                   letterSpacing: -0.3,
@@ -210,7 +211,7 @@ class _OrderDetailsHeroBackground extends StatelessWidget {
                                     Text(
                                       order.formattedTotal,
                                       style: theme.textTheme.titleSmall?.copyWith(
-                                        color: Colors.white,
+                                        color: AppColors.lightOnPrimary,
                                         fontWeight: FontWeight.w700,
                                       ),
                                     ),
@@ -287,11 +288,11 @@ class _StatusPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.lightSurface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.12),
+            color: AppColors.lightShadow,
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -309,7 +310,7 @@ class _StatusPill extends StatelessWidget {
           Text(
             label,
             style: const TextStyle(
-              color: Color(0xFF1A1A1A),
+              color: AppColors.lightTextPrimary,
               fontSize: 12,
               fontWeight: FontWeight.w700,
             ),
@@ -336,12 +337,12 @@ class _HeaderActionChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bg = filled
-        ? Colors.white
-        : Colors.white.withValues(alpha: 0.16);
-    final fg = filled ? AppColors.primaryColor : Colors.white;
+        ? AppColors.lightSurface
+        : AppColors.lightOnPrimary.withValues(alpha: 0.16);
+    final fg = filled ? AppColors.primaryColor : AppColors.lightOnPrimary;
     final border = filled
         ? null
-        : Border.all(color: Colors.white.withValues(alpha: 0.35));
+        : Border.all(color: AppColors.lightOnPrimary.withValues(alpha: 0.35));
 
     return Material(
       color: Colors.transparent,
@@ -388,7 +389,7 @@ class _HeaderIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.black.withValues(alpha: 0.22),
+      color: AppColors.semiTransparent.withValues(alpha: 0.22),
       shape: const CircleBorder(),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -396,7 +397,7 @@ class _HeaderIconButton extends StatelessWidget {
         child: SizedBox(
           width: 40,
           height: 40,
-          child: Icon(icon, size: 22, color: Colors.white),
+          child: Icon(icon, size: 22, color: AppColors.lightOnPrimary),
         ),
       ),
     );
@@ -422,10 +423,10 @@ class _OrderHeaderMenu extends StatelessWidget {
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.22),
+          color: AppColors.semiTransparent.withValues(alpha: 0.22),
           shape: BoxShape.circle,
         ),
-        child: const Icon(Icons.more_vert_rounded, color: Colors.white, size: 22),
+        child: const Icon(Icons.more_vert_rounded, color: AppColors.lightOnPrimary, size: 22),
       ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       onSelected: (value) async {

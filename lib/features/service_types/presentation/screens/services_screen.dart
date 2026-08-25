@@ -411,10 +411,10 @@ class _ServiceCard extends StatelessWidget {
               context,
               MaterialPageRoute(
                 builder: (context) => Scaffold(
-                  backgroundColor: HomeColors.background,
+                  backgroundColor: HomeColors.backgroundOf(context),
                   appBar: AppBar(
-                    backgroundColor: HomeColors.background,
-                    foregroundColor: HomeColors.textPrimary,
+                    backgroundColor: HomeColors.backgroundOf(context),
+                    foregroundColor: HomeColors.textPrimaryOf(context),
                     title: Text(context.l10n.homeTabHandyman),
                   ),
                   body: const ServiceComingSoonScreen(

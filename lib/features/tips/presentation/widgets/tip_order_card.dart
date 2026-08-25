@@ -302,12 +302,12 @@ class _TipOrderCardState extends State<TipOrderCard> {
                       backgroundColor: AppColors.primaryColor,
                     ),
                     child: state.isSubmitting
-                        ? const SizedBox(
+                        ? SizedBox(
                             height: 20,
                             width: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: Colors.white,
+                              color: Theme.of(context).colorScheme.onPrimary,
                             ),
                           )
                         : Text(l10n.tipsSubmit),

@@ -98,19 +98,19 @@ class _VerifyDeliveryOtpScreenState extends State<VerifyDeliveryOtpScreen> {
     return CourierTheme.wrap(
       context,
       child: Scaffold(
-        backgroundColor: HomeColors.background,
+        backgroundColor: HomeColors.backgroundOf(context),
         appBar: AppBar(
-          backgroundColor: HomeColors.surface,
+          backgroundColor: HomeColors.surfaceOf(context),
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-            color: HomeColors.textPrimary,
+            icon: Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+            color: HomeColors.textPrimaryOf(context),
             onPressed: () => Navigator.pop(context),
           ),
-          title: const Text(
+          title: Text(
             'Delivery verification',
             style: TextStyle(
-              color: HomeColors.textPrimary,
+              color: HomeColors.textPrimaryOf(context),
               fontWeight: FontWeight.w600,
               fontSize: 17,
             ),
@@ -124,9 +124,9 @@ class _VerifyDeliveryOtpScreenState extends State<VerifyDeliveryOtpScreen> {
               Container(
                 padding: const EdgeInsets.all(AppColors.spaceMD),
                 decoration: BoxDecoration(
-                  color: HomeColors.surface,
+                  color: HomeColors.surfaceOf(context),
                   borderRadius: BorderRadius.circular(AppColors.radiusLG),
-                  border: Border.all(color: HomeColors.border),
+                  border: Border.all(color: HomeColors.borderOf(context)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -135,8 +135,8 @@ class _VerifyDeliveryOtpScreenState extends State<VerifyDeliveryOtpScreen> {
                       _isTerminal
                           ? 'Verification closed'
                           : 'Share this code with your driver',
-                      style: const TextStyle(
-                        color: HomeColors.textPrimary,
+                      style: TextStyle(
+                        color: HomeColors.textPrimaryOf(context),
                         fontWeight: FontWeight.w700,
                         fontSize: 18,
                       ),
@@ -146,8 +146,8 @@ class _VerifyDeliveryOtpScreenState extends State<VerifyDeliveryOtpScreen> {
                       tracking != null && tracking.isNotEmpty
                           ? 'Tracking: $tracking'
                           : 'Delivery #${widget.deliveryId}',
-                      style: const TextStyle(
-                        color: HomeColors.textSecondary,
+                      style: TextStyle(
+                        color: HomeColors.textSecondaryOf(context),
                         fontSize: 14,
                       ),
                     ),
@@ -161,11 +161,11 @@ class _VerifyDeliveryOtpScreenState extends State<VerifyDeliveryOtpScreen> {
                         ),
                       )
                     else if (_isTerminal)
-                      const Text(
+                      Text(
                         'This delivery is closed. The verification code is '
                         'no longer valid.',
                         style: TextStyle(
-                          color: HomeColors.textSecondary,
+                          color: HomeColors.textSecondaryOf(context),
                           fontSize: 15,
                           height: 1.45,
                         ),
@@ -183,12 +183,12 @@ class _VerifyDeliveryOtpScreenState extends State<VerifyDeliveryOtpScreen> {
                         ),
                       )
                     else
-                      const Center(
+                      Center(
                         child: Text(
                           'Check your SMS for the verification code.',
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: HomeColors.textSecondary,
+                            color: HomeColors.textSecondaryOf(context),
                             fontSize: 15,
                           ),
                         ),
@@ -210,8 +210,8 @@ class _VerifyDeliveryOtpScreenState extends State<VerifyDeliveryOtpScreen> {
                             widget.expiresOnDeliveryVerification
                                 ? 'Valid until delivery verification'
                                 : 'Valid for this delivery',
-                            style: const TextStyle(
-                              color: HomeColors.textPrimary,
+                            style: TextStyle(
+                              color: HomeColors.textPrimaryOf(context),
                               fontWeight: FontWeight.w600,
                               fontSize: 15,
                             ),
@@ -227,15 +227,15 @@ class _VerifyDeliveryOtpScreenState extends State<VerifyDeliveryOtpScreen> {
                 Container(
                   padding: const EdgeInsets.all(AppColors.spaceMD),
                   decoration: BoxDecoration(
-                    color: HomeColors.surfaceElevated,
+                    color: HomeColors.surfaceElevatedOf(context),
                     borderRadius: BorderRadius.circular(AppColors.radiusLG),
-                    border: Border.all(color: HomeColors.border),
+                    border: Border.all(color: HomeColors.borderOf(context)),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Do not share this code with anyone except your HudHud '
                     'driver at drop-off. HudHud will never ask for it by phone.',
                     style: TextStyle(
-                      color: HomeColors.textSecondary,
+                      color: HomeColors.textSecondaryOf(context),
                       fontSize: 14,
                       height: 1.45,
                     ),

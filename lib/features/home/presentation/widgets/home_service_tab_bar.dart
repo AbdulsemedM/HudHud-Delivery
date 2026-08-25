@@ -139,7 +139,7 @@ class _ServiceTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final bg = selected ? spec.brand : spec.unselectedWell;
     final labelColor =
-        selected ? HomeColors.textPrimary : HomeColors.textMuted;
+        selected ? HomeColors.textPrimaryOf(context) : HomeColors.textMutedOf(context);
 
     return Material(
       color: Colors.transparent,
@@ -173,7 +173,9 @@ class _ServiceTile extends StatelessWidget {
                   errorBuilder: (_, __, ___) => Icon(
                     spec.fallbackIcon,
                     size: 32,
-                    color: selected ? Colors.black87 : spec.brand,
+                    color: selected
+                        ? Theme.of(context).colorScheme.onPrimary
+                        : spec.brand,
                   ),
                 ),
               ),

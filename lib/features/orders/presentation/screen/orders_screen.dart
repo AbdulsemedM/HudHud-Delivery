@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:hudhud_delivery/core/theme/system_ui_style.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/features/orders/presentation/widgets/orders_coming_soon_screen.dart';
 
@@ -9,11 +11,14 @@ class OrdersScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Theme(
-      data: HomeColors.darkTheme(Theme.of(context)),
-      child: const Scaffold(
-        backgroundColor: HomeColors.background,
-        body: SafeArea(
-          child: OrdersComingSoonScreen(),
+      data: HomeColors.themeFor(context),
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: systemUiOverlayFor(context),
+        child: Scaffold(
+          backgroundColor: HomeColors.backgroundOf(context),
+          body: const SafeArea(
+            child: OrdersComingSoonScreen(),
+          ),
         ),
       ),
     );

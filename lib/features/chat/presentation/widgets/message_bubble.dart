@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/chat/model/chat_message_model.dart';
 import 'package:hudhud_delivery/features/chat/presentation/theme/chat_theme.dart';
 import 'package:hudhud_delivery/features/chat/presentation/widgets/message_status_icon.dart';
@@ -31,8 +32,11 @@ class MessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chatTheme = ChatTheme.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context)!;
     final align = isMine ? CrossAxisAlignment.end : CrossAxisAlignment.start;
+    final sentText = chatTheme.sentTextColor;
 
     if (message.isDeleted) {
       return Padding(
@@ -55,7 +59,7 @@ class MessageBubble extends StatelessWidget {
       isGroupedTop: isGroupedTop,
     );
 
-    Widget bubbleChild = _buildContent(context, chatTheme, l10n);
+    Widget bubbleChild = _buildContent(context, chatTheme, l10n, sentText);
 
     final bubble = GestureDetector(
       onLongPress: onLongPress,
@@ -73,7 +77,7 @@ class MessageBubble extends StatelessWidget {
               ? null
               : [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.04),
+                    color: isDark ? AppColors.darkShadow : AppColors.lightShadow,
                     blurRadius: 4,
                     offset: const Offset(0, 1),
                   ),
@@ -96,7 +100,7 @@ class MessageBubble extends StatelessWidget {
                         fontSize: 10,
                         fontStyle: FontStyle.italic,
                         color: isMine
-                            ? Colors.white.withValues(alpha: 0.75)
+                            ? sentText.withValues(alpha: 0.75)
                             : chatTheme.timestampColor,
                       ),
                     ),
@@ -107,7 +111,7 @@ class MessageBubble extends StatelessWidget {
                   ),
                   style: chatTheme.timestampStyle.copyWith(
                     color: isMine
-                        ? Colors.white.withValues(alpha: 0.8)
+                        ? sentText.withValues(alpha: 0.8)
                         : chatTheme.timestampColor,
                   ),
                 ),
@@ -115,6 +119,7 @@ class MessageBubble extends StatelessWidget {
                 MessageStatusIcon(
                   status: message.deliveryStatus(),
                   isMine: isMine,
+                  onBubbleColor: sentText.withValues(alpha: 0.85),
                 ),
               ],
             ),
@@ -125,7 +130,7 @@ class MessageBubble extends StatelessWidget {
                   l10n.chatRetry,
                   style: TextStyle(
                     fontSize: 11,
-                    color: Colors.red[200],
+                    color: scheme.error.withValues(alpha: 0.85),
                   ),
                 ),
               ),
@@ -154,26 +159,45 @@ class MessageBubble extends StatelessWidget {
     BuildContext context,
     ChatTheme chatTheme,
     AppLocalizations l10n,
+    Color sentText,
   ) {
     switch (message.type) {
       case ChatMessageType.image:
-        return _ImageContent(message: message, isMine: isMine);
+        return _ImageContent(message: message, isMine: isMine, sentText: sentText);
       case ChatMessageType.file:
-        return _FileContent(message: message, l10n: l10n);
+        return _FileContent(
+          message: message,
+          l10n: l10n,
+          isMine: isMine,
+          sentText: sentText,
+          receivedText: chatTheme.messageTextStyle.color,
+        );
       case ChatMessageType.audio:
-        return _AudioContent(message: message, l10n: l10n);
+        return _AudioContent(
+          message: message,
+          l10n: l10n,
+          isMine: isMine,
+          sentText: sentText,
+          receivedText: chatTheme.messageTextStyle.color,
+        );
       case ChatMessageType.location:
-        return _LocationContent(message: message, l10n: l10n);
+        return _LocationContent(
+          message: message,
+          l10n: l10n,
+          isMine: isMine,
+          sentText: sentText,
+          receivedText: chatTheme.messageTextStyle.color,
+        );
       case ChatMessageType.text:
       case ChatMessageType.unknown:
         return Linkify(
           onOpen: (link) => launchUrl(Uri.parse(link.url)),
           text: message.body,
           style: chatTheme.messageTextStyle.copyWith(
-            color: isMine ? Colors.white : chatTheme.messageTextStyle.color,
+            color: isMine ? sentText : chatTheme.messageTextStyle.color,
           ),
           linkStyle: TextStyle(
-            color: isMine ? Colors.white : Theme.of(context).colorScheme.primary,
+            color: isMine ? sentText : Theme.of(context).colorScheme.primary,
             decoration: TextDecoration.underline,
           ),
         );
@@ -184,8 +208,13 @@ class MessageBubble extends StatelessWidget {
 class _ImageContent extends StatelessWidget {
   final ChatMessageModel message;
   final bool isMine;
+  final Color sentText;
 
-  const _ImageContent({required this.message, required this.isMine});
+  const _ImageContent({
+    required this.message,
+    required this.isMine,
+    required this.sentText,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -198,7 +227,7 @@ class _ImageContent extends StatelessWidget {
     if (urls.isEmpty) {
       return Text(
         message.body,
-        style: TextStyle(color: isMine ? Colors.white : null),
+        style: TextStyle(color: isMine ? sentText : null),
       );
     }
 
@@ -258,11 +287,15 @@ class _FullScreenImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final background =
+        isDark ? AppColors.darkBackground : AppColors.lightOnBackground;
+
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: background,
       appBar: AppBar(
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
+        backgroundColor: background,
+        foregroundColor: isDark ? AppColors.darkOnBackground : AppColors.lightOnBackground,
       ),
       body: InteractiveViewer(
         child: Center(
@@ -276,8 +309,19 @@ class _FullScreenImage extends StatelessWidget {
 class _FileContent extends StatelessWidget {
   final ChatMessageModel message;
   final AppLocalizations l10n;
+  final bool isMine;
+  final Color? sentText;
+  final Color? receivedText;
 
-  const _FileContent({required this.message, required this.l10n});
+  const _FileContent({
+    required this.message,
+    required this.l10n,
+    required this.isMine,
+    required this.sentText,
+    required this.receivedText,
+  });
+
+  Color get _textColor => isMine ? sentText! : receivedText!;
 
   @override
   Widget build(BuildContext context) {
@@ -285,15 +329,15 @@ class _FileContent extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (message.body.isNotEmpty)
-          Text(message.body, style: const TextStyle(color: Colors.white)),
+          Text(message.body, style: TextStyle(color: _textColor)),
         ...message.attachments.map((a) {
           return ListTile(
             dense: true,
             contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.insert_drive_file_rounded, color: Colors.white),
+            leading: Icon(Icons.insert_drive_file_rounded, color: _textColor),
             title: Text(
               a.name ?? l10n.chatFile,
-              style: const TextStyle(color: Colors.white, fontSize: 13),
+              style: TextStyle(color: _textColor, fontSize: 13),
             ),
             subtitle: a.sizeLabel != null
                 ? Text(a.sizeLabel!, style: const TextStyle(fontSize: 11))
@@ -311,8 +355,19 @@ class _FileContent extends StatelessWidget {
 class _AudioContent extends StatelessWidget {
   final ChatMessageModel message;
   final AppLocalizations l10n;
+  final bool isMine;
+  final Color? sentText;
+  final Color? receivedText;
 
-  const _AudioContent({required this.message, required this.l10n});
+  const _AudioContent({
+    required this.message,
+    required this.l10n,
+    required this.isMine,
+    required this.sentText,
+    required this.receivedText,
+  });
+
+  Color get _textColor => isMine ? sentText! : receivedText!;
 
   @override
   Widget build(BuildContext context) {
@@ -322,31 +377,40 @@ class _AudioContent extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(Icons.mic_rounded, color: isMineColor(context)),
+        Icon(Icons.mic_rounded, color: _textColor),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
             message.body.isNotEmpty ? message.body : l10n.chatVoiceMessage,
-            style: TextStyle(color: isMineColor(context)),
+            style: TextStyle(color: _textColor),
           ),
         ),
         if (url != null)
           IconButton(
-            icon: Icon(Icons.play_arrow_rounded, color: isMineColor(context)),
+            icon: Icon(Icons.play_arrow_rounded, color: _textColor),
             onPressed: () => launchUrl(Uri.parse(url)),
           ),
       ],
     );
   }
-
-  Color isMineColor(BuildContext context) => Colors.white;
 }
 
 class _LocationContent extends StatelessWidget {
   final ChatMessageModel message;
   final AppLocalizations l10n;
+  final bool isMine;
+  final Color? sentText;
+  final Color? receivedText;
 
-  const _LocationContent({required this.message, required this.l10n});
+  const _LocationContent({
+    required this.message,
+    required this.l10n,
+    required this.isMine,
+    required this.sentText,
+    required this.receivedText,
+  });
+
+  Color get _textColor => isMine ? sentText! : receivedText!;
 
   @override
   Widget build(BuildContext context) {
@@ -354,6 +418,7 @@ class _LocationContent extends StatelessWidget {
     final lat = meta['latitude'];
     final lng = meta['longitude'];
     final address = meta['address']?.toString() ?? message.body;
+    final scheme = Theme.of(context).colorScheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -362,13 +427,13 @@ class _LocationContent extends StatelessWidget {
           height: 120,
           width: double.infinity,
           decoration: BoxDecoration(
-            color: Colors.black12,
+            color: scheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(12),
           ),
-          child: const Icon(Icons.location_on_rounded, size: 48),
+          child: Icon(Icons.location_on_rounded, size: 48, color: scheme.primary),
         ),
         const SizedBox(height: 8),
-        Text(address, style: const TextStyle(color: Colors.white)),
+        Text(address, style: TextStyle(color: _textColor)),
         if (lat != null && lng != null)
           TextButton(
             onPressed: () {

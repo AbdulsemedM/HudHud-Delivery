@@ -78,36 +78,36 @@ class _TipsHistoryBodyState extends State<_TipsHistoryBody> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            padding: EdgeInsets.fromLTRB(16, 12, 16, 0),
             child: Row(
               children: [
                 ChoiceChip(
                   label: Text(l10n.tipsStatusCompleted),
                   selected: _statusFilter == 'completed',
                   selectedColor: AuthScreenColors.orange,
-                  checkmarkColor: Colors.black,
+                  checkmarkColor: Theme.of(context).colorScheme.onPrimary,
                   labelStyle: TextStyle(
                     color: _statusFilter == 'completed'
-                        ? Colors.black
-                        : AuthScreenColors.textPrimary,
+                        ? Theme.of(context).colorScheme.onPrimary
+                        : AuthScreenColors.textPrimaryOf(context),
                   ),
-                  backgroundColor: AuthScreenColors.surface,
-                  side: const BorderSide(color: AuthScreenColors.surfaceBorder),
+                  backgroundColor: AuthScreenColors.surfaceOf(context),
+                  side: BorderSide(color: AuthScreenColors.surfaceBorderOf(context)),
                   onSelected: (_) => _reload(status: 'completed'),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 ChoiceChip(
                   label: Text(l10n.tipsStatusAll),
                   selected: _statusFilter == null,
                   selectedColor: AuthScreenColors.orange,
-                  checkmarkColor: Colors.black,
+                  checkmarkColor: Theme.of(context).colorScheme.onPrimary,
                   labelStyle: TextStyle(
                     color: _statusFilter == null
-                        ? Colors.black
-                        : AuthScreenColors.textPrimary,
+                        ? Theme.of(context).colorScheme.onPrimary
+                        : AuthScreenColors.textPrimaryOf(context),
                   ),
-                  backgroundColor: AuthScreenColors.surface,
-                  side: const BorderSide(color: AuthScreenColors.surfaceBorder),
+                  backgroundColor: AuthScreenColors.surfaceOf(context),
+                  side: BorderSide(color: AuthScreenColors.surfaceBorderOf(context)),
                   onSelected: (_) => _reload(status: null),
                 ),
               ],
@@ -124,36 +124,36 @@ class _TipsHistoryBodyState extends State<_TipsHistoryBody> {
               },
               builder: (context, state) {
                 if (state is TipsLoading) {
-                  return const Center(child: CircularProgressIndicator());
+                  return Center(child: CircularProgressIndicator());
                 }
                 if (state is TipsError) {
                   return Center(
                     child: Padding(
-                      padding: const EdgeInsets.all(24),
+                      padding: EdgeInsets.all(24),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
                             l10n.tipsLoadError,
-                            style: const TextStyle(
-                              color: AuthScreenColors.textPrimary,
+                            style: TextStyle(
+                              color: AuthScreenColors.textPrimaryOf(context),
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          SizedBox(height: 8),
                           Text(
                             state.message,
                             textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: AuthScreenColors.textSecondary,
+                            style: TextStyle(
+                              color: AuthScreenColors.textSecondaryOf(context),
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: 16),
                           FilledButton(
                             onPressed: () =>
                                 _reload(status: _statusFilter),
                             style: FilledButton.styleFrom(
                               backgroundColor: AuthScreenColors.orange,
-                              foregroundColor: Colors.black,
+                              foregroundColor: Theme.of(context).colorScheme.onPrimary,
                             ),
                             child: Text(l10n.actionRetry),
                           ),
@@ -163,7 +163,7 @@ class _TipsHistoryBodyState extends State<_TipsHistoryBody> {
                   );
                 }
                 if (state is! TipsLoaded) {
-                  return const SizedBox.shrink();
+                  return SizedBox.shrink();
                 }
 
                 return RefreshIndicator(
@@ -186,8 +186,8 @@ class _TipsHistoryBodyState extends State<_TipsHistoryBody> {
                           child: Center(
                             child: Text(
                               l10n.tipsHistoryEmpty,
-                              style: const TextStyle(
-                                color: AuthScreenColors.textSecondary,
+                              style: TextStyle(
+                                color: AuthScreenColors.textSecondaryOf(context),
                               ),
                             ),
                           ),
@@ -197,7 +197,7 @@ class _TipsHistoryBodyState extends State<_TipsHistoryBody> {
                           delegate: SliverChildBuilderDelegate(
                             (context, index) {
                               if (index >= state.history.length) {
-                                return const Padding(
+                                return Padding(
                                   padding: EdgeInsets.all(16),
                                   child: Center(
                                     child: CircularProgressIndicator(),
@@ -241,7 +241,7 @@ class _StatsHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       child: Row(
         children: [
           Expanded(
@@ -250,14 +250,14 @@ class _StatsHeader extends StatelessWidget {
               value: '${stats.totalTipsGiven}',
             ),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
           Expanded(
             child: _StatBox(
               label: l10n.tipsStatsAmount,
               value: stats.totalAmountTipped.toString(),
             ),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
           Expanded(
             child: _StatBox(
               label: l10n.tipsStatsAverage,
@@ -282,28 +282,28 @@ class _StatBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AuthScreenColors.surface,
+        color: AuthScreenColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AuthScreenColors.surfaceBorder),
+        border: Border.all(color: AuthScreenColors.surfaceBorderOf(context)),
       ),
       child: Column(
         children: [
           Text(
             value,
-            style: const TextStyle(
-              color: AuthScreenColors.textPrimary,
+            style: TextStyle(
+              color: AuthScreenColors.textPrimaryOf(context),
               fontWeight: FontWeight.bold,
               fontSize: 16,
             ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
           Text(
             label,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: AuthScreenColors.textSecondary,
+            style: TextStyle(
+              color: AuthScreenColors.textSecondaryOf(context),
               fontSize: 11,
             ),
           ),
@@ -330,15 +330,15 @@ class _TipHistoryTile extends StatelessWidget {
     return ListTile(
       title: Text(
         orderNumber,
-        style: const TextStyle(
-          color: AuthScreenColors.textPrimary,
+        style: TextStyle(
+          color: AuthScreenColors.textPrimaryOf(context),
           fontWeight: FontWeight.w600,
           fontSize: 14,
         ),
       ),
       subtitle: Text(
         '$recipientLabel · ${item.paymentStatus}',
-        style: const TextStyle(color: AuthScreenColors.textSecondary),
+        style: TextStyle(color: AuthScreenColors.textSecondaryOf(context)),
       ),
       trailing: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -346,7 +346,7 @@ class _TipHistoryTile extends StatelessWidget {
         children: [
           Text(
             'ETB ${item.amount}',
-            style: const TextStyle(
+            style: TextStyle(
               color: AuthScreenColors.orange,
               fontWeight: FontWeight.w600,
               fontSize: 14,
@@ -354,8 +354,8 @@ class _TipHistoryTile extends StatelessWidget {
           ),
           Text(
             dateLabel,
-            style: const TextStyle(
-              color: AuthScreenColors.textMuted,
+            style: TextStyle(
+              color: AuthScreenColors.textMutedOf(context),
               fontSize: 11,
             ),
           ),

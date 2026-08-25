@@ -1648,9 +1648,10 @@ class _TaxiInlineShimmer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final baseColor = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0);
+    final baseColor =
+        isDark ? AppColors.darkSurfaceVariant : AppColors.lightBorder;
     final highlightColor =
-        isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF5F5F5);
+        isDark ? AppColors.darkBorder : AppColors.lightInputFill;
 
     return Shimmer.fromColors(
       baseColor: baseColor,
@@ -1671,9 +1672,10 @@ class _TaxiMapShimmer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final baseColor = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0);
+    final baseColor =
+        isDark ? AppColors.darkSurfaceVariant : AppColors.lightBorder;
     final highlightColor =
-        isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF5F5F5);
+        isDark ? AppColors.darkBorder : AppColors.lightInputFill;
 
     return Shimmer.fromColors(
       baseColor: baseColor,

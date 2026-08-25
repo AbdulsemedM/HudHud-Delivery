@@ -386,17 +386,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               padding: const EdgeInsets.only(left: 4),
               child: IconButton(
                 style: IconButton.styleFrom(
-                  backgroundColor: Colors.white.withValues(alpha: 0.2),
+                  backgroundColor: AppColors.lightOnPrimary.withValues(alpha: 0.2),
                 ),
                 icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                    color: Colors.white, size: 18),
+                    color: AppColors.lightOnPrimary, size: 18),
                 onPressed: () => Navigator.of(context).pop(),
               ),
             ),
             title: const Text(
               'Checkout',
               style: TextStyle(
-                color: Colors.white,
+                color: AppColors.lightOnPrimary,
                 fontWeight: FontWeight.w700,
               ),
             ),

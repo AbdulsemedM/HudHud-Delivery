@@ -45,7 +45,7 @@ class _WalletScreenContent extends StatelessWidget {
       body: BlocBuilder<WalletBloc, WalletState>(
         builder: (context, state) {
           if (state is WalletLoading || state is WalletInitial) {
-            return const Padding(
+            return Padding(
               padding: EdgeInsets.all(AppColors.spaceMD),
               child: WalletShimmer(),
             );
@@ -53,21 +53,21 @@ class _WalletScreenContent extends StatelessWidget {
           if (state is WalletError) {
             return Center(
               child: Padding(
-                padding: const EdgeInsets.all(24),
+                padding: EdgeInsets.all(24),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.wifi_off_rounded,
                       size: 48,
-                      color: AuthScreenColors.textMuted,
+                      color: AuthScreenColors.textMutedOf(context),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16),
                     Text(
                       state.message,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: AuthScreenColors.textSecondary,
+                      style: TextStyle(
+                        color: AuthScreenColors.textSecondaryOf(context),
                       ),
                     ),
                     const SizedBox(height: 24),

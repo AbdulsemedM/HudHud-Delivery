@@ -42,10 +42,10 @@ class CourierVehicleEstimateCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? HomeColors.violet.withValues(alpha: 0.12)
-              : HomeColors.surface,
+              : HomeColors.surfaceOf(context),
           borderRadius: BorderRadius.circular(AppColors.radiusLG),
           border: Border.all(
-            color: isSelected ? HomeColors.violet : HomeColors.border,
+            color: isSelected ? HomeColors.violet : HomeColors.borderOf(context),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -55,25 +55,25 @@ class CourierVehicleEstimateCard extends StatelessWidget {
             Icon(
               icon,
               size: 36,
-              color: isSelected ? HomeColors.violet : HomeColors.textPrimary,
+              color: isSelected ? HomeColors.violet : HomeColors.textPrimaryOf(context),
             ),
             const SizedBox(height: 8),
             Text(
               label,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: HomeColors.textPrimary,
+                color: HomeColors.textPrimaryOf(context),
                 height: 1.2,
               ),
             ),
             const Spacer(),
             if (isLoading)
               Shimmer.fromColors(
-                baseColor: HomeColors.surfaceElevated,
-                highlightColor: HomeColors.surfaceElevated.withValues(alpha: 0.6),
+                baseColor: HomeColors.surfaceElevatedOf(context),
+                highlightColor: HomeColors.surfaceElevatedOf(context).withValues(alpha: 0.6),
                 child: Container(
                   width: 72,
                   height: 28,
@@ -86,9 +86,9 @@ class CourierVehicleEstimateCard extends StatelessWidget {
             else ...[
               Text(
                 minutes != null ? l10n.courierEstimateMinutes(minutes) : '—',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
-                  color: HomeColors.textMuted,
+                  color: HomeColors.textMutedOf(context),
                 ),
               ),
               const SizedBox(height: 2),
@@ -99,10 +99,10 @@ class CourierVehicleEstimateCard extends StatelessWidget {
                         _formatAmount(cost),
                       )
                     : '—',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
-                  color: HomeColors.textPrimary,
+                  color: HomeColors.textPrimaryOf(context),
                 ),
               ),
             ],

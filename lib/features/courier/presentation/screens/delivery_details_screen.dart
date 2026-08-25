@@ -140,25 +140,25 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
       builder: (dialogContext) => CourierTheme.wrap(
         context,
         child: AlertDialog(
-          backgroundColor: HomeColors.surfaceElevated,
+          backgroundColor: HomeColors.surfaceElevatedOf(context),
           surfaceTintColor: Colors.transparent,
           title: Text(
             context.l10n.cancelDeliveryTitle,
-            style: const TextStyle(color: HomeColors.textPrimary),
+            style: TextStyle(color: HomeColors.textPrimaryOf(context)),
           ),
           content: Text(
             cancelDeliveryConfirmMessage(
               context.l10n,
               paymentStatus: paymentStatus,
             ),
-            style: const TextStyle(color: HomeColors.textSecondary),
+            style: TextStyle(color: HomeColors.textSecondaryOf(context)),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, false),
               child: Text(
                 context.l10n.actionNo,
-                style: const TextStyle(color: HomeColors.textMuted),
+                style: TextStyle(color: HomeColors.textMutedOf(context)),
               ),
             ),
             TextButton(
@@ -228,22 +228,22 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
       builder: (dialogContext) => CourierTheme.wrap(
         context,
         child: AlertDialog(
-          backgroundColor: HomeColors.surfaceElevated,
+          backgroundColor: HomeColors.surfaceElevatedOf(context),
           surfaceTintColor: Colors.transparent,
           title: Text(
             context.l10n.insufficientWalletBalance,
-            style: const TextStyle(color: HomeColors.textPrimary),
+            style: TextStyle(color: HomeColors.textPrimaryOf(context)),
           ),
           content: Text(
             error.displayMessage,
-            style: const TextStyle(color: HomeColors.textSecondary),
+            style: TextStyle(color: HomeColors.textSecondaryOf(context)),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, false),
               child: Text(
                 context.l10n.actionCancel,
-                style: const TextStyle(color: HomeColors.textMuted),
+                style: TextStyle(color: HomeColors.textMutedOf(context)),
               ),
             ),
             FilledButton(
@@ -295,7 +295,7 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
     return showModalBottomSheet<_RetryPaymentChoice>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: HomeColors.surface,
+      backgroundColor: HomeColors.surfaceOf(context),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -427,7 +427,7 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
 
   Widget _buildContent(BuildContext context) {
     final l10n = context.l10n;
-    const borderColor = HomeColors.border;
+    final borderColor = HomeColors.borderOf(context);
     final d = _delivery!;
 
     return Column(
@@ -435,7 +435,7 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
         Expanded(
           child: RefreshIndicator(
             color: HomeColors.violet,
-            backgroundColor: HomeColors.surface,
+            backgroundColor: HomeColors.surfaceOf(context),
             onRefresh: () => _fetchDetails(refresh: true),
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
@@ -554,20 +554,20 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
           final theme = Theme.of(context);
 
           return Scaffold(
-            backgroundColor: HomeColors.background,
+            backgroundColor: HomeColors.backgroundOf(context),
             appBar: AppBar(
-              backgroundColor: HomeColors.surface,
+              backgroundColor: HomeColors.surfaceOf(context),
               elevation: 0,
               surfaceTintColor: Colors.transparent,
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back, color: HomeColors.textPrimary),
+                icon: Icon(Icons.arrow_back, color: HomeColors.textPrimaryOf(context)),
                 onPressed: () => Navigator.pop(context),
               ),
               title: Text(
                 _deliveryLabel,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: HomeColors.textPrimary,
+                  color: HomeColors.textPrimaryOf(context),
                 ),
               ),
               centerTitle: true,
@@ -584,16 +584,16 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.wifi_off_rounded,
                                 size: 48,
-                                color: HomeColors.textMuted,
+                                color: HomeColors.textMutedOf(context),
                               ),
                               const SizedBox(height: AppColors.spaceMD),
                               Text(
                                 _error!,
                                 style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: HomeColors.textPrimary,
+                                  color: HomeColors.textPrimaryOf(context),
                                 ),
                                 textAlign: TextAlign.center,
                               ),
@@ -606,7 +606,7 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
                                     color: HomeColors.violet),
                                 label: Text(
                                   l10n.actionRetry,
-                                  style: const TextStyle(color: HomeColors.violet),
+                                  style: TextStyle(color: HomeColors.violet),
                                 ),
                               ),
                             ],
@@ -641,7 +641,7 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
                                     textAlign: TextAlign.center,
                                     style: theme.textTheme.titleMedium?.copyWith(
                                       fontWeight: FontWeight.w600,
-                                      color: HomeColors.textPrimary,
+                                      color: HomeColors.textPrimaryOf(context),
                                     ),
                                   ),
                                   const SizedBox(height: 8),
@@ -649,7 +649,7 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
                                     'This delivery may have been removed or is no longer available.',
                                     textAlign: TextAlign.center,
                                     style: theme.textTheme.bodySmall?.copyWith(
-                                      color: HomeColors.textMuted,
+                                      color: HomeColors.textMutedOf(context),
                                     ),
                                   ),
                                 ],
@@ -690,7 +690,7 @@ class _SummaryHero extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppColors.spaceMD),
       decoration: BoxDecoration(
-        color: HomeColors.surfaceElevated,
+        color: HomeColors.surfaceElevatedOf(context),
         borderRadius: BorderRadius.circular(AppColors.radiusLG),
         border: Border.all(color: borderColor),
       ),
@@ -704,7 +704,7 @@ class _SummaryHero extends StatelessWidget {
                   deliveryLabel,
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: HomeColors.textPrimary,
+                    color: HomeColors.textPrimaryOf(context),
                   ),
                 ),
               ),
@@ -715,7 +715,7 @@ class _SummaryHero extends StatelessWidget {
           Text(
             createdAt,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: HomeColors.textMuted,
+              color: HomeColors.textMutedOf(context),
             ),
           ),
           if (tracking != null && tracking.isNotEmpty) ...[
@@ -723,7 +723,7 @@ class _SummaryHero extends StatelessWidget {
             Text(
               'Tracking code',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: HomeColors.textMuted,
+                color: HomeColors.textMutedOf(context),
               ),
             ),
             const SizedBox(height: 6),
@@ -735,7 +735,7 @@ class _SummaryHero extends StatelessWidget {
                     tracking,
                     style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: HomeColors.textPrimary,
+                      color: HomeColors.textPrimaryOf(context),
                       letterSpacing: 0.4,
                     ),
                   ),
@@ -805,7 +805,7 @@ class _RouteCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppColors.spaceMD),
       decoration: BoxDecoration(
-        color: HomeColors.surfaceElevated,
+        color: HomeColors.surfaceElevatedOf(context),
         borderRadius: BorderRadius.circular(AppColors.radiusLG),
         border: Border.all(color: borderColor),
       ),
@@ -816,7 +816,7 @@ class _RouteCard extends StatelessWidget {
             'Route',
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w600,
-              color: HomeColors.textPrimary,
+              color: HomeColors.textPrimaryOf(context),
             ),
           ),
           const SizedBox(height: AppColors.spaceMD),
@@ -834,7 +834,7 @@ class _RouteCard extends StatelessWidget {
             instructions: deliveryInstructions,
             showConnector: false,
           ),
-          const Divider(height: AppColors.spaceLG, color: HomeColors.border),
+          Divider(height: AppColors.spaceLG, color: HomeColors.borderOf(context)),
           _DetailField(label: 'Recipient', value: recipientName),
           _DetailField(label: 'Phone', value: displayPhone),
         ],
@@ -883,7 +883,7 @@ class _RouteStop extends StatelessWidget {
                   child: Container(
                     width: 2,
                     margin: const EdgeInsets.symmetric(vertical: 4),
-                    color: HomeColors.border,
+                    color: HomeColors.borderOf(context),
                   ),
                 ),
             ],
@@ -898,7 +898,7 @@ class _RouteStop extends StatelessWidget {
                   Text(
                     label,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: HomeColors.textMuted,
+                      color: HomeColors.textMutedOf(context),
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -906,7 +906,7 @@ class _RouteStop extends StatelessWidget {
                     address,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: HomeColors.textPrimary,
+                      color: HomeColors.textPrimaryOf(context),
                     ),
                   ),
                   if (extra != null && extra.isNotEmpty) ...[
@@ -914,7 +914,7 @@ class _RouteStop extends StatelessWidget {
                     Text(
                       extra,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: HomeColors.textSecondary,
+                        color: HomeColors.textSecondaryOf(context),
                       ),
                     ),
                   ],
@@ -945,7 +945,7 @@ class _SectionCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppColors.spaceMD),
       decoration: BoxDecoration(
-        color: HomeColors.surfaceElevated,
+        color: HomeColors.surfaceElevatedOf(context),
         borderRadius: BorderRadius.circular(AppColors.radiusLG),
         border: Border.all(color: borderColor),
       ),
@@ -956,7 +956,7 @@ class _SectionCard extends StatelessWidget {
             title,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: HomeColors.textPrimary,
+                  color: HomeColors.textPrimaryOf(context),
                 ),
           ),
           const SizedBox(height: 12),
@@ -996,7 +996,7 @@ class _DetailField extends StatelessWidget {
           Text(
             label,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: HomeColors.textMuted,
+                  color: HomeColors.textMutedOf(context),
                 ),
           ),
           const SizedBox(height: 4),
@@ -1004,7 +1004,7 @@ class _DetailField extends StatelessWidget {
             v!,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: HomeColors.textPrimary,
+                  color: HomeColors.textPrimaryOf(context),
                 ),
           ),
         ],
@@ -1047,9 +1047,9 @@ class _BottomActions extends StatelessWidget {
         AppColors.spaceMD,
         AppColors.spaceMD + MediaQuery.paddingOf(context).bottom,
       ),
-      decoration: const BoxDecoration(
-        color: HomeColors.surface,
-        border: Border(top: BorderSide(color: HomeColors.border)),
+      decoration: BoxDecoration(
+        color: HomeColors.surfaceOf(context),
+        border: Border(top: BorderSide(color: HomeColors.borderOf(context))),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -1095,7 +1095,7 @@ class _BottomActions extends StatelessWidget {
                 onPressed: busy ? null : onTrack,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: HomeColors.violet,
-                  foregroundColor: Colors.white,
+                  foregroundColor: Theme.of(context).colorScheme.onSecondary,
                   disabledBackgroundColor:
                       HomeColors.violet.withValues(alpha: 0.4),
                   shape: RoundedRectangleBorder(
@@ -1278,15 +1278,15 @@ class _RetryPaymentSheetState extends State<_RetryPaymentSheet> {
                 height: 4,
                 margin: const EdgeInsets.only(bottom: 12),
                 decoration: BoxDecoration(
-                  color: HomeColors.border,
+                  color: HomeColors.borderOf(context),
                   borderRadius: BorderRadius.circular(999),
                 ),
               ),
             ),
             Text(
               context.l10n.retryPaymentTitle,
-              style: const TextStyle(
-                color: HomeColors.textPrimary,
+              style: TextStyle(
+                color: HomeColors.textPrimaryOf(context),
                 fontWeight: FontWeight.w700,
                 fontSize: 18,
               ),
@@ -1294,8 +1294,8 @@ class _RetryPaymentSheetState extends State<_RetryPaymentSheet> {
             const SizedBox(height: 4),
             Text(
               context.l10n.retryPaymentSubtitle,
-              style: const TextStyle(
-                color: HomeColors.textMuted,
+              style: TextStyle(
+                color: HomeColors.textMutedOf(context),
                 fontSize: 13,
               ),
             ),
@@ -1352,7 +1352,7 @@ class _RetryPaymentSheetState extends State<_RetryPaymentSheet> {
                 onPressed: widget.isLoading ? null : _submit,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: HomeColors.violet,
-                  foregroundColor: Colors.white,
+                  foregroundColor: Theme.of(context).colorScheme.onSecondary,
                 ),
                 child: Text(context.l10n.actionContinue),
               ),

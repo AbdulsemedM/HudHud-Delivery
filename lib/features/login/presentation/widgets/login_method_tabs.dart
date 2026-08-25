@@ -9,7 +9,7 @@ class LoginMethodTabs extends StatelessWidget {
   final LoginMethod selected;
   final ValueChanged<LoginMethod> onChanged;
 
-  /// When true, uses the always-dark auth mock styling (orange selected pill).
+  /// When true, uses auth screen styling (orange selected pill).
   final bool authStyle;
 
   const LoginMethodTabs({
@@ -24,7 +24,7 @@ class LoginMethodTabs extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final trackColor = authStyle
-        ? AuthScreenColors.surface
+        ? AuthScreenColors.surfaceOf(context)
         : (theme.brightness == Brightness.dark
             ? theme.colorScheme.surfaceContainerHighest
             : const Color(0xFFE8EEF4));
@@ -38,7 +38,7 @@ class LoginMethodTabs extends StatelessWidget {
           color: trackColor,
           borderRadius: BorderRadius.circular(14),
           border: authStyle
-              ? Border.all(color: AuthScreenColors.surfaceBorder)
+              ? Border.all(color: AuthScreenColors.surfaceBorderOf(context))
               : null,
         ),
         child: Row(
@@ -97,7 +97,7 @@ class _TabSegment extends StatelessWidget {
     if (authStyle) {
       activeColor = AuthScreenColors.orange;
       activeFg = Colors.black;
-      inactiveFg = AuthScreenColors.textMuted;
+      inactiveFg = AuthScreenColors.textMutedOf(context);
     } else {
       activeColor = theme.brightness == Brightness.dark
           ? AppColors.primaryLightColor

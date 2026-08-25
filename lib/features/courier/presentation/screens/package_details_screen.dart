@@ -130,12 +130,12 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
     return InputDecoration(
       labelText: labelText,
       hintText: hintText,
-      labelStyle: const TextStyle(
+      labelStyle: TextStyle(
         fontSize: 14,
-        color: HomeColors.textPrimary,
+        color: HomeColors.textPrimaryOf(context),
       ),
       hintStyle: hintText != null
-          ? const TextStyle(color: HomeColors.textMuted)
+          ? TextStyle(color: HomeColors.textMutedOf(context))
           : null,
       filled: true,
       fillColor: fieldFill,
@@ -251,24 +251,24 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
       child: Builder(
         builder: (context) {
           final theme = Theme.of(context);
-          const borderColor = HomeColors.border;
-          const outline = HomeColors.border;
-          const fieldFill = HomeColors.surfaceElevated;
+          final borderColor = HomeColors.borderOf(context);
+          final outline = HomeColors.borderOf(context);
+          final fieldFill = HomeColors.surfaceElevatedOf(context);
           return Scaffold(
-            backgroundColor: HomeColors.background,
+            backgroundColor: HomeColors.backgroundOf(context),
             appBar: AppBar(
-              backgroundColor: HomeColors.surface,
+              backgroundColor: HomeColors.surfaceOf(context),
               elevation: 0,
               surfaceTintColor: Colors.transparent,
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back, color: HomeColors.textPrimary),
+                icon: Icon(Icons.arrow_back, color: HomeColors.textPrimaryOf(context)),
                 onPressed: () => Navigator.pop(context),
               ),
               title: Text(
                 'What are you sending',
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: HomeColors.textPrimary,
+                  color: HomeColors.textPrimaryOf(context),
                 ),
               ),
               centerTitle: true,
@@ -282,26 +282,26 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'What are you sending',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
-                              color: HomeColors.textPrimary,
+                              color: HomeColors.textPrimaryOf(context),
                             ),
                           ),
                           const SizedBox(height: 16),
                           DropdownButtonFormField<String>(
                             initialValue: _itemType,
                             isExpanded: true,
-                            dropdownColor: HomeColors.surface,
-                            icon: const Icon(
+                            dropdownColor: HomeColors.surfaceOf(context),
+                            icon: Icon(
                               Icons.keyboard_arrow_down,
-                              color: HomeColors.textMuted,
+                              color: HomeColors.textMutedOf(context),
                             ),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 14,
-                              color: HomeColors.textPrimary,
+                              color: HomeColors.textPrimaryOf(context),
                             ),
                             decoration: _fieldDecoration(
                               labelText: 'What are you sending',
@@ -310,11 +310,11 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                               fieldFill: fieldFill,
                               outline: outline,
                             ),
-                            hint: const Text(
+                            hint: Text(
                               'Select type of item (e.g. gadget, document)',
                               style: TextStyle(
                                 fontSize: 14,
-                                color: HomeColors.textMuted,
+                                color: HomeColors.textMutedOf(context),
                               ),
                             ),
                             items: _itemTypes
@@ -337,8 +337,8 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                                 child: TextFormField(
                                   controller: _quantityController,
                                   keyboardType: TextInputType.number,
-                                  style: const TextStyle(
-                                      color: HomeColors.textPrimary),
+                                  style: TextStyle(
+                                      color: HomeColors.textPrimaryOf(context)),
                                   decoration: _fieldDecoration(
                                     labelText: 'Quantity',
                                     fieldFill: fieldFill,
@@ -353,8 +353,8 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                                   keyboardType:
                                       const TextInputType.numberWithOptions(
                                           decimal: true),
-                                  style: const TextStyle(
-                                      color: HomeColors.textPrimary),
+                                  style: TextStyle(
+                                      color: HomeColors.textPrimaryOf(context)),
                                   decoration: _fieldDecoration(
                                     labelText: 'Weight (kg)',
                                     fieldFill: fieldFill,
@@ -368,7 +368,7 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                           TextFormField(
                             controller: _packageDescriptionController,
                             maxLines: 2,
-                            style: const TextStyle(color: HomeColors.textPrimary),
+                            style: TextStyle(color: HomeColors.textPrimaryOf(context)),
                             decoration: _fieldDecoration(
                               labelText: 'Package Description (optional)',
                               fieldFill: fieldFill,
@@ -376,19 +376,19 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                             ),
                           ),
                           const SizedBox(height: 24),
-                          const Text(
+                          Text(
                             'Sender Information',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
-                              color: HomeColors.textPrimary,
+                              color: HomeColors.textPrimaryOf(context),
                             ),
                           ),
                           const SizedBox(height: 16),
                           TextFormField(
                             controller: _senderPhoneController,
                             keyboardType: TextInputType.phone,
-                            style: const TextStyle(color: HomeColors.textPrimary),
+                            style: TextStyle(color: HomeColors.textPrimaryOf(context)),
                             decoration: _fieldDecoration(
                               labelText: 'Sender phone (09xxxxxxxx)',
                               hintText: '0912345678',
@@ -397,18 +397,18 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                             ),
                           ),
                           const SizedBox(height: 24),
-                          const Text(
+                          Text(
                             'Recipient Information',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
-                              color: HomeColors.textPrimary,
+                              color: HomeColors.textPrimaryOf(context),
                             ),
                           ),
                           const SizedBox(height: 16),
                           TextFormField(
                             controller: _recipientNameController,
-                            style: const TextStyle(color: HomeColors.textPrimary),
+                            style: TextStyle(color: HomeColors.textPrimaryOf(context)),
                             decoration: _fieldDecoration(
                               labelText: 'Recipient Names',
                               fieldFill: fieldFill,
@@ -419,7 +419,7 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                           TextFormField(
                             controller: _recipientPhoneController,
                             keyboardType: TextInputType.phone,
-                            style: const TextStyle(color: HomeColors.textPrimary),
+                            style: TextStyle(color: HomeColors.textPrimaryOf(context)),
                             decoration: _fieldDecoration(
                               labelText: 'Recipient contact number',
                               fieldFill: fieldFill,
@@ -442,19 +442,19 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                                   width: 2,
                                 ),
                               ),
-                              child: const Column(
+                              child: Column(
                                 children: [
                                   Icon(
                                     Icons.camera_alt,
                                     size: 48,
-                                    color: HomeColors.textMuted,
+                                    color: HomeColors.textMutedOf(context),
                                   ),
                                   SizedBox(height: 12),
                                   Text(
                                     'Take a picture of the package',
                                     style: TextStyle(
                                       fontSize: 14,
-                                      color: HomeColors.textMuted,
+                                      color: HomeColors.textMutedOf(context),
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
@@ -469,8 +469,8 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                   ),
                   Container(
                     padding: const EdgeInsets.all(AppColors.spaceMD),
-                    decoration: const BoxDecoration(
-                      color: HomeColors.surface,
+                    decoration: BoxDecoration(
+                      color: HomeColors.surfaceOf(context),
                       border: Border(top: BorderSide(color: borderColor)),
                     ),
                     child: SizedBox(
@@ -480,7 +480,7 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                         onPressed: _navigateToConfirm,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: HomeColors.violet,
-                          foregroundColor: Colors.white,
+                          foregroundColor: Theme.of(context).colorScheme.onSecondary,
                           minimumSize: const Size(
                               double.infinity, AppColors.buttonHeightMD),
                           shape: RoundedRectangleBorder(

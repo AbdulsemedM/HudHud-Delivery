@@ -59,18 +59,22 @@ class AuthBrandHeader extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             l10n.brandTagline,
-            style: const TextStyle(
-              color: AuthScreenColors.textSecondary,
+            style: TextStyle(
+              color: AuthScreenColors.textSecondaryOf(context),
               fontSize: 11,
               fontWeight: FontWeight.w500,
               letterSpacing: 1.4,
             ),
           ),
           const SizedBox(height: 16),
-          const SizedBox(
+          SizedBox(
             width: double.infinity,
             height: 28,
-            child: CustomPaint(painter: _AuthDashedCurvePainter()),
+            child: CustomPaint(
+              painter: _AuthDashedCurvePainter(
+                dashColor: AuthScreenColors.textSecondaryOf(context),
+              ),
+            ),
           ),
         ],
       ],
@@ -84,16 +88,22 @@ class AuthDashedCurve extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox(
+    return SizedBox(
       width: double.infinity,
       height: 28,
-      child: CustomPaint(painter: _AuthDashedCurvePainter()),
+      child: CustomPaint(
+        painter: _AuthDashedCurvePainter(
+          dashColor: AuthScreenColors.textSecondaryOf(context),
+        ),
+      ),
     );
   }
 }
 
 class _AuthDashedCurvePainter extends CustomPainter {
-  const _AuthDashedCurvePainter();
+  const _AuthDashedCurvePainter({required this.dashColor});
+
+  final Color dashColor;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -107,7 +117,7 @@ class _AuthDashedCurvePainter extends CustomPainter {
       );
 
     final dashPaint = Paint()
-      ..color = AuthScreenColors.textSecondary.withValues(alpha: 0.45)
+      ..color = dashColor.withValues(alpha: 0.45)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.4
       ..strokeCap = StrokeCap.round;
@@ -144,5 +154,6 @@ class _AuthDashedCurvePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _AuthDashedCurvePainter oldDelegate) =>
+      oldDelegate.dashColor != dashColor;
 }

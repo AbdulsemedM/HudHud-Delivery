@@ -66,14 +66,14 @@ class _ForgotPasswordNewPasswordViewState
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AuthScreenColors.surface,
+        backgroundColor: AuthScreenColors.surfaceOf(ctx),
         title: Text(
           l10n.snackbarSuccessLabel,
-          style: const TextStyle(color: AuthScreenColors.textPrimary),
+          style: TextStyle(color: AuthScreenColors.textPrimaryOf(ctx)),
         ),
         content: Text(
           message.isNotEmpty ? message : l10n.forgotPasswordSuccessMessage,
-          style: const TextStyle(color: AuthScreenColors.textSecondary),
+          style: TextStyle(color: AuthScreenColors.textSecondaryOf(ctx)),
         ),
         actions: [
           TextButton(
@@ -118,27 +118,27 @@ class _ForgotPasswordNewPasswordViewState
               children: [
                 Text(
                   l10n.forgotPasswordNewTitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w700,
-                    color: AuthScreenColors.textPrimary,
+                    color: AuthScreenColors.textPrimaryOf(context),
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   l10n.forgotPasswordNewSubtitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
-                    color: AuthScreenColors.textSecondary,
+                    color: AuthScreenColors.textSecondaryOf(context),
                     height: 1.45,
                   ),
                 ),
                 const SizedBox(height: 24),
                 Text(
                   l10n.labelPassword,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
-                    color: AuthScreenColors.textSecondary,
+                    color: AuthScreenColors.textSecondaryOf(context),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -147,15 +147,16 @@ class _ForgotPasswordNewPasswordViewState
                   controller: _passwordController,
                   obscureText: _obscure1,
                   enabled: !state.loading,
-                  style: const TextStyle(
-                    color: AuthScreenColors.textPrimary,
+                  style: TextStyle(
+                    color: AuthScreenColors.textPrimaryOf(context),
                     fontSize: 15,
                   ),
                   decoration: authFieldDecoration(
+                    context,
                     hint: l10n.hintPassword,
-                    prefixIcon: const Icon(
+                    prefixIcon: Icon(
                       Icons.lock_outline_rounded,
-                      color: AuthScreenColors.textSecondary,
+                      color: AuthScreenColors.textSecondaryOf(context),
                       size: 20,
                     ),
                     suffixIcon: IconButton(
@@ -163,7 +164,7 @@ class _ForgotPasswordNewPasswordViewState
                         _obscure1
                             ? Icons.visibility_rounded
                             : Icons.visibility_off_rounded,
-                        color: AuthScreenColors.textSecondary,
+                        color: AuthScreenColors.textSecondaryOf(context),
                       ),
                       onPressed: () => setState(() => _obscure1 = !_obscure1),
                     ),
@@ -173,9 +174,9 @@ class _ForgotPasswordNewPasswordViewState
                 const SizedBox(height: 16),
                 Text(
                   l10n.forgotPasswordLabelConfirmPassword,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
-                    color: AuthScreenColors.textSecondary,
+                    color: AuthScreenColors.textSecondaryOf(context),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -184,15 +185,16 @@ class _ForgotPasswordNewPasswordViewState
                   controller: _confirmController,
                   obscureText: _obscure2,
                   enabled: !state.loading,
-                  style: const TextStyle(
-                    color: AuthScreenColors.textPrimary,
+                  style: TextStyle(
+                    color: AuthScreenColors.textPrimaryOf(context),
                     fontSize: 15,
                   ),
                   decoration: authFieldDecoration(
+                    context,
                     hint: l10n.forgotPasswordHintConfirmPassword,
-                    prefixIcon: const Icon(
+                    prefixIcon: Icon(
                       Icons.lock_outline_rounded,
-                      color: AuthScreenColors.textSecondary,
+                      color: AuthScreenColors.textSecondaryOf(context),
                       size: 20,
                     ),
                     suffixIcon: IconButton(
@@ -200,7 +202,7 @@ class _ForgotPasswordNewPasswordViewState
                         _obscure2
                             ? Icons.visibility_rounded
                             : Icons.visibility_off_rounded,
-                        color: AuthScreenColors.textSecondary,
+                        color: AuthScreenColors.textSecondaryOf(context),
                       ),
                       onPressed: () => setState(() => _obscure2 = !_obscure2),
                     ),

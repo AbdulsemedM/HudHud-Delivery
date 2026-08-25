@@ -54,7 +54,7 @@ class _ServiceComingSoonScreenState extends State<ServiceComingSoonScreen>
               radius: 1.1,
               colors: [
                 spec.brand.withValues(alpha: 0.22),
-                HomeColors.background,
+                HomeColors.backgroundOf(context),
               ],
             ),
           ),
@@ -109,8 +109,8 @@ class _ServiceComingSoonScreenState extends State<ServiceComingSoonScreen>
                 Text(
                   spec.title,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: HomeColors.textPrimary,
+                  style: TextStyle(
+                    color: HomeColors.textPrimaryOf(context),
                     fontSize: 24,
                     fontWeight: FontWeight.w800,
                     height: 1.25,
@@ -120,8 +120,8 @@ class _ServiceComingSoonScreenState extends State<ServiceComingSoonScreen>
                 Text(
                   spec.subtitle,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: HomeColors.textMuted,
+                  style: TextStyle(
+                    color: HomeColors.textMutedOf(context),
                     fontSize: 15,
                     height: 1.5,
                   ),
@@ -291,14 +291,14 @@ class _TeaserChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: HomeColors.surface,
+        color: HomeColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: color.withValues(alpha: 0.28)),
       ),
       child: Text(
         label,
-        style: const TextStyle(
-          color: HomeColors.textSecondary,
+        style: TextStyle(
+          color: HomeColors.textSecondaryOf(context),
           fontSize: 13,
           fontWeight: FontWeight.w600,
         ),

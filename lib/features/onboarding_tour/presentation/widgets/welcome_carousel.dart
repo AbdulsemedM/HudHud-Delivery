@@ -81,7 +81,7 @@ class _WelcomeCarouselState extends State<WelcomeCarousel> {
     final isLastPage = _currentPage == slides.length - 1;
 
     return Material(
-      color: HomeColors.background,
+      color: HomeColors.backgroundOf(context),
       child: SafeArea(
         child: Column(
           children: [
@@ -91,8 +91,8 @@ class _WelcomeCarouselState extends State<WelcomeCarousel> {
                 onPressed: _skip,
                 child: Text(
                   l10n.actionSkip,
-                  style: const TextStyle(
-                    color: HomeColors.textMuted,
+                  style: TextStyle(
+                    color: HomeColors.textMutedOf(context),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -237,10 +237,10 @@ class _AnimatedSlideContentState extends State<_AnimatedSlideContent>
               Text(
                 slide.title,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.w800,
-                  color: HomeColors.textPrimary,
+                  color: HomeColors.textPrimaryOf(context),
                   height: 1.2,
                 ),
               ),
@@ -248,10 +248,10 @@ class _AnimatedSlideContentState extends State<_AnimatedSlideContent>
               Text(
                 slide.description,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 15,
                   height: 1.5,
-                  color: HomeColors.textSecondary,
+                  color: HomeColors.textSecondaryOf(context),
                 ),
               ),
             ],
@@ -377,7 +377,7 @@ class _IllustrationState extends State<_Illustration>
                     for (final path in _welcomeAssets)
                       Container(
                         decoration: BoxDecoration(
-                          color: HomeColors.surfaceElevated,
+                          color: HomeColors.surfaceElevatedOf(context),
                           borderRadius: BorderRadius.circular(18),
                           border: Border.all(
                             color: widget.color.withValues(alpha: 0.35),
@@ -431,7 +431,7 @@ class _PageDots extends StatelessWidget {
           decoration: BoxDecoration(
             color: isActive
                 ? activeColor
-                : HomeColors.textMuted.withValues(alpha: 0.35),
+                : HomeColors.textMutedOf(context).withValues(alpha: 0.35),
             borderRadius: BorderRadius.circular(8),
           ),
         );

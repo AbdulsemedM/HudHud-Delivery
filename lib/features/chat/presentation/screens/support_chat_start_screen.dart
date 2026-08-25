@@ -49,69 +49,69 @@ class _SupportChatStartScreenState extends State<SupportChatStartScreen> {
     return ProfileDarkPage(
       title: l10n.chatSupportTitle,
       body: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
               l10n.chatSupportSubject,
-              style: const TextStyle(
-                color: AuthScreenColors.textPrimary,
+              style: TextStyle(
+                color: AuthScreenColors.textPrimaryOf(context),
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             TextField(
               controller: _subjectController,
               maxLines: 3,
-              style: const TextStyle(color: AuthScreenColors.textPrimary),
+              style: TextStyle(color: AuthScreenColors.textPrimaryOf(context)),
               decoration: InputDecoration(
                 hintText: l10n.chatSupportSubjectHint,
-                hintStyle: const TextStyle(color: AuthScreenColors.textSecondary),
+                hintStyle: TextStyle(color: AuthScreenColors.textSecondaryOf(context)),
                 filled: true,
-                fillColor: AuthScreenColors.surface,
+                fillColor: AuthScreenColors.surfaceOf(context),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
                   borderSide: BorderSide.none,
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: const BorderSide(
-                    color: AuthScreenColors.surfaceBorder,
+                  borderSide: BorderSide(
+                    color: AuthScreenColors.surfaceBorderOf(context),
                   ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: const BorderSide(
+                  borderSide: BorderSide(
                     color: AuthScreenColors.orange,
                     width: 1.5,
                   ),
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
             FilledButton(
               onPressed: _loading ? null : _submit,
               style: FilledButton.styleFrom(
                 backgroundColor: AuthScreenColors.orange,
-                foregroundColor: Colors.black,
-                padding: const EdgeInsets.symmetric(vertical: 14),
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                padding: EdgeInsets.symmetric(vertical: 14),
               ),
               child: _loading
-                  ? const SizedBox(
+                  ? SizedBox(
                       height: 22,
                       width: 22,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: Colors.black,
+                        color: Theme.of(context).colorScheme.onPrimary,
                       ),
                     )
                   : Text(l10n.chatCreateSupport),
             ),
-            const SizedBox(height: 28),
-            const Divider(color: AuthScreenColors.surfaceBorder),
-            const SizedBox(height: 20),
+            SizedBox(height: 28),
+            Divider(color: AuthScreenColors.surfaceBorderOf(context)),
+            SizedBox(height: 20),
             OutlinedButton.icon(
               onPressed: _loading
                   ? null
@@ -121,20 +121,20 @@ class _SupportChatStartScreenState extends State<SupportChatStartScreen> {
                         AuthSnackBar.error(context, l10n.actionTryAgain);
                       }
                     },
-              icon: const Icon(Icons.email_outlined, size: 20),
+              icon: Icon(Icons.email_outlined, size: 20),
               label: Text(l10n.settingsContactEmail),
               style: OutlinedButton.styleFrom(
-                foregroundColor: AuthScreenColors.textPrimary,
-                side: const BorderSide(color: AuthScreenColors.surfaceBorder),
-                padding: const EdgeInsets.symmetric(vertical: 14),
+                foregroundColor: AuthScreenColors.textPrimaryOf(context),
+                side: BorderSide(color: AuthScreenColors.surfaceBorderOf(context)),
+                padding: EdgeInsets.symmetric(vertical: 14),
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             Text(
               SupportConfig.supportEmail,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: AuthScreenColors.textSecondary,
+              style: TextStyle(
+                color: AuthScreenColors.textSecondaryOf(context),
                 fontSize: 12,
               ),
             ),

@@ -40,7 +40,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         newPassword.isEmpty ||
         confirmPassword.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Please fill all fields'),
           backgroundColor: Colors.red,
         ),
@@ -49,7 +49,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     }
     if (newPassword != confirmPassword) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Passwords do not match'),
           backgroundColor: Colors.red,
         ),
@@ -87,15 +87,15 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       title: 'Change Password',
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Update your account password',
-                style: TextStyle(color: AuthScreenColors.textSecondary),
+                style: TextStyle(color: AuthScreenColors.textSecondaryOf(context)),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               _PasswordField(
                 label: 'Current Password',
                 hint: 'Enter current password',
@@ -107,7 +107,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   });
                 },
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               _PasswordField(
                 label: 'New Password',
                 hint: 'Enter new password',
@@ -119,7 +119,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   });
                 },
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               _PasswordField(
                 label: 'Confirm New Password',
                 hint: 'Re-enter new password',
@@ -139,22 +139,24 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   onPressed: _isChangingPassword ? null : _submitChangePassword,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AuthScreenColors.orange,
-                    foregroundColor: Colors.black,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
                   child: _isChangingPassword
-                      ? const SizedBox(
+                      ? SizedBox(
                           width: 24,
                           height: 24,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
                             valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.black),
+                                AlwaysStoppedAnimation<Color>(
+                                  Theme.of(context).colorScheme.onPrimary,
+                                ),
                           ),
                         )
-                      : const Text(
+                      : Text(
                           'Update Password',
                           style: TextStyle(
                             fontSize: 16,
@@ -193,38 +195,38 @@ class _PasswordField extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            color: AuthScreenColors.textPrimary,
+          style: TextStyle(
+            color: AuthScreenColors.textPrimaryOf(context),
             fontWeight: FontWeight.w500,
             fontSize: 13,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         TextField(
           controller: controller,
           obscureText: obscureText,
-          style: const TextStyle(color: AuthScreenColors.textPrimary),
+          style: TextStyle(color: AuthScreenColors.textPrimaryOf(context)),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: const TextStyle(color: AuthScreenColors.textSecondary),
+            hintStyle: TextStyle(color: AuthScreenColors.textSecondaryOf(context)),
             filled: true,
-            fillColor: AuthScreenColors.surface,
+            fillColor: AuthScreenColors.surfaceOf(context),
             suffixIcon: IconButton(
               icon: Icon(
                 obscureText ? Icons.visibility_off : Icons.visibility,
-                color: AuthScreenColors.textMuted,
+                color: AuthScreenColors.textMutedOf(context),
               ),
               onPressed: onToggleVisibility,
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide:
-                  const BorderSide(color: AuthScreenColors.surfaceBorder),
+                  BorderSide(color: AuthScreenColors.surfaceBorderOf(context)),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide:
-                  const BorderSide(color: AuthScreenColors.surfaceBorder),
+                  BorderSide(color: AuthScreenColors.surfaceBorderOf(context)),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),

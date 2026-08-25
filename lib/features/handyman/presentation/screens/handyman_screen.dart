@@ -65,7 +65,7 @@ class _HandymanScreenState extends State<HandymanScreen> {
   Color _cardBorder(BuildContext context) {
     if (widget.embedded) return HomeColors.border;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return isDark ? AppColors.darkBorder : const Color(0xFFEEEEEE);
+    return isDark ? AppColors.darkBorder : AppColors.lightBorder;
   }
 
   @override
@@ -75,8 +75,8 @@ class _HandymanScreenState extends State<HandymanScreen> {
     final colorScheme = theme.colorScheme;
     final borderColor = _cardBorder(context);
     final embedded = widget.embedded;
-    final bg = embedded ? HomeColors.background : theme.scaffoldBackgroundColor;
-    final onSurface = embedded ? HomeColors.textPrimary : colorScheme.onSurface;
+    final bg = embedded ? HomeColors.backgroundOf(context) : theme.scaffoldBackgroundColor;
+    final onSurface = embedded ? HomeColors.textPrimaryOf(context) : colorScheme.onSurface;
 
     return Scaffold(
       backgroundColor: bg,
@@ -201,10 +201,10 @@ class _CreateRequestCard extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final accent = embedded ? _handymanBlue : AppColors.primaryColor;
-    final surface = embedded ? HomeColors.surfaceElevated : colorScheme.surface;
-    final titleColor = embedded ? HomeColors.textPrimary : colorScheme.onSurface;
+    final surface = embedded ? HomeColors.surfaceElevatedOf(context) : colorScheme.surface;
+    final titleColor = embedded ? HomeColors.textPrimaryOf(context) : colorScheme.onSurface;
     final subtitleColor =
-        embedded ? HomeColors.textMuted : colorScheme.onSurfaceVariant;
+        embedded ? HomeColors.textMutedOf(context) : colorScheme.onSurfaceVariant;
 
     return Material(
       color: surface,
@@ -290,10 +290,10 @@ class _HandymanEmptyState extends StatelessWidget {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final surface = embedded ? HomeColors.surface : colorScheme.surface;
-    final titleColor = embedded ? HomeColors.textPrimary : colorScheme.onSurface;
+    final surface = embedded ? HomeColors.surfaceOf(context) : colorScheme.surface;
+    final titleColor = embedded ? HomeColors.textPrimaryOf(context) : colorScheme.onSurface;
     final subtitleColor =
-        embedded ? HomeColors.textMuted : colorScheme.onSurfaceVariant;
+        embedded ? HomeColors.textMutedOf(context) : colorScheme.onSurfaceVariant;
     final iconColor = embedded ? _handymanBlue : colorScheme.onSurfaceVariant;
 
     return Container(
@@ -375,9 +375,9 @@ class _HandymanErrorState extends StatelessWidget {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final surface = embedded ? HomeColors.surface : colorScheme.surface;
+    final surface = embedded ? HomeColors.surfaceOf(context) : colorScheme.surface;
     final muted =
-        embedded ? HomeColors.textMuted : colorScheme.onSurfaceVariant;
+        embedded ? HomeColors.textMutedOf(context) : colorScheme.onSurfaceVariant;
 
     return Container(
       width: double.infinity,
@@ -430,10 +430,10 @@ class _RequestCard extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final accent = embedded ? _handymanBlue : AppColors.primaryColor;
-    final surface = embedded ? HomeColors.surface : colorScheme.surface;
-    final titleColor = embedded ? HomeColors.textPrimary : colorScheme.onSurface;
+    final surface = embedded ? HomeColors.surfaceOf(context) : colorScheme.surface;
+    final titleColor = embedded ? HomeColors.textPrimaryOf(context) : colorScheme.onSurface;
     final muted =
-        embedded ? HomeColors.textMuted : colorScheme.onSurfaceVariant;
+        embedded ? HomeColors.textMutedOf(context) : colorScheme.onSurfaceVariant;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppColors.spaceMD),
@@ -538,7 +538,7 @@ class _RequestCard extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: embedded
-                              ? HomeColors.surfaceElevated
+                              ? HomeColors.surfaceElevatedOf(context)
                               : colorScheme.surfaceContainerHighest,
                           borderRadius:
                               BorderRadius.circular(AppColors.radiusFull),

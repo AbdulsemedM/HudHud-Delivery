@@ -20,14 +20,14 @@ class LanguageScreen extends StatelessWidget {
     }) {
       final isSelected = controller.locale.languageCode == code;
       return Container(
-        margin: const EdgeInsets.only(bottom: 8),
+        margin: EdgeInsets.only(bottom: 8),
         decoration: BoxDecoration(
-          color: AuthScreenColors.surface,
+          color: AuthScreenColors.surfaceOf(context),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected
                 ? AuthScreenColors.orange
-                : AuthScreenColors.surfaceBorder,
+                : AuthScreenColors.surfaceBorderOf(context),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -37,19 +37,19 @@ class LanguageScreen extends StatelessWidget {
           },
           title: Text(
             label,
-            style: const TextStyle(color: AuthScreenColors.textPrimary),
+            style: TextStyle(color: AuthScreenColors.textPrimaryOf(context)),
           ),
           subtitle: scriptLabel != null
               ? Text(
                   scriptLabel,
-                  style: const TextStyle(color: AuthScreenColors.textSecondary),
+                  style: TextStyle(color: AuthScreenColors.textSecondaryOf(context)),
                 )
               : null,
           trailing: isSelected
-              ? const Icon(Icons.check_circle, color: AuthScreenColors.orange)
-              : const Icon(
+              ? Icon(Icons.check_circle, color: AuthScreenColors.orange)
+              : Icon(
                   Icons.circle_outlined,
-                  color: AuthScreenColors.textMuted,
+                  color: AuthScreenColors.textMutedOf(context),
                 ),
         ),
       );

@@ -134,18 +134,18 @@ class _ForgotPasswordOtpScreenState extends State<ForgotPasswordOtpScreen> {
                     children: [
                       Text(
                         l10n.forgotPasswordVerifyTitle,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.w700,
-                          color: AuthScreenColors.textPrimary,
+                          color: AuthScreenColors.textPrimaryOf(context),
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         l10n.forgotPasswordVerifySubtitle(masked),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
-                          color: AuthScreenColors.textSecondary,
+                          color: AuthScreenColors.textSecondaryOf(context),
                           height: 1.45,
                         ),
                       ),
@@ -160,15 +160,15 @@ class _ForgotPasswordOtpScreenState extends State<ForgotPasswordOtpScreen> {
                           fontSize: 13,
                           color: _expired
                               ? const Color(0xFFEF5350)
-                              : AuthScreenColors.textSecondary,
+                              : AuthScreenColors.textSecondaryOf(context),
                         ),
                       ),
                       const SizedBox(height: 24),
                       Text(
                         l10n.forgotPasswordOtpLabel,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
-                          color: AuthScreenColors.textSecondary,
+                          color: AuthScreenColors.textSecondaryOf(context),
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -181,13 +181,13 @@ class _ForgotPasswordOtpScreenState extends State<ForgotPasswordOtpScreen> {
                           FilteringTextInputFormatter.digitsOnly,
                         ],
                         enabled: !state.verifyLoading && !state.resendLoading,
-                        style: const TextStyle(
-                          color: AuthScreenColors.textPrimary,
+                        style: TextStyle(
+                          color: AuthScreenColors.textPrimaryOf(context),
                           fontSize: 18,
                           letterSpacing: 8,
                           fontWeight: FontWeight.w600,
                         ),
-                        decoration: authFieldDecoration().copyWith(
+                        decoration: authFieldDecoration(context).copyWith(
                           counterText: '',
                         ),
                         validator: (v) {

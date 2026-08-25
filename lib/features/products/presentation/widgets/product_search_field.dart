@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class ProductSearchField extends StatefulWidget {
@@ -63,11 +64,9 @@ class _ProductSearchFieldState extends State<ProductSearchField> {
     final fill = widget.fillColor ??
         (isDark
             ? theme.colorScheme.surfaceContainerHighest
-            : Colors.grey[100]!);
+            : AppColors.lightInputFill);
     final hint = widget.hintColor ??
-        (isDark
-            ? theme.colorScheme.onSurfaceVariant
-            : Colors.grey[600]!);
+        theme.colorScheme.onSurfaceVariant;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),

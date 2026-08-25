@@ -29,16 +29,16 @@ class ProfileImagePicker extends StatelessWidget {
             bottom: 0,
             right: 0,
             child: Container(
-              padding: const EdgeInsets.all(4),
+              padding: EdgeInsets.all(4),
               decoration: BoxDecoration(
-                color: AuthScreenColors.surface,
+                color: AuthScreenColors.surfaceOf(context),
                 shape: BoxShape.circle,
-                border: Border.all(color: AuthScreenColors.surfaceBorder),
+                border: Border.all(color: AuthScreenColors.surfaceBorderOf(context)),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.camera_alt,
                 size: 20,
-                color: AuthScreenColors.textMuted,
+                color: AuthScreenColors.textMutedOf(context),
               ),
             ),
           ),
@@ -69,26 +69,26 @@ class ProfileTextField extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
-            color: AuthScreenColors.textSecondary,
+            color: AuthScreenColors.textSecondaryOf(context),
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: AuthScreenColors.surface,
+            color: AuthScreenColors.surfaceOf(context),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AuthScreenColors.surfaceBorder),
+            border: Border.all(color: AuthScreenColors.surfaceBorderOf(context)),
           ),
           child: TextFormField(
             controller: controller,
             readOnly: readOnly,
             keyboardType: keyboardType,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
-              color: AuthScreenColors.textPrimary,
+              color: AuthScreenColors.textPrimaryOf(context),
             ),
             decoration: const InputDecoration(
               border: InputBorder.none,

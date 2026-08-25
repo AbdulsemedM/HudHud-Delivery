@@ -592,7 +592,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
           const initialSheetSize = 0.5;
 
           return Scaffold(
-            backgroundColor: HomeColors.background,
+            backgroundColor: HomeColors.backgroundOf(context),
             body: Stack(
               children: [
                 Positioned.fill(
@@ -603,7 +603,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                   left: 16,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: HomeColors.surfaceElevated,
+                      color: HomeColors.surfaceElevatedOf(context),
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
@@ -613,8 +613,8 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                       ],
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.arrow_back,
-                          color: HomeColors.textPrimary),
+                      icon: Icon(Icons.arrow_back,
+                          color: HomeColors.textPrimaryOf(context)),
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ),
@@ -625,7 +625,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                   child: FloatingActionButton(
                     heroTag: 'schedule_delivery_my_location',
                     mini: true,
-                    backgroundColor: HomeColors.surfaceElevated,
+                    backgroundColor: HomeColors.surfaceElevatedOf(context),
                     onPressed: () async {
                       await _getCurrentLocation();
                       if (_pickupPosition != null && mounted) {
@@ -640,7 +640,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                     child: Icon(
                       Icons.my_location,
                       color: _isLoadingLocation
-                          ? HomeColors.textMuted
+                          ? HomeColors.textMutedOf(context)
                           : HomeColors.violet,
                     ),
                   ),
@@ -651,8 +651,8 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                   maxChildSize: 0.85,
                   builder: (context, scrollController) {
                     return Container(
-                      decoration: const BoxDecoration(
-                        color: HomeColors.surface,
+                      decoration: BoxDecoration(
+                        color: HomeColors.surfaceOf(context),
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(AppColors.radiusLG),
                           topRight: Radius.circular(AppColors.radiusLG),
@@ -665,7 +665,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                             width: 40,
                             height: 4,
                             decoration: BoxDecoration(
-                              color: HomeColors.border,
+                              color: HomeColors.borderOf(context),
                               borderRadius: BorderRadius.circular(2),
                             ),
                           ),
@@ -681,19 +681,19 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                                     style: theme.textTheme.headlineSmall
                                             ?.copyWith(
                                           fontWeight: FontWeight.bold,
-                                          color: HomeColors.textPrimary,
+                                          color: HomeColors.textPrimaryOf(context),
                                         ) ??
-                                        const TextStyle(
+                                        TextStyle(
                                           fontSize: 24,
                                           fontWeight: FontWeight.bold,
-                                          color: HomeColors.textPrimary,
+                                          color: HomeColors.textPrimaryOf(context),
                                         ),
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
                                     l10n.courierScheduleSubtitle,
                                     style: theme.textTheme.bodyMedium?.copyWith(
-                                      color: HomeColors.textMuted,
+                                      color: HomeColors.textMutedOf(context),
                                     ),
                                   ),
                                   const SizedBox(height: 24),
@@ -734,7 +734,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                                               l10n.labelDate,
                                               style: theme.textTheme.labelLarge
                                                   ?.copyWith(
-                                                color: HomeColors.textPrimary,
+                                                color: HomeColors.textPrimaryOf(context),
                                               ),
                                             ),
                                             const SizedBox(height: 8),
@@ -749,7 +749,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                                                   borderRadius:
                                                       BorderRadius.circular(12),
                                                   border: Border.all(
-                                                    color: HomeColors.border,
+                                                    color: HomeColors.borderOf(context),
                                                   ),
                                                 ),
                                                 child: Row(
@@ -773,11 +773,11 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                                                         ),
                                                       ),
                                                     ),
-                                                    const Icon(
+                                                    Icon(
                                                       Icons.calendar_today,
                                                       size: 20,
                                                       color:
-                                                          HomeColors.textMuted,
+                                                          HomeColors.textMutedOf(context),
                                                     ),
                                                   ],
                                                 ),
@@ -796,7 +796,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                                               l10n.labelTime,
                                               style: theme.textTheme.labelLarge
                                                   ?.copyWith(
-                                                color: HomeColors.textPrimary,
+                                                color: HomeColors.textPrimaryOf(context),
                                               ),
                                             ),
                                             const SizedBox(height: 8),
@@ -853,7 +853,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                                                         BorderRadius.circular(
                                                             12),
                                                     border: Border.all(
-                                                      color: HomeColors.border,
+                                                      color: HomeColors.borderOf(context),
                                                     ),
                                                   ),
                                                   child:
@@ -904,12 +904,12 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                                     style: theme.textTheme.titleMedium
                                             ?.copyWith(
                                           fontWeight: FontWeight.w600,
-                                          color: HomeColors.textPrimary,
+                                          color: HomeColors.textPrimaryOf(context),
                                         ) ??
-                                        const TextStyle(
+                                        TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w600,
-                                          color: HomeColors.textPrimary,
+                                          color: HomeColors.textPrimaryOf(context),
                                         ),
                                   ),
                                   const SizedBox(height: 12),
@@ -1067,7 +1067,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                                       },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: HomeColors.violet,
-                                        foregroundColor: Colors.white,
+                                        foregroundColor: Theme.of(context).colorScheme.onSecondary,
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(
                                               AppColors.radiusLG),
@@ -1104,8 +1104,8 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
     final theme = Theme.of(context);
     final l10n = context.l10n;
     if (_hasGoogleMapsApiKey == null) {
-      return const ColoredBox(
-        color: HomeColors.background,
+      return ColoredBox(
+        color: HomeColors.backgroundOf(context),
         child: Center(
           child: CircularProgressIndicator(color: HomeColors.violet),
         ),
@@ -1113,7 +1113,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
     }
     if (_hasGoogleMapsApiKey == false) {
       return ColoredBox(
-        color: HomeColors.background,
+        color: HomeColors.backgroundOf(context),
         child: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -1121,7 +1121,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
               l10n.taxiGoogleMapsNotConfigured,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: HomeColors.textPrimary,
+                color: HomeColors.textPrimaryOf(context),
               ),
             ),
           ),
@@ -1190,7 +1190,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
             right: 12,
             bottom: 12,
             child: Material(
-              color: HomeColors.surfaceElevated.withValues(alpha: 0.92),
+              color: HomeColors.surfaceElevatedOf(context).withValues(alpha: 0.92),
               borderRadius: BorderRadius.circular(8),
               child: Padding(
                 padding: const EdgeInsets.all(8),
@@ -1199,7 +1199,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: HomeColors.textMuted,
+                    color: HomeColors.textMutedOf(context),
                   ),
                 ),
               ),
@@ -1234,9 +1234,9 @@ class _LocationField extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: HomeColors.surfaceElevated,
+          color: HomeColors.surfaceElevatedOf(context),
           borderRadius: BorderRadius.circular(AppColors.radiusLG),
-          border: Border.all(color: HomeColors.border),
+          border: Border.all(color: HomeColors.borderOf(context)),
         ),
         child: Row(
           children: [
@@ -1248,25 +1248,25 @@ class _LocationField extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
-                      color: HomeColors.textMuted,
+                      color: HomeColors.textMutedOf(context),
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     value,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: HomeColors.textPrimary,
+                      color: HomeColors.textPrimaryOf(context),
                     ),
                   ),
                 ],
               ),
             ),
             if (!isReadOnly)
-              const Icon(Icons.chevron_right, color: HomeColors.textMuted),
+              Icon(Icons.chevron_right, color: HomeColors.textMutedOf(context)),
           ],
         ),
       ),
@@ -1296,10 +1296,10 @@ class _VehicleTypeOption extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? HomeColors.violet.withValues(alpha: 0.12)
-              : HomeColors.surfaceElevated,
+              : HomeColors.surfaceElevatedOf(context),
           borderRadius: BorderRadius.circular(AppColors.radiusLG),
           border: Border.all(
-            color: isSelected ? HomeColors.violet : HomeColors.border,
+            color: isSelected ? HomeColors.violet : HomeColors.borderOf(context),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -1308,7 +1308,7 @@ class _VehicleTypeOption extends StatelessWidget {
             Icon(
               icon,
               size: 32,
-              color: isSelected ? HomeColors.violet : HomeColors.textMuted,
+              color: isSelected ? HomeColors.violet : HomeColors.textMutedOf(context),
             ),
             const SizedBox(height: 8),
             Text(
@@ -1316,7 +1316,7 @@ class _VehicleTypeOption extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                color: isSelected ? HomeColors.violet : HomeColors.textMuted,
+                color: isSelected ? HomeColors.violet : HomeColors.textMutedOf(context),
               ),
               textAlign: TextAlign.center,
             ),

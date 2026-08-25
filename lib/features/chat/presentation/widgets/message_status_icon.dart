@@ -21,7 +21,7 @@ class MessageStatusIcon extends StatelessWidget {
     final color = onBubbleColor ??
         (status == ChatMessageStatus.read
             ? AppColors.secondaryColor
-            : Colors.white.withValues(alpha: 0.85));
+            : AppColors.lightOnPrimary.withValues(alpha: 0.85));
 
     switch (status) {
       case ChatMessageStatus.sending:

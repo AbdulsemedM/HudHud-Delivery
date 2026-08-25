@@ -53,14 +53,14 @@ class _LoginScreenState extends State<LoginScreen> {
     final shouldExit = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        backgroundColor: AuthScreenColors.surface,
+        backgroundColor: AuthScreenColors.surfaceOf(dialogContext),
         title: Text(
           l10n.exitAppTitle,
-          style: const TextStyle(color: AuthScreenColors.textPrimary),
+          style: TextStyle(color: AuthScreenColors.textPrimaryOf(dialogContext)),
         ),
         content: Text(
           l10n.exitAppMessage,
-          style: const TextStyle(color: AuthScreenColors.textSecondary),
+          style: TextStyle(color: AuthScreenColors.textSecondaryOf(dialogContext)),
         ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
@@ -70,7 +70,7 @@ class _LoginScreenState extends State<LoginScreen> {
             onPressed: () => Navigator.of(dialogContext).pop(false),
             child: Text(
               l10n.actionCancel,
-              style: const TextStyle(color: AuthScreenColors.textSecondary),
+              style: TextStyle(color: AuthScreenColors.textSecondaryOf(dialogContext)),
             ),
           ),
           ElevatedButton(
@@ -126,8 +126,8 @@ class _LoginScreenState extends State<LoginScreen> {
           title: l10n.biometricOptInTitle,
           content: Text(
             l10n.biometricOptInMessage,
-            style: const TextStyle(
-              color: AuthScreenColors.textSecondary,
+            style: TextStyle(
+              color: AuthScreenColors.textSecondaryOf(dialogContext),
               fontSize: 14,
               height: 1.4,
             ),
@@ -230,9 +230,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 20),
                     Row(
                       children: [
-                        const Expanded(
+                        Expanded(
                           child: Divider(
-                            color: AuthScreenColors.textSecondary,
+                            color: AuthScreenColors.textSecondaryOf(context),
                             thickness: 0.6,
                           ),
                         ),
@@ -240,15 +240,15 @@ class _LoginScreenState extends State<LoginScreen> {
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                           child: Text(
                             l10n.loginOrContinueWith,
-                            style: const TextStyle(
-                              color: AuthScreenColors.textSecondary,
+                            style: TextStyle(
+                              color: AuthScreenColors.textSecondaryOf(context),
                               fontSize: 13,
                             ),
                           ),
                         ),
-                        const Expanded(
+                        Expanded(
                           child: Divider(
-                            color: AuthScreenColors.textSecondary,
+                            color: AuthScreenColors.textSecondaryOf(context),
                             thickness: 0.6,
                           ),
                         ),
@@ -288,8 +288,8 @@ class _SignUpPrompt extends StatelessWidget {
         onTap: onPressed,
         child: Text.rich(
           TextSpan(
-            style: const TextStyle(
-              color: AuthScreenColors.textMuted,
+            style: TextStyle(
+              color: AuthScreenColors.textMutedOf(context),
               fontSize: 14,
               height: 1.35,
             ),
@@ -328,14 +328,14 @@ class _GoogleSignInButton extends StatelessWidget {
                 ? null
                 : () => context.read<LoginBloc>().add(GoogleLoginRequested()),
             style: OutlinedButton.styleFrom(
-              side: const BorderSide(
-                color: AuthScreenColors.surfaceBorder,
+              side: BorderSide(
+                color: AuthScreenColors.surfaceBorderOf(context),
                 width: 1.25,
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
               ),
-              backgroundColor: AuthScreenColors.surface,
+              backgroundColor: AuthScreenColors.surfaceOf(context),
             ),
             child: loading
                 ? const SizedBox(
@@ -355,18 +355,18 @@ class _GoogleSignInButton extends StatelessWidget {
                         height: 20,
                         fit: BoxFit.contain,
                         errorBuilder: (context, error, stackTrace) {
-                          return const Icon(
+                          return Icon(
                             Icons.g_mobiledata,
                             size: 22,
-                            color: AuthScreenColors.textMuted,
+                            color: AuthScreenColors.textMutedOf(context),
                           );
                         },
                       ),
                       const SizedBox(width: 12),
                       Text(
                         l10n.continueWithGoogle,
-                        style: const TextStyle(
-                          color: AuthScreenColors.textPrimary,
+                        style: TextStyle(
+                          color: AuthScreenColors.textPrimaryOf(context),
                           fontSize: 15,
                           fontWeight: FontWeight.w500,
                         ),

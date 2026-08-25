@@ -19,14 +19,15 @@ class LogoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final logoColor = AuthScreenColors.textPrimaryOf(context);
     return Image.asset(
       'assets/images/logo.png',
       width: 140,
       fit: BoxFit.contain,
-      color: Colors.white,
+      color: logoColor,
       colorBlendMode: BlendMode.srcIn,
       errorBuilder: (context, error, stackTrace) {
-        return const Icon(Icons.delivery_dining, color: Colors.white, size: 72);
+        return Icon(Icons.delivery_dining, color: logoColor, size: 72);
       },
     );
   }
@@ -43,18 +44,18 @@ class LoginTitle extends StatelessWidget {
       children: [
         Text(
           l10n.welcomeTitle,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.w700,
-            color: AuthScreenColors.textPrimary,
+            color: AuthScreenColors.textPrimaryOf(context),
             height: 1.2,
           ),
         ),
         const SizedBox(height: 8),
         Text(
           l10n.loginSubtitle,
-          style: const TextStyle(
-            color: AuthScreenColors.textSecondary,
+          style: TextStyle(
+            color: AuthScreenColors.textSecondaryOf(context),
             fontSize: 14,
             height: 1.45,
           ),
@@ -216,9 +217,9 @@ class _LoginFormState extends State<LoginForm> {
             else ...[
               Text(
                 l10n.labelEmail,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
-                  color: AuthScreenColors.textSecondary,
+                  color: AuthScreenColors.textSecondaryOf(context),
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -227,15 +228,16 @@ class _LoginFormState extends State<LoginForm> {
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 autofillHints: const [AutofillHints.email],
-                style: const TextStyle(
-                  color: AuthScreenColors.textPrimary,
+                style: TextStyle(
+                  color: AuthScreenColors.textPrimaryOf(context),
                   fontSize: 15,
                 ),
                 decoration: authFieldDecoration(
+                  context,
                   hint: l10n.hintEmail,
-                  prefixIcon: const Icon(
+                  prefixIcon: Icon(
                     Icons.mail_outline_rounded,
-                    color: AuthScreenColors.textSecondary,
+                    color: AuthScreenColors.textSecondaryOf(context),
                     size: 20,
                   ),
                 ),
@@ -245,9 +247,9 @@ class _LoginFormState extends State<LoginForm> {
             const SizedBox(height: 16),
             Text(
               l10n.labelPassword,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
-                color: AuthScreenColors.textSecondary,
+                color: AuthScreenColors.textSecondaryOf(context),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -255,15 +257,16 @@ class _LoginFormState extends State<LoginForm> {
             TextFormField(
               controller: _passwordController,
               obscureText: !_isPasswordVisible,
-              style: const TextStyle(
-                color: AuthScreenColors.textPrimary,
+              style: TextStyle(
+                color: AuthScreenColors.textPrimaryOf(context),
                 fontSize: 15,
               ),
               decoration: authFieldDecoration(
+                context,
                 hint: l10n.hintPassword,
-                prefixIcon: const Icon(
+                prefixIcon: Icon(
                   Icons.lock_outline_rounded,
-                  color: AuthScreenColors.textSecondary,
+                  color: AuthScreenColors.textSecondaryOf(context),
                   size: 20,
                 ),
                 suffixIcon: IconButton(
@@ -271,7 +274,7 @@ class _LoginFormState extends State<LoginForm> {
                     _isPasswordVisible
                         ? Icons.visibility_rounded
                         : Icons.visibility_off_rounded,
-                    color: AuthScreenColors.textSecondary,
+                    color: AuthScreenColors.textSecondaryOf(context),
                   ),
                   onPressed: () {
                     setState(() => _isPasswordVisible = !_isPasswordVisible);
@@ -328,9 +331,9 @@ class _LoginFormState extends State<LoginForm> {
               const SizedBox(height: 16),
               Row(
                 children: [
-                  const Expanded(
+                  Expanded(
                     child: Divider(
-                      color: AuthScreenColors.textSecondary,
+                      color: AuthScreenColors.textSecondaryOf(context),
                       thickness: 0.6,
                     ),
                   ),
@@ -338,15 +341,15 @@ class _LoginFormState extends State<LoginForm> {
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: Text(
                       l10n.loginBiometricOrDivider,
-                      style: const TextStyle(
-                        color: AuthScreenColors.textSecondary,
+                      style: TextStyle(
+                        color: AuthScreenColors.textSecondaryOf(context),
                         fontSize: 13,
                       ),
                     ),
                   ),
-                  const Expanded(
+                  Expanded(
                     child: Divider(
-                      color: AuthScreenColors.textSecondary,
+                      color: AuthScreenColors.textSecondaryOf(context),
                       thickness: 0.6,
                     ),
                   ),

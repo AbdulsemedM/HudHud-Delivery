@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import 'package:hudhud_delivery/core/config/store_config.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
+import 'package:hudhud_delivery/core/theme/system_ui_style.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/utils/store_launcher.dart';
 
@@ -23,12 +24,15 @@ class ForceUpdateScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final scheme = Theme.of(context).colorScheme;
     return PopScope(
       canPop: false,
       child: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle.dark,
+        value: systemUiOverlayFor(context),
         child: Scaffold(
-          backgroundColor: AppColors.lightBackground,
+          backgroundColor:
+              isDark ? AppColors.darkBackground : AppColors.lightBackground,
           body: SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 28),
@@ -47,7 +51,7 @@ class ForceUpdateScreen extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: AppColors.lightOnBackground,
+                          color: scheme.onSurface,
                         ),
                   ),
                   const SizedBox(height: 12),
@@ -57,9 +61,7 @@ class ForceUpdateScreen extends StatelessWidget {
                     '(native / plugin changes cannot be delivered over the air).',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.lightOnBackground.withValues(
-                            alpha: 0.75,
-                          ),
+                          color: scheme.onSurfaceVariant,
                           height: 1.4,
                         ),
                   ),
@@ -70,9 +72,7 @@ class ForceUpdateScreen extends StatelessWidget {
                     'Latest: $latestStoreVersion',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.lightOnBackground.withValues(
-                            alpha: 0.55,
-                          ),
+                          color: scheme.onSurfaceVariant.withValues(alpha: 0.75),
                         ),
                   ),
                   const Spacer(),

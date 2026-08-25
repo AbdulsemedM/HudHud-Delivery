@@ -24,19 +24,19 @@ class DriverContactCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppColors.spaceMD),
       decoration: BoxDecoration(
-        color: HomeColors.surfaceElevated,
+        color: HomeColors.surfaceElevatedOf(context),
         borderRadius: BorderRadius.circular(AppColors.radiusLG),
         border: Border.all(color: borderColor),
       ),
       child: Row(
         children: [
-          const CircleAvatar(
+          CircleAvatar(
             radius: 30,
-            backgroundColor: HomeColors.surface,
+            backgroundColor: HomeColors.surfaceOf(context),
             child: Icon(
               Icons.person,
               size: 30,
-              color: HomeColors.textMuted,
+              color: HomeColors.textMutedOf(context),
             ),
           ),
           const SizedBox(width: 16),
@@ -46,18 +46,18 @@ class DriverContactCard extends StatelessWidget {
               children: [
                 Text(
                   driverName,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: HomeColors.textPrimary,
+                    color: HomeColors.textPrimaryOf(context),
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   (details == null || details!.isEmpty) ? 'Driver' : details!,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
-                    color: HomeColors.textMuted,
+                    color: HomeColors.textMutedOf(context),
                   ),
                 ),
               ],
@@ -68,8 +68,8 @@ class DriverContactCard extends StatelessWidget {
               tooltip: 'Call',
               icon: Container(
                 padding: const EdgeInsets.all(8),
-                decoration: const BoxDecoration(
-                  color: HomeColors.surface,
+                decoration: BoxDecoration(
+                  color: HomeColors.surfaceOf(context),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -84,14 +84,14 @@ class DriverContactCard extends StatelessWidget {
             tooltip: 'Message',
             icon: Container(
               padding: const EdgeInsets.all(8),
-              decoration: const BoxDecoration(
-                color: HomeColors.surface,
+              decoration: BoxDecoration(
+                color: HomeColors.surfaceOf(context),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.chat_bubble_outline,
                 size: 20,
-                color: HomeColors.textPrimary,
+                color: HomeColors.textPrimaryOf(context),
               ),
             ),
             onPressed: onMessage,

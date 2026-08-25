@@ -31,7 +31,7 @@ class DeliveryHistoryCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Material(
-        color: HomeColors.surface,
+        color: HomeColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(AppColors.radiusLG),
         child: InkWell(
           onTap: onTap,
@@ -65,19 +65,19 @@ class DeliveryHistoryCard extends StatelessWidget {
                         orderId,
                         style: Theme.of(context).textTheme.labelMedium?.copyWith(
                               fontWeight: FontWeight.w600,
-                              color: HomeColors.textPrimary,
+                              color: HomeColors.textPrimaryOf(context),
                             ),
                       ),
                       Text(
                         recipient,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: HomeColors.textMuted,
+                              color: HomeColors.textMutedOf(context),
                             ),
                       ),
                       Text(
                         dateTime,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: HomeColors.textMuted,
+                              color: HomeColors.textMutedOf(context),
                             ),
                       ),
                     ],

@@ -102,18 +102,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
     super.dispose();
   }
 
-  static const Color _navInactive = AuthScreenColors.textMuted;
-  static const Color _navActive = AuthScreenColors.orange;
-  static final Color _navIndicator = AuthScreenColors.orange.withValues(alpha: 0.22);
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final navInactive = AuthScreenColors.textMutedOf(context);
+    final navActive = AuthScreenColors.orange;
+    final navIndicator = AuthScreenColors.orange.withValues(alpha: 0.22);
 
     return Scaffold(
       body: _screens[_selectedIndex],
       bottomNavigationBar: Material(
-        color: AuthScreenColors.background,
+        color: AuthScreenColors.backgroundOf(context),
         child: SafeArea(
           top: false,
           child: Theme(
@@ -121,8 +120,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
               navigationBarTheme: NavigationBarThemeData(
                 height: 68,
                 elevation: 0,
-                backgroundColor: AuthScreenColors.background,
-                indicatorColor: _navIndicator,
+                backgroundColor: AuthScreenColors.backgroundOf(context),
+                indicatorColor: navIndicator,
                 indicatorShape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
@@ -134,14 +133,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
                     fontSize: 11.5,
                     letterSpacing: 0.1,
-                    color: selected ? _navActive : _navInactive,
+                    color: selected ? navActive : navInactive,
                   );
                 }),
                 iconTheme: WidgetStateProperty.resolveWith((states) {
                   final selected = states.contains(WidgetState.selected);
                   return IconThemeData(
                     size: 24,
-                    color: selected ? _navActive : _navInactive,
+                    color: selected ? navActive : navInactive,
                   );
                 }),
               ),
@@ -151,9 +150,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
               labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
               height: 68,
               elevation: 0,
-              backgroundColor: AuthScreenColors.background,
+              backgroundColor: AuthScreenColors.backgroundOf(context),
               surfaceTintColor: Colors.transparent,
-              indicatorColor: _navIndicator,
+              indicatorColor: navIndicator,
               indicatorShape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -173,29 +172,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
               },
               destinations: [
                 NavigationDestination(
-                  icon: const Icon(Icons.home_outlined, color: _navInactive),
-                  selectedIcon: const Icon(Icons.home_rounded, color: _navActive),
+                  icon: Icon(Icons.home_outlined, color: navInactive),
+                  selectedIcon: Icon(Icons.home_rounded, color: navActive),
                   label: l10n.navHome,
                 ),
                 NavigationDestination(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.receipt_long_outlined,
-                    color: _navInactive,
+                    color: navInactive,
                   ),
-                  selectedIcon: const Icon(
+                  selectedIcon: Icon(
                     Icons.receipt_long_rounded,
-                    color: _navActive,
+                    color: navActive,
                   ),
                   label: l10n.navOrderHistory,
                 ),
                 NavigationDestination(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.person_outline_rounded,
-                    color: _navInactive,
+                    color: navInactive,
                   ),
-                  selectedIcon: const Icon(
+                  selectedIcon: Icon(
                     Icons.person_rounded,
-                    color: _navActive,
+                    color: navActive,
                   ),
                   label: l10n.navProfile,
                 ),

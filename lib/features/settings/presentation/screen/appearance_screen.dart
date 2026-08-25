@@ -16,16 +16,16 @@ class AppearanceScreen extends StatelessWidget {
     return ProfileDarkPage(
       title: l10n.settingsAppearance,
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         children: [
           Text(
             l10n.appearanceChooseTheme,
-            style: const TextStyle(
-              color: AuthScreenColors.textSecondary,
+            style: TextStyle(
+              color: AuthScreenColors.textSecondaryOf(context),
               fontSize: 15,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           _AppearanceOption(
             icon: Icons.dark_mode,
             title: l10n.themeDark,
@@ -71,21 +71,21 @@ class _AppearanceOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.only(bottom: 12),
       child: Material(
-        color: AuthScreenColors.surface,
+        color: AuthScreenColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(16),
           child: Container(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: isSelected
                     ? AuthScreenColors.orange
-                    : AuthScreenColors.surfaceBorder,
+                    : AuthScreenColors.surfaceBorderOf(context),
                 width: isSelected ? 2 : 1,
               ),
               color: isSelected
@@ -98,9 +98,9 @@ class _AppearanceOption extends StatelessWidget {
                   icon,
                   color: isSelected
                       ? AuthScreenColors.orange
-                      : AuthScreenColors.textMuted,
+                      : AuthScreenColors.textMutedOf(context),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -110,14 +110,14 @@ class _AppearanceOption extends StatelessWidget {
                         style: TextStyle(
                           fontWeight:
                               isSelected ? FontWeight.w600 : FontWeight.normal,
-                          color: AuthScreenColors.textPrimary,
+                          color: AuthScreenColors.textPrimaryOf(context),
                         ),
                       ),
                       Text(
                         subtitle,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
-                          color: AuthScreenColors.textSecondary,
+                          color: AuthScreenColors.textSecondaryOf(context),
                         ),
                       ),
                     ],

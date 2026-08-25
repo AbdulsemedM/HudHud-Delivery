@@ -3,6 +3,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:lottie/lottie.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
+import 'package:hudhud_delivery/core/widgets/theme_toggle_button.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/avatar_util.dart';
 import '../../../../core/widgets/user_avatar.dart';
@@ -169,7 +170,7 @@ class VerificationStatusCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 12, 8, 12),
       decoration: BoxDecoration(
-        color: HomeColors.surface,
+        color: HomeColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: const Color(0xFFFFD600).withValues(alpha: 0.35),
@@ -189,8 +190,8 @@ class VerificationStatusCard extends StatelessWidget {
               children: [
                 Text(
                   message,
-                  style: const TextStyle(
-                    color: HomeColors.textSecondary,
+                  style: TextStyle(
+                    color: HomeColors.textSecondaryOf(context),
                     fontSize: 13,
                     height: 1.3,
                   ),
@@ -214,10 +215,10 @@ class VerificationStatusCard extends StatelessWidget {
             IconButton(
               onPressed: onDismiss,
               visualDensity: VisualDensity.compact,
-              icon: const Icon(
+              icon: Icon(
                 Icons.close,
                 size: 18,
-                color: HomeColors.textMuted,
+                color: HomeColors.textMutedOf(context),
               ),
             ),
         ],
@@ -299,17 +300,17 @@ class _UserProfileHeaderState extends State<UserProfileHeader>
                 ? UserAvatar(
                     radius: 22,
                     imageUrl: avatarUrl,
-                    backgroundColor: HomeColors.surfaceElevated,
+                    backgroundColor: HomeColors.surfaceElevatedOf(context),
                   )
                 : Container(
-                    color: HomeColors.surfaceElevated,
+                    color: HomeColors.surfaceElevatedOf(context),
                     alignment: Alignment.center,
                     child: Text(
                       _initial,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
-                        color: HomeColors.textPrimary,
+                        color: HomeColors.textPrimaryOf(context),
                       ),
                     ),
                   ),
@@ -322,10 +323,10 @@ class _UserProfileHeaderState extends State<UserProfileHeader>
             children: [
               Text(
                 widget.name,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 16,
-                  color: HomeColors.textPrimary,
+                  color: HomeColors.textPrimaryOf(context),
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -387,22 +388,36 @@ class _UserProfileHeaderState extends State<UserProfileHeader>
             ],
           ),
         ),
+        const SizedBox(width: 8),
+        Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: HomeColors.surfaceOf(context),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: HomeColors.surfaceElevatedOf(context)),
+          ),
+          child: ThemeToggleIconButton(
+            iconColor: HomeColors.textPrimaryOf(context),
+          ),
+        ),
+        const SizedBox(width: 8),
         Container(
           key: widget.notificationsKey,
           width: 44,
           height: 44,
           decoration: BoxDecoration(
-            color: HomeColors.surface,
+            color: HomeColors.surfaceOf(context),
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: HomeColors.surfaceElevated),
+            border: Border.all(color: HomeColors.surfaceElevatedOf(context)),
           ),
           child: Stack(
             alignment: Alignment.center,
             children: [
               IconButton(
-                icon: const Icon(
+                icon: Icon(
                   Icons.notifications_outlined,
-                  color: HomeColors.textPrimary,
+                  color: HomeColors.textPrimaryOf(context),
                   size: 22,
                 ),
                 onPressed: widget.onNotificationsTap,
@@ -672,7 +687,7 @@ class OrderHistoryEmptyState extends StatelessWidget {
                 onPressed: onBrowseTap,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryColor,
-                  foregroundColor: Colors.white,
+                  foregroundColor: Theme.of(context).colorScheme.onSecondary,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),

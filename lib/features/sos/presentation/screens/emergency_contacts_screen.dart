@@ -70,8 +70,8 @@ class _EmergencyContactsBodyState extends State<_EmergencyContactsBody> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _openForm(),
         backgroundColor: AuthScreenColors.orange,
-        foregroundColor: Colors.black,
-        icon: const Icon(Icons.person_add_outlined),
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        icon: Icon(Icons.person_add_outlined),
         label: Text(l10n.sosAddContact),
       ),
       body: BlocConsumer<SosBloc, SosState>(
@@ -91,37 +91,37 @@ class _EmergencyContactsBodyState extends State<_EmergencyContactsBody> {
         },
         builder: (context, state) {
           if (state is SosLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(child: CircularProgressIndicator());
           }
           final contacts =
               state is SosLoaded ? state.contacts : <EmergencyContactModel>[];
           if (contacts.isEmpty) {
             return Center(
               child: Padding(
-                padding: const EdgeInsets.all(32),
+                padding: EdgeInsets.all(32),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.contact_emergency_outlined,
                       size: 56,
-                      color: AuthScreenColors.textMuted,
+                      color: AuthScreenColors.textMutedOf(context),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16),
                     Text(
                       l10n.sosNoContacts,
-                      style: const TextStyle(
-                        color: AuthScreenColors.textPrimary,
+                      style: TextStyle(
+                        color: AuthScreenColors.textPrimaryOf(context),
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
                     Text(
                       l10n.sosNoContactsSubtitle,
-                      style: const TextStyle(
-                        color: AuthScreenColors.textSecondary,
+                      style: TextStyle(
+                        color: AuthScreenColors.textSecondaryOf(context),
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -132,18 +132,18 @@ class _EmergencyContactsBodyState extends State<_EmergencyContactsBody> {
           }
 
           return ListView.separated(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 88),
+            padding: EdgeInsets.fromLTRB(16, 16, 16, 88),
             itemCount: contacts.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 8),
+            separatorBuilder: (_, __) => SizedBox(height: 8),
             itemBuilder: (context, index) {
               final contact = contacts[index];
               return Material(
-                color: AuthScreenColors.surface,
+                color: AuthScreenColors.surfaceOf(context),
                 borderRadius: BorderRadius.circular(12),
                 child: ListTile(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
-                    side: const BorderSide(color: AuthScreenColors.surfaceBorder),
+                    side: BorderSide(color: AuthScreenColors.surfaceBorderOf(context)),
                   ),
                   leading: CircleAvatar(
                     backgroundColor: AuthScreenColors.orange.withValues(alpha: 0.2),
@@ -156,7 +156,7 @@ class _EmergencyContactsBodyState extends State<_EmergencyContactsBody> {
                   ),
                   title: Text(
                     contact.name,
-                    style: const TextStyle(color: AuthScreenColors.textPrimary),
+                    style: TextStyle(color: AuthScreenColors.textPrimaryOf(context)),
                   ),
                   subtitle: Text(
                     [
@@ -166,10 +166,10 @@ class _EmergencyContactsBodyState extends State<_EmergencyContactsBody> {
                         contact.relationship,
                       if (contact.isPrimary) 'Primary',
                     ].whereType<String>().join(' · '),
-                    style: const TextStyle(color: AuthScreenColors.textSecondary),
+                    style: TextStyle(color: AuthScreenColors.textSecondaryOf(context)),
                   ),
                   trailing: PopupMenuButton<String>(
-                    color: AuthScreenColors.surface,
+                    color: AuthScreenColors.surfaceOf(context),
                     onSelected: (value) {
                       if (value == 'edit') {
                         _openForm(contact: contact);

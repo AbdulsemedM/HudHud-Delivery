@@ -14,8 +14,10 @@ Future<void> showSoftUpdateDialog(
     context: context,
     barrierDismissible: true,
     builder: (dialogContext) {
+      final isDark = Theme.of(dialogContext).brightness == Brightness.dark;
       return AlertDialog(
-        backgroundColor: AppColors.lightBackground,
+        backgroundColor:
+            isDark ? AppColors.darkSurface : AppColors.lightBackground,
         title: Text(dialogContext.l10n.softUpdateTitle),
         content: Text(
           dialogContext.l10n.softUpdateMessage(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 
 class ChatScrollToBottomFab extends StatelessWidget {
   final VoidCallback onPressed;
@@ -43,7 +44,7 @@ class ChatScrollToBottomFab extends StatelessWidget {
                       newMessageCount > 9 ? '9+' : '$newMessageCount',
                       textAlign: TextAlign.center,
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: AppColors.lightOnPrimary,
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                       ),

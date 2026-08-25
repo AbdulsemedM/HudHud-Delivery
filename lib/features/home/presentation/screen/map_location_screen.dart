@@ -372,7 +372,9 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
                     ),
                     child: Text(
                       context.l10n.selectLocationTitle,
-                      style: const TextStyle(color: Colors.white),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      ),
                     ),
                   ),
                 ),

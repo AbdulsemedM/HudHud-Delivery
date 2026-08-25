@@ -42,7 +42,7 @@ class CheckoutHeroHeader extends StatelessWidget {
           Text(
             'Almost there!',
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.85),
+              color: AppColors.lightOnPrimary.withValues(alpha: 0.85),
               fontSize: 13,
               fontWeight: FontWeight.w500,
             ),
@@ -51,7 +51,7 @@ class CheckoutHeroHeader extends StatelessWidget {
           const Text(
             'Review & place order',
             style: TextStyle(
-              color: Colors.white,
+              color: AppColors.lightOnPrimary,
               fontSize: 22,
               fontWeight: FontWeight.w700,
               letterSpacing: -0.3,
@@ -61,9 +61,10 @@ class CheckoutHeroHeader extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.14),
+              color: AppColors.lightOnPrimary.withValues(alpha: 0.14),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+              border: Border.all(
+                  color: AppColors.lightOnPrimary.withValues(alpha: 0.2)),
             ),
             child: Row(
               children: [
@@ -75,7 +76,7 @@ class CheckoutHeroHeader extends StatelessWidget {
                   width: 1,
                   height: 28,
                   margin: const EdgeInsets.symmetric(horizontal: 16),
-                  color: Colors.white.withValues(alpha: 0.25),
+                  color: AppColors.lightOnPrimary.withValues(alpha: 0.25),
                 ),
                 _HeroStat(
                   icon: Icons.payments_outlined,
@@ -101,13 +102,13 @@ class _HeroStat extends StatelessWidget {
     return Expanded(
       child: Row(
         children: [
-          Icon(icon, color: Colors.white, size: 18),
+          Icon(icon, color: AppColors.lightOnPrimary, size: 18),
           const SizedBox(width: 8),
           Flexible(
             child: Text(
               label,
               style: const TextStyle(
-                color: Colors.white,
+                color: AppColors.lightOnPrimary,
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),
@@ -493,7 +494,7 @@ class _PromoCodeSectionState extends State<PromoCodeSection> {
               },
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.primaryColor,
-                foregroundColor: Colors.white,
+                foregroundColor: AppColors.lightOnPrimary,
                 padding:
                     const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
                 shape: RoundedRectangleBorder(
@@ -780,7 +781,7 @@ class _TipChip extends StatelessWidget {
             label,
             style: TextStyle(
               color: selected
-                  ? Colors.white
+                  ? AppColors.lightOnPrimary
                   : Theme.of(context).colorScheme.onSurface,
               fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
               fontSize: 13,
@@ -852,7 +853,7 @@ class OrderSummarySection extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
-                    color: Colors.white,
+                    color: AppColors.lightOnPrimary,
                   ),
                 ),
               ),
@@ -1082,7 +1083,7 @@ class CheckoutBottomBar extends StatelessWidget {
         color: Theme.of(context).colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
+            color: isDark ? AppColors.darkShadow : AppColors.lightShadow,
             blurRadius: 20,
             offset: const Offset(0, -6),
           ),
@@ -1170,18 +1171,20 @@ class ConfirmOrderButton extends StatelessWidget {
                       width: 22,
                       child: CircularProgressIndicator(
                         strokeWidth: 2.5,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(AppColors.lightOnPrimary),
                       ),
                     )
                   : const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.lock_outline, color: Colors.white, size: 18),
+                        Icon(Icons.lock_outline,
+                            color: AppColors.lightOnPrimary, size: 18),
                         SizedBox(width: 8),
                         Text(
                           'Place Order',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: AppColors.lightOnPrimary,
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
                           ),
@@ -1258,7 +1261,7 @@ class CheckoutSuccessDialog extends StatelessWidget {
                 onPressed: onDone,
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.primaryColor,
-                  foregroundColor: Colors.white,
+                  foregroundColor: AppColors.lightOnPrimary,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),

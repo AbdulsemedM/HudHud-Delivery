@@ -305,10 +305,10 @@ class _PhoneEnrollmentScreenState extends State<PhoneEnrollmentScreen> {
           children: [
             Text(
               onOtp ? l10n.phoneEnrollmentOtpTitle : l10n.phoneEnrollmentTitle,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.w700,
-                color: AuthScreenColors.textPrimary,
+                color: AuthScreenColors.textPrimaryOf(context),
               ),
             ),
             const SizedBox(height: 8),
@@ -316,9 +316,9 @@ class _PhoneEnrollmentScreenState extends State<PhoneEnrollmentScreen> {
               onOtp
                   ? l10n.phoneEnrollmentOtpSubtitle(displayPhone)
                   : l10n.phoneEnrollmentSubtitle,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
-                color: AuthScreenColors.textSecondary,
+                color: AuthScreenColors.textSecondaryOf(context),
                 height: 1.45,
               ),
             ),
@@ -329,7 +329,7 @@ class _PhoneEnrollmentScreenState extends State<PhoneEnrollmentScreen> {
               onPressed: _loading ? null : _openSupport,
               child: Text(
                 l10n.phoneEnrollmentContactSupport,
-                style: const TextStyle(color: AuthScreenColors.textSecondary),
+                style: TextStyle(color: AuthScreenColors.textSecondaryOf(context)),
               ),
             ),
             TextButton(
@@ -385,7 +385,7 @@ class _PhoneEnrollmentScreenState extends State<PhoneEnrollmentScreen> {
             Text(
               l10n.phoneEnrollmentResendIn(_resendSeconds),
               textAlign: TextAlign.center,
-              style: const TextStyle(color: AuthScreenColors.textSecondary),
+              style: TextStyle(color: AuthScreenColors.textSecondaryOf(context)),
             ),
           ],
         ],
@@ -404,9 +404,9 @@ class _PhoneEnrollmentScreenState extends State<PhoneEnrollmentScreen> {
         children: [
           Text(
             l10n.forgotPasswordOtpLabel,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
-              color: AuthScreenColors.textSecondary,
+              color: AuthScreenColors.textSecondaryOf(context),
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -417,13 +417,13 @@ class _PhoneEnrollmentScreenState extends State<PhoneEnrollmentScreen> {
             maxLength: 6,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             enabled: canVerify,
-            style: const TextStyle(
-              color: AuthScreenColors.textPrimary,
+            style: TextStyle(
+              color: AuthScreenColors.textPrimaryOf(context),
               fontSize: 18,
               letterSpacing: 8,
               fontWeight: FontWeight.w600,
             ),
-            decoration: authFieldDecoration().copyWith(counterText: ''),
+            decoration: authFieldDecoration(context).copyWith(counterText: ''),
             validator: (v) {
               final t = v?.trim() ?? '';
               if (t.length != 6) return l10n.validationOtpLength;
@@ -452,7 +452,7 @@ class _PhoneEnrollmentScreenState extends State<PhoneEnrollmentScreen> {
                 style: TextStyle(
                   color: canResend
                       ? AuthScreenColors.orange
-                      : AuthScreenColors.textSecondary,
+                      : AuthScreenColors.textSecondaryOf(context),
                 ),
               ),
             ),
@@ -465,7 +465,7 @@ class _PhoneEnrollmentScreenState extends State<PhoneEnrollmentScreen> {
                     }),
             child: Text(
               l10n.phoneEnrollmentChangeNumber,
-              style: const TextStyle(color: AuthScreenColors.textSecondary),
+              style: TextStyle(color: AuthScreenColors.textSecondaryOf(context)),
             ),
           ),
         ],

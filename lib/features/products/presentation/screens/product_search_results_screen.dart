@@ -137,7 +137,10 @@ class _ProductSearchResultsScreenState extends State<ProductSearchResultsScreen>
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               child: Text(
                 'Price: ${_minPrice ?? '—'} – ${_maxPrice ?? '—'}',
-                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
           Expanded(
@@ -166,7 +169,11 @@ class _ProductSearchResultsScreenState extends State<ProductSearchResultsScreen>
                               _search.isEmpty
                                   ? 'Enter a search term'
                                   : 'No products found',
-                              style: TextStyle(color: Colors.grey[600]),
+                              style: TextStyle(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                              ),
                             ),
                           )
                         : RefreshIndicator(

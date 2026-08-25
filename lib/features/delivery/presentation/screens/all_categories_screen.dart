@@ -233,8 +233,8 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
         ProductSearchField(
           hint: searchHint,
           readOnly: true,
-          fillColor: embedded ? HomeColors.surfaceElevated : null,
-          hintColor: embedded ? HomeColors.textMuted : null,
+          fillColor: embedded ? HomeColors.surfaceElevatedOf(context) : null,
+          hintColor: embedded ? HomeColors.textMutedOf(context) : null,
           onTap: () {
             Navigator.push(
               context,
@@ -254,7 +254,7 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
       final themed = Theme(
         data: HomeColors.darkTheme(theme),
         child: ColoredBox(
-          color: HomeColors.background,
+          color: HomeColors.backgroundOf(context),
           child: body,
         ),
       );
@@ -715,7 +715,7 @@ class _CategoriesGrid extends StatelessWidget {
     final textTheme = theme.textTheme;
     final displayCategories = showAll ? categories : categories.take(3).toList();
     final hasMore = categories.length > 3 && !showAll;
-    final titleColor = embedded ? HomeColors.textPrimary : null;
+    final titleColor = embedded ? HomeColors.textPrimaryOf(context) : null;
     final accentColor = embedded ? HomeColors.orange : AppColors.primaryColor;
 
     TextStyle? sectionTitle(TextStyle? base, {double? fontSize}) =>
@@ -839,7 +839,7 @@ class _CategoriesGrid extends StatelessWidget {
                   Text(
                     categoriesError!,
                     style: textTheme.bodySmall?.copyWith(
-                      color: embedded ? HomeColors.textMuted : null,
+                      color: embedded ? HomeColors.textMutedOf(context) : null,
                     ),
                   ),
                   if (onCategoriesRetry != null) ...[
@@ -1065,7 +1065,7 @@ class _VendorSliderCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: embedded
-                      ? Border.all(color: HomeColors.border)
+                      ? Border.all(color: HomeColors.borderOf(context))
                       : null,
                   boxShadow: [
                     BoxShadow(
@@ -1082,16 +1082,16 @@ class _VendorSliderCard extends StatelessWidget {
                       ? FallbackNetworkImage(
                           url: avatarUrl,
                           fit: BoxFit.cover,
-                          errorBuilder: (_) => _avatarPlaceholder(),
+                          errorBuilder: (_) => _avatarPlaceholder(context),
                         )
                       : (avatarUrl.isNotEmpty
                             ? Image.asset(
                                 avatarUrl,
                                 fit: BoxFit.cover,
                                 errorBuilder: (_, __, ___) =>
-                                    _avatarPlaceholder(),
+                                    _avatarPlaceholder(context),
                               )
-                            : _avatarPlaceholder()),
+                            : _avatarPlaceholder(context)),
                 ),
               ),
               const SizedBox(height: 8),
@@ -1100,7 +1100,7 @@ class _VendorSliderCard extends StatelessWidget {
                 style: textTheme.bodySmall?.copyWith(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: embedded ? HomeColors.textPrimary : null,
+                  color: embedded ? HomeColors.textPrimaryOf(context) : null,
                 ),
                 maxLines: 2,
                 textAlign: TextAlign.center,
@@ -1113,13 +1113,13 @@ class _VendorSliderCard extends StatelessWidget {
     );
   }
 
-  Widget _avatarPlaceholder() {
+  Widget _avatarPlaceholder(BuildContext context) {
     return Container(
-      color: embedded ? HomeColors.surfaceElevated : Colors.grey[200],
+      color: embedded ? HomeColors.surfaceElevatedOf(context) : Colors.grey[200],
       child: Icon(
         Icons.store_rounded,
         size: 36,
-        color: embedded ? HomeColors.textMuted : Colors.grey,
+        color: embedded ? HomeColors.textMutedOf(context) : Colors.grey,
       ),
     );
   }
@@ -1148,10 +1148,10 @@ class _PopularProductCard extends StatelessWidget {
     final deliveryFee = item.deliveryFee;
     final promoText = item.promoLabel;
     final accent = embedded ? HomeColors.orange : AppColors.primaryColor;
-    final cardBg = embedded ? HomeColors.surface : colorScheme.surface;
-    final titleColor = embedded ? HomeColors.textPrimary : null;
+    final cardBg = embedded ? HomeColors.surfaceOf(context) : colorScheme.surface;
+    final titleColor = embedded ? HomeColors.textPrimaryOf(context) : null;
     final mutedColor =
-        embedded ? HomeColors.textMuted : colorScheme.onSurface.withValues(alpha: 0.72);
+        embedded ? HomeColors.textMutedOf(context) : colorScheme.onSurface.withValues(alpha: 0.72);
 
     return Material(
       color: Colors.transparent,
@@ -1162,7 +1162,7 @@ class _PopularProductCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: cardBg,
             borderRadius: BorderRadius.circular(12),
-            border: embedded ? Border.all(color: HomeColors.border) : null,
+            border: embedded ? Border.all(color: HomeColors.borderOf(context)) : null,
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: embedded ? 0.35 : 0.1),
@@ -1188,9 +1188,9 @@ class _PopularProductCard extends StatelessWidget {
                             height: 160,
                             width: double.infinity,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => _imagePlaceholder(),
+                            errorBuilder: (_, __, ___) => _imagePlaceholder(context),
                           )
-                        : _imagePlaceholder(),
+                        : _imagePlaceholder(context),
                   ),
                   if (promoText != null)
                     Positioned(
@@ -1301,15 +1301,15 @@ class _PopularProductCard extends StatelessWidget {
     );
   }
 
-  Widget _imagePlaceholder() {
+  Widget _imagePlaceholder(BuildContext context) {
     return Container(
       height: 160,
       width: double.infinity,
-      color: embedded ? HomeColors.surfaceElevated : Colors.grey[200],
+      color: embedded ? HomeColors.surfaceElevatedOf(context) : Colors.grey[200],
       child: Icon(
         Icons.shopping_bag_outlined,
         size: 48,
-        color: embedded ? HomeColors.textMuted : Colors.grey,
+        color: embedded ? HomeColors.textMutedOf(context) : Colors.grey,
       ),
     );
   }
@@ -1380,7 +1380,7 @@ class _CategoryCard extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final icon = _iconFromMeta(category.meta);
     final imageUrl = category.displayImageUrl;
-    final cardBg = embedded ? HomeColors.surfaceElevated : colorScheme.surface;
+    final cardBg = embedded ? HomeColors.surfaceElevatedOf(context) : colorScheme.surface;
 
     return Material(
       color: Colors.transparent,
@@ -1391,7 +1391,7 @@ class _CategoryCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: cardBg,
             borderRadius: BorderRadius.circular(12),
-            border: embedded ? Border.all(color: HomeColors.border) : null,
+            border: embedded ? Border.all(color: HomeColors.borderOf(context)) : null,
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: embedded ? 0.35 : 0.1),
@@ -1425,7 +1425,7 @@ class _CategoryCard extends StatelessWidget {
                   style: textTheme.bodySmall?.copyWith(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: embedded ? HomeColors.textPrimary : null,
+                    color: embedded ? HomeColors.textPrimaryOf(context) : null,
                   ),
                   maxLines: 2,
                   textAlign: TextAlign.center,

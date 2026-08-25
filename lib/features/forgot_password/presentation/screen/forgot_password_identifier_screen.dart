@@ -124,18 +124,18 @@ class _ForgotPasswordIdentifierViewState
                 const SizedBox(height: 12),
                 Text(
                   l10n.forgotPasswordRequestTitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w700,
-                    color: AuthScreenColors.textPrimary,
+                    color: AuthScreenColors.textPrimaryOf(context),
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   l10n.forgotPasswordRequestSubtitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
-                    color: AuthScreenColors.textSecondary,
+                    color: AuthScreenColors.textSecondaryOf(context),
                     height: 1.45,
                   ),
                 ),
@@ -164,9 +164,9 @@ class _ForgotPasswordIdentifierViewState
                 else ...[
                   Text(
                     l10n.labelEmail,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
-                      color: AuthScreenColors.textSecondary,
+                      color: AuthScreenColors.textSecondaryOf(context),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -175,15 +175,16 @@ class _ForgotPasswordIdentifierViewState
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     enabled: !state.loading,
-                    style: const TextStyle(
-                      color: AuthScreenColors.textPrimary,
+                    style: TextStyle(
+                      color: AuthScreenColors.textPrimaryOf(context),
                       fontSize: 15,
                     ),
                     decoration: authFieldDecoration(
+                      context,
                       hint: l10n.hintEmail,
-                      prefixIcon: const Icon(
+                      prefixIcon: Icon(
                         Icons.mail_outline_rounded,
-                        color: AuthScreenColors.textSecondary,
+                        color: AuthScreenColors.textSecondaryOf(context),
                         size: 20,
                       ),
                     ),

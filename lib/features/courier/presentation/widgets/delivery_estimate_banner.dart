@@ -31,7 +31,7 @@ class DeliveryEstimateBanner extends StatelessWidget {
 
     final l10n = context.l10n;
     final theme = Theme.of(context);
-    const borderColor = HomeColors.border;
+    final borderColor = HomeColors.borderOf(context);
 
     final metaParts = <String>[];
     if (estimatedDistance != null) {
@@ -53,7 +53,7 @@ class DeliveryEstimateBanner extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: HomeColors.surfaceElevated,
+          color: HomeColors.surfaceElevatedOf(context),
           borderRadius: BorderRadius.circular(AppColors.radiusLG),
           border: Border.all(color: borderColor),
         ),
@@ -71,14 +71,14 @@ class DeliveryEstimateBanner extends StatelessWidget {
                         l10n.labelEstimatedCost,
                         style: theme.textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: HomeColors.textPrimary,
+                          color: HomeColors.textPrimaryOf(context),
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         'Based on 1 kg package',
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: HomeColors.textMuted,
+                          color: HomeColors.textMutedOf(context),
                         ),
                       ),
                     ],
@@ -86,9 +86,9 @@ class DeliveryEstimateBanner extends StatelessWidget {
                 ),
                 if (isLoading)
                   Shimmer.fromColors(
-                    baseColor: HomeColors.surfaceElevated,
+                    baseColor: HomeColors.surfaceElevatedOf(context),
                     highlightColor:
-                        HomeColors.surfaceElevated.withValues(alpha: 0.6),
+                        HomeColors.surfaceElevatedOf(context).withValues(alpha: 0.6),
                     child: Container(
                       width: 88,
                       height: 28,
@@ -113,7 +113,7 @@ class DeliveryEstimateBanner extends StatelessWidget {
               Text(
                 metaText,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: HomeColors.textMuted,
+                  color: HomeColors.textMutedOf(context),
                 ),
               ),
             ],

@@ -16,7 +16,7 @@ class SosSettingsScreen extends StatelessWidget {
     return ProfileDarkPage(
       title: l10n.sosSettingsTitle,
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         children: [
           _SosTile(
             icon: Icons.contact_emergency_outlined,
@@ -32,7 +32,7 @@ class SosSettingsScreen extends StatelessWidget {
               );
             },
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           _SosTile(
             icon: Icons.history,
             iconColor: AuthScreenColors.orange,
@@ -47,7 +47,7 @@ class SosSettingsScreen extends StatelessWidget {
               );
             },
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           _SosTile(
             icon: Icons.sos,
             iconColor: const Color(0xFFEF5350),
@@ -82,16 +82,16 @@ class _SosTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AuthScreenColors.surface,
+      color: AuthScreenColors.surfaceOf(context),
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AuthScreenColors.surfaceBorder),
+            border: Border.all(color: AuthScreenColors.surfaceBorderOf(context)),
           ),
           child: Row(
             children: [
@@ -104,7 +104,7 @@ class _SosTile extends StatelessWidget {
                 ),
                 child: Icon(icon, color: iconColor),
               ),
-              const SizedBox(width: 14),
+              SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -114,23 +114,23 @@ class _SosTile extends StatelessWidget {
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 15,
-                        color: titleColor ?? AuthScreenColors.textPrimary,
+                        color: titleColor ?? AuthScreenColors.textPrimaryOf(context),
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4),
                     Text(
                       subtitle,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
-                        color: AuthScreenColors.textSecondary,
+                        color: AuthScreenColors.textSecondaryOf(context),
                       ),
                     ),
                   ],
                 ),
               ),
-              const Icon(
+              Icon(
                 Icons.chevron_right,
-                color: AuthScreenColors.textMuted,
+                color: AuthScreenColors.textMutedOf(context),
               ),
             ],
           ),

@@ -93,18 +93,17 @@ class ThemeController extends ChangeNotifier {
   
   // Update system UI overlay style based on current theme
   void _updateSystemUIOverlay() {
-    final brightness = isDarkMode ? Brightness.dark : Brightness.light;
-    final overlayStyle = brightness == Brightness.dark
-        ? SystemUiOverlayStyle.light
-        : SystemUiOverlayStyle.dark;
-    
-    SystemChrome.setSystemUIOverlayStyle(overlayStyle.copyWith(
-      statusBarColor: AppColors.primaryColor,
-      statusBarIconBrightness: Brightness.light,
-      statusBarBrightness: Brightness.dark,
-      systemNavigationBarColor: brightness == Brightness.dark
-          ? const Color(0xFF121212)
-          : const Color(0xFFFAFAFA),
+    final isDark = isDarkMode;
+    final background =
+        isDark ? AppColors.darkBackground : AppColors.lightBackground;
+
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+      statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+      systemNavigationBarColor: background,
+      systemNavigationBarIconBrightness:
+          isDark ? Brightness.light : Brightness.dark,
     ));
   }
   

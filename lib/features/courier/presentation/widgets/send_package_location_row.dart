@@ -29,10 +29,10 @@ class SendPackageLocationRow extends StatelessWidget {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: HomeColors.surfaceElevated,
+                color: HomeColors.surfaceElevatedOf(context),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(icon, size: 20, color: HomeColors.textPrimary),
+              child: Icon(icon, size: 20, color: HomeColors.textPrimaryOf(context)),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -44,8 +44,8 @@ class SendPackageLocationRow extends StatelessWidget {
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                   color: isPlaceholder
-                      ? HomeColors.textMuted
-                      : HomeColors.textPrimary,
+                      ? HomeColors.textMutedOf(context)
+                      : HomeColors.textPrimaryOf(context),
                 ),
               ),
             ),

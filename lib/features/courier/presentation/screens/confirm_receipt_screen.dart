@@ -93,19 +93,19 @@ class _ConfirmReceiptScreenState extends State<ConfirmReceiptScreen> {
     return CourierTheme.wrap(
       context,
       child: Scaffold(
-        backgroundColor: HomeColors.background,
+        backgroundColor: HomeColors.backgroundOf(context),
         appBar: AppBar(
-          backgroundColor: HomeColors.surface,
+          backgroundColor: HomeColors.surfaceOf(context),
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-            color: HomeColors.textPrimary,
+            icon: Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+            color: HomeColors.textPrimaryOf(context),
             onPressed: () => Navigator.pop(context),
           ),
-          title: const Text(
+          title: Text(
             'Confirm receipt',
             style: TextStyle(
-              color: HomeColors.textPrimary,
+              color: HomeColors.textPrimaryOf(context),
               fontWeight: FontWeight.w600,
               fontSize: 17,
             ),
@@ -123,8 +123,8 @@ class _ConfirmReceiptScreenState extends State<ConfirmReceiptScreen> {
                           Text(
                             _error!,
                             textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: HomeColors.textSecondary,
+                            style: TextStyle(
+                              color: HomeColors.textSecondaryOf(context),
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -141,17 +141,17 @@ class _ConfirmReceiptScreenState extends State<ConfirmReceiptScreen> {
                         Container(
                           padding: const EdgeInsets.all(AppColors.spaceMD),
                           decoration: BoxDecoration(
-                            color: HomeColors.surface,
+                            color: HomeColors.surfaceOf(context),
                             borderRadius: BorderRadius.circular(AppColors.radiusLG),
-                            border: Border.all(color: HomeColors.border),
+                            border: Border.all(color: HomeColors.borderOf(context)),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
+                              Text(
                                 'Did you receive your package?',
                                 style: TextStyle(
-                                  color: HomeColors.textPrimary,
+                                  color: HomeColors.textPrimaryOf(context),
                                   fontWeight: FontWeight.w700,
                                   fontSize: 18,
                                 ),
@@ -160,8 +160,8 @@ class _ConfirmReceiptScreenState extends State<ConfirmReceiptScreen> {
                               Text(
                                 delivery?['tracking_number']?.toString() ??
                                     'Delivery #${widget.deliveryId}',
-                                style: const TextStyle(
-                                  color: HomeColors.textSecondary,
+                                style: TextStyle(
+                                  color: HomeColors.textSecondaryOf(context),
                                   fontSize: 14,
                                 ),
                               ),
@@ -233,8 +233,8 @@ class _InfoRow extends StatelessWidget {
           width: 56,
           child: Text(
             label,
-            style: const TextStyle(
-              color: HomeColors.textMuted,
+            style: TextStyle(
+              color: HomeColors.textMutedOf(context),
               fontSize: 13,
             ),
           ),
@@ -242,8 +242,8 @@ class _InfoRow extends StatelessWidget {
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(
-              color: HomeColors.textPrimary,
+            style: TextStyle(
+              color: HomeColors.textPrimaryOf(context),
               fontSize: 14,
               fontWeight: FontWeight.w500,
             ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/app/navigation/dashboard_navigation.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_gradient_button.dart';
@@ -61,11 +62,11 @@ class _OrdersComingSoonScreenState extends State<OrdersComingSoonScreen>
         DecoratedBox(
           decoration: BoxDecoration(
             gradient: RadialGradient(
-              center: const Alignment(0, -0.45),
+              center: Alignment(0, -0.45),
               radius: 1.15,
               colors: [
                 _brandViolet.withValues(alpha: 0.28),
-                HomeColors.background,
+                HomeColors.backgroundOf(context),
               ],
             ),
           ),
@@ -96,7 +97,7 @@ class _OrdersComingSoonScreenState extends State<OrdersComingSoonScreen>
               );
             },
             child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
+              padding: EdgeInsets.fromLTRB(24, 20, 24, 32),
               child: Column(
                 children: [
                   ScaleTransition(
@@ -105,10 +106,10 @@ class _OrdersComingSoonScreenState extends State<OrdersComingSoonScreen>
                       title: l10n.navOrderHistory,
                     ),
                   ),
-                  const SizedBox(height: 28),
+                  SizedBox(height: 28),
                   Container(
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                        EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
@@ -123,7 +124,7 @@ class _OrdersComingSoonScreenState extends State<OrdersComingSoonScreen>
                     ),
                     child: Text(
                       l10n.serviceComingSoonBadge,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: _brandOrange,
                         fontWeight: FontWeight.w700,
                         fontSize: 12,
@@ -131,29 +132,29 @@ class _OrdersComingSoonScreenState extends State<OrdersComingSoonScreen>
                       ),
                     ),
                   ),
-                  const SizedBox(height: 22),
+                  SizedBox(height: 22),
                   Text(
                     l10n.ordersComingSoonTitle,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: HomeColors.textPrimary,
+                    style: TextStyle(
+                      color: HomeColors.textPrimaryOf(context),
                       fontSize: 26,
                       fontWeight: FontWeight.w800,
                       height: 1.2,
                       letterSpacing: -0.3,
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12),
                   Text(
                     l10n.ordersComingSoonSubtitle,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: HomeColors.textMuted,
+                    style: TextStyle(
+                      color: HomeColors.textMutedOf(context),
                       fontSize: 15,
                       height: 1.55,
                     ),
                   ),
-                  const SizedBox(height: 28),
+                  SizedBox(height: 28),
                   _FeaturePreviewRow(
                     items: [
                       _FeaturePreview(
@@ -173,7 +174,7 @@ class _OrdersComingSoonScreenState extends State<OrdersComingSoonScreen>
                       ),
                     ],
                   ),
-                  const SizedBox(height: 28),
+                  SizedBox(height: 28),
                   _ProgressCard(
                     steps: [
                       l10n.ordersComingSoonStep1,
@@ -181,17 +182,17 @@ class _OrdersComingSoonScreenState extends State<OrdersComingSoonScreen>
                       l10n.ordersComingSoonStep3,
                     ],
                   ),
-                  const SizedBox(height: 32),
+                  SizedBox(height: 32),
                   AuthGradientButton(
                     label: l10n.ordersComingSoonCta,
                     onPressed: _openCourierOnHome,
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12),
                   Text(
                     l10n.ordersComingSoonFootnote,
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: HomeColors.textMuted.withValues(alpha: 0.85),
+                      color: HomeColors.textMutedOf(context).withValues(alpha: 0.85),
                       fontSize: 12,
                       height: 1.4,
                     ),
@@ -247,8 +248,8 @@ class _OrdersHero extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    HomeColors.surfaceElevated,
-                    HomeColors.surface,
+                    HomeColors.surfaceElevatedOf(context),
+                    HomeColors.surfaceOf(context),
                   ],
                 ),
                 border: Border.all(
@@ -267,7 +268,7 @@ class _OrdersHero extends StatelessWidget {
                     bottom: 28,
                     right: 32,
                     child: Container(
-                      padding: const EdgeInsets.all(6),
+                      padding: EdgeInsets.all(6),
                       decoration: BoxDecoration(
                         color: AuthScreenColors.orange,
                         borderRadius: BorderRadius.circular(10),
@@ -280,10 +281,10 @@ class _OrdersHero extends StatelessWidget {
                           ),
                         ],
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.inventory_2_outlined,
                         size: 18,
-                        color: Colors.white,
+                        color: AppColors.lightOnPrimary,
                       ),
                     ),
                   ),
@@ -309,11 +310,11 @@ class _OrdersHero extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 14),
+        SizedBox(height: 14),
         Text(
           title,
-          style: const TextStyle(
-            color: HomeColors.textSecondary,
+          style: TextStyle(
+            color: HomeColors.textSecondaryOf(context),
             fontSize: 13,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.4,
@@ -334,7 +335,7 @@ class _FeaturePreviewRow extends StatelessWidget {
     return Row(
       children: [
         for (var i = 0; i < items.length; i++) ...[
-          if (i > 0) const SizedBox(width: 10),
+          if (i > 0) SizedBox(width: 10),
           Expanded(child: items[i]),
         ],
       ],
@@ -356,9 +357,9 @@ class _FeaturePreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 14),
       decoration: BoxDecoration(
-        color: HomeColors.surface,
+        color: HomeColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: color.withValues(alpha: 0.28)),
       ),
@@ -373,14 +374,14 @@ class _FeaturePreview extends StatelessWidget {
             ),
             child: Icon(icon, color: color, size: 20),
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
           Text(
             label,
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: HomeColors.textSecondary,
+            style: TextStyle(
+              color: HomeColors.textSecondaryOf(context),
               fontSize: 11,
               fontWeight: FontWeight.w600,
               height: 1.25,
@@ -401,17 +402,17 @@ class _ProgressCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
+      padding: EdgeInsets.fromLTRB(18, 18, 18, 16),
       decoration: BoxDecoration(
-        color: HomeColors.surface.withValues(alpha: 0.85),
+        color: HomeColors.surfaceOf(context).withValues(alpha: 0.85),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: HomeColors.border),
+        border: Border.all(color: HomeColors.borderOf(context)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           for (var i = 0; i < steps.length; i++) ...[
-            if (i > 0) const SizedBox(height: 12),
+            if (i > 0) SizedBox(height: 12),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -427,7 +428,7 @@ class _ProgressCard extends StatelessWidget {
                         : null,
                     color: i == 0
                         ? null
-                        : HomeColors.surfaceElevated,
+                        : HomeColors.surfaceElevatedOf(context),
                     border: i == 0
                         ? null
                         : Border.all(
@@ -436,26 +437,26 @@ class _ProgressCard extends StatelessWidget {
                   ),
                   alignment: Alignment.center,
                   child: i == 0
-                      ? const Icon(Icons.check_rounded, size: 14, color: Colors.white)
+                      ? Icon(Icons.check_rounded, size: 14, color: AppColors.lightOnPrimary)
                       : Text(
                           '${i + 1}',
                           style: TextStyle(
-                            color: HomeColors.textMuted.withValues(alpha: 0.9),
+                            color: HomeColors.textMutedOf(context).withValues(alpha: 0.9),
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.only(top: 4),
+                    padding: EdgeInsets.only(top: 4),
                     child: Text(
                       steps[i],
                       style: TextStyle(
                         color: i == 0
-                            ? HomeColors.textPrimary
-                            : HomeColors.textMuted,
+                            ? HomeColors.textPrimaryOf(context)
+                            : HomeColors.textMutedOf(context),
                         fontSize: 13,
                         fontWeight:
                             i == 0 ? FontWeight.w600 : FontWeight.w500,

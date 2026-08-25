@@ -51,7 +51,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       .read<NotificationsBloc>()
                       .add(MarkAllNotificationsReadEvent());
                 },
-                child: const Text(
+                child: Text(
                   'Mark all read',
                   style: TextStyle(color: AuthScreenColors.orange),
                 ),
@@ -65,7 +65,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   Widget _buildBody(BuildContext context, NotificationsState state) {
     if (state is NotificationsLoading) {
-      return const Padding(
+      return Padding(
         padding: EdgeInsets.all(16),
         child: _NotificationsShimmer(),
       );
@@ -73,32 +73,32 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     if (state is NotificationsFailure) {
       return Center(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: EdgeInsets.all(24),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
+              Icon(
                 Icons.error_outline,
                 size: 48,
-                color: AuthScreenColors.textMuted,
+                color: AuthScreenColors.textMutedOf(context),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               Text(
                 state.message,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
-                  color: AuthScreenColors.textSecondary,
+                  color: AuthScreenColors.textSecondaryOf(context),
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               TextButton.icon(
                 onPressed: () => _refetch(state),
-                icon: const Icon(
+                icon: Icon(
                   Icons.refresh,
                   color: AuthScreenColors.orange,
                 ),
-                label: const Text(
+                label: Text(
                   'Retry',
                   style: TextStyle(color: AuthScreenColors.orange),
                 ),
@@ -116,11 +116,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Lottie.asset('assets/animations/browse.json', width: 160),
-              const SizedBox(height: 16),
-              const Text(
+              SizedBox(height: 16),
+              Text(
                 'No notifications yet',
                 style: TextStyle(
-                  color: AuthScreenColors.textPrimary,
+                  color: AuthScreenColors.textPrimaryOf(context),
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
@@ -133,29 +133,29 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         onRefresh: () async => _refetch(state),
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          padding: EdgeInsets.symmetric(vertical: 16),
           children: [
             if (state.temporaryError != null)
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                padding: EdgeInsets.fromLTRB(16, 0, 16, 12),
                 child: Material(
-                  color: AuthScreenColors.surface,
+                  color: AuthScreenColors.surfaceOf(context),
                   borderRadius: BorderRadius.circular(12),
                   child: ListTile(
-                    leading: const Icon(
+                    leading: Icon(
                       Icons.cloud_off_outlined,
                       color: AuthScreenColors.orange,
                     ),
                     title: Text(
                       state.temporaryError!,
-                      style: const TextStyle(
-                        color: AuthScreenColors.textSecondary,
+                      style: TextStyle(
+                        color: AuthScreenColors.textSecondaryOf(context),
                         fontSize: 14,
                       ),
                     ),
                     trailing: TextButton(
                       onPressed: () => _refetch(state),
-                      child: const Text(
+                      child: Text(
                         'Retry',
                         style: TextStyle(color: AuthScreenColors.orange),
                       ),
@@ -173,7 +173,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         ),
       );
     }
-    return const SizedBox.shrink();
+    return SizedBox.shrink();
   }
 
   Map<String, List<NotificationModel>> _groupNotificationsByDate(
@@ -223,22 +223,22 @@ class _NotificationSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: EdgeInsets.symmetric(vertical: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: EdgeInsets.symmetric(horizontal: 16),
             child: Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: AuthScreenColors.textPrimary,
+                color: AuthScreenColors.textPrimaryOf(context),
               ),
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           ...notifications.map((n) => _NotificationItem(notification: n)),
         ],
       ),
@@ -254,7 +254,7 @@ class _NotificationItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final iconColor = notification.isRead
-        ? AuthScreenColors.textMuted
+        ? AuthScreenColors.textMutedOf(context)
         : AuthScreenColors.orange;
     final timeAgo = _formatTimeAgo(notification.createdAt);
     return Material(
@@ -263,18 +263,18 @@ class _NotificationItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         onTap: () => _onTap(context),
         child: Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      padding: const EdgeInsets.all(16),
+      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AuthScreenColors.surface,
+        color: AuthScreenColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AuthScreenColors.surfaceBorder),
+        border: Border.all(color: AuthScreenColors.surfaceBorderOf(context)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: iconColor.withValues(alpha: 0.1),
               shape: BoxShape.circle,
@@ -285,7 +285,7 @@ class _NotificationItem extends StatelessWidget {
               size: 24,
             ),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -296,23 +296,23 @@ class _NotificationItem extends StatelessWidget {
                     fontSize: 16,
                     fontWeight:
                         notification.isRead ? FontWeight.w500 : FontWeight.w600,
-                    color: AuthScreenColors.textPrimary,
+                    color: AuthScreenColors.textPrimaryOf(context),
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 4),
                 Text(
                   notification.message,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
-                    color: AuthScreenColors.textSecondary,
+                    color: AuthScreenColors.textSecondaryOf(context),
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 4),
                 Text(
                   timeAgo,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: AuthScreenColors.textMuted,
+                    color: AuthScreenColors.textMutedOf(context),
                   ),
                 ),
               ],
@@ -370,14 +370,14 @@ class _NotificationsShimmer extends StatelessWidget {
     return Column(
       children: List.generate(5, (index) {
         return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
+          padding: EdgeInsets.only(bottom: 12),
           child: Shimmer.fromColors(
-            baseColor: AuthScreenColors.surface,
-            highlightColor: AuthScreenColors.surfaceBorder,
+            baseColor: AuthScreenColors.surfaceOf(context),
+            highlightColor: AuthScreenColors.surfaceBorderOf(context),
             child: Container(
               height: 72,
               decoration: BoxDecoration(
-                color: AuthScreenColors.surface,
+                color: AuthScreenColors.surfaceOf(context),
                 borderRadius: BorderRadius.circular(16),
               ),
             ),

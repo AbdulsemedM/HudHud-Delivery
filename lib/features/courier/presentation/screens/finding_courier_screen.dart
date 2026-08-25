@@ -479,7 +479,7 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
       child: Builder(
         builder: (context) {
           final theme = Theme.of(context);
-          const borderColor = HomeColors.border;
+          final borderColor = HomeColors.borderOf(context);
           final privacy = _nearbyPoller.result.privacyMessage;
           final nearbyEmpty = _nearbyPoller.result.drivers.isEmpty;
 
@@ -489,7 +489,7 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
               if (!didPop) _goToHome();
             },
             child: Scaffold(
-              backgroundColor: HomeColors.background,
+              backgroundColor: HomeColors.backgroundOf(context),
               body: Stack(
                 children: [
                   _buildMapOrFallback(context),
@@ -497,13 +497,13 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
                     top: MediaQuery.paddingOf(context).top + 8,
                     left: 16,
                     child: Material(
-                      color: HomeColors.surfaceElevated,
+                      color: HomeColors.surfaceElevatedOf(context),
                       shape: const CircleBorder(),
                       elevation: 2,
                       child: IconButton(
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.close,
-                          color: HomeColors.textPrimary,
+                          color: HomeColors.textPrimaryOf(context),
                         ),
                         onPressed: _goToHome,
                         tooltip: 'Go to home',
@@ -516,8 +516,8 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
                     maxChildSize: 0.55,
                     builder: (context, scrollController) {
                       return Container(
-                        decoration: const BoxDecoration(
-                          color: HomeColors.surface,
+                        decoration: BoxDecoration(
+                          color: HomeColors.surfaceOf(context),
                           borderRadius: BorderRadius.vertical(
                             top: Radius.circular(AppColors.radiusLG),
                           ),
@@ -541,7 +541,7 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
                                 width: 40,
                                 height: 4,
                                 decoration: BoxDecoration(
-                                  color: HomeColors.border,
+                                  color: HomeColors.borderOf(context),
                                   borderRadius: BorderRadius.circular(2),
                                 ),
                               ),
@@ -562,7 +562,7 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
                                       .courierFindingNearestDriversSubtitle,
                               textAlign: TextAlign.center,
                               style: theme.textTheme.bodyMedium?.copyWith(
-                                color: HomeColors.textMuted,
+                                color: HomeColors.textMutedOf(context),
                               ),
                             ),
                             if (nearbyEmpty) ...[
@@ -571,7 +571,7 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
                                 'No drivers nearby yet — still searching',
                                 textAlign: TextAlign.center,
                                 style: theme.textTheme.bodySmall?.copyWith(
-                                  color: HomeColors.textMuted,
+                                  color: HomeColors.textMutedOf(context),
                                 ),
                               ),
                             ],
@@ -581,7 +581,7 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
                                 privacy,
                                 textAlign: TextAlign.center,
                                 style: theme.textTheme.bodySmall?.copyWith(
-                                  color: HomeColors.textMuted,
+                                  color: HomeColors.textMutedOf(context),
                                 ),
                               ),
                             ],
@@ -652,8 +652,8 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
   Widget _buildMapOrFallback(BuildContext context) {
     final theme = Theme.of(context);
     if (_hasGoogleMapsApiKey == null) {
-      return const ColoredBox(
-        color: HomeColors.background,
+      return ColoredBox(
+        color: HomeColors.backgroundOf(context),
         child: Center(
           child: CircularProgressIndicator(color: HomeColors.violet),
         ),
@@ -661,7 +661,7 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
     }
     if (_hasGoogleMapsApiKey == false) {
       return ColoredBox(
-        color: HomeColors.background,
+        color: HomeColors.backgroundOf(context),
         child: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -669,7 +669,7 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
               context.l10n.taxiGoogleMapsNotConfigured,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: HomeColors.textPrimary,
+                color: HomeColors.textPrimaryOf(context),
               ),
             ),
           ),

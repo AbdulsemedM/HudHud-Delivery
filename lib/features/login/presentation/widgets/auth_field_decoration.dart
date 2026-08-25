@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
 
-InputDecoration authFieldDecoration({
+InputDecoration authFieldDecoration(
+  BuildContext context, {
   String? hint,
   Widget? prefixIcon,
   Widget? suffixIcon,
@@ -12,12 +13,12 @@ InputDecoration authFieldDecoration({
     labelText: labelText,
     prefixIcon: prefixIcon,
     suffixIcon: suffixIcon,
-    hintStyle: const TextStyle(
-      color: AuthScreenColors.textSecondary,
+    hintStyle: TextStyle(
+      color: AuthScreenColors.textSecondaryOf(context),
       fontSize: 14,
     ),
     filled: true,
-    fillColor: AuthScreenColors.surface,
+    fillColor: AuthScreenColors.surfaceOf(context),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(14),
       borderSide: BorderSide.none,
@@ -45,12 +46,15 @@ InputDecoration authFieldDecoration({
   );
 }
 
-BoxDecoration authSurfaceBoxDecoration({bool withBorder = false}) {
+BoxDecoration authSurfaceBoxDecoration(
+  BuildContext context, {
+  bool withBorder = false,
+}) {
   return BoxDecoration(
-    color: AuthScreenColors.surface,
+    color: AuthScreenColors.surfaceOf(context),
     borderRadius: BorderRadius.circular(14),
     border: withBorder
-        ? Border.all(color: AuthScreenColors.surfaceBorder)
+        ? Border.all(color: AuthScreenColors.surfaceBorderOf(context))
         : null,
   );
 }

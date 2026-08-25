@@ -937,9 +937,9 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
           }
 
           final theme = Theme.of(context);
-          const borderColor = HomeColors.border;
+          final borderColor = HomeColors.borderOf(context);
           return Scaffold(
-            backgroundColor: HomeColors.background,
+            backgroundColor: HomeColors.backgroundOf(context),
             body: LayoutBuilder(
               builder: (context, constraints) {
                 final mapBottomPadding = constraints.maxHeight * 0.48;
@@ -956,7 +956,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                       left: 16,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: HomeColors.surfaceElevated,
+                          color: HomeColors.surfaceElevatedOf(context),
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
@@ -966,8 +966,8 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                           ],
                         ),
                         child: IconButton(
-                          icon: const Icon(Icons.arrow_back,
-                              color: HomeColors.textPrimary),
+                          icon: Icon(Icons.arrow_back,
+                              color: HomeColors.textPrimaryOf(context)),
                           onPressed: () => Navigator.pop(context),
                         ),
                       ),
@@ -978,7 +978,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: HomeColors.surfaceElevated,
+                          color: HomeColors.surfaceElevatedOf(context),
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
@@ -1000,8 +1000,8 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                       maxChildSize: 0.85,
                       builder: (context, scrollController) {
                         return Container(
-                          decoration: const BoxDecoration(
-                            color: HomeColors.surface,
+                          decoration: BoxDecoration(
+                            color: HomeColors.surfaceOf(context),
                             borderRadius: BorderRadius.only(
                               topLeft: Radius.circular(AppColors.radiusLG),
                               topRight: Radius.circular(AppColors.radiusLG),
@@ -1019,7 +1019,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                                 width: 40,
                                 height: 4,
                                 decoration: BoxDecoration(
-                                  color: HomeColors.border,
+                                  color: HomeColors.borderOf(context),
                                   borderRadius: BorderRadius.circular(2),
                                 ),
                               ),
@@ -1036,7 +1036,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                                         style: theme.textTheme.headlineSmall
                                             ?.copyWith(
                                           fontWeight: FontWeight.w700,
-                                          color: HomeColors.textPrimary,
+                                          color: HomeColors.textPrimaryOf(context),
                                         ),
                                       ),
                                       const SizedBox(height: AppColors.spaceMD),
@@ -1102,7 +1102,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                                               'Estimated fee',
                                               style: theme.textTheme.bodySmall
                                                   ?.copyWith(
-                                                color: HomeColors.textMuted,
+                                                color: HomeColors.textMutedOf(context),
                                               ),
                                             ),
                                             const SizedBox(height: 4),
@@ -1173,7 +1173,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                                               : _createDeliveryRequest,
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: HomeColors.violet,
-                                            foregroundColor: Colors.white,
+                                            foregroundColor: Theme.of(context).colorScheme.onSecondary,
                                             shape: RoundedRectangleBorder(
                                               borderRadius:
                                                   BorderRadius.circular(
@@ -1224,23 +1224,23 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
     double bottomPadding = 0,
   }) {
     if (_hasGoogleMapsApiKey == null) {
-      return const ColoredBox(
-        color: HomeColors.background,
+      return ColoredBox(
+        color: HomeColors.backgroundOf(context),
         child: Center(
           child: CircularProgressIndicator(color: HomeColors.violet),
         ),
       );
     }
     if (_hasGoogleMapsApiKey == false) {
-      return const ColoredBox(
-        color: HomeColors.background,
+      return ColoredBox(
+        color: HomeColors.backgroundOf(context),
         child: Center(
           child: Padding(
             padding: EdgeInsets.all(24),
             child: Text(
               'Google Maps is not configured on iOS. Add GOOGLE_MAPS_API_KEY and restart the app.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: HomeColors.textPrimary),
+              style: TextStyle(color: HomeColors.textPrimaryOf(context)),
             ),
           ),
         ),
@@ -1321,7 +1321,7 @@ class _DetailCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppColors.spaceMD),
       decoration: BoxDecoration(
-        color: HomeColors.surfaceElevated,
+        color: HomeColors.surfaceElevatedOf(context),
         borderRadius: BorderRadius.circular(AppColors.radiusLG),
         border: Border.all(color: borderColor),
       ),
@@ -1359,7 +1359,7 @@ class _DetailRow extends StatelessWidget {
               Text(
                 label,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: HomeColors.textMuted,
+                      color: HomeColors.textMutedOf(context),
                     ),
               ),
               const SizedBox(height: 4),
@@ -1367,7 +1367,7 @@ class _DetailRow extends StatelessWidget {
                 value,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w500,
-                      color: HomeColors.textPrimary,
+                      color: HomeColors.textPrimaryOf(context),
                     ),
               ),
             ],

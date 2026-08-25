@@ -208,11 +208,11 @@ class SplashTagline extends StatelessWidget {
     return Text(
       context.l10n.splashTagline,
       textAlign: TextAlign.center,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 11,
         fontWeight: FontWeight.w500,
         letterSpacing: 2.4,
-        color: SplashColors.textMuted,
+        color: SplashColors.textMutedOf(context),
       ),
     );
   }
@@ -232,9 +232,9 @@ class SplashStatus extends StatelessWidget {
         const SizedBox(height: 12),
         Text(
           context.l10n.splashStatus,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 12,
-            color: SplashColors.textMuted,
+            color: SplashColors.textMutedOf(context),
             fontWeight: FontWeight.w400,
           ),
         ),
@@ -379,8 +379,8 @@ class SplashGlowBackground extends StatelessWidget {
     return Container(
       width: double.infinity,
       height: double.infinity,
-      decoration: const BoxDecoration(
-        color: SplashColors.bgOuter,
+      decoration: BoxDecoration(
+        color: SplashColors.bgOuterOf(context),
       ),
       child: Stack(
         fit: StackFit.expand,
@@ -433,16 +433,16 @@ class SplashGlowBackground extends StatelessWidget {
               ),
             ),
           ),
-          const DecoratedBox(
+          DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Color(0x001D1224),
-                  SplashColors.bgDeep,
+                  SplashColors.bgDeepOf(context).withValues(alpha: 0),
+                  SplashColors.bgDeepOf(context),
                 ],
-                stops: [0.0, 0.55],
+                stops: const [0.0, 0.55],
               ),
             ),
           ),

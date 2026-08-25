@@ -281,7 +281,10 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   child: Text(
                     'Price: ${_minPrice ?? 'â€”'} â€“ ${_maxPrice ?? 'â€”'}',
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ),
             ],
@@ -353,7 +356,9 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
                                             fontSize: 14,
-                                            color: Colors.grey[600],
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurfaceVariant,
                                           ),
                                         ),
                                         const SizedBox(height: 16),
@@ -405,22 +410,31 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
               else if (widget.vendor == null)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Container(
-                    height: 100,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Center(
-                      child: Text(
-                        'ETB 0 Delivery Fee with selected products',
-                        style: TextStyle(
-                          color: Colors.black54,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
+                  child: Builder(
+                    builder: (context) {
+                      final scheme = Theme.of(context).colorScheme;
+                      final isDark =
+                          Theme.of(context).brightness == Brightness.dark;
+                      return Container(
+                        height: 100,
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? AppColors.darkSurfaceVariant
+                              : AppColors.lightInputFill,
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                      ),
-                    ),
+                        child: Center(
+                          child: Text(
+                            'ETB 0 Delivery Fee with selected products',
+                            style: TextStyle(
+                              color: scheme.onSurfaceVariant,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
               if (widget.vendor == null) const SizedBox(height: 24),
@@ -471,7 +485,7 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                 color: AppColors.primaryColor,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
+                    color: AppColors.lightShadow,
                     blurRadius: 10,
                     offset: const Offset(0, -5),
                   ),
@@ -481,7 +495,7 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                 children: [
                   const Icon(
                     Icons.shopping_bag_outlined,
-                    color: Colors.white,
+                    color: AppColors.lightOnPrimary,
                     size: 22,
                   ),
                   const SizedBox(width: 8),
@@ -489,7 +503,7 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                     child: Text(
                       'TOTAL ITEMS: $_totalItems',
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: AppColors.lightOnPrimary,
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                       ),
@@ -501,7 +515,7 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                   Text(
                     'ETB${_totalPrice.toStringAsFixed(1)}',
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: AppColors.lightOnPrimary,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
@@ -511,7 +525,7 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                   TextButton(
                     onPressed: _goToCart,
                     style: TextButton.styleFrom(
-                      backgroundColor: Colors.white,
+                      backgroundColor: AppColors.lightSurface,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
                         vertical: 8,
@@ -624,7 +638,7 @@ class _VendorDetailHeader extends StatelessWidget {
                       padding: EdgeInsets.all(10),
                       child: Icon(
                         Icons.arrow_back_ios_new_rounded,
-                        color: Colors.white,
+                        color: AppColors.lightOnPrimary,
                         size: 20,
                       ),
                     ),
@@ -646,7 +660,7 @@ class _VendorDetailHeader extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w800,
-                    color: Colors.white,
+                    color: AppColors.lightOnPrimary,
                     height: 1.15,
                     letterSpacing: -0.8,
                   ),
@@ -678,7 +692,7 @@ class _VendorDetailHeader extends StatelessWidget {
                     branches.map((b) => b.name).join(' Â· '),
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.white.withValues(alpha: 0.85),
+                      color: AppColors.lightOnPrimary.withValues(alpha: 0.85),
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -697,10 +711,10 @@ class _VendorDetailHeader extends StatelessWidget {
                           vertical: 12,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.14),
+                          color: AppColors.lightOnPrimary.withValues(alpha: 0.14),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.22),
+                            color: AppColors.lightOnPrimary.withValues(alpha: 0.22),
                           ),
                         ),
                         child: Row(
@@ -714,7 +728,7 @@ class _VendorDetailHeader extends StatelessWidget {
                               ),
                               child: const Icon(
                                 Icons.schedule_rounded,
-                                color: Colors.white,
+                                color: AppColors.lightOnPrimary,
                                 size: 20,
                               ),
                             ),
@@ -728,7 +742,7 @@ class _VendorDetailHeader extends StatelessWidget {
                                     style: TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,
-                                      color: Colors.white
+                                      color: AppColors.lightOnPrimary
                                           .withValues(alpha: 0.75),
                                       letterSpacing: 0.4,
                                     ),
@@ -739,7 +753,7 @@ class _VendorDetailHeader extends StatelessWidget {
                                     style: const TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.w700,
-                                      color: Colors.white,
+                                      color: AppColors.lightOnPrimary,
                                     ),
                                   ),
                                 ],
@@ -758,7 +772,7 @@ class _VendorDetailHeader extends StatelessWidget {
                     vendor.description!,
                     style: TextStyle(
                       fontSize: 13,
-                      color: Colors.white.withValues(alpha: 0.88),
+                      color: AppColors.lightOnPrimary.withValues(alpha: 0.88),
                       height: 1.4,
                     ),
                     maxLines: 2,
@@ -785,11 +799,11 @@ class _VendorDetailHeader extends StatelessWidget {
             ],
           ),
         ),
-        child: const Center(
+        child: Center(
           child: Icon(
             Icons.storefront_rounded,
             size: 88,
-            color: Colors.white38,
+            color: AppColors.lightOnPrimary.withValues(alpha: 0.38),
           ),
         ),
       );
@@ -825,7 +839,7 @@ class _VendorInfoChip extends StatelessWidget {
             style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w700,
-              color: Colors.white,
+              color: AppColors.lightOnPrimary,
             ),
           ),
         ],
@@ -847,12 +861,13 @@ class _CategoryTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryColor : Colors.white,
+          color: isSelected ? AppColors.primaryColor : scheme.surface,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected ? AppColors.primaryColor : AppColors.primaryColor,
@@ -864,7 +879,7 @@ class _CategoryTab extends StatelessWidget {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: isSelected ? Colors.white : AppColors.primaryColor,
+            color: isSelected ? AppColors.lightOnPrimary : AppColors.primaryColor,
           ),
         ),
       ),
@@ -895,6 +910,7 @@ class _ProductSectionFromModel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
@@ -905,10 +921,10 @@ class _ProductSectionFromModel extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF2C3E50),
+                  color: scheme.onSurface,
                 ),
               ),
               TextButton(
@@ -916,9 +932,19 @@ class _ProductSectionFromModel extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(context.l10n.actionSeeAll, style: const TextStyle(fontSize: 14, color: Color(0xFF2C3E50))),
+                    Text(
+                      context.l10n.actionSeeAll,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: scheme.onSurface,
+                      ),
+                    ),
                     const SizedBox(width: 4),
-                    Icon(Icons.arrow_forward, size: 16, color: Colors.grey[600]),
+                    Icon(
+                      Icons.arrow_forward,
+                      size: 16,
+                      color: scheme.onSurfaceVariant,
+                    ),
                   ],
                 ),
               ),

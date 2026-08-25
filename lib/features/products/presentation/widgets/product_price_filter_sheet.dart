@@ -100,6 +100,7 @@ class _ProductPriceFilterSheetBodyState
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Padding(
       padding: EdgeInsets.only(
         left: 20,
@@ -116,7 +117,7 @@ class _ProductPriceFilterSheetBodyState
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey[400],
+                color: scheme.outline.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -158,7 +159,7 @@ class _ProductPriceFilterSheetBodyState
             const SizedBox(height: 8),
             Text(
               _error!,
-              style: const TextStyle(color: Colors.red, fontSize: 13),
+              style: TextStyle(color: scheme.error, fontSize: 13),
             ),
           ],
           const SizedBox(height: 20),

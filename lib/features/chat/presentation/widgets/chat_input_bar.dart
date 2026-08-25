@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hudhud_delivery/features/chat/presentation/theme/chat_theme.dart';
@@ -229,7 +230,7 @@ class _SendButton extends StatelessWidget {
         onTap: onPressed,
         child: const Padding(
           padding: EdgeInsets.all(12),
-          child: Icon(Icons.send_rounded, color: Colors.white, size: 22),
+          child: Icon(Icons.send_rounded, color: AppColors.lightOnPrimary, size: 22),
         ),
       ),
     );

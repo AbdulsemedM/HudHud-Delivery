@@ -24,7 +24,7 @@ class ButtonUtil {
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: backgroundColor ?? AppColors.primaryColor,
-          foregroundColor: textColor ?? Colors.white,
+          foregroundColor: textColor ?? AppColors.lightOnPrimary,
           padding: padding ?? const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           elevation: elevation ?? 2,
           shape: RoundedRectangleBorder(
@@ -40,7 +40,7 @@ class ButtonUtil {
                 height: 20,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.lightOnPrimary),
                 ),
               )
             : Row(
@@ -207,13 +207,13 @@ class ButtonUtil {
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    iconColor ?? Colors.white,
+                    iconColor ?? AppColors.lightOnPrimary,
                   ),
                 ),
               )
             : Icon(
                 icon,
-                color: iconColor ?? Colors.white,
+                color: iconColor ?? AppColors.lightOnPrimary,
                 size: iconSize ?? 24,
               ),
         padding: padding ?? EdgeInsets.zero,
@@ -236,7 +236,7 @@ class ButtonUtil {
     return FloatingActionButton(
       onPressed: isLoading ? null : onPressed,
       backgroundColor: backgroundColor ?? AppColors.primaryColor,
-      foregroundColor: iconColor ?? Colors.white,
+      foregroundColor: iconColor ?? AppColors.lightOnPrimary,
       tooltip: tooltip,
       heroTag: heroTag,
       child: isLoading
@@ -245,7 +245,7 @@ class ButtonUtil {
               height: 20,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                valueColor: AlwaysStoppedAnimation<Color>(AppColors.lightOnPrimary),
               ),
             )
           : Icon(
@@ -295,7 +295,7 @@ class ButtonUtil {
                       height: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.lightOnPrimary),
                       ),
                     ),
                   )
@@ -307,7 +307,7 @@ class ButtonUtil {
                         Icon(
                           icon,
                           size: 18,
-                          color: textColor ?? Colors.white,
+                          color: textColor ?? AppColors.lightOnPrimary,
                         ),
                         const SizedBox(width: 8),
                       ],
@@ -316,7 +316,7 @@ class ButtonUtil {
                         style: TextStyle(
                           fontSize: fontSize ?? 16,
                           fontWeight: fontWeight ?? FontWeight.w600,
-                          color: textColor ?? Colors.white,
+                          color: textColor ?? AppColors.lightOnPrimary,
                         ),
                       ),
                     ],

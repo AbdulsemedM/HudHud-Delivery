@@ -59,7 +59,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
     return ProfileDarkPage(
       title: 'Personal Details',
       body: _isLoading
-          ? const Padding(
+          ? Padding(
               padding: EdgeInsets.all(16),
               child: _PersonalDetailsShimmer(),
             )
@@ -68,14 +68,14 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                 children: [
                   if (_errorMessage != null) ...[
                     Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: EdgeInsets.all(16),
                       child: Text(
                         _errorMessage!,
-                        style: const TextStyle(color: Colors.red),
+                        style: TextStyle(color: Colors.red),
                       ),
                     ),
                   ],
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20),
                   Stack(
                     children: [
                       Container(
@@ -92,17 +92,17 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                             ? UserAvatar(
                                 radius: 50,
                                 imageUrl: getDisplayAvatarUrl(_user),
-                                backgroundColor: AuthScreenColors.surfaceBorder,
+                                backgroundColor: AuthScreenColors.surfaceBorderOf(context),
                               )
                             : CircleAvatar(
                                 radius: 50,
-                                backgroundColor: AuthScreenColors.surfaceBorder,
+                                backgroundColor: AuthScreenColors.surfaceBorderOf(context),
                                 child: Text(
                                   _initial,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 36,
                                     fontWeight: FontWeight.w700,
-                                    color: AuthScreenColors.textPrimary,
+                                    color: AuthScreenColors.textPrimaryOf(context),
                                   ),
                                 ),
                               ),
@@ -114,14 +114,14 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                           width: 32,
                           height: 32,
                           decoration: BoxDecoration(
-                            color: AuthScreenColors.surface,
+                            color: AuthScreenColors.surfaceOf(context),
                             shape: BoxShape.circle,
                             border: Border.all(
                               color: AuthScreenColors.orange,
                               width: 2,
                             ),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.camera_alt,
                             size: 16,
                             color: AuthScreenColors.orange,
@@ -130,25 +130,25 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   Text(
                     _user?.name ?? '—',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: AuthScreenColors.textPrimary,
+                      color: AuthScreenColors.textPrimaryOf(context),
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4),
                   Text(
                     _user?.email ?? '—',
-                    style: const TextStyle(
-                      color: AuthScreenColors.textSecondary,
+                    style: TextStyle(
+                      color: AuthScreenColors.textSecondaryOf(context),
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  SizedBox(height: 32),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: EdgeInsets.symmetric(horizontal: 16),
                     child: Column(
                       children: [
                         _DetailCard(
@@ -156,19 +156,19 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                           label: 'Full Name',
                           value: _user?.name ?? '—',
                         ),
-                        const SizedBox(height: 16),
+                        SizedBox(height: 16),
                         _DetailCard(
                           icon: Icons.phone,
                           label: 'Phone number',
                           value: _user?.phone ?? '—',
                         ),
-                        const SizedBox(height: 16),
+                        SizedBox(height: 16),
                         _DetailCard(
                           icon: Icons.email,
                           label: 'Email address',
                           value: _user?.email ?? '—',
                         ),
-                        const SizedBox(height: 16),
+                        SizedBox(height: 16),
                         _DetailCard(
                           icon: Icons.calendar_today,
                           label: 'Date of birth',
@@ -176,7 +176,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                         ),
                         if (_user?.referralCode != null &&
                             _user!.referralCode!.isNotEmpty) ...[
-                          const SizedBox(height: 16),
+                          SizedBox(height: 16),
                           _DetailCard(
                             icon: Icons.card_giftcard,
                             label: 'Referral code',
@@ -186,7 +186,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
                 ],
               ),
             ),
@@ -208,11 +208,11 @@ class _DetailCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AuthScreenColors.surface,
+        color: AuthScreenColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AuthScreenColors.surfaceBorder),
+        border: Border.all(color: AuthScreenColors.surfaceBorderOf(context)),
       ),
       child: Row(
         children: [
@@ -225,25 +225,25 @@ class _DetailCard extends StatelessWidget {
             ),
             child: Icon(icon, color: AuthScreenColors.orange, size: 22),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   label,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: AuthScreenColors.textSecondary,
+                    color: AuthScreenColors.textSecondaryOf(context),
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 4),
                 Text(
                   value,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
-                    color: AuthScreenColors.textPrimary,
+                    color: AuthScreenColors.textPrimaryOf(context),
                   ),
                 ),
               ],
@@ -263,14 +263,14 @@ class _PersonalDetailsShimmer extends StatelessWidget {
     return Column(
       children: List.generate(4, (index) {
         return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
+          padding: EdgeInsets.only(bottom: 12),
           child: Shimmer.fromColors(
-            baseColor: AuthScreenColors.surface,
-            highlightColor: AuthScreenColors.surfaceBorder,
+            baseColor: AuthScreenColors.surfaceOf(context),
+            highlightColor: AuthScreenColors.surfaceBorderOf(context),
             child: Container(
               height: 72,
               decoration: BoxDecoration(
-                color: AuthScreenColors.surface,
+                color: AuthScreenColors.surfaceOf(context),
                 borderRadius: BorderRadius.circular(16),
               ),
             ),

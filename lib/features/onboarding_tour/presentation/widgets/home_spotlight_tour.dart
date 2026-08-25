@@ -221,7 +221,7 @@ class _SpotlightBubbleState extends State<_SpotlightBubble>
           margin: const EdgeInsets.symmetric(horizontal: 20),
           padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
           decoration: BoxDecoration(
-            color: HomeColors.surfaceElevated,
+            color: HomeColors.surfaceElevatedOf(context),
             borderRadius: BorderRadius.circular(18),
             border: Border.all(color: widget.accent.withValues(alpha: 0.35)),
             boxShadow: [
@@ -238,8 +238,8 @@ class _SpotlightBubbleState extends State<_SpotlightBubble>
             children: [
               Text(
                 widget.title,
-                style: const TextStyle(
-                  color: HomeColors.textPrimary,
+                style: TextStyle(
+                  color: HomeColors.textPrimaryOf(context),
                   fontWeight: FontWeight.w800,
                   fontSize: 17,
                 ),
@@ -247,8 +247,8 @@ class _SpotlightBubbleState extends State<_SpotlightBubble>
               const SizedBox(height: 6),
               Text(
                 widget.description,
-                style: const TextStyle(
-                  color: HomeColors.textSecondary,
+                style: TextStyle(
+                  color: HomeColors.textSecondaryOf(context),
                   fontSize: 14,
                   height: 1.4,
                 ),

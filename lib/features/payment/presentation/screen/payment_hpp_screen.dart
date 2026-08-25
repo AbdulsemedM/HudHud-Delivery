@@ -55,7 +55,7 @@ class _PaymentHppScreenState extends State<PaymentHppScreen> {
       appBar: AppBar(
         title: Text(widget.title ?? 'Complete payment'),
         backgroundColor: AppColors.primaryColor,
-        foregroundColor: Colors.white,
+        foregroundColor: AppColors.lightOnPrimary,
       ),
       body: Stack(
         children: [

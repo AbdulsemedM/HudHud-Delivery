@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/chat/presentation/theme/chat_theme.dart';
 
 class ChatUnreadBadge extends StatelessWidget {
@@ -20,7 +21,7 @@ class ChatUnreadBadge extends StatelessWidget {
       child: Text(
         label,
         style: const TextStyle(
-          color: Colors.white,
+          color: AppColors.lightOnPrimary,
           fontSize: 11,
           fontWeight: FontWeight.w700,
         ),

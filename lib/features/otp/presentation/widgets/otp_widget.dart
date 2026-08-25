@@ -89,12 +89,12 @@ class OtpInputFieldsState extends State<OtpInputFields> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final borderColor =
-        isDark ? const Color(0xFF2A2A2A) : const Color(0xFFEEEEEE);
+        isDark ? AppColors.darkBorder : AppColors.lightBorder;
 
     return InputDecoration(
       counterText: '',
       filled: true,
-      fillColor: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFF4F4F4),
+      fillColor: isDark ? AppColors.darkInputFill : AppColors.lightInputFill,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
         borderSide: BorderSide(color: borderColor),
@@ -315,10 +315,10 @@ class OtpNumericKeyboard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final keyBg = isDark ? const Color(0xFF1E1E1E) : Colors.white;
+    final keyBg = isDark ? AppColors.darkInputFill : AppColors.lightSurface;
     final keyBorder =
-        isDark ? const Color(0xFF2A2A2A) : const Color(0xFFEEEEEE);
-    final panelBg = isDark ? const Color(0xFF121212) : const Color(0xFFF8F8F8);
+        isDark ? AppColors.darkBorder : AppColors.lightBorder;
+    final panelBg = isDark ? AppColors.darkSurface : AppColors.lightBackground;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -361,7 +361,7 @@ class OtpNumericKeyboard extends StatelessWidget {
               const SizedBox(width: 8),
               _SpecialKey(
                 Icons.remove,
-                color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE8E8E8),
+                color: isDark ? AppColors.darkBorder : AppColors.lightInputFill,
                 onPressed: () => _handleKeyPress('-', context),
               ),
             ],
@@ -398,7 +398,7 @@ class OtpNumericKeyboard extends StatelessWidget {
               const SizedBox(width: 8),
               _SpecialKey(
                 Icons.code,
-                color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE8E8E8),
+                color: isDark ? AppColors.darkBorder : AppColors.lightInputFill,
                 onPressed: () => _handleKeyPress(']', context),
               ),
             ],
@@ -435,7 +435,7 @@ class OtpNumericKeyboard extends StatelessWidget {
               const SizedBox(width: 8),
               _SpecialKey(
                 Icons.backspace_outlined,
-                color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0),
+                color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
                 onPressed: () => _handleKeyPress('backspace', context),
               ),
             ],
@@ -584,7 +584,7 @@ class _SubmitKey extends StatelessWidget {
             angle: 3.14159,
             child: const Icon(
               Icons.arrow_forward,
-              color: Colors.white,
+              color: AppColors.lightOnPrimary,
               size: 20,
             ),
           ),

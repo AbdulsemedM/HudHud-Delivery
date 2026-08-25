@@ -198,17 +198,17 @@ class _CourierScreenState extends State<CourierScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
-    const borderColor = HomeColors.border;
+    final borderColor = HomeColors.borderOf(context);
     final hasActive =
         !_isLoadingActiveDelivery && _activeDelivery != null;
 
     return Scaffold(
-      backgroundColor: HomeColors.background,
+      backgroundColor: HomeColors.backgroundOf(context),
       floatingActionButton: hasActive
           ? FloatingActionButton.extended(
               heroTag: 'courier_instant_delivery_fab',
               backgroundColor: AuthScreenColors.orange,
-              foregroundColor: Colors.white,
+              foregroundColor: Theme.of(context).colorScheme.onSecondary,
               icon: const Icon(Icons.add_rounded),
               label: Text(l10n.courierAddDelivery),
               onPressed: _openInstantDelivery,
@@ -217,7 +217,7 @@ class _CourierScreenState extends State<CourierScreen> {
       body: SafeArea(
         child: RefreshIndicator(
           color: HomeColors.violet,
-          backgroundColor: HomeColors.surface,
+          backgroundColor: HomeColors.surfaceOf(context),
           onRefresh: _refreshData,
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -230,7 +230,7 @@ class _CourierScreenState extends State<CourierScreen> {
                   l10n.courierActiveDelivery,
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: HomeColors.textPrimary,
+                    color: HomeColors.textPrimaryOf(context),
                   ),
                 ),
                 const SizedBox(height: AppColors.spaceMD),
@@ -243,7 +243,7 @@ class _CourierScreenState extends State<CourierScreen> {
                   l10n.courierWhatToDo,
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: HomeColors.textPrimary,
+                    color: HomeColors.textPrimaryOf(context),
                   ),
                 ),
                 const SizedBox(height: AppColors.spaceMD),
@@ -257,7 +257,7 @@ class _CourierScreenState extends State<CourierScreen> {
                       l10n.history,
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: HomeColors.textPrimary,
+                        color: HomeColors.textPrimaryOf(context),
                       ),
                     ),
                   ),
@@ -286,7 +286,7 @@ class _CourierScreenState extends State<CourierScreen> {
                         _deliveriesError!,
                         textAlign: TextAlign.center,
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: HomeColors.textSecondary,
+                          color: HomeColors.textSecondaryOf(context),
                         ),
                       ),
                       TextButton.icon(
@@ -364,12 +364,15 @@ class _InstantDeliveryCard extends StatelessWidget {
           ),
           child: Stack(
             children: [
-              const Positioned(
+              Positioned(
                 top: 0,
                 right: 0,
                 child: Icon(
                   Icons.flash_on_rounded,
-                  color: Colors.white70,
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onPrimary
+                      .withValues(alpha: 0.7),
                   size: 32,
                 ),
               ),
@@ -379,8 +382,8 @@ class _InstantDeliveryCard extends StatelessWidget {
                 children: [
                   Text(
                     l10n.courierInstantTitle,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimary,
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                     ),
@@ -389,7 +392,10 @@ class _InstantDeliveryCard extends StatelessWidget {
                   Text(
                     l10n.courierInstantSubtitle,
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.85),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onPrimary
+                          .withValues(alpha: 0.85),
                       fontSize: 11,
                     ),
                     maxLines: 2,
@@ -422,9 +428,9 @@ class _ScheduleDeliveryCard extends StatelessWidget {
           height: 120,
           padding: const EdgeInsets.all(AppColors.spaceMD),
           decoration: BoxDecoration(
-            color: HomeColors.surface,
+            color: HomeColors.surfaceOf(context),
             borderRadius: BorderRadius.circular(AppColors.radiusLG),
-            border: Border.all(color: HomeColors.border),
+            border: Border.all(color: HomeColors.borderOf(context)),
           ),
           child: Stack(
             children: [
@@ -443,8 +449,8 @@ class _ScheduleDeliveryCard extends StatelessWidget {
                 children: [
                   Text(
                     l10n.courierScheduleTitle,
-                    style: const TextStyle(
-                      color: HomeColors.textPrimary,
+                    style: TextStyle(
+                      color: HomeColors.textPrimaryOf(context),
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                     ),
@@ -452,8 +458,8 @@ class _ScheduleDeliveryCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     l10n.courierScheduleSubtitle,
-                    style: const TextStyle(
-                      color: HomeColors.textMuted,
+                    style: TextStyle(
+                      color: HomeColors.textMutedOf(context),
                       fontSize: 11,
                     ),
                     maxLines: 2,

@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +10,7 @@ import 'package:hudhud_delivery/app/services/auth_service.dart';
 // import 'package:hudhud_delivery/controllers/theme_controller.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
+import 'package:hudhud_delivery/core/theme/system_ui_style.dart';
 import 'package:hudhud_delivery/core/utils/avatar_util.dart';
 import 'package:hudhud_delivery/core/utils/phone_util.dart';
 import 'package:hudhud_delivery/core/widgets/user_avatar.dart';
@@ -279,7 +280,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                     return null;
                   },
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
                 TextFormField(
                   controller: passwordController,
                   obscureText: true,
@@ -407,9 +408,7 @@ class _SettingsScreenState extends State<SettingsScreen>
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final baseTheme = Theme.of(context);
-    final authTheme = AuthScreenColors.darkTheme(baseTheme);
-    // final themeController = Provider.of<ThemeController>(context);
+    final authTheme = AuthScreenColors.themeFor(context);
     final displayName = _user?.name?.trim().isNotEmpty == true
         ? _user!.name!.trim()
         : l10n.userDefault;
@@ -418,26 +417,22 @@ class _SettingsScreenState extends State<SettingsScreen>
         : l10n.emDash;
 
     final walletText = _walletTotal == null
-        ? '—'
+        ? ''
         : '${l10n.currencyEtb} ${_walletTotal!.toStringAsFixed(2)}';
 
     return Theme(
       data: authTheme,
       child: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: const SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent,
-          statusBarIconBrightness: Brightness.light,
-          statusBarBrightness: Brightness.dark,
-        ),
+        value: systemUiOverlayFor(context),
         child: Scaffold(
-          backgroundColor: AuthScreenColors.background,
+          backgroundColor: AuthScreenColors.backgroundOf(context),
           body: SafeArea(
             child: RefreshIndicator(
               color: AuthScreenColors.orange,
-              backgroundColor: AuthScreenColors.surface,
+              backgroundColor: AuthScreenColors.surfaceOf(context),
               onRefresh: _loadAll,
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
+                padding: EdgeInsets.fromLTRB(16, 8, 16, 28),
                 physics: const AlwaysScrollableScrollPhysics(),
                 children: [
                   _ProfileHeaderCard(
@@ -453,7 +448,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                       ).then((_) => _loadUserData());
                     },
                   ),
-                  const SizedBox(height: 14),
+                  SizedBox(height: 14),
                   Row(
                     children: [
                       Expanded(
@@ -470,7 +465,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                           },
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12),
                       Expanded(
                         child: _ProfileStatCard(
                           icon: Icons.account_balance_wallet_outlined,
@@ -489,7 +484,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                       ),
                     ],
                   ),
-                  const SizedBox(height: 22),
+                  SizedBox(height: 22),
                   _ProfileSectionLabel(title: l10n.settingsAccount),
                   _ProfileGroupCard(
                     children: [
@@ -580,7 +575,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                       ),
                     ],
                   ),
-                  const SizedBox(height: 14),
+                  SizedBox(height: 14),
                   _ProfileGroupCard(
                     children: [
                       if (!kIsWeb) ...[
@@ -612,7 +607,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                       // ),
                     ],
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20),
                   _ProfileSectionLabel(title: l10n.settingsPreferences),
                   _ProfileGroupCard(
                     children: [
@@ -651,7 +646,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                   ),
                   // TODO: restore when home tour replay is needed
                   // if (kDebugMode) ...[
-                  //   const SizedBox(height: 20),
+                  //   SizedBox(height: 20),
                   //   const _ProfileSectionLabel(title: 'Developer'),
                   //   _ProfileGroupCard(
                   //     children: [
@@ -671,7 +666,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                   //     ],
                   //   ),
                   // ],
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20),
                   _ProfileSectionLabel(title: l10n.settingsAppSettings),
                   _ProfileGroupCard(
                     children: [
@@ -737,35 +732,35 @@ class _SettingsScreenState extends State<SettingsScreen>
                       // ),
                     ],
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
                   SizedBox(
                     width: double.infinity,
                     height: 52,
                     child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AuthScreenColors.orange,
-                        side: const BorderSide(
+                        side: BorderSide(
                           color: AuthScreenColors.orange,
                           width: 1.2,
                         ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
-                        backgroundColor: AuthScreenColors.surface,
+                        backgroundColor: AuthScreenColors.surfaceOf(context),
                       ),
                       onPressed: () => _handleLogout(context),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.logout_rounded,
                             color: AuthScreenColors.orange,
                             size: 22,
                           ),
-                          const SizedBox(width: 10),
+                          SizedBox(width: 10),
                           Text(
                             l10n.actionLogOut,
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: AuthScreenColors.orange,
                               fontWeight: FontWeight.w700,
                               fontSize: 15,
@@ -775,7 +770,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20),
                   _LegalFooter(
                     packageInfo: _packageInfo,
                     l10n: l10n,
@@ -798,14 +793,14 @@ class _ProfileSectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: 10),
+      padding: EdgeInsets.only(left: 4, bottom: 10),
       child: Text(
         title.toUpperCase(),
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w600,
           letterSpacing: 0.8,
-          color: AuthScreenColors.textMuted,
+          color: AuthScreenColors.textMutedOf(context),
         ),
       ),
     );
@@ -821,9 +816,9 @@ class _ProfileGroupCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AuthScreenColors.surface,
+        color: AuthScreenColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AuthScreenColors.surfaceBorder),
+        border: Border.all(color: AuthScreenColors.surfaceBorderOf(context)),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(children: children),
@@ -836,12 +831,12 @@ class _ProfileTileDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Divider(
+    return Divider(
       height: 1,
       thickness: 1,
       indent: 60,
       endIndent: 16,
-      color: AuthScreenColors.surfaceBorder,
+      color: AuthScreenColors.surfaceBorderOf(context),
     );
   }
 }
@@ -866,7 +861,7 @@ class _ProfileMenuTile extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          padding: EdgeInsets.symmetric(horizontal: 14, vertical: 14),
           child: Row(
             children: [
               Container(
@@ -878,24 +873,24 @@ class _ProfileMenuTile extends StatelessWidget {
                 ),
                 child: Icon(icon, color: AuthScreenColors.orange, size: 22),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               Expanded(
                 child: Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w500,
                     fontSize: 15,
-                    color: AuthScreenColors.textPrimary,
+                    color: AuthScreenColors.textPrimaryOf(context),
                   ),
                 ),
               ),
               if (trailing != null) ...[
                 trailing!,
-                const SizedBox(width: 4),
+                SizedBox(width: 4),
               ],
-              const Icon(
+              Icon(
                 Icons.chevron_right_rounded,
-                color: AuthScreenColors.textSecondary,
+                color: AuthScreenColors.textSecondaryOf(context),
                 size: 22,
               ),
             ],
@@ -934,7 +929,7 @@ class _ProfileBiometricTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      padding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -951,32 +946,32 @@ class _ProfileBiometricTile extends StatelessWidget {
               size: 22,
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   l10n.settingsBiometricLogin,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 15,
-                    color: AuthScreenColors.textPrimary,
+                    color: AuthScreenColors.textPrimaryOf(context),
                   ),
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: 2),
                 Text(
                   _subtitle(l10n),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     height: 1.35,
-                    color: AuthScreenColors.textSecondary,
+                    color: AuthScreenColors.textSecondaryOf(context),
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
           _ProfileGradientSwitch(
             value: enabled,
             onChanged: switchEnabled ? onChanged : null,
@@ -1002,7 +997,7 @@ class _ProfileMarketingConsentTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      padding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -1013,38 +1008,38 @@ class _ProfileMarketingConsentTile extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               color: AuthScreenColors.orange.withValues(alpha: 0.12),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.campaign_outlined,
               color: AuthScreenColors.orange,
               size: 22,
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   l10n.settingsMarketingOffers,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 15,
-                    color: AuthScreenColors.textPrimary,
+                    color: AuthScreenColors.textPrimaryOf(context),
                   ),
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: 2),
                 Text(
                   l10n.settingsMarketingOffersSubtitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     height: 1.35,
-                    color: AuthScreenColors.textSecondary,
+                    color: AuthScreenColors.textSecondaryOf(context),
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
           _ProfileGradientSwitch(
             value: enabled,
             onChanged: switchEnabled ? onChanged : null,
@@ -1072,7 +1067,7 @@ class _ProfileGradientSwitch extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         width: 52,
         height: 30,
-        padding: const EdgeInsets.all(3),
+        padding: EdgeInsets.all(3),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           gradient: value
@@ -1080,14 +1075,14 @@ class _ProfileGradientSwitch extends StatelessWidget {
                   colors: AuthScreenColors.signInGradient,
                 )
               : null,
-          color: value ? null : AuthScreenColors.surfaceBorder,
+          color: value ? null : AuthScreenColors.surfaceBorderOf(context),
         ),
         child: Align(
           alignment: value ? Alignment.centerRight : Alignment.centerLeft,
           child: Container(
             width: 24,
             height: 24,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: Colors.white,
               shape: BoxShape.circle,
             ),
@@ -1121,11 +1116,11 @@ class _ProfileStatCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.fromLTRB(14, 14, 12, 14),
+          padding: EdgeInsets.fromLTRB(14, 14, 12, 14),
           decoration: BoxDecoration(
-            color: AuthScreenColors.surface,
+            color: AuthScreenColors.surfaceOf(context),
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: AuthScreenColors.surfaceBorder),
+            border: Border.all(color: AuthScreenColors.surfaceBorderOf(context)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1141,31 +1136,31 @@ class _ProfileStatCard extends StatelessWidget {
                     ),
                     child: Icon(icon, color: iconColor, size: 18),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 13,
-                        color: AuthScreenColors.textPrimary,
+                        color: AuthScreenColors.textPrimaryOf(context),
                       ),
                     ),
                   ),
-                  const Icon(
+                  Icon(
                     Icons.chevron_right_rounded,
                     size: 18,
-                    color: AuthScreenColors.textSecondary,
+                    color: AuthScreenColors.textSecondaryOf(context),
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               Text(
                 value,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 22,
-                  color: AuthScreenColors.textPrimary,
+                  color: AuthScreenColors.textPrimaryOf(context),
                 ),
               ),
             ],
@@ -1191,7 +1186,7 @@ class _ProfileHeaderCard extends StatelessWidget {
 
   String get _initial {
     final name = displayName.trim();
-    if (name.isEmpty || name == '—') return '?';
+    if (name.isEmpty || name == '') return '?';
     return name[0].toUpperCase();
   }
 
@@ -1201,51 +1196,51 @@ class _ProfileHeaderCard extends StatelessWidget {
     final avatarUrl = getDisplayAvatarUrl(user);
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AuthScreenColors.surface,
+        color: AuthScreenColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: AuthScreenColors.surfaceBorder),
+        border: Border.all(color: AuthScreenColors.surfaceBorderOf(context)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _ProfileAvatar(imageUrl: avatarUrl, initial: _initial),
-          const SizedBox(width: 12),
+          SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   displayName,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w700,
                     fontSize: 18,
-                    color: AuthScreenColors.textPrimary,
+                    color: AuthScreenColors.textPrimaryOf(context),
                   ),
                 ),
-                const SizedBox(height: 6),
+                SizedBox(height: 6),
                 Row(
                   children: [
                     Flexible(
                       child: Text(
                         phone,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
-                          color: AuthScreenColors.textSecondary,
+                          color: AuthScreenColors.textSecondaryOf(context),
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     OutlinedButton.icon(
                       onPressed: onEdit,
-                      icon: const Icon(Icons.edit_outlined, size: 14),
+                      icon: Icon(Icons.edit_outlined, size: 14),
                       label: Text(l10n.profileEdit),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AuthScreenColors.orange,
-                        side: const BorderSide(color: AuthScreenColors.orange),
-                        padding: const EdgeInsets.symmetric(
+                        side: BorderSide(color: AuthScreenColors.orange),
+                        padding: EdgeInsets.symmetric(
                           horizontal: 10,
                           vertical: 4,
                         ),
@@ -1253,7 +1248,7 @@ class _ProfileHeaderCard extends StatelessWidget {
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         visualDensity: VisualDensity.compact,
                         shape: const StadiumBorder(),
-                        textStyle: const TextStyle(
+                        textStyle: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                         ),
@@ -1264,7 +1259,7 @@ class _ProfileHeaderCard extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 6),
+          SizedBox(width: 6),
           const _LoyaltyRibbon(),
         ],
       ),
@@ -1298,17 +1293,17 @@ class _ProfileAvatar extends StatelessWidget {
             ? UserAvatar(
                 radius: 30,
                 imageUrl: imageUrl,
-                backgroundColor: AuthScreenColors.surfaceBorder,
+                backgroundColor: AuthScreenColors.surfaceBorderOf(context),
               )
             : Container(
-                color: AuthScreenColors.surfaceBorder,
+                color: AuthScreenColors.surfaceBorderOf(context),
                 alignment: Alignment.center,
                 child: Text(
                   initial,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 26,
                     fontWeight: FontWeight.w700,
-                    color: AuthScreenColors.textPrimary,
+                    color: AuthScreenColors.textPrimaryOf(context),
                   ),
                 ),
               ),
@@ -1344,9 +1339,9 @@ class _LoyaltyRibbon extends StatelessWidget {
           ),
         ],
       ),
-      child: const Icon(
+      child: Icon(
         Icons.workspace_premium_rounded,
-        color: Colors.black,
+        color: Theme.of(context).colorScheme.onPrimary,
         size: 24,
       ),
     );
@@ -1382,7 +1377,7 @@ class _LegalFooter extends StatelessWidget {
             TextButton(
               style: TextButton.styleFrom(
                 foregroundColor: AuthScreenColors.orange,
-                padding: const EdgeInsets.symmetric(horizontal: 4),
+                padding: EdgeInsets.symmetric(horizontal: 4),
                 minimumSize: Size.zero,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
@@ -1396,24 +1391,24 @@ class _LegalFooter extends StatelessWidget {
               },
               child: Text(
                 l10n.profileTermsOfUse,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AuthScreenColors.orange,
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ),
-            const Text(
-              'â€¢',
+            Text(
+              'â¢',
               style: TextStyle(
-                color: AuthScreenColors.textSecondary,
+                color: AuthScreenColors.textSecondaryOf(context),
                 fontSize: 12,
               ),
             ),
             TextButton(
               style: TextButton.styleFrom(
                 foregroundColor: AuthScreenColors.orange,
-                padding: const EdgeInsets.symmetric(horizontal: 4),
+                padding: EdgeInsets.symmetric(horizontal: 4),
                 minimumSize: Size.zero,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
@@ -1427,7 +1422,7 @@ class _LegalFooter extends StatelessWidget {
               },
               child: Text(
                 l10n.profilePrivacyPolicy,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AuthScreenColors.orange,
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
@@ -1436,21 +1431,21 @@ class _LegalFooter extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 6),
+        SizedBox(height: 6),
         Text(
           l10n.profileCopyright(year),
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: AuthScreenColors.textSecondary.withValues(alpha: 0.85),
+            color: AuthScreenColors.textSecondaryOf(context).withValues(alpha: 0.85),
             fontSize: 11,
           ),
         ),
-        const SizedBox(height: 6),
+        SizedBox(height: 6),
         Text(
           versionLine,
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: AuthScreenColors.textSecondary.withValues(alpha: 0.75),
+            color: AuthScreenColors.textSecondaryOf(context).withValues(alpha: 0.75),
             fontSize: 11,
           ),
         ),
@@ -1471,17 +1466,17 @@ class _AccountSettingsHubPage extends StatelessWidget {
     final l10n = context.l10n;
 
     return Theme(
-      data: AuthScreenColors.darkTheme(Theme.of(context)),
+      data: AuthScreenColors.themeFor(context),
       child: Scaffold(
-        backgroundColor: AuthScreenColors.background,
+        backgroundColor: AuthScreenColors.backgroundOf(context),
         appBar: AppBar(
-          backgroundColor: AuthScreenColors.background,
-          foregroundColor: AuthScreenColors.textPrimary,
+          backgroundColor: AuthScreenColors.backgroundOf(context),
+          foregroundColor: AuthScreenColors.textPrimaryOf(context),
           title: Text(l10n.profileMenuAccountSettings),
           elevation: 0,
         ),
         body: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(16),
           children: [
             _ProfileGroupCard(
               children: [
@@ -1490,8 +1485,8 @@ class _AccountSettingsHubPage extends StatelessWidget {
                   title: l10n.settingsAppearance,
                   trailing: Text(
                     themeModeLabel,
-                    style: const TextStyle(
-                      color: AuthScreenColors.textSecondary,
+                    style: TextStyle(
+                      color: AuthScreenColors.textSecondaryOf(context),
                       fontSize: 12,
                     ),
                   ),
@@ -1563,23 +1558,23 @@ class _DeliveryPreferencesPageState extends State<_DeliveryPreferencesPage> {
     final l10n = context.l10n;
 
     return Theme(
-      data: AuthScreenColors.darkTheme(Theme.of(context)),
+      data: AuthScreenColors.themeFor(context),
       child: Scaffold(
-        backgroundColor: AuthScreenColors.background,
+        backgroundColor: AuthScreenColors.backgroundOf(context),
         appBar: AppBar(
-          backgroundColor: AuthScreenColors.background,
-          foregroundColor: AuthScreenColors.textPrimary,
+          backgroundColor: AuthScreenColors.backgroundOf(context),
+          foregroundColor: AuthScreenColors.textPrimaryOf(context),
           title: Text(l10n.settingsDeliveryPreferences),
           elevation: 0,
         ),
         body: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(16),
           children: [
             _ProfileGroupCard(
               children: [
                 Padding(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   child: Row(
                     children: [
                       Container(
@@ -1589,20 +1584,20 @@ class _DeliveryPreferencesPageState extends State<_DeliveryPreferencesPage> {
                           borderRadius: BorderRadius.circular(12),
                           color: AuthScreenColors.orange.withValues(alpha: 0.12),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.sms_outlined,
                           color: AuthScreenColors.orange,
                           size: 22,
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12),
                       Expanded(
                         child: Text(
                           l10n.settingsSmsNotifications,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.w500,
                             fontSize: 15,
-                            color: AuthScreenColors.textPrimary,
+                            color: AuthScreenColors.textPrimaryOf(context),
                           ),
                         ),
                       ),

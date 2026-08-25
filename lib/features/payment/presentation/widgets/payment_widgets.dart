@@ -101,7 +101,7 @@ class PaymentMethodCard extends StatelessWidget {
                   ),
                   child: const Icon(
                     Icons.check,
-                    color: Colors.white,
+                    color: AppColors.lightOnPrimary,
                     size: 16,
                   ),
                 ),
@@ -204,8 +204,8 @@ class PaymentSummaryCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppColors.radiusLG),
         border: Border.all(
           color: Theme.of(context).brightness == Brightness.dark
-              ? const Color(0xFF2A2A2A)
-              : const Color(0xFFEEEEEE),
+              ? AppColors.darkBorder
+              : AppColors.lightBorder,
         ),
       ),
       child: Column(

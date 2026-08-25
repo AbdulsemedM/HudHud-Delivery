@@ -160,7 +160,7 @@ class _ActiveDeliveryCardState extends State<ActiveDeliveryCard> {
         delivery['dropoff_location']?.toString() ?? '';
 
     return Material(
-      color: HomeColors.surface,
+      color: HomeColors.surfaceOf(context),
       borderRadius: BorderRadius.circular(AppColors.radiusLG),
       child: InkWell(
         onTap: widget.onTrack,
@@ -168,7 +168,7 @@ class _ActiveDeliveryCardState extends State<ActiveDeliveryCard> {
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppColors.radiusLG),
-            border: Border.all(color: HomeColors.border),
+            border: Border.all(color: HomeColors.borderOf(context)),
           ),
           clipBehavior: Clip.antiAlias,
           child: Column(
@@ -201,8 +201,8 @@ class _ActiveDeliveryCardState extends State<ActiveDeliveryCard> {
                         Expanded(
                           child: Text(
                             statusMessage,
-                            style: const TextStyle(
-                              color: HomeColors.textPrimary,
+                            style: TextStyle(
+                              color: HomeColors.textPrimaryOf(context),
                               fontWeight: FontWeight.w700,
                               fontSize: 16,
                             ),
@@ -215,8 +215,8 @@ class _ActiveDeliveryCardState extends State<ActiveDeliveryCard> {
                     const SizedBox(height: 6),
                     Text(
                       orderId,
-                      style: const TextStyle(
-                        color: HomeColors.textSecondary,
+                      style: TextStyle(
+                        color: HomeColors.textSecondaryOf(context),
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
@@ -243,7 +243,7 @@ class _ActiveDeliveryCardState extends State<ActiveDeliveryCard> {
                         onPressed: widget.onTrack,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: HomeColors.violet,
-                          foregroundColor: Colors.white,
+                          foregroundColor: Theme.of(context).colorScheme.onSecondary,
                           elevation: 0,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -334,10 +334,10 @@ class _MapPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: HomeColors.surfaceElevated,
+      color: HomeColors.surfaceElevatedOf(context),
       child: InkWell(
         onTap: onTap,
-        child: const Center(
+        child: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -350,7 +350,7 @@ class _MapPlaceholder extends StatelessWidget {
               Text(
                 'Open map to track',
                 style: TextStyle(
-                  color: HomeColors.textSecondary,
+                  color: HomeColors.textSecondaryOf(context),
                   fontWeight: FontWeight.w600,
                   fontSize: 13,
                 ),
@@ -389,16 +389,16 @@ class _AddressLine extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: const TextStyle(
-                  color: HomeColors.textMuted,
+                style: TextStyle(
+                  color: HomeColors.textMutedOf(context),
                   fontSize: 11,
                   fontWeight: FontWeight.w500,
                 ),
               ),
               Text(
                 value,
-                style: const TextStyle(
-                  color: HomeColors.textPrimary,
+                style: TextStyle(
+                  color: HomeColors.textPrimaryOf(context),
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                 ),

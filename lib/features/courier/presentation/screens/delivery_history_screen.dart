@@ -115,7 +115,7 @@ class _DeliveryHistoryScreenState extends State<DeliveryHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    const borderColor = HomeColors.border;
+    final borderColor = HomeColors.borderOf(context);
     final filtered = _filteredDeliveries;
     final canLoadMore = _currentPage < _lastPage &&
         _selectedFilter == kDeliveryHistoryFilterAll;
@@ -123,16 +123,16 @@ class _DeliveryHistoryScreenState extends State<DeliveryHistoryScreen> {
     return CourierTheme.wrap(
       context,
       child: Scaffold(
-        backgroundColor: HomeColors.background,
+        backgroundColor: HomeColors.backgroundOf(context),
         appBar: AppBar(
-          backgroundColor: HomeColors.background,
-          foregroundColor: HomeColors.textPrimary,
+          backgroundColor: HomeColors.backgroundOf(context),
+          foregroundColor: HomeColors.textPrimaryOf(context),
           elevation: 0,
           title: Text(l10n.history),
         ),
         body: RefreshIndicator(
           color: HomeColors.violet,
-          backgroundColor: HomeColors.surface,
+          backgroundColor: HomeColors.surfaceOf(context),
           onRefresh: () => _fetchDeliveries(refresh: true),
           child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -201,17 +201,17 @@ class _DeliveryHistoryScreenState extends State<DeliveryHistoryScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.wifi_off_rounded,
                           size: 48,
-                          color: HomeColors.textMuted,
+                          color: HomeColors.textMutedOf(context),
                         ),
                         const SizedBox(height: AppColors.spaceMD),
                         Text(
                           _error!,
                           textAlign: TextAlign.center,
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: HomeColors.textSecondary,
+                                color: HomeColors.textSecondaryOf(context),
                               ),
                         ),
                         TextButton.icon(
@@ -320,12 +320,12 @@ class _HistoryFilterChip extends StatelessWidget {
       labelStyle: TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.w600,
-        color: selected ? Colors.white : HomeColors.textMuted,
+        color: selected ? Theme.of(context).colorScheme.onSecondary : HomeColors.textMutedOf(context),
       ),
-      backgroundColor: HomeColors.surface,
+      backgroundColor: HomeColors.surfaceOf(context),
       selectedColor: HomeColors.violet,
       side: BorderSide(
-        color: selected ? HomeColors.violet : HomeColors.border,
+        color: selected ? HomeColors.violet : HomeColors.borderOf(context),
       ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppColors.radiusFull),

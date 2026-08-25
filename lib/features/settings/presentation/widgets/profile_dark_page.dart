@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hudhud_delivery/core/theme/system_ui_style.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
 
-/// Always-dark chrome for screens opened from Profile, matching
-/// [AuthScreenColors] independent of the app light/dark theme.
-class ProfileDarkPage extends StatelessWidget {
-  const ProfileDarkPage({
+/// Theme-aware chrome for screens opened from Profile.
+class ProfilePage extends StatelessWidget {
+  const ProfilePage({
     super.key,
     this.title,
     this.titleWidget,
@@ -28,23 +28,18 @@ class ProfileDarkPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authTheme = AuthScreenColors.darkTheme(Theme.of(context));
+    final authTheme = AuthScreenColors.themeFor(context);
+    final scheme = authTheme.colorScheme;
 
     return Theme(
       data: authTheme,
       child: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: const SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent,
-          statusBarIconBrightness: Brightness.light,
-          statusBarBrightness: Brightness.dark,
-          systemNavigationBarColor: AuthScreenColors.background,
-          systemNavigationBarIconBrightness: Brightness.light,
-        ),
+        value: systemUiOverlayFor(context),
         child: Scaffold(
-          backgroundColor: AuthScreenColors.background,
+          backgroundColor: scheme.surface,
           appBar: AppBar(
-            backgroundColor: AuthScreenColors.background,
-            foregroundColor: AuthScreenColors.textPrimary,
+            backgroundColor: authTheme.scaffoldBackgroundColor,
+            foregroundColor: scheme.onSurface,
             surfaceTintColor: Colors.transparent,
             elevation: 0,
             centerTitle: centerTitle,
@@ -52,13 +47,12 @@ class ProfileDarkPage extends StatelessWidget {
             title: titleWidget ??
                 Text(
                   title!,
-                  style: const TextStyle(
-                    color: AuthScreenColors.textPrimary,
+                  style: TextStyle(
+                    color: scheme.onSurface,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-            iconTheme:
-                const IconThemeData(color: AuthScreenColors.textPrimary),
+            iconTheme: IconThemeData(color: scheme.onSurface),
             actions: actions,
           ),
           body: body,
@@ -69,3 +63,6 @@ class ProfileDarkPage extends StatelessWidget {
     );
   }
 }
+
+/// @deprecated Use [ProfilePage] instead.
+typedef ProfileDarkPage = ProfilePage;
