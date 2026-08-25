@@ -252,7 +252,7 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
 
     if (embedded) {
       final themed = Theme(
-        data: HomeColors.darkTheme(theme),
+        data: HomeColors.themeFor(context),
         child: ColoredBox(
           color: HomeColors.backgroundOf(context),
           child: body,

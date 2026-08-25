@@ -341,8 +341,8 @@ class OrderItemCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       _formatDate(order.createdAt),
-                      style: const TextStyle(
-                        color: HomeColors.textMuted,
+                      style: TextStyle(
+                        color: HomeColors.textMutedOf(context),
                         fontSize: 12,
                       ),
                     ),

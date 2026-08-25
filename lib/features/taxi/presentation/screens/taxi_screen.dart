@@ -736,7 +736,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
   }
 
   Color _cardBorder(BuildContext context) {
-    return HomeColors.border;
+    return HomeColors.borderOf(context);
   }
 
   Widget _buildActiveRideSheet(
@@ -754,7 +754,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
 
     return Container(
       decoration: BoxDecoration(
-        color: HomeColors.surface,
+        color: HomeColors.surfaceOf(context),
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(AppColors.radiusXL),
           topRight: Radius.circular(AppColors.radiusXL),
@@ -1096,7 +1096,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
     final borderColor = _cardBorder(context);
 
     return Scaffold(
-      backgroundColor: HomeColors.background,
+      backgroundColor: HomeColors.backgroundOf(context),
       // Nested under Home — no AppBar (avoids double chrome).
       body: LayoutBuilder(
         builder: (context, constraints) {
@@ -1129,7 +1129,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
                         vertical: AppColors.spaceSM,
                       ),
                       decoration: BoxDecoration(
-                        color: HomeColors.surfaceElevated,
+                        color: HomeColors.surfaceElevatedOf(context),
                         borderRadius:
                             BorderRadius.circular(AppColors.radiusFull),
                         border: Border.all(color: borderColor),
@@ -1185,7 +1185,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
                   heroTag: 'current_location',
                   mini: true,
                   elevation: 0,
-                  backgroundColor: HomeColors.surfaceElevated,
+                  backgroundColor: HomeColors.surfaceElevatedOf(context),
                   shape: CircleBorder(
                     side: BorderSide(color: borderColor),
                   ),
@@ -1212,7 +1212,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
                   }
                   return Container(
                     decoration: BoxDecoration(
-                      color: HomeColors.surface,
+                      color: HomeColors.surfaceOf(context),
                       borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(AppColors.radiusXL),
                         topRight: Radius.circular(AppColors.radiusXL),
@@ -1305,7 +1305,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
                               vertical: 12,
                             ),
                             decoration: BoxDecoration(
-                              color: HomeColors.surfaceElevated,
+                              color: HomeColors.surfaceElevatedOf(context),
                               borderRadius:
                                   BorderRadius.circular(AppColors.radiusLG),
                               border: Border.all(color: borderColor),
@@ -1373,7 +1373,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
                           Expanded(
                             child: Container(
                               decoration: BoxDecoration(
-                                color: HomeColors.surfaceElevated,
+                                color: HomeColors.surfaceElevatedOf(context),
                                 borderRadius:
                                     BorderRadius.circular(AppColors.radiusLG),
                                 border: Border.all(color: borderColor),
@@ -1445,7 +1445,7 @@ class _TaxiScreenState extends State<TaxiScreen> {
                                 vertical: 12,
                               ),
                               decoration: BoxDecoration(
-                                color: HomeColors.surfaceElevated,
+                                color: HomeColors.surfaceElevatedOf(context),
                                 borderRadius:
                                     BorderRadius.circular(AppColors.radiusLG),
                                 border: Border.all(color: borderColor),
