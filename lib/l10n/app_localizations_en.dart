@@ -680,7 +680,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get validationPasswordRequired => 'Please enter your password';
 
   @override
-  String get validationPasswordMin => 'Password must be at least 6 characters';
+  String get validationPasswordMin => 'Password must be at least 4 characters';
 
   @override
   String get validationPasswordComplexity =>
@@ -1375,7 +1375,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hintReenterPassword => 'Re-enter your password';
 
   @override
-  String get passwordStrengthHint => 'Use 6+ characters';
+  String get passwordStrengthHint => 'Use 4+ characters';
 
   @override
   String get signupAcceptTermsPrefix => 'I\'ve read and accepted Hudhud\'s ';
@@ -2156,7 +2156,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get forgotPasswordNewTitle => 'Create new password';
 
   @override
-  String get forgotPasswordNewSubtitle => 'Use at least 6 characters.';
+  String get forgotPasswordNewSubtitle => 'Use at least 4 characters.';
 
   @override
   String get forgotPasswordLabelConfirmPassword => 'Confirm password';

@@ -215,7 +215,6 @@ class _LoginScreenState extends State<LoginScreen> {
             showBackButton: widget.resumeAfterAuth,
             child: Builder(
               builder: (context) {
-                final l10n = context.l10n;
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -227,38 +226,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     const LoginForm(),
                     const SizedBox(height: 20),
                     _SignUpPrompt(onPressed: () => _openSignup(context)),
-                    const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Divider(
-                            color: AuthScreenColors.textSecondaryOf(context),
-                            thickness: 0.6,
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          child: Text(
-                            l10n.loginOrContinueWith,
-                            style: TextStyle(
-                              color: AuthScreenColors.textSecondaryOf(context),
-                              fontSize: 13,
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Divider(
-                            color: AuthScreenColors.textSecondaryOf(context),
-                            thickness: 0.6,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    if (defaultTargetPlatform != TargetPlatform.iOS) ...[
-                      const _GoogleSignInButton(),
-                      const SizedBox(height: 16),
-                    ],
                   ],
                 );
               },
@@ -307,75 +274,6 @@ class _SignUpPrompt extends StatelessWidget {
           textAlign: TextAlign.center,
         ),
       ),
-    );
-  }
-}
-
-class _GoogleSignInButton extends StatelessWidget {
-  const _GoogleSignInButton();
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    return BlocBuilder<LoginBloc, LoginState>(
-      builder: (context, state) {
-        final loading = state.isLoginLoading(LoginAction.google);
-        return SizedBox(
-          width: double.infinity,
-          height: 52,
-          child: OutlinedButton(
-            onPressed: state.isAnyLoginLoading
-                ? null
-                : () => context.read<LoginBloc>().add(GoogleLoginRequested()),
-            style: OutlinedButton.styleFrom(
-              side: BorderSide(
-                color: AuthScreenColors.surfaceBorderOf(context),
-                width: 1.25,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-              backgroundColor: AuthScreenColors.surfaceOf(context),
-            ),
-            child: loading
-                ? const SizedBox(
-                    height: 22,
-                    width: 22,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: AuthScreenColors.orange,
-                    ),
-                  )
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        'assets/images/Google_Favicon_2025.svg.png',
-                        width: 20,
-                        height: 20,
-                        fit: BoxFit.contain,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Icon(
-                            Icons.g_mobiledata,
-                            size: 22,
-                            color: AuthScreenColors.textMutedOf(context),
-                          );
-                        },
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        l10n.continueWithGoogle,
-                        style: TextStyle(
-                          color: AuthScreenColors.textPrimaryOf(context),
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-          ),
-        );
-      },
     );
   }
 }

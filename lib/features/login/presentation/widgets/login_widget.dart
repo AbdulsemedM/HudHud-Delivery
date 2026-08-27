@@ -285,7 +285,7 @@ class _LoginFormState extends State<LoginForm> {
                 if (value == null || value.isEmpty) {
                   return l10n.validationPasswordRequired;
                 }
-                if (value.length < 6) {
+                if (value.length < 4) {
                   return l10n.validationPasswordMin;
                 }
                 return null;

@@ -1373,7 +1373,7 @@ abstract class AppLocalizations {
   /// No description provided for @validationPasswordMin.
   ///
   /// In en, this message translates to:
-  /// **'Password must be at least 6 characters'**
+  /// **'Password must be at least 4 characters'**
   String get validationPasswordMin;
 
   /// No description provided for @validationPasswordComplexity.
@@ -2699,7 +2699,7 @@ abstract class AppLocalizations {
   /// No description provided for @passwordStrengthHint.
   ///
   /// In en, this message translates to:
-  /// **'Use 6+ characters'**
+  /// **'Use 4+ characters'**
   String get passwordStrengthHint;
 
   /// No description provided for @signupAcceptTermsPrefix.
@@ -4109,7 +4109,7 @@ abstract class AppLocalizations {
   /// No description provided for @forgotPasswordNewSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Use at least 6 characters.'**
+  /// **'Use at least 4 characters.'**
   String get forgotPasswordNewSubtitle;
 
   /// No description provided for @forgotPasswordLabelConfirmPassword.

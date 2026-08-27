@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/features/splash/presentation/theme/splash_colors.dart';
 
-/// Full splash content: routes, halo, logo, wordmark, tagline, status.
+/// Full splash content: routes, halo, logo, status.
 class SplashIntroContent extends StatelessWidget {
   const SplashIntroContent({
     super.key,
@@ -24,25 +24,17 @@ class SplashIntroContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final markOpacity = CurvedAnimation(
       parent: intro,
-      curve: const Interval(0.0, 0.35, curve: Curves.easeOutCubic),
+      curve: const Interval(0.0, 0.45, curve: Curves.easeOutCubic),
     );
     final markScale = Tween<double>(begin: 0.85, end: 1.0).animate(
       CurvedAnimation(
         parent: intro,
-        curve: const Interval(0.0, 0.35, curve: Curves.easeOutCubic),
+        curve: const Interval(0.0, 0.45, curve: Curves.easeOutCubic),
       ),
-    );
-    final wordmark = CurvedAnimation(
-      parent: intro,
-      curve: const Interval(0.35, 0.55, curve: Curves.easeOut),
-    );
-    final tagline = CurvedAnimation(
-      parent: intro,
-      curve: const Interval(0.5, 0.7, curve: Curves.easeOut),
     );
     final status = CurvedAnimation(
       parent: intro,
-      curve: const Interval(0.65, 0.9, curve: Curves.easeOut),
+      curve: const Interval(0.55, 0.9, curve: Curves.easeOut),
     );
 
     return Stack(
@@ -75,10 +67,10 @@ class SplashIntroContent extends StatelessWidget {
                         child: Opacity(
                           opacity: opacity,
                           child: Container(
-                            width: 180,
-                            height: 180,
+                            width: 220,
+                            height: 160,
                             decoration: BoxDecoration(
-                              shape: BoxShape.circle,
+                              borderRadius: BorderRadius.circular(80),
                               gradient: RadialGradient(
                                 colors: [
                                   SplashColors.orange.withValues(alpha: 0.30),
@@ -101,28 +93,6 @@ class SplashIntroContent extends StatelessWidget {
                     ),
                   ),
                 ],
-              ),
-              const SizedBox(height: 22),
-              FadeTransition(
-                opacity: wordmark,
-                child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0, 0.18),
-                    end: Offset.zero,
-                  ).animate(wordmark),
-                  child: const SplashWordmark(),
-                ),
-              ),
-              const SizedBox(height: 8),
-              FadeTransition(
-                opacity: tagline,
-                child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0, 0.15),
-                    end: Offset.zero,
-                  ).animate(tagline),
-                  child: const SplashTagline(),
-                ),
               ),
               const Spacer(flex: 4),
               FadeTransition(
@@ -149,13 +119,13 @@ class SplashIntroContent extends StatelessWidget {
 class SplashLogoMark extends StatelessWidget {
   const SplashLogoMark({super.key});
 
-  static const assetPath = 'assets/images/logo (2).jpg';
+  static const assetPath = 'assets/images/logo.png';
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 112,
-      height: 112,
+      width: 260,
+      height: 120,
       child: Image.asset(
         assetPath,
         fit: BoxFit.contain,
@@ -166,53 +136,6 @@ class SplashLogoMark extends StatelessWidget {
             color: SplashColors.orange,
           );
         },
-      ),
-    );
-  }
-}
-
-class SplashWordmark extends StatelessWidget {
-  const SplashWordmark({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Text.rich(
-      TextSpan(
-        style: TextStyle(
-          fontSize: 34,
-          fontWeight: FontWeight.w700,
-          letterSpacing: -0.5,
-          height: 1.1,
-        ),
-        children: [
-          TextSpan(
-            text: 'Hud',
-            style: TextStyle(color: SplashColors.orange),
-          ),
-          TextSpan(
-            text: 'Hud',
-            style: TextStyle(color: SplashColors.violet),
-          ),
-        ],
-      ),
-      textAlign: TextAlign.center,
-    );
-  }
-}
-
-class SplashTagline extends StatelessWidget {
-  const SplashTagline({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      context.l10n.splashTagline,
-      textAlign: TextAlign.center,
-      style: TextStyle(
-        fontSize: 11,
-        fontWeight: FontWeight.w500,
-        letterSpacing: 2.4,
-        color: SplashColors.textMutedOf(context),
       ),
     );
   }

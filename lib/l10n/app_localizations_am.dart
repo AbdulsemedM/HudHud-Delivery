@@ -667,7 +667,7 @@ class AppLocalizationsAm extends AppLocalizations {
   String get validationPasswordRequired => 'እባክህ የይለፍ ቃልህን አስገባ';
 
   @override
-  String get validationPasswordMin => 'የይለፍ ቃል ቢያንስ 6 ቁምፊዎች መሆን አለበት።';
+  String get validationPasswordMin => 'የይለፍ ቃል ቢያንስ 4 ቁምፊዎች መሆን አለበት።';
 
   @override
   String get validationPasswordComplexity =>
@@ -1357,7 +1357,7 @@ class AppLocalizationsAm extends AppLocalizations {
   String get hintReenterPassword => 'የይለፍ ቃልዎን እንደገና ያስገቡ';
 
   @override
-  String get passwordStrengthHint => '6+ ቁምፊዎችን ይጠቀሙ';
+  String get passwordStrengthHint => '4+ ቁምፊዎችን ይጠቀሙ';
 
   @override
   String get signupAcceptTermsPrefix => 'የሁድሁድን ';
@@ -2126,7 +2126,7 @@ class AppLocalizationsAm extends AppLocalizations {
   String get forgotPasswordNewTitle => 'አዲስ የይለፍ ቃል ይፍጠሩ';
 
   @override
-  String get forgotPasswordNewSubtitle => 'ቢያንስ 6 ቁምፊዎች ይጠቀሙ።';
+  String get forgotPasswordNewSubtitle => 'ቢያንስ 4 ቁምፊዎች ይጠቀሙ።';
 
   @override
   String get forgotPasswordLabelConfirmPassword => 'የይለፍ ቃል አረጋግጥ';
