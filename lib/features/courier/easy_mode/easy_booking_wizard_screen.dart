@@ -254,24 +254,26 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
   Future<void> _pickContact() async {
     final l10n = context.l10n;
     try {
-      final granted = await FlutterContacts.requestPermission(readonly: true);
-      if (!granted) {
+      // showPicker needs no permission on iOS; Android needs READ_CONTACTS when
+      // requesting properties.
+      final status =
+          await FlutterContacts.permissions.request(PermissionType.read);
+      if (status != PermissionStatus.granted) {
         if (mounted) _snack(l10n.contactsPermissionRequired);
         return;
       }
-      final contact = await FlutterContacts.openExternalPick();
-      if (contact == null || !mounted) return;
-      final full = await FlutterContacts.getContact(
-        contact.id,
-        withProperties: true,
-        withPhoto: false,
+      final contact = await FlutterContacts.native.showPicker(
+        properties: {ContactProperty.phone, ContactProperty.name},
       );
-      final name = full?.displayName ?? contact.displayName;
-      final phone = full?.phones.isNotEmpty == true
-          ? full!.phones.first.number
-          : (contact.phones.isNotEmpty ? contact.phones.first.number : '');
+      if (contact == null || !mounted) return;
+      final name = contact.displayName ?? '';
+      final phone = contact.phones.isNotEmpty
+          ? contact.phones.first.number
+          : '';
       setState(() {
-        _recipientNameController.text = name;
+        if (name.isNotEmpty) {
+          _recipientNameController.text = name;
+        }
         if (phone.isNotEmpty) {
           final parts = splitPhoneForDisplay(phone);
           _recipientPhoneController.text = parts.nationalNumber.isEmpty

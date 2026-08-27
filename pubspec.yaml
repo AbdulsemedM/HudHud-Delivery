@@ -80,7 +80,9 @@ dependencies:
   tutorial_coach_mark: ^1.3.3
   flutter_dotenv: ^6.0.1
   flutter_tts: ^4.2.2
-  flutter_contacts: ^1.1.9+2
+  # 2.x fixes iOS crash with FlutterSceneDelegate (nil window force-unwrap in 1.x).
+  # Cap below 2.2 — that line needs Dart 3.12 / Flutter 3.44+.
+  flutter_contacts: ^2.1.0
 
 dependency_overrides:
   # Local Flutter SDK is Dart 3.11; 0.8.13+18+ requires Dart 3.12.
