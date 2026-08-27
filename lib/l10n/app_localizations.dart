@@ -5869,6 +5869,403 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Something went wrong. Please try again.'**
   String get phoneEnrollmentGenericError;
+
+  /// No description provided for @whatAreYouSending.
+  ///
+  /// In en, this message translates to:
+  /// **'What are you sending'**
+  String get whatAreYouSending;
+
+  /// No description provided for @selectItemTypeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select type of item'**
+  String get selectItemTypeHint;
+
+  /// No description provided for @senderInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Sender information'**
+  String get senderInformation;
+
+  /// No description provided for @senderPhoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sender phone (09xxxxxxxx)'**
+  String get senderPhoneLabel;
+
+  /// No description provided for @senderPhoneExample.
+  ///
+  /// In en, this message translates to:
+  /// **'0912345678'**
+  String get senderPhoneExample;
+
+  /// No description provided for @recipientInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Who receives this'**
+  String get recipientInformation;
+
+  /// No description provided for @takePackagePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a picture of the package'**
+  String get takePackagePhoto;
+
+  /// No description provided for @packagePhotoAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Package photo added'**
+  String get packagePhotoAdded;
+
+  /// No description provided for @changePackagePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Change photo'**
+  String get changePackagePhoto;
+
+  /// No description provided for @itemTypeElectronics.
+  ///
+  /// In en, this message translates to:
+  /// **'Electronics'**
+  String get itemTypeElectronics;
+
+  /// No description provided for @itemTypeDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents'**
+  String get itemTypeDocuments;
+
+  /// No description provided for @itemTypeFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Food'**
+  String get itemTypeFood;
+
+  /// No description provided for @itemTypeClothing.
+  ///
+  /// In en, this message translates to:
+  /// **'Clothes'**
+  String get itemTypeClothing;
+
+  /// No description provided for @itemTypeBooks.
+  ///
+  /// In en, this message translates to:
+  /// **'Books'**
+  String get itemTypeBooks;
+
+  /// No description provided for @itemTypeFragile.
+  ///
+  /// In en, this message translates to:
+  /// **'Fragile'**
+  String get itemTypeFragile;
+
+  /// No description provided for @itemTypeOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get itemTypeOther;
+
+  /// No description provided for @callSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Call for help'**
+  String get callSupport;
+
+  /// No description provided for @orderByCall.
+  ///
+  /// In en, this message translates to:
+  /// **'Order by phone'**
+  String get orderByCall;
+
+  /// No description provided for @orderByCallSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We will help you create the delivery on a call'**
+  String get orderByCallSubtitle;
+
+  /// No description provided for @easyMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Easy mode'**
+  String get easyMode;
+
+  /// No description provided for @easyModeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bigger buttons, pictures, and spoken help'**
+  String get easyModeSubtitle;
+
+  /// No description provided for @navMyDeliveries.
+  ///
+  /// In en, this message translates to:
+  /// **'My deliveries'**
+  String get navMyDeliveries;
+
+  /// No description provided for @navMe.
+  ///
+  /// In en, this message translates to:
+  /// **'Me'**
+  String get navMe;
+
+  /// No description provided for @courierNowTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Now'**
+  String get courierNowTitle;
+
+  /// No description provided for @courierNowSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send right away'**
+  String get courierNowSubtitle;
+
+  /// No description provided for @courierLaterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get courierLaterTitle;
+
+  /// No description provided for @courierLaterSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a day and time'**
+  String get courierLaterSubtitle;
+
+  /// No description provided for @homeMoreServices.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get homeMoreServices;
+
+  /// No description provided for @homeHideMoreServices.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get homeHideMoreServices;
+
+  /// No description provided for @homeSendPackage.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a package'**
+  String get homeSendPackage;
+
+  /// No description provided for @easyPickupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Where to pick up?'**
+  String get easyPickupTitle;
+
+  /// No description provided for @easyPickupHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Move the map. Put the pin on the pickup place.'**
+  String get easyPickupHint;
+
+  /// No description provided for @easyDropTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Where to deliver?'**
+  String get easyDropTitle;
+
+  /// No description provided for @easyDropHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Move the map. Put the pin on the drop-off place.'**
+  String get easyDropHint;
+
+  /// No description provided for @easyIAmHere.
+  ///
+  /// In en, this message translates to:
+  /// **'I am here'**
+  String get easyIAmHere;
+
+  /// No description provided for @easyUseThisPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this place'**
+  String get easyUseThisPlace;
+
+  /// No description provided for @easyWhoReceives.
+  ///
+  /// In en, this message translates to:
+  /// **'Who gets the package?'**
+  String get easyWhoReceives;
+
+  /// No description provided for @easyPickContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick from contacts'**
+  String get easyPickContact;
+
+  /// No description provided for @easyOrTypePhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Or enter name and phone'**
+  String get easyOrTypePhone;
+
+  /// No description provided for @easyWhatIsIt.
+  ///
+  /// In en, this message translates to:
+  /// **'What are you sending?'**
+  String get easyWhatIsIt;
+
+  /// No description provided for @easyPackageSize.
+  ///
+  /// In en, this message translates to:
+  /// **'How big is it?'**
+  String get easyPackageSize;
+
+  /// No description provided for @easySizeSmall.
+  ///
+  /// In en, this message translates to:
+  /// **'Small'**
+  String get easySizeSmall;
+
+  /// No description provided for @easySizeMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get easySizeMedium;
+
+  /// No description provided for @easySizeLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Large'**
+  String get easySizeLarge;
+
+  /// No description provided for @easyConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your delivery'**
+  String get easyConfirmTitle;
+
+  /// No description provided for @easyConfirmPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Hear summary'**
+  String get easyConfirmPlay;
+
+  /// No description provided for @easyConfirmSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'From {pickup} to {dropoff}. Package: {item}. For {recipient}.'**
+  String easyConfirmSummary(
+      String pickup, String dropoff, String item, String recipient);
+
+  /// No description provided for @easySpeakHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Listen'**
+  String get easySpeakHint;
+
+  /// No description provided for @pleaseAddPackagePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Please take a photo of the package'**
+  String get pleaseAddPackagePhoto;
+
+  /// No description provided for @pleaseSelectPackageSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Please choose how big the package is'**
+  String get pleaseSelectPackageSize;
+
+  /// No description provided for @pleaseEnterValidRecipientPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid recipient phone (09xxxxxxxx)'**
+  String get pleaseEnterValidRecipientPhone;
+
+  /// No description provided for @voiceNoteOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a voice note (optional)'**
+  String get voiceNoteOptional;
+
+  /// No description provided for @voiceNoteRecordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold to record a message for the courier'**
+  String get voiceNoteRecordHint;
+
+  /// No description provided for @voiceNoteAttached.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice note added'**
+  String get voiceNoteAttached;
+
+  /// No description provided for @voiceNoteClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove voice note'**
+  String get voiceNoteClear;
+
+  /// No description provided for @trackingStatusSearching.
+  ///
+  /// In en, this message translates to:
+  /// **'Looking for a courier'**
+  String get trackingStatusSearching;
+
+  /// No description provided for @trackingStatusOnTheWay.
+  ///
+  /// In en, this message translates to:
+  /// **'Courier is coming'**
+  String get trackingStatusOnTheWay;
+
+  /// No description provided for @trackingStatusArrived.
+  ///
+  /// In en, this message translates to:
+  /// **'Courier has arrived'**
+  String get trackingStatusArrived;
+
+  /// No description provided for @trackingStatusDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery finished'**
+  String get trackingStatusDone;
+
+  /// No description provided for @pleaseSelectLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Please choose a place on the map'**
+  String get pleaseSelectLocation;
+
+  /// No description provided for @contactsPermissionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow contacts to pick who receives the package'**
+  String get contactsPermissionRequired;
+
+  /// No description provided for @couldNotOpenContacts.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open contacts'**
+  String get couldNotOpenContacts;
+
+  /// No description provided for @easyStepOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {current} of {total}'**
+  String easyStepOf(int current, int total);
+
+  /// No description provided for @paymentCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash'**
+  String get paymentCash;
+
+  /// No description provided for @paymentWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet'**
+  String get paymentWallet;
+
+  /// No description provided for @paymentCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Card'**
+  String get paymentCard;
 }
 
 class _AppLocalizationsDelegate

@@ -9,8 +9,10 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 // import 'package:hudhud_delivery/controllers/theme_controller.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
+import 'package:hudhud_delivery/core/easy_mode/easy_mode_controller.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/system_ui_style.dart';
+import 'package:provider/provider.dart';
 import 'package:hudhud_delivery/core/utils/avatar_util.dart';
 import 'package:hudhud_delivery/core/utils/phone_util.dart';
 import 'package:hudhud_delivery/core/widgets/user_avatar.dart';
@@ -692,6 +694,15 @@ class _SettingsScreenState extends State<SettingsScreen>
                         onChanged: _onMarketingConsentChanged,
                       ),
                       const _ProfileTileDivider(),
+                      Consumer<EasyModeController>(
+                        builder: (context, easyMode, _) {
+                          return _ProfileEasyModeTile(
+                            enabled: easyMode.enabled,
+                            onChanged: (v) => easyMode.setEnabled(v),
+                          );
+                        },
+                      ),
+                      const _ProfileTileDivider(),
                       _ProfileMenuTile(
                         icon: Icons.language_outlined,
                         title: l10n.settingsLanguage,
@@ -975,6 +986,72 @@ class _ProfileBiometricTile extends StatelessWidget {
           _ProfileGradientSwitch(
             value: enabled,
             onChanged: switchEnabled ? onChanged : null,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProfileEasyModeTile extends StatelessWidget {
+  final bool enabled;
+  final ValueChanged<bool> onChanged;
+
+  const _ProfileEasyModeTile({
+    required this.enabled,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: AuthScreenColors.orange.withValues(alpha: 0.12),
+            ),
+            child: Icon(
+              Icons.accessibility_new_rounded,
+              color: AuthScreenColors.orange,
+              size: 22,
+            ),
+          ),
+          SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.easyMode,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                    color: AuthScreenColors.textPrimaryOf(context),
+                  ),
+                ),
+                SizedBox(height: 2),
+                Text(
+                  l10n.easyModeSubtitle,
+                  style: TextStyle(
+                    fontSize: 12,
+                    height: 1.35,
+                    color: AuthScreenColors.textSecondaryOf(context),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(width: 8),
+          _ProfileGradientSwitch(
+            value: enabled,
+            onChanged: onChanged,
           ),
         ],
       ),

@@ -10,6 +10,10 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Profile avatar (image_picker) -->
     <uses-permission android:name="android.permission.CAMERA" />
+    <!-- Easy mode: pick recipient from contacts -->
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <!-- Voice notes / TTS playback -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <!-- Use system photo picker instead of broad media access (Play policy) -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" tools:node="remove" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" tools:node="remove" />

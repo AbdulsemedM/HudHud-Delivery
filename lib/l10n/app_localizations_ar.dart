@@ -3098,4 +3098,210 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get phoneEnrollmentGenericError =>
       'Something went wrong. Please try again.';
+
+  @override
+  String get whatAreYouSending => 'What are you sending';
+
+  @override
+  String get selectItemTypeHint => 'Select type of item';
+
+  @override
+  String get senderInformation => 'Sender information';
+
+  @override
+  String get senderPhoneLabel => 'Sender phone (09xxxxxxxx)';
+
+  @override
+  String get senderPhoneExample => '0912345678';
+
+  @override
+  String get recipientInformation => 'Who receives this';
+
+  @override
+  String get takePackagePhoto => 'Take a picture of the package';
+
+  @override
+  String get packagePhotoAdded => 'Package photo added';
+
+  @override
+  String get changePackagePhoto => 'Change photo';
+
+  @override
+  String get itemTypeElectronics => 'Electronics';
+
+  @override
+  String get itemTypeDocuments => 'Documents';
+
+  @override
+  String get itemTypeFood => 'Food';
+
+  @override
+  String get itemTypeClothing => 'Clothes';
+
+  @override
+  String get itemTypeBooks => 'Books';
+
+  @override
+  String get itemTypeFragile => 'Fragile';
+
+  @override
+  String get itemTypeOther => 'Other';
+
+  @override
+  String get callSupport => 'Call for help';
+
+  @override
+  String get orderByCall => 'Order by phone';
+
+  @override
+  String get orderByCallSubtitle =>
+      'We will help you create the delivery on a call';
+
+  @override
+  String get easyMode => 'Easy mode';
+
+  @override
+  String get easyModeSubtitle => 'Bigger buttons, pictures, and spoken help';
+
+  @override
+  String get navMyDeliveries => 'My deliveries';
+
+  @override
+  String get navMe => 'Me';
+
+  @override
+  String get courierNowTitle => 'Now';
+
+  @override
+  String get courierNowSubtitle => 'Send right away';
+
+  @override
+  String get courierLaterTitle => 'Later';
+
+  @override
+  String get courierLaterSubtitle => 'Pick a day and time';
+
+  @override
+  String get homeMoreServices => 'More';
+
+  @override
+  String get homeHideMoreServices => 'Hide';
+
+  @override
+  String get homeSendPackage => 'Send a package';
+
+  @override
+  String get easyPickupTitle => 'Where to pick up?';
+
+  @override
+  String get easyPickupHint => 'Move the map. Put the pin on the pickup place.';
+
+  @override
+  String get easyDropTitle => 'Where to deliver?';
+
+  @override
+  String get easyDropHint => 'Move the map. Put the pin on the drop-off place.';
+
+  @override
+  String get easyIAmHere => 'I am here';
+
+  @override
+  String get easyUseThisPlace => 'Use this place';
+
+  @override
+  String get easyWhoReceives => 'Who gets the package?';
+
+  @override
+  String get easyPickContact => 'Pick from contacts';
+
+  @override
+  String get easyOrTypePhone => 'Or enter name and phone';
+
+  @override
+  String get easyWhatIsIt => 'What are you sending?';
+
+  @override
+  String get easyPackageSize => 'How big is it?';
+
+  @override
+  String get easySizeSmall => 'Small';
+
+  @override
+  String get easySizeMedium => 'Medium';
+
+  @override
+  String get easySizeLarge => 'Large';
+
+  @override
+  String get easyConfirmTitle => 'Check your delivery';
+
+  @override
+  String get easyConfirmPlay => 'Hear summary';
+
+  @override
+  String easyConfirmSummary(
+      String pickup, String dropoff, String item, String recipient) {
+    return 'From $pickup to $dropoff. Package: $item. For $recipient.';
+  }
+
+  @override
+  String get easySpeakHint => 'Listen';
+
+  @override
+  String get pleaseAddPackagePhoto => 'Please take a photo of the package';
+
+  @override
+  String get pleaseSelectPackageSize => 'Please choose how big the package is';
+
+  @override
+  String get pleaseEnterValidRecipientPhone =>
+      'Please enter a valid recipient phone (09xxxxxxxx)';
+
+  @override
+  String get voiceNoteOptional => 'Add a voice note (optional)';
+
+  @override
+  String get voiceNoteRecordHint => 'Hold to record a message for the courier';
+
+  @override
+  String get voiceNoteAttached => 'Voice note added';
+
+  @override
+  String get voiceNoteClear => 'Remove voice note';
+
+  @override
+  String get trackingStatusSearching => 'Looking for a courier';
+
+  @override
+  String get trackingStatusOnTheWay => 'Courier is coming';
+
+  @override
+  String get trackingStatusArrived => 'Courier has arrived';
+
+  @override
+  String get trackingStatusDone => 'Delivery finished';
+
+  @override
+  String get pleaseSelectLocation => 'Please choose a place on the map';
+
+  @override
+  String get contactsPermissionRequired =>
+      'Allow contacts to pick who receives the package';
+
+  @override
+  String get couldNotOpenContacts => 'Could not open contacts';
+
+  @override
+  String easyStepOf(int current, int total) {
+    return 'Step $current of $total';
+  }
+
+  @override
+  String get paymentCash => 'Cash';
+
+  @override
+  String get paymentWallet => 'Wallet';
+
+  @override
+  String get paymentCard => 'Card';
 }

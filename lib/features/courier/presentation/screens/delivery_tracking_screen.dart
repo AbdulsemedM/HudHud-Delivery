@@ -7,9 +7,12 @@ import 'package:lottie/lottie.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/app/services/google_directions_service.dart';
+import 'package:hudhud_delivery/core/easy_mode/voice_hint_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/widgets/call_support_button.dart';
 import 'package:hudhud_delivery/core/widgets/status_chip.dart';
+import 'package:hudhud_delivery/features/courier/easy_mode/delivery_status_sound_service.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/models/delivery_live_tracking.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
@@ -113,6 +116,48 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
     final icon = await loadDeliveryGuyMapIcon();
     if (!mounted || icon == null) return;
     setState(() => _deliveryGuyIcon = icon);
+  }
+
+  String _friendlyStatus(BuildContext context, String raw) {
+    final l10n = context.l10n;
+    final key = raw.toLowerCase();
+    if (key.contains('search') ||
+        key.contains('pending') ||
+        key.contains('finding') ||
+        key.contains('requested')) {
+      return l10n.trackingStatusSearching;
+    }
+    if (key.contains('arriv') || key.contains('pickup')) {
+      return l10n.trackingStatusArrived;
+    }
+    if (key.contains('deliver') &&
+        (key.contains('ed') || key.contains('complete') || key.contains('done'))) {
+      return l10n.trackingStatusDone;
+    }
+    if (key.contains('complete') || key.contains('done') || key.contains('finish')) {
+      return l10n.trackingStatusDone;
+    }
+    return l10n.trackingStatusOnTheWay;
+  }
+
+  IconData _statusIcon(String raw) {
+    final key = raw.toLowerCase();
+    if (key.contains('search') ||
+        key.contains('pending') ||
+        key.contains('finding') ||
+        key.contains('requested')) {
+      return Icons.search_rounded;
+    }
+    if (key.contains('arriv') || key.contains('pickup')) {
+      return Icons.place_rounded;
+    }
+    if (key.contains('complete') ||
+        key.contains('done') ||
+        key.contains('finish') ||
+        (key.contains('deliver') && key.contains('ed'))) {
+      return Icons.check_circle_rounded;
+    }
+    return Icons.delivery_dining_rounded;
   }
 
   void _startPollTimer() {
@@ -304,6 +349,12 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
             _trackingAvailable = true;
           }
           _trackError = null;
+          final statusKey = resolveDeliveryStatus(_trackData);
+          if (statusKey != null) {
+            unawaited(
+              DeliveryStatusSoundService.instance.playStatusChange(statusKey),
+            );
+          }
         } else {
           _trackError = result['message'] as String?;
         }
@@ -466,6 +517,8 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
       _trackData,
       fallback: 'in_progress',
     );
+    final friendlyStatus = _friendlyStatus(context, statusText);
+    final statusIcon = _statusIcon(statusText);
     return CourierTheme.wrap(
       context,
       child: Builder(
@@ -487,26 +540,44 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                     _fitBounds();
                   },
                 ),
-                // Back button
+                // Back + call support
                 Positioned(
                   top: 40,
                   left: 16,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: HomeColors.surfaceElevatedOf(context),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.25),
-                          blurRadius: 4,
+                  child: Row(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: HomeColors.surfaceElevatedOf(context),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.25),
+                              blurRadius: 4,
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    child: IconButton(
-                      icon: Icon(Icons.arrow_back,
-                          color: HomeColors.textPrimaryOf(context)),
-                      onPressed: () => Navigator.pop(context),
-                    ),
+                        child: IconButton(
+                          icon: Icon(Icons.arrow_back,
+                              color: HomeColors.textPrimaryOf(context)),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: HomeColors.surfaceElevatedOf(context),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.25),
+                              blurRadius: 4,
+                            ),
+                          ],
+                        ),
+                        child: const CallSupportButton(compact: true),
+                      ),
+                    ],
                   ),
                 ),
                 // Status badge
@@ -606,55 +677,57 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                             ),
                             child: Row(
                               children: [
+                                Container(
+                                  width: 56,
+                                  height: 56,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.2),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(statusIcon,
+                                      color: Colors.white, size: 32),
+                                ),
+                                const SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
+                                        friendlyStatus,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
                                         (_trackData?['pickup_location']
                                                         ?.toString() ??
                                                     widget.pickupLocation)
                                                 .length >
-                                            30
-                                            ? '${(_trackData?['pickup_location']?.toString() ?? widget.pickupLocation).substring(0, 30)}...'
+                                            40
+                                            ? '${(_trackData?['pickup_location']?.toString() ?? widget.pickupLocation).substring(0, 40)}...'
                                             : (_trackData?['pickup_location']
                                                     ?.toString() ??
                                                 widget.pickupLocation),
                                         style: const TextStyle(
                                           color: Colors.white,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        resolveDeliveryStatus(_trackData) ??
-                                            _trackData?[
-                                                    'estimated_delivery_time']
-                                                ?.toString() ??
-                                            'Delivery in progress',
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 12,
+                                          fontSize: 13,
                                         ),
                                       ),
                                     ],
                                   ),
                                 ),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color:
-                                        Colors.white.withValues(alpha: 0.2),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: IconButton(
-                                    icon: const Icon(Icons.send,
-                                        color: Colors.white),
-                                    onPressed: () {
-                                      // TODO: Implement send action
-                                    },
-                                  ),
+                                IconButton(
+                                  tooltip: context.l10n.easySpeakHint,
+                                  icon: const Icon(Icons.volume_up_rounded,
+                                      color: Colors.white),
+                                  onPressed: () {
+                                    VoiceHintService.instance
+                                        .speak(friendlyStatus);
+                                  },
                                 ),
                               ],
                             ),

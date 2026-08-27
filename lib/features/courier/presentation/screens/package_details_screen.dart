@@ -1,10 +1,16 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/utils/phone_util.dart';
+import 'package:hudhud_delivery/core/widgets/call_support_button.dart';
+import 'package:hudhud_delivery/features/courier/easy_mode/package_item_catalog.dart';
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:latlong2/latlong.dart';
 import 'confirm_details_screen.dart';
 
@@ -50,15 +56,7 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
   String? _packageImagePath;
   bool _senderManuallyCleared = false;
   String _lastSenderText = '';
-
-  final List<String> _itemTypes = [
-    'Electronics/Gadgets',
-    'Documents',
-    'Food',
-    'Clothing',
-    'Books',
-    'Other'
-  ];
+  final ImagePicker _imagePicker = ImagePicker();
 
   @override
   void initState() {
@@ -112,13 +110,51 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
   }
 
   Future<void> _takePicture() async {
-    // TODO: Implement image picker
-    // For now, just show a message
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(context.l10n.imagePickerTodo),
-      ),
-    );
+    final l10n = context.l10n;
+    try {
+      final source = await showModalBottomSheet<ImageSource>(
+        context: context,
+        builder: (ctx) => SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.camera_alt_rounded),
+                title: Text(l10n.takePackagePhoto),
+                onTap: () => Navigator.pop(ctx, ImageSource.camera),
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library_rounded),
+                title: Text(l10n.changePackagePhoto),
+                onTap: () => Navigator.pop(ctx, ImageSource.gallery),
+              ),
+            ],
+          ),
+        ),
+      );
+      if (source == null || !mounted) return;
+      final picked = await _imagePicker.pickImage(
+        source: source,
+        maxWidth: 1200,
+        maxHeight: 1200,
+        imageQuality: 85,
+        requestFullMetadata: source != ImageSource.gallery,
+      );
+      if (picked == null || !mounted) return;
+      setState(() => _packageImagePath = picked.path);
+    } on PlatformException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.couldNotOpenPhotoPicker(e.message ?? e.code)),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.couldNotOpenPhotoPicker('$e'))),
+      );
+    }
   }
 
   InputDecoration _fieldDecoration({
@@ -154,66 +190,45 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
     );
   }
 
+  void _snack(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
+    );
+  }
+
   void _navigateToConfirm() {
+    final l10n = context.l10n;
     if (_itemType == null || _itemType!.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.pleaseSelectItemType),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _snack(l10n.pleaseSelectItemType);
       return;
     }
 
     if (_quantityController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.pleaseEnterQuantity),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _snack(l10n.pleaseEnterQuantity);
       return;
     }
 
     final weight = double.tryParse(_packageWeightController.text);
     if (weight == null || weight <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.pleaseEnterValidWeight),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _snack(l10n.pleaseEnterValidWeight);
       return;
     }
 
     final senderPhone = normalizePhoneToBackend(_senderPhoneController.text);
     if (!RegExp(r'^2519\d{8}$').hasMatch(senderPhone)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.pleaseEnterValidSenderPhone),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _snack(l10n.pleaseEnterValidSenderPhone);
       return;
     }
 
     if (_recipientNameController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.pleaseEnterRecipientName),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _snack(l10n.pleaseEnterRecipientName);
       return;
     }
 
-    if (_recipientPhoneController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.pleaseEnterRecipientPhone),
-          backgroundColor: Colors.red,
-        ),
-      );
+    final recipientPhone =
+        normalizePhoneToBackend(_recipientPhoneController.text);
+    if (!RegExp(r'^2519\d{8}$').hasMatch(recipientPhone)) {
+      _snack(l10n.pleaseEnterValidRecipientPhone);
       return;
     }
 
@@ -236,8 +251,8 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
           whoPays: 'recipient',
           paymentType: 'cash_on_delivery',
           senderPhone: senderPhone,
-          recipientName: _recipientNameController.text,
-          recipientPhone: _recipientPhoneController.text,
+          recipientName: _recipientNameController.text.trim(),
+          recipientPhone: recipientPhone,
           packageImagePath: _packageImagePath,
         ),
       ),
@@ -246,6 +261,7 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return CourierTheme.wrap(
       context,
       child: Builder(
@@ -261,17 +277,19 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
               elevation: 0,
               surfaceTintColor: Colors.transparent,
               leading: IconButton(
-                icon: Icon(Icons.arrow_back, color: HomeColors.textPrimaryOf(context)),
+                icon: Icon(Icons.arrow_back,
+                    color: HomeColors.textPrimaryOf(context)),
                 onPressed: () => Navigator.pop(context),
               ),
               title: Text(
-                'What are you sending',
+                l10n.whatAreYouSending,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: HomeColors.textPrimaryOf(context),
                 ),
               ),
               centerTitle: true,
+              actions: const [CallSupportButton(compact: true)],
             ),
             body: SafeArea(
               child: Column(
@@ -283,51 +301,27 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'What are you sending',
+                            l10n.whatAreYouSending,
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                               color: HomeColors.textPrimaryOf(context),
                             ),
                           ),
-                          const SizedBox(height: 16),
-                          DropdownButtonFormField<String>(
-                            initialValue: _itemType,
-                            isExpanded: true,
-                            dropdownColor: HomeColors.surfaceOf(context),
-                            icon: Icon(
-                              Icons.keyboard_arrow_down,
-                              color: HomeColors.textMutedOf(context),
-                            ),
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: HomeColors.textPrimaryOf(context),
-                            ),
-                            decoration: _fieldDecoration(
-                              labelText: 'What are you sending',
-                              hintText:
-                                  'Select type of item (e.g. gadget, document)',
-                              fieldFill: fieldFill,
-                              outline: outline,
-                            ),
-                            hint: Text(
-                              'Select type of item (e.g. gadget, document)',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: HomeColors.textMutedOf(context),
-                              ),
-                            ),
-                            items: _itemTypes
-                                .map(
-                                  (type) => DropdownMenuItem<String>(
-                                    value: type,
-                                    child: Text(type),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (value) {
-                              setState(() => _itemType = value);
-                            },
+                          const SizedBox(height: 12),
+                          Wrap(
+                            spacing: 10,
+                            runSpacing: 10,
+                            children: [
+                              for (final id in PackageItemCatalog.allIds)
+                                _ItemTypeChip(
+                                  selected: _itemType == id,
+                                  icon: PackageItemCatalog.iconFor(id),
+                                  label: PackageItemCatalog.labelFor(id, l10n),
+                                  onTap: () =>
+                                      setState(() => _itemType = id),
+                                ),
+                            ],
                           ),
                           const SizedBox(height: 16),
                           Row(
@@ -338,9 +332,10 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                                   controller: _quantityController,
                                   keyboardType: TextInputType.number,
                                   style: TextStyle(
-                                      color: HomeColors.textPrimaryOf(context)),
+                                      color:
+                                          HomeColors.textPrimaryOf(context)),
                                   decoration: _fieldDecoration(
-                                    labelText: 'Quantity',
+                                    labelText: l10n.quantity,
                                     fieldFill: fieldFill,
                                     outline: outline,
                                   ),
@@ -354,9 +349,10 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                                       const TextInputType.numberWithOptions(
                                           decimal: true),
                                   style: TextStyle(
-                                      color: HomeColors.textPrimaryOf(context)),
+                                      color:
+                                          HomeColors.textPrimaryOf(context)),
                                   decoration: _fieldDecoration(
-                                    labelText: 'Weight (kg)',
+                                    labelText: l10n.packageWeightKg,
                                     fieldFill: fieldFill,
                                     outline: outline,
                                   ),
@@ -368,16 +364,17 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                           TextFormField(
                             controller: _packageDescriptionController,
                             maxLines: 2,
-                            style: TextStyle(color: HomeColors.textPrimaryOf(context)),
+                            style: TextStyle(
+                                color: HomeColors.textPrimaryOf(context)),
                             decoration: _fieldDecoration(
-                              labelText: 'Package Description (optional)',
+                              labelText: l10n.packageDescriptionOptional,
                               fieldFill: fieldFill,
                               outline: outline,
                             ),
                           ),
                           const SizedBox(height: 24),
                           Text(
-                            'Sender Information',
+                            l10n.senderInformation,
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -388,17 +385,18 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                           TextFormField(
                             controller: _senderPhoneController,
                             keyboardType: TextInputType.phone,
-                            style: TextStyle(color: HomeColors.textPrimaryOf(context)),
+                            style: TextStyle(
+                                color: HomeColors.textPrimaryOf(context)),
                             decoration: _fieldDecoration(
-                              labelText: 'Sender phone (09xxxxxxxx)',
-                              hintText: '0912345678',
+                              labelText: l10n.senderPhoneLabel,
+                              hintText: l10n.senderPhoneExample,
                               fieldFill: fieldFill,
                               outline: outline,
                             ),
                           ),
                           const SizedBox(height: 24),
                           Text(
-                            'Recipient Information',
+                            l10n.recipientInformation,
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -408,9 +406,10 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                           const SizedBox(height: 16),
                           TextFormField(
                             controller: _recipientNameController,
-                            style: TextStyle(color: HomeColors.textPrimaryOf(context)),
+                            style: TextStyle(
+                                color: HomeColors.textPrimaryOf(context)),
                             decoration: _fieldDecoration(
-                              labelText: 'Recipient Names',
+                              labelText: l10n.recipientNames,
                               fieldFill: fieldFill,
                               outline: outline,
                             ),
@@ -419,9 +418,10 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                           TextFormField(
                             controller: _recipientPhoneController,
                             keyboardType: TextInputType.phone,
-                            style: TextStyle(color: HomeColors.textPrimaryOf(context)),
+                            style: TextStyle(
+                                color: HomeColors.textPrimaryOf(context)),
                             decoration: _fieldDecoration(
-                              labelText: 'Recipient contact number',
+                              labelText: l10n.recipientContactNumber,
                               fieldFill: fieldFill,
                               outline: outline,
                             ),
@@ -438,28 +438,61 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                                     BorderRadius.circular(AppColors.radiusLG),
                                 border: Border.all(
                                   color: outline,
-                                  style: BorderStyle.solid,
                                   width: 2,
                                 ),
                               ),
-                              child: Column(
-                                children: [
-                                  Icon(
-                                    Icons.camera_alt,
-                                    size: 48,
-                                    color: HomeColors.textMutedOf(context),
-                                  ),
-                                  SizedBox(height: 12),
-                                  Text(
-                                    'Take a picture of the package',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: HomeColors.textMutedOf(context),
-                                      fontWeight: FontWeight.w500,
+                              child: _packageImagePath == null
+                                  ? Column(
+                                      children: [
+                                        Icon(
+                                          Icons.camera_alt,
+                                          size: 48,
+                                          color:
+                                              HomeColors.textMutedOf(context),
+                                        ),
+                                        const SizedBox(height: 12),
+                                        Text(
+                                          l10n.takePackagePhoto,
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: HomeColors.textMutedOf(
+                                                context),
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  : Column(
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          child: Image.file(
+                                            File(_packageImagePath!),
+                                            height: 160,
+                                            width: double.infinity,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 12),
+                                        Text(
+                                          l10n.packagePhotoAdded,
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: HomeColors.textPrimaryOf(
+                                                context),
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        Text(
+                                          l10n.changePackagePhoto,
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: HomeColors.violet,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                ],
-                              ),
                             ),
                           ),
                           const SizedBox(height: 100),
@@ -475,12 +508,13 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                     ),
                     child: SizedBox(
                       width: double.infinity,
-                      height: 50,
+                      height: 56,
                       child: ElevatedButton(
                         onPressed: _navigateToConfirm,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: HomeColors.violet,
-                          foregroundColor: Theme.of(context).colorScheme.onSecondary,
+                          foregroundColor:
+                              Theme.of(context).colorScheme.onSecondary,
                           minimumSize: const Size(
                               double.infinity, AppColors.buttonHeightMD),
                           shape: RoundedRectangleBorder(
@@ -488,9 +522,9 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                                 BorderRadius.circular(AppColors.radiusLG),
                           ),
                         ),
-                        child: const Text(
-                          'Continue',
-                          style: TextStyle(
+                        child: Text(
+                          l10n.actionContinue,
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -504,6 +538,70 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _ItemTypeChip extends StatelessWidget {
+  const _ItemTypeChip({
+    required this.selected,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final bool selected;
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: selected
+          ? HomeColors.violet.withValues(alpha: 0.15)
+          : HomeColors.surfaceElevatedOf(context),
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          width: 104,
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: selected
+                  ? HomeColors.violet
+                  : HomeColors.borderOf(context),
+              width: selected ? 2 : 1,
+            ),
+          ),
+          child: Column(
+            children: [
+              Icon(
+                icon,
+                size: 32,
+                color: selected
+                    ? HomeColors.violet
+                    : HomeColors.textPrimaryOf(context),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  color: HomeColors.textPrimaryOf(context),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

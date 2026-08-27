@@ -24,6 +24,8 @@ import 'controllers/auth_controller.dart';
 import 'controllers/theme_controller.dart';
 import 'controllers/locale_controller.dart';
 import 'controllers/service_accent_controller.dart';
+import 'core/easy_mode/easy_mode_controller.dart';
+import 'core/easy_mode/voice_hint_service.dart';
 
 // Services
 import 'app/services/fcm_service.dart';
@@ -106,6 +108,12 @@ void main() async {
   final localeController = LocaleController();
   await localeController.init();
 
+  final easyModeController = EasyModeController();
+  await easyModeController.init();
+  await VoiceHintService.instance.init(
+    languageCode: localeController.locale.languageCode,
+  );
+
   // Initialize auth service
   final authService = AuthService();
 
@@ -127,6 +135,7 @@ void main() async {
   runApp(MyApp(
     themeController: themeController,
     localeController: localeController,
+    easyModeController: easyModeController,
     authService: authService,
     ordersRepository: ordersRepository,
     navigatorKey: navigatorKey,
@@ -136,6 +145,7 @@ void main() async {
 class MyApp extends StatefulWidget {
   final ThemeController themeController;
   final LocaleController localeController;
+  final EasyModeController easyModeController;
   final AuthService authService;
   final OrdersRepository ordersRepository;
   final GlobalKey<NavigatorState> navigatorKey;
@@ -144,6 +154,7 @@ class MyApp extends StatefulWidget {
     Key? key,
     required this.themeController,
     required this.localeController,
+    required this.easyModeController,
     required this.authService,
     required this.ordersRepository,
     required this.navigatorKey,
@@ -160,6 +171,7 @@ class _MyAppState extends State<MyApp> {
       providers: [
         ChangeNotifierProvider.value(value: widget.themeController),
         ChangeNotifierProvider.value(value: widget.localeController),
+        ChangeNotifierProvider.value(value: widget.easyModeController),
         ChangeNotifierProvider(create: (_) => ServiceAccentController()),
         ChangeNotifierProvider(
           create: (_) => AuthController(),
@@ -176,6 +188,9 @@ class _MyAppState extends State<MyApp> {
             ServiceAccentController>(
           builder: (context, themeController, localeController,
               serviceAccent, child) {
+            VoiceHintService.instance.setLanguage(
+              localeController.locale.languageCode,
+            );
             final seed =
                 ServiceTabPalette.seedFor(serviceAccent.homeServiceMode);
             final themeLight = serviceAccent.shouldApplyServiceAccent

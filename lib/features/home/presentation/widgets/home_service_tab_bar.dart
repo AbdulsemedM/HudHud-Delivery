@@ -7,8 +7,9 @@ import 'package:hudhud_delivery/features/onboarding_tour/presentation/onboarding
 export 'package:hudhud_delivery/core/theme/service_tab_palette.dart'
     show HomeServiceMode;
 
-/// Four service tiles with brand PNG artwork on a flat dark strip.
-class HomeServiceTabBar extends StatelessWidget {
+/// Service tiles with brand PNG artwork. Coming-soon services stay collapsed
+/// behind "More" so the home screen focuses on Send a package (courier).
+class HomeServiceTabBar extends StatefulWidget {
   const HomeServiceTabBar({
     super.key,
     required this.selected,
@@ -20,6 +21,11 @@ class HomeServiceTabBar extends StatelessWidget {
   final ValueChanged<HomeServiceMode> onSelected;
   final OnboardingTourKeys? tourKeys;
 
+  @override
+  State<HomeServiceTabBar> createState() => _HomeServiceTabBarState();
+}
+
+class _HomeServiceTabBarState extends State<HomeServiceTabBar> {
   static const String _foodPng =
       'assets/images/home_service_tabs/food_groceries.png';
   static const String _courierPng = 'assets/images/home_service_tabs/courier.png';
@@ -27,19 +33,29 @@ class HomeServiceTabBar extends StatelessWidget {
   static const String _handymanPng =
       'assets/images/home_service_tabs/handyman.png';
 
+  bool _showMore = false;
+
+  @override
+  void didUpdateWidget(covariant HomeServiceTabBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.selected != HomeServiceMode.courier && !_showMore) {
+      _showMore = true;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
-    final items = <_TabSpec>[
-      _TabSpec(
-        mode: HomeServiceMode.courier,
-        label: l10n.homeTabCourier,
-        assetPath: _courierPng,
-        fallbackIcon: Icons.inventory_2_rounded,
-        brand: ServiceTabPalette.courier,
-        unselectedWell: const Color(0xFF2A2040),
-      ),
+    final courier = _TabSpec(
+      mode: HomeServiceMode.courier,
+      label: l10n.homeSendPackage,
+      assetPath: _courierPng,
+      fallbackIcon: Icons.inventory_2_rounded,
+      brand: ServiceTabPalette.courier,
+      unselectedWell: const Color(0xFF2A2040),
+    );
+    final others = <_TabSpec>[
       _TabSpec(
         mode: HomeServiceMode.foodGroceries,
         label: l10n.homeTabFood,
@@ -67,19 +83,56 @@ class HomeServiceTabBar extends StatelessWidget {
     ];
 
     return KeyedSubtree(
-      key: tourKeys?.serviceTabsKey,
+      key: widget.tourKeys?.serviceTabsKey,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            for (var i = 0; i < items.length; i++) ...[
-              if (i > 0) const SizedBox(width: 10),
-              Expanded(
-                child: _ServiceTile(
-                  key: _tourKeyFor(items[i].mode),
-                  spec: items[i],
-                  selected: items[i].mode == selected,
-                  onTap: () => onSelected(items[i].mode),
+            Row(
+              children: [
+                Expanded(
+                  flex: _showMore ? 1 : 3,
+                  child: _ServiceTile(
+                    key: widget.tourKeys?.courierTabKey,
+                    spec: courier,
+                    selected: widget.selected == HomeServiceMode.courier,
+                    large: !_showMore,
+                    onTap: () => widget.onSelected(HomeServiceMode.courier),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                if (!_showMore)
+                  Expanded(
+                    child: _MoreTile(
+                      label: l10n.homeMoreServices,
+                      onTap: () => setState(() => _showMore = true),
+                    ),
+                  )
+                else
+                  for (var i = 0; i < others.length; i++) ...[
+                    if (i > 0) const SizedBox(width: 10),
+                    Expanded(
+                      child: _ServiceTile(
+                        key: _tourKeyFor(others[i].mode),
+                        spec: others[i],
+                        selected: others[i].mode == widget.selected,
+                        onTap: () => widget.onSelected(others[i].mode),
+                      ),
+                    ),
+                  ],
+              ],
+            ),
+            if (_showMore) ...[
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () {
+                    setState(() => _showMore = false);
+                    widget.onSelected(HomeServiceMode.courier);
+                  },
+                  child: Text(l10n.homeHideMoreServices),
                 ),
               ),
             ],
@@ -90,7 +143,7 @@ class HomeServiceTabBar extends StatelessWidget {
   }
 
   GlobalKey? _tourKeyFor(HomeServiceMode mode) {
-    final keys = tourKeys;
+    final keys = widget.tourKeys;
     if (keys == null) return null;
     switch (mode) {
       case HomeServiceMode.courier:
@@ -123,24 +176,14 @@ class _TabSpec {
   final Color unselectedWell;
 }
 
-class _ServiceTile extends StatelessWidget {
-  const _ServiceTile({
-    super.key,
-    required this.spec,
-    required this.selected,
-    required this.onTap,
-  });
+class _MoreTile extends StatelessWidget {
+  const _MoreTile({required this.label, required this.onTap});
 
-  final _TabSpec spec;
-  final bool selected;
+  final String label;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final bg = selected ? spec.brand : spec.unselectedWell;
-    final labelColor =
-        selected ? HomeColors.textPrimaryOf(context) : HomeColors.textMutedOf(context);
-
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -151,6 +194,69 @@ class _ServiceTile extends StatelessWidget {
           children: [
             AspectRatio(
               aspectRatio: 1,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2A2A32),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: HomeColors.borderOf(context)),
+                ),
+                child: Icon(
+                  Icons.apps_rounded,
+                  size: 36,
+                  color: HomeColors.textMutedOf(context),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 12,
+                color: HomeColors.textMutedOf(context),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ServiceTile extends StatelessWidget {
+  const _ServiceTile({
+    super.key,
+    required this.spec,
+    required this.selected,
+    required this.onTap,
+    this.large = false,
+  });
+
+  final _TabSpec spec;
+  final bool selected;
+  final VoidCallback onTap;
+  final bool large;
+
+  @override
+  Widget build(BuildContext context) {
+    final bg = selected ? spec.brand : spec.unselectedWell;
+    final labelColor = selected
+        ? HomeColors.textPrimaryOf(context)
+        : HomeColors.textMutedOf(context);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AspectRatio(
+              aspectRatio: large ? 2.2 : 1,
               child: Container(
                 decoration: BoxDecoration(
                   color: bg,
@@ -165,14 +271,14 @@ class _ServiceTile extends StatelessWidget {
                         ]
                       : null,
                 ),
-                padding: const EdgeInsets.all(14),
+                padding: EdgeInsets.all(large ? 18 : 14),
                 child: Image.asset(
                   spec.assetPath,
                   fit: BoxFit.contain,
                   gaplessPlayback: true,
                   errorBuilder: (_, __, ___) => Icon(
                     spec.fallbackIcon,
-                    size: 32,
+                    size: large ? 48 : 32,
                     color: selected
                         ? Theme.of(context).colorScheme.onPrimary
                         : spec.brand,
@@ -183,12 +289,12 @@ class _ServiceTile extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               spec.label,
-              maxLines: 1,
+              maxLines: large ? 2 : 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                fontSize: 12,
+                fontSize: large ? 14 : 12,
                 color: labelColor,
               ),
             ),

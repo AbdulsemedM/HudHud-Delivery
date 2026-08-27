@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/core/easy_mode/easy_mode_controller.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
+import 'package:hudhud_delivery/core/utils/support_launcher.dart';
+import 'package:hudhud_delivery/core/widgets/call_support_button.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
+import 'package:hudhud_delivery/features/courier/easy_mode/easy_booking_wizard_screen.dart';
 import 'package:hudhud_delivery/features/courier/presentation/widgets/active_delivery_card.dart';
 import 'package:hudhud_delivery/features/courier/presentation/widgets/courier_history_empty_state.dart';
 import 'package:hudhud_delivery/features/courier/presentation/widgets/delivery_history_card.dart';
@@ -14,6 +18,8 @@ import 'package:hudhud_delivery/features/courier/utils/courier_access_gate.dart'
 import 'package:hudhud_delivery/features/courier/utils/courier_live_job_screen.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_status.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
+import 'package:hudhud_delivery/features/settings/presentation/widgets/auth_feedback.dart';
+import 'package:provider/provider.dart';
 import '../../../home/presentation/widgets/home_widget.dart';
 import 'delivery_details_screen.dart';
 import 'delivery_history_screen.dart';
@@ -155,10 +161,13 @@ class _CourierScreenState extends State<CourierScreen> {
   Future<void> _openInstantDelivery() async {
     if (!await requireCourierSendAccess(context)) return;
     if (!mounted) return;
+    final easyMode = context.read<EasyModeController>().enabled;
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const InstantDeliveryScreen(),
+        builder: (context) => easyMode
+            ? const EasyBookingWizardScreen()
+            : const InstantDeliveryScreen(),
       ),
     );
   }
@@ -174,22 +183,36 @@ class _CourierScreenState extends State<CourierScreen> {
     );
   }
 
+  Future<void> _orderByCall() async {
+    final ok = await launchSupportPhone();
+    if (!mounted) return;
+    if (!ok) {
+      AuthSnackBar.error(context, context.l10n.actionTryAgain);
+    }
+  }
+
   Widget _buildCreateDeliveryRow(AppLocalizations l10n) {
-    return Row(
+    return Column(
       children: [
-        Expanded(
-          child: _InstantDeliveryCard(
-            l10n: l10n,
-            onTap: _openInstantDelivery,
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: _InstantDeliveryCard(
+                l10n: l10n,
+                onTap: _openInstantDelivery,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _ScheduleDeliveryCard(
+                l10n: l10n,
+                onTap: _openScheduleDelivery,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _ScheduleDeliveryCard(
-            l10n: l10n,
-            onTap: _openScheduleDelivery,
-          ),
-        ),
+        const SizedBox(height: 12),
+        _OrderByCallCard(l10n: l10n, onTap: _orderByCall),
       ],
     );
   }
@@ -205,15 +228,26 @@ class _CourierScreenState extends State<CourierScreen> {
     return Scaffold(
       backgroundColor: HomeColors.backgroundOf(context),
       floatingActionButton: hasActive
-          ? FloatingActionButton.extended(
-              heroTag: 'courier_instant_delivery_fab',
-              backgroundColor: AuthScreenColors.orange,
-              foregroundColor: Theme.of(context).colorScheme.onSecondary,
-              icon: const Icon(Icons.add_rounded),
-              label: Text(l10n.courierAddDelivery),
-              onPressed: _openInstantDelivery,
+          ? Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                const CallSupportFab(
+                  heroTag: 'courier_call_support_fab',
+                  extended: false,
+                ),
+                const SizedBox(height: 12),
+                FloatingActionButton.extended(
+                  heroTag: 'courier_instant_delivery_fab',
+                  backgroundColor: AuthScreenColors.orange,
+                  foregroundColor: Theme.of(context).colorScheme.onSecondary,
+                  icon: const Icon(Icons.add_rounded),
+                  label: Text(l10n.courierAddDelivery),
+                  onPressed: _openInstantDelivery,
+                ),
+              ],
             )
-          : null,
+          : const CallSupportFab(heroTag: 'courier_call_support_fab'),
       body: SafeArea(
         child: RefreshIndicator(
           color: HomeColors.violet,
@@ -356,52 +390,41 @@ class _InstantDeliveryCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(AppColors.radiusLG),
         child: Container(
-          height: 120,
+          height: 168,
           padding: const EdgeInsets.all(AppColors.spaceMD),
           decoration: BoxDecoration(
             color: AuthScreenColors.orange,
             borderRadius: BorderRadius.circular(AppColors.radiusLG),
           ),
-          child: Stack(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Positioned(
-                top: 0,
-                right: 0,
-                child: Icon(
-                  Icons.flash_on_rounded,
+              Icon(
+                Icons.flash_on_rounded,
+                color: Theme.of(context).colorScheme.onPrimary,
+                size: 44,
+              ),
+              const Spacer(),
+              Text(
+                l10n.courierNowTitle,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onPrimary,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                l10n.courierNowSubtitle,
+                style: TextStyle(
                   color: Theme.of(context)
                       .colorScheme
                       .onPrimary
-                      .withValues(alpha: 0.7),
-                  size: 32,
+                      .withValues(alpha: 0.9),
+                  fontSize: 13,
                 ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    l10n.courierInstantTitle,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onPrimary,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    l10n.courierInstantSubtitle,
-                    style: TextStyle(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onPrimary
-                          .withValues(alpha: 0.85),
-                      fontSize: 11,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
@@ -425,47 +448,113 @@ class _ScheduleDeliveryCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(AppColors.radiusLG),
         child: Container(
-          height: 120,
+          height: 168,
           padding: const EdgeInsets.all(AppColors.spaceMD),
           decoration: BoxDecoration(
             color: HomeColors.surfaceOf(context),
             borderRadius: BorderRadius.circular(AppColors.radiusLG),
             border: Border.all(color: HomeColors.borderOf(context)),
           ),
-          child: Stack(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Positioned(
-                top: 0,
-                right: 0,
-                child: Icon(
-                  Icons.schedule_rounded,
-                  color: HomeColors.violet.withValues(alpha: 0.55),
-                  size: 32,
+              Icon(
+                Icons.calendar_month_rounded,
+                color: HomeColors.violet,
+                size: 44,
+              ),
+              const Spacer(),
+              Text(
+                l10n.courierLaterTitle,
+                style: TextStyle(
+                  color: HomeColors.textPrimaryOf(context),
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    l10n.courierScheduleTitle,
-                    style: TextStyle(
-                      color: HomeColors.textPrimaryOf(context),
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
+              const SizedBox(height: 4),
+              Text(
+                l10n.courierLaterSubtitle,
+                style: TextStyle(
+                  color: HomeColors.textMutedOf(context),
+                  fontSize: 13,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _OrderByCallCard extends StatelessWidget {
+  final AppLocalizations l10n;
+  final VoidCallback onTap;
+
+  const _OrderByCallCard({required this.l10n, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        child: Container(
+          width: double.infinity,
+          constraints: const BoxConstraints(minHeight: 72),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: HomeColors.violet.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(AppColors.radiusLG),
+            border: Border.all(color: HomeColors.violet.withValues(alpha: 0.35)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: HomeColors.violet,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(
+                  Icons.phone_in_talk_rounded,
+                  color: Colors.white,
+                  size: 28,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.orderByCall,
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w800,
+                        color: HomeColors.textPrimaryOf(context),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    l10n.courierScheduleSubtitle,
-                    style: TextStyle(
-                      color: HomeColors.textMutedOf(context),
-                      fontSize: 11,
+                    const SizedBox(height: 2),
+                    Text(
+                      l10n.orderByCallSubtitle,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: HomeColors.textMutedOf(context),
+                      ),
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: HomeColors.violet,
+                size: 28,
               ),
             ],
           ),

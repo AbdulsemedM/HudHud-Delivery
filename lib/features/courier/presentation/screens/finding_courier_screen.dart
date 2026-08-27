@@ -7,8 +7,11 @@ import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
 import 'package:hudhud_delivery/app/navigation/dashboard_navigation.dart';
 import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
+import 'package:hudhud_delivery/core/easy_mode/voice_hint_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
+import 'package:hudhud_delivery/core/widgets/call_support_button.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/features/courier/easy_mode/delivery_status_sound_service.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/courier/data/models/delivery_live_tracking.dart';
@@ -103,6 +106,14 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
         apiService: ApiService.instance,
       ),
     );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final msg = context.l10n.trackingStatusSearching;
+      VoiceHintService.instance.speak(msg);
+      unawaited(
+        DeliveryStatusSoundService.instance.playStatusChange('searching'),
+      );
+    });
     _nearbyPoller = NearbyDriversPoller(
       repository: _courierRepository,
       onUpdate: () {
@@ -508,6 +519,16 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
                         onPressed: _goToHome,
                         tooltip: 'Go to home',
                       ),
+                    ),
+                  ),
+                  Positioned(
+                    top: MediaQuery.paddingOf(context).top + 8,
+                    right: 16,
+                    child: Material(
+                      color: HomeColors.surfaceElevatedOf(context),
+                      shape: const CircleBorder(),
+                      elevation: 2,
+                      child: const CallSupportButton(compact: true),
                     ),
                   ),
                   DraggableScrollableSheet(

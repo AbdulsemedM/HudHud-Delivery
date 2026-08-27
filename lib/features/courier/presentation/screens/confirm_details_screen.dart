@@ -10,6 +10,7 @@ import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/utils/payment_idempotency.dart';
 import 'package:hudhud_delivery/core/utils/phone_util.dart';
+import 'package:hudhud_delivery/core/widgets/call_support_button.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/models/create_delivery_result.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
@@ -307,6 +308,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
       'Food': 'food',
       'Clothing': 'clothing',
       'Books': 'books',
+      'Fragile': 'fragile',
       'Other': 'other',
     };
     return mapping[itemType] ?? 'other';
@@ -954,22 +956,40 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                     Positioned(
                       top: 40,
                       left: 16,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: HomeColors.surfaceElevatedOf(context),
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.25),
-                              blurRadius: 4,
+                      child: Row(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              color: HomeColors.surfaceElevatedOf(context),
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.25),
+                                  blurRadius: 4,
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                        child: IconButton(
-                          icon: Icon(Icons.arrow_back,
-                              color: HomeColors.textPrimaryOf(context)),
-                          onPressed: () => Navigator.pop(context),
-                        ),
+                            child: IconButton(
+                              icon: Icon(Icons.arrow_back,
+                                  color: HomeColors.textPrimaryOf(context)),
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: HomeColors.surfaceElevatedOf(context),
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.25),
+                                  blurRadius: 4,
+                                ),
+                              ],
+                            ),
+                            child: const CallSupportButton(compact: true),
+                          ),
+                        ],
                       ),
                     ),
                     Positioned(

@@ -185,7 +185,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Icons.receipt_long_rounded,
                     color: navActive,
                   ),
-                  label: l10n.navOrderHistory,
+                  label: l10n.navMyDeliveries,
                 ),
                 NavigationDestination(
                   icon: Icon(
@@ -196,7 +196,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Icons.person_rounded,
                     color: navActive,
                   ),
-                  label: l10n.navProfile,
+                  label: l10n.navMe,
                 ),
               ],
             ),

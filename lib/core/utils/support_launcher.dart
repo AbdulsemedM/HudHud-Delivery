@@ -12,10 +12,10 @@ Future<bool> launchSupportEmail() {
   return launchUrl(uri, mode: LaunchMode.externalApplication);
 }
 
-/// Opens the phone dialer when [SupportConfig.supportPhoneE164] is set.
+/// Opens the phone dialer when a support phone is configured.
 Future<bool> launchSupportPhone() {
-  const n = SupportConfig.supportPhoneE164;
-  if (n == null || n.isEmpty) {
+  final n = SupportConfig.supportPhoneE164.trim();
+  if (n.isEmpty) {
     return Future.value(false);
   }
   final uri = Uri(scheme: 'tel', path: n);
