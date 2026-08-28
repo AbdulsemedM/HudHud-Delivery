@@ -1,83 +1,23 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
 
 class AuthBrandHeader extends StatelessWidget {
-  const AuthBrandHeader({super.key, this.showTagline = true});
-
-  final bool showTagline;
+  const AuthBrandHeader({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(
-              'assets/images/logo.png',
-              width: 40,
-              height: 40,
-              fit: BoxFit.contain,
-              errorBuilder: (_, __, ___) => const Icon(
-                Icons.local_shipping_rounded,
-                size: 36,
-                color: AuthScreenColors.orange,
-              ),
-            ),
-            const SizedBox(width: 10),
-            const Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(
-                    text: 'Hud',
-                    style: TextStyle(
-                      color: AuthScreenColors.orange,
-                      fontSize: 28,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                  TextSpan(
-                    text: 'Hud',
-                    style: TextStyle(
-                      color: AuthScreenColors.lavender,
-                      fontSize: 28,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        if (showTagline) ...[
-          const SizedBox(height: 8),
-          Text(
-            l10n.brandTagline,
-            style: TextStyle(
-              color: AuthScreenColors.textSecondaryOf(context),
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-              letterSpacing: 1.4,
-            ),
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            height: 28,
-            child: CustomPaint(
-              painter: _AuthDashedCurvePainter(
-                dashColor: AuthScreenColors.textSecondaryOf(context),
-              ),
-            ),
-          ),
-        ],
-      ],
+    return Image.asset(
+      'assets/images/logo.png',
+      width: 96,
+      height: 96,
+      fit: BoxFit.contain,
+      errorBuilder: (_, __, ___) => const Icon(
+        Icons.local_shipping_rounded,
+        size: 80,
+        color: AuthScreenColors.orange,
+      ),
     );
   }
 }
