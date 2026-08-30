@@ -49,6 +49,9 @@ ios/Flutter/LocalSecrets.xcconfig
 # Local documentation / tooling notes
 /docs/
 
+# App assets (kept local; do not commit)
+/assets/
+
 # Symbolication related
 app.*.symbols
 
