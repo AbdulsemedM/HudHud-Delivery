@@ -18,7 +18,7 @@ import '../../firebase_options.dart';
 ///   "notification": { "title": "...", "body": "..." },
 ///   "android": {
 ///     "notification": {
-///       "channel_id": "hudhud_delivery_channel_v3",
+///       "channel_id": "hudhud_delivery_channel_v4",
 ///       "sound": "notification_sound"
 ///     }
 ///   },
@@ -35,8 +35,13 @@ class FcmService {
   static final FcmService _instance = FcmService._();
   factory FcmService() => _instance;
 
-  /// v3: native channel sound enabled (v2 had playSound: false; channel settings are immutable).
-  static const String channelId = 'hudhud_delivery_channel_v3';
+  /// v4: native channel registered in MainActivity before Flutter starts.
+  /// v3 may have been auto-created by FCM with default sound; v2 had playSound: false.
+  static const String channelId = 'hudhud_delivery_channel_v4';
+  static const List<String> legacyChannelIds = [
+    'hudhud_delivery_channel_v2',
+    'hudhud_delivery_channel_v3',
+  ];
   static const String channelName = 'HudHud Delivery';
   static const String androidSoundResource = 'notification_sound';
   static const String iosSoundFile = 'notification_sound.caf';
@@ -144,10 +149,13 @@ class FcmService {
     );
 
     if (Platform.isAndroid) {
-      await _localNotifications
+      final androidPlugin = _localNotifications
           .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>()
-          ?.createNotificationChannel(androidChannel);
+              AndroidFlutterLocalNotificationsPlugin>();
+      for (final legacyId in legacyChannelIds) {
+        await androidPlugin?.deleteNotificationChannel(legacyId);
+      }
+      await androidPlugin?.createNotificationChannel(androidChannel);
     }
   }
 
@@ -279,10 +287,13 @@ Future<void> _ensureBackgroundLocalNotifications(
   );
   await plugin.initialize(initSettings);
   if (Platform.isAndroid) {
-    await plugin
+    final androidPlugin = plugin
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(FcmService.androidChannel);
+            AndroidFlutterLocalNotificationsPlugin>();
+    for (final legacyId in FcmService.legacyChannelIds) {
+      await androidPlugin?.deleteNotificationChannel(legacyId);
+    }
+    await androidPlugin?.createNotificationChannel(FcmService.androidChannel);
   }
 }
 

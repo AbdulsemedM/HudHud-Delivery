@@ -8,7 +8,7 @@ import 'package:just_audio/just_audio.dart';
 class NotificationSoundPlayer {
   NotificationSoundPlayer._();
 
-  static const assetPath = 'assets/sound/notification_sound.mpeg';
+  static const assetPath = 'assets/sound/notification_sound.mp3';
 
   static AudioPlayer? _player;
 

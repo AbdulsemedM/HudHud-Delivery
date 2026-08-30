@@ -1,9 +1,14 @@
 package com.hudhud.userapp
 
 import android.Manifest
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.LocationManager
+import android.media.AudioAttributes
+import android.net.Uri
+import android.os.Build
 import androidx.core.app.ActivityCompat
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -17,6 +22,52 @@ class MainActivity: FlutterFragmentActivity() {
     private val CONFIG_CHANNEL = "hudhud_delivery/config"
     private lateinit var locationManager: LocationManager
     private var currentLocation: Location? = null
+
+    companion object {
+        private const val NOTIFICATION_CHANNEL_ID = "hudhud_delivery_channel_v4"
+        private const val NOTIFICATION_CHANNEL_NAME = "HudHud Delivery"
+        private val LEGACY_NOTIFICATION_CHANNEL_IDS = listOf(
+            "hudhud_delivery_channel_v2",
+            "hudhud_delivery_channel_v3",
+        )
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        createNotificationChannelEarly()
+    }
+
+    private fun createNotificationChannelEarly() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+
+        val notificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        for (legacyId in LEGACY_NOTIFICATION_CHANNEL_IDS) {
+            notificationManager.deleteNotificationChannel(legacyId)
+        }
+
+        val soundUri =
+            Uri.parse("android.resource://${packageName}/raw/notification_sound")
+        val audioAttributes =
+            AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build()
+
+        val channel =
+            NotificationChannel(
+                NOTIFICATION_CHANNEL_ID,
+                NOTIFICATION_CHANNEL_NAME,
+                NotificationManager.IMPORTANCE_HIGH,
+            ).apply {
+                description = "Notifications for HudHud Delivery"
+                setSound(soundUri, audioAttributes)
+                enableVibration(true)
+            }
+
+        notificationManager.createNotificationChannel(channel)
+    }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)

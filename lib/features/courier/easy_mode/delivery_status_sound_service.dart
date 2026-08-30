@@ -15,7 +15,7 @@ class DeliveryStatusSoundService {
     _lastPlayedKey = statusKey;
     try {
       await _player.stop();
-      await _player.setAsset('assets/sound/notification_sound.mpeg');
+      await _player.setAsset('assets/sound/notification_sound.mp3');
       await _player.play();
     } catch (e) {
       if (kDebugMode) {

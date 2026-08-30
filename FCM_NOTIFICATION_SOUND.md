@@ -6,14 +6,15 @@ Use **native OS notification sound**, not Dart/`just_audio`. Dart playback only 
 
 | Platform | Path | Name rules |
 |----------|------|------------|
+| Source | `assets/sound/notification_sound.mp3` | Flutter asset for in-app UI sounds only |
 | Android | `android/app/src/main/res/raw/notification_sound.mp3` | lowercase, no hyphens; resource name is `notification_sound` (no extension) |
 | iOS | `ios/Runner/notification_sound.caf` | add to the **Runner** Xcode target (Copy Bundle Resources) |
 
 Convert from a source clip (≤30s). Mono is cleaner on the notification stream:
 
 ```bash
-ffmpeg -i your_clip.mp3 -ac 1 -ar 44100 android/app/src/main/res/raw/notification_sound.mp3
-ffmpeg -i your_clip.mp3 -ac 1 -ar 44100 ios/Runner/notification_sound.caf
+ffmpeg -y -i assets/sound/notification_sound.mp3 -ac 1 -ar 44100 android/app/src/main/res/raw/notification_sound.mp3
+ffmpeg -y -i assets/sound/notification_sound.mp3 -ac 1 -ar 44100 ios/Runner/notification_sound.caf
 ```
 
 On macOS, CAF can also be made with `afconvert -f caff -d ima4 source.mp3 ios/Runner/notification_sound.caf`.
@@ -22,16 +23,18 @@ Do **not** put the sound only in `assets/` for FCM. Flutter assets are not used 
 
 ## 2. Android channel + manifest
 
-Android channel sound is **immutable** after first create. If you ever shipped `playSound: false`, bump the channel id (e.g. `_v3`).
+Android channel sound is **immutable** after first create. If you ever shipped `playSound: false`, bump the channel id (e.g. `_v4`).
+
+The channel is created **natively in `MainActivity.onCreate()`** before Flutter starts, so FCM cannot auto-create it with the system default sound. Dart also creates the same channel on init.
 
 Create the channel in Flutter (`flutter_local_notifications`):
 
 ```dart
-const channelId = 'your_app_channel_v3';
+const channelId = 'hudhud_delivery_channel_v4';
 
 const channel = AndroidNotificationChannel(
   channelId,
-  'Your App',
+  'HudHud Delivery',
   importance: Importance.high,
   playSound: true,
   sound: RawResourceAndroidNotificationSound('notification_sound'),
@@ -43,7 +46,7 @@ Match it in `AndroidManifest.xml` inside `<application>`:
 ```xml
 <meta-data
     android:name="com.google.firebase.messaging.default_notification_channel_id"
-    android:value="your_app_channel_v3" />
+    android:value="hudhud_delivery_channel_v4" />
 <meta-data
     android:name="com.google.firebase.messaging.default_notification_sound"
     android:resource="@raw/notification_sound" />
@@ -93,7 +96,7 @@ Do **not** send `"sound": "default"`.
   "notification": { "title": "...", "body": "..." },
   "android": {
     "notification": {
-      "channel_id": "your_app_channel_v3",
+      "channel_id": "hudhud_delivery_channel_v4",
       "sound": "notification_sound"
     }
   },
@@ -105,7 +108,9 @@ Do **not** send `"sound": "default"`.
 }
 ```
 
-`channel_id` must match the Flutter channel. iOS filename must match the bundled file (case-sensitive).
+`channel_id` must match the Flutter channel (`hudhud_delivery_channel_v4`). iOS filename must match the bundled file (case-sensitive).
+
+**Alternative (most reliable):** send **data-only** messages (no top-level `notification` block) so the app always shows a local notification with the custom channel/sound via `firebaseMessagingBackgroundHandler`.
 
 ## 6. Checklist on a real device
 
