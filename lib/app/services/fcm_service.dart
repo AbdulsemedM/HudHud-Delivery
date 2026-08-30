@@ -6,17 +6,74 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../../firebase_options.dart';
-import 'notification_sound_player.dart';
 
 /// Handles FCM initialization, token, and message callbacks (foreground, background, opened).
+///
+/// Custom notification sound: native `notification_sound` on Android (res/raw) and
+/// `notification_sound.caf` in the iOS app bundle. Do not play the clip from Dart for FCM.
+///
+/// Backend FCM payload (required for background/killed OS-delivered notifications):
+/// ```json
+/// {
+///   "notification": { "title": "...", "body": "..." },
+///   "android": {
+///     "notification": {
+///       "channel_id": "hudhud_delivery_channel_v3",
+///       "sound": "notification_sound"
+///     }
+///   },
+///   "apns": {
+///     "payload": {
+///       "aps": { "sound": "notification_sound.caf" }
+///     }
+///   }
+/// }
+/// ```
+/// Data-only messages are shown by the app with the same native sound (client fallback).
 class FcmService {
   FcmService._();
   static final FcmService _instance = FcmService._();
   factory FcmService() => _instance;
 
-  /// v2: system channel sound off; custom clip is played twice in Dart.
-  static const String _channelId = 'hudhud_delivery_channel_v2';
-  static const String _channelName = 'HudHud Delivery';
+  /// v3: native channel sound enabled (v2 had playSound: false; channel settings are immutable).
+  static const String channelId = 'hudhud_delivery_channel_v3';
+  static const String channelName = 'HudHud Delivery';
+  static const String androidSoundResource = 'notification_sound';
+  static const String iosSoundFile = 'notification_sound.caf';
+
+  static const AndroidNotificationChannel androidChannel =
+      AndroidNotificationChannel(
+    channelId,
+    channelName,
+    description: 'Notifications for HudHud Delivery',
+    importance: Importance.high,
+    playSound: true,
+    sound: RawResourceAndroidNotificationSound(androidSoundResource),
+  );
+
+  static const AndroidNotificationDetails _androidNotificationDetails =
+      AndroidNotificationDetails(
+    channelId,
+    channelName,
+    channelDescription: 'Notifications for HudHud Delivery',
+    importance: Importance.high,
+    priority: Priority.high,
+    playSound: true,
+    sound: RawResourceAndroidNotificationSound(androidSoundResource),
+  );
+
+  static const DarwinNotificationDetails _iosNotificationDetails =
+      DarwinNotificationDetails(
+    presentAlert: true,
+    presentBadge: true,
+    presentSound: true,
+    sound: iosSoundFile,
+  );
+
+  static const NotificationDetails _notificationDetails = NotificationDetails(
+    android: _androidNotificationDetails,
+    iOS: _iosNotificationDetails,
+  );
 
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin _localNotifications =
@@ -87,17 +144,10 @@ class FcmService {
     );
 
     if (Platform.isAndroid) {
-      const channel = AndroidNotificationChannel(
-        _channelId,
-        _channelName,
-        description: 'Notifications for HudHud Delivery',
-        importance: Importance.high,
-        playSound: false,
-      );
       await _localNotifications
           .resolvePlatformSpecificImplementation<
               AndroidFlutterLocalNotificationsPlugin>()
-          ?.createNotificationChannel(channel);
+          ?.createNotificationChannel(androidChannel);
     }
   }
 
@@ -124,9 +174,11 @@ class FcmService {
   }
 
   Future<void> _setForegroundPresentationOptions() async {
+    // Foreground banners use flutter_local_notifications (with native sound).
+    // Disable FCM system presentation sound to avoid double playback.
     await FirebaseMessaging.instance
         .setForegroundNotificationPresentationOptions(
-      alert: true,
+      alert: false,
       badge: true,
       sound: false,
     );
@@ -140,48 +192,16 @@ class FcmService {
   }
 
   void _subscribeToMessageHandlers() {
-    // Foreground: show via local notifications
     FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
-    // User tapped notification (app in background)
     FirebaseMessaging.onMessageOpenedApp.listen((message) {
       onNotificationTap?.call(message);
     });
   }
 
   Future<void> _handleForegroundMessage(RemoteMessage message) async {
-    await NotificationSoundPlayer.play();
-
-    final notification = message.notification;
-    if (notification == null) return;
-
-    const androidDetails = AndroidNotificationDetails(
-      _channelId,
-      _channelName,
-      channelDescription: 'Notifications for HudHud Delivery',
-      importance: Importance.high,
-      priority: Priority.high,
-      playSound: false,
-    );
-    const iosDetails = DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: false,
-    );
-    const details = NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
-    final dataJson = message.data.isEmpty
-        ? '{}'
-        : jsonEncode(
-            {for (final e in message.data.entries) e.key: e.value.toString()},
-          );
-    await _localNotifications.show(
-      message.hashCode,
-      notification.title ?? 'Notification',
-      notification.body,
-      details,
-      payload: dataJson,
+    await showFcmLocalNotification(
+      localNotifications: _localNotifications,
+      message: message,
     );
   }
 
@@ -214,16 +234,78 @@ class FcmService {
   }
 }
 
+/// Shows a local notification with the HudHud native sound clip.
+Future<void> showFcmLocalNotification({
+  required FlutterLocalNotificationsPlugin localNotifications,
+  required RemoteMessage message,
+}) async {
+  final (title, body) = _fcmNotificationContent(message);
+  final dataJson = message.data.isEmpty
+      ? '{}'
+      : jsonEncode(
+          {for (final e in message.data.entries) e.key: e.value.toString()},
+        );
+  await localNotifications.show(
+    message.hashCode,
+    title,
+    body,
+    FcmService._notificationDetails,
+    payload: dataJson,
+  );
+}
+
+(String title, String? body) _fcmNotificationContent(RemoteMessage message) {
+  final notification = message.notification;
+  if (notification != null) {
+    return (notification.title ?? 'Notification', notification.body);
+  }
+  final data = message.data;
+  final title = data['title'] ??
+      data['notification_title'] ??
+      data['subject'] ??
+      'Notification';
+  final body = data['body'] ?? data['notification_body'] ?? data['message'];
+  return (title.toString(), body?.toString());
+}
+
+Future<void> _ensureBackgroundLocalNotifications(
+  FlutterLocalNotificationsPlugin plugin,
+) async {
+  const androidSettings =
+      AndroidInitializationSettings('@mipmap/ic_launcher');
+  const initSettings = InitializationSettings(
+    android: androidSettings,
+    iOS: DarwinInitializationSettings(),
+  );
+  await plugin.initialize(initSettings);
+  if (Platform.isAndroid) {
+    await plugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(FcmService.androidChannel);
+  }
+}
+
 /// Top-level handler for background messages. Must be a top-level function.
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   try {
     if (Firebase.apps.isEmpty) {
-      await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+      await Firebase.initializeApp(
+          options: DefaultFirebaseOptions.currentPlatform);
     }
   } on FirebaseException catch (e) {
     if (!e.code.contains('duplicate-app')) rethrow;
   }
   WidgetsFlutterBinding.ensureInitialized();
-  await NotificationSoundPlayer.play();
+
+  // Notification-payload messages are displayed by the OS (sound from backend payload).
+  if (message.notification != null) return;
+
+  final plugin = FlutterLocalNotificationsPlugin();
+  await _ensureBackgroundLocalNotifications(plugin);
+  await showFcmLocalNotification(
+    localNotifications: plugin,
+    message: message,
+  );
 }

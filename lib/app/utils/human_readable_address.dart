@@ -27,6 +27,26 @@ class HumanReadableAddress {
     return null;
   }
 
+  /// Removes plus-code segments from a comma-separated address string.
+  static String stripPlusCodesFromAddress(String text) {
+    final parts = text
+        .split(',')
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty && !isPlusCode(s))
+        .toList();
+    if (parts.isEmpty) {
+      return firstReadableSegment(text) ?? text.trim();
+    }
+    return parts.join(', ');
+  }
+
+  /// True when the first comma-separated segment is a plus code.
+  static bool startsWithPlusCode(String? text) {
+    if (text == null || text.trim().isEmpty) return false;
+    final first = text.split(',').first.trim();
+    return isPlusCode(first);
+  }
+
   /// Picks the geocode hit most likely to be a real place name (Bole, Merkato, etc.).
   static PlaceResult? pickBestPlace(List<PlaceResult> places) {
     if (places.isEmpty) return null;

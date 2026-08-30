@@ -404,7 +404,7 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              _selectedPlace!.shortAddress,
+                              _selectedPlace!.formattedAddress,
                               style: theme.textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.w500,
                                     color: colorScheme.onSurface,
@@ -414,18 +414,28 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
                                     fontWeight: FontWeight.w500,
                                     color: colorScheme.onSurface,
                                   ),
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              _selectedPlace!.displayName,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: colorScheme.onSurfaceVariant,
-                                  ) ??
-                                  TextStyle(
-                                    fontSize: 14,
-                                    color: colorScheme.onSurfaceVariant,
-                                  ),
-                            ),
+                            if (_selectedPlace!.venueLabel
+                                    .toLowerCase() !=
+                                _selectedPlace!.formattedAddress
+                                    .split(',')
+                                    .first
+                                    .trim()
+                                    .toLowerCase()) ...[
+                              const SizedBox(height: 8),
+                              Text(
+                                _selectedPlace!.venueLabel,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                      color: colorScheme.onSurfaceVariant,
+                                    ) ??
+                                    TextStyle(
+                                      fontSize: 14,
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                              ),
+                            ],
                             const SizedBox(height: 8),
                             Text(
                               l10n.locationCoordinatesFormat(
@@ -461,7 +471,7 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
                         onPressed: () {
                           // Pin center is authoritative — must match the address.
                           Navigator.pop(context, {
-                            'address': _selectedPlace!.shortAddress,
+                            'address': _selectedPlace!.formattedAddress,
                             'coordinates': LatLng(
                               _currentPosition.latitude,
                               _currentPosition.longitude,

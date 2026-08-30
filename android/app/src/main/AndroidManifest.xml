@@ -64,10 +64,13 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="${googleMapsApiKey}"
             tools:replace="android:value" />
-        <!-- FCM default notification channel (optional; can be overridden in Flutter) -->
+        <!-- FCM default notification channel (must match FcmService.channelId) -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
-            android:value="hudhud_delivery_channel" />
+            android:value="hudhud_delivery_channel_v3" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_sound"
+            android:resource="@raw/notification_sound" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

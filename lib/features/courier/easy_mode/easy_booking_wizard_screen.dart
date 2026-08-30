@@ -53,6 +53,8 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
   LatLng _dropoffPosition = const LatLng(9.0222, 38.7468);
   String _pickupAddress = '';
   String _dropoffAddress = '';
+  PlaceResult? _pickupPlace;
+  PlaceResult? _dropoffPlace;
 
   final _recipientNameController = TextEditingController();
   final _recipientPhoneController = TextEditingController();
@@ -123,28 +125,59 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
     VoiceHintService.instance.speak(text);
   }
 
-  Future<String> _reverseGeocode(LatLng point) async {
+  Future<PlaceResult?> _reverseGeocodePlace(LatLng point) async {
     try {
       final places = await GooglePlacesService.reverseGeocode(
         point.latitude,
         point.longitude,
       );
-      final best = HumanReadableAddress.pickBestPlace(places);
-      if (best != null) {
-        return best.shortAddress;
-      }
+      return HumanReadableAddress.pickBestPlace(places);
     } catch (_) {}
-    return '${point.latitude.toStringAsFixed(5)}, ${point.longitude.toStringAsFixed(5)}';
+    return null;
+  }
+
+  bool _isLocationSpecificEnough(PlaceResult? place, String address) {
+    if (place != null) return !place.isCityLevelOnly;
+    final segments = address
+        .split(',')
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty && !HumanReadableAddress.isPlusCode(s))
+        .toList();
+    return segments.length > 1;
   }
 
   Future<void> _reverseGeocodePickup() async {
-    final address = await _reverseGeocode(_pickupPosition);
-    if (mounted) setState(() => _pickupAddress = address);
+    final place = await _reverseGeocodePlace(_pickupPosition);
+    if (!mounted) return;
+    if (place != null) {
+      setState(() {
+        _pickupPlace = place;
+        _pickupAddress = place.formattedAddress;
+      });
+    } else {
+      setState(() {
+        _pickupPlace = null;
+        _pickupAddress =
+            '${_pickupPosition.latitude.toStringAsFixed(5)}, ${_pickupPosition.longitude.toStringAsFixed(5)}';
+      });
+    }
   }
 
   Future<void> _reverseGeocodeDropoff() async {
-    final address = await _reverseGeocode(_dropoffPosition);
-    if (mounted) setState(() => _dropoffAddress = address);
+    final place = await _reverseGeocodePlace(_dropoffPosition);
+    if (!mounted) return;
+    if (place != null) {
+      setState(() {
+        _dropoffPlace = place;
+        _dropoffAddress = place.formattedAddress;
+      });
+    } else {
+      setState(() {
+        _dropoffPlace = null;
+        _dropoffAddress =
+            '${_dropoffPosition.latitude.toStringAsFixed(5)}, ${_dropoffPosition.longitude.toStringAsFixed(5)}';
+      });
+    }
   }
 
   void _snack(String message) {
@@ -159,7 +192,8 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
       if (_pickupAddress.trim().isEmpty) {
         await _reverseGeocodePickup();
       }
-      if (_pickupAddress.trim().isEmpty) {
+      if (_pickupAddress.trim().isEmpty ||
+          !_isLocationSpecificEnough(_pickupPlace, _pickupAddress)) {
         _snack(l10n.pleaseSelectLocation);
         return;
       }
@@ -171,7 +205,8 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
       if (_dropoffAddress.trim().isEmpty) {
         await _reverseGeocodeDropoff();
       }
-      if (_dropoffAddress.trim().isEmpty) {
+      if (_dropoffAddress.trim().isEmpty ||
+          !_isLocationSpecificEnough(_dropoffPlace, _dropoffAddress)) {
         _snack(l10n.pleaseSelectLocation);
         return;
       }
@@ -199,10 +234,6 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
     if (_step == 3) {
       if (_itemType == null) {
         _snack(l10n.pleaseSelectItemType);
-        return;
-      }
-      if (_packageImagePath == null) {
-        _snack(l10n.pleaseAddPackagePhoto);
         return;
       }
       setState(() => _step = 4);
@@ -453,6 +484,7 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
     switch (_step) {
       case 0:
         return _MapStep(
+          key: const ValueKey('easy_map_pickup'),
           title: l10n.easyPickupTitle,
           hint: l10n.easyPickupHint,
           iAmHereLabel: l10n.easyIAmHere,
@@ -471,19 +503,22 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
           onPlaceSelected: (place) {
             setState(() {
               _pickupPosition = place.coordinates;
-              _pickupAddress = place.shortAddress;
+              _pickupAddress = place.formattedAddress;
+              _pickupPlace = place;
             });
             _syncNearbyDrivers();
+            unawaited(_goNext());
           },
         );
       case 1:
         return _MapStep(
+          key: const ValueKey('easy_map_dropoff'),
           title: l10n.easyDropTitle,
           hint: l10n.easyDropHint,
           iAmHereLabel: l10n.easyIAmHere,
           address: _dropoffAddress,
           position: _dropoffPosition,
-          snapToGpsOnStart: true,
+          searchFirst: true,
           requireTapToPin: true,
           showIAmHereButton: false,
           onPositionChanged: (pos) {
@@ -495,8 +530,10 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
           onPlaceSelected: (place) {
             setState(() {
               _dropoffPosition = place.coordinates;
-              _dropoffAddress = place.shortAddress;
+              _dropoffAddress = place.formattedAddress;
+              _dropoffPlace = place;
             });
+            unawaited(_goNext());
           },
         );
       case 2:
@@ -537,12 +574,14 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
 
 class _MapStep extends StatefulWidget {
   const _MapStep({
+    super.key,
     required this.title,
     required this.hint,
     required this.iAmHereLabel,
     required this.address,
     required this.position,
     this.snapToGpsOnStart = false,
+    this.searchFirst = false,
     this.requireTapToPin = false,
     this.showIAmHereButton = true,
     this.markers = const {},
@@ -558,6 +597,8 @@ class _MapStep extends StatefulWidget {
   final LatLng position;
   /// When true, centers the map on GPS when the step opens.
   final bool snapToGpsOnStart;
+  /// When true, opens on the search panel (map hidden until a place is chosen).
+  final bool searchFirst;
   /// When true, hides the pin until the user taps the map or picks a search result.
   final bool requireTapToPin;
   final bool showIAmHereButton;
@@ -583,14 +624,28 @@ class _MapStepState extends State<_MapStep> {
   int _gpsRequestId = 0;
   bool _isLoadingGps = false;
   bool _pinPlaced = false;
+  bool _searchActive = false;
+  List<PlaceResult> _searchSuggestions = [];
+  bool _searchLoading = false;
+  String _searchQuery = '';
 
   static gmaps.LatLng _toG(LatLng p) => gmaps.LatLng(p.latitude, p.longitude);
+
+  bool get _showMap {
+    if (widget.searchFirst && !_pinPlaced) return false;
+    return !_searchActive;
+  }
+
+  bool get _showSearchPanel {
+    if (widget.searchFirst && !_pinPlaced) return true;
+    return _searchActive;
+  }
 
   @override
   void initState() {
     super.initState();
     _mapCenter = widget.position;
-    if (widget.snapToGpsOnStart) {
+    if (widget.snapToGpsOnStart && !widget.searchFirst) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) unawaited(_getCurrentLocation());
       });
@@ -639,19 +694,7 @@ class _MapStepState extends State<_MapStep> {
       await Future<void>.delayed(const Duration(milliseconds: 50));
     }
 
-    final controller = _mapController;
-    if (controller != null) {
-      _skipNextIdleGeocode = true;
-      try {
-        await controller.animateCamera(
-          gmaps.CameraUpdate.newLatLngZoom(_toG(position), 16.0),
-        );
-      } catch (e) {
-        if (kDebugMode) {
-          debugPrint('EasyBookingWizard: animateCamera failed: $e');
-        }
-      }
-    }
+    await _animateCameraIfReady(position);
   }
 
   Future<void> _movePinTo(
@@ -678,17 +721,23 @@ class _MapStepState extends State<_MapStep> {
       await Future<void>.delayed(const Duration(milliseconds: 50));
     }
 
+    await _animateCameraIfReady(position);
+  }
+
+  Future<void> _animateCameraIfReady(LatLng position) async {
+    if (!mounted || _searchActive) return;
+
     final controller = _mapController;
-    if (controller != null) {
-      _skipNextIdleGeocode = true;
-      try {
-        await controller.animateCamera(
-          gmaps.CameraUpdate.newLatLngZoom(_toG(position), 16.0),
-        );
-      } catch (e) {
-        if (kDebugMode) {
-          debugPrint('EasyBookingWizard: animateCamera failed: $e');
-        }
+    if (controller == null) return;
+
+    _skipNextIdleGeocode = true;
+    try {
+      await controller.animateCamera(
+        gmaps.CameraUpdate.newLatLngZoom(_toG(position), 16.0),
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('EasyBookingWizard: animateCamera failed: $e');
       }
     }
   }
@@ -770,6 +819,22 @@ class _MapStepState extends State<_MapStep> {
     _awaitingInitialGps = false;
     widget.onPlaceSelected(place);
     _skipNextIdleGeocode = true;
+
+    if (_searchActive) {
+      // Map is not in the tree while searching; remount at the new position.
+      setState(() {
+        _mapCenter = place.coordinates;
+        _hasUserLocation = true;
+        if (widget.requireTapToPin) {
+          _pinPlaced = true;
+        }
+        _mapGeneration++;
+        _mapController = null;
+      });
+      widget.onPositionChanged(_toG(place.coordinates));
+      return;
+    }
+
     await _movePinTo(place.coordinates);
   }
 
@@ -787,19 +852,13 @@ class _MapStepState extends State<_MapStep> {
       _hasUserLocation = true;
     });
     widget.onPositionChanged(point);
-    await _mapController?.animateCamera(
-      gmaps.CameraUpdate.newLatLngZoom(point, 16.0),
-    );
+    await _animateCameraIfReady(pin);
   }
 
   void _onMapCreated(gmaps.GoogleMapController controller) {
     _mapController = controller;
-    if (_hasUserLocation) {
-      unawaited(
-        controller.animateCamera(
-          gmaps.CameraUpdate.newLatLngZoom(_toG(_mapCenter), 16.0),
-        ),
-      );
+    if (_hasUserLocation && !_searchActive) {
+      unawaited(_animateCameraIfReady(_mapCenter));
     }
   }
 
@@ -832,116 +891,174 @@ class _MapStepState extends State<_MapStep> {
             ],
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-          child: LocationSearchField(
-            initialLocation:
-                widget.address.isNotEmpty ? widget.address : null,
-            onLocationSelected: _onSearchPlaceSelected,
-          ),
-        ),
         Expanded(
-          child: Stack(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              CenteredPinMap(
-                key: ValueKey('easy_map_$_mapGeneration'),
-                initialCameraPosition: gmaps.CameraPosition(
-                  target: _toG(_mapCenter),
-                  zoom: _hasUserLocation ? 16.0 : 13.0,
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: LocationSearchField(
+                  autofocus: widget.searchFirst,
+                  initialLocation:
+                      widget.address.isNotEmpty ? widget.address : null,
+                  expandSuggestions: true,
+                  onSearchActiveChanged: (active) {
+                    if (_searchActive != active) {
+                      setState(() {
+                        _searchActive = active;
+                        if (active) {
+                          _mapController = null;
+                        }
+                      });
+                    }
+                  },
+                  onSuggestionsStateChanged: ({
+                    required suggestions,
+                    required isLoading,
+                    required show,
+                    required query,
+                  }) {
+                    if (!mounted) return;
+                    setState(() {
+                      _searchSuggestions = suggestions;
+                      _searchLoading = isLoading;
+                      _searchQuery = query;
+                    });
+                  },
+                  onLocationSelected: _onSearchPlaceSelected,
                 ),
-                idleDebounce: const Duration(milliseconds: 400),
-                onMapCreated: _onMapCreated,
-                onCenterLatLngChanged: _onCenterLatLngChanged,
-                onTap: widget.requireTapToPin ? _handleMapTap : null,
-                centerIndicator: widget.requireTapToPin && !_pinPlaced
-                    ? const SizedBox.shrink()
-                    : null,
-                markers: widget.markers,
-                myLocationButtonEnabled: false,
               ),
-              Positioned(
-                left: 16,
-                right: 16,
-                bottom: 16,
-                child: Column(
-                  children: [
-                    if (widget.privacyMessage != null &&
-                        widget.privacyMessage!.isNotEmpty)
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-                        margin: const EdgeInsets.only(bottom: 10),
-                        decoration: BoxDecoration(
-                          color: HomeColors.surfaceOf(context).withOpacity(0.94),
-                          borderRadius: BorderRadius.circular(12),
+              if (_showSearchPanel)
+                Expanded(
+                  child: _searchSuggestions.isEmpty &&
+                          !_searchLoading &&
+                          _searchQuery.isEmpty
+                      ? const SizedBox.shrink()
+                      : LocationSearchField.buildExpandedSuggestionsList(
+                          suggestions: _searchSuggestions,
+                          isLoading: _searchLoading,
+                          query: _searchQuery,
+                          useFormattedAddress: true,
+                          onLocationSelected: _onSearchPlaceSelected,
+                          l10n: context.l10n,
+                          colorScheme: Theme.of(context).colorScheme,
                         ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                )
+              else if (_showMap)
+                Expanded(
+                  child: Stack(
+                    children: [
+                      CenteredPinMap(
+                        key: ValueKey('easy_map_$_mapGeneration'),
+                        initialCameraPosition: gmaps.CameraPosition(
+                          target: _toG(_mapCenter),
+                          zoom: _hasUserLocation ? 16.0 : 13.0,
+                        ),
+                        idleDebounce: const Duration(milliseconds: 400),
+                        onMapCreated: _onMapCreated,
+                        onCenterLatLngChanged: _onCenterLatLngChanged,
+                        onTap: widget.requireTapToPin ? _handleMapTap : null,
+                        centerIndicator: widget.requireTapToPin && !_pinPlaced
+                            ? const SizedBox.shrink()
+                            : null,
+                        markers: widget.markers,
+                        myLocationButtonEnabled: false,
+                      ),
+                      Positioned(
+                        left: 16,
+                        right: 16,
+                        bottom: 16,
+                        child: Column(
                           children: [
-                            Icon(Icons.two_wheeler_rounded, size: 18, color: HomeColors.violet),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                'Nearby motorbikes are shown approximately. Driver details appear after acceptance.',
-                                style: TextStyle(
-                                  color: HomeColors.textMutedOf(context),
-                                  fontSize: 12,
+                            if (widget.privacyMessage != null &&
+                                widget.privacyMessage!.isNotEmpty)
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 9,
+                                ),
+                                margin: const EdgeInsets.only(bottom: 10),
+                                decoration: BoxDecoration(
+                                  color: HomeColors.surfaceOf(context)
+                                      .withValues(alpha: 0.94),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Icon(
+                                      Icons.two_wheeler_rounded,
+                                      size: 18,
+                                      color: HomeColors.violet,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        'Nearby motorbikes are shown approximately. Driver details appear after acceptance.',
+                                        style: TextStyle(
+                                          color: HomeColors.textMutedOf(context),
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ),
+                            if (widget.address.isNotEmpty)
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(12),
+                                margin: const EdgeInsets.only(bottom: 10),
+                                decoration: BoxDecoration(
+                                  color: HomeColors.surfaceOf(context),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  widget.address,
+                                  maxLines: 4,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: HomeColors.textPrimaryOf(context),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            if (widget.showIAmHereButton)
+                              SizedBox(
+                                width: double.infinity,
+                                height: 52,
+                                child: ElevatedButton.icon(
+                                  onPressed: _isLoadingGps
+                                      ? null
+                                      : () =>
+                                          _getCurrentLocation(fromUserButton: true),
+                                  icon: _isLoadingGps
+                                      ? const SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: Colors.white,
+                                          ),
+                                        )
+                                      : const Icon(Icons.my_location_rounded),
+                                  label: Text(widget.iAmHereLabel),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: HomeColors.violet,
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                  ),
+                                ),
+                              ),
                           ],
                         ),
                       ),
-                    if (widget.address.isNotEmpty)
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(12),
-                        margin: const EdgeInsets.only(bottom: 10),
-                        decoration: BoxDecoration(
-                          color: HomeColors.surfaceOf(context),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          widget.address,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: HomeColors.textPrimaryOf(context),
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    if (widget.showIAmHereButton)
-                      SizedBox(
-                        width: double.infinity,
-                        height: 52,
-                        child: ElevatedButton.icon(
-                          onPressed: _isLoadingGps
-                              ? null
-                              : () => _getCurrentLocation(fromUserButton: true),
-                          icon: _isLoadingGps
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : const Icon(Icons.my_location_rounded),
-                          label: Text(widget.iAmHereLabel),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: HomeColors.violet,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
             ],
           ),
         ),
