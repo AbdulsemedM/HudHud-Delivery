@@ -1,12 +1,15 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
+import 'package:hudhud_delivery/app/models/place_result.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/app/services/custom_location_service.dart';
+import 'package:hudhud_delivery/app/services/startup_location_service.dart';
 import 'package:hudhud_delivery/app/services/google_places_service.dart';
 import 'package:hudhud_delivery/app/utils/human_readable_address.dart';
 import 'package:hudhud_delivery/core/easy_mode/voice_hint_service.dart';
@@ -14,6 +17,7 @@ import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/utils/phone_util.dart';
 import 'package:hudhud_delivery/core/widgets/call_support_button.dart';
 import 'package:hudhud_delivery/core/widgets/centered_pin_map.dart';
+import 'package:hudhud_delivery/core/widgets/location_search_field.dart';
 import 'package:hudhud_delivery/core/widgets/speak_button.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/features/courier/easy_mode/package_item_catalog.dart';
@@ -83,21 +87,11 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
     await VoiceHintService.instance.init();
     final user = await AuthService().getStoredUser();
     _senderPhone = user?.phone;
-    final position = await CustomLocationService.getCurrentPosition();
-    if (position != null && mounted) {
-      setState(() {
-        _pickupPosition = LatLng(position.latitude, position.longitude);
-        _dropoffPosition = LatLng(position.latitude, position.longitude);
-      });
-      _syncNearbyDrivers();
-      await _reverseGeocodePickup();
-    }
     if (mounted) _speakCurrentStep();
   }
 
   void _syncNearbyDrivers() {
     final pickup = _pickupPosition;
-    if (pickup == null) return;
     _nearbyPoller.setTarget(
       latitude: pickup.latitude,
       longitude: pickup.longitude,
@@ -169,9 +163,7 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
         _snack(l10n.pleaseSelectLocation);
         return;
       }
-      setState(() {
-        _step = 1;
-      });
+      setState(() => _step = 1);
       _speakCurrentStep();
       return;
     }
@@ -466,6 +458,7 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
           iAmHereLabel: l10n.easyIAmHere,
           address: _pickupAddress,
           position: _pickupPosition,
+          snapToGpsOnStart: true,
           markers: nearbyDriverMapMarkers(_nearbyPoller.result.drivers),
           privacyMessage: _nearbyPoller.result.privacyMessage,
           onPositionChanged: (pos) {
@@ -475,16 +468,12 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
             _syncNearbyDrivers();
             unawaited(_reverseGeocodePickup());
           },
-          onIAmHere: () async {
-            final position =
-                await CustomLocationService.getCurrentPosition();
-            if (position == null || !mounted) return;
+          onPlaceSelected: (place) {
             setState(() {
-              _pickupPosition =
-                  LatLng(position.latitude, position.longitude);
+              _pickupPosition = place.coordinates;
+              _pickupAddress = place.shortAddress;
             });
             _syncNearbyDrivers();
-            await _reverseGeocodePickup();
           },
         );
       case 1:
@@ -494,21 +483,20 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
           iAmHereLabel: l10n.easyIAmHere,
           address: _dropoffAddress,
           position: _dropoffPosition,
+          snapToGpsOnStart: true,
+          requireTapToPin: true,
+          showIAmHereButton: false,
           onPositionChanged: (pos) {
             setState(() {
               _dropoffPosition = LatLng(pos.latitude, pos.longitude);
             });
             unawaited(_reverseGeocodeDropoff());
           },
-          onIAmHere: () async {
-            final position =
-                await CustomLocationService.getCurrentPosition();
-            if (position == null || !mounted) return;
+          onPlaceSelected: (place) {
             setState(() {
-              _dropoffPosition =
-                  LatLng(position.latitude, position.longitude);
+              _dropoffPosition = place.coordinates;
+              _dropoffAddress = place.shortAddress;
             });
-            await _reverseGeocodeDropoff();
           },
         );
       case 2:
@@ -547,17 +535,20 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
   }
 }
 
-class _MapStep extends StatelessWidget {
+class _MapStep extends StatefulWidget {
   const _MapStep({
     required this.title,
     required this.hint,
     required this.iAmHereLabel,
     required this.address,
     required this.position,
+    this.snapToGpsOnStart = false,
+    this.requireTapToPin = false,
+    this.showIAmHereButton = true,
     this.markers = const {},
     this.privacyMessage,
     required this.onPositionChanged,
-    required this.onIAmHere,
+    required this.onPlaceSelected,
   });
 
   final String title;
@@ -565,10 +556,252 @@ class _MapStep extends StatelessWidget {
   final String iAmHereLabel;
   final String address;
   final LatLng position;
+  /// When true, centers the map on GPS when the step opens.
+  final bool snapToGpsOnStart;
+  /// When true, hides the pin until the user taps the map or picks a search result.
+  final bool requireTapToPin;
+  final bool showIAmHereButton;
   final Set<gmaps.Marker> markers;
   final String? privacyMessage;
   final ValueChanged<gmaps.LatLng> onPositionChanged;
-  final VoidCallback onIAmHere;
+  final ValueChanged<PlaceResult> onPlaceSelected;
+
+  @override
+  State<_MapStep> createState() => _MapStepState();
+}
+
+class _MapStepState extends State<_MapStep> {
+  static const LatLng _fallbackPosition = LatLng(9.0222, 38.7468);
+
+  gmaps.GoogleMapController? _mapController;
+  LatLng _mapCenter = _fallbackPosition;
+  bool _hasUserLocation = false;
+  int _mapGeneration = 0;
+  bool _skipNextIdleGeocode = false;
+  bool _awaitingInitialGps = false;
+  bool _userChoseLocation = false;
+  int _gpsRequestId = 0;
+  bool _isLoadingGps = false;
+  bool _pinPlaced = false;
+
+  static gmaps.LatLng _toG(LatLng p) => gmaps.LatLng(p.latitude, p.longitude);
+
+  @override
+  void initState() {
+    super.initState();
+    _mapCenter = widget.position;
+    if (widget.snapToGpsOnStart) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) unawaited(_getCurrentLocation());
+      });
+    }
+  }
+
+  Future<LocationFetchResult> _resolveGpsFix({bool forceFresh = false}) {
+    return StartupLocationService.resolveFix(forceFresh: forceFresh);
+  }
+
+  void _showLocationFailureSnackBar(LocationFetchFailure? failure) {
+    final l10n = context.l10n;
+    final colorScheme = Theme.of(context).colorScheme;
+    final showSettings = failure == LocationFetchFailure.permissionDenied ||
+        failure == LocationFetchFailure.locationDisabled;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(l10n.locationCurrentPositionFailed),
+        backgroundColor: colorScheme.error,
+        action: showSettings
+            ? SnackBarAction(
+                label: l10n.actionOpenSettings,
+                onPressed: CustomLocationService.openLocationAppSettings,
+              )
+            : null,
+      ),
+    );
+  }
+
+  Future<void> _centerCameraOn(
+    LatLng position, {
+    bool remountMap = false,
+  }) async {
+    if (!mounted) return;
+
+    setState(() {
+      _mapCenter = position;
+      _hasUserLocation = true;
+      if (remountMap) {
+        _mapGeneration++;
+        _mapController = null;
+      }
+    });
+
+    if (remountMap) {
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+    }
+
+    final controller = _mapController;
+    if (controller != null) {
+      _skipNextIdleGeocode = true;
+      try {
+        await controller.animateCamera(
+          gmaps.CameraUpdate.newLatLngZoom(_toG(position), 16.0),
+        );
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint('EasyBookingWizard: animateCamera failed: $e');
+        }
+      }
+    }
+  }
+
+  Future<void> _movePinTo(
+    LatLng position, {
+    bool remountMap = false,
+  }) async {
+    if (!mounted) return;
+
+    setState(() {
+      _mapCenter = position;
+      _hasUserLocation = true;
+      if (widget.requireTapToPin) {
+        _pinPlaced = true;
+      }
+      if (remountMap) {
+        _mapGeneration++;
+        _mapController = null;
+      }
+    });
+
+    widget.onPositionChanged(_toG(position));
+
+    if (remountMap) {
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+    }
+
+    final controller = _mapController;
+    if (controller != null) {
+      _skipNextIdleGeocode = true;
+      try {
+        await controller.animateCamera(
+          gmaps.CameraUpdate.newLatLngZoom(_toG(position), 16.0),
+        );
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint('EasyBookingWizard: animateCamera failed: $e');
+        }
+      }
+    }
+  }
+
+  void _onCenterLatLngChanged(gmaps.LatLng point) {
+    if (_skipNextIdleGeocode) {
+      _skipNextIdleGeocode = false;
+      return;
+    }
+    if (_awaitingInitialGps && !_userChoseLocation) return;
+    if (widget.requireTapToPin && !_pinPlaced) return;
+
+    _userChoseLocation = true;
+    _gpsRequestId++;
+    final pin = LatLng(point.latitude, point.longitude);
+    setState(() {
+      _mapCenter = pin;
+      _awaitingInitialGps = false;
+      _isLoadingGps = false;
+    });
+    widget.onPositionChanged(point);
+  }
+
+  Future<void> _getCurrentLocation({bool fromUserButton = false}) async {
+    if (!mounted) return;
+
+    if (fromUserButton) {
+      _userChoseLocation = false;
+    }
+
+    final requestId = ++_gpsRequestId;
+
+    setState(() {
+      _isLoadingGps = true;
+      if (!fromUserButton) {
+        _awaitingInitialGps = true;
+      }
+    });
+
+    try {
+      final gpsResult = await _resolveGpsFix(forceFresh: fromUserButton);
+      if (!mounted || requestId != _gpsRequestId) return;
+
+      if (!fromUserButton && _userChoseLocation) {
+        return;
+      }
+
+      final position = gpsResult.data;
+      if (position != null) {
+        final latLng = LatLng(position.latitude, position.longitude);
+        if (widget.requireTapToPin && !fromUserButton) {
+          await _centerCameraOn(latLng, remountMap: true);
+        } else {
+          await _movePinTo(latLng, remountMap: true);
+        }
+      } else {
+        _showLocationFailureSnackBar(gpsResult.failure);
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('EasyBookingWizard: GPS error: $e');
+      }
+      if (mounted) {
+        _showLocationFailureSnackBar(LocationFetchFailure.unknown);
+      }
+    } finally {
+      if (mounted && requestId == _gpsRequestId) {
+        setState(() {
+          _isLoadingGps = false;
+          _awaitingInitialGps = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _onSearchPlaceSelected(PlaceResult place) async {
+    _gpsRequestId++;
+    _userChoseLocation = true;
+    _awaitingInitialGps = false;
+    widget.onPlaceSelected(place);
+    _skipNextIdleGeocode = true;
+    await _movePinTo(place.coordinates);
+  }
+
+  Future<void> _handleMapTap(gmaps.LatLng point) async {
+    if (!widget.requireTapToPin) return;
+
+    _userChoseLocation = true;
+    _awaitingInitialGps = false;
+    _gpsRequestId++;
+    _skipNextIdleGeocode = true;
+    final pin = LatLng(point.latitude, point.longitude);
+    setState(() {
+      _pinPlaced = true;
+      _mapCenter = pin;
+      _hasUserLocation = true;
+    });
+    widget.onPositionChanged(point);
+    await _mapController?.animateCamera(
+      gmaps.CameraUpdate.newLatLngZoom(point, 16.0),
+    );
+  }
+
+  void _onMapCreated(gmaps.GoogleMapController controller) {
+    _mapController = controller;
+    if (_hasUserLocation) {
+      unawaited(
+        controller.animateCamera(
+          gmaps.CameraUpdate.newLatLngZoom(_toG(_mapCenter), 16.0),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -581,7 +814,7 @@ class _MapStep extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                title,
+                widget.title,
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w800,
@@ -590,7 +823,7 @@ class _MapStep extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               Text(
-                hint,
+                widget.hint,
                 style: TextStyle(
                   fontSize: 15,
                   color: HomeColors.textMutedOf(context),
@@ -599,17 +832,31 @@ class _MapStep extends StatelessWidget {
             ],
           ),
         ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+          child: LocationSearchField(
+            initialLocation:
+                widget.address.isNotEmpty ? widget.address : null,
+            onLocationSelected: _onSearchPlaceSelected,
+          ),
+        ),
         Expanded(
           child: Stack(
             children: [
               CenteredPinMap(
+                key: ValueKey('easy_map_$_mapGeneration'),
                 initialCameraPosition: gmaps.CameraPosition(
-                  target: gmaps.LatLng(position.latitude, position.longitude),
-                  zoom: 15,
+                  target: _toG(_mapCenter),
+                  zoom: _hasUserLocation ? 16.0 : 13.0,
                 ),
-                onMapCreated: (_) {},
-                onCenterLatLngChanged: onPositionChanged,
-                markers: markers,
+                idleDebounce: const Duration(milliseconds: 400),
+                onMapCreated: _onMapCreated,
+                onCenterLatLngChanged: _onCenterLatLngChanged,
+                onTap: widget.requireTapToPin ? _handleMapTap : null,
+                centerIndicator: widget.requireTapToPin && !_pinPlaced
+                    ? const SizedBox.shrink()
+                    : null,
+                markers: widget.markers,
                 myLocationButtonEnabled: false,
               ),
               Positioned(
@@ -618,7 +865,8 @@ class _MapStep extends StatelessWidget {
                 bottom: 16,
                 child: Column(
                   children: [
-                    if (privacyMessage != null && privacyMessage!.isNotEmpty)
+                    if (widget.privacyMessage != null &&
+                        widget.privacyMessage!.isNotEmpty)
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
@@ -644,7 +892,7 @@ class _MapStep extends StatelessWidget {
                           ],
                         ),
                       ),
-                    if (address.isNotEmpty)
+                    if (widget.address.isNotEmpty)
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(12),
@@ -654,7 +902,7 @@ class _MapStep extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          address,
+                          widget.address,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -663,22 +911,34 @@ class _MapStep extends StatelessWidget {
                           ),
                         ),
                       ),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: ElevatedButton.icon(
-                        onPressed: onIAmHere,
-                        icon: const Icon(Icons.my_location_rounded),
-                        label: Text(iAmHereLabel),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: HomeColors.violet,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                    if (widget.showIAmHereButton)
+                      SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: ElevatedButton.icon(
+                          onPressed: _isLoadingGps
+                              ? null
+                              : () => _getCurrentLocation(fromUserButton: true),
+                          icon: _isLoadingGps
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Icon(Icons.my_location_rounded),
+                          label: Text(widget.iAmHereLabel),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: HomeColors.violet,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
                           ),
                         ),
                       ),
-                    ),
                   ],
                 ),
               ),

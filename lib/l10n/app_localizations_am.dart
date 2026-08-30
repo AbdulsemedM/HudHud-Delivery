@@ -3160,13 +3160,15 @@ class AppLocalizationsAm extends AppLocalizations {
   String get easyPickupTitle => 'Where to pick up?';
 
   @override
-  String get easyPickupHint => 'Move the map. Put the pin on the pickup place.';
+  String get easyPickupHint =>
+      'Move the map. Put the pin on the pickup place. Or search for an address below.';
 
   @override
   String get easyDropTitle => 'Where to deliver?';
 
   @override
-  String get easyDropHint => 'Move the map. Put the pin on the drop-off place.';
+  String get easyDropHint =>
+      'Tap the map or search to choose the delivery place. Then slide the map to adjust the pin.';
 
   @override
   String get easyIAmHere => 'I am here';

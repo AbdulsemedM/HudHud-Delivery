@@ -6059,7 +6059,7 @@ abstract class AppLocalizations {
   /// No description provided for @easyPickupHint.
   ///
   /// In en, this message translates to:
-  /// **'Move the map. Put the pin on the pickup place.'**
+  /// **'Move the map. Put the pin on the pickup place. Or search for an address below.'**
   String get easyPickupHint;
 
   /// No description provided for @easyDropTitle.
@@ -6071,7 +6071,7 @@ abstract class AppLocalizations {
   /// No description provided for @easyDropHint.
   ///
   /// In en, this message translates to:
-  /// **'Move the map. Put the pin on the drop-off place.'**
+  /// **'Tap the map or search to choose the delivery place. Then slide the map to adjust the pin.'**
   String get easyDropHint;
 
   /// No description provided for @easyIAmHere.

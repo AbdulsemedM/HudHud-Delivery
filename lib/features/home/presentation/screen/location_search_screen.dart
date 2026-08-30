@@ -167,19 +167,27 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
     }
   }
 
-  Future<LocationData?> _resolveGpsFix() async {
-    // Prefer a permission-aware fetch; refresh if we only have a cache miss.
-    final fromStartup = await StartupLocationService.fetchAtStartup();
-    if (fromStartup != null) return fromStartup;
+  Future<LocationFetchResult> _resolveGpsFix({bool forceFresh = false}) {
+    return StartupLocationService.resolveFix(forceFresh: forceFresh);
+  }
 
-    final granted = await CustomLocationService.requestLocationPermission();
-    if (!granted) return null;
-
-    final fresh = await CustomLocationService.getCurrentPosition();
-    if (fresh != null) {
-      StartupLocationService.updateCache(fresh);
-    }
-    return fresh;
+  void _showLocationFailureSnackBar(LocationFetchFailure? failure) {
+    final l10n = context.l10n;
+    final colorScheme = Theme.of(context).colorScheme;
+    final showSettings = failure == LocationFetchFailure.permissionDenied ||
+        failure == LocationFetchFailure.locationDisabled;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(l10n.locationCurrentPositionFailed),
+        backgroundColor: colorScheme.error,
+        action: showSettings
+            ? SnackBarAction(
+                label: l10n.actionOpenSettings,
+                onPressed: CustomLocationService.openLocationAppSettings,
+              )
+            : null,
+      ),
+    );
   }
 
   Future<void> _getCurrentLocation({bool fromUserButton = false}) async {
@@ -199,11 +207,8 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
       }
     });
 
-    final l10n = context.l10n;
-    final colorScheme = Theme.of(context).colorScheme;
-
     try {
-      final position = await _resolveGpsFix();
+      final gpsResult = await _resolveGpsFix(forceFresh: fromUserButton);
       if (!mounted || requestId != _gpsRequestId) return;
 
       // User already picked a place/pan while GPS was in flight — keep it.
@@ -216,6 +221,7 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
         return;
       }
 
+      final position = gpsResult.data;
       if (position != null) {
         final latLng = LatLng(position.latitude, position.longitude);
         if (kDebugMode) {
@@ -226,28 +232,14 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
         }
         await _movePinTo(latLng, remountMap: true);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.locationCurrentPositionFailed),
-            backgroundColor: colorScheme.error,
-            action: SnackBarAction(
-              label: l10n.actionOpenSettings,
-              onPressed: CustomLocationService.openLocationAppSettings,
-            ),
-          ),
-        );
+        _showLocationFailureSnackBar(gpsResult.failure);
       }
     } catch (e) {
       if (kDebugMode) {
         debugPrint('LocationSearchScreen: GPS error: $e');
       }
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.locationCurrentPositionFailed),
-            backgroundColor: colorScheme.error,
-          ),
-        );
+        _showLocationFailureSnackBar(LocationFetchFailure.unknown);
       }
     } finally {
       if (mounted && requestId == _gpsRequestId) {

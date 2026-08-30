@@ -35,25 +35,40 @@ class StartupLocationService {
     return _fetchFuture!;
   }
 
-  static Future<LocationData?> _fetchOnce() async {
-    try {
+  /// Resolves GPS for map screens. Set [forceFresh] to skip cache (e.g. "I am here").
+  static Future<LocationFetchResult> resolveFix({bool forceFresh = false}) async {
+    if (!forceFresh) {
+      final cached = await fetchAtStartup();
+      if (cached != null) {
+        return LocationFetchResult.success(cached);
+      }
+    }
+
+    isPermanentlyDenied =
+        await CustomLocationService.isLocationPermissionPermanentlyDenied();
+    if (isPermanentlyDenied) {
+      return LocationFetchResult.failure(LocationFetchFailure.permissionDenied);
+    }
+
+    final granted = await CustomLocationService.requestLocationPermission();
+    if (!granted) {
       isPermanentlyDenied =
           await CustomLocationService.isLocationPermissionPermanentlyDenied();
-      if (isPermanentlyDenied) {
-        return null;
-      }
+      return LocationFetchResult.failure(LocationFetchFailure.permissionDenied);
+    }
 
-      final granted = await CustomLocationService.requestLocationPermission();
-      if (!granted) {
-        isPermanentlyDenied =
-            await CustomLocationService.isLocationPermissionPermanentlyDenied();
-        return null;
-      }
+    final result = await CustomLocationService.getCurrentPositionDetailed();
+    if (result.data != null) {
+      _cached = result.data;
+    }
+    return result;
+  }
 
-      final position = await CustomLocationService.getCurrentPosition();
-      _cached = position;
-      return position;
-    } catch (e) {
+  static Future<LocationData?> _fetchOnce() async {
+    try {
+      final result = await resolveFix(forceFresh: true);
+      return result.data;
+    } catch (_) {
       return null;
     } finally {
       _fetchFuture = null;

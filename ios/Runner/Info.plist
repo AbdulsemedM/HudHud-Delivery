@@ -63,6 +63,12 @@
 	<string>This app needs access to your photos to update your profile picture.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Use Face ID to sign in quickly and securely.</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>tel</string>
+		<string>telprompt</string>
+		<string>mailto</string>
+	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
