@@ -15,7 +15,12 @@ import 'package:hudhud_delivery/core/utils/phone_util.dart';
 import 'package:hudhud_delivery/core/widgets/call_support_button.dart';
 import 'package:hudhud_delivery/core/widgets/centered_pin_map.dart';
 import 'package:hudhud_delivery/core/widgets/speak_button.dart';
+import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/features/courier/easy_mode/package_item_catalog.dart';
+import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
+import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
+import 'package:hudhud_delivery/features/courier/presentation/widgets/nearby_driver_markers.dart';
+import 'package:hudhud_delivery/features/courier/utils/nearby_drivers_poller.dart';
 import 'package:hudhud_delivery/features/courier/presentation/screens/confirm_details_screen.dart';
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
@@ -58,9 +63,19 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
   final _audioRecorder = AudioRecorder();
   bool _isRecording = false;
 
+  late final NearbyDriversPoller _nearbyPoller;
+
   @override
   void initState() {
     super.initState();
+    _nearbyPoller = NearbyDriversPoller(
+      repository: CourierRepository(
+        courierDataProvider: CourierDataProvider(apiService: ApiService.instance),
+      ),
+      onUpdate: () {
+        if (mounted) setState(() {});
+      },
+    );
     _bootstrap();
   }
 
@@ -74,13 +89,26 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
         _pickupPosition = LatLng(position.latitude, position.longitude);
         _dropoffPosition = LatLng(position.latitude, position.longitude);
       });
+      _syncNearbyDrivers();
       await _reverseGeocodePickup();
     }
     if (mounted) _speakCurrentStep();
   }
 
+  void _syncNearbyDrivers() {
+    final pickup = _pickupPosition;
+    if (pickup == null) return;
+    _nearbyPoller.setTarget(
+      latitude: pickup.latitude,
+      longitude: pickup.longitude,
+      vehicleType: 'motorbike',
+      radius: 5,
+    );
+  }
+
   @override
   void dispose() {
+    _nearbyPoller.dispose();
     _recipientNameController.dispose();
     _recipientPhoneController.dispose();
     _audioRecorder.dispose();
@@ -438,10 +466,13 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
           iAmHereLabel: l10n.easyIAmHere,
           address: _pickupAddress,
           position: _pickupPosition,
+          markers: nearbyDriverMapMarkers(_nearbyPoller.result.drivers),
+          privacyMessage: _nearbyPoller.result.privacyMessage,
           onPositionChanged: (pos) {
             setState(() {
               _pickupPosition = LatLng(pos.latitude, pos.longitude);
             });
+            _syncNearbyDrivers();
             unawaited(_reverseGeocodePickup());
           },
           onIAmHere: () async {
@@ -452,6 +483,7 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
               _pickupPosition =
                   LatLng(position.latitude, position.longitude);
             });
+            _syncNearbyDrivers();
             await _reverseGeocodePickup();
           },
         );
@@ -522,6 +554,8 @@ class _MapStep extends StatelessWidget {
     required this.iAmHereLabel,
     required this.address,
     required this.position,
+    this.markers = const {},
+    this.privacyMessage,
     required this.onPositionChanged,
     required this.onIAmHere,
   });
@@ -531,6 +565,8 @@ class _MapStep extends StatelessWidget {
   final String iAmHereLabel;
   final String address;
   final LatLng position;
+  final Set<gmaps.Marker> markers;
+  final String? privacyMessage;
   final ValueChanged<gmaps.LatLng> onPositionChanged;
   final VoidCallback onIAmHere;
 
@@ -573,6 +609,7 @@ class _MapStep extends StatelessWidget {
                 ),
                 onMapCreated: (_) {},
                 onCenterLatLngChanged: onPositionChanged,
+                markers: markers,
                 myLocationButtonEnabled: false,
               ),
               Positioned(
@@ -581,6 +618,32 @@ class _MapStep extends StatelessWidget {
                 bottom: 16,
                 child: Column(
                   children: [
+                    if (privacyMessage != null && privacyMessage!.isNotEmpty)
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                        margin: const EdgeInsets.only(bottom: 10),
+                        decoration: BoxDecoration(
+                          color: HomeColors.surfaceOf(context).withOpacity(0.94),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(Icons.two_wheeler_rounded, size: 18, color: HomeColors.violet),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Nearby motorbikes are shown approximately. Driver details appear after acceptance.',
+                                style: TextStyle(
+                                  color: HomeColors.textMutedOf(context),
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     if (address.isNotEmpty)
                       Container(
                         width: double.infinity,
