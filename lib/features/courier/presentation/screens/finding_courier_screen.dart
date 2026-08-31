@@ -70,7 +70,7 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
 
   Timer? _pollTimer;
   gmaps.GoogleMapController? _mapController;
-  gmaps.BitmapDescriptor? _deliveryGuyIcon;
+  Map<String, gmaps.BitmapDescriptor> _nearbyIconsByAsset = {};
   List<LatLng>? _routePolylinePoints;
   bool? _hasGoogleMapsApiKey;
   bool _isCancelling = false;
@@ -116,12 +116,10 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
     });
     _nearbyPoller = NearbyDriversPoller(
       repository: _courierRepository,
-      onUpdate: () {
-        if (mounted) setState(() {});
-      },
+      onUpdate: () => unawaited(_onNearbyDriversUpdated()),
     );
 
-    _loadDeliveryGuyIcon();
+    unawaited(preloadCommonCourierVehicleMapIcons());
     _loadMapsAvailability();
     _startNearbyPoller();
     final seeded = widget.routePolylinePoints;
@@ -136,10 +134,15 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
     _startPollTimer();
   }
 
-  Future<void> _loadDeliveryGuyIcon() async {
-    final icon = await loadDeliveryGuyMapIcon();
-    if (!mounted || icon == null) return;
-    setState(() => _deliveryGuyIcon = icon);
+  Future<void> _onNearbyDriversUpdated() async {
+    await preloadCourierVehicleMapIcons(
+      _nearbyPoller.result.drivers.map((d) => d.vehicleType),
+    );
+    if (mounted) {
+      setState(() {
+        _nearbyIconsByAsset = CourierVehicleMapIconCache.snapshot();
+      });
+    }
   }
 
   void _startNearbyPoller() {
@@ -260,7 +263,7 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
         ),
       ...nearbyDriverMapMarkers(
         _nearbyPoller.result.drivers,
-        icon: _deliveryGuyIcon,
+        iconsByAsset: _nearbyIconsByAsset,
       ),
     };
   }

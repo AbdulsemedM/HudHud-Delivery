@@ -4,15 +4,62 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:hudhud_delivery/features/courier/data/models/nearby_drivers_result.dart';
+import 'package:hudhud_delivery/features/courier/utils/courier_vehicle_display.dart';
 
-const kDeliveryGuyMapAsset = 'assets/images/delivery-guy.png';
+const kDeliveryGuyMapAsset = kCourierMotorbikeMapAsset;
 
-/// Decodes [kDeliveryGuyMapAsset] to a map marker ~[logicalWidth] dp wide.
-Future<gmaps.BitmapDescriptor?> loadDeliveryGuyMapIcon({
+/// In-memory cache of decoded map marker icons keyed by asset path.
+class CourierVehicleMapIconCache {
+  CourierVehicleMapIconCache._();
+
+  static final Map<String, gmaps.BitmapDescriptor> _cache = {};
+
+  static Map<String, gmaps.BitmapDescriptor> snapshot() =>
+      Map<String, gmaps.BitmapDescriptor>.from(_cache);
+
+  static gmaps.BitmapDescriptor? get(String assetPath) => _cache[assetPath];
+
+  static Future<void> preloadAssets(Iterable<String> assetPaths) async {
+    final missing = assetPaths
+        .where((path) => path.isNotEmpty && !_cache.containsKey(path))
+        .toSet();
+    if (missing.isEmpty) return;
+
+    await Future.wait(
+      missing.map((path) async {
+        final icon = await loadCourierVehicleMapIcon(assetPath: path);
+        if (icon != null) {
+          _cache[path] = icon;
+        }
+      }),
+    );
+  }
+}
+
+/// Preloads marker icons for the given API vehicle types (deduped by asset).
+Future<void> preloadCourierVehicleMapIcons(
+  Iterable<String?> vehicleTypes,
+) async {
+  final assets = vehicleTypes.map(courierVehicleMapAsset).toSet();
+  await CourierVehicleMapIconCache.preloadAssets(assets);
+}
+
+/// Preloads the three common courier map marker assets.
+Future<void> preloadCommonCourierVehicleMapIcons() async {
+  await CourierVehicleMapIconCache.preloadAssets({
+    kCourierMotorbikeMapAsset,
+    kCourierTukMapAsset,
+    kCourierCarMapAsset,
+  });
+}
+
+/// Decodes a vehicle asset to a map marker ~[logicalWidth] dp wide.
+Future<gmaps.BitmapDescriptor?> loadCourierVehicleMapIcon({
+  required String assetPath,
   double logicalWidth = 56.0,
 }) async {
   try {
-    final data = await rootBundle.load(kDeliveryGuyMapAsset);
+    final data = await rootBundle.load(assetPath);
     final dpr =
         WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
     final targetWidth = (logicalWidth * dpr).round().clamp(72, 168);
@@ -36,15 +83,27 @@ Future<gmaps.BitmapDescriptor?> loadDeliveryGuyMapIcon({
   }
 }
 
+/// Decodes [kDeliveryGuyMapAsset] to a map marker ~[logicalWidth] dp wide.
+Future<gmaps.BitmapDescriptor?> loadDeliveryGuyMapIcon({
+  double logicalWidth = 56.0,
+}) =>
+    loadCourierVehicleMapIcon(
+      assetPath: kDeliveryGuyMapAsset,
+      logicalWidth: logicalWidth,
+    );
+
+gmaps.BitmapDescriptor _defaultNearbyMarkerIcon() =>
+    gmaps.BitmapDescriptor.defaultMarkerWithHue(
+      gmaps.BitmapDescriptor.hueOrange,
+    );
+
 /// Generic vehicle markers only — no driver identity or contact actions.
 Set<gmaps.Marker> nearbyDriverMapMarkers(
   List<NearbyDriverMarker> drivers, {
-  gmaps.BitmapDescriptor? icon,
+  Map<String, gmaps.BitmapDescriptor>? iconsByAsset,
+  gmaps.BitmapDescriptor? fallbackIcon,
 }) {
-  final markerIcon = icon ??
-      gmaps.BitmapDescriptor.defaultMarkerWithHue(
-        gmaps.BitmapDescriptor.hueOrange,
-      );
+  final defaultIcon = fallbackIcon ?? _defaultNearbyMarkerIcon();
   return {
     for (final driver in drivers)
       gmaps.Marker(
@@ -56,7 +115,8 @@ Set<gmaps.Marker> nearbyDriverMapMarkers(
         infoWindow: gmaps.InfoWindow(
           title: driver.label ?? 'Available ${driver.vehicleType ?? 'vehicle'}',
         ),
-        icon: markerIcon,
+        icon: iconsByAsset?[courierVehicleMapAsset(driver.vehicleType)] ??
+            defaultIcon,
       ),
   };
 }

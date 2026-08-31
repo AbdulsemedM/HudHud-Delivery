@@ -70,6 +70,7 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
   bool _isRecording = false;
 
   late final NearbyDriversPoller _nearbyPoller;
+  Map<String, gmaps.BitmapDescriptor> _nearbyIconsByAsset = {};
 
   @override
   void initState() {
@@ -78,11 +79,21 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
       repository: CourierRepository(
         courierDataProvider: CourierDataProvider(apiService: ApiService.instance),
       ),
-      onUpdate: () {
-        if (mounted) setState(() {});
-      },
+      onUpdate: () => unawaited(_onNearbyDriversUpdated()),
     );
+    unawaited(preloadCommonCourierVehicleMapIcons());
     _bootstrap();
+  }
+
+  Future<void> _onNearbyDriversUpdated() async {
+    await preloadCourierVehicleMapIcons(
+      _nearbyPoller.result.drivers.map((d) => d.vehicleType),
+    );
+    if (mounted) {
+      setState(() {
+        _nearbyIconsByAsset = CourierVehicleMapIconCache.snapshot();
+      });
+    }
   }
 
   Future<void> _bootstrap() async {
@@ -491,7 +502,10 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
           address: _pickupAddress,
           position: _pickupPosition,
           snapToGpsOnStart: true,
-          markers: nearbyDriverMapMarkers(_nearbyPoller.result.drivers),
+          markers: nearbyDriverMapMarkers(
+            _nearbyPoller.result.drivers,
+            iconsByAsset: _nearbyIconsByAsset,
+          ),
           privacyMessage: _nearbyPoller.result.privacyMessage,
           onPositionChanged: (pos) {
             setState(() {

@@ -52,6 +52,7 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
   bool _isLoadingServiceArea = false;
   Map<String, DeliveryEstimate> _vehicleEstimates = {};
   List<String> _supportedVehicleTypes = const [];
+  Map<String, gmaps.BitmapDescriptor> _nearbyIconsByAsset = {};
 
   bool get _canFetchEstimate =>
       _pickupPosition != null && _deliveryPosition != null;
@@ -82,12 +83,22 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
     );
     _nearbyPoller = NearbyDriversPoller(
       repository: _courierRepository,
-      onUpdate: () {
-        if (mounted) setState(() {});
-      },
+      onUpdate: () => unawaited(_onNearbyDriversUpdated()),
     );
+    unawaited(preloadCommonCourierVehicleMapIcons());
     _loadMapsAvailability();
     _getCurrentLocation();
+  }
+
+  Future<void> _onNearbyDriversUpdated() async {
+    await preloadCourierVehicleMapIcons(
+      _nearbyPoller.result.drivers.map((d) => d.vehicleType),
+    );
+    if (mounted) {
+      setState(() {
+        _nearbyIconsByAsset = CourierVehicleMapIconCache.snapshot();
+      });
+    }
   }
 
   void _syncNearbyDrivers() {
@@ -809,7 +820,10 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                   gmaps.BitmapDescriptor.hueRed,
                 ),
               ),
-            ...nearbyDriverMapMarkers(_nearbyPoller.result.drivers),
+            ...nearbyDriverMapMarkers(
+              _nearbyPoller.result.drivers,
+              iconsByAsset: _nearbyIconsByAsset,
+            ),
           },
           polylines: _pickupPosition != null && _deliveryPosition != null
               ? {

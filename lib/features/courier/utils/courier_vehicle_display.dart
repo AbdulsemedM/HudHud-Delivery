@@ -19,6 +19,24 @@ IconData courierVehicleIcon(String vehicleId) {
   }
 }
 
+const kCourierMotorbikeMapAsset = 'assets/images/delivery-guy.png';
+const kCourierTukMapAsset = 'assets/images/tuk.png';
+const kCourierCarMapAsset = 'assets/images/car.png';
+
+/// Map marker asset for anonymous nearby-driver pins by API `vehicle_type`.
+String courierVehicleMapAsset(String? vehicleType) {
+  switch (mapCourierVehicleType(vehicleType?.trim() ?? '')) {
+    case 'bajaj':
+      return kCourierTukMapAsset;
+    case 'car':
+    case 'van':
+    case 'pickup':
+      return kCourierCarMapAsset;
+    default:
+      return kCourierMotorbikeMapAsset;
+  }
+}
+
 String courierVehicleLabel(String vehicleId, AppLocalizations l10n) {
   switch (mapCourierVehicleType(vehicleId)) {
     case 'car':

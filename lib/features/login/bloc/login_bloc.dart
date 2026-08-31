@@ -62,10 +62,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
       emit(LoginLoading(LoginAction.biometric));
       try {
+        final rememberMe = await biometricService.isRememberMeEnabled();
         final result = await loginRepository.login(
           credentials.identifier,
           credentials.password,
           credentials.fieldType,
+          rememberMe: rememberMe,
         );
         emit(LoginSuccess(
           LoginAction.biometric,
