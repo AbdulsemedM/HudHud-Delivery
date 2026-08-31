@@ -98,6 +98,10 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
   List<LatLng>? _routePolylinePoints;
   bool? _hasGoogleMapsApiKey;
 
+  static const _initialSheetSize = 0.38;
+  static const _minSheetSize = 0.28;
+  double _sheetExtent = _initialSheetSize;
+
   /// After create succeeds, keep delivery so pay can retry without re-creating.
   CreateDeliveryResult? _pendingCreatedDelivery;
 
@@ -278,27 +282,30 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
     }
   }
 
+  Widget _buildFindingCourierScreen(CreateDeliveryResult created) {
+    return FindingCourierScreen(
+      deliveryId: created.deliveryId,
+      pickupLocation: widget.pickupLocation,
+      deliveryLocation: widget.deliveryLocation,
+      pickupPosition: widget.pickupPosition,
+      deliveryPosition: widget.deliveryPosition,
+      selectedVehicle: _selectedVehicle,
+      itemType: widget.itemType,
+      quantity: widget.quantity,
+      whoPays: widget.whoPays,
+      paymentType: _paymentType,
+      recipientName: widget.recipientName,
+      recipientPhone: widget.recipientPhone,
+      packageImagePath: widget.packageImagePath,
+      routePolylinePoints: _routePolylinePoints,
+    );
+  }
+
   void _navigateToFindingCourier(CreateDeliveryResult created) {
-    Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => FindingCourierScreen(
-            deliveryId: created.deliveryId,
-            pickupLocation: widget.pickupLocation,
-            deliveryLocation: widget.deliveryLocation,
-            pickupPosition: widget.pickupPosition,
-            deliveryPosition: widget.deliveryPosition,
-            selectedVehicle: _selectedVehicle,
-            itemType: widget.itemType,
-            quantity: widget.quantity,
-            whoPays: widget.whoPays,
-            paymentType: _paymentType,
-            recipientName: widget.recipientName,
-            recipientPhone: widget.recipientPhone,
-            packageImagePath: widget.packageImagePath,
-            routePolylinePoints: _routePolylinePoints,
-          ),
-        ));
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => _buildFindingCourierScreen(created)),
+      (route) => route.isFirst,
+    );
   }
 
   String _mapPackageType(String itemType) {
@@ -762,24 +769,12 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
             trackingNumber: delivery.trackingNumber ?? '',
             successActionLabel: 'Find courier',
             onTerminalSuccess: (resultContext) {
-              Navigator.of(resultContext).pushReplacement(MaterialPageRoute(
-                builder: (_) => FindingCourierScreen(
-                  deliveryId: delivery.deliveryId,
-                  pickupLocation: widget.pickupLocation,
-                  deliveryLocation: widget.deliveryLocation,
-                  pickupPosition: widget.pickupPosition,
-                  deliveryPosition: widget.deliveryPosition,
-                  selectedVehicle: _selectedVehicle,
-                  itemType: widget.itemType,
-                  quantity: widget.quantity,
-                  whoPays: widget.whoPays,
-                  paymentType: _paymentType,
-                  recipientName: widget.recipientName,
-                  recipientPhone: widget.recipientPhone,
-                  packageImagePath: widget.packageImagePath,
-                  routePolylinePoints: _routePolylinePoints,
+              Navigator.of(resultContext).pushAndRemoveUntil(
+                MaterialPageRoute(
+                  builder: (_) => _buildFindingCourierScreen(delivery),
                 ),
-              ));
+                (route) => route.isFirst,
+              );
             },
           ),
         ),
@@ -905,6 +900,14 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
     return null;
   }
 
+  bool _onSheetNotification(DraggableScrollableNotification notification) {
+    final extent = notification.extent;
+    if ((extent - _sheetExtent).abs() > 0.001) {
+      setState(() => _sheetExtent = extent);
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return CourierTheme.wrap(
@@ -928,14 +931,14 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
             mapCenter = widget.deliveryPosition!;
           }
 
-          String estimatedFeeText = 'N/A';
-          if (_isLoadingEstimate) {
-            estimatedFeeText = 'Loading...';
-          } else if (_estimateError != null) {
-            estimatedFeeText = 'N/A';
-          } else if (_estimatedCost != null) {
-            estimatedFeeText =
-                '$_estimatedCurrency ${_estimatedCost!.toStringAsFixed(2)}';
+          String? estimatedFeeText;
+          if (!_isLoadingEstimate) {
+            if (_estimateError != null) {
+              estimatedFeeText = 'N/A';
+            } else if (_estimatedCost != null) {
+              estimatedFeeText =
+                  '$_estimatedCurrency ${_estimatedCost!.toStringAsFixed(2)}';
+            }
           }
 
           final theme = Theme.of(context);
@@ -944,8 +947,11 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
             backgroundColor: HomeColors.backgroundOf(context),
             body: LayoutBuilder(
               builder: (context, constraints) {
-                final mapBottomPadding = constraints.maxHeight * 0.48;
-                return Stack(
+                final mapBottomPadding =
+                    constraints.maxHeight * _sheetExtent;
+                return NotificationListener<DraggableScrollableNotification>(
+                  onNotification: _onSheetNotification,
+                  child: Stack(
                   children: [
                     Positioned.fill(
                       child: _buildMapOrFallback(
@@ -1015,10 +1021,12 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                       ),
                     ),
                     DraggableScrollableSheet(
-                      initialChildSize: 0.5,
-                      minChildSize: 0.35,
+                      initialChildSize: _initialSheetSize,
+                      minChildSize: _minSheetSize,
                       maxChildSize: 0.85,
                       builder: (context, scrollController) {
+                        final bottomInset =
+                            MediaQuery.paddingOf(context).bottom;
                         return Container(
                           decoration: BoxDecoration(
                             color: HomeColors.surfaceOf(context),
@@ -1043,23 +1051,48 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                                   borderRadius: BorderRadius.circular(2),
                                 ),
                               ),
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                  20,
+                                  12,
+                                  20,
+                                  0,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Confirm Details',
+                                      style: theme.textTheme.headlineSmall
+                                          ?.copyWith(
+                                        fontWeight: FontWeight.w700,
+                                        color:
+                                            HomeColors.textPrimaryOf(context),
+                                      ),
+                                    ),
+                                    const SizedBox(height: AppColors.spaceMD),
+                                    _EstimatedFeeCard(
+                                      borderColor: borderColor,
+                                      isLoading: _isLoadingEstimate,
+                                      feeText: estimatedFeeText,
+                                      errorText: _estimateError,
+                                    ),
+                                  ],
+                                ),
+                              ),
                               Expanded(
                                 child: SingleChildScrollView(
                                   controller: scrollController,
-                                  padding: const EdgeInsets.all(20),
+                                  padding: const EdgeInsets.fromLTRB(
+                                    20,
+                                    AppColors.spaceMD,
+                                    20,
+                                    8,
+                                  ),
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        'Confirm Details',
-                                        style: theme.textTheme.headlineSmall
-                                            ?.copyWith(
-                                          fontWeight: FontWeight.w700,
-                                          color: HomeColors.textPrimaryOf(context),
-                                        ),
-                                      ),
-                                      const SizedBox(height: AppColors.spaceMD),
                                       _DetailCard(
                                         borderColor: borderColor,
                                         child: Column(
@@ -1111,117 +1144,70 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                                           ],
                                         ),
                                       ),
-                                      const SizedBox(height: AppColors.spaceMD),
-                                      _DetailCard(
-                                        borderColor: borderColor,
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              'Estimated fee',
-                                              style: theme.textTheme.bodySmall
-                                                  ?.copyWith(
-                                                color: HomeColors.textMutedOf(context),
-                                              ),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            _isLoadingEstimate
-                                                ? Shimmer.fromColors(
-                                                    baseColor: HomeColors
-                                                        .surfaceElevated,
-                                                    highlightColor: HomeColors
-                                                        .surfaceElevated
-                                                        .withValues(alpha: 0.6),
-                                                    child: Container(
-                                                      width: 80,
-                                                      height: 24,
-                                                      decoration: BoxDecoration(
-                                                        color: Colors.white,
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(4),
-                                                      ),
-                                                    ),
-                                                  )
-                                                : Text(
-                                                    estimatedFeeText,
-                                                    style: theme
-                                                        .textTheme.titleLarge
-                                                        ?.copyWith(
-                                                      fontWeight:
-                                                          FontWeight.w700,
-                                                      color: HomeColors.violet,
-                                                    ),
-                                                  ),
-                                            if (_estimateError != null)
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                    top: 4),
-                                                child: Text(
-                                                  _estimateError!,
-                                                  style: theme
-                                                      .textTheme.bodySmall
-                                                      ?.copyWith(
-                                                    color: AppColors.errorColor,
-                                                  ),
-                                                ),
-                                              ),
-                                          ],
-                                        ),
-                                      ),
-                                      const SizedBox(height: AppColors.spaceLG),
-                                      TextButton(
-                                        onPressed: () => Navigator.pop(context),
-                                        child: const Text(
-                                          'Edit Details',
-                                          style: TextStyle(
-                                            color: HomeColors.violet,
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(height: AppColors.spaceMD),
-                                      SizedBox(
-                                        width: double.infinity,
-                                        height: AppColors.buttonHeightMD,
-                                        child: ElevatedButton(
-                                          onPressed: (_isLoadingRequest ||
-                                                  !_hasServerEstimate)
-                                              ? null
-                                              : _createDeliveryRequest,
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: HomeColors.violet,
-                                            foregroundColor: Theme.of(context).colorScheme.onSecondary,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(
-                                                      AppColors.radiusLG),
-                                            ),
-                                          ),
-                                          child: _isLoadingRequest
-                                              ? const SizedBox(
-                                                  width: 24,
-                                                  height: 24,
-                                                  child:
-                                                      CircularProgressIndicator(
-                                                    strokeWidth: 2,
-                                                    color: Colors.white,
-                                                  ),
-                                                )
-                                              : const Text(
-                                                  'Look for Courier',
-                                                  style: TextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                                ),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 20),
                                     ],
                                   ),
+                                ),
+                              ),
+                              Padding(
+                                padding: EdgeInsets.fromLTRB(
+                                  20,
+                                  8,
+                                  20,
+                                  12 + bottomInset,
+                                ),
+                                child: Column(
+                                  children: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text(
+                                        'Edit Details',
+                                        style: TextStyle(
+                                          color: HomeColors.violet,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: AppColors.spaceSM),
+                                    SizedBox(
+                                      width: double.infinity,
+                                      height: AppColors.buttonHeightMD,
+                                      child: ElevatedButton(
+                                        onPressed: (_isLoadingRequest ||
+                                                !_hasServerEstimate)
+                                            ? null
+                                            : _createDeliveryRequest,
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: HomeColors.violet,
+                                          foregroundColor: Theme.of(context)
+                                              .colorScheme
+                                              .onSecondary,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              AppColors.radiusLG,
+                                            ),
+                                          ),
+                                        ),
+                                        child: _isLoadingRequest
+                                            ? const SizedBox(
+                                                width: 24,
+                                                height: 24,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                  strokeWidth: 2,
+                                                  color: Colors.white,
+                                                ),
+                                              )
+                                            : const Text(
+                                                'Look for Courier',
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
@@ -1230,6 +1216,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                       },
                     ),
                   ],
+                ),
                 );
               },
             ),
@@ -1325,6 +1312,107 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
           if (mounted) _fitBounds();
         });
       },
+    );
+  }
+}
+
+class _EstimatedFeeCard extends StatelessWidget {
+  const _EstimatedFeeCard({
+    required this.borderColor,
+    required this.isLoading,
+    this.feeText,
+    this.errorText,
+  });
+
+  final Color borderColor;
+  final bool isLoading;
+  final String? feeText;
+  final String? errorText;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return _DetailCard(
+      borderColor: borderColor,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Estimated fee',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: HomeColors.textMutedOf(context),
+            ),
+          ),
+          const SizedBox(height: 4),
+          if (isLoading)
+            const _EstimateFeeLoading()
+          else
+            Text(
+              feeText ?? 'N/A',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: HomeColors.violet,
+              ),
+            ),
+          if (errorText != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                errorText!,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: AppColors.errorColor,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EstimateFeeLoading extends StatelessWidget {
+  const _EstimateFeeLoading();
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseColor = isDark
+        ? AppColors.darkSurfaceVariant
+        : AppColors.lightBorder;
+    final highlightColor =
+        isDark ? AppColors.darkBorder : AppColors.lightInputFill;
+
+    return Row(
+      children: [
+        SizedBox(
+          width: 18,
+          height: 18,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            color: HomeColors.violet,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Shimmer.fromColors(
+          baseColor: baseColor,
+          highlightColor: highlightColor,
+          child: Container(
+            width: 96,
+            height: 24,
+            decoration: BoxDecoration(
+              color: baseColor,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          'Calculating…',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: HomeColors.textMutedOf(context),
+              ),
+        ),
+      ],
     );
   }
 }

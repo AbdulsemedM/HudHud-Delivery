@@ -439,7 +439,7 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
 
     final deliveryId = widget.deliveryId;
     if (deliveryId == null) {
-      Navigator.pop(context);
+      _goToHome();
       return;
     }
 
@@ -476,7 +476,7 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
         backgroundColor: Colors.green,
       ),
     );
-    Navigator.pop(context);
+    _goToHome();
   }
 
   void _goToHome() {
