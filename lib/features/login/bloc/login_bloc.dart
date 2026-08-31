@@ -18,6 +18,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           event.emailOrPhone,
           event.password,
           event.fieldType,
+          rememberMe: event.rememberMe,
         );
         emit(LoginSuccess(
           LoginAction.credentials,

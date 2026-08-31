@@ -519,7 +519,7 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
           address: _dropoffAddress,
           position: _dropoffPosition,
           searchFirst: true,
-          requireTapToPin: true,
+          requireTapToPin: false,
           showIAmHereButton: false,
           onPositionChanged: (pos) {
             setState(() {
@@ -533,7 +533,6 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
               _dropoffAddress = place.formattedAddress;
               _dropoffPlace = place;
             });
-            unawaited(_goNext());
           },
         );
       case 2:
@@ -813,18 +812,48 @@ class _MapStepState extends State<_MapStep> {
     }
   }
 
+  Future<void> _revealMapAt(LatLng position) async {
+    if (!mounted) return;
+
+    FocusManager.instance.primaryFocus?.unfocus();
+    _skipNextIdleGeocode = true;
+
+    setState(() {
+      _mapCenter = position;
+      _hasUserLocation = true;
+      _searchActive = false;
+      _pinPlaced = true;
+      _searchSuggestions = [];
+      _searchLoading = false;
+      _searchQuery = '';
+      _mapGeneration++;
+      _mapController = null;
+    });
+
+    widget.onPositionChanged(_toG(position));
+
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    await _animateCameraIfReady(position);
+  }
+
   Future<void> _onSearchPlaceSelected(PlaceResult place) async {
     _gpsRequestId++;
     _userChoseLocation = true;
     _awaitingInitialGps = false;
     widget.onPlaceSelected(place);
+
+    if (widget.searchFirst) {
+      await _revealMapAt(place.coordinates);
+      return;
+    }
+
     _skipNextIdleGeocode = true;
 
     if (_searchActive) {
-      // Map is not in the tree while searching; remount at the new position.
       setState(() {
         _mapCenter = place.coordinates;
         _hasUserLocation = true;
+        _searchActive = false;
         if (widget.requireTapToPin) {
           _pinPlaced = true;
         }
@@ -832,6 +861,9 @@ class _MapStepState extends State<_MapStep> {
         _mapController = null;
       });
       widget.onPositionChanged(_toG(place.coordinates));
+      FocusManager.instance.primaryFocus?.unfocus();
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await _animateCameraIfReady(place.coordinates);
       return;
     }
 

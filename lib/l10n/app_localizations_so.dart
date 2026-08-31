@@ -611,6 +611,9 @@ class AppLocalizationsSo extends AppLocalizations {
       'Fadlan geli waraaqahaaga aqoonsiga si aad u gasho akoonkaaga iyo dhammaan adeegyada jira';
 
   @override
+  String get loginRememberMe => 'I xasuuso';
+
+  @override
   String get brandTagline => 'GAARSIIN, SI WANAAGSAN LOO GEIYEY';
 
   @override
@@ -3251,7 +3254,7 @@ class AppLocalizationsSo extends AppLocalizations {
 
   @override
   String get easyDropHint =>
-      'Tap the map or search to choose the delivery place. Then slide the map to adjust the pin.';
+      'Search for the delivery address first. Then drag the map to fine-tune the pin.';
 
   @override
   String get easyIAmHere => 'I am here';

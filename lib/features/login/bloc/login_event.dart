@@ -7,7 +7,13 @@ class LoginFormSubmitted extends LoginEvent {
   final String emailOrPhone;
   final String password;
   final String fieldType; // 'email' or 'phone'
-  LoginFormSubmitted(this.emailOrPhone, this.password, this.fieldType);
+  final bool rememberMe;
+  LoginFormSubmitted(
+    this.emailOrPhone,
+    this.password,
+    this.fieldType, {
+    this.rememberMe = false,
+  });
 }
 
 class GoogleLoginRequested extends LoginEvent {}

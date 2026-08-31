@@ -614,6 +614,9 @@ class AppLocalizationsOm extends AppLocalizations {
       'Maaloo akkaawuntii keessanii fi tajaajiloota jiran hunda argachuuf ragaa keessan galchaa';
 
   @override
+  String get loginRememberMe => 'Na hordof';
+
+  @override
   String get brandTagline => 'GEEJJIBAA, SIRRIITTI GEEESSIFAME';
 
   @override
@@ -3245,7 +3248,7 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get easyDropHint =>
-      'Tap the map or search to choose the delivery place. Then slide the map to adjust the pin.';
+      'Search for the delivery address first. Then drag the map to fine-tune the pin.';
 
   @override
   String get easyIAmHere => 'I am here';

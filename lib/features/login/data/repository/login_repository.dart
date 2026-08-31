@@ -35,8 +35,9 @@ class LoginRepository {
   Future<LoginSessionResult> login(
     String emailOrPhone,
     String password,
-    String fieldType,
-  ) async {
+    String fieldType, {
+    bool rememberMe = false,
+  }) async {
     AuthService authService = AuthService();
     try {
       final response =
@@ -50,10 +51,11 @@ class LoginRepository {
         }
 
         final result = await _completeSessionFromLoginData(data, authService);
-        await _persistBiometricCredentialsAfterLogin(
+        await _persistCredentialsAfterLogin(
           emailOrPhone: emailOrPhone,
           password: password,
           fieldType: fieldType,
+          rememberMe: rememberMe,
         );
         return result;
       } else {
@@ -224,15 +226,19 @@ class LoginRepository {
     );
   }
 
-  /// Saves identifier + password for later biometric enable / silent login.
-  /// Does not auto-enable biometric unlock.
-  Future<void> _persistBiometricCredentialsAfterLogin({
+  /// Saves or clears identifier + password based on remember-me preference.
+  Future<void> _persistCredentialsAfterLogin({
     required String emailOrPhone,
     required String password,
     required String fieldType,
+    required bool rememberMe,
   }) async {
     final biometric = BiometricCredentialService();
-    if (!await biometric.isDeviceSupported()) return;
+
+    if (!rememberMe) {
+      await biometric.clearRememberedLogin();
+      return;
+    }
 
     final existing = await biometric.peekCredentials();
     if (existing != null) {
@@ -250,6 +256,11 @@ class LoginRepository {
       password: password,
       fieldType: fieldType,
     );
+    await biometric.setRememberMeEnabled(true);
+
+    if (await biometric.isDeviceSupported()) {
+      await biometric.enableBiometricLogin();
+    }
   }
 
   String _cleanErrorMessage(String message) {

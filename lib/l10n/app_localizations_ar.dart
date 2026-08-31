@@ -603,6 +603,9 @@ class AppLocalizationsAr extends AppLocalizations {
       'يرجى إدخال بيانات الاعتماد الخاصة بك للوصول إلى حسابك وجميع الخدمات المتاحة';
 
   @override
+  String get loginRememberMe => 'تذكرني';
+
+  @override
   String get brandTagline => 'توصيل، يُنجَز بإتقان';
 
   @override
@@ -3202,7 +3205,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get easyDropHint =>
-      'Tap the map or search to choose the delivery place. Then slide the map to adjust the pin.';
+      'Search for the delivery address first. Then drag the map to fine-tune the pin.';
 
   @override
   String get easyIAmHere => 'I am here';

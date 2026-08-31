@@ -1220,6 +1220,12 @@ abstract class AppLocalizations {
   /// **'Sign in to track your orders and get your next delivery moving.'**
   String get loginSubtitle;
 
+  /// No description provided for @loginRememberMe.
+  ///
+  /// In en, this message translates to:
+  /// **'Remember me'**
+  String get loginRememberMe;
+
   /// No description provided for @brandTagline.
   ///
   /// In en, this message translates to:
@@ -6071,7 +6077,7 @@ abstract class AppLocalizations {
   /// No description provided for @easyDropHint.
   ///
   /// In en, this message translates to:
-  /// **'Tap the map or search to choose the delivery place. Then slide the map to adjust the pin.'**
+  /// **'Search for the delivery address first. Then drag the map to fine-tune the pin.'**
   String get easyDropHint;
 
   /// No description provided for @easyIAmHere.

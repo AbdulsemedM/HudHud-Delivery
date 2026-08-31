@@ -603,6 +603,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Sign in to track your orders and get your next delivery moving.';
 
   @override
+  String get loginRememberMe => 'Remember me';
+
+  @override
   String get brandTagline => 'DELIVERY, DELIVERED WELL';
 
   @override
@@ -3220,7 +3223,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get easyDropHint =>
-      'Tap the map or search to choose the delivery place. Then slide the map to adjust the pin.';
+      'Search for the delivery address first. Then drag the map to fine-tune the pin.';
 
   @override
   String get easyIAmHere => 'I am here';

@@ -84,6 +84,7 @@ class _LoginFormState extends State<LoginForm> {
   String _countryIso = 'ET';
   bool _showBiometric = false;
   bool _useFaceIcon = false;
+  bool _rememberMe = false;
 
   @override
   void initState() {
@@ -91,6 +92,55 @@ class _LoginFormState extends State<LoginForm> {
     _emailController.addListener(_refreshBiometricVisibility);
     _phoneController.addListener(_refreshBiometricVisibility);
     _loadBiometricAvailability();
+    _loadRememberedCredentials();
+  }
+
+  Future<void> _loadRememberedCredentials() async {
+    if (kIsWeb) return;
+
+    final rememberMe = await _biometricService.isRememberMeEnabled();
+    if (!rememberMe) return;
+
+    final deviceSupported = await _biometricService.isDeviceSupported();
+    if (deviceSupported) {
+      if (!mounted) return;
+      setState(() => _rememberMe = true);
+      await _refreshBiometricVisibility();
+      return;
+    }
+
+    final creds = await _biometricService.peekCredentials();
+    if (creds == null) return;
+
+    if (!mounted) return;
+    if (creds.fieldType == 'email') {
+      setState(() {
+        _rememberMe = true;
+        _method = LoginMethod.email;
+        _emailController.text = creds.identifier;
+        _passwordController.text = creds.password;
+      });
+    } else {
+      final parts = splitPhoneForDisplay(creds.identifier);
+      final country = _countryForDialCode(parts.countryDialCode);
+      setState(() {
+        _rememberMe = true;
+        _method = LoginMethod.phone;
+        _dialCode = parts.countryDialCode;
+        _countryIso = country?.countryCode ?? 'ET';
+        _phoneController.text = parts.nationalNumber;
+        _passwordController.text = creds.password;
+      });
+    }
+    await _refreshBiometricVisibility();
+  }
+
+  Country? _countryForDialCode(String dialCode) {
+    final digits = dialCode.replaceAll(RegExp(r'\D'), '');
+    for (final country in CountryService().getAll()) {
+      if (country.phoneCode == digits) return country;
+    }
+    return null;
   }
 
   Future<void> _loadBiometricAvailability() async {
@@ -292,30 +342,57 @@ class _LoginFormState extends State<LoginForm> {
               },
             ),
             const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => const ForgotPasswordIdentifierScreen(),
+            Row(
+              children: [
+                SizedBox(
+                  height: 24,
+                  width: 24,
+                  child: Checkbox(
+                    value: _rememberMe,
+                    onChanged: (value) {
+                      setState(() => _rememberMe = value ?? false);
+                    },
+                    activeColor: AuthScreenColors.orange,
+                    side: BorderSide(
+                      color: AuthScreenColors.textSecondaryOf(context),
                     ),
-                  );
-                },
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: Text(
-                  l10n.forgotPasswordLink,
-                  style: const TextStyle(
-                    color: AuthScreenColors.orange,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
                   ),
                 ),
-              ),
+                const SizedBox(width: 4),
+                GestureDetector(
+                  onTap: () => setState(() => _rememberMe = !_rememberMe),
+                  child: Text(
+                    l10n.loginRememberMe,
+                    style: TextStyle(
+                      color: AuthScreenColors.textSecondaryOf(context),
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+                const Spacer(),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const ForgotPasswordIdentifierScreen(),
+                      ),
+                    );
+                  },
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: Text(
+                    l10n.forgotPasswordLink,
+                    style: const TextStyle(
+                      color: AuthScreenColors.orange,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 20),
             BlocBuilder<LoginBloc, LoginState>(
@@ -410,6 +487,7 @@ class _LoginFormState extends State<LoginForm> {
             identifier,
             _passwordController.text.trim(),
             isEmail ? 'email' : 'phone',
+            rememberMe: _rememberMe,
           ),
         );
   }

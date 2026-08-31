@@ -592,6 +592,9 @@ class AppLocalizationsAm extends AppLocalizations {
       'እባክህ መለያህን እና ሁሉንም ያሉትን አገልግሎቶች ለመድረስ ምስክርነትህን አስገባ';
 
   @override
+  String get loginRememberMe => 'አስታውሰኝ';
+
+  @override
   String get brandTagline => 'መላኪያ፣ በደንብ የደረሰ';
 
   @override
@@ -3168,7 +3171,7 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get easyDropHint =>
-      'Tap the map or search to choose the delivery place. Then slide the map to adjust the pin.';
+      'Search for the delivery address first. Then drag the map to fine-tune the pin.';
 
   @override
   String get easyIAmHere => 'I am here';

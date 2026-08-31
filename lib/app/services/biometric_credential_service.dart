@@ -35,6 +35,7 @@ class BiometricCredentialService {
   static const _enabledKey = 'biometric_login_enabled';
   static const _credentialsKey = 'biometric_credentials_blob';
   static const _optedOutKey = 'biometric_user_opted_out';
+  static const _rememberMeKey = 'remember_me_enabled';
 
   static const _storage = FlutterSecureStorage(
     aOptions: AndroidOptions(
@@ -94,6 +95,18 @@ class BiometricCredentialService {
   Future<bool> hasUserOptedOut() async {
     final value = await _storage.read(key: _optedOutKey);
     return value == 'true';
+  }
+
+  Future<bool> isRememberMeEnabled() async {
+    final value = await _storage.read(key: _rememberMeKey);
+    return value == 'true';
+  }
+
+  Future<void> setRememberMeEnabled(bool enabled) async {
+    await _storage.write(
+      key: _rememberMeKey,
+      value: enabled ? 'true' : 'false',
+    );
   }
 
   /// Credentials present regardless of enabled flag.
@@ -161,12 +174,16 @@ class BiometricCredentialService {
     await _storage.write(key: _enabledKey, value: 'false');
   }
 
-  /// Full wipe of biometric session and opt-out flag.
+  /// Full wipe of biometric session, remember-me, and opt-out flag.
   Future<void> clearAll() async {
     await _storage.delete(key: _credentialsKey);
     await _storage.delete(key: _enabledKey);
     await _storage.delete(key: _optedOutKey);
+    await _storage.delete(key: _rememberMeKey);
   }
+
+  /// Wipe stored login credentials and related flags (remember me + biometric).
+  Future<void> clearRememberedLogin() => clearAll();
 
   /// @Deprecated — use [optOut] or [clearAll]. Kept for call-site migration.
   Future<void> setBiometricLoginEnabled(bool enabled) async {
