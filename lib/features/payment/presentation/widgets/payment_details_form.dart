@@ -349,5 +349,9 @@ Map<String, dynamic> buildInitiatePaymentDetails({
   }
   // ebirr_kaafi / ebirr_coop: provider is encoded in payment_method_code.
 
+  if (paymentMethodCode == 'qpay') {
+    details['channel'] = 'qr';
+  }
+
   return details;
 }

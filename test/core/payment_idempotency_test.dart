@@ -28,6 +28,24 @@ void main() {
     });
   });
 
+  group('createWalletIdempotencyKey', () {
+    test('topup uses wallet-topup-uuid format', () {
+      final key = createWalletIdempotencyKey(operation: 'topup');
+      expect(key, startsWith('wallet-topup-'));
+    });
+  });
+
+  group('isIdempotencyConflictError', () {
+    test('detects idempotency conflict messages', () {
+      expect(
+        isIdempotencyConflictError(
+          ApiException('Idempotency already used with different payload'),
+        ),
+        isTrue,
+      );
+    });
+  });
+
   group('isTransientPaymentNetworkError', () {
     test('detects timeout and connection ApiExceptions', () {
       expect(

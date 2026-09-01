@@ -26,6 +26,9 @@ dependencies:
   # HTTP Client
   dio: ^5.4.0
 
+  # QPay QR rendering
+  qr_flutter: ^4.1.0
+
   # URLs (support mailto / tel)
   url_launcher: ^6.3.1
   # Hosted payment page (Waafi HPP)

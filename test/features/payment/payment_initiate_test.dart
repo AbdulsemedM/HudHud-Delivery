@@ -139,7 +139,53 @@ void main() {
       final result = PaymentInitiateResult.fromJson(json);
       expect(result.uiMode, PaymentInitiateUiMode.qrCode);
       expect(result.qrCodeBase64, 'aVZORw0KGgo=');
+      expect(result.qrCodeRaw, 'aVZORw0KGgo=');
       expect(result.qrPayload, '000201010211');
+    });
+
+    test('parses wallet top-up QPay initiate response', () {
+      const json = {
+        'success': true,
+        'message': 'Scan the QR code',
+        'data': {
+          'next_action': 'show_qr_code',
+          'qr_code': '000201010212345678',
+          'qr_id': 'ref-1',
+          'expires_at': '2026-08-22T10:15:00.000000Z',
+          'payment': {
+            'id': 901,
+            'status': 'pending',
+            'method': 'qpay',
+            'amount': 500.00,
+            'currency': 'ETB',
+          },
+        },
+      };
+
+      final result = PaymentInitiateResult.fromJson(json);
+      expect(result.isSuccess, isTrue);
+      expect(result.uiMode, PaymentInitiateUiMode.qrCode);
+      expect(result.paymentId, 901);
+      expect(result.qrCodeRaw, '000201010212345678');
+      expect(result.qrId, 'ref-1');
+      expect(result.expiresAt, '2026-08-22T10:15:00.000000Z');
+    });
+
+    test('parses payment.qr_code fallback', () {
+      const json = {
+        'success': true,
+        'data': {
+          'next_action': 'show_qr_code',
+          'payment': {
+            'id': 1,
+            'status': 'pending',
+            'qr_code': '000201010211',
+          },
+        },
+      };
+
+      final result = PaymentInitiateResult.fromJson(json);
+      expect(result.qrCodeRaw, '000201010211');
     });
 
     test('parses redirect_to_hpp', () {
@@ -284,7 +330,7 @@ void main() {
         {'id': 'ebirr_coop', 'enabled': true},
       ]);
       expect(filtered.map((m) => m['id']),
-          ['wallet', 'ebirr_kaafi', 'ebirr_coop']);
+          ['wallet', 'qpay', 'ebirr_kaafi', 'ebirr_coop']);
     });
 
     test('isEbirrPaymentMethodCode recognizes ebirr variants', () {
@@ -328,6 +374,16 @@ void main() {
       expect(ebirr['provider'], 'coop');
       expect(ebirr['phone'], '251915741199');
       expect(ebirr.containsKey('use_hpp'), isFalse);
+    });
+
+    test('buildInitiatePaymentDetails sets channel qr for qpay', () {
+      final qpay = buildInitiatePaymentDetails(
+        paymentMethodCode: 'qpay',
+        collectedDetails: {},
+        orderId: 0,
+      );
+      expect(qpay['channel'], 'qr');
+      expect(qpay.containsKey('phone'), isFalse);
     });
   });
 }

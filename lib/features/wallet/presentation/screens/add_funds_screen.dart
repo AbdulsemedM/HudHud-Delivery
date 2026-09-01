@@ -42,6 +42,7 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
   String _ebirrProvider = 'kaafi';
   bool _useHpp = false;
   String? _idempotencyKey;
+  var _retryAfterIdempotencyConflict = false;
 
   late final WalletRepository _walletRepository;
   late final PaymentRepository _paymentRepository;
@@ -72,14 +73,13 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
 
   Future<void> _fetchPaymentMethods() async {
     try {
-      final methods = await _paymentRepository.getPaymentMethods();
+      final methods =
+          await _paymentRepository.getWalletFundingMethods(widget.defaultCurrency);
       if (!mounted) return;
       setState(() {
-        _paymentMethods = filterWalletFundingMethods(methods);
+        _paymentMethods = methods;
         _isLoadingPaymentMethods = false;
-        if (_selectedMethodId == null && _paymentMethods.isNotEmpty) {
-          _selectedMethodId = _paymentMethods.first['id'] as String?;
-        }
+        _selectedMethodId ??= _paymentMethods.first['id'] as String?;
       });
     } catch (_) {
       if (!mounted) return;
@@ -134,7 +134,11 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
       orderId: 0,
     );
 
-    _idempotencyKey ??= createWalletIdempotencyKey(operation: 'topup');
+    if (method == 'qpay') {
+      _idempotencyKey = createWalletIdempotencyKey(operation: 'topup');
+    } else {
+      _idempotencyKey ??= createWalletIdempotencyKey(operation: 'topup');
+    }
 
     _walletBloc.add(AddFundsEvent(
       amount: amount,
@@ -145,15 +149,15 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
     ));
   }
 
-  Future<void> _handlePaymentResult(Map<String, dynamic> envelope) async {
+  Future<bool?> _handlePaymentResult(Map<String, dynamic> envelope) async {
     final result = PaymentInitiateResult.fromJson(envelope);
     if (!result.isSuccess &&
         result.uiMode == PaymentInitiateUiMode.failure &&
         result.paymentId == null) {
-      return;
+      return false;
     }
-    if (!mounted) return;
-    await Navigator.of(context).push(
+    if (!mounted) return null;
+    return Navigator.of(context).push<bool?>(
       MaterialPageRoute(
         builder: (_) => PaymentInitiateResultScreen(
           result: result,
@@ -185,7 +189,7 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
         body: BlocConsumer<WalletBloc, WalletState>(
           listener: (context, state) async {
             if (state is AddFundsSuccess) {
-              _invalidateIdempotencyKey();
+              _retryAfterIdempotencyConflict = false;
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(_successSnackMessage(state)),
@@ -194,9 +198,19 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
                       : AppColors.successColor,
                 ),
               );
-              await _handlePaymentResult(state.initiateEnvelope);
-              if (context.mounted) Navigator.pop(context, true);
+              final terminal = await _handlePaymentResult(state.initiateEnvelope);
+              if (terminal == true || terminal == false) {
+                _invalidateIdempotencyKey();
+              }
+              if (context.mounted) Navigator.pop(context, terminal == true);
             } else if (state is AddFundsError) {
+              if (isIdempotencyConflictError(state.message) &&
+                  !_retryAfterIdempotencyConflict) {
+                _retryAfterIdempotencyConflict = true;
+                _invalidateIdempotencyKey();
+                await _submit();
+                return;
+              }
               if (!isTransientPaymentNetworkError(state.message)) {
                 _invalidateIdempotencyKey();
               }

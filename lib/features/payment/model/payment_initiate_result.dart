@@ -15,6 +15,7 @@ enum PaymentInitiateUiMode {
 const Set<String> kAllowedPaymentMethodCodes = {
   'wallet',
   'cash_on_delivery',
+  'qpay',
   'waafi',
   'edahab',
   'sahay',
@@ -51,6 +52,7 @@ class PaymentInitiateResult {
     this.nextAction,
     this.message,
     this.qrCodeBase64,
+    this.qrCodeRaw,
     this.qrPayload,
     this.qrId,
     this.redirectUrl,
@@ -77,6 +79,8 @@ class PaymentInitiateResult {
   final String? nextAction;
   final String? message;
   final String? qrCodeBase64;
+  /// Unmodified QR payload from API (plain EMVCo string, data URL, image URL, etc.).
+  final String? qrCodeRaw;
   final String? qrPayload;
   final String? qrId;
   final String? redirectUrl;
@@ -188,9 +192,15 @@ class PaymentInitiateResult {
         'Payment initiated';
 
     final topLevelQr = dataMap['qr_code']?.toString();
+    final dataQpayQr = dataMap['qpay_qr_code']?.toString();
     final nestedQr = detailsMap['qpay_qr_code']?.toString();
-    final qrRaw =
-        (topLevelQr != null && topLevelQr.isNotEmpty) ? topLevelQr : nestedQr;
+    final paymentQr = paymentMap['qr_code']?.toString();
+    final qrRaw = _firstNonEmpty([
+      topLevelQr,
+      dataQpayQr,
+      nestedQr,
+      paymentQr,
+    ]);
     final qrCodeBase64 = _stripDataUriPrefix(qrRaw);
 
     final ussdSent = dataMap['ussd_sent'] == true ||
@@ -219,6 +229,7 @@ class PaymentInitiateResult {
       nextAction: nextAction,
       message: message,
       qrCodeBase64: qrCodeBase64,
+      qrCodeRaw: qrRaw,
       qrPayload: detailsMap['qpay_qr_id']?.toString(),
       qrId:
           dataMap['qr_id']?.toString() ?? detailsMap['qpay_qr_id']?.toString(),
@@ -252,6 +263,13 @@ class PaymentInitiateResult {
       return value.substring(comma + 1);
     }
     return value;
+  }
+
+  static String? _firstNonEmpty(List<String?> values) {
+    for (final value in values) {
+      if (value != null && value.isNotEmpty) return value;
+    }
+    return null;
   }
 }
 

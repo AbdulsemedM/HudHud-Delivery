@@ -1,4 +1,4 @@
-/// Parses payment method items from GET /api/payment-methods `data` array.
+/// Parses payment method items from GET /api/payment-methods or /payments/methods.
 List<Map<String, dynamic>> parsePaymentMethodsList(dynamic list) {
   if (list == null || list is! List) {
     return [];
@@ -9,12 +9,16 @@ List<Map<String, dynamic>> parsePaymentMethodsList(dynamic list) {
     if (item is! Map) continue;
 
     final map = Map<String, dynamic>.from(item);
-    final isActive = map['is_active'] == true;
-    final code = map['code']?.toString();
+    final code = map['code']?.toString() ?? map['id']?.toString();
     final name = map['name']?.toString() ?? code ?? 'Unknown';
     final description = map['description']?.toString() ?? 'Pay with $name';
     final sortOrder =
         int.tryParse(map['sort_order']?.toString() ?? '0') ?? 0;
+
+    // Legacy /payment-methods uses is_active; registry uses can_use.
+    final canUse = map['can_use'];
+    final isActive = map['is_active'] == true;
+    final enabled = canUse != null ? canUse == true : isActive;
 
     if (code != null && code.isNotEmpty) {
       methods.add({
@@ -22,7 +26,11 @@ List<Map<String, dynamic>> parsePaymentMethodsList(dynamic list) {
         'name': name,
         'description': description,
         'icon': map['icon'],
-        'enabled': isActive,
+        'enabled': enabled,
+        'can_use': canUse,
+        'availability_code': map['availability_code']?.toString(),
+        'requires_qr': map['requires_qr'] == true,
+        'supports_qr_payment': map['supports_qr_payment'] == true,
         '_sortOrder': sortOrder,
       });
     }

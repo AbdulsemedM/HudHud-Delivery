@@ -3,6 +3,7 @@ import '../data_provider/payment_data_provider.dart';
 import '../../model/payment_initiate_result.dart';
 import '../../model/payment_status_result.dart';
 import '../../utils/service_payment_mapping.dart';
+import '../../../wallet/utils/wallet_funding_methods.dart';
 
 class PaymentRepository {
   final PaymentDataProvider paymentDataProvider;
@@ -45,6 +46,19 @@ class PaymentRepository {
     } catch (e) {
       throw Exception('Failed to get payment methods: $e');
     }
+  }
+
+  Future<List<Map<String, dynamic>>> getWalletFundingMethods(
+    String currency,
+  ) async {
+    return loadWalletFundingMethods(
+      fetchRegistry: ({String? type}) =>
+          paymentDataProvider.getPaymentMethodsRegistry(
+            type: type,
+            currency: currency,
+          ),
+      fetchLegacy: () => paymentDataProvider.getPaymentMethods(),
+    );
   }
 
   /// Service convenience payment (POST /api/payments/service/...).

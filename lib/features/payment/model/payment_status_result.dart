@@ -13,6 +13,8 @@ class PaymentStatusResult {
     this.paidAt,
     this.relatedOrderId,
     this.relatedOrderStatus,
+    this.walletTopupSettlement,
+    this.qpayStatus,
     this.message,
     this.raw,
   });
@@ -29,10 +31,13 @@ class PaymentStatusResult {
   final String? paidAt;
   final int? relatedOrderId;
   final String? relatedOrderStatus;
+  final String? walletTopupSettlement;
+  final String? qpayStatus;
   final String? message;
   final Map<String, dynamic>? raw;
 
   bool get isTerminal => isTerminalPaymentStatus(status);
+
   bool get isCompleted => status == 'completed';
   bool get isFailed =>
       status == 'failed' || status == 'cancelled' || status == 'refunded';
@@ -59,10 +64,13 @@ class PaymentStatusResult {
     final relatedMap =
         related is Map ? Map<String, dynamic>.from(related) : <String, dynamic>{};
 
+    final paymentStatus = paymentMap['status']?.toString();
+    final topLevelStatus = dataMap['status']?.toString();
+
     return PaymentStatusResult(
       isSuccess: true,
       paymentId: int.tryParse(paymentMap['id']?.toString() ?? ''),
-      status: paymentMap['status']?.toString(),
+      status: paymentStatus ?? topLevelStatus,
       method: paymentMap['method']?.toString(),
       type: paymentMap['type']?.toString(),
       amount: paymentMap['amount']?.toString(),
@@ -72,6 +80,9 @@ class PaymentStatusResult {
       paidAt: paymentMap['paid_at']?.toString(),
       relatedOrderId: int.tryParse(relatedMap['order_id']?.toString() ?? ''),
       relatedOrderStatus: relatedMap['order_status']?.toString(),
+      walletTopupSettlement:
+          dataMap['wallet_topup_settlement']?.toString(),
+      qpayStatus: dataMap['qpay_status']?.toString(),
       message: json['message']?.toString(),
       raw: json,
     );
@@ -84,11 +95,22 @@ const Set<String> kTerminalPaymentStatuses = {
   'refunded',
   'partially_refunded',
   'cancelled',
+  'expired',
 };
 
 const Set<String> kPendingPaymentStatuses = {
   'pending',
   'processing',
+};
+
+const Set<String> kWalletTopUpSettledStatuses = {
+  'credited',
+  'already_credited',
+};
+
+const Set<String> kWalletTopUpAwaitingSettlementStatuses = {
+  'awaiting_provider_confirmation',
+  'awaiting_provider_amount',
 };
 
 bool isTerminalPaymentStatus(String? status) {
@@ -99,6 +121,45 @@ bool isTerminalPaymentStatus(String? status) {
 bool isPendingPaymentStatus(String? status) {
   if (status == null || status.isEmpty) return false;
   return kPendingPaymentStatuses.contains(status);
+}
+
+bool isWalletTopUpSettled(PaymentStatusResult result) {
+  final settlement = result.walletTopupSettlement?.toLowerCase();
+  if (settlement != null && settlement.isNotEmpty) {
+    return kWalletTopUpSettledStatuses.contains(settlement);
+  }
+
+  final paymentStatus = result.status?.toLowerCase();
+  return paymentStatus == 'completed' ||
+      paymentStatus == 'paid' ||
+      paymentStatus == 'settled';
+}
+
+bool isQPayTerminalFailure(PaymentStatusResult result) {
+  final qpay = result.qpayStatus?.toUpperCase();
+  if (qpay == 'FAILED' || qpay == 'EXPIRED') return true;
+
+  final paymentStatus = result.status?.toLowerCase();
+  return paymentStatus == 'failed' ||
+      paymentStatus == 'cancelled' ||
+      paymentStatus == 'refunded' ||
+      paymentStatus == 'partially_refunded' ||
+      paymentStatus == 'expired';
+}
+
+bool shouldKeepPollingWalletTopUp(PaymentStatusResult result) {
+  if (!result.isSuccess) return true;
+  if (isWalletTopUpSettled(result)) return false;
+  if (isQPayTerminalFailure(result)) return false;
+
+  final settlement = result.walletTopupSettlement?.toLowerCase();
+  if (settlement != null &&
+      kWalletTopUpAwaitingSettlementStatuses.contains(settlement)) {
+    return true;
+  }
+
+  return isPendingPaymentStatus(result.status) ||
+      result.status == 'completed';
 }
 
 /// Whether the initiate result should start status polling.
