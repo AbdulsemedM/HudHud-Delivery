@@ -16,6 +16,14 @@ void main() {
       expect(ids, isNot(contains('cash_on_delivery')));
     });
 
+    test('includes qpay when present', () {
+      final filtered = filterWalletFundingMethods([
+        {'id': 'qpay', 'name': 'QPay', 'enabled': true},
+        {'id': 'waafi', 'name': 'Waafi', 'enabled': true},
+      ]);
+      expect(filtered.map((m) => m['id']), contains('qpay'));
+    });
+
     test('falls back to default funding methods', () {
       final filtered = filterWalletFundingMethods([]);
       expect(

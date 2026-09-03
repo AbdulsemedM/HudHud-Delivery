@@ -12,7 +12,8 @@ import 'package:hudhud_delivery/features/wallet/data/models/wallet_transaction_m
 import 'package:intl/intl.dart';
 import 'package:hudhud_delivery/features/wallet/data/providers/wallet_data_provider.dart';
 import 'package:hudhud_delivery/features/wallet/data/repositories/wallet_repository.dart';
-import 'add_funds_screen.dart';
+import 'package:hudhud_delivery/features/wallet/services/wallet_topup_recovery_service.dart';
+import 'wallet_topup_page.dart';
 import 'withdraw_funds_screen.dart';
 import '../widgets/wallet_widget.dart';
 
@@ -115,6 +116,22 @@ class _WalletContent extends StatefulWidget {
 class _WalletContentState extends State<_WalletContent> {
   final _transactionsKey = GlobalKey();
 
+  @override
+  void initState() {
+    super.initState();
+    WalletTopUpRecoveryService.instance.addListener(_onRecoveryChanged);
+  }
+
+  @override
+  void dispose() {
+    WalletTopUpRecoveryService.instance.removeListener(_onRecoveryChanged);
+    super.dispose();
+  }
+
+  void _onRecoveryChanged() {
+    if (mounted) setState(() {});
+  }
+
   static List<TransactionItem> _toTransactionItems(
     AppLocalizations l10n,
     List<WalletTransactionModel> transactions,
@@ -156,15 +173,20 @@ class _WalletContentState extends State<_WalletContent> {
             balance:
                 '$currency ${widget.balance.balance.toStringAsFixed(2)}',
             bottomActions: WalletActions(
+              showPendingTopUp:
+                  WalletTopUpRecoveryService.instance.hasPendingTopUp,
               onAddMoney: () async {
                 final result = await Navigator.of(context).push<bool>(
                   MaterialPageRoute(
-                    builder: (_) => AddFundsScreen(
+                    builder: (_) => WalletTopUpPage(
                       defaultCurrency: currency,
                     ),
                   ),
                 );
-                if (result == true) await _refreshAfterMutation();
+                if (result == true) {
+                  await WalletTopUpRecoveryService.instance.refresh();
+                  await _refreshAfterMutation();
+                }
               },
               onSendMoney: () async {
                 final result = await Navigator.of(context).push<bool>(

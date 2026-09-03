@@ -9,19 +9,32 @@ class PaymentDataProvider {
 
   PaymentDataProvider({required this.apiService});
 
-  /// GET /api/payment-methods - fetches available payment methods.
-  Future<List<Map<String, dynamic>>> getPaymentMethods() async {
-    final response = await apiService.get(
-      '${ApiConstants.baseUrl}${ApiConstants.paymentMethods}',
-    );
-    final data = response.data;
-
-    if (data == null || data is! Map) {
-      return [];
+  /// GET /api/payment-methods (or /payments/methods) — optional [type] filter.
+  Future<List<Map<String, dynamic>>> getPaymentMethods({String? type}) async {
+    final query = <String, dynamic>{};
+    if (type != null && type.isNotEmpty) {
+      query['type'] = type;
     }
 
-    final map = Map<String, dynamic>.from(data);
-    return parsePaymentMethodsList(map['data']);
+    for (final path in [
+      ApiConstants.paymentMethods,
+      ApiConstants.paymentsMethods,
+    ]) {
+      try {
+        final response = await apiService.get(
+          '${ApiConstants.baseUrl}$path',
+          queryParameters: query.isEmpty ? null : query,
+        );
+        final data = response.data;
+        if (data == null || data is! Map) continue;
+        final map = Map<String, dynamic>.from(data);
+        final methods = parsePaymentMethodsList(map['data']);
+        if (methods.isNotEmpty || type == null) return methods;
+      } catch (_) {
+        continue;
+      }
+    }
+    return [];
   }
 
   Future<Map<String, dynamic>> initiatePayment({

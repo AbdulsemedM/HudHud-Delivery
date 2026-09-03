@@ -1,6 +1,13 @@
 import 'dart:math';
 
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 import '../api/api_service.dart';
+
+const _walletTopUpFingerprintKey = 'wallet_topup_idempotency_fingerprint';
+const _walletTopUpKeyKey = 'wallet_topup_idempotency_key';
+
+final _walletTopUpIdempotencyStorage = const FlutterSecureStorage();
 
 /// Generates a RFC 4122 version-4 UUID (no external dependency).
 String generateUuidV4() {
@@ -32,6 +39,56 @@ String createPaymentIdempotencyKey({
 String createWalletIdempotencyKey({required String operation}) {
   final op = operation.trim().isEmpty ? 'wallet' : operation.trim();
   return '$op-${generateUuidV4()}';
+}
+
+/// Intent fingerprint for wallet top-up idempotency reuse.
+String buildWalletTopUpFingerprint({
+  required String paymentMethodCode,
+  required double amount,
+  required String currency,
+  String phone = '',
+  String cashNote = '',
+}) {
+  return '$paymentMethodCode|$amount|$currency|$phone|$cashNote';
+}
+
+/// Reuses stored key when [fingerprint] matches; otherwise mints `wallet-topup-{uuid}`.
+Future<String> resolveWalletTopUpKey(String fingerprint) async {
+  final storedFingerprint =
+      await _walletTopUpIdempotencyStorage.read(key: _walletTopUpFingerprintKey);
+  final storedKey =
+      await _walletTopUpIdempotencyStorage.read(key: _walletTopUpKeyKey);
+  if (storedFingerprint == fingerprint &&
+      storedKey != null &&
+      storedKey.isNotEmpty) {
+    return storedKey;
+  }
+  final key = 'wallet-topup-${generateUuidV4()}';
+  await _walletTopUpIdempotencyStorage.write(
+    key: _walletTopUpFingerprintKey,
+    value: fingerprint,
+  );
+  await _walletTopUpIdempotencyStorage.write(
+    key: _walletTopUpKeyKey,
+    value: key,
+  );
+  return key;
+}
+
+Future<void> clearWalletTopUpIdempotency() async {
+  await _walletTopUpIdempotencyStorage.delete(key: _walletTopUpFingerprintKey);
+  await _walletTopUpIdempotencyStorage.delete(key: _walletTopUpKeyKey);
+}
+
+/// True for idempotency conflict responses where the client should mint a new key.
+bool isIdempotencyConflictError(Object error) {
+  if (error is ApiException) {
+    if (error.isConflict) return true;
+    final code = error.code?.toUpperCase() ?? '';
+    if (code.startsWith('IDEMPOTENCY')) return true;
+  }
+  final text = error.toString().toUpperCase();
+  return text.contains('IDEMPOTENCY');
 }
 
 /// True for timeouts / connection failures where the same Idempotency-Key

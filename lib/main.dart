@@ -41,6 +41,7 @@ import 'features/orders/data/repositories/orders_repository.dart';
 // Widgets
 import 'app/widgets/app_connectivity_banner.dart';
 import 'app/widgets/ota_lifecycle_binder.dart';
+import 'package:hudhud_delivery/features/wallet/services/wallet_topup_recovery_service.dart';
 import 'package:image_picker_android/image_picker_android.dart';
 import 'package:image_picker_platform_interface/image_picker_platform_interface.dart';
 
@@ -100,6 +101,15 @@ void main() async {
 
   // Initialize API service
   // DioClient.initialize(); // Will be implemented when needed
+
+  try {
+    await WalletTopUpRecoveryService.instance.initialize();
+  } catch (e, st) {
+    if (kDebugMode) {
+      debugPrint('Wallet top-up recovery init failed: $e');
+      debugPrint('$st');
+    }
+  }
 
   // Initialize theme controller
   final themeController = ThemeController();

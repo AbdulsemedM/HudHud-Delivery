@@ -65,6 +65,41 @@ void main() {
       expect(result.isSuccess, isFalse);
       expect(result.message, 'Payment not found');
     });
+
+    test('parses wallet top-up settlement credited', () {
+      const json = {
+        'success': true,
+        'data': {
+          'wallet_topup_settlement': 'credited',
+          'payment': {
+            'id': 12,
+            'status': 'pending',
+            'method': 'qpay',
+          },
+        },
+      };
+
+      final result = PaymentStatusResult.fromJson(json);
+      expect(result.isWalletTopUpSettled, isTrue);
+      expect(result.walletTopupSettlement, 'credited');
+    });
+
+    test('parses qpay terminal failure', () {
+      const json = {
+        'success': true,
+        'data': {
+          'qpay_status': 'EXPIRED',
+          'payment': {
+            'id': 12,
+            'status': 'pending',
+            'method': 'qpay',
+          },
+        },
+      };
+
+      final result = PaymentStatusResult.fromJson(json);
+      expect(result.isWalletTopUpTerminalFailure, isTrue);
+    });
   });
 
   group('payment status helpers', () {

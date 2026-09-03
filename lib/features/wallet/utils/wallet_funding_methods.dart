@@ -1,5 +1,6 @@
 /// Methods allowed for wallet top-up / withdraw (no wallet, no COD).
 const Set<String> kWalletFundingMethodCodes = {
+  'qpay',
   'waafi',
   'edahab',
   'sahay',

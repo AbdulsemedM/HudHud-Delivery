@@ -17,12 +17,17 @@ List<Map<String, dynamic>> parsePaymentMethodsList(dynamic list) {
         int.tryParse(map['sort_order']?.toString() ?? '0') ?? 0;
 
     if (code != null && code.isNotEmpty) {
+      final canUse = map['can_use'];
       methods.add({
         'id': code,
+        'code': code,
         'name': name,
         'description': description,
         'icon': map['icon'],
         'enabled': isActive,
+        if (canUse != null) 'can_use': canUse == true,
+        if (map['availability_code'] != null)
+          'availability_code': map['availability_code']?.toString(),
         '_sortOrder': sortOrder,
       });
     }

@@ -110,12 +110,14 @@ class WalletActionButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+  final bool showBadge;
 
   const WalletActionButton({
     super.key,
     required this.icon,
     required this.label,
     required this.onTap,
+    this.showBadge = false,
   });
 
   @override
@@ -123,18 +125,36 @@ class WalletActionButton extends StatelessWidget {
     return Expanded(
       child: Column(
         children: [
-          Material(
-            color: Colors.white.withValues(alpha: 0.2),
-            shape: const CircleBorder(),
-            child: InkWell(
-              onTap: onTap,
-              customBorder: const CircleBorder(),
-              child: SizedBox(
-                width: 48,
-                height: 48,
-                child: Icon(icon, color: Colors.white, size: 22),
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Material(
+                color: Colors.white.withValues(alpha: 0.2),
+                shape: const CircleBorder(),
+                child: InkWell(
+                  onTap: onTap,
+                  customBorder: const CircleBorder(),
+                  child: SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: Icon(icon, color: Colors.white, size: 22),
+                  ),
+                ),
               ),
-            ),
+              if (showBadge)
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  child: Container(
+                    width: 10,
+                    height: 10,
+                    decoration: const BoxDecoration(
+                      color: Colors.redAccent,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+            ],
           ),
           SizedBox(height: 6),
           Text(
@@ -156,12 +176,14 @@ class WalletActions extends StatelessWidget {
   final VoidCallback onAddMoney;
   final VoidCallback onSendMoney;
   final VoidCallback? onHistory;
+  final bool showPendingTopUp;
 
   const WalletActions({
     super.key,
     required this.onAddMoney,
     required this.onSendMoney,
     this.onHistory,
+    this.showPendingTopUp = false,
   });
 
   @override
@@ -173,6 +195,7 @@ class WalletActions extends StatelessWidget {
           icon: Icons.add_rounded,
           label: l10n.walletAddMoney,
           onTap: onAddMoney,
+          showBadge: showPendingTopUp,
         ),
         WalletActionButton(
           icon: Icons.arrow_upward_rounded,

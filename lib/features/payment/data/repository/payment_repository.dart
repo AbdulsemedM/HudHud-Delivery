@@ -2,6 +2,7 @@ import '../../../../core/api/api_service.dart';
 import '../data_provider/payment_data_provider.dart';
 import '../../model/payment_initiate_result.dart';
 import '../../model/payment_status_result.dart';
+import '../../utils/qpay_method.dart';
 import '../../utils/service_payment_mapping.dart';
 
 class PaymentRepository {
@@ -37,14 +38,29 @@ class PaymentRepository {
     }
   }
 
-  Future<List<Map<String, dynamic>>> getPaymentMethods() async {
+  Future<List<Map<String, dynamic>>> getPaymentMethods({String? type}) async {
     try {
-      final methods = await paymentDataProvider.getPaymentMethods();
+      final methods = await paymentDataProvider.getPaymentMethods(type: type);
       final enabled = methods.where((method) => method['enabled'] == true);
       return filterAllowedPaymentMethods(enabled.toList());
     } catch (e) {
       throw Exception('Failed to get payment methods: $e');
     }
+  }
+
+  /// Finds a usable QPay method: wallet registry → delivery → untyped.
+  Future<Map<String, dynamic>?> resolveUsableQpay() async {
+    for (final type in ['wallet', 'delivery', null]) {
+      try {
+        final methods = await getPaymentMethods(type: type);
+        for (final method in methods) {
+          if (canInitiateQpay(method)) return method;
+        }
+      } catch (_) {
+        continue;
+      }
+    }
+    return null;
   }
 
   /// Service convenience payment (POST /api/payments/service/...).

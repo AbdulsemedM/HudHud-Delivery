@@ -15,6 +15,7 @@ enum PaymentInitiateUiMode {
 const Set<String> kAllowedPaymentMethodCodes = {
   'wallet',
   'cash_on_delivery',
+  'qpay',
   'waafi',
   'edahab',
   'sahay',
