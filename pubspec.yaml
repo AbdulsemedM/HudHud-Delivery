@@ -26,6 +26,9 @@ dependencies:
   # HTTP Client
   dio: ^5.4.0
 
+  # QPay QR rendering
+  qr_flutter: ^4.1.0
+
   # URLs (support mailto / tel)
   url_launcher: ^6.3.1
   # Hosted payment page (Waafi HPP)
@@ -74,7 +77,6 @@ dependencies:
   just_audio: ^0.9.42
   audio_session: ^0.1.25
   cached_network_image: ^3.4.1
-  qr_flutter: ^4.1.0
   flutter_linkify: ^6.0.0
   shorebird_code_push: ^2.0.7
   firebase_remote_config: ^5.5.0

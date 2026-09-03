@@ -102,6 +102,10 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
   static const _minSheetSize = 0.28;
   double _sheetExtent = _initialSheetSize;
 
+  /// Fixed footer: Edit Details + Look for Courier (always visible above home indicator).
+  static const double _footerContentHeight =
+      8 + 48 + AppColors.spaceSM + AppColors.buttonHeightMD + 12;
+
   /// After create succeeds, keep delivery so pay can retry without re-creating.
   CreateDeliveryResult? _pendingCreatedDelivery;
 
@@ -944,11 +948,15 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
           final theme = Theme.of(context);
           final borderColor = HomeColors.borderOf(context);
           return Scaffold(
+            resizeToAvoidBottomInset: false,
             backgroundColor: HomeColors.backgroundOf(context),
             body: LayoutBuilder(
               builder: (context, constraints) {
+                final bottomInset = MediaQuery.paddingOf(context).bottom;
+                final footerHeight = _footerContentHeight + bottomInset;
+                final sheetAreaHeight = constraints.maxHeight - footerHeight;
                 final mapBottomPadding =
-                    constraints.maxHeight * _sheetExtent;
+                    footerHeight + sheetAreaHeight * _sheetExtent;
                 return NotificationListener<DraggableScrollableNotification>(
                   onNotification: _onSheetNotification,
                   child: Stack(
@@ -1020,13 +1028,16 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                         ),
                       ),
                     ),
-                    DraggableScrollableSheet(
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: footerHeight,
+                      child: DraggableScrollableSheet(
                       initialChildSize: _initialSheetSize,
                       minChildSize: _minSheetSize,
                       maxChildSize: 0.85,
                       builder: (context, scrollController) {
-                        final bottomInset =
-                            MediaQuery.paddingOf(context).bottom;
                         return Container(
                           decoration: BoxDecoration(
                             color: HomeColors.surfaceOf(context),
@@ -1087,7 +1098,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                                     20,
                                     AppColors.spaceMD,
                                     20,
-                                    8,
+                                    AppColors.spaceMD,
                                   ),
                                   child: Column(
                                     crossAxisAlignment:
@@ -1148,72 +1159,23 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                                   ),
                                 ),
                               ),
-                              Padding(
-                                padding: EdgeInsets.fromLTRB(
-                                  20,
-                                  8,
-                                  20,
-                                  12 + bottomInset,
-                                ),
-                                child: Column(
-                                  children: [
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      child: const Text(
-                                        'Edit Details',
-                                        style: TextStyle(
-                                          color: HomeColors.violet,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: AppColors.spaceSM),
-                                    SizedBox(
-                                      width: double.infinity,
-                                      height: AppColors.buttonHeightMD,
-                                      child: ElevatedButton(
-                                        onPressed: (_isLoadingRequest ||
-                                                !_hasServerEstimate)
-                                            ? null
-                                            : _createDeliveryRequest,
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: HomeColors.violet,
-                                          foregroundColor: Theme.of(context)
-                                              .colorScheme
-                                              .onSecondary,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              AppColors.radiusLG,
-                                            ),
-                                          ),
-                                        ),
-                                        child: _isLoadingRequest
-                                            ? const SizedBox(
-                                                width: 24,
-                                                height: 24,
-                                                child:
-                                                    CircularProgressIndicator(
-                                                  strokeWidth: 2,
-                                                  color: Colors.white,
-                                                ),
-                                              )
-                                            : const Text(
-                                                'Look for Courier',
-                                                style: TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                              ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
                             ],
                           ),
                         );
                       },
+                    ),
+                    ),
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: _ConfirmDetailsFooter(
+                        bottomInset: bottomInset,
+                        isLoadingRequest: _isLoadingRequest,
+                        hasServerEstimate: _hasServerEstimate,
+                        onEditDetails: () => Navigator.pop(context),
+                        onLookForCourier: _createDeliveryRequest,
+                      ),
                     ),
                   ],
                 ),
@@ -1312,6 +1274,91 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
           if (mounted) _fitBounds();
         });
       },
+    );
+  }
+}
+
+class _ConfirmDetailsFooter extends StatelessWidget {
+  const _ConfirmDetailsFooter({
+    required this.bottomInset,
+    required this.isLoadingRequest,
+    required this.hasServerEstimate,
+    required this.onEditDetails,
+    required this.onLookForCourier,
+  });
+
+  final double bottomInset;
+  final bool isLoadingRequest;
+  final bool hasServerEstimate;
+  final VoidCallback onEditDetails;
+  final VoidCallback onLookForCourier;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: HomeColors.surfaceOf(context),
+      elevation: 8,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: HomeColors.surfaceOf(context),
+          border: Border(
+            top: BorderSide(color: HomeColors.borderOf(context)),
+          ),
+        ),
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(20, 8, 20, 12 + bottomInset),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextButton(
+                onPressed: onEditDetails,
+                child: const Text(
+                  'Edit Details',
+                  style: TextStyle(
+                    color: HomeColors.violet,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppColors.spaceSM),
+              SizedBox(
+                width: double.infinity,
+                height: AppColors.buttonHeightMD,
+                child: ElevatedButton(
+                  onPressed: (isLoadingRequest || !hasServerEstimate)
+                      ? null
+                      : onLookForCourier,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: HomeColors.violet,
+                    foregroundColor:
+                        Theme.of(context).colorScheme.onSecondary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppColors.radiusLG),
+                    ),
+                  ),
+                  child: isLoadingRequest
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'Look for Courier',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

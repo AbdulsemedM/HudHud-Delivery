@@ -100,6 +100,51 @@ void main() {
       final result = PaymentStatusResult.fromJson(json);
       expect(result.isWalletTopUpTerminalFailure, isTrue);
     });
+
+    test('wallet top-up credited settlement is settled', () {
+      const json = {
+        'success': true,
+        'data': {
+          'status': 'completed',
+          'payment': {'id': 901, 'status': 'completed'},
+          'qpay_status': 'COMPLETED',
+          'wallet_topup_settlement': 'credited',
+        },
+      };
+
+      final result = PaymentStatusResult.fromJson(json);
+      expect(isWalletTopUpSettled(result), isTrue);
+      expect(shouldKeepPollingWalletTopUp(result), isFalse);
+    });
+
+    test('awaiting_provider_amount with completed is not settled', () {
+      const json = {
+        'success': true,
+        'data': {
+          'status': 'completed',
+          'payment': {'id': 901, 'status': 'completed'},
+          'wallet_topup_settlement': 'awaiting_provider_amount',
+        },
+      };
+
+      final result = PaymentStatusResult.fromJson(json);
+      expect(isWalletTopUpSettled(result), isFalse);
+      expect(shouldKeepPollingWalletTopUp(result), isTrue);
+    });
+
+    test('qpay EXPIRED with pending payment is terminal failure', () {
+      const json = {
+        'success': true,
+        'data': {
+          'payment': {'id': 901, 'status': 'pending'},
+          'qpay_status': 'EXPIRED',
+        },
+      };
+
+      final result = PaymentStatusResult.fromJson(json);
+      expect(isQPayTerminalFailure(result), isTrue);
+      expect(shouldKeepPollingWalletTopUp(result), isFalse);
+    });
   });
 
   group('payment status helpers', () {

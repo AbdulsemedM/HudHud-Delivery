@@ -37,6 +37,29 @@ class PaymentDataProvider {
     return [];
   }
 
+  /// GET /api/payments/methods - registry with type/currency filters.
+  Future<List<Map<String, dynamic>>> getPaymentMethodsRegistry({
+    String? type,
+    String? currency,
+  }) async {
+    final query = <String, dynamic>{};
+    if (type != null && type.isNotEmpty) query['type'] = type;
+    if (currency != null && currency.isNotEmpty) query['currency'] = currency;
+
+    final response = await apiService.get(
+      '${ApiConstants.baseUrl}${ApiConstants.paymentsMethods}',
+      queryParameters: query.isEmpty ? null : query,
+    );
+    final data = response.data;
+
+    if (data == null || data is! Map) {
+      return [];
+    }
+
+    final map = Map<String, dynamic>.from(data);
+    return parsePaymentMethodsList(map['data']);
+  }
+
   Future<Map<String, dynamic>> initiatePayment({
     required String paymentMethodCode,
     required String type,

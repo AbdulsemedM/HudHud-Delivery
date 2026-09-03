@@ -25,9 +25,13 @@ Future<bool> launchSupportPhone() async {
   if (n.isEmpty) return false;
 
   // Prefer Uri.parse so short codes stay as tel:9491 (not oddly encoded).
+  // iOS: try tel: / tel:// before telprompt: — telprompt is flaky on some iOS versions.
   final candidates = <Uri>[
-    if (!kIsWeb && Platform.isIOS) Uri.parse('telprompt:$n'),
     Uri.parse('tel:$n'),
+    if (!kIsWeb && Platform.isIOS) ...[
+      Uri.parse('tel://$n'),
+      Uri.parse('telprompt:$n'),
+    ],
   ];
 
   for (final uri in candidates) {

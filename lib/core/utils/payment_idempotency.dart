@@ -35,9 +35,12 @@ String createPaymentIdempotencyKey({
   return '$normalizedType-$entityId-attempt-${generateUuidV4()}';
 }
 
-/// Wallet mutation keys per handoff: `topup-<uuid>` / `withdraw-<uuid>`.
+/// Wallet mutation keys: `wallet-topup-<uuid>` / `withdraw-<uuid>`.
 String createWalletIdempotencyKey({required String operation}) {
   final op = operation.trim().isEmpty ? 'wallet' : operation.trim();
+  if (op == 'topup') {
+    return 'wallet-topup-${generateUuidV4()}';
+  }
   return '$op-${generateUuidV4()}';
 }
 
@@ -87,8 +90,15 @@ bool isIdempotencyConflictError(Object error) {
     final code = error.code?.toUpperCase() ?? '';
     if (code.startsWith('IDEMPOTENCY')) return true;
   }
-  final text = error.toString().toUpperCase();
-  return text.contains('IDEMPOTENCY');
+  final text = error is ApiException ? error.message : error.toString();
+  final lower = text.toLowerCase();
+  if (lower.contains('idempotency') &&
+      (lower.contains('already used') ||
+          lower.contains('conflict') ||
+          lower.contains('different payload'))) {
+    return true;
+  }
+  return text.toUpperCase().contains('IDEMPOTENCY');
 }
 
 /// True for timeouts / connection failures where the same Idempotency-Key

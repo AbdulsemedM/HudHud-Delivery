@@ -3,9 +3,12 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import '../../../../core/api/api_service.dart';
 import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/payment_poller.dart';
+import '../../../../core/utils/qpay_qr_payload.dart';
 import '../../../checkout/data/models/create_order_result.dart';
 import '../../../courier/data/models/create_delivery_result.dart';
 import '../../../courier/presentation/theme/courier_theme.dart';
@@ -47,20 +50,18 @@ class PaymentInitiateResultScreen extends StatefulWidget {
 }
 
 class _PaymentInitiateResultScreenState
-    extends State<PaymentInitiateResultScreen> {
-  static const _pollInterval = Duration(seconds: 3);
-  static const _defaultTimeout = Duration(minutes: 5);
-
+    extends State<PaymentInitiateResultScreen> with WidgetsBindingObserver {
   late final PaymentRepository _paymentRepository;
   Timer? _pollTimer;
   PaymentStatusResult? _polledStatus;
   var _checking = false;
   var _timedOut = false;
-  DateTime? _pollDeadline;
+  DateTime? _pollStartedAt;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _paymentRepository = widget.paymentRepository ??
         PaymentRepository(
           paymentDataProvider: PaymentDataProvider(
@@ -89,12 +90,21 @@ class _PaymentInitiateResultScreenState
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _stopPolling();
     super.dispose();
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && _isPollingActive) {
+      _checkStatus(manual: false);
+    }
+  }
+
   PaymentInitiateResult get result => widget.result;
   String get orderId => widget.orderId;
+  bool get _isWalletTopUp => orderId == 'wallet-topup';
   bool get _isDeliveryContext => widget.trackingNumber != null;
 
   String get _entityLabel => _isDeliveryContext ? 'Delivery' : 'Order';
@@ -107,6 +117,9 @@ class _PaymentInitiateResultScreenState
 
   bool get _isTerminalSuccess {
     final polled = _polledStatus;
+    if (_isWalletTopUp && polled != null && polled.isSuccess) {
+      return isWalletTopUpSettled(polled);
+    }
     if (polled != null && polled.isSuccess && polled.isCompleted) return true;
     if (!result.isSuccess) return false;
     if (result.uiMode != PaymentInitiateUiMode.success) return false;
@@ -116,6 +129,13 @@ class _PaymentInitiateResultScreenState
         result.nextAction == null;
   }
 
+  bool _shouldStopPolling(PaymentStatusResult status) {
+    if (_isWalletTopUp) {
+      return isWalletTopUpSettled(status) || isQPayTerminalFailure(status);
+    }
+    return status.isTerminal;
+  }
+
   bool get _shouldPoll => shouldPollPaymentStatus(
         isSuccess: result.isSuccess,
         nextAction: result.nextAction,
@@ -123,28 +143,31 @@ class _PaymentInitiateResultScreenState
         method: result.method,
       );
 
-  bool get _isPollingActive =>
-      _shouldPoll && (_polledStatus == null || !_polledStatus!.isTerminal);
+  bool get _isPollingActive {
+    if (!_shouldPoll || result.paymentId == null) return false;
+    final polled = _polledStatus;
+    if (polled == null) return true;
+    if (_isWalletTopUp) return shouldKeepPollingWalletTopUp(polled);
+    return !polled.isTerminal;
+  }
 
   void _maybeStartPolling() {
     if (!_shouldPoll || result.paymentId == null) return;
-    _pollDeadline = _resolveDeadline();
+    _pollStartedAt = DateTime.now();
     _checkStatus(manual: false);
-    _pollTimer?.cancel();
-    _pollTimer = Timer.periodic(_pollInterval, (_) {
-      if (!mounted) return;
-      _checkStatus(manual: false);
-    });
+    _scheduleNextPoll();
   }
 
-  DateTime _resolveDeadline() {
-    final now = DateTime.now();
-    final defaultEnd = now.add(_defaultTimeout);
-    final expiresRaw = result.expiresAt;
-    if (expiresRaw == null || expiresRaw.isEmpty) return defaultEnd;
-    final expires = DateTime.tryParse(expiresRaw);
-    if (expires == null) return defaultEnd;
-    return expires.isBefore(defaultEnd) ? expires : defaultEnd;
+  void _scheduleNextPoll() {
+    _pollTimer?.cancel();
+    final started = _pollStartedAt;
+    if (started == null || !_isPollingActive) return;
+    final interval = PaymentPollSchedule.nextInterval(startedAt: started);
+    _pollTimer = Timer(interval, () {
+      if (!mounted) return;
+      _checkStatus(manual: false);
+      if (_isPollingActive) _scheduleNextPoll();
+    });
   }
 
   void _stopPolling() {
@@ -156,11 +179,11 @@ class _PaymentInitiateResultScreenState
     // Poll status only — never call payments/initiate again from this screen.
     final paymentId = result.paymentId;
     if (paymentId == null || paymentId <= 0) return;
-    if (_polledStatus?.isTerminal == true) return;
+    final polled = _polledStatus;
+    if (polled != null && _shouldStopPolling(polled)) return;
 
-    if (!manual &&
-        _pollDeadline != null &&
-        DateTime.now().isAfter(_pollDeadline!)) {
+    final started = _pollStartedAt ?? DateTime.now();
+    if (!manual && PaymentPollSchedule.isPastDeadline(startedAt: started)) {
       _stopPolling();
       if (mounted) {
         setState(() {
@@ -173,12 +196,7 @@ class _PaymentInitiateResultScreenState
 
     if (manual && _timedOut) {
       _timedOut = false;
-      _pollDeadline = DateTime.now().add(_defaultTimeout);
-      _pollTimer?.cancel();
-      _pollTimer = Timer.periodic(_pollInterval, (_) {
-        if (!mounted) return;
-        _checkStatus(manual: false);
-      });
+      _pollStartedAt = DateTime.now();
     }
 
     if (_checking) return;
@@ -191,12 +209,15 @@ class _PaymentInitiateResultScreenState
         _polledStatus = status;
         _checking = false;
       });
-      if (status.isTerminal) {
+      if (_shouldStopPolling(status)) {
         _stopPolling();
+      } else if (_isPollingActive) {
+        _scheduleNextPoll();
       }
     } catch (_) {
       if (!mounted) return;
       setState(() => _checking = false);
+      if (_isPollingActive) _scheduleNextPoll();
       if (manual) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -206,6 +227,32 @@ class _PaymentInitiateResultScreenState
         );
       }
     }
+  }
+
+  void _finishScreen() {
+    if (_isWalletTopUp) {
+      if (_isTerminalSuccess) {
+        Navigator.of(context).pop(true);
+        return;
+      }
+      final polled = _polledStatus;
+      if (polled != null && isQPayTerminalFailure(polled)) {
+        Navigator.of(context).pop(false);
+        return;
+      }
+      Navigator.of(context).pop(null);
+      return;
+    }
+
+    final success =
+        result.isSuccess || (_polledStatus?.isCompleted ?? false);
+    if (success &&
+        _isTerminalSuccess &&
+        widget.onTerminalSuccess != null) {
+      widget.onTerminalSuccess!(context);
+      return;
+    }
+    Navigator.of(context).popUntil((route) => route.isFirst);
   }
 
   @override
@@ -277,18 +324,7 @@ class _PaymentInitiateResultScreenState
                                 BorderRadius.circular(AppColors.radiusLG),
                           ),
                         ),
-                        onPressed: () {
-                          final success = result.isSuccess ||
-                              (_polledStatus?.isCompleted ?? false);
-                          if (success &&
-                              _isTerminalSuccess &&
-                              widget.onTerminalSuccess != null) {
-                            widget.onTerminalSuccess!(context);
-                            return;
-                          }
-                          Navigator.of(context)
-                              .popUntil((route) => route.isFirst);
-                        },
+                        onPressed: _finishScreen,
                         child: Text(
                           () {
                             final success = result.isSuccess ||
@@ -330,43 +366,83 @@ class _PaymentInitiateResultScreenState
           ),
         ];
 
-    if (polled != null && polled.isSuccess && polled.isTerminal) {
-      if (polled.isCompleted) {
+    if (polled != null && polled.isSuccess) {
+      if (_isWalletTopUp && isWalletTopUpSettled(polled)) {
         return _StatusContent(
           icon: Icons.check_circle,
           iconColor: HomeColors.violet,
-          title: 'Payment successful',
-          message: 'Your payment was confirmed.',
+          title: 'Wallet credited',
+          message: 'Your wallet balance has been updated.',
           children: [
-            if (polled.relatedOrderStatus != null)
-              _InfoRow(label: _statusLabel, value: polled.relatedOrderStatus!),
-            if (polled.transactionId != null)
-              _InfoRow(label: 'Transaction', value: polled.transactionId!),
-            if (polled.reference != null)
-              _InfoRow(label: 'Reference', value: polled.reference!),
             if (polled.amount != null)
               _InfoRow(
                 label: 'Amount',
                 value: '${polled.amount} ${polled.currency ?? ''}'.trim(),
               ),
-            ...entityRows(
-              relatedId: polled.relatedOrderId?.toString(),
-            ),
+            if (polled.transactionId != null)
+              _InfoRow(label: 'Transaction', value: polled.transactionId!),
+            if (polled.reference != null)
+              _InfoRow(label: 'Reference', value: polled.reference!),
           ],
         );
       }
-      return _StatusContent(
-        icon: Icons.error_outline,
-        iconColor: AppColors.errorColor,
-        title: 'Payment ${polled.status ?? 'failed'}',
-        message:
-            polled.message ?? 'Payment was not completed. Please try again.',
-        children: [
-          if (polled.relatedOrderStatus != null)
-            _InfoRow(label: _statusLabel, value: polled.relatedOrderStatus!),
-          ...entityRows(),
-        ],
-      );
+      if (_isWalletTopUp && isQPayTerminalFailure(polled)) {
+        final expired = polled.qpayStatus?.toUpperCase() == 'EXPIRED';
+        return _StatusContent(
+          icon: Icons.error_outline,
+          iconColor: AppColors.errorColor,
+          title: expired ? 'QR expired' : 'Payment failed',
+          message: expired
+              ? 'This QR payment expired. Start a new attempt.'
+              : (polled.message ??
+                  'Payment was not completed. Please try again.'),
+          children: [
+            if (polled.amount != null)
+              _InfoRow(
+                label: 'Amount',
+                value: '${polled.amount} ${polled.currency ?? ''}'.trim(),
+              ),
+          ],
+        );
+      }
+      if (!_isWalletTopUp && polled.isTerminal) {
+        if (polled.isCompleted) {
+          return _StatusContent(
+            icon: Icons.check_circle,
+            iconColor: HomeColors.violet,
+            title: 'Payment successful',
+            message: 'Your payment was confirmed.',
+            children: [
+              if (polled.relatedOrderStatus != null)
+                _InfoRow(label: _statusLabel, value: polled.relatedOrderStatus!),
+              if (polled.transactionId != null)
+                _InfoRow(label: 'Transaction', value: polled.transactionId!),
+              if (polled.reference != null)
+                _InfoRow(label: 'Reference', value: polled.reference!),
+              if (polled.amount != null)
+                _InfoRow(
+                  label: 'Amount',
+                  value: '${polled.amount} ${polled.currency ?? ''}'.trim(),
+                ),
+              ...entityRows(
+                relatedId: polled.relatedOrderId?.toString(),
+              ),
+            ],
+          );
+        }
+        return _StatusContent(
+          icon: Icons.error_outline,
+          iconColor: AppColors.errorColor,
+          title: 'Payment ${polled.status ?? 'failed'}',
+          message:
+              polled.message ?? 'Payment was not completed. Please try again.',
+          children: [
+            if (polled.relatedOrderStatus != null)
+              _InfoRow(label: _statusLabel, value: polled.relatedOrderStatus!),
+            ...entityRows(),
+          ],
+        );
+      }
     }
 
     if (!result.isSuccess) {
@@ -449,6 +525,7 @@ class _PaymentInitiateResultScreenState
         return _QrContent(
           result: result,
           orderId: orderId,
+          isQPay: _isWalletTopUp || result.method == 'qpay',
           entityLabel: _entityLabel,
           statusLabel: _statusLabel,
           expectedStatus: _expectedStatus(result.method),
@@ -625,6 +702,7 @@ class _StatusContent extends StatelessWidget {
 class _QrContent extends StatelessWidget {
   final PaymentInitiateResult result;
   final String orderId;
+  final bool isQPay;
   final String entityLabel;
   final String statusLabel;
   final String expectedStatus;
@@ -634,6 +712,7 @@ class _QrContent extends StatelessWidget {
   const _QrContent({
     required this.result,
     required this.orderId,
+    this.isQPay = false,
     required this.entityLabel,
     required this.statusLabel,
     required this.expectedStatus,
@@ -644,22 +723,38 @@ class _QrContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    Uint8List? imageBytes;
-    final raw = result.qrCodeBase64;
-    if (raw != null && raw.isNotEmpty) {
-      try {
-        imageBytes = base64Decode(raw);
-      } catch (_) {}
-    }
+    final qrRaw = result.qrCodeRaw ?? result.qrCodeBase64;
+    final payload = parseQpayQrPayload(qrRaw);
 
     return SingleChildScrollView(
       child: Column(
         children: [
           SizedBox(height: AppColors.spaceMD),
+          if (isQPay) ...[
+            Text(
+              'QPay QR',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: HomeColors.textPrimaryOf(context),
+              ),
+            ),
+            SizedBox(height: AppColors.spaceSM),
+            Text(
+              'Accepts CBE, Telebirr, and all Banks in Ethiopia',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: HomeColors.textMutedOf(context),
+              ),
+            ),
+            SizedBox(height: AppColors.spaceSM),
+          ],
           Text(
-            result.customerMessage ??
-                result.message ??
-                'Scan the QR code to complete payment.',
+            isQPay
+                ? 'Scan with CBE, Telebirr, or any Ethiopian bank app. Do not close this screen until payment is confirmed.'
+                : (result.customerMessage ??
+                    result.message ??
+                    'Scan the QR code to complete payment.'),
             textAlign: TextAlign.center,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: HomeColors.textSecondaryOf(context),
@@ -667,18 +762,7 @@ class _QrContent extends StatelessWidget {
             ),
           ),
           SizedBox(height: AppColors.spaceLG),
-          if (imageBytes != null)
-            Container(
-              padding: EdgeInsets.all(AppColors.spaceMD),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(AppColors.radiusLG),
-                border: Border.all(color: HomeColors.borderOf(context)),
-              ),
-              child: Image.memory(imageBytes, width: 260, height: 260),
-            )
-          else
-            Icon(Icons.qr_code_2, size: 120, color: HomeColors.violet),
+          _QpayQrImage(payload: payload),
           SizedBox(height: AppColors.spaceLG),
           if (extraChildren.isNotEmpty) ...extraChildren,
           Container(
@@ -692,25 +776,93 @@ class _QrContent extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _InfoRow(label: statusLabel, value: expectedStatus),
+                if (!isQPay)
+                  _InfoRow(label: statusLabel, value: expectedStatus),
                 if (result.amount != null)
                   _InfoRow(
                     label: 'Amount',
                     value: '${result.amount} ${result.currency ?? ''}'.trim(),
                   ),
                 if (result.expiresAt != null)
-                  _InfoRow(label: 'Expires', value: result.expiresAt!),
+                  _InfoRow(
+                    label: isQPay ? 'QR valid until' : 'Expires',
+                    value: result.expiresAt!,
+                  ),
                 if (result.qrId != null)
                   _InfoRow(label: 'QR ID', value: result.qrId!),
                 if (trackingNumber != null && trackingNumber!.isNotEmpty)
                   _InfoRow(label: 'Tracking', value: trackingNumber!),
-                _InfoRow(label: entityLabel, value: '#$orderId'),
+                if (!isQPay)
+                  _InfoRow(label: entityLabel, value: '#$orderId'),
               ],
             ),
           ),
         ],
       ),
     );
+  }
+}
+
+class _QpayQrImage extends StatelessWidget {
+  const _QpayQrImage({required this.payload});
+
+  final QpayQrPayload payload;
+
+  @override
+  Widget build(BuildContext context) {
+    final frame = BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(AppColors.radiusLG),
+      border: Border.all(color: HomeColors.borderOf(context)),
+    );
+
+    if (payload.isEmpty) {
+      return Icon(Icons.qr_code_2, size: 120, color: HomeColors.violet);
+    }
+
+    switch (payload.kind) {
+      case QpayQrDisplayKind.qrValue:
+        return Container(
+          padding: EdgeInsets.all(AppColors.spaceMD),
+          decoration: frame,
+          child: QrImageView(
+            data: payload.value,
+            version: QrVersions.auto,
+            size: 260,
+            backgroundColor: Colors.white,
+          ),
+        );
+      case QpayQrDisplayKind.imageUrl:
+        return Container(
+          padding: EdgeInsets.all(AppColors.spaceMD),
+          decoration: frame,
+          child: Image.network(
+            payload.value,
+            width: 260,
+            height: 260,
+            fit: BoxFit.contain,
+            errorBuilder: (_, __, ___) =>
+                Icon(Icons.qr_code_2, size: 120, color: HomeColors.violet),
+          ),
+        );
+      case QpayQrDisplayKind.dataUrl:
+      case QpayQrDisplayKind.rawBase64:
+        final base64 = base64ImageBytesFromQrPayload(payload);
+        Uint8List? imageBytes;
+        if (base64 != null && base64.isNotEmpty) {
+          try {
+            imageBytes = base64Decode(base64);
+          } catch (_) {}
+        }
+        if (imageBytes == null) {
+          return Icon(Icons.qr_code_2, size: 120, color: HomeColors.violet);
+        }
+        return Container(
+          padding: EdgeInsets.all(AppColors.spaceMD),
+          decoration: frame,
+          child: Image.memory(imageBytes, width: 260, height: 260),
+        );
+    }
   }
 }
 

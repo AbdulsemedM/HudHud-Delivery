@@ -9,6 +9,38 @@ import '../api/api_service.dart';
 
 typedef PaymentStatusCallback = void Function(PaymentStatusResult result);
 
+/// Adaptive polling schedule for wallet top-up / QPay status checks.
+class PaymentPollSchedule {
+  const PaymentPollSchedule._();
+
+  static const fastInterval = Duration(seconds: 3);
+  static const slowInterval = Duration(seconds: 10);
+  static const fastPhase = Duration(seconds: 30);
+  static const totalDuration = Duration(minutes: 5);
+
+  static DateTime deadlineFrom(DateTime startedAt) =>
+      startedAt.add(totalDuration);
+
+  static Duration nextInterval({
+    required DateTime startedAt,
+    DateTime? now,
+  }) {
+    final current = now ?? DateTime.now();
+    if (current.difference(startedAt) < fastPhase) {
+      return fastInterval;
+    }
+    return slowInterval;
+  }
+
+  static bool isPastDeadline({
+    required DateTime startedAt,
+    DateTime? now,
+  }) {
+    final current = now ?? DateTime.now();
+    return !current.isBefore(deadlineFrom(startedAt));
+  }
+}
+
 /// Adaptive poll schedule for wallet top-ups: 3s for 30s, then 10s up to 5 min.
 class PaymentPoller {
   PaymentPoller({
@@ -26,11 +58,6 @@ class PaymentPoller {
               ),
             ),
         _binding = binding ?? WidgetsBinding.instance;
-
-  static const _fastInterval = Duration(seconds: 3);
-  static const _slowInterval = Duration(seconds: 10);
-  static const _fastPhase = Duration(seconds: 30);
-  static const _maxDuration = Duration(minutes: 5);
 
   final int paymentId;
   final PaymentStatusCallback onStatus;
@@ -70,15 +97,13 @@ class PaymentPoller {
 
   Duration _currentInterval() {
     final started = _startedAt ?? DateTime.now();
-    final elapsed = DateTime.now().difference(started);
-    if (elapsed < _fastPhase) return _fastInterval;
-    return _slowInterval;
+    return PaymentPollSchedule.nextInterval(startedAt: started);
   }
 
   Future<void> _tick() async {
     if (_stopped || _paused || _polling) return;
     final started = _startedAt ?? DateTime.now();
-    if (DateTime.now().difference(started) > _maxDuration) {
+    if (PaymentPollSchedule.isPastDeadline(startedAt: started)) {
       stop();
       onTimeout?.call();
       return;

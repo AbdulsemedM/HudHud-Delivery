@@ -30,6 +30,87 @@ void main() {
         filtered.map((m) => m['id']).toSet(),
         equals(kDefaultWalletFundingMethods.map((m) => m['id']).toSet()),
       );
+      expect(filtered.map((m) => m['id']), contains('qpay'));
+    });
+  });
+
+  group('QPay availability', () {
+    test('shows qpay when can_use is omitted (legacy API)', () {
+      expect(
+        isQPayMethodAvailable({'id': 'qpay', 'enabled': true}),
+        isTrue,
+      );
+    });
+
+    test('hides qpay when can_use is false', () {
+      expect(
+        isQPayMethodAvailable({'id': 'qpay', 'enabled': true, 'can_use': false}),
+        isFalse,
+      );
+    });
+
+    test('hides qpay when not configured', () {
+      expect(
+        isQPayMethodAvailable({
+          'id': 'qpay',
+          'enabled': true,
+          'can_use': true,
+          'availability_code': 'QPAY_NOT_CONFIGURED',
+        }),
+        isFalse,
+      );
+    });
+
+    test('shows qpay when explicitly usable', () {
+      expect(
+        isQPayMethodAvailable({
+          'id': 'qpay',
+          'enabled': true,
+          'can_use': true,
+        }),
+        isTrue,
+      );
+    });
+
+    test('applyQPayAvailabilityRules filters unavailable qpay', () {
+      final filtered = applyQPayAvailabilityRules([
+        {'id': 'waafi', 'enabled': true},
+        {'id': 'qpay', 'enabled': true, 'can_use': false},
+        {
+          'id': 'qpay',
+          'enabled': true,
+          'can_use': true,
+        },
+      ]);
+      expect(filtered.length, 2);
+      expect(filtered.any((m) => m['id'] == 'waafi'), isTrue);
+      expect(
+        filtered.where((m) => m['id'] == 'qpay').length,
+        1,
+      );
+    });
+
+    test('sortWalletFundingMethods puts qpay first then ebirr coop/kaafi', () {
+      final sorted = sortWalletFundingMethods([
+        {'id': 'waafi', 'name': 'Waafi'},
+        {'id': 'ebirr_kaafi', 'name': 'Kaafi'},
+        {'id': 'qpay', 'name': 'QPay'},
+        {'id': 'ebirr_coop', 'name': 'Coop'},
+      ]);
+      expect(sorted.map((m) => m['id']).toList(), [
+        'qpay',
+        'ebirr_coop',
+        'ebirr_kaafi',
+        'waafi',
+      ]);
+    });
+
+    test('ensureQPayInWalletMethods injects qpay when API omits it', () {
+      final methods = ensureQPayInWalletMethods([
+        {'id': 'waafi', 'name': 'Waafi', 'enabled': true},
+      ]);
+      expect(methods.first['id'], 'qpay');
+      expect(methods.length, 2);
     });
   });
 

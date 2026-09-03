@@ -4,6 +4,7 @@ import '../../model/payment_initiate_result.dart';
 import '../../model/payment_status_result.dart';
 import '../../utils/qpay_method.dart';
 import '../../utils/service_payment_mapping.dart';
+import '../../../wallet/utils/wallet_funding_methods.dart';
 
 class PaymentRepository {
   final PaymentDataProvider paymentDataProvider;
@@ -61,6 +62,19 @@ class PaymentRepository {
       }
     }
     return null;
+  }
+
+  Future<List<Map<String, dynamic>>> getWalletFundingMethods(
+    String currency,
+  ) async {
+    return loadWalletFundingMethods(
+      fetchRegistry: ({String? type}) =>
+          paymentDataProvider.getPaymentMethodsRegistry(
+            type: type,
+            currency: currency,
+          ),
+      fetchLegacy: () => paymentDataProvider.getPaymentMethods(),
+    );
   }
 
   /// Service convenience payment (POST /api/payments/service/...).
