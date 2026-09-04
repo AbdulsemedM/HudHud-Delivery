@@ -53,7 +53,7 @@ android {
     defaultConfig {
         applicationId = "com.hudhud.userapp"
         minSdkVersion = flutter.minSdkVersion
-        targetSdk = 35
+        targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         manifestPlaceholders = [
