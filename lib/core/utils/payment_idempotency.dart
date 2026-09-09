@@ -35,6 +35,11 @@ String createPaymentIdempotencyKey({
   return '$normalizedType-$entityId-attempt-${generateUuidV4()}';
 }
 
+/// Stable key for one customer checkout action; reuse across network retries.
+String createOrderIdempotencyKey() {
+  return 'customer-order-${generateUuidV4()}';
+}
+
 /// Wallet mutation keys: `wallet-topup-<uuid>` / `withdraw-<uuid>`.
 String createWalletIdempotencyKey({required String operation}) {
   final op = operation.trim().isEmpty ? 'wallet' : operation.trim();

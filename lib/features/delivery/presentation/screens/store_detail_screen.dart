@@ -184,22 +184,47 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
     return null;
   }
 
-  void _addToCart(String productId) {
+  Future<void> _addToCart(String productId) async {
     final product = _productById(productId);
-    if (product != null && product.canOrder) {
-      _cart.addProduct(product);
+    if (product == null || !product.canOrder) return;
+    var result = _cart.addProduct(product);
+    if (result == CartAddResult.differentVendor) {
+      final replace = await _confirmReplaceCart();
+      if (!mounted || replace != true) return;
+      result = _cart.addProduct(product, replaceIfDifferentVendor: true);
     }
+  }
+
+  Future<bool?> _confirmReplaceCart() {
+    final l10n = context.l10n;
+    return showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.cartDifferentVendorTitle),
+        content: Text(l10n.cartDifferentVendorMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cartKeepCurrentAction),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.cartReplaceAction),
+          ),
+        ],
+      ),
+    );
   }
 
   void _removeFromCart(String productId) {
     _cart.removeProduct(productId);
   }
 
-  void _incrementQuantity(String productId) {
+  Future<void> _incrementQuantity(String productId) async {
     final product = _productById(productId);
     if (product != null && !product.canOrder) return;
     if (_cart.quantityFor(int.tryParse(productId)) == 0 && product != null) {
-      _cart.addProduct(product);
+      await _addToCart(productId);
       return;
     }
     _cart.increment(productId);
@@ -513,7 +538,7 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'ETB${_totalPrice.toStringAsFixed(1)}',
+                    'ETB ${_totalPrice.toStringAsFixed(1)}',
                     style: const TextStyle(
                       color: AppColors.lightOnPrimary,
                       fontSize: 16,

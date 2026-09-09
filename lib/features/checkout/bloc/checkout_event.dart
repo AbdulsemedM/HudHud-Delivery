@@ -15,6 +15,7 @@ class CreateOrderEvent extends CheckoutEvent {
   final String? notes;
   final String? couponCode;
   final String serviceType;
+  final String? idempotencyKey;
 
   CreateOrderEvent({
     required this.vendorId,
@@ -29,6 +30,7 @@ class CreateOrderEvent extends CheckoutEvent {
     this.notes,
     this.couponCode,
     this.serviceType = 'restaurant',
+    this.idempotencyKey,
   });
 }
 

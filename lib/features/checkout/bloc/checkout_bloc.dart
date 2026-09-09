@@ -33,6 +33,7 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
         couponCode: event.couponCode,
         serviceType: event.serviceType,
         notes: event.notes,
+        idempotencyKey: event.idempotencyKey,
       );
 
       if (result['success'] == true) {

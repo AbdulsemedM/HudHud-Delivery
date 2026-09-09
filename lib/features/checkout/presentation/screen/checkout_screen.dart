@@ -341,7 +341,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 'delivery_location': _deliveryAddress,
                 'delivery_latitude': _deliveryLatitude!,
                 'delivery_longitude': _deliveryLongitude!,
-                'service_type': 'delivery',
+                'service_type': 'restaurant',
                 'notes': _notesController.text.trim().isEmpty
                     ? null
                     : _notesController.text.trim(),

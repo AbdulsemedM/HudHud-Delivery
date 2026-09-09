@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -217,6 +218,14 @@ void pushOrderDetailsById(
   if (!context.mounted) return;
   final nav = Navigator.of(context);
   final repo = context.read<OrdersRepository>();
+  // Refresh server state before opening so push payloads are not shown stale.
+  unawaited(() async {
+    try {
+      await repo.getOrderById(orderId);
+    } catch (_) {
+      // Screen will surface the error / retry UI.
+    }
+  }());
   nav.push(
     MaterialPageRoute<void>(
       builder: (c) => BlocProvider(

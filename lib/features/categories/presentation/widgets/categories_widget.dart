@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/money_format.dart';
 import '../../../home/presentation/theme/home_colors.dart';
 import '../../model/categories_products_model.dart';
 import '../../../wishlist/presentation/widgets/wishlist_toggle_button.dart';
@@ -427,7 +428,7 @@ class ProductDetailsModal extends StatelessWidget {
                     if (product.discount_price != null &&
                         product.discount_price!.isNotEmpty) ...[
                       Text(
-                        '\$${product.discount_price}',
+                        formatEtbPriceString(product.discount_price),
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -436,7 +437,7 @@ class ProductDetailsModal extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        '\$${product.price ?? '0'}',
+                        formatEtbPriceString(product.price),
                         style: const TextStyle(
                           fontSize: 16,
                           decoration: TextDecoration.lineThrough,
@@ -445,7 +446,7 @@ class ProductDetailsModal extends StatelessWidget {
                       ),
                     ] else ...[
                       Text(
-                        '\$${product.price ?? '0'}',
+                        formatEtbPriceString(product.price),
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -1087,7 +1088,7 @@ class ProductCard extends StatelessWidget {
                             if (product.discount_price != null &&
                                 product.discount_price!.isNotEmpty) ...[
                               Text(
-                                '\$${product.discount_price}',
+                                formatEtbPriceString(product.discount_price),
                                 style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -1095,7 +1096,7 @@ class ProductCard extends StatelessWidget {
                                 ),
                               ),
                               Text(
-                                '\$${product.price ?? '0'}',
+                                formatEtbPriceString(product.price),
                                 style: const TextStyle(
                                   fontSize: 12,
                                   decoration: TextDecoration.lineThrough,
@@ -1104,7 +1105,7 @@ class ProductCard extends StatelessWidget {
                               ),
                             ] else ...[
                               Text(
-                                '\$${product.price ?? '0'}',
+                                formatEtbPriceString(product.price),
                                 style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -1246,7 +1247,7 @@ class ProductItem extends StatelessWidget {
                               if (discountPrice != null) ...[
                                 Flexible(
                                   child: Text(
-                                    'ETB$discountPrice',
+                                    formatEtbPriceString(discountPrice),
                                     style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
@@ -1258,7 +1259,7 @@ class ProductItem extends StatelessWidget {
                                 const SizedBox(width: 8),
                                 Flexible(
                                   child: Text(
-                                    'ETB$price',
+                                    formatEtbPriceString(price),
                                     style: const TextStyle(
                                       fontSize: 14,
                                       decoration: TextDecoration.lineThrough,
@@ -1270,7 +1271,7 @@ class ProductItem extends StatelessWidget {
                               ] else
                                 Flexible(
                                   child: Text(
-                                    'ETB$price',
+                                    formatEtbPriceString(price),
                                     style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,

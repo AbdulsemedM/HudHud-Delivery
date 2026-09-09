@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/utils/money_format.dart';
 import 'package:hudhud_delivery/features/handyman/data/data_provider/handyman_data_provider.dart';
 import 'package:hudhud_delivery/features/handyman/data/models/handyman_model.dart';
 import 'package:hudhud_delivery/features/handyman/data/repository/handyman_repository.dart';
@@ -298,7 +299,7 @@ class _HandymanDetailsScreenState extends State<HandymanDetailsScreen> {
             _DetailRow(
               theme: theme,
               label: l10n.handymanHourlyRateLabel,
-              value: '\$${profile.hourlyRate}',
+              value: formatEtbPriceString('${profile.hourlyRate}'),
             ),
           ],
           if (profile.experienceYears != null) ...[

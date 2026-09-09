@@ -83,16 +83,17 @@ class OrdersDataProvider {
     }
   }
 
-  /// Cancel an order
+  /// Cancel an order — POST /api/customer/orders/{id}/cancel
   Future<Map<String, dynamic>> cancelOrder(int orderId, {String? reason}) async {
     try {
       final body = {
-        if (reason != null) 'reason': reason,
+        if (reason != null && reason.trim().isNotEmpty) 'reason': reason.trim(),
       };
       
       final response = await apiService.post(
-        ApiConstants.replacePathParams(ApiConstants.cancelOrder, {'id': orderId}),
-        data: body,
+        ApiConstants.replacePathParams(
+            ApiConstants.customerOrderCancel, {'id': orderId}),
+        data: body.isEmpty ? null : body,
       );
       
       return {
@@ -207,11 +208,12 @@ class OrdersDataProvider {
     }
   }
 
-  /// Get order details by ID
+  /// Get order details by ID — GET /api/customer/orders/{id}
   Future<Map<String, dynamic>> getOrderById(int orderId) async {
     try {
       final response = await apiService.get(
-        ApiConstants.replacePathParams(ApiConstants.orderDetails, {'id': orderId}),
+        ApiConstants.replacePathParams(
+            ApiConstants.customerOrderDetails, {'id': orderId}),
       );
       
       return {

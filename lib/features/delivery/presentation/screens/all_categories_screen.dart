@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:hudhud_delivery/app/services/startup_location_service.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
@@ -96,7 +97,13 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
       _vendorsError = null;
     });
     try {
-      final list = await _vendorsRepository.getVendors(page: 1);
+      final location = StartupLocationService.cached ??
+          await StartupLocationService.fetchAtStartup();
+      final list = await _vendorsRepository.getVendors(
+        page: 1,
+        latitude: location?.latitude,
+        longitude: location?.longitude,
+      );
       if (!mounted) return;
       setState(() {
         _vendors = list;
