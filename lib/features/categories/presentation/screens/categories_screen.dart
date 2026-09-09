@@ -933,7 +933,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 
                               Text(
 
-                                'ETB${_totalPrice.toStringAsFixed(1)}',
+                                'ETB ${_totalPrice.toStringAsFixed(1)}',
 
                                 style: const TextStyle(
 

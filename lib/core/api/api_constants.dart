@@ -102,6 +102,7 @@ class ApiConstants {
 
   // Customer order creation - POST /api/customer/orders
   static const String customerOrders = 'customer/orders';
+  static const String customerOrderDetails = 'customer/orders/{id}';
   static const String customerOrdersAvailable = 'customer/orders/available';
   static const String customerOrderRate = 'customer/orders/{id}/rate';
   static const String customerOrderCancel = 'customer/orders/{id}/cancel';

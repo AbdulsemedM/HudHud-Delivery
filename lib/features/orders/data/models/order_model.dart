@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/core/utils/money_format.dart';
 import 'order_item_model.dart';
 import 'vendor_model.dart';
 import 'customer_model.dart';
@@ -206,6 +207,7 @@ class OrderModel extends Equatable {
 
   // Helper methods for order status
   bool get isPending => status == 'pending';
+  bool get isPaid => status == 'paid';
   bool get isAccepted => status == 'accepted';
   bool get isPreparing => status == 'preparing';
   bool get isReadyForPickup => status == 'ready_for_pickup';
@@ -213,7 +215,10 @@ class OrderModel extends Equatable {
   bool get isDelivered => status == 'delivered';
   bool get isCancelled => status == 'cancelled';
   
-  bool get canBeCancelled => isPending || isAccepted || isPreparing;
+  /// Backend allows cancel for early states: pending, paid, accepted.
+  bool get canBeCancelled => isPending || isPaid || isAccepted;
+
+  bool get isTerminal => isDelivered || isCancelled;
   
   String get statusDisplayText {
     switch (status) {
@@ -239,9 +244,9 @@ class OrderModel extends Equatable {
   String get formattedTotal {
     try {
       final total = double.parse(totalAmount);
-      return '\$${total.toStringAsFixed(2)}';
+      return formatEtbAmount(total);
     } catch (e) {
-      return totalAmount;
+      return formatEtbPriceString(totalAmount);
     }
   }
   
@@ -256,36 +261,36 @@ class OrderModel extends Equatable {
   String get formattedDiscount {
     try {
       final discount = double.parse(discountAmount);
-      return '\$${discount.toStringAsFixed(2)}';
+      return formatEtbAmount(discount);
     } catch (e) {
-      return discountAmount;
+      return formatEtbPriceString(discountAmount);
     }
   }
   
   String get formattedDeliveryFee {
     try {
       final fee = double.parse(deliveryFee);
-      return '\$${fee.toStringAsFixed(2)}';
+      return formatEtbAmount(fee);
     } catch (e) {
-      return deliveryFee;
+      return formatEtbPriceString(deliveryFee);
     }
   }
   
   String get formattedTax {
     try {
       final tax = double.parse(taxAmount);
-      return '\$${tax.toStringAsFixed(2)}';
+      return formatEtbAmount(tax);
     } catch (e) {
-      return taxAmount;
+      return formatEtbPriceString(taxAmount);
     }
   }
   
   String get formattedSubtotal {
     try {
       final sub = double.parse(subtotal);
-      return '\$${sub.toStringAsFixed(2)}';
+      return formatEtbAmount(sub);
     } catch (e) {
-      return subtotal;
+      return formatEtbPriceString(subtotal);
     }
   }
   

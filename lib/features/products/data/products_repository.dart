@@ -22,6 +22,14 @@ class ProductsRepository {
             );
 
   Future<ProductsListResult> getProducts(ProductsQuery query) async {
+    // Prefer public discovery routes for vendor catalogs (doc §3).
+    if (query.vendorId != null && publicCatalogRepository != null) {
+      try {
+        return await publicCatalogRepository!.getProducts(query);
+      } catch (_) {
+        // Fall through to authenticated products route.
+      }
+    }
     final response = await productsDataProvider.getProducts(query);
     if (response['statusCode'] != 200) {
       throw Exception(

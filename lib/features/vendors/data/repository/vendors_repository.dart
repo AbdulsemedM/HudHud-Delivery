@@ -9,9 +9,23 @@ class VendorsRepository {
     required this.vendorsDataProvider,
   });
 
-  /// GET /api/vendors?page=
-  Future<List<VendorModel>> getVendors({int page = 1}) async {
-    final response = await vendorsDataProvider.getVendors(page: page);
+  /// GET /api/public/vendors
+  Future<List<VendorModel>> getVendors({
+    int page = 1,
+    int perPage = 20,
+    String? search,
+    int? categoryId,
+    double? latitude,
+    double? longitude,
+  }) async {
+    final response = await vendorsDataProvider.getVendors(
+      page: page,
+      perPage: perPage,
+      search: search,
+      categoryId: categoryId,
+      latitude: latitude,
+      longitude: longitude,
+    );
     if (response['statusCode'] != 200) {
       throw Exception(
         _clean(response['errorMessage']?.toString() ?? 'Error fetching vendors'),

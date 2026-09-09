@@ -1250,6 +1250,36 @@ abstract class AppLocalizations {
   /// **'Food'**
   String get homeTabFood;
 
+  /// No description provided for @homeTabDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery'**
+  String get homeTabDelivery;
+
+  /// No description provided for @cartDifferentVendorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a new cart?'**
+  String get cartDifferentVendorTitle;
+
+  /// No description provided for @cartDifferentVendorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your cart has items from another store. Clear it to add items from this store.'**
+  String get cartDifferentVendorMessage;
+
+  /// No description provided for @cartReplaceAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear and add'**
+  String get cartReplaceAction;
+
+  /// No description provided for @cartKeepCurrentAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep cart'**
+  String get cartKeepCurrentAction;
+
   /// No description provided for @homeTabCourier.
   ///
   /// In en, this message translates to:
@@ -5129,7 +5159,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingWelcomeSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Send parcels across town today — food, rides, and home services are coming soon.'**
+  /// **'Send packages or order food for delivery — more services are on the way.'**
   String get onboardingWelcomeSubtitle;
 
   /// No description provided for @onboardingFoodTitle.
@@ -5141,7 +5171,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingFoodDescription.
   ///
   /// In en, this message translates to:
-  /// **'Coming soon — order meals and groceries from local shops in minutes.'**
+  /// **'Order meals and groceries from local shops for delivery.'**
   String get onboardingFoodDescription;
 
   /// No description provided for @onboardingCourierTitle.
@@ -5219,7 +5249,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingSpotlightFoodDescription.
   ///
   /// In en, this message translates to:
-  /// **'Coming soon — browse restaurants and shops to order food and essentials.'**
+  /// **'Browse restaurants and shops to order food and essentials for delivery.'**
   String get onboardingSpotlightFoodDescription;
 
   /// No description provided for @onboardingSpotlightCourierTitle.
@@ -5267,7 +5297,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingSpotlightDoneDescription.
   ///
   /// In en, this message translates to:
-  /// **'Courier is ready now. Food, Taxi, and Handyman are coming soon — switch tabs anytime. Enjoy HudHud!'**
+  /// **'Send a package or order Delivery anytime. Taxi and Handyman are coming soon — switch tabs anytime. Enjoy HudHud!'**
   String get onboardingSpotlightDoneDescription;
 
   /// No description provided for @onboardingDebugReplayTour.
@@ -5291,7 +5321,7 @@ abstract class AppLocalizations {
   /// No description provided for @foodComingSoonSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Groceries and meals from your favourite vendors — launching soon.'**
+  /// **'Groceries and meals from your favourite vendors.'**
   String get foodComingSoonSubtitle;
 
   /// No description provided for @foodComingSoonTeaser1.

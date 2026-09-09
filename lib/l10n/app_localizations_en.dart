@@ -618,6 +618,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeTabFood => 'Food';
 
   @override
+  String get homeTabDelivery => 'Delivery';
+
+  @override
+  String get cartDifferentVendorTitle => 'Start a new cart?';
+
+  @override
+  String get cartDifferentVendorMessage =>
+      'Your cart has items from another store. Clear it to add items from this store.';
+
+  @override
+  String get cartReplaceAction => 'Clear and add';
+
+  @override
+  String get cartKeepCurrentAction => 'Keep cart';
+
+  @override
   String get homeTabCourier => 'Courier';
 
   @override
@@ -2686,14 +2702,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingWelcomeSubtitle =>
-      'Send parcels across town today — food, rides, and home services are coming soon.';
+      'Send packages or order food for delivery — more services are on the way.';
 
   @override
   String get onboardingFoodTitle => 'Food & Groceries';
 
   @override
   String get onboardingFoodDescription =>
-      'Coming soon — order meals and groceries from local shops in minutes.';
+      'Order meals and groceries from local shops for delivery.';
 
   @override
   String get onboardingCourierTitle => 'Courier';
@@ -2738,7 +2754,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingSpotlightFoodDescription =>
-      'Coming soon — browse restaurants and shops to order food and essentials.';
+      'Browse restaurants and shops to order food and essentials for delivery.';
 
   @override
   String get onboardingSpotlightCourierTitle => 'Courier';
@@ -2766,7 +2782,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingSpotlightDoneDescription =>
-      'Courier is ready now. Food, Taxi, and Handyman are coming soon — switch tabs anytime. Enjoy HudHud!';
+      'Send a package or order Delivery anytime. Taxi and Handyman are coming soon — switch tabs anytime. Enjoy HudHud!';
 
   @override
   String get onboardingDebugReplayTour => 'Replay home tour (debug)';
@@ -2779,7 +2795,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get foodComingSoonSubtitle =>
-      'Groceries and meals from your favourite vendors — launching soon.';
+      'Groceries and meals from your favourite vendors.';
 
   @override
   String get foodComingSoonTeaser1 => 'Fresh groceries';

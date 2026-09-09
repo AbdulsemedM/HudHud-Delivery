@@ -607,6 +607,22 @@ class AppLocalizationsAm extends AppLocalizations {
   String get homeTabFood => 'ምግብ';
 
   @override
+  String get homeTabDelivery => 'Delivery';
+
+  @override
+  String get cartDifferentVendorTitle => 'Start a new cart?';
+
+  @override
+  String get cartDifferentVendorMessage =>
+      'Your cart has items from another store. Clear it to add items from this store.';
+
+  @override
+  String get cartReplaceAction => 'Clear and add';
+
+  @override
+  String get cartKeepCurrentAction => 'Keep cart';
+
+  @override
   String get homeTabCourier => 'መልእክተኛ';
 
   @override

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:hudhud_delivery/core/utils/money_format.dart';
 import 'product_model.dart';
 
 class OrderItemModel extends Equatable {
@@ -87,9 +88,9 @@ class OrderItemModel extends Equatable {
   String get formattedPrice {
     try {
       final priceValue = double.parse(price);
-      return '\$${priceValue.toStringAsFixed(2)}';
+      return formatEtbAmount(priceValue);
     } catch (e) {
-      return price;
+      return formatEtbPriceString(price);
     }
   }
 

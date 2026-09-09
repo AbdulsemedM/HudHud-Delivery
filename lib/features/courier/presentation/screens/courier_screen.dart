@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/easy_mode/easy_mode_controller.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
-import 'package:hudhud_delivery/core/utils/support_launcher.dart';
 import 'package:hudhud_delivery/core/widgets/call_support_button.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
@@ -18,7 +17,6 @@ import 'package:hudhud_delivery/features/courier/utils/courier_access_gate.dart'
 import 'package:hudhud_delivery/features/courier/utils/courier_live_job_screen.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_status.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
-import 'package:hudhud_delivery/features/settings/presentation/widgets/auth_feedback.dart';
 import 'package:provider/provider.dart';
 import '../../../home/presentation/widgets/home_widget.dart';
 import 'delivery_details_screen.dart';
@@ -183,36 +181,22 @@ class _CourierScreenState extends State<CourierScreen> {
     );
   }
 
-  Future<void> _orderByCall() async {
-    final ok = await launchSupportPhone();
-    if (!mounted) return;
-    if (!ok) {
-      AuthSnackBar.error(context, context.l10n.actionTryAgain);
-    }
-  }
-
   Widget _buildCreateDeliveryRow(AppLocalizations l10n) {
-    return Column(
+    return Row(
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: _InstantDeliveryCard(
-                l10n: l10n,
-                onTap: _openInstantDelivery,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _ScheduleDeliveryCard(
-                l10n: l10n,
-                onTap: _openScheduleDelivery,
-              ),
-            ),
-          ],
+        Expanded(
+          child: _InstantDeliveryCard(
+            l10n: l10n,
+            onTap: _openInstantDelivery,
+          ),
         ),
-        const SizedBox(height: 12),
-        _OrderByCallCard(l10n: l10n, onTap: _orderByCall),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _ScheduleDeliveryCard(
+            l10n: l10n,
+            onTap: _openScheduleDelivery,
+          ),
+        ),
       ],
     );
   }
@@ -232,9 +216,9 @@ class _CourierScreenState extends State<CourierScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                const CallSupportFab(
+                CallSupportFab(
                   heroTag: 'courier_call_support_fab',
-                  extended: false,
+                  label: l10n.orderByCall,
                 ),
                 const SizedBox(height: 12),
                 FloatingActionButton.extended(
@@ -247,7 +231,10 @@ class _CourierScreenState extends State<CourierScreen> {
                 ),
               ],
             )
-          : const CallSupportFab(heroTag: 'courier_call_support_fab'),
+          : CallSupportFab(
+              heroTag: 'courier_call_support_fab',
+              label: l10n.orderByCall,
+            ),
       body: SafeArea(
         child: RefreshIndicator(
           color: HomeColors.violet,
@@ -481,80 +468,6 @@ class _ScheduleDeliveryCard extends StatelessWidget {
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _OrderByCallCard extends StatelessWidget {
-  final AppLocalizations l10n;
-  final VoidCallback onTap;
-
-  const _OrderByCallCard({required this.l10n, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppColors.radiusLG),
-        child: Container(
-          width: double.infinity,
-          constraints: const BoxConstraints(minHeight: 72),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: BoxDecoration(
-            color: HomeColors.violet.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(AppColors.radiusLG),
-            border: Border.all(color: HomeColors.violet.withValues(alpha: 0.35)),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: HomeColors.violet,
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: const Icon(
-                  Icons.phone_in_talk_rounded,
-                  color: Colors.white,
-                  size: 28,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.orderByCall,
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w800,
-                        color: HomeColors.textPrimaryOf(context),
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      l10n.orderByCallSubtitle,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: HomeColors.textMutedOf(context),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.chevron_right_rounded,
-                color: HomeColors.violet,
-                size: 28,
               ),
             ],
           ),

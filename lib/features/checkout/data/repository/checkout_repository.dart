@@ -14,9 +14,13 @@ class CheckoutRepository {
     required double deliveryLatitude,
     required double deliveryLongitude,
     required String paymentMethod,
-    String serviceType = 'delivery',
+    String serviceType = 'restaurant',
     String? notes,
     String? couponCode,
+    String? pickupLocation,
+    double? pickupLatitude,
+    double? pickupLongitude,
+    String? idempotencyKey,
   }) async {
     try {
       final response = await checkoutDataProvider.createOrder(
@@ -32,6 +36,10 @@ class CheckoutRepository {
         serviceType: serviceType,
         notes: notes,
         couponCode: couponCode,
+        pickupLocation: pickupLocation,
+        pickupLatitude: pickupLatitude,
+        pickupLongitude: pickupLongitude,
+        idempotencyKey: idempotencyKey,
       );
 
       if (response['statusCode'] == 200 || response['statusCode'] == 201) {
@@ -53,9 +61,13 @@ class CheckoutRepository {
     }
   }
 
-  Future<Map<String, dynamic>> cancelOrder(int orderId) async {
+  Future<Map<String, dynamic>> cancelOrder(
+    int orderId, {
+    String? reason,
+  }) async {
     try {
-      final response = await checkoutDataProvider.cancelOrder(orderId);
+      final response =
+          await checkoutDataProvider.cancelOrder(orderId, reason: reason);
 
       if (response['statusCode'] == 200 || response['statusCode'] == 201) {
         final data = response['data'] as Map<String, dynamic>?;
@@ -63,11 +75,13 @@ class CheckoutRepository {
           'success': true,
           'message':
               data?['message']?.toString() ?? 'Order cancelled successfully',
+          'data': data,
         };
       } else {
         return {
           'success': false,
-          'message': "You can't cancel this order",
+          'message': response['errorMessage']?.toString() ??
+              "You can't cancel this order",
         };
       }
     } catch (e) {

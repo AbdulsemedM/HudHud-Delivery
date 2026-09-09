@@ -6,6 +6,7 @@ import 'package:hudhud_delivery/app/services/cart_service.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/utils/money_format.dart';
 import 'package:hudhud_delivery/features/categories/data/data_provider/categories_data_provider.dart';
 import 'package:hudhud_delivery/features/categories/data/repository/categories_repository.dart';
 import 'package:hudhud_delivery/features/categories/model/categories_products_model.dart';
@@ -33,11 +34,52 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   CategoriesProductsModel? _product;
   bool _loading = true;
   String? _error;
+  int? _selectedVariantId;
+  final Set<int> _selectedModifierIds = {};
 
   @override
   void initState() {
     super.initState();
     _loadProduct();
+  }
+
+  List<Map<String, dynamic>> get _variants {
+    final options = _product?.options;
+    if (options == null) return const [];
+    final raw = options['variants'] ?? options['variant_options'];
+    if (raw is! List) return const [];
+    return raw
+        .whereType<Map>()
+        .map((e) => Map<String, dynamic>.from(e))
+        .toList();
+  }
+
+  List<Map<String, dynamic>> get _modifierOptions {
+    final options = _product?.options;
+    if (options == null) return const [];
+    final groups = options['modifier_groups'] ?? options['modifiers'];
+    if (groups is! List) return const [];
+    final out = <Map<String, dynamic>>[];
+    for (final group in groups) {
+      if (group is! Map) continue;
+      final opts = group['options'] ?? group['modifier_options'];
+      if (opts is! List) continue;
+      for (final opt in opts) {
+        if (opt is Map) out.add(Map<String, dynamic>.from(opt));
+      }
+    }
+    return out;
+  }
+
+  CategoriesProductsModel _productForCart(CategoriesProductsModel product) {
+    final baseOptions = Map<String, dynamic>.from(product.options ?? {});
+    if (_selectedVariantId != null) {
+      baseOptions['variant_id'] = _selectedVariantId;
+    }
+    if (_selectedModifierIds.isNotEmpty) {
+      baseOptions['modifier_option_ids'] = _selectedModifierIds.toList();
+    }
+    return product.copyWith(options: baseOptions);
   }
 
   Future<void> _loadProduct() async {
@@ -61,7 +103,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     }
   }
 
-  void _addToCart() {
+  Future<void> _addToCart() async {
     final product = _product;
     if (product == null) return;
     if (!product.canOrder) {
@@ -73,8 +115,20 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       );
       return;
     }
-    final added = _cart.addProduct(product);
-    if (!added || !mounted) return;
+    if (_variants.isNotEmpty && _selectedVariantId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a variant')),
+      );
+      return;
+    }
+    final cartProduct = _productForCart(product);
+    var result = _cart.addProduct(cartProduct);
+    if (result == CartAddResult.differentVendor) {
+      final replace = await _confirmReplaceCart();
+      if (!mounted || replace != true) return;
+      result = _cart.addProduct(cartProduct, replaceIfDifferentVendor: true);
+    }
+    if (result != CartAddResult.added || !mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('${product.name ?? 'Product'} added to cart'),
@@ -85,6 +139,27 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             fallbackVendorId: product.vendor_id,
           ),
         ),
+      ),
+    );
+  }
+
+  Future<bool?> _confirmReplaceCart() {
+    final l10n = context.l10n;
+    return showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.cartDifferentVendorTitle),
+        content: Text(l10n.cartDifferentVendorMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cartKeepCurrentAction),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.cartReplaceAction),
+          ),
+        ],
       ),
     );
   }
@@ -205,7 +280,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                       Row(
                                         children: [
                                           Text(
-                                            '${l10n.currencyEtb} ${product.formatted_price ?? product.price ?? '0'}',
+                                            formatEtbPriceString(
+                                              product.formatted_price ??
+                                                  product.price,
+                                            ),
                                             style: const TextStyle(
                                               fontSize: 22,
                                               fontWeight: FontWeight.bold,
@@ -217,7 +295,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                                   null) ...[
                                             const SizedBox(width: 12),
                                             Text(
-                                              product.formatted_original_price!,
+                                              formatEtbPriceString(
+                                                product.formatted_original_price,
+                                              ),
                                               style: textTheme.bodyMedium
                                                   ?.copyWith(
                                                 color: colorScheme
@@ -238,6 +318,85 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                             color: colorScheme.onSurfaceVariant,
                                             height: 1.5,
                                           ),
+                                        ),
+                                      ],
+                                      if (_variants.isNotEmpty) ...[
+                                        const SizedBox(height: 20),
+                                        Text(
+                                          'Options',
+                                          style: textTheme.titleSmall?.copyWith(
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Wrap(
+                                          spacing: 8,
+                                          runSpacing: 8,
+                                          children: _variants.map((variant) {
+                                            final id = variant['id'] is int
+                                                ? variant['id'] as int
+                                                : int.tryParse(
+                                                    '${variant['id']}');
+                                            final label = variant['name']
+                                                    ?.toString() ??
+                                                variant['label']?.toString() ??
+                                                'Option';
+                                            final selected =
+                                                id != null &&
+                                                    id == _selectedVariantId;
+                                            return ChoiceChip(
+                                              label: Text(label),
+                                              selected: selected,
+                                              onSelected: id == null
+                                                  ? null
+                                                  : (_) => setState(() =>
+                                                      _selectedVariantId = id),
+                                            );
+                                          }).toList(),
+                                        ),
+                                      ],
+                                      if (_modifierOptions.isNotEmpty) ...[
+                                        const SizedBox(height: 16),
+                                        Text(
+                                          'Add-ons',
+                                          style: textTheme.titleSmall?.copyWith(
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Wrap(
+                                          spacing: 8,
+                                          runSpacing: 8,
+                                          children:
+                                              _modifierOptions.map((opt) {
+                                            final id = opt['id'] is int
+                                                ? opt['id'] as int
+                                                : int.tryParse('${opt['id']}');
+                                            final label = opt['name']
+                                                    ?.toString() ??
+                                                opt['label']?.toString() ??
+                                                'Add-on';
+                                            final selected = id != null &&
+                                                _selectedModifierIds
+                                                    .contains(id);
+                                            return FilterChip(
+                                              label: Text(label),
+                                              selected: selected,
+                                              onSelected: id == null
+                                                  ? null
+                                                  : (value) {
+                                                      setState(() {
+                                                        if (value) {
+                                                          _selectedModifierIds
+                                                              .add(id);
+                                                        } else {
+                                                          _selectedModifierIds
+                                                              .remove(id);
+                                                        }
+                                                      });
+                                                    },
+                                            );
+                                          }).toList(),
                                         ),
                                       ],
                                       const SizedBox(height: 24),
@@ -394,7 +553,7 @@ class _CartCheckoutBar extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              'ETB${subtotal.toStringAsFixed(1)}',
+              'ETB ${subtotal.toStringAsFixed(1)}',
               style: const TextStyle(
                 color: AppColors.lightOnPrimary,
                 fontSize: 16,

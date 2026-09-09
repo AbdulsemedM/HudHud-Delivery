@@ -89,7 +89,14 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
     FetchOrderDetailsEvent event,
     Emitter<OrdersState> emit,
   ) async {
-    emit(OrderDetailsLoading());
+    final previous = state;
+    final OrderDetailsLoaded? keep =
+        previous is OrderDetailsLoaded && previous.order.id == event.orderId
+            ? previous
+            : null;
+    if (keep == null) {
+      emit(OrderDetailsLoading());
+    }
 
     try {
       final order = await ordersRepository.getOrderById(event.orderId);
@@ -98,10 +105,16 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
         tracking = await ordersRepository.getOrderTracking(event.orderId);
       } catch (_) {
         // Tracking is optional; show order details even if tracking fails
+        tracking = keep?.tracking;
       }
       emit(OrderDetailsLoaded(order, tracking: tracking));
     } catch (e) {
-      emit(OrdersError(e.toString()));
+      if (keep != null) {
+        // Keep last good snapshot on poll failure.
+        emit(keep);
+      } else {
+        emit(OrdersError(e.toString()));
+      }
     }
   }
 

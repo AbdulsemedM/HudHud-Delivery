@@ -98,7 +98,20 @@ class OrdersRepositoryImpl implements OrdersRepository {
       final response = await dataProvider.getOrderById(orderId);
       
       if (response['statusCode'] == 200 && response['data'] != null) {
-        return OrderModel.fromJson(response['data']);
+        final raw = response['data'];
+        Map<String, dynamic> map;
+        if (raw is Map<String, dynamic>) {
+          map = raw;
+        } else if (raw is Map) {
+          map = Map<String, dynamic>.from(raw);
+        } else {
+          throw const OrdersRepositoryException('Invalid order response');
+        }
+        final nested = map['order'] ?? map['data'];
+        if (nested is Map) {
+          map = Map<String, dynamic>.from(nested);
+        }
+        return OrderModel.fromJson(map);
       } else {
         throw OrdersRepositoryException(response['errorMessage'] ?? 'Order not found');
       }

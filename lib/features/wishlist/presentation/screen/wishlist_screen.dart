@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
+import 'package:hudhud_delivery/core/utils/money_format.dart';
 import 'package:hudhud_delivery/core/utils/snackbar_util.dart';
 import 'package:hudhud_delivery/features/categories/model/categories_products_model.dart';
 import 'package:hudhud_delivery/features/delivery/presentation/screens/product_detail_screen.dart';
@@ -54,10 +55,10 @@ class _WishlistScreenState extends State<WishlistScreen> {
 
   String _priceLabel(CategoriesProductsModel? p) {
     if (p == null) return '—';
-    final formatted = p.formatted_price ?? p.current_price;
-    if (formatted != null && formatted.isNotEmpty) return formatted;
-    final raw = p.price;
-    if (raw != null && raw.isNotEmpty) return 'ETB $raw';
+    final formatted = p.formatted_price ?? p.current_price ?? p.price;
+    if (formatted != null && formatted.isNotEmpty) {
+      return formatEtbPriceString(formatted);
+    }
     return '—';
   }
 

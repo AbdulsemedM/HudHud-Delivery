@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,10 +23,34 @@ class OrderDetailsScreen extends StatefulWidget {
 }
 
 class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
+  static const _pollInterval = Duration(seconds: 12);
+  Timer? _pollTimer;
+
   @override
   void initState() {
     super.initState();
     context.read<OrdersBloc>().add(FetchOrderDetailsEvent(widget.orderId));
+    _startPolling();
+  }
+
+  @override
+  void dispose() {
+    _pollTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startPolling() {
+    _pollTimer?.cancel();
+    _pollTimer = Timer.periodic(_pollInterval, (_) {
+      if (!mounted) return;
+      final state = context.read<OrdersBloc>().state;
+      if (state is OrderDetailsLoaded && state.order.isTerminal) {
+        _pollTimer?.cancel();
+        return;
+      }
+      // Silent refresh — keep showing last loaded order while fetching.
+      context.read<OrdersBloc>().add(FetchOrderDetailsEvent(widget.orderId));
+    });
   }
 
   ThemeData _homeTheme(BuildContext context) {
@@ -68,6 +94,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 );
               }
               if (state is OrderCancelled) {
+                _pollTimer?.cancel();
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(state.message),
@@ -84,6 +111,17 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                   ),
                 );
               }
+              if (state is OrderDetailsLoaded && state.order.isTerminal) {
+                _pollTimer?.cancel();
+              }
+            },
+            buildWhen: (previous, current) {
+              // Avoid flicker to loading shimmer on poll refreshes.
+              if (current is OrderDetailsLoading &&
+                  previous is OrderDetailsLoaded) {
+                return false;
+              }
+              return true;
             },
             builder: (context, state) {
               if (state is OrderDetailsLoading) {

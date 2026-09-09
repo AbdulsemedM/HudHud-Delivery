@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:hudhud_delivery/core/api/api_constants.dart';
 import '../../../../core/api/api_service.dart';
 
@@ -17,9 +18,13 @@ class CheckoutDataProvider {
     required double deliveryLatitude,
     required double deliveryLongitude,
     required String paymentMethod,
-    String serviceType = 'delivery',
+    String serviceType = 'restaurant',
     String? notes,
     String? couponCode,
+    String? pickupLocation,
+    double? pickupLatitude,
+    double? pickupLongitude,
+    String? idempotencyKey,
   }) async {
     try {
       final Map<String, dynamic> orderData = {
@@ -38,6 +43,18 @@ class CheckoutDataProvider {
                   mapped['variant_id'] = parsed;
                 }
               }
+              final modifierIds = item['modifier_option_ids'];
+              if (modifierIds is List && modifierIds.isNotEmpty) {
+                mapped['modifier_option_ids'] = modifierIds
+                    .map((e) => e is int ? e : int.tryParse(e.toString()))
+                    .whereType<int>()
+                    .where((id) => id > 0)
+                    .toList();
+              }
+              final itemNotes = item['notes'];
+              if (itemNotes is String && itemNotes.trim().isNotEmpty) {
+                mapped['notes'] = itemNotes.trim();
+              }
               return mapped;
             })
             .toList(),
@@ -53,11 +70,35 @@ class CheckoutDataProvider {
         'delivery_latitude': deliveryLatitude,
         'delivery_longitude': deliveryLongitude,
         'payment_method': paymentMethod,
+        'service_type':
+            serviceType.trim().isEmpty ? 'restaurant' : serviceType.trim(),
       };
+
+      if (notes != null && notes.trim().isNotEmpty) {
+        orderData['notes'] = notes.trim();
+      }
+      if (couponCode != null && couponCode.trim().isNotEmpty) {
+        orderData['coupon_code'] = couponCode.trim();
+      }
+      if (pickupLocation != null && pickupLocation.trim().isNotEmpty) {
+        orderData['pickup_location'] = pickupLocation.trim();
+      }
+      if (pickupLatitude != null) {
+        orderData['pickup_latitude'] = pickupLatitude;
+      }
+      if (pickupLongitude != null) {
+        orderData['pickup_longitude'] = pickupLongitude;
+      }
+
+      final headers = <String, dynamic>{};
+      if (idempotencyKey != null && idempotencyKey.isNotEmpty) {
+        headers['Idempotency-Key'] = idempotencyKey;
+      }
 
       final response = await apiService.post(
         '${ApiConstants.baseUrl}${ApiConstants.customerOrders}',
         data: orderData,
+        options: headers.isEmpty ? null : Options(headers: headers),
       );
 
       return {
@@ -159,12 +200,24 @@ class CheckoutDataProvider {
   }
 
   /// POST /api/customer/orders/{id}/cancel
-  Future<Map<String, dynamic>> cancelOrder(int orderId) async {
+  Future<Map<String, dynamic>> cancelOrder(
+    int orderId, {
+    String? reason,
+  }) async {
     try {
       final url = ApiConstants.baseUrl +
-          ApiConstants.customerOrderCancel
-              .replaceAll('{id}', orderId.toString());
-      final response = await apiService.post(url);
+          ApiConstants.replacePathParams(
+            ApiConstants.customerOrderCancel,
+            {'id': orderId},
+          );
+      final body = <String, dynamic>{};
+      if (reason != null && reason.trim().isNotEmpty) {
+        body['reason'] = reason.trim();
+      }
+      final response = await apiService.post(
+        url,
+        data: body.isEmpty ? null : body,
+      );
 
       return {
         'statusCode': response.statusCode,

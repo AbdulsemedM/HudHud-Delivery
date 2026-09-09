@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/core/theme/system_ui_style.dart';
 import 'package:hudhud_delivery/features/settings/presentation/screen/notifications_screen.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
-// import 'package:hudhud_delivery/features/delivery/presentation/screens/all_categories_screen.dart';
+import 'package:hudhud_delivery/features/delivery/presentation/screens/all_categories_screen.dart';
 // import 'package:hudhud_delivery/features/handyman/presentation/screens/handyman_screen.dart';
 import 'package:hudhud_delivery/features/courier/presentation/screens/courier_screen.dart';
 // import 'package:hudhud_delivery/features/taxi/presentation/screens/taxi_screen.dart';
@@ -497,8 +497,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     index: _serviceMode.index,
                     children: const [
                       CourierScreen(),
-                      // AllCategoriesScreen(embedded: true), // TODO: restore when Food & Groceries launches
-                      ServiceComingSoonScreen(mode: HomeServiceMode.foodGroceries),
+                      AllCategoriesScreen(embedded: true),
                       // TaxiScreen(), // TODO: restore when Taxi launches
                       ServiceComingSoonScreen(mode: HomeServiceMode.taxi),
                       // HandymanScreen(embedded: true), // TODO: restore when Handyman launches

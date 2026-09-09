@@ -102,6 +102,9 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
   final PaymentRepository paymentRepository;
   final CheckoutRepository checkoutRepository;
 
+  /// Reused across retries of the same checkout action until order is created.
+  String? _orderIdempotencyKey;
+
   PaymentBloc({
     required this.paymentRepository,
     required this.checkoutRepository,
@@ -123,6 +126,8 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
         return;
       }
 
+      _orderIdempotencyKey ??= createOrderIdempotencyKey();
+
       final orderResult = await checkoutRepository.createOrder(
         vendorId: orderDetails['vendor_id'] as int,
         items: List<Map<String, dynamic>>.from(orderDetails['items'] as List),
@@ -139,8 +144,16 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
         deliveryLongitude:
             (orderDetails['delivery_longitude'] as num?)?.toDouble() ?? 0.0,
         paymentMethod: event.paymentMethod,
-        serviceType: orderDetails['service_type'] as String? ?? 'delivery',
+        serviceType: orderDetails['service_type'] as String? ?? 'restaurant',
         notes: orderDetails['notes'] as String?,
+        couponCode: orderDetails['coupon_code'] as String? ??
+            orderDetails['couponCode'] as String?,
+        pickupLocation: orderDetails['pickup_location'] as String?,
+        pickupLatitude:
+            (orderDetails['pickup_latitude'] as num?)?.toDouble(),
+        pickupLongitude:
+            (orderDetails['pickup_longitude'] as num?)?.toDouble(),
+        idempotencyKey: _orderIdempotencyKey,
       );
 
       if (orderResult['success'] != true) {
@@ -148,6 +161,9 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
             error: orderResult['message'] ?? 'Failed to create order'));
         return;
       }
+
+      // Order exists — mint a new key only on a future distinct checkout.
+      _orderIdempotencyKey = null;
 
       final fallbackId = int.tryParse(event.orderId) ?? 0;
       final created = parseCreateOrderResponse(

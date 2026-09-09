@@ -11,10 +11,13 @@ class CallSupportFab extends StatelessWidget {
     super.key,
     this.heroTag = 'call_support_fab',
     this.extended = true,
+    this.label,
   });
 
   final Object heroTag;
   final bool extended;
+  /// Overrides the default "Call for help" label when set.
+  final String? label;
 
   Future<void> _call(BuildContext context) async {
     final ok = await launchSupportPhone();
@@ -26,13 +29,14 @@ class CallSupportFab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final text = label ?? context.l10n.callSupport;
     if (extended) {
       return FloatingActionButton.extended(
         heroTag: heroTag,
         backgroundColor: AuthScreenColors.orange,
         foregroundColor: Theme.of(context).colorScheme.onSecondary,
         icon: const Icon(Icons.phone_in_talk_rounded),
-        label: Text(context.l10n.callSupport),
+        label: Text(text),
         onPressed: () => _call(context),
       );
     }
@@ -40,7 +44,7 @@ class CallSupportFab extends StatelessWidget {
       heroTag: heroTag,
       backgroundColor: AuthScreenColors.orange,
       foregroundColor: Theme.of(context).colorScheme.onSecondary,
-      tooltip: context.l10n.callSupport,
+      tooltip: text,
       onPressed: () => _call(context),
       child: const Icon(Icons.phone_in_talk_rounded),
     );
