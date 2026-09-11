@@ -16,6 +16,7 @@ class CartService extends ChangeNotifier {
 
   final Map<String, int> _quantities = {};
   final Map<String, CategoriesProductsModel> _products = {};
+  int? _selectedBranchId;
 
   Map<String, int> get quantities => Map.unmodifiable(_quantities);
 
@@ -23,6 +24,16 @@ class CartService extends ChangeNotifier {
       _quantities.values.fold(0, (sum, quantity) => sum + quantity);
 
   bool get isEmpty => _quantities.isEmpty;
+
+  /// Restaurant branch selected for delivery-fee quote / order create.
+  int? get selectedBranchId => _selectedBranchId;
+
+  void setSelectedBranchId(int? branchId) {
+    final next = (branchId != null && branchId > 0) ? branchId : null;
+    if (_selectedBranchId == next) return;
+    _selectedBranchId = next;
+    notifyListeners();
+  }
 
   /// Vendor id shared by all cart lines, if any product has one.
   int? get currentVendorId {
@@ -62,6 +73,7 @@ class CartService extends ChangeNotifier {
       }
       _quantities.clear();
       _products.clear();
+      _selectedBranchId = null;
     }
     final id = product.id!.toString();
     _products[id] = product;
@@ -163,6 +175,7 @@ class CartService extends ChangeNotifier {
   void clear() {
     _quantities.clear();
     _products.clear();
+    _selectedBranchId = null;
     notifyListeners();
   }
 }

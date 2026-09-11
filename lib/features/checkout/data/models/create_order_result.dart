@@ -5,6 +5,7 @@ class CreateOrderResult {
     this.totalAmount,
     this.currency,
     this.status,
+    this.deliveryFee,
     this.raw = const {},
   });
 
@@ -12,6 +13,7 @@ class CreateOrderResult {
   final double? totalAmount;
   final String? currency;
   final String? status;
+  final double? deliveryFee;
   final Map<String, dynamic> raw;
 
   bool get isValid => orderId > 0;
@@ -67,11 +69,17 @@ CreateOrderResult parseCreateOrderResponse(
     nestedOrder['status'],
   ]);
 
+  final deliveryFee = _firstDouble([
+    payload['delivery_fee'],
+    nestedOrder['delivery_fee'],
+  ]);
+
   return CreateOrderResult(
     orderId: orderId,
     totalAmount: totalAmount,
     currency: currency,
     status: status,
+    deliveryFee: deliveryFee,
     raw: payload,
   );
 }

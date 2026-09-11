@@ -1,8 +1,71 @@
 import '../data_provider/checkout_data_provider.dart';
+import '../models/delivery_fee_quote.dart';
 
 class CheckoutRepository {
   final CheckoutDataProvider checkoutDataProvider;
   CheckoutRepository({required this.checkoutDataProvider});
+
+  /// POST /api/customer/delivery-fee/quote — preview only.
+  Future<DeliveryFeeQuote> quoteDeliveryFee({
+    required int branchId,
+    required String deliveryAddress,
+    required double deliveryLatitude,
+    required double deliveryLongitude,
+  }) async {
+    final response = await checkoutDataProvider.quoteDeliveryFee(
+      branchId: branchId,
+      deliveryAddress: deliveryAddress,
+      deliveryLatitude: deliveryLatitude,
+      deliveryLongitude: deliveryLongitude,
+    );
+
+    final statusCode = response['statusCode'] as int?;
+    final body = response['data'];
+    final code = response['code'] as String?;
+    final errorMessage = _cleanErrorMessage(
+      response['errorMessage']?.toString() ?? 'Unable to calculate delivery fee',
+    );
+
+    if (statusCode == 200 || statusCode == 201) {
+      final root = body is Map<String, dynamic>
+          ? body
+          : body is Map
+              ? Map<String, dynamic>.from(body)
+              : null;
+      if (root == null || root['success'] != true) {
+        throw DeliveryFeeQuoteException(
+          message: root?['message']?.toString() ?? errorMessage,
+          statusCode: statusCode,
+          code: root?['code']?.toString() ?? code,
+        );
+      }
+      final data = root['data'];
+      if (data is! Map) {
+        throw DeliveryFeeQuoteException(
+          message: 'Unable to calculate delivery fee',
+          statusCode: statusCode,
+        );
+      }
+      return DeliveryFeeQuote.fromJson(Map<String, dynamic>.from(data));
+    }
+
+    Map<String, dynamic>? errors;
+    if (body is Map) {
+      final rawErrors = body['errors'];
+      if (rawErrors is Map) {
+        errors = Map<String, dynamic>.from(rawErrors);
+      }
+    }
+
+    throw DeliveryFeeQuoteException(
+      message: body is Map && body['message'] != null
+          ? body['message'].toString()
+          : errorMessage,
+      statusCode: statusCode,
+      code: code ?? (body is Map ? body['code']?.toString() : null),
+      errors: errors,
+    );
+  }
 
   Future<Map<String, dynamic>> createOrder({
     required int vendorId,
@@ -20,6 +83,7 @@ class CheckoutRepository {
     String? pickupLocation,
     double? pickupLatitude,
     double? pickupLongitude,
+    int? branchId,
     String? idempotencyKey,
   }) async {
     try {
@@ -39,6 +103,7 @@ class CheckoutRepository {
         pickupLocation: pickupLocation,
         pickupLatitude: pickupLatitude,
         pickupLongitude: pickupLongitude,
+        branchId: branchId,
         idempotencyKey: idempotencyKey,
       );
 

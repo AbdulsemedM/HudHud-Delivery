@@ -69,14 +69,27 @@ class PaymentSuccess extends PaymentState {
 class PaymentInitiated extends PaymentState {
   final PaymentInitiateResult result;
   final String orderId;
+  /// True when server delivery fee differs from the checkout quote preview.
+  final bool deliveryFeeUpdated;
+  final double? finalDeliveryFee;
+  final String? currencySymbol;
 
   const PaymentInitiated({
     required this.result,
     required this.orderId,
+    this.deliveryFeeUpdated = false,
+    this.finalDeliveryFee,
+    this.currencySymbol,
   });
 
   @override
-  List<Object?> get props => [result, orderId];
+  List<Object?> get props => [
+        result,
+        orderId,
+        deliveryFeeUpdated,
+        finalDeliveryFee,
+        currencySymbol,
+      ];
 }
 
 class PaymentFailure extends PaymentState {
@@ -128,6 +141,12 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
 
       _orderIdempotencyKey ??= createOrderIdempotencyKey();
 
+      final quotedDeliveryFee =
+          (orderDetails['quoted_delivery_fee'] as num?)?.toDouble();
+      final branchId = orderDetails['branch_id'] is int
+          ? orderDetails['branch_id'] as int
+          : int.tryParse(orderDetails['branch_id']?.toString() ?? '');
+
       final orderResult = await checkoutRepository.createOrder(
         vendorId: orderDetails['vendor_id'] as int,
         items: List<Map<String, dynamic>>.from(orderDetails['items'] as List),
@@ -153,6 +172,7 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
             (orderDetails['pickup_latitude'] as num?)?.toDouble(),
         pickupLongitude:
             (orderDetails['pickup_longitude'] as num?)?.toDouble(),
+        branchId: branchId,
         idempotencyKey: _orderIdempotencyKey,
       );
 
@@ -178,6 +198,9 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
 
       final currency = created.currency ?? 'ETB';
       final amount = created.totalAmount ?? event.amount;
+      final deliveryFeeUpdated = quotedDeliveryFee != null &&
+          created.deliveryFee != null &&
+          (quotedDeliveryFee - created.deliveryFee!).abs() > 0.009;
 
       final collectedDetails = Map<String, dynamic>.from(
         (event.paymentDetails ?? {})..remove('order_details'),
@@ -214,6 +237,8 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
         emit(PaymentInitiated(
           result: result,
           orderId: created.orderId.toString(),
+          deliveryFeeUpdated: deliveryFeeUpdated,
+          finalDeliveryFee: created.deliveryFee,
         ));
       } catch (e) {
         emit(PaymentFailure(

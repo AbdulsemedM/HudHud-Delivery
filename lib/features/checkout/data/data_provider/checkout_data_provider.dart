@@ -6,6 +6,47 @@ class CheckoutDataProvider {
   ApiService apiService;
   CheckoutDataProvider({required this.apiService});
 
+  /// POST /api/customer/delivery-fee/quote
+  Future<Map<String, dynamic>> quoteDeliveryFee({
+    required int branchId,
+    required String deliveryAddress,
+    required double deliveryLatitude,
+    required double deliveryLongitude,
+  }) async {
+    try {
+      final response = await apiService.post(
+        '${ApiConstants.baseUrl}${ApiConstants.customerDeliveryFeeQuote}',
+        data: {
+          'branch_id': branchId,
+          'delivery_address': deliveryAddress,
+          'delivery_latitude': deliveryLatitude,
+          'delivery_longitude': deliveryLongitude,
+        },
+      );
+
+      return {
+        'statusCode': response.statusCode,
+        'data': response.data,
+        'errorMessage': null,
+        'code': null,
+      };
+    } on ApiException catch (apiException) {
+      return {
+        'statusCode': apiException.statusCode,
+        'data': apiException.data,
+        'errorMessage': _extractApiErrorMessage(apiException),
+        'code': apiException.code ?? _extractErrorCode(apiException.data),
+      };
+    } on Exception catch (e) {
+      return {
+        'statusCode': 500,
+        'data': null,
+        'errorMessage': e.toString(),
+        'code': null,
+      };
+    }
+  }
+
   /// POST /api/customer/orders
   /// Nested delivery_address (docs) plus flat delivery_* fields (live API validation).
   Future<Map<String, dynamic>> createOrder({
@@ -24,6 +65,7 @@ class CheckoutDataProvider {
     String? pickupLocation,
     double? pickupLatitude,
     double? pickupLongitude,
+    int? branchId,
     String? idempotencyKey,
   }) async {
     try {
@@ -74,6 +116,12 @@ class CheckoutDataProvider {
             serviceType.trim().isEmpty ? 'restaurant' : serviceType.trim(),
       };
 
+      if (vendorId > 0) {
+        orderData['vendor_id'] = vendorId;
+      }
+      if (branchId != null && branchId > 0) {
+        orderData['branch_id'] = branchId;
+      }
       if (notes != null && notes.trim().isNotEmpty) {
         orderData['notes'] = notes.trim();
       }
@@ -153,6 +201,14 @@ class CheckoutDataProvider {
         'errorMessage': e.toString(),
       };
     }
+  }
+
+  String? _extractErrorCode(dynamic rawData) {
+    if (rawData is Map) {
+      final code = rawData['code']?.toString();
+      if (code != null && code.isNotEmpty) return code;
+    }
+    return null;
   }
 
   String _extractApiErrorMessage(ApiException apiException) {
