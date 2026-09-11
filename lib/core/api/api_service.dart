@@ -174,6 +174,8 @@ class ApiService {
         return ApiException('Send timeout. Please try again.');
       case DioExceptionType.receiveTimeout:
         return ApiException('Receive timeout. Please try again.');
+      case DioExceptionType.transformTimeout:
+        return ApiException('Request timed out. Please try again.');
       case DioExceptionType.badResponse:
         return _handleResponseError(error);
       case DioExceptionType.cancel:

@@ -6,6 +6,7 @@ import '../../../../app/services/saved_location_service.dart';
 import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/api/api_service.dart';
+import '../../../guest/data/branches_repository.dart';
 import '../../../home/presentation/screen/map_location_screen.dart';
 import '../../../payment/bloc/payment_bloc.dart';
 import '../../../payment/data/data_provider/payment_data_provider.dart';
@@ -14,7 +15,9 @@ import '../../../payment/model/payment_initiate_result.dart';
 import '../../../payment/presentation/screen/payment_initiate_result_screen.dart';
 import '../../../payment/presentation/widgets/payment_details_form.dart';
 import '../../data/data_provider/checkout_data_provider.dart';
+import '../../data/models/delivery_fee_quote.dart';
 import '../../data/repository/checkout_repository.dart';
+import '../../utils/nearest_branch.dart';
 import '../widgets/checkout_widgets.dart';
 
 class CheckoutScreen extends StatefulWidget {
@@ -34,6 +37,9 @@ class CheckoutScreen extends StatefulWidget {
 class _CheckoutScreenState extends State<CheckoutScreen> {
   final TextEditingController _notesController = TextEditingController();
   final CartService _cart = CartService();
+  final BranchesRepository _branchesRepository = BranchesRepository();
+  late final CheckoutRepository _checkoutRepository;
+
   late List<Map<String, dynamic>> _cartItems;
   double _tipAmount = 0.0;
   String _deliveryAddress = 'Loading address...';
@@ -48,12 +54,27 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   String _ebirrProvider = 'kaafi';
   bool _useHpp = false;
 
+  int? _branchId;
+  String? _branchName;
+  DeliveryFeeQuote? _deliveryFeeQuote;
+  String? _quoteCacheKey;
+  bool _quoteLoading = false;
+  String? _quoteError;
+  bool _quoteRetryable = false;
+  int _quoteRequestId = 0;
+
   @override
   void initState() {
     super.initState();
+    _checkoutRepository = CheckoutRepository(
+      checkoutDataProvider: CheckoutDataProvider(
+        apiService: ApiService.instance,
+      ),
+    );
     _cartItems = widget.cartItems
         .map((item) => Map<String, dynamic>.from(item))
         .toList();
+    _branchId = _cart.selectedBranchId;
     _loadDeliveryAddress();
   }
 
@@ -73,6 +94,33 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       final price = (item['price'] ?? 0.0).toDouble();
       return sum + price * _quantityOf(item);
     });
+  }
+
+  double get _quotedDeliveryFee {
+    final quote = _deliveryFeeQuote;
+    if (quote == null || !quote.isUsable) return 0;
+    return quote.deliveryFee < 0 ? 0 : quote.deliveryFee;
+  }
+
+  double get _total => _subtotal + _tipAmount + _quotedDeliveryFee;
+
+  bool get _hasValidQuote =>
+      _deliveryFeeQuote != null &&
+      _deliveryFeeQuote!.isUsable &&
+      !_quoteLoading &&
+      _quoteError == null;
+
+  String _formatMoney(double amount) {
+    final quote = _deliveryFeeQuote;
+    final symbol = quote?.currencySymbol.trim();
+    if (symbol != null && symbol.isNotEmpty) {
+      return '$symbol${amount.toStringAsFixed(2)}';
+    }
+    final code = quote?.currency.trim();
+    if (code != null && code.isNotEmpty) {
+      return '$code ${amount.toStringAsFixed(2)}';
+    }
+    return 'ETB ${amount.toStringAsFixed(2)}';
   }
 
   void _syncSharedCart(String productId, int quantity) {
@@ -129,6 +177,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           _deliveryLatitude = (saved?['latitude'] as num?)?.toDouble();
           _deliveryLongitude = (saved?['longitude'] as num?)?.toDouble();
         });
+        await _refreshDeliveryFeeQuote();
       }
       return;
     }
@@ -142,6 +191,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           _deliveryLatitude = position?.latitude;
           _deliveryLongitude = position?.longitude;
         });
+        await _refreshDeliveryFeeQuote();
       }
     } catch (_) {
       if (mounted) {
@@ -149,8 +199,164 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           _deliveryAddress = 'Select delivery address';
           _deliveryLatitude = null;
           _deliveryLongitude = null;
+          _invalidateQuote(error: 'Choose a delivery location with coordinates.');
         });
       }
+    }
+  }
+
+  void _invalidateQuote({String? error, bool retryable = false}) {
+    _deliveryFeeQuote = null;
+    _quoteCacheKey = null;
+    _quoteError = error;
+    _quoteRetryable = retryable;
+    _quoteLoading = false;
+  }
+
+  Future<int?> _resolveBranchId() async {
+    final cached = _branchId ?? _cart.selectedBranchId;
+    if (cached != null && cached > 0) {
+      _branchId = cached;
+      return cached;
+    }
+
+    final vendorId = _vendorId;
+    final lat = _deliveryLatitude;
+    final lng = _deliveryLongitude;
+    if (vendorId == null || lat == null || lng == null) return null;
+
+    try {
+      final branches =
+          await _branchesRepository.getBranches(vendorId: vendorId);
+      final nearest = pickNearestActiveBranch(
+        branches: branches,
+        latitude: lat,
+        longitude: lng,
+      );
+      if (nearest == null) return null;
+      _branchId = nearest.id;
+      _branchName = nearest.name;
+      _cart.setSelectedBranchId(nearest.id);
+      return nearest.id;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> _refreshDeliveryFeeQuote({bool force = false}) async {
+    final lat = _deliveryLatitude;
+    final lng = _deliveryLongitude;
+    final address = _deliveryAddress.trim();
+
+    if (lat == null || lng == null || address.isEmpty) {
+      if (mounted) {
+        setState(() {
+          _invalidateQuote(
+            error: 'Choose a delivery location with valid coordinates.',
+          );
+        });
+      }
+      return;
+    }
+
+    final requestId = ++_quoteRequestId;
+    if (mounted) {
+      setState(() {
+        _quoteLoading = true;
+        _quoteError = null;
+        _quoteRetryable = false;
+      });
+    }
+
+    final branchId = await _resolveBranchId();
+    if (!mounted || requestId != _quoteRequestId) return;
+
+    if (branchId == null || branchId <= 0) {
+      setState(() {
+        _invalidateQuote(
+          error:
+              'No delivery branch is available for this restaurant. Try another store.',
+          retryable: true,
+        );
+      });
+      return;
+    }
+
+    final cacheKey = deliveryFeeQuoteCacheKey(
+      branchId: branchId,
+      latitude: lat,
+      longitude: lng,
+      address: address,
+    );
+
+    final existing = _deliveryFeeQuote;
+    if (!force &&
+        existing != null &&
+        existing.isUsable &&
+        _quoteCacheKey == cacheKey) {
+      if (mounted) {
+        setState(() {
+          _quoteLoading = false;
+          _quoteError = null;
+        });
+      }
+      return;
+    }
+
+    try {
+      final quote = await _checkoutRepository.quoteDeliveryFee(
+        branchId: branchId,
+        deliveryAddress: address,
+        deliveryLatitude: lat,
+        deliveryLongitude: lng,
+      );
+      if (!mounted || requestId != _quoteRequestId) return;
+      setState(() {
+        _deliveryFeeQuote = quote;
+        _quoteCacheKey = cacheKey;
+        _quoteLoading = false;
+        _quoteError = null;
+        _quoteRetryable = false;
+        _branchName = quote.restaurant?.name ?? _branchName;
+      });
+    } on DeliveryFeeQuoteException catch (e) {
+      if (!mounted || requestId != _quoteRequestId) return;
+      setState(() {
+        _deliveryFeeQuote = null;
+        _quoteCacheKey = null;
+        _quoteLoading = false;
+        _quoteRetryable = e.isRetryableNetwork || e.isBranchUnavailable;
+        if (e.isUnauthenticated) {
+          _quoteError = 'Your session expired. Please log in again.';
+        } else if (e.isBranchUnavailable) {
+          _quoteError =
+              'This restaurant branch is not available for delivery. Please choose another branch or store.';
+          _branchId = null;
+          _cart.setSelectedBranchId(null);
+        } else if (e.isBranchLocationUnavailable) {
+          _quoteError =
+              'Delivery pricing is temporarily unavailable for this restaurant.';
+          _quoteRetryable = false;
+        } else if (e.isValidation || e.errors != null) {
+          _quoteError =
+              'Please select a valid delivery location with coordinates.';
+        } else {
+          _quoteError = e.message.isNotEmpty
+              ? e.message
+              : 'Unable to calculate delivery fee. Tap Retry.';
+          _quoteRetryable = true;
+        }
+      });
+    } catch (_) {
+      if (!mounted || requestId != _quoteRequestId) return;
+      setState(() {
+        _deliveryFeeQuote = null;
+        _quoteCacheKey = null;
+        _quoteLoading = false;
+        _quoteRetryable = true;
+        _quoteError =
+            'Unable to calculate delivery fee. Check your connection and retry.';
+      });
     }
   }
 
@@ -163,12 +369,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return null;
   }
 
-  double get _total => _subtotal + _tipAmount;
-
   void _onPromoCodeApplied(String promoCode) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-            content: Text(context.l10n.promoCodeApplied(promoCode)),
+        content: Text(context.l10n.promoCodeApplied(promoCode)),
         backgroundColor: AppColors.primaryColor,
       ),
     );
@@ -203,10 +407,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           _deliveryAddress = newAddress;
           _deliveryLatitude = latitude;
           _deliveryLongitude = longitude;
+          _invalidateQuote();
         });
-      }
+        await _refreshDeliveryFeeQuote(force: true);
+        if (!mounted) return;
 
-      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(context.l10n.addressUpdatedTo(newAddress)),
@@ -218,6 +423,29 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   void _onConfirmOrder(BuildContext blocContext) {
+    if (_quoteLoading) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Calculating delivery fee…'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    if (!_hasValidQuote) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _quoteError ??
+                'Delivery fee is required before placing the order.',
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     final List<Map<String, dynamic>> orderItems = _cartItems
         .map((item) {
           final productId =
@@ -319,6 +547,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       return;
     }
 
+    final branchId = _branchId;
+    if (branchId == null || branchId <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Unable to determine restaurant branch.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     final initiateDetails = buildInitiatePaymentDetails(
       paymentMethodCode: _selectedPaymentMethod!,
       collectedDetails: _paymentDetails,
@@ -334,6 +573,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               ...initiateDetails,
               'order_details': {
                 'vendor_id': vendorId,
+                'branch_id': branchId,
                 'items': orderItems,
                 'tax_amount': 0.0,
                 'discount_amount': 0.0,
@@ -346,6 +586,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     ? null
                     : _notesController.text.trim(),
                 'subtotal': _subtotal,
+                // Comparison only — never trusted by the backend as fee authority.
+                'quoted_delivery_fee': _quotedDeliveryFee,
               },
             },
           ),
@@ -368,11 +610,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             apiService: ApiService.instance,
           ),
         ),
-        checkoutRepository: CheckoutRepository(
-          checkoutDataProvider: CheckoutDataProvider(
-            apiService: ApiService.instance,
-          ),
-        ),
+        checkoutRepository: _checkoutRepository,
       )..add(const GetPaymentMethodsEvent()),
       child: Builder(
         builder: (blocContext) => Scaffold(
@@ -386,7 +624,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               padding: const EdgeInsets.only(left: 4),
               child: IconButton(
                 style: IconButton.styleFrom(
-                  backgroundColor: AppColors.lightOnPrimary.withValues(alpha: 0.2),
+                  backgroundColor:
+                      AppColors.lightOnPrimary.withValues(alpha: 0.2),
                 ),
                 icon: const Icon(Icons.arrow_back_ios_new_rounded,
                     color: AppColors.lightOnPrimary, size: 18),
@@ -406,7 +645,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             builder: (context, state) {
               return CheckoutBottomBar(
                 total: _total,
+                totalLabel: _formatMoney(_total),
                 isLoading: state is PaymentLoading,
+                enabled: _hasValidQuote && state is! PaymentLoading,
+                confirmLabel: _quoteLoading
+                    ? 'Calculating…'
+                    : (!_hasValidQuote ? 'Waiting for fee' : null),
                 onConfirm: () => _onConfirmOrder(blocContext),
               );
             },
@@ -428,6 +672,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   }
                 });
               } else if (state is PaymentInitiated) {
+                if (state.deliveryFeeUpdated) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Delivery fee updated for the selected address.',
+                      ),
+                      backgroundColor: AppColors.primaryColor,
+                    ),
+                  );
+                }
                 CartService().clear();
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(
@@ -507,7 +761,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       CheckoutSectionCard(
                         icon: Icons.location_on_outlined,
                         title: 'Delivery',
-                        subtitle: 'Where should we bring your order?',
+                        subtitle: _branchName != null
+                            ? 'From $_branchName'
+                            : 'Where should we bring your order?',
                         child: DeliveryAddressSection(
                           currentAddress: _deliveryAddress,
                           onChangeAddress: _onChangeAddress,
@@ -582,6 +838,19 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           subtotal: _subtotal,
                           tipAmount: _tipAmount,
                           total: _total,
+                          deliveryFee: _deliveryFeeQuote?.deliveryFee,
+                          formattedDeliveryFee:
+                              _deliveryFeeQuote?.formattedDeliveryFee,
+                          currencyCode: _deliveryFeeQuote?.currency,
+                          currencySymbol: _deliveryFeeQuote?.currencySymbol,
+                          deliveryFeeLoading: _quoteLoading,
+                          deliveryFeeError: _quoteError,
+                          onRetryDeliveryFee: _quoteRetryable
+                              ? () => _refreshDeliveryFeeQuote(force: true)
+                              : null,
+                          distanceKm: _deliveryFeeQuote?.distanceKm,
+                          estimatedDurationMinutes:
+                              _deliveryFeeQuote?.estimatedDurationMinutes,
                         ),
                       ),
                     ]),

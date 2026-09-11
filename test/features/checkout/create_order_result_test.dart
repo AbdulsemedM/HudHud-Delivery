@@ -61,6 +61,17 @@ void main() {
       });
       expect(result.totalAmount, 1500);
     });
+    test('parses delivery_fee when present', () {
+      final result = parseCreateOrderResponse({
+        'data': {
+          'order_id': 5,
+          'total_amount': 120,
+          'delivery_fee': 7.02,
+          'currency': 'ETB',
+        },
+      });
+      expect(result.deliveryFee, 7.02);
+    });
   });
 
   group('expectedOrderStatusAfterPayment', () {

@@ -797,13 +797,43 @@ class OrderSummarySection extends StatelessWidget {
   final double subtotal;
   final double total;
   final double tipAmount;
+  final double? deliveryFee;
+  final String? formattedDeliveryFee;
+  final String? currencyCode;
+  final String? currencySymbol;
+  final bool deliveryFeeLoading;
+  final String? deliveryFeeError;
+  final VoidCallback? onRetryDeliveryFee;
+  final double? distanceKm;
+  final int? estimatedDurationMinutes;
 
   const OrderSummarySection({
     super.key,
     required this.subtotal,
     required this.total,
     this.tipAmount = 0.0,
+    this.deliveryFee,
+    this.formattedDeliveryFee,
+    this.currencyCode,
+    this.currencySymbol,
+    this.deliveryFeeLoading = false,
+    this.deliveryFeeError,
+    this.onRetryDeliveryFee,
+    this.distanceKm,
+    this.estimatedDurationMinutes,
   });
+
+  String _formatAmount(double amount) {
+    final symbol = currencySymbol?.trim();
+    if (symbol != null && symbol.isNotEmpty) {
+      return '$symbol${amount.toStringAsFixed(2)}';
+    }
+    final code = currencyCode?.trim();
+    if (code != null && code.isNotEmpty) {
+      return '$code ${amount.toStringAsFixed(2)}';
+    }
+    return 'ETB ${amount.toStringAsFixed(2)}';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -817,9 +847,99 @@ class OrderSummarySection extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _SummaryRow(label: 'Subtotal', amount: subtotal),
-          const _SummaryRow(label: 'Delivery fee', amount: 0, muted: true),
-          if (tipAmount > 0) _SummaryRow(label: 'Tip', amount: tipAmount),
+          _SummaryRow(
+            label: 'Subtotal',
+            amountLabel: _formatAmount(subtotal),
+          ),
+          if (deliveryFeeLoading)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 5),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: scheme.primary,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Calculating delivery fee…',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: scheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else if (deliveryFeeError != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 5),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Text(
+                      deliveryFeeError!,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: scheme.error,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  if (onRetryDeliveryFee != null)
+                    TextButton(
+                      onPressed: onRetryDeliveryFee,
+                      child: const Text('Retry'),
+                    ),
+                ],
+              ),
+            )
+          else
+            _SummaryRow(
+              label: 'Delivery fee',
+              amountLabel: formattedDeliveryFee?.isNotEmpty == true
+                  ? formattedDeliveryFee!
+                  : (deliveryFee != null
+                      ? (deliveryFee == 0
+                          ? 'Free'
+                          : _formatAmount(deliveryFee!))
+                      : '—'),
+              muted: deliveryFee == null || deliveryFee == 0,
+            ),
+          if (!deliveryFeeLoading &&
+              deliveryFeeError == null &&
+              (distanceKm != null || estimatedDurationMinutes != null))
+            Padding(
+              padding: const EdgeInsets.only(top: 2, bottom: 4),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  [
+                    if (distanceKm != null)
+                      '~${distanceKm!.toStringAsFixed(1)} km',
+                    if (estimatedDurationMinutes != null)
+                      '~$estimatedDurationMinutes min',
+                  ].join(' · '),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ),
+          if (tipAmount > 0)
+            _SummaryRow(
+              label: 'Tip',
+              amountLabel: _formatAmount(tipAmount),
+            ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
             child: Row(
@@ -849,7 +969,7 @@ class OrderSummarySection extends StatelessWidget {
                   colors: [AppColors.primaryColor, AppColors.primaryDarkColor],
                 ).createShader(bounds),
                 child: Text(
-                  'ETB ${total.toStringAsFixed(2)}',
+                  _formatAmount(total),
                   style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
@@ -867,12 +987,12 @@ class OrderSummarySection extends StatelessWidget {
 
 class _SummaryRow extends StatelessWidget {
   final String label;
-  final double amount;
+  final String amountLabel;
   final bool muted;
 
   const _SummaryRow({
     required this.label,
-    required this.amount,
+    required this.amountLabel,
     this.muted = false,
   });
 
@@ -894,9 +1014,7 @@ class _SummaryRow extends StatelessWidget {
             ),
           ),
           Text(
-            muted && amount == 0
-                ? 'Free'
-                : 'ETB ${amount.toStringAsFixed(2)}',
+            amountLabel,
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -1064,6 +1182,9 @@ class PaymentMethodGridSection extends StatelessWidget {
 class CheckoutBottomBar extends StatelessWidget {
   final double total;
   final bool isLoading;
+  final bool enabled;
+  final String? totalLabel;
+  final String? confirmLabel;
   final VoidCallback onConfirm;
 
   const CheckoutBottomBar({
@@ -1071,6 +1192,9 @@ class CheckoutBottomBar extends StatelessWidget {
     required this.total,
     required this.isLoading,
     required this.onConfirm,
+    this.enabled = true,
+    this.totalLabel,
+    this.confirmLabel,
   });
 
   @override
@@ -1106,7 +1230,7 @@ class CheckoutBottomBar extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'ETB ${total.toStringAsFixed(2)}',
+                    totalLabel ?? 'ETB ${total.toStringAsFixed(2)}',
                     style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w800,
@@ -1122,6 +1246,8 @@ class CheckoutBottomBar extends StatelessWidget {
               child: ConfirmOrderButton(
                 onPressed: onConfirm,
                 isLoading: isLoading,
+                enabled: enabled,
+                label: confirmLabel,
               ),
             ),
           ],
@@ -1134,63 +1260,72 @@ class CheckoutBottomBar extends StatelessWidget {
 class ConfirmOrderButton extends StatelessWidget {
   final VoidCallback onPressed;
   final bool isLoading;
+  final bool enabled;
+  final String? label;
 
   const ConfirmOrderButton({
     super.key,
     required this.onPressed,
     this.isLoading = false,
+    this.enabled = true,
+    this.label,
   });
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.primaryColor, AppColors.primaryDarkColor],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primaryColor.withValues(alpha: 0.35),
-            blurRadius: 14,
-            offset: const Offset(0, 6),
+    final canTap = enabled && !isLoading;
+    return Opacity(
+      opacity: canTap || isLoading ? 1 : 0.55,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [AppColors.primaryColor, AppColors.primaryDarkColor],
           ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: isLoading ? null : onPressed,
           borderRadius: BorderRadius.circular(16),
-          child: SizedBox(
-            height: 52,
-            child: Center(
-              child: isLoading
-                  ? const SizedBox(
-                      height: 22,
-                      width: 22,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        valueColor:
-                            AlwaysStoppedAnimation<Color>(AppColors.lightOnPrimary),
-                      ),
-                    )
-                  : const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.lock_outline,
-                            color: AppColors.lightOnPrimary, size: 18),
-                        SizedBox(width: 8),
-                        Text(
-                          'Place Order',
-                          style: TextStyle(
-                            color: AppColors.lightOnPrimary,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primaryColor.withValues(alpha: 0.35),
+              blurRadius: 14,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: canTap ? onPressed : null,
+            borderRadius: BorderRadius.circular(16),
+            child: SizedBox(
+              height: 52,
+              child: Center(
+                child: isLoading
+                    ? const SizedBox(
+                        height: 22,
+                        width: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            AppColors.lightOnPrimary,
                           ),
                         ),
-                      ],
-                    ),
+                      )
+                    : Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.lock_outline,
+                              color: AppColors.lightOnPrimary, size: 18),
+                          const SizedBox(width: 8),
+                          Text(
+                            label ?? 'Place Order',
+                            style: const TextStyle(
+                              color: AppColors.lightOnPrimary,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
             ),
           ),
         ),

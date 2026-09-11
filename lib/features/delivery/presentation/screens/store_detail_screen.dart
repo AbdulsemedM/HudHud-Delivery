@@ -96,6 +96,13 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
     try {
       final branches = await _branchesRepository.getBranches(vendorId: vendorId);
       if (mounted) setState(() => _branches = branches);
+      final active = branches.where((b) => b.id > 0 && (b.isActive || branches.length == 1)).toList();
+      final candidates = active.isNotEmpty
+          ? active
+          : branches.where((b) => b.id > 0).toList();
+      if (candidates.length == 1) {
+        CartService().setSelectedBranchId(candidates.first.id);
+      }
     } catch (_) {}
   }
 

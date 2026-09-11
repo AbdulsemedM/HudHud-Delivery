@@ -106,6 +106,8 @@ class ApiConstants {
   static const String customerOrdersAvailable = 'customer/orders/available';
   static const String customerOrderRate = 'customer/orders/{id}/rate';
   static const String customerOrderCancel = 'customer/orders/{id}/cancel';
+  /// POST /api/customer/delivery-fee/quote — checkout delivery-fee preview.
+  static const String customerDeliveryFeeQuote = 'customer/delivery-fee/quote';
 
   // Delivery endpoints
   static const String delivery = '/delivery';
