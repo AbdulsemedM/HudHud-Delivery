@@ -120,14 +120,16 @@ class SplashLogoMark extends StatelessWidget {
   const SplashLogoMark({super.key});
 
   static const assetPath = 'assets/images/logo.png';
+  static const darkAssetPath = 'assets/images/logo_dark.png';
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return SizedBox(
       width: 260,
       height: 120,
       child: Image.asset(
-        assetPath,
+        isDark ? darkAssetPath : assetPath,
         fit: BoxFit.contain,
         errorBuilder: (context, error, stackTrace) {
           return const Icon(

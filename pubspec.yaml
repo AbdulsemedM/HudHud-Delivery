@@ -44,6 +44,9 @@ dependencies:
 
   # Shared Preferences
   shared_preferences: ^2.2.2
+  # Pin below 2.6.0: that release pulls objective_c via FFI native assets and can
+  # embed an IOSSIMULATOR-tagged binary in App Store archives (Flutter 3.41.x).
+  path_provider_foundation: 2.5.1
   flutter_bloc: ^8.1.6
   font_awesome_flutter: ^10.6.0
   intl: ^0.20.2
@@ -102,9 +105,9 @@ dev_dependencies:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/images/logo (2).jpg"
+  image_path: "assets/images/app_icon.png"
   adaptive_icon_background: "#FFFFFF"
-  adaptive_icon_foreground: "assets/images/logo (2).jpg"
+  adaptive_icon_foreground: "assets/images/app_icon_foreground.png"
   remove_alpha_ios: true
 
 flutter:

@@ -8,10 +8,11 @@ class AuthBrandHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Image.asset(
-      'assets/images/logo.png',
-      width: 96,
-      height: 96,
+      isDark ? 'assets/images/logo_dark.png' : 'assets/images/logo.png',
+      width: 200,
+      height: 72,
       fit: BoxFit.contain,
       errorBuilder: (_, __, ___) => const Icon(
         Icons.local_shipping_rounded,

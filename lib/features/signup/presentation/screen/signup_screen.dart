@@ -173,8 +173,9 @@ class _SignupTopBar extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Image.asset(
-              'assets/images/logo.png',
-              width: 28,
+              Theme.of(context).brightness == Brightness.dark
+                  ? 'assets/images/logo_dark.png'
+                  : 'assets/images/logo.png',
               height: 28,
               fit: BoxFit.contain,
               errorBuilder: (_, __, ___) => const Icon(

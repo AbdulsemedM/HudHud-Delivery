@@ -19,15 +19,17 @@ class LogoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final logoColor = AuthScreenColors.textPrimaryOf(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Image.asset(
-      'assets/images/logo.png',
+      isDark ? 'assets/images/logo_dark.png' : 'assets/images/logo.png',
       width: 140,
       fit: BoxFit.contain,
-      color: logoColor,
-      colorBlendMode: BlendMode.srcIn,
       errorBuilder: (context, error, stackTrace) {
-        return Icon(Icons.delivery_dining, color: logoColor, size: 72);
+        return Icon(
+          Icons.delivery_dining,
+          color: AuthScreenColors.textPrimaryOf(context),
+          size: 72,
+        );
       },
     );
   }
