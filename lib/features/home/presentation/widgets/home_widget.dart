@@ -3,7 +3,6 @@ import 'package:shimmer/shimmer.dart';
 import 'package:lottie/lottie.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
-import 'package:hudhud_delivery/core/widgets/theme_toggle_button.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/avatar_util.dart';
 import '../../../../core/widgets/user_avatar.dart';
@@ -25,7 +24,8 @@ class MarketingOffersPromptDialog extends StatefulWidget {
       _MarketingOffersPromptDialogState();
 }
 
-class _MarketingOffersPromptDialogState extends State<MarketingOffersPromptDialog> {
+class _MarketingOffersPromptDialogState
+    extends State<MarketingOffersPromptDialog> {
   bool _busy = false;
 
   Future<void> _accept() async {
@@ -282,162 +282,219 @@ class _UserProfileHeaderState extends State<UserProfileHeader>
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final avatarUrl = getDisplayAvatarUrl(widget.user);
+    final dark = HomeColors.isDark(context);
+    final firstName = widget.name.trim().split(RegExp(r'\s+')).first;
 
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: HomeColors.violet.withValues(alpha: 0.75),
-              width: 2,
-            ),
-          ),
-          child: ClipOval(
-            child: avatarUrl != null && avatarUrl.isNotEmpty
-                ? UserAvatar(
-                    radius: 22,
-                    imageUrl: avatarUrl,
-                    backgroundColor: HomeColors.surfaceElevatedOf(context),
-                  )
-                : Container(
-                    color: HomeColors.surfaceElevatedOf(context),
-                    alignment: Alignment.center,
-                    child: Text(
-                      _initial,
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: HomeColors.textPrimaryOf(context),
+        Row(
+          children: [
+            Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: AppColors.brandHeroGradient,
+                ),
+                boxShadow: dark
+                    ? null
+                    : [
+                        BoxShadow(
+                          color: AppColors.brandIndigo.withValues(alpha: 0.25),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+              ),
+              child: ClipOval(
+                child: avatarUrl != null && avatarUrl.isNotEmpty
+                    ? UserAvatar(
+                        radius: 25,
+                        imageUrl: avatarUrl,
+                        backgroundColor: AppColors.brandIndigo,
+                      )
+                    : Center(
+                        child: Text(
+                          _initial,
+                          style: const TextStyle(
+                            fontSize: 21,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                widget.name,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                firstName.isEmpty ? widget.name : firstName,
                 style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 22,
+                  letterSpacing: -0.4,
                   color: HomeColors.textPrimaryOf(context),
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(height: 4),
-              KeyedSubtree(
-                key: widget.locationKey,
-                child: GestureDetector(
-                  onTap: () {
-                    _chevronController.forward(from: 0).then((_) {
-                      _chevronController.reverse();
-                    });
-                    widget.onLocationTap();
-                  },
+            ),
+            const SizedBox(width: 8),
+            _HeaderIconButton(
+              key: widget.notificationsKey,
+              icon: Icons.notifications_none_rounded,
+              showDot: true,
+              onTap: widget.onNotificationsTap,
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        KeyedSubtree(
+          key: widget.locationKey,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: AppColors.softShadow(context),
+            ),
+            child: Material(
+              color: HomeColors.surfaceOf(context),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18),
+                side: BorderSide(color: HomeColors.borderOf(context)),
+              ),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(18),
+                onTap: () {
+                  _chevronController.forward(from: 0).then((_) {
+                    _chevronController.reverse();
+                  });
+                  widget.onLocationTap();
+                },
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 8, 12, 8),
                   child: Row(
                     children: [
-                      const Icon(
-                        Icons.location_on_rounded,
-                        color: HomeColors.orange,
-                        size: 16,
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: dark
+                              ? AppColors.orangeTintDark
+                              : AppColors.orangeTint,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.location_on_rounded,
+                          color: HomeColors.orange,
+                          size: 24,
+                        ),
                       ),
-                      const SizedBox(width: 4),
-                      Flexible(
+                      const SizedBox(width: 12),
+                      Expanded(
                         child: widget.isLoadingLocation
-                            ? const SizedBox(
-                                width: 12,
-                                height: 12,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: HomeColors.orange,
+                            ? const Align(
+                                alignment: Alignment.centerLeft,
+                                child: SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.2,
+                                    color: HomeColors.orange,
+                                  ),
                                 ),
                               )
                             : Text(
                                 widget.location.isEmpty
                                     ? l10n.yourLocation
                                     : widget.location,
-                                style: const TextStyle(
-                                  color: HomeColors.orange,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 12,
+                                style: TextStyle(
+                                  color: HomeColors.textPrimaryOf(context),
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 15,
                                 ),
                                 overflow: TextOverflow.ellipsis,
                                 maxLines: 1,
                               ),
                       ),
+                      const SizedBox(width: 8),
                       RotationTransition(
                         turns: Tween<double>(begin: 0, end: 0.5)
                             .animate(_chevronController),
-                        child: const Icon(
-                          Icons.chevron_right_rounded,
-                          color: HomeColors.orange,
-                          size: 18,
+                        child: Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          color: HomeColors.textMutedOf(context),
+                          size: 26,
                         ),
                       ),
                     ],
                   ),
                 ),
               ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 8),
-        Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: HomeColors.surfaceOf(context),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: HomeColors.surfaceElevatedOf(context)),
-          ),
-          child: ThemeToggleIconButton(
-            iconColor: HomeColors.textPrimaryOf(context),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Container(
-          key: widget.notificationsKey,
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: HomeColors.surfaceOf(context),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: HomeColors.surfaceElevatedOf(context)),
-          ),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              IconButton(
-                icon: Icon(
-                  Icons.notifications_outlined,
-                  color: HomeColors.textPrimaryOf(context),
-                  size: 22,
-                ),
-                onPressed: widget.onNotificationsTap,
-              ),
-              Positioned(
-                top: 10,
-                right: 10,
-                child: Container(
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(
-                    color: HomeColors.orange,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ],
+    );
+  }
+}
+
+class _HeaderIconButton extends StatelessWidget {
+  const _HeaderIconButton({
+    super.key,
+    required this.icon,
+    required this.onTap,
+    this.showDot = false,
+  });
+
+  final IconData icon;
+  final VoidCallback onTap;
+  final bool showDot;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: HomeColors.surfaceOf(context),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: HomeColors.borderOf(context)),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        customBorder: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: SizedBox(
+          width: 50,
+          height: 50,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Icon(icon, color: HomeColors.textPrimaryOf(context), size: 27),
+              if (showDot)
+                Positioned(
+                  top: 12,
+                  right: 13,
+                  child: Container(
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      color: HomeColors.orange,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: HomeColors.surfaceOf(context),
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -571,7 +628,8 @@ class ServiceCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: colorScheme.surface,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: colorScheme.outline.withValues(alpha: 0.28), width: 1),
+            border: Border.all(
+                color: colorScheme.outline.withValues(alpha: 0.28), width: 1),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.08),
@@ -1036,22 +1094,24 @@ class ShimmerListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final baseColor = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0);
+    // Tinted neutrals, matching the indigo-tinted surfaces.
+    final baseColor =
+        isDark ? AppColors.darkSurfaceVariant : const Color(0xFFEAE8F0);
     final highlightColor =
-        isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF5F5F5);
+        isDark ? const Color(0xFF2C2443) : const Color(0xFFF8F7FB);
 
     return Column(
       children: List.generate(itemCount, (index) {
         return Padding(
-          padding: const EdgeInsets.only(bottom: AppColors.spaceMD),
+          padding: const EdgeInsets.only(bottom: 12),
           child: Shimmer.fromColors(
             baseColor: baseColor,
             highlightColor: highlightColor,
             child: Container(
-              height: 88,
+              height: 104,
               decoration: BoxDecoration(
                 color: baseColor,
-                borderRadius: BorderRadius.circular(AppColors.radiusLG),
+                borderRadius: BorderRadius.circular(20),
               ),
             ),
           ),
@@ -1089,7 +1149,8 @@ class SectionHeader extends StatelessWidget {
             onPressed: onAction,
             style: TextButton.styleFrom(
               foregroundColor: AppColors.primaryColor,
-              textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+              textStyle:
+                  const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
             ),
             child: Text(actionLabel),
           ),

@@ -11,6 +11,7 @@ import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/easy_mode/easy_mode_controller.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/theme/system_ui_style.dart';
 import 'package:provider/provider.dart';
 import 'package:hudhud_delivery/core/utils/avatar_util.dart';
@@ -419,8 +420,10 @@ class _SettingsScreenState extends State<SettingsScreen>
         : l10n.emDash;
 
     final walletText = _walletTotal == null
-        ? ''
+        ? l10n.emDash
         : '${l10n.currencyEtb} ${_walletTotal!.toStringAsFixed(2)}';
+
+    final indigo = _accentIndigo(context);
 
     return Theme(
       data: authTheme,
@@ -434,7 +437,7 @@ class _SettingsScreenState extends State<SettingsScreen>
               backgroundColor: AuthScreenColors.surfaceOf(context),
               onRefresh: _loadAll,
               child: ListView(
-                padding: EdgeInsets.fromLTRB(16, 8, 16, 28),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
                 physics: const AlwaysScrollableScrollPhysics(),
                 children: [
                   _ProfileHeaderCard(
@@ -450,48 +453,52 @@ class _SettingsScreenState extends State<SettingsScreen>
                       ).then((_) => _loadUserData());
                     },
                   ),
-                  SizedBox(height: 14),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _ProfileStatCard(
-                          icon: Icons.local_activity_outlined,
-                          iconColor: AuthScreenColors.orange,
-                          title: l10n.profileCoupons,
-                          value: '0',
-                          onTap: () {
-                            AuthSnackBar.comingSoon(
-                              context,
-                              l10n.profileCouponsComingSoon,
-                            );
-                          },
+                  const SizedBox(height: 14),
+                  IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(
+                          child: _ProfileStatCard(
+                            icon: Icons.account_balance_wallet_rounded,
+                            iconColor: indigo,
+                            title: l10n.profileWallet,
+                            value: walletText,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const WalletScreen(),
+                                ),
+                              ).then((_) => _loadWalletSummary());
+                            },
+                          ),
                         ),
-                      ),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: _ProfileStatCard(
-                          icon: Icons.account_balance_wallet_outlined,
-                          iconColor: AuthScreenColors.lavender,
-                          title: l10n.profileWallet,
-                          value: walletText,
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const WalletScreen(),
-                              ),
-                            ).then((_) => _loadWalletSummary());
-                          },
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _ProfileStatCard(
+                            icon: Icons.local_activity_rounded,
+                            iconColor: AuthScreenColors.orange,
+                            title: l10n.profileCoupons,
+                            value: '0',
+                            onTap: () {
+                              AuthSnackBar.comingSoon(
+                                context,
+                                l10n.profileCouponsComingSoon,
+                              );
+                            },
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                  SizedBox(height: 22),
+                  const SizedBox(height: 26),
                   _ProfileSectionLabel(title: l10n.settingsAccount),
                   _ProfileGroupCard(
                     children: [
                       _ProfileMenuTile(
-                        icon: Icons.person_outline,
+                        icon: Icons.person_rounded,
+                        color: indigo,
                         title: l10n.profileMenuProfile,
                         onTap: () {
                           Navigator.push(
@@ -505,21 +512,22 @@ class _SettingsScreenState extends State<SettingsScreen>
                       ),
                       const _ProfileTileDivider(),
                       _ProfileMenuTile(
-                        icon: Icons.location_on_outlined,
+                        icon: Icons.location_on_rounded,
+                        color: AuthScreenColors.orange,
                         title: l10n.profileMenuAddresses,
                         onTap: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  const AddressesListScreen(),
+                              builder: (context) => const AddressesListScreen(),
                             ),
                           );
                         },
                       ),
                       const _ProfileTileDivider(),
                       _ProfileMenuTile(
-                        icon: Icons.shield_outlined,
+                        icon: Icons.shield_rounded,
+                        color: AppColors.warningColor,
                         title: l10n.sosSettingsTitle,
                         onTap: () {
                           Navigator.push(
@@ -561,7 +569,8 @@ class _SettingsScreenState extends State<SettingsScreen>
                       // ),
                       // const _ProfileTileDivider(),
                       _ProfileMenuTile(
-                        icon: Icons.chat_bubble_outline,
+                        icon: Icons.chat_bubble_rounded,
+                        color: indigo,
                         title: l10n.profileMenuMessages,
                         trailing: ChatUnreadBadge(count: _chatUnreadCount),
                         onTap: () async {
@@ -575,12 +584,8 @@ class _SettingsScreenState extends State<SettingsScreen>
                           if (mounted) _fetchChatUnreadCount();
                         },
                       ),
-                    ],
-                  ),
-                  SizedBox(height: 14),
-                  _ProfileGroupCard(
-                    children: [
                       if (!kIsWeb) ...[
+                        const _ProfileTileDivider(),
                         _ProfileBiometricTile(
                           useFaceIcon: _useFaceBiometricIcon,
                           enabled: _biometricEnabled,
@@ -589,7 +594,6 @@ class _SettingsScreenState extends State<SettingsScreen>
                           hasCredentials: _biometricHasCredentials,
                           onChanged: _onBiometricLoginChanged,
                         ),
-                        // const _ProfileTileDivider(),
                       ],
                       // TODO: restore when Account Settings launches
                       // _ProfileMenuTile(
@@ -609,12 +613,13 @@ class _SettingsScreenState extends State<SettingsScreen>
                       // ),
                     ],
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 26),
                   _ProfileSectionLabel(title: l10n.settingsPreferences),
                   _ProfileGroupCard(
                     children: [
                       _ProfileMenuTile(
-                        icon: Icons.settings_outlined,
+                        icon: Icons.tune_rounded,
+                        color: indigo,
                         title: l10n.settingsGeneralPreferences,
                         onTap: () {
                           Navigator.push(
@@ -644,6 +649,29 @@ class _SettingsScreenState extends State<SettingsScreen>
                       //     );
                       //   },
                       // ),
+                      const _ProfileTileDivider(),
+                      Consumer<EasyModeController>(
+                        builder: (context, easyMode, _) {
+                          return _ProfileEasyModeTile(
+                            enabled: easyMode.enabled,
+                            onChanged: (v) => easyMode.setEnabled(v),
+                          );
+                        },
+                      ),
+                      const _ProfileTileDivider(),
+                      _ProfileMenuTile(
+                        icon: Icons.translate_rounded,
+                        color: indigo,
+                        title: l10n.settingsLanguage,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const LanguageScreen(),
+                            ),
+                          );
+                        },
+                      ),
                     ],
                   ),
                   // TODO: restore when home tour replay is needed
@@ -668,12 +696,13 @@ class _SettingsScreenState extends State<SettingsScreen>
                   //     ],
                   //   ),
                   // ],
-                  SizedBox(height: 20),
+                  const SizedBox(height: 26),
                   _ProfileSectionLabel(title: l10n.settingsAppSettings),
                   _ProfileGroupCard(
                     children: [
                       _ProfileMenuTile(
-                        icon: Icons.notifications_outlined,
+                        icon: Icons.notifications_rounded,
+                        color: AuthScreenColors.orange,
                         title: l10n.settingsNotifications,
                         onTap: () {
                           Navigator.push(
@@ -694,30 +723,9 @@ class _SettingsScreenState extends State<SettingsScreen>
                         onChanged: _onMarketingConsentChanged,
                       ),
                       const _ProfileTileDivider(),
-                      Consumer<EasyModeController>(
-                        builder: (context, easyMode, _) {
-                          return _ProfileEasyModeTile(
-                            enabled: easyMode.enabled,
-                            onChanged: (v) => easyMode.setEnabled(v),
-                          );
-                        },
-                      ),
-                      const _ProfileTileDivider(),
                       _ProfileMenuTile(
-                        icon: Icons.language_outlined,
-                        title: l10n.settingsLanguage,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const LanguageScreen(),
-                            ),
-                          );
-                        },
-                      ),
-                      const _ProfileTileDivider(),
-                      _ProfileMenuTile(
-                        icon: Icons.headset_mic_outlined,
+                        icon: Icons.headset_mic_rounded,
+                        color: AppColors.successColor,
                         title: l10n.settingsSupport,
                         onTap: () {
                           Navigator.push(
@@ -743,45 +751,20 @@ class _SettingsScreenState extends State<SettingsScreen>
                       // ),
                     ],
                   ),
-                  SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AuthScreenColors.orange,
-                        side: BorderSide(
-                          color: AuthScreenColors.orange,
-                          width: 1.2,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        backgroundColor: AuthScreenColors.surfaceOf(context),
+                  const SizedBox(height: 26),
+                  _ProfileGroupCard(
+                    children: [
+                      _ProfileMenuTile(
+                        icon: Icons.logout_rounded,
+                        color: AppColors.errorColor,
+                        title: l10n.actionLogOut,
+                        titleColor: AppColors.errorColor,
+                        showChevron: false,
+                        onTap: () => _handleLogout(context),
                       ),
-                      onPressed: () => _handleLogout(context),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.logout_rounded,
-                            color: AuthScreenColors.orange,
-                            size: 22,
-                          ),
-                          SizedBox(width: 10),
-                          Text(
-                            l10n.actionLogOut,
-                            style: TextStyle(
-                              color: AuthScreenColors.orange,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 15,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    ],
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 24),
                   _LegalFooter(
                     packageInfo: _packageInfo,
                     l10n: l10n,
@@ -796,6 +779,33 @@ class _SettingsScreenState extends State<SettingsScreen>
   }
 }
 
+/// Brand indigo tuned for the current brightness.
+Color _accentIndigo(BuildContext context) => AuthScreenColors.isDark(context)
+    ? AppColors.brandIndigoBright
+    : AppColors.brandIndigo;
+
+/// 44px rounded tile with a soft tint fill behind an icon.
+class _TintIconTile extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+
+  const _TintIconTile({required this.icon, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = AuthScreenColors.isDark(context);
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        color: color.withValues(alpha: dark ? 0.2 : 0.11),
+      ),
+      child: Icon(icon, color: color, size: 24),
+    );
+  }
+}
+
 class _ProfileSectionLabel extends StatelessWidget {
   final String title;
 
@@ -804,13 +814,13 @@ class _ProfileSectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(left: 4, bottom: 10),
+      padding: const EdgeInsets.only(left: 6, bottom: 10),
       child: Text(
         title.toUpperCase(),
         style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.8,
+          fontSize: 12.5,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 1.1,
           color: AuthScreenColors.textMutedOf(context),
         ),
       ),
@@ -825,14 +835,24 @@ class _ProfileGroupCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final dark = AuthScreenColors.isDark(context);
+    final radius = BorderRadius.circular(20);
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color: AuthScreenColors.surfaceOf(context),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AuthScreenColors.surfaceBorderOf(context)),
+        borderRadius: radius,
+        boxShadow: AppColors.softShadow(context),
       ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(children: children),
+      child: Material(
+        color: AuthScreenColors.surfaceOf(context),
+        shape: RoundedRectangleBorder(
+          borderRadius: radius,
+          side: dark
+              ? BorderSide(color: AuthScreenColors.surfaceBorderOf(context))
+              : BorderSide.none,
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(children: children),
+      ),
     );
   }
 }
@@ -845,7 +865,7 @@ class _ProfileTileDivider extends StatelessWidget {
     return Divider(
       height: 1,
       thickness: 1,
-      indent: 60,
+      indent: 72,
       endIndent: 16,
       color: AuthScreenColors.surfaceBorderOf(context),
     );
@@ -857,52 +877,125 @@ class _ProfileMenuTile extends StatelessWidget {
   final String title;
   final VoidCallback onTap;
   final Widget? trailing;
+  final Color? color;
+  final Color? titleColor;
+  final bool showChevron;
 
   const _ProfileMenuTile({
     required this.icon,
     required this.title,
     required this.onTap,
     this.trailing,
+    this.color,
+    this.titleColor,
+    this.showChevron = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
+    return InkWell(
+      onTap: onTap,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 68),
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           child: Row(
             children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: AuthScreenColors.orange.withValues(alpha: 0.12),
-                ),
-                child: Icon(icon, color: AuthScreenColors.orange, size: 22),
+              _TintIconTile(
+                icon: icon,
+                color: color ?? _accentIndigo(context),
               ),
-              SizedBox(width: 12),
+              const SizedBox(width: 14),
               Expanded(
                 child: Text(
                   title,
                   style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 15,
-                    color: AuthScreenColors.textPrimaryOf(context),
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                    letterSpacing: -0.2,
+                    color:
+                        titleColor ?? AuthScreenColors.textPrimaryOf(context),
                   ),
                 ),
               ),
               if (trailing != null) ...[
                 trailing!,
-                SizedBox(width: 4),
+                const SizedBox(width: 4),
               ],
-              Icon(
-                Icons.chevron_right_rounded,
-                color: AuthScreenColors.textSecondaryOf(context),
-                size: 22,
+              if (showChevron)
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: AuthScreenColors.textMutedOf(context),
+                  size: 26,
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Row with an icon tile, title + hint, and a trailing switch.
+class _ProfileSwitchRow extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String title;
+  final String subtitle;
+  final bool value;
+  final ValueChanged<bool>? onChanged;
+
+  const _ProfileSwitchRow({
+    required this.icon,
+    required this.color,
+    required this.title,
+    required this.subtitle,
+    required this.value,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onChanged == null ? null : () => onChanged!(!value),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 68),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          child: Row(
+            children: [
+              _TintIconTile(icon: icon, color: color),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                        letterSpacing: -0.2,
+                        color: AuthScreenColors.textPrimaryOf(context),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 13,
+                        height: 1.35,
+                        fontWeight: FontWeight.w600,
+                        color: AuthScreenColors.textMutedOf(context),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              _ProfileGradientSwitch(
+                value: value,
+                onChanged: onChanged,
               ),
             ],
           ),
@@ -939,56 +1032,13 @@ class _ProfileBiometricTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              color: AuthScreenColors.orange.withValues(alpha: 0.12),
-            ),
-            child: Icon(
-              useFaceIcon ? Icons.face_outlined : Icons.fingerprint_outlined,
-              color: AuthScreenColors.orange,
-              size: 22,
-            ),
-          ),
-          SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.settingsBiometricLogin,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15,
-                    color: AuthScreenColors.textPrimaryOf(context),
-                  ),
-                ),
-                SizedBox(height: 2),
-                Text(
-                  _subtitle(l10n),
-                  style: TextStyle(
-                    fontSize: 12,
-                    height: 1.35,
-                    color: AuthScreenColors.textSecondaryOf(context),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(width: 8),
-          _ProfileGradientSwitch(
-            value: enabled,
-            onChanged: switchEnabled ? onChanged : null,
-          ),
-        ],
-      ),
+    return _ProfileSwitchRow(
+      icon: useFaceIcon ? Icons.face_rounded : Icons.fingerprint_rounded,
+      color: _accentIndigo(context),
+      title: l10n.settingsBiometricLogin,
+      subtitle: _subtitle(l10n),
+      value: enabled,
+      onChanged: switchEnabled ? onChanged : null,
     );
   }
 }
@@ -1005,56 +1055,13 @@ class _ProfileEasyModeTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              color: AuthScreenColors.orange.withValues(alpha: 0.12),
-            ),
-            child: Icon(
-              Icons.accessibility_new_rounded,
-              color: AuthScreenColors.orange,
-              size: 22,
-            ),
-          ),
-          SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.easyMode,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15,
-                    color: AuthScreenColors.textPrimaryOf(context),
-                  ),
-                ),
-                SizedBox(height: 2),
-                Text(
-                  l10n.easyModeSubtitle,
-                  style: TextStyle(
-                    fontSize: 12,
-                    height: 1.35,
-                    color: AuthScreenColors.textSecondaryOf(context),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(width: 8),
-          _ProfileGradientSwitch(
-            value: enabled,
-            onChanged: onChanged,
-          ),
-        ],
-      ),
+    return _ProfileSwitchRow(
+      icon: Icons.accessibility_new_rounded,
+      color: AppColors.successColor,
+      title: l10n.easyMode,
+      subtitle: l10n.easyModeSubtitle,
+      value: enabled,
+      onChanged: onChanged,
     );
   }
 }
@@ -1073,60 +1080,18 @@ class _ProfileMarketingConsentTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              color: AuthScreenColors.orange.withValues(alpha: 0.12),
-            ),
-            child: Icon(
-              Icons.campaign_outlined,
-              color: AuthScreenColors.orange,
-              size: 22,
-            ),
-          ),
-          SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.settingsMarketingOffers,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15,
-                    color: AuthScreenColors.textPrimaryOf(context),
-                  ),
-                ),
-                SizedBox(height: 2),
-                Text(
-                  l10n.settingsMarketingOffersSubtitle,
-                  style: TextStyle(
-                    fontSize: 12,
-                    height: 1.35,
-                    color: AuthScreenColors.textSecondaryOf(context),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(width: 8),
-          _ProfileGradientSwitch(
-            value: enabled,
-            onChanged: switchEnabled ? onChanged : null,
-          ),
-        ],
-      ),
+    return _ProfileSwitchRow(
+      icon: Icons.campaign_rounded,
+      color: AuthScreenColors.orange,
+      title: l10n.settingsMarketingOffers,
+      subtitle: l10n.settingsMarketingOffersSubtitle,
+      value: enabled,
+      onChanged: switchEnabled ? onChanged : null,
     );
   }
 }
 
+/// Large, high-contrast on/off switch (indigo when on).
 class _ProfileGradientSwitch extends StatelessWidget {
   final bool value;
   final ValueChanged<bool>? onChanged;
@@ -1138,30 +1103,52 @@ class _ProfileGradientSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onChanged == null ? null : () => onChanged!(!value),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        width: 52,
-        height: 30,
-        padding: EdgeInsets.all(3),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          gradient: value
-              ? const LinearGradient(
-                  colors: AuthScreenColors.signInGradient,
-                )
-              : null,
-          color: value ? null : AuthScreenColors.surfaceBorderOf(context),
-        ),
-        child: Align(
-          alignment: value ? Alignment.centerRight : Alignment.centerLeft,
-          child: Container(
-            width: 24,
-            height: 24,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
+    final disabled = onChanged == null;
+    return Semantics(
+      toggled: value,
+      enabled: !disabled,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: disabled ? null : () => onChanged!(!value),
+        child: SizedBox(
+          height: 48,
+          child: Center(
+            child: Opacity(
+              opacity: disabled ? 0.5 : 1,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOut,
+                width: 54,
+                height: 32,
+                padding: const EdgeInsets.all(3),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: value
+                      ? _accentIndigo(context)
+                      : AuthScreenColors.surfaceBorderOf(context),
+                ),
+                child: AnimatedAlign(
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeOut,
+                  alignment:
+                      value ? Alignment.centerRight : Alignment.centerLeft,
+                  child: Container(
+                    width: 26,
+                    height: 26,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Color(0x29000000),
+                          blurRadius: 4,
+                          offset: Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
         ),
@@ -1187,60 +1174,68 @@ class _ProfileStatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(18),
-        onTap: onTap,
-        child: Container(
-          padding: EdgeInsets.fromLTRB(14, 14, 12, 14),
-          decoration: BoxDecoration(
-            color: AuthScreenColors.surfaceOf(context),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: AuthScreenColors.surfaceBorderOf(context)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: iconColor.withValues(alpha: 0.15),
+    final dark = AuthScreenColors.isDark(context);
+    final radius = BorderRadius.circular(20);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: radius,
+        boxShadow: AppColors.softShadow(context),
+      ),
+      child: Material(
+        color: AuthScreenColors.surfaceOf(context),
+        shape: RoundedRectangleBorder(
+          borderRadius: radius,
+          side: dark
+              ? BorderSide(color: AuthScreenColors.surfaceBorderOf(context))
+              : BorderSide.none,
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(14, 14, 10, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    _TintIconTile(icon: icon, color: iconColor),
+                    const Spacer(),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      size: 24,
+                      color: AuthScreenColors.textMutedOf(context),
                     ),
-                    child: Icon(icon, color: iconColor, size: 18),
-                  ),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13,
-                        color: AuthScreenColors.textPrimaryOf(context),
-                      ),
-                    ),
-                  ),
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    size: 18,
+                  ],
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
                     color: AuthScreenColors.textSecondaryOf(context),
                   ),
-                ],
-              ),
-              SizedBox(height: 12),
-              Text(
-                value,
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 22,
-                  color: AuthScreenColors.textPrimaryOf(context),
                 ),
-              ),
-            ],
+                const SizedBox(height: 2),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    value,
+                    maxLines: 1,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 22,
+                      letterSpacing: -0.5,
+                      color: AuthScreenColors.textPrimaryOf(context),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -1263,82 +1258,153 @@ class _ProfileHeaderCard extends StatelessWidget {
 
   String get _initial {
     final name = displayName.trim();
-    if (name.isEmpty || name == '') return '?';
-    return name[0].toUpperCase();
+    if (name.isEmpty) return '?';
+    return name.characters.first.toUpperCase();
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final avatarUrl = getDisplayAvatarUrl(user);
+    final dark = AuthScreenColors.isDark(context);
+    const radius = BorderRadius.all(Radius.circular(24));
 
     return Container(
-      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AuthScreenColors.surfaceOf(context),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: AuthScreenColors.surfaceBorderOf(context)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _ProfileAvatar(imageUrl: avatarUrl, initial: _initial),
-          SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  displayName,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 18,
-                    color: AuthScreenColors.textPrimaryOf(context),
-                  ),
-                ),
-                SizedBox(height: 6),
-                Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        phone,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: AuthScreenColors.textSecondaryOf(context),
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    SizedBox(width: 8),
-                    OutlinedButton.icon(
-                      onPressed: onEdit,
-                      icon: Icon(Icons.edit_outlined, size: 14),
-                      label: Text(l10n.profileEdit),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AuthScreenColors.orange,
-                        side: BorderSide(color: AuthScreenColors.orange),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        visualDensity: VisualDensity.compact,
-                        shape: const StadiumBorder(),
-                        textStyle: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
+        borderRadius: radius,
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: AppColors.brandHeroGradient,
+        ),
+        boxShadow: dark
+            ? null
+            : [
+                BoxShadow(
+                  color: AppColors.brandIndigo.withValues(alpha: 0.28),
+                  blurRadius: 24,
+                  offset: const Offset(0, 12),
                 ),
               ],
+      ),
+      child: ClipRRect(
+        borderRadius: radius,
+        child: Stack(
+          children: [
+            // Soft decorative rings give the hero card depth.
+            Positioned(
+              right: -40,
+              top: -50,
+              child: Container(
+                width: 170,
+                height: 170,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withValues(alpha: 0.06),
+                ),
+              ),
             ),
-          ),
-          SizedBox(width: 6),
-          const _LoyaltyRibbon(),
-        ],
+            Positioned(
+              right: 30,
+              bottom: -70,
+              child: Container(
+                width: 130,
+                height: 130,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withValues(alpha: 0.05),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(18),
+              child: Row(
+                children: [
+                  _ProfileAvatar(imageUrl: avatarUrl, initial: _initial),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          displayName,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 21,
+                            height: 1.15,
+                            letterSpacing: -0.4,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.phone_rounded,
+                              size: 16,
+                              color: Colors.white.withValues(alpha: 0.8),
+                            ),
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: Text(
+                                phone,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white.withValues(alpha: 0.88),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Material(
+                          color: Colors.white.withValues(alpha: 0.18),
+                          shape: const StadiumBorder(),
+                          clipBehavior: Clip.antiAlias,
+                          child: InkWell(
+                            onTap: onEdit,
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(minHeight: 44),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.edit_rounded,
+                                      size: 18,
+                                      color: Colors.white,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      l10n.profileEdit,
+                                      style: const TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1355,71 +1421,38 @@ class _ProfileAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final placeholder = Container(
+      color: Colors.white.withValues(alpha: 0.16),
+      alignment: Alignment.center,
+      child: Text(
+        initial,
+        style: const TextStyle(
+          fontSize: 30,
+          fontWeight: FontWeight.w800,
+          color: Colors.white,
+        ),
+      ),
+    );
     return Container(
-      width: 64,
-      height: 64,
+      width: 78,
+      height: 78,
+      padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
-          color: AuthScreenColors.lavender.withValues(alpha: 0.7),
-          width: 2,
+          color: Colors.white.withValues(alpha: 0.9),
+          width: 2.5,
         ),
       ),
       child: ClipOval(
         child: imageUrl != null && imageUrl!.isNotEmpty
             ? UserAvatar(
-                radius: 30,
+                radius: 34,
                 imageUrl: imageUrl,
-                backgroundColor: AuthScreenColors.surfaceBorderOf(context),
+                name: initial,
+                backgroundColor: Colors.white.withValues(alpha: 0.16),
               )
-            : Container(
-                color: AuthScreenColors.surfaceBorderOf(context),
-                alignment: Alignment.center,
-                child: Text(
-                  initial,
-                  style: TextStyle(
-                    fontSize: 26,
-                    fontWeight: FontWeight.w700,
-                    color: AuthScreenColors.textPrimaryOf(context),
-                  ),
-                ),
-              ),
-      ),
-    );
-  }
-}
-
-/// Decorative loyalty-style badge (not tied to a backend tier).
-class _LoyaltyRibbon extends StatelessWidget {
-  const _LoyaltyRibbon();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 44,
-      height: 44,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AuthScreenColors.orange,
-            Color(0xFFFFC107),
-          ],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AuthScreenColors.orange.withValues(alpha: 0.35),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Icon(
-        Icons.workspace_premium_rounded,
-        color: Theme.of(context).colorScheme.onPrimary,
-        size: 24,
+            : placeholder,
       ),
     );
   }
@@ -1443,87 +1476,69 @@ class _LegalFooter extends StatelessWidget {
             packageInfo!.buildNumber,
           )
         : l10n.settingsVersion;
+    final linkColor = AuthScreenColors.textSecondaryOf(context);
+    final muted = AuthScreenColors.textMutedOf(context);
+
+    Widget link(String label) => TextButton(
+          style: TextButton.styleFrom(
+            foregroundColor: linkColor,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            minimumSize: const Size(48, 44),
+          ),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const TermsConditionsScreen(),
+              ),
+            );
+          },
+          child: Text(
+            label,
+            style: TextStyle(
+              color: linkColor,
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        );
 
     return Column(
       children: [
-        Wrap(
-          alignment: WrapAlignment.center,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: 6,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TextButton(
-              style: TextButton.styleFrom(
-                foregroundColor: AuthScreenColors.orange,
-                padding: EdgeInsets.symmetric(horizontal: 4),
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const TermsConditionsScreen(),
-                  ),
-                );
-              },
-              child: Text(
-                l10n.profileTermsOfUse,
-                style: TextStyle(
-                  color: AuthScreenColors.orange,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
+            Flexible(child: link(l10n.profileTermsOfUse)),
+            Container(
+              width: 4,
+              height: 4,
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              decoration: BoxDecoration(
+                color: muted,
+                shape: BoxShape.circle,
               ),
             ),
-            Text(
-              'â¢',
-              style: TextStyle(
-                color: AuthScreenColors.textSecondaryOf(context),
-                fontSize: 12,
-              ),
-            ),
-            TextButton(
-              style: TextButton.styleFrom(
-                foregroundColor: AuthScreenColors.orange,
-                padding: EdgeInsets.symmetric(horizontal: 4),
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const TermsConditionsScreen(),
-                  ),
-                );
-              },
-              child: Text(
-                l10n.profilePrivacyPolicy,
-                style: TextStyle(
-                  color: AuthScreenColors.orange,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
+            Flexible(child: link(l10n.profilePrivacyPolicy)),
           ],
         ),
-        SizedBox(height: 6),
+        const SizedBox(height: 4),
         Text(
           l10n.profileCopyright(year),
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: AuthScreenColors.textSecondaryOf(context).withValues(alpha: 0.85),
-            fontSize: 11,
+            color: muted,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
           ),
         ),
-        SizedBox(height: 6),
+        const SizedBox(height: 4),
         Text(
           versionLine,
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: AuthScreenColors.textSecondaryOf(context).withValues(alpha: 0.75),
-            fontSize: 11,
+            color: muted.withValues(alpha: 0.85),
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ],
@@ -1650,8 +1665,7 @@ class _DeliveryPreferencesPageState extends State<_DeliveryPreferencesPage> {
             _ProfileGroupCard(
               children: [
                 Padding(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   child: Row(
                     children: [
                       Container(
@@ -1659,7 +1673,8 @@ class _DeliveryPreferencesPageState extends State<_DeliveryPreferencesPage> {
                         height: 40,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12),
-                          color: AuthScreenColors.orange.withValues(alpha: 0.12),
+                          color:
+                              AuthScreenColors.orange.withValues(alpha: 0.12),
                         ),
                         child: Icon(
                           Icons.sms_outlined,
@@ -1696,4 +1711,3 @@ class _DeliveryPreferencesPageState extends State<_DeliveryPreferencesPage> {
     );
   }
 }
-

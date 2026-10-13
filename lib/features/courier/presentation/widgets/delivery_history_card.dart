@@ -27,64 +27,102 @@ class DeliveryHistoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final statusColor = StatusChip.colorForStatus(status);
+    final dark = HomeColors.isDark(context);
+    final radius = BorderRadius.circular(20);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: Material(
-        color: HomeColors.surfaceOf(context),
-        borderRadius: BorderRadius.circular(AppColors.radiusLG),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(AppColors.radiusLG),
-          child: Container(
-            padding: const EdgeInsets.all(AppColors.spaceMD),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(AppColors.radiusLG),
-              border: Border.all(color: borderColor),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(12),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: radius,
+          boxShadow: AppColors.softShadow(context),
+        ),
+        child: Material(
+          color: HomeColors.surfaceOf(context),
+          shape: RoundedRectangleBorder(
+            borderRadius: radius,
+            side: dark ? BorderSide(color: borderColor) : BorderSide.none,
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: radius,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(14, 14, 12, 14),
+              child: Row(
+                children: [
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: statusColor.withValues(alpha: dark ? 0.2 : 0.1),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Icon(
+                      Icons.inventory_2_rounded,
+                      color: statusColor,
+                      size: 26,
+                    ),
                   ),
-                  child: Icon(
-                    Icons.local_shipping_rounded,
-                    color: statusColor,
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          recipient,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.2,
+                            color: HomeColors.textPrimaryOf(context),
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          dateTime,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: HomeColors.textMutedOf(context),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            StatusChip(status: status),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                orderId,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.3,
+                                  color: HomeColors.textMutedOf(context)
+                                      .withValues(alpha: 0.8),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        orderId,
-                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: HomeColors.textPrimaryOf(context),
-                            ),
-                      ),
-                      Text(
-                        recipient,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: HomeColors.textMutedOf(context),
-                            ),
-                      ),
-                      Text(
-                        dateTime,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: HomeColors.textMutedOf(context),
-                            ),
-                      ),
-                    ],
-                  ),
-                ),
-                StatusChip(status: status),
-              ],
+                  if (onTap != null)
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      color: HomeColors.textMutedOf(context),
+                      size: 26,
+                    ),
+                ],
+              ),
             ),
           ),
         ),

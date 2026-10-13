@@ -15,7 +15,8 @@ import 'package:hudhud_delivery/app/utils/human_readable_address.dart';
 import 'package:hudhud_delivery/core/easy_mode/voice_hint_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/utils/phone_util.dart';
-import 'package:hudhud_delivery/core/widgets/call_support_button.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/utils/support_launcher.dart';
 import 'package:hudhud_delivery/core/widgets/centered_pin_map.dart';
 import 'package:hudhud_delivery/core/widgets/location_search_field.dart';
 import 'package:hudhud_delivery/core/widgets/speak_button.dart';
@@ -28,7 +29,7 @@ import 'package:hudhud_delivery/features/courier/utils/nearby_drivers_poller.dar
 import 'package:hudhud_delivery/features/courier/presentation/screens/confirm_details_screen.dart';
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
-import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
+import 'package:hudhud_delivery/features/settings/presentation/widgets/auth_feedback.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:latlong2/latlong.dart';
@@ -77,7 +78,8 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
     super.initState();
     _nearbyPoller = NearbyDriversPoller(
       repository: CourierRepository(
-        courierDataProvider: CourierDataProvider(apiService: ApiService.instance),
+        courierDataProvider:
+            CourierDataProvider(apiService: ApiService.instance),
       ),
       onUpdate: () => unawaited(_onNearbyDriversUpdated()),
     );
@@ -193,7 +195,10 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
 
   void _snack(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.red),
+      SnackBar(
+        content: Text(message),
+        backgroundColor: AppColors.errorColor,
+      ),
     );
   }
 
@@ -232,8 +237,7 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
         _snack(l10n.pleaseEnterRecipientName);
         return;
       }
-      final phone =
-          normalizePhoneToBackend(_recipientPhoneController.text);
+      final phone = normalizePhoneToBackend(_recipientPhoneController.text);
       if (!RegExp(r'^2519\d{8}$').hasMatch(phone)) {
         _snack(l10n.pleaseEnterValidRecipientPhone);
         return;
@@ -329,9 +333,8 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
       );
       if (contact == null || !mounted) return;
       final name = contact.displayName ?? '';
-      final phone = contact.phones.isNotEmpty
-          ? contact.phones.first.number
-          : '';
+      final phone =
+          contact.phones.isNotEmpty ? contact.phones.first.number : '';
       setState(() {
         if (name.isNotEmpty) {
           _recipientNameController.text = name;
@@ -401,9 +404,7 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
     return l10n.easyConfirmSummary(
       _pickupAddress,
       _dropoffAddress,
-      _itemType == null
-          ? ''
-          : PackageItemCatalog.labelFor(_itemType!, l10n),
+      _itemType == null ? '' : PackageItemCatalog.labelFor(_itemType!, l10n),
       _recipientNameController.text.trim(),
     );
   }
@@ -411,78 +412,43 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final (title, hint) = switch (_step) {
+      0 => (l10n.easyPickupTitle, l10n.easyPickupHint),
+      1 => (l10n.easyDropTitle, l10n.easyDropHint),
+      2 => (l10n.easyWhoReceives, null),
+      3 => (l10n.easyWhatIsIt, null),
+      _ => (l10n.easyConfirmTitle, null),
+    };
     return CourierTheme.wrap(
       context,
       child: Scaffold(
         backgroundColor: HomeColors.backgroundOf(context),
-        appBar: AppBar(
-          backgroundColor: HomeColors.surfaceOf(context),
-          elevation: 0,
-          surfaceTintColor: Colors.transparent,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back,
-                color: HomeColors.textPrimaryOf(context)),
-            onPressed: _goBack,
-          ),
-          title: Text(
-            l10n.easyStepOf(_step + 1, _totalSteps),
-            style: TextStyle(
-              color: HomeColors.textPrimaryOf(context),
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          actions: [
-            SpeakButton(
-              text: switch (_step) {
-                0 => '${l10n.easyPickupTitle}. ${l10n.easyPickupHint}',
-                1 => '${l10n.easyDropTitle}. ${l10n.easyDropHint}',
-                2 => l10n.easyWhoReceives,
-                3 => '${l10n.easyWhatIsIt}. ${l10n.easyPackageSize}',
-                4 => _summary(l10n),
-                _ => '',
-              },
-            ),
-            const CallSupportButton(compact: true),
-          ],
-        ),
-        floatingActionButton: const CallSupportFab(
-          heroTag: 'easy_booking_call_support',
-          extended: false,
-        ),
         body: SafeArea(
+          bottom: false,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              LinearProgressIndicator(
-                value: (_step + 1) / _totalSteps,
-                backgroundColor: HomeColors.borderOf(context),
-                color: HomeColors.violet,
-                minHeight: 6,
+              _WizardHeader(
+                step: _step,
+                totalSteps: _totalSteps,
+                stepLabel: l10n.easyStepOf(_step + 1, _totalSteps),
+                title: title,
+                hint: hint,
+                onBack: _goBack,
+                speakText: switch (_step) {
+                  0 => '${l10n.easyPickupTitle}. ${l10n.easyPickupHint}',
+                  1 => '${l10n.easyDropTitle}. ${l10n.easyDropHint}',
+                  2 => l10n.easyWhoReceives,
+                  3 => '${l10n.easyWhatIsIt}. ${l10n.easyPackageSize}',
+                  4 => _summary(l10n),
+                  _ => '',
+                },
               ),
               Expanded(child: _buildStep(l10n)),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: ElevatedButton(
-                    onPressed: _goNext,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AuthScreenColors.orange,
-                      foregroundColor:
-                          Theme.of(context).colorScheme.onSecondary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    child: Text(
-                      _step == 4 ? l10n.actionContinue : l10n.actionNext,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ),
+              _WizardBottomBar(
+                label: _step == 4 ? l10n.actionContinue : l10n.actionNext,
+                isLast: _step == 4,
+                onPressed: _goNext,
               ),
             ],
           ),
@@ -535,6 +501,7 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
           searchFirst: true,
           requireTapToPin: false,
           showIAmHereButton: false,
+          isDropoff: true,
           onPositionChanged: (pos) {
             setState(() {
               _dropoffPosition = LatLng(pos.latitude, pos.longitude);
@@ -597,6 +564,7 @@ class _MapStep extends StatefulWidget {
     this.searchFirst = false,
     this.requireTapToPin = false,
     this.showIAmHereButton = true,
+    this.isDropoff = false,
     this.markers = const {},
     this.privacyMessage,
     required this.onPositionChanged,
@@ -608,13 +576,17 @@ class _MapStep extends StatefulWidget {
   final String iAmHereLabel;
   final String address;
   final LatLng position;
+
   /// When true, centers the map on GPS when the step opens.
   final bool snapToGpsOnStart;
+
   /// When true, opens on the search panel (map hidden until a place is chosen).
   final bool searchFirst;
+
   /// When true, hides the pin until the user taps the map or picks a search result.
   final bool requireTapToPin;
   final bool showIAmHereButton;
+  final bool isDropoff;
   final Set<gmaps.Marker> markers;
   final String? privacyMessage;
   final ValueChanged<gmaps.LatLng> onPositionChanged;
@@ -641,6 +613,8 @@ class _MapStepState extends State<_MapStep> {
   List<PlaceResult> _searchSuggestions = [];
   bool _searchLoading = false;
   String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
 
   static gmaps.LatLng _toG(LatLng p) => gmaps.LatLng(p.latitude, p.longitude);
 
@@ -909,209 +883,826 @@ class _MapStepState extends State<_MapStep> {
   }
 
   @override
+  void dispose() {
+    _searchFocusNode.dispose();
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  /// "Change" on the address card: clear the search box and open the keyboard.
+  void _startChangingAddress() {
+    _searchController.clear();
+    _searchFocusNode.requestFocus();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final dark = HomeColors.isDark(context);
+    final privacy = widget.privacyMessage;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                widget.title,
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                  color: HomeColors.textPrimaryOf(context),
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                widget.hint,
-                style: TextStyle(
-                  fontSize: 15,
-                  color: HomeColors.textMutedOf(context),
-                ),
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                child: LocationSearchField(
-                  autofocus: widget.searchFirst,
-                  initialLocation:
-                      widget.address.isNotEmpty ? widget.address : null,
-                  expandSuggestions: true,
-                  onSearchActiveChanged: (active) {
-                    if (_searchActive != active) {
-                      setState(() {
-                        _searchActive = active;
-                        if (active) {
-                          _mapController = null;
-                        }
-                      });
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: AppColors.softShadow(context),
+            ),
+            child: LocationSearchField(
+              controller: _searchController,
+              focusNode: _searchFocusNode,
+              autofocus: widget.searchFirst,
+              initialLocation:
+                  widget.address.isNotEmpty ? widget.address : null,
+              expandSuggestions: true,
+              onSearchActiveChanged: (active) {
+                if (_searchActive != active) {
+                  setState(() {
+                    _searchActive = active;
+                    if (active) {
+                      _mapController = null;
                     }
-                  },
-                  onSuggestionsStateChanged: ({
-                    required suggestions,
-                    required isLoading,
-                    required show,
-                    required query,
-                  }) {
-                    if (!mounted) return;
-                    setState(() {
-                      _searchSuggestions = suggestions;
-                      _searchLoading = isLoading;
-                      _searchQuery = query;
-                    });
-                  },
-                  onLocationSelected: _onSearchPlaceSelected,
-                ),
-              ),
-              if (_showSearchPanel)
-                Expanded(
-                  child: _searchSuggestions.isEmpty &&
-                          !_searchLoading &&
-                          _searchQuery.isEmpty
-                      ? const SizedBox.shrink()
-                      : LocationSearchField.buildExpandedSuggestionsList(
-                          suggestions: _searchSuggestions,
-                          isLoading: _searchLoading,
-                          query: _searchQuery,
-                          useFormattedAddress: true,
-                          onLocationSelected: _onSearchPlaceSelected,
-                          l10n: context.l10n,
-                          colorScheme: Theme.of(context).colorScheme,
-                        ),
-                )
-              else if (_showMap)
-                Expanded(
-                  child: Stack(
-                    children: [
-                      CenteredPinMap(
-                        key: ValueKey('easy_map_$_mapGeneration'),
-                        initialCameraPosition: gmaps.CameraPosition(
-                          target: _toG(_mapCenter),
-                          zoom: _hasUserLocation ? 16.0 : 13.0,
-                        ),
-                        idleDebounce: const Duration(milliseconds: 400),
-                        onMapCreated: _onMapCreated,
-                        onCenterLatLngChanged: _onCenterLatLngChanged,
-                        onTap: widget.requireTapToPin ? _handleMapTap : null,
-                        centerIndicator: widget.requireTapToPin && !_pinPlaced
-                            ? const SizedBox.shrink()
-                            : null,
-                        markers: widget.markers,
-                        myLocationButtonEnabled: false,
-                      ),
-                      Positioned(
-                        left: 16,
-                        right: 16,
-                        bottom: 16,
-                        child: Column(
-                          children: [
-                            if (widget.privacyMessage != null &&
-                                widget.privacyMessage!.isNotEmpty)
-                              Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 9,
-                                ),
-                                margin: const EdgeInsets.only(bottom: 10),
-                                decoration: BoxDecoration(
-                                  color: HomeColors.surfaceOf(context)
-                                      .withValues(alpha: 0.94),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Icon(
-                                      Icons.two_wheeler_rounded,
-                                      size: 18,
-                                      color: HomeColors.violet,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text(
-                                        'Nearby motorbikes are shown approximately. Driver details appear after acceptance.',
-                                        style: TextStyle(
-                                          color: HomeColors.textMutedOf(context),
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            if (widget.address.isNotEmpty)
-                              Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.all(12),
-                                margin: const EdgeInsets.only(bottom: 10),
-                                decoration: BoxDecoration(
-                                  color: HomeColors.surfaceOf(context),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  widget.address,
-                                  maxLines: 4,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    color: HomeColors.textPrimaryOf(context),
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            if (widget.showIAmHereButton)
-                              SizedBox(
-                                width: double.infinity,
-                                height: 52,
-                                child: ElevatedButton.icon(
-                                  onPressed: _isLoadingGps
-                                      ? null
-                                      : () =>
-                                          _getCurrentLocation(fromUserButton: true),
-                                  icon: _isLoadingGps
-                                      ? const SizedBox(
-                                          width: 20,
-                                          height: 20,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            color: Colors.white,
-                                          ),
-                                        )
-                                      : const Icon(Icons.my_location_rounded),
-                                  label: Text(widget.iAmHereLabel),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: HomeColors.violet,
-                                    foregroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(14),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-            ],
+                  });
+                }
+              },
+              onSuggestionsStateChanged: ({
+                required suggestions,
+                required isLoading,
+                required show,
+                required query,
+              }) {
+                if (!mounted) return;
+                setState(() {
+                  _searchSuggestions = suggestions;
+                  _searchLoading = isLoading;
+                  _searchQuery = query;
+                });
+              },
+              onLocationSelected: _onSearchPlaceSelected,
+            ),
           ),
         ),
+        if (_showSearchPanel)
+          Expanded(
+            child: _searchSuggestions.isEmpty &&
+                    !_searchLoading &&
+                    _searchQuery.isEmpty
+                ? const SizedBox.shrink()
+                : Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                    child: Material(
+                      color: HomeColors.surfaceOf(context),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        side: dark
+                            ? BorderSide(color: HomeColors.borderOf(context))
+                            : BorderSide.none,
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: LocationSearchField.buildExpandedSuggestionsList(
+                        suggestions: _searchSuggestions,
+                        isLoading: _searchLoading,
+                        query: _searchQuery,
+                        useFormattedAddress: true,
+                        onLocationSelected: _onSearchPlaceSelected,
+                        l10n: context.l10n,
+                        colorScheme: Theme.of(context).colorScheme,
+                      ),
+                    ),
+                  ),
+          )
+        else if (_showMap)
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: Stack(
+                  children: [
+                    CenteredPinMap(
+                      key: ValueKey('easy_map_$_mapGeneration'),
+                      initialCameraPosition: gmaps.CameraPosition(
+                        target: _toG(_mapCenter),
+                        zoom: _hasUserLocation ? 16.0 : 13.0,
+                      ),
+                      idleDebounce: const Duration(milliseconds: 400),
+                      onMapCreated: _onMapCreated,
+                      onCenterLatLngChanged: _onCenterLatLngChanged,
+                      onTap: widget.requireTapToPin ? _handleMapTap : null,
+                      centerIndicator: widget.requireTapToPin && !_pinPlaced
+                          ? const SizedBox.shrink()
+                          : null,
+                      markers: widget.markers,
+                      myLocationButtonEnabled: false,
+                      // Pinch to zoom still works; the +/- buttons collided
+                      // with our own overlay controls.
+                      zoomControlsEnabled: false,
+                      mapToolbarEnabled: false,
+                    ),
+                    Positioned(
+                      left: 12,
+                      right: 12,
+                      bottom: 12,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          if (widget.showIAmHereButton) ...[
+                            _IAmHerePill(
+                              label: widget.iAmHereLabel,
+                              loading: _isLoadingGps,
+                              onTap: () =>
+                                  _getCurrentLocation(fromUserButton: true),
+                            ),
+                            const SizedBox(height: 10),
+                          ],
+                          if (privacy != null && privacy.isNotEmpty) ...[
+                            const _NearbyInfoBanner(
+                              text:
+                                  'Nearby motorbikes are shown approximately. Driver details appear after acceptance.',
+                            ),
+                            const SizedBox(height: 8),
+                          ],
+                          if (widget.address.isNotEmpty)
+                            _AddressCard(
+                              address: widget.address,
+                              isDropoff: widget.isDropoff,
+                              changeLabel: context.l10n.actionChange,
+                              onChange: _startChangingAddress,
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
       ],
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Wizard chrome
+// ---------------------------------------------------------------------------
+
+class _WizardHeader extends StatelessWidget {
+  const _WizardHeader({
+    required this.step,
+    required this.totalSteps,
+    required this.stepLabel,
+    required this.title,
+    required this.hint,
+    required this.onBack,
+    required this.speakText,
+  });
+
+  final int step;
+  final int totalSteps;
+  final String stepLabel;
+  final String title;
+  final String? hint;
+  final VoidCallback onBack;
+  final String speakText;
+
+  @override
+  Widget build(BuildContext context) {
+    final muted = HomeColors.textMutedOf(context);
+    final hintText = hint;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 6, 12, 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              _HeaderCircleButton(
+                icon: Icons.arrow_back_rounded,
+                tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+                onTap: onBack,
+              ),
+              Expanded(
+                child: Text(
+                  stepLabel,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.2,
+                    color: muted,
+                  ),
+                ),
+              ),
+              SpeakButton(text: speakText),
+              const _CallSupportCircle(),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: _StepSegments(step: step, total: totalSteps),
+          ),
+          const SizedBox(height: 18),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 220),
+              layoutBuilder: (current, previous) => Stack(
+                alignment: AlignmentDirectional.topStart,
+                children: [...previous, if (current != null) current],
+              ),
+              child: Column(
+                key: ValueKey(step),
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 26,
+                      height: 1.15,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.6,
+                      color: HomeColors.textPrimaryOf(context),
+                    ),
+                  ),
+                  if (hintText != null && hintText.isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      hintText,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14,
+                        height: 1.35,
+                        fontWeight: FontWeight.w600,
+                        color: muted,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Five rounded segments; done + current are filled brand orange.
+class _StepSegments extends StatelessWidget {
+  const _StepSegments({required this.step, required this.total});
+
+  final int step;
+  final int total;
+
+  @override
+  Widget build(BuildContext context) {
+    final empty = HomeColors.isDark(context)
+        ? HomeColors.surfaceElevatedOf(context)
+        : HomeColors.borderOf(context);
+    return Row(
+      children: [
+        for (var i = 0; i < total; i++) ...[
+          Expanded(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 260),
+              curve: Curves.easeOut,
+              height: 6,
+              decoration: BoxDecoration(
+                color: i <= step ? AppColors.brandOrange : empty,
+                borderRadius: BorderRadius.circular(3),
+              ),
+            ),
+          ),
+          if (i != total - 1) const SizedBox(width: 6),
+        ],
+      ],
+    );
+  }
+}
+
+class _HeaderCircleButton extends StatelessWidget {
+  const _HeaderCircleButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = HomeColors.isDark(context);
+    return Tooltip(
+      message: tooltip,
+      child: Padding(
+        padding: const EdgeInsets.all(4),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            boxShadow: AppColors.softShadow(context),
+          ),
+          child: Material(
+            color: HomeColors.surfaceOf(context),
+            shape: CircleBorder(
+              side: dark
+                  ? BorderSide(color: HomeColors.borderOf(context))
+                  : BorderSide.none,
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: onTap,
+              child: SizedBox(
+                width: 48,
+                height: 48,
+                child: Icon(
+                  icon,
+                  size: 26,
+                  color: HomeColors.textPrimaryOf(context),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Single call-for-help affordance for the wizard (green = phone call).
+class _CallSupportCircle extends StatelessWidget {
+  const _CallSupportCircle();
+
+  Future<void> _call(BuildContext context) async {
+    final ok = await launchSupportPhone();
+    if (!context.mounted) return;
+    if (!ok) {
+      AuthSnackBar.error(context, context.l10n.actionTryAgain);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = HomeColors.isDark(context);
+    final label = context.l10n.callSupport;
+    return Semantics(
+      button: true,
+      label: label,
+      child: Tooltip(
+        message: label,
+        child: Padding(
+          padding: const EdgeInsets.all(4),
+          child: Material(
+            color: AppColors.successColor.withValues(alpha: dark ? 0.22 : 0.12),
+            shape: const CircleBorder(),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: () => _call(context),
+              child: const SizedBox(
+                width: 48,
+                height: 48,
+                child: Icon(
+                  Icons.call_rounded,
+                  size: 24,
+                  color: AppColors.successColor,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _WizardBottomBar extends StatelessWidget {
+  const _WizardBottomBar({
+    required this.label,
+    required this.isLast,
+    required this.onPressed,
+  });
+
+  final String label;
+  final bool isLast;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: HomeColors.surfaceOf(context),
+        border: Border(top: BorderSide(color: HomeColors.borderOf(context))),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+          child: SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: ElevatedButton(
+              onPressed: onPressed,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.brandOrange,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Flexible(
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Icon(
+                    isLast ? Icons.check_rounded : Icons.arrow_forward_rounded,
+                    size: 24,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Map overlays
+// ---------------------------------------------------------------------------
+
+/// Compact white pill: "use my location".
+class _IAmHerePill extends StatelessWidget {
+  const _IAmHerePill({
+    required this.label,
+    required this.loading,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool loading;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = HomeColors.violetOf(context);
+    final radius = BorderRadius.circular(AppColors.radiusFull);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: radius,
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x261B1530),
+            blurRadius: 14,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: HomeColors.surfaceOf(context),
+        shape: RoundedRectangleBorder(borderRadius: radius),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: loading ? null : onTap,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(14, 12, 18, 12),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: loading
+                      ? Padding(
+                          padding: const EdgeInsets.all(3),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.4,
+                            color: accent,
+                          ),
+                        )
+                      : Icon(Icons.my_location_rounded,
+                          color: accent, size: 24),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: accent,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NearbyInfoBanner extends StatelessWidget {
+  const _NearbyInfoBanner({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(8, 8, 12, 8),
+      decoration: BoxDecoration(
+        color: HomeColors.surfaceOf(context).withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: HomeColors.violetTintOf(context),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              Icons.two_wheeler_rounded,
+              size: 18,
+              color: HomeColors.violetOf(context),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 12,
+                height: 1.3,
+                fontWeight: FontWeight.w600,
+                color: HomeColors.textMutedOf(context),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AddressCard extends StatelessWidget {
+  const _AddressCard({
+    required this.address,
+    required this.isDropoff,
+    required this.changeLabel,
+    required this.onChange,
+  });
+
+  final String address;
+  final bool isDropoff;
+  final String changeLabel;
+  final VoidCallback onChange;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = HomeColors.isDark(context);
+    final accent =
+        isDropoff ? HomeColors.violetOf(context) : AppColors.brandOrange;
+    final tint = isDropoff
+        ? HomeColors.violetTintOf(context)
+        : (dark ? AppColors.orangeTintDark : AppColors.orangeTint);
+    final radius = BorderRadius.circular(20);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: radius,
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x261B1530),
+            blurRadius: 18,
+            offset: Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Material(
+        color: HomeColors.surfaceOf(context),
+        shape: RoundedRectangleBorder(
+          borderRadius: radius,
+          side: dark
+              ? BorderSide(color: HomeColors.borderOf(context))
+              : BorderSide.none,
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 12, 6, 12),
+          child: Row(
+            children: [
+              _IconTile(
+                icon:
+                    isDropoff ? Icons.flag_rounded : Icons.location_on_rounded,
+                color: accent,
+                background: tint,
+                size: 48,
+                iconSize: 26,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  address,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 15,
+                    height: 1.3,
+                    fontWeight: FontWeight.w700,
+                    color: HomeColors.textPrimaryOf(context),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 4),
+              TextButton.icon(
+                onPressed: onChange,
+                icon: const Icon(Icons.edit_location_alt_rounded, size: 20),
+                label: Text(changeLabel),
+                style: TextButton.styleFrom(
+                  foregroundColor: HomeColors.violetOf(context),
+                  minimumSize: const Size(48, 48),
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  textStyle: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Shared step pieces
+// ---------------------------------------------------------------------------
+
+/// Surface card with the app's soft shadow (light) / hairline (dark).
+class _SurfaceCard extends StatelessWidget {
+  const _SurfaceCard({
+    required this.child,
+    this.padding = const EdgeInsets.all(16),
+    this.onTap,
+    this.radius = 22,
+  });
+
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+  final VoidCallback? onTap;
+  final double radius;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = HomeColors.isDark(context);
+    final r = BorderRadius.circular(radius);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: r,
+        boxShadow: AppColors.softShadow(context),
+      ),
+      child: Material(
+        color: HomeColors.surfaceOf(context),
+        shape: RoundedRectangleBorder(
+          borderRadius: r,
+          side: dark
+              ? BorderSide(color: HomeColors.borderOf(context))
+              : BorderSide.none,
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: onTap == null
+            ? Padding(padding: padding, child: child)
+            : InkWell(
+                onTap: onTap,
+                child: Padding(padding: padding, child: child),
+              ),
+      ),
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.w800,
+        letterSpacing: -0.3,
+        color: HomeColors.textPrimaryOf(context),
+      ),
+    );
+  }
+}
+
+class _IconTile extends StatelessWidget {
+  const _IconTile({
+    required this.icon,
+    required this.color,
+    required this.background,
+    this.size = 52,
+    this.iconSize = 26,
+  });
+
+  final IconData icon;
+  final Color color;
+  final Color background;
+  final double size;
+  final double iconSize;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(size * 0.32),
+      ),
+      child: Icon(icon, color: color, size: iconSize),
+    );
+  }
+}
+
+InputDecoration _easyInputDecoration(
+  BuildContext context, {
+  required String label,
+  required IconData icon,
+  String? hint,
+}) {
+  final radius = BorderRadius.circular(16);
+  final border = HomeColors.borderOf(context);
+  return InputDecoration(
+    labelText: label,
+    hintText: hint,
+    filled: true,
+    fillColor: HomeColors.surfaceOf(context),
+    labelStyle: TextStyle(
+      fontSize: 15,
+      fontWeight: FontWeight.w600,
+      color: HomeColors.textMutedOf(context),
+    ),
+    floatingLabelStyle: TextStyle(
+      fontSize: 15,
+      fontWeight: FontWeight.w700,
+      color: HomeColors.violetOf(context),
+    ),
+    hintStyle: TextStyle(color: HomeColors.textMutedOf(context)),
+    prefixIcon: Padding(
+      padding: const EdgeInsetsDirectional.only(start: 12, end: 10),
+      child: Icon(icon, color: HomeColors.violetOf(context), size: 24),
+    ),
+    prefixIconConstraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+    border: OutlineInputBorder(
+      borderRadius: radius,
+      borderSide: BorderSide(color: border),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: radius,
+      borderSide: BorderSide(color: border),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: radius,
+      borderSide: BorderSide(color: HomeColors.violetOf(context), width: 1.8),
+    ),
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Step 3 — recipient
+// ---------------------------------------------------------------------------
 
 class _RecipientStep extends StatelessWidget {
   const _RecipientStep({
@@ -1127,80 +1718,96 @@ class _RecipientStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final fill = HomeColors.surfaceElevatedOf(context);
-    final outline = HomeColors.borderOf(context);
+    final muted = HomeColors.textMutedOf(context);
+    final fieldStyle = TextStyle(
+      fontSize: 17,
+      fontWeight: FontWeight.w700,
+      color: HomeColors.textPrimaryOf(context),
+    );
     return ListView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
       children: [
-        Text(
-          l10n.easyWhoReceives,
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.w800,
-            color: HomeColors.textPrimaryOf(context),
-          ),
-        ),
-        const SizedBox(height: 20),
-        SizedBox(
-          height: 64,
-          child: ElevatedButton.icon(
-            onPressed: onPickContact,
-            icon: const Icon(Icons.contacts_rounded, size: 28),
-            label: Text(
-              l10n.easyPickContact,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: HomeColors.violet,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+        _SurfaceCard(
+          onTap: onPickContact,
+          padding: const EdgeInsets.fromLTRB(16, 18, 14, 18),
+          child: Row(
+            children: [
+              _IconTile(
+                icon: Icons.contacts_rounded,
+                color: HomeColors.violetOf(context),
+                background: HomeColors.violetTintOf(context),
+                size: 60,
+                iconSize: 30,
               ),
-            ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  l10n.easyPickContact,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.3,
+                    color: HomeColors.textPrimaryOf(context),
+                  ),
+                ),
+              ),
+              Icon(Icons.chevron_right_rounded, size: 28, color: muted),
+            ],
           ),
         ),
         const SizedBox(height: 24),
-        Text(
-          l10n.easyOrTypePhone,
-          style: TextStyle(
-            fontSize: 15,
-            color: HomeColors.textMutedOf(context),
-          ),
+        Row(
+          children: [
+            Expanded(child: Divider(color: HomeColors.borderOf(context))),
+            Flexible(
+              flex: 3,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Text(
+                  l10n.easyOrTypePhone,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: muted,
+                  ),
+                ),
+              ),
+            ),
+            Expanded(child: Divider(color: HomeColors.borderOf(context))),
+          ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 20),
         TextField(
           controller: nameController,
-          style: TextStyle(color: HomeColors.textPrimaryOf(context)),
-          decoration: InputDecoration(
-            labelText: l10n.recipientNames,
-            filled: true,
-            fillColor: fill,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: outline),
-            ),
+          textCapitalization: TextCapitalization.words,
+          style: fieldStyle,
+          decoration: _easyInputDecoration(
+            context,
+            label: l10n.recipientNames,
+            icon: Icons.person_rounded,
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 14),
         TextField(
           controller: phoneController,
           keyboardType: TextInputType.phone,
-          style: TextStyle(color: HomeColors.textPrimaryOf(context)),
-          decoration: InputDecoration(
-            labelText: l10n.recipientContactNumber,
-            hintText: l10n.senderPhoneExample,
-            filled: true,
-            fillColor: fill,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: outline),
-            ),
+          style: fieldStyle,
+          decoration: _easyInputDecoration(
+            context,
+            label: l10n.recipientContactNumber,
+            hint: l10n.senderPhoneExample,
+            icon: Icons.phone_rounded,
           ),
         ),
       ],
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Step 4 — package
+// ---------------------------------------------------------------------------
 
 class _PackageStep extends StatelessWidget {
   const _PackageStep({
@@ -1232,25 +1839,20 @@ class _PackageStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final dark = HomeColors.isDark(context);
+    final orangeTint = dark ? AppColors.orangeTintDark : AppColors.orangeTint;
+    const recordColor = AppColors.errorColor;
+    final hasVoice = voiceNotePath != null;
     return ListView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
       children: [
-        Text(
-          l10n.easyWhatIsIt,
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.w800,
-            color: HomeColors.textPrimaryOf(context),
-          ),
-        ),
-        const SizedBox(height: 16),
         GridView.count(
           crossAxisCount: 3,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 10,
-          crossAxisSpacing: 10,
-          childAspectRatio: 0.9,
+          mainAxisSpacing: 12,
+          crossAxisSpacing: 12,
+          childAspectRatio: 0.88,
           children: [
             for (final id in PackageItemCatalog.easyModeIds)
               _BigChoice(
@@ -1261,69 +1863,109 @@ class _PackageStep extends StatelessWidget {
               ),
           ],
         ),
-        const SizedBox(height: 24),
-        Text(
-          l10n.easyPackageSize,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: HomeColors.textPrimaryOf(context),
-          ),
-        ),
+        const SizedBox(height: 28),
+        _SectionTitle(l10n.easyPackageSize),
         const SizedBox(height: 12),
         Row(
           children: [
             for (final entry in [
-              ('small', l10n.easySizeSmall, Icons.crop_square),
-              ('medium', l10n.easySizeMedium, Icons.crop_5_4),
-              ('large', l10n.easySizeLarge, Icons.crop_landscape),
+              ('small', l10n.easySizeSmall, 20.0),
+              ('medium', l10n.easySizeMedium, 28.0),
+              ('large', l10n.easySizeLarge, 36.0),
             ]) ...[
               Expanded(
-                child: _BigChoice(
-                  selected: sizeId == entry.$1,
-                  icon: entry.$3,
-                  label: entry.$2,
-                  onTap: () => onSelectSize(entry.$1),
+                child: SizedBox(
+                  height: 128,
+                  child: _BigChoice(
+                    selected: sizeId == entry.$1,
+                    icon: Icons.inventory_2_rounded,
+                    iconSize: entry.$3,
+                    label: entry.$2,
+                    onTap: () => onSelectSize(entry.$1),
+                  ),
                 ),
               ),
-              if (entry.$1 != 'large') const SizedBox(width: 10),
+              if (entry.$1 != 'large') const SizedBox(width: 12),
             ],
           ],
         ),
-        const SizedBox(height: 24),
-        GestureDetector(
+        const SizedBox(height: 28),
+        _SurfaceCard(
           onTap: onTakePhoto,
-          child: Container(
-            height: 160,
-            decoration: BoxDecoration(
-              color: HomeColors.surfaceElevatedOf(context),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: HomeColors.borderOf(context), width: 2),
-            ),
-            clipBehavior: Clip.antiAlias,
+          padding: EdgeInsets.zero,
+          child: SizedBox(
+            height: 168,
             child: imagePath == null
                 ? Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.camera_alt_rounded, size: 48),
-                      const SizedBox(height: 8),
-                      Text(l10n.takePackagePhoto),
+                      Container(
+                        width: 68,
+                        height: 68,
+                        decoration: BoxDecoration(
+                          color: orangeTint,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.photo_camera_rounded,
+                          size: 34,
+                          color: AppColors.brandOrange,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        l10n.takePackagePhoto,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          color: HomeColors.textPrimaryOf(context),
+                        ),
+                      ),
                     ],
                   )
                 : Stack(
                     fit: StackFit.expand,
                     children: [
                       Image.file(File(imagePath!), fit: BoxFit.cover),
-                      Align(
-                        alignment: Alignment.bottomCenter,
+                      const DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [Color(0x00000000), Color(0x8C000000)],
+                            stops: [0.45, 1],
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        left: 12,
+                        bottom: 12,
                         child: Container(
-                          width: double.infinity,
-                          color: Colors.black54,
-                          padding: const EdgeInsets.all(8),
-                          child: Text(
-                            l10n.changePackagePhoto,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(color: Colors.white),
+                          padding: const EdgeInsets.fromLTRB(10, 8, 14, 8),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius:
+                                BorderRadius.circular(AppColors.radiusFull),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.photo_camera_rounded,
+                                size: 18,
+                                color: AppColors.brandInk,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                l10n.changePackagePhoto,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.brandInk,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -1331,68 +1973,101 @@ class _PackageStep extends StatelessWidget {
                   ),
           ),
         ),
-        const SizedBox(height: 24),
-        Text(
-          l10n.voiceNoteOptional,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: HomeColors.textPrimaryOf(context),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          l10n.voiceNoteRecordHint,
-          style: TextStyle(color: HomeColors.textMutedOf(context)),
-        ),
+        const SizedBox(height: 28),
+        _SectionTitle(l10n.voiceNoteOptional),
         const SizedBox(height: 12),
         GestureDetector(
           onLongPressStart: (_) => onRecordStart(),
           onLongPressEnd: (_) => onRecordEnd(),
-          child: Container(
-            height: 64,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.fromLTRB(12, 12, 16, 12),
             decoration: BoxDecoration(
               color: isRecording
-                  ? Colors.red.withValues(alpha: 0.15)
-                  : HomeColors.surfaceElevatedOf(context),
-              borderRadius: BorderRadius.circular(16),
+                  ? recordColor.withValues(alpha: dark ? 0.2 : 0.1)
+                  : HomeColors.surfaceOf(context),
+              borderRadius: BorderRadius.circular(22),
               border: Border.all(
-                color: isRecording ? Colors.red : HomeColors.borderOf(context),
+                color: isRecording
+                    ? recordColor
+                    : (dark
+                        ? HomeColors.borderOf(context)
+                        : Colors.transparent),
+                width: isRecording ? 2 : 1,
               ),
+              boxShadow: isRecording ? null : AppColors.softShadow(context),
             ),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  isRecording ? Icons.mic_rounded : Icons.mic_none_rounded,
-                  color: isRecording ? Colors.red : HomeColors.violet,
-                  size: 28,
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  voiceNotePath != null
-                      ? l10n.voiceNoteAttached
-                      : l10n.voiceNoteRecordHint,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: HomeColors.textPrimaryOf(context),
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isRecording
+                        ? recordColor
+                        : HomeColors.violetTintOf(context),
+                  ),
+                  child: Icon(
+                    isRecording ? Icons.mic_rounded : Icons.mic_none_rounded,
+                    color: isRecording
+                        ? Colors.white
+                        : HomeColors.violetOf(context),
+                    size: 28,
                   ),
                 ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Text(
+                    hasVoice
+                        ? l10n.voiceNoteAttached
+                        : l10n.voiceNoteRecordHint,
+                    style: TextStyle(
+                      fontSize: 15,
+                      height: 1.3,
+                      fontWeight: FontWeight.w700,
+                      color: HomeColors.textPrimaryOf(context),
+                    ),
+                  ),
+                ),
+                if (hasVoice && !isRecording)
+                  const Icon(
+                    Icons.check_circle_rounded,
+                    color: AppColors.successColor,
+                    size: 26,
+                  ),
               ],
             ),
           ),
         ),
-        if (voiceNotePath != null) ...[
+        if (hasVoice) ...[
           const SizedBox(height: 8),
-          TextButton(
-            onPressed: onClearVoice,
-            child: Text(l10n.voiceNoteClear),
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: TextButton.icon(
+              onPressed: onClearVoice,
+              icon: const Icon(Icons.delete_outline_rounded, size: 20),
+              label: Text(l10n.voiceNoteClear),
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.errorColor,
+                minimumSize: const Size(48, 48),
+                textStyle: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
           ),
         ],
       ],
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Step 5 — review
+// ---------------------------------------------------------------------------
 
 class _ConfirmStep extends StatelessWidget {
   const _ConfirmStep({
@@ -1416,61 +2091,109 @@ class _ConfirmStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final dark = HomeColors.isDark(context);
+    final orangeTint = dark ? AppColors.orangeTintDark : AppColors.orangeTint;
+    final accent = HomeColors.violetOf(context);
+    final indigoTint = HomeColors.violetTintOf(context);
+    final divider = Divider(
+      height: 1,
+      thickness: 1,
+      indent: 80,
+      endIndent: 16,
+      color: HomeColors.borderOf(context),
+    );
     return ListView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
       children: [
-        Text(
-          l10n.easyConfirmTitle,
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.w800,
-            color: HomeColors.textPrimaryOf(context),
+        _SurfaceCard(
+          padding: EdgeInsets.zero,
+          radius: 24,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (imagePath != null)
+                Image.file(
+                  File(imagePath!),
+                  height: 150,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+              const SizedBox(height: 6),
+              _InfoRow(
+                icon: Icons.trip_origin_rounded,
+                color: AppColors.brandOrange,
+                background: orangeTint,
+                caption: l10n.pickupLocationLabel,
+                label: pickup,
+              ),
+              divider,
+              _InfoRow(
+                icon: Icons.flag_rounded,
+                color: accent,
+                background: indigoTint,
+                caption: l10n.deliveryLocationLabel,
+                label: dropoff,
+              ),
+              divider,
+              _InfoRow(
+                icon: Icons.inventory_2_rounded,
+                color: accent,
+                background: indigoTint,
+                caption: l10n.whatAreYouSending,
+                label: itemLabel,
+              ),
+              divider,
+              _InfoRow(
+                icon: Icons.person_rounded,
+                color: accent,
+                background: indigoTint,
+                caption: l10n.recipient,
+                label: recipient,
+              ),
+              const SizedBox(height: 6),
+            ],
           ),
         ),
         const SizedBox(height: 16),
-        if (imagePath != null)
-          ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: Image.file(
-              File(imagePath!),
-              height: 140,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
-          ),
-        const SizedBox(height: 16),
-        _InfoRow(icon: Icons.trip_origin, label: pickup),
-        const SizedBox(height: 8),
-        _InfoRow(icon: Icons.flag_rounded, label: dropoff),
-        const SizedBox(height: 8),
-        _InfoRow(icon: Icons.inventory_2_rounded, label: itemLabel),
-        const SizedBox(height: 8),
-        _InfoRow(icon: Icons.person_rounded, label: recipient),
-        const SizedBox(height: 20),
         SizedBox(
           height: 56,
-          child: ElevatedButton.icon(
-            onPressed: onPlay,
-            icon: const Icon(Icons.volume_up_rounded),
-            label: Text(
-              l10n.easyConfirmPlay,
-              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+          child: Material(
+            color: indigoTint,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
             ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: HomeColors.violet,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: onPlay,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.volume_up_rounded, color: accent, size: 26),
+                  const SizedBox(width: 10),
+                  Text(
+                    l10n.easyConfirmPlay,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: accent,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
         ),
-        const SizedBox(height: 12),
-        Text(
-          summary,
-          style: TextStyle(
-            fontSize: 14,
-            color: HomeColors.textMutedOf(context),
+        const SizedBox(height: 14),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Text(
+            summary,
+            style: TextStyle(
+              fontSize: 14,
+              height: 1.45,
+              fontWeight: FontWeight.w600,
+              color: HomeColors.textMutedOf(context),
+            ),
           ),
         ),
       ],
@@ -1479,87 +2202,168 @@ class _ConfirmStep extends StatelessWidget {
 }
 
 class _InfoRow extends StatelessWidget {
-  const _InfoRow({required this.icon, required this.label});
+  const _InfoRow({
+    required this.icon,
+    required this.color,
+    required this.background,
+    required this.caption,
+    required this.label,
+  });
 
   final IconData icon;
+  final Color color;
+  final Color background;
+  final String caption;
   final String label;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, color: HomeColors.violet),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-              color: HomeColors.textPrimaryOf(context),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+      child: Row(
+        children: [
+          _IconTile(
+            icon: icon,
+            color: color,
+            background: background,
+            size: 48,
+            iconSize: 24,
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  caption,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: HomeColors.textMutedOf(context),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  label,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 16,
+                    height: 1.3,
+                    fontWeight: FontWeight.w700,
+                    color: HomeColors.textPrimaryOf(context),
+                  ),
+                ),
+              ],
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
 
+/// Big picture-first choice tile. Selected = indigo border + tint + check.
 class _BigChoice extends StatelessWidget {
   const _BigChoice({
     required this.selected,
     required this.icon,
     required this.label,
     required this.onTap,
+    this.iconSize = 30,
   });
 
   final bool selected;
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+  final double iconSize;
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: selected
-          ? HomeColors.violet.withValues(alpha: 0.18)
-          : HomeColors.surfaceElevatedOf(context),
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: selected ? HomeColors.violet : HomeColors.borderOf(context),
-              width: selected ? 2.5 : 1,
-            ),
+    final dark = HomeColors.isDark(context);
+    final accent = HomeColors.violetOf(context);
+    final tint = HomeColors.violetTintOf(context);
+    final radius = BorderRadius.circular(20);
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: label,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: radius,
+          boxShadow: selected ? null : AppColors.softShadow(context),
+        ),
+        child: Material(
+          color: selected ? tint : HomeColors.surfaceOf(context),
+          shape: RoundedRectangleBorder(
+            borderRadius: radius,
+            side: selected
+                ? BorderSide(color: accent, width: 2)
+                : (dark
+                    ? BorderSide(color: HomeColors.borderOf(context))
+                    : BorderSide.none),
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                icon,
-                size: 36,
-                color: selected
-                    ? HomeColors.violet
-                    : HomeColors.textPrimaryOf(context),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
-                  color: HomeColors.textPrimaryOf(context),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: onTap,
+            child: Stack(
+              children: [
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(8, 12, 8, 10),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 180),
+                          width: 56,
+                          height: 56,
+                          decoration: BoxDecoration(
+                            color:
+                                selected ? HomeColors.surfaceOf(context) : tint,
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: Icon(icon, size: iconSize, color: accent),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          label,
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 14,
+                            height: 1.2,
+                            fontWeight:
+                                selected ? FontWeight.w800 : FontWeight.w700,
+                            color: HomeColors.textPrimaryOf(context),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-            ],
+                if (selected)
+                  PositionedDirectional(
+                    top: 8,
+                    end: 8,
+                    child: Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        color: accent,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.check_rounded,
+                        size: 16,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),

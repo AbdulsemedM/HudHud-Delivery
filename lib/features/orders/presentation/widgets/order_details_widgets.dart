@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/widgets/status_chip.dart';
@@ -7,6 +7,292 @@ import '../../data/models/order_model.dart';
 import '../../data/models/order_item_model.dart';
 import '../../data/models/order_tracking_model.dart';
 import '../../data/models/vendor_model.dart';
+
+// ---------------------------------------------------------------------------
+// Shared building blocks
+// ---------------------------------------------------------------------------
+
+/// White rounded card with the app's soft shadow (border in dark mode).
+class _DetailCard extends StatelessWidget {
+  const _DetailCard({required this.child, this.padding});
+
+  final Widget child;
+  final EdgeInsetsGeometry? padding;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = HomeColors.isDark(context);
+    return Container(
+      width: double.infinity,
+      padding: padding ?? const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: HomeColors.surfaceOf(context),
+        borderRadius: BorderRadius.circular(20),
+        border: dark ? Border.all(color: HomeColors.borderOf(context)) : null,
+        boxShadow: AppColors.softShadow(context),
+      ),
+      child: child,
+    );
+  }
+}
+
+/// Tinted rounded square holding an icon.
+class _IconTile extends StatelessWidget {
+  const _IconTile({
+    required this.icon,
+    required this.color,
+    this.size = 44,
+    this.iconSize = 24,
+  });
+
+  final IconData icon;
+  final Color color;
+  final double size;
+  final double iconSize;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = HomeColors.isDark(context);
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: dark ? 0.2 : 0.1),
+        borderRadius: BorderRadius.circular(size * 0.32),
+      ),
+      child: Icon(icon, color: color, size: iconSize),
+    );
+  }
+}
+
+/// Card title row: icon tile + bold title + optional trailing widget.
+class _CardHeader extends StatelessWidget {
+  const _CardHeader({
+    required this.icon,
+    required this.title,
+    this.color,
+    this.trailing,
+  });
+
+  final IconData icon;
+  final String title;
+  final Color? color;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        _IconTile(icon: icon, color: color ?? HomeColors.violetOf(context)),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.3,
+              color: HomeColors.textPrimaryOf(context),
+            ),
+          ),
+        ),
+        if (trailing != null) ...[
+          const SizedBox(width: 8),
+          trailing!,
+        ],
+      ],
+    );
+  }
+}
+
+/// Receipt-style label / value row.
+class _InfoRow extends StatelessWidget {
+  const _InfoRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 7),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 2,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: HomeColors.textMutedOf(context),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            flex: 3,
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: HomeColors.textPrimaryOf(context),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Dashed horizontal rule, like a torn receipt line.
+class _DashedDivider extends StatelessWidget {
+  const _DashedDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: CustomPaint(
+        size: const Size(double.infinity, 1.5),
+        painter: _HorizontalDashPainter(color: HomeColors.borderOf(context)),
+      ),
+    );
+  }
+}
+
+class _HorizontalDashPainter extends CustomPainter {
+  _HorizontalDashPainter({required this.color});
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1.5
+      ..strokeCap = StrokeCap.round;
+    double x = 0;
+    while (x < size.width) {
+      canvas.drawLine(
+          Offset(x, 0), Offset((x + 6).clamp(0, size.width), 0), paint);
+      x += 11;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _HorizontalDashPainter oldDelegate) =>
+      oldDelegate.color != color;
+}
+
+/// Circle avatar from a network URL, falling back to the name's initial.
+class _PersonAvatar extends StatelessWidget {
+  const _PersonAvatar({
+    required this.url,
+    required this.name,
+    this.radius = 24,
+  });
+
+  final String url;
+  final String name;
+  final double radius;
+
+  @override
+  Widget build(BuildContext context) {
+    final trimmed = name.trim();
+    final initial = trimmed.isEmpty ? '?' : trimmed.characters.first;
+    final fallback = Container(
+      width: radius * 2,
+      height: radius * 2,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: HomeColors.violetTintOf(context),
+      ),
+      child: Text(
+        initial.toUpperCase(),
+        style: TextStyle(
+          fontSize: radius * 0.85,
+          fontWeight: FontWeight.w800,
+          color: HomeColors.violetOf(context),
+        ),
+      ),
+    );
+    if (!url.startsWith('http')) return fallback;
+    return ClipOval(
+      child: Image.network(
+        url,
+        width: radius * 2,
+        height: radius * 2,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => fallback,
+      ),
+    );
+  }
+}
+
+/// Round green phone button (keeps the original no-op behaviour).
+class _CallButton extends StatelessWidget {
+  const _CallButton();
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = HomeColors.isDark(context);
+    return Material(
+      color: AppColors.successColor.withValues(alpha: dark ? 0.2 : 0.12),
+      shape: const CircleBorder(),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () {},
+        child: const SizedBox(
+          width: 48,
+          height: 48,
+          child: Icon(
+            Icons.call_rounded,
+            color: AppColors.successColor,
+            size: 24,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+IconData _statusIcon(String status) {
+  switch (status.toLowerCase().replaceAll(' ', '_')) {
+    case 'pending':
+      return Icons.schedule_rounded;
+    case 'confirmed':
+    case 'accepted':
+      return Icons.thumb_up_alt_rounded;
+    case 'preparing':
+      return Icons.restaurant_rounded;
+    case 'ready_for_pickup':
+      return Icons.inventory_2_rounded;
+    case 'on_the_way':
+    case 'out_for_delivery':
+    case 'picked_up':
+      return Icons.delivery_dining_rounded;
+    case 'delivered':
+    case 'completed':
+      return Icons.task_alt_rounded;
+    case 'cancelled':
+    case 'canceled':
+      return Icons.cancel_rounded;
+    default:
+      return Icons.receipt_long_rounded;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Cards
+// ---------------------------------------------------------------------------
 
 class OrderStatusCard extends StatelessWidget {
   final OrderModel order;
@@ -21,56 +307,98 @@ class OrderStatusCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colorScheme = Theme.of(context).colorScheme;
     final eta = (trackingEstimatedTime != null &&
             trackingEstimatedTime!.trim().isNotEmpty)
         ? trackingEstimatedTime
         : order.formattedEstimatedDelivery;
+    final statusColor = StatusChip.colorForStatus(order.status);
+    final dark = HomeColors.isDark(context);
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppColors.spaceMD),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  l10n.deliveryDetailsStatus,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+    return _DetailCard(
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              _IconTile(
+                icon: _statusIcon(order.status),
+                color: statusColor,
+                size: 56,
+                iconSize: 30,
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.deliveryDetailsStatus,
+                      style: TextStyle(
+                        fontSize: 13,
                         fontWeight: FontWeight.w600,
+                        color: HomeColors.textMutedOf(context),
                       ),
+                    ),
+                    const SizedBox(height: 6),
+                    StatusChip(status: order.statusDisplayName),
+                  ],
                 ),
-                StatusChip(status: order.statusDisplayName),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              order.formattedCreatedAt,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Icon(
+                Icons.calendar_today_rounded,
+                size: 18,
+                color: HomeColors.textMutedOf(context),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  order.formattedCreatedAt,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: HomeColors.textSecondaryOf(context),
                   ),
-            ),
-            if (eta != null && eta.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Row(
+                ),
+              ),
+            ],
+          ),
+          if (eta != null && eta.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: dark ? AppColors.orangeTintDark : AppColors.orangeTint,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Row(
                 children: [
                   const Icon(
-                    Icons.access_time_rounded,
-                    size: 16,
-                    color: HomeColors.violet,
+                    Icons.access_time_filled_rounded,
+                    size: 20,
+                    color: AppColors.brandOrange,
                   ),
-                  const SizedBox(width: 4),
-                  Text(
-                    eta,
-                    style: Theme.of(context).textTheme.bodySmall,
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      eta,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: HomeColors.textPrimaryOf(context),
+                      ),
+                    ),
                   ),
                 ],
               ),
-            ],
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
@@ -84,64 +412,47 @@ class OrderTrackingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colorScheme = Theme.of(context).colorScheme;
     final statusColor = StatusChip.colorForStatus(tracking.orderStatus);
+    final muted = HomeColors.textMutedOf(context);
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppColors.spaceMD),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.location_on_rounded, color: statusColor, size: 24),
-                const SizedBox(width: 8),
-                Text(
-                  l10n.actionTrackDelivery,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+    Widget line(IconData icon, String text) => Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(icon, size: 20, color: muted),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  text,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: HomeColors.textPrimaryOf(context),
+                  ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            StatusChip(status: tracking.orderStatus),
-            if (tracking.currentLocation != null &&
-                tracking.currentLocation!.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(Icons.place_outlined,
-                      size: 18, color: colorScheme.onSurfaceVariant),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      tracking.currentLocation!,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ),
-                ],
               ),
             ],
-            if (tracking.estimatedTime != null &&
-                tracking.estimatedTime!.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Icon(Icons.access_time_rounded,
-                      size: 18, color: colorScheme.onSurfaceVariant),
-                  const SizedBox(width: 8),
-                  Text(
-                    tracking.estimatedTime!,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ),
-            ],
-          ],
-        ),
+          ),
+        );
+
+    return _DetailCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _CardHeader(
+            icon: Icons.location_on_rounded,
+            title: l10n.actionTrackDelivery,
+            color: statusColor,
+            trailing: StatusChip(status: tracking.orderStatus),
+          ),
+          if (tracking.currentLocation != null &&
+              tracking.currentLocation!.isNotEmpty)
+            line(Icons.place_rounded, tracking.currentLocation!),
+          if (tracking.estimatedTime != null &&
+              tracking.estimatedTime!.isNotEmpty)
+            line(Icons.access_time_rounded, tracking.estimatedTime!),
+        ],
       ),
     );
   }
@@ -198,7 +509,7 @@ class _OrderTimelineCardState extends State<OrderTimelineCard>
         isActive: widget.order.isConfirmed &&
             !widget.order.isPreparing &&
             !widget.order.isDelivered,
-        icon: Icons.check_circle_outline_rounded,
+        icon: Icons.check_circle_rounded,
       ),
       TimelineStep(
         title: l10n.timelinePreparing,
@@ -220,19 +531,17 @@ class _OrderTimelineCardState extends State<OrderTimelineCard>
         isCompleted: widget.order.isReadyForPickup ||
             widget.order.isOutForDelivery ||
             widget.order.isDelivered,
-        isActive: widget.order.isReadyForPickup &&
-            !widget.order.isOutForDelivery,
-        icon: Icons.inventory_2_outlined,
+        isActive:
+            widget.order.isReadyForPickup && !widget.order.isOutForDelivery,
+        icon: Icons.inventory_2_rounded,
       ),
       TimelineStep(
         title: l10n.timelineOutDelivery,
         time: widget.order.outForDeliveryAt != null
             ? widget.order.formattedOutForDeliveryAt
             : null,
-        isCompleted:
-            widget.order.isOutForDelivery || widget.order.isDelivered,
-        isActive:
-            widget.order.isOutForDelivery && !widget.order.isDelivered,
+        isCompleted: widget.order.isOutForDelivery || widget.order.isDelivered,
+        isActive: widget.order.isOutForDelivery && !widget.order.isDelivered,
         icon: Icons.delivery_dining_rounded,
       ),
       TimelineStep(
@@ -252,47 +561,61 @@ class _OrderTimelineCardState extends State<OrderTimelineCard>
     final l10n = context.l10n;
     final steps = _getTimelineSteps(context);
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppColors.spaceMD),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.timeline,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-            ),
-            const SizedBox(height: 16),
-            ...List.generate(steps.length, (index) {
-              final step = steps[index];
-              final isLast = index == steps.length - 1;
-              return _buildTimelineStep(context, step, isLast);
-            }),
-          ],
-        ),
+    return _DetailCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _CardHeader(icon: Icons.route_rounded, title: l10n.timeline),
+          const SizedBox(height: 18),
+          ...List.generate(steps.length, (index) {
+            final step = steps[index];
+            final isLast = index == steps.length - 1;
+            final nextDone = !isLast && steps[index + 1].isCompleted;
+            return _buildTimelineStep(context, step, isLast, nextDone);
+          }),
+        ],
       ),
     );
   }
 
   Widget _buildTimelineStep(
-      BuildContext context, TimelineStep step, bool isLast) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final circleColor = step.isCompleted
-        ? HomeColors.violet
-        : colorScheme.surfaceContainerHighest;
-    final iconColor =
-        step.isCompleted ? AppColors.lightOnPrimary : colorScheme.onSurfaceVariant;
+    BuildContext context,
+    TimelineStep step,
+    bool isLast,
+    bool nextDone,
+  ) {
+    final indigo = HomeColors.violetOf(context);
+    final muted = HomeColors.textMutedOf(context);
+    final Color circleColor;
+    final Color iconColor;
+    if (step.isActive && step.isCompleted) {
+      circleColor = AppColors.brandOrange;
+      iconColor = Colors.white;
+    } else if (step.isCompleted) {
+      circleColor = indigo;
+      iconColor = Colors.white;
+    } else {
+      circleColor = HomeColors.surfaceElevatedOf(context);
+      iconColor = muted;
+    }
 
     Widget circle = Container(
-      width: 32,
-      height: 32,
+      width: 38,
+      height: 38,
       decoration: BoxDecoration(
         color: circleColor,
         shape: BoxShape.circle,
+        boxShadow: step.isActive && !HomeColors.isDark(context)
+            ? [
+                BoxShadow(
+                  color: AppColors.brandOrange.withValues(alpha: 0.35),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : null,
       ),
-      child: Icon(step.icon, size: 16, color: iconColor),
+      child: Icon(step.icon, size: 20, color: iconColor),
     );
 
     if (step.isActive) {
@@ -303,47 +626,63 @@ class _OrderTimelineCardState extends State<OrderTimelineCard>
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Column(
-            children: [
-              circle,
-              if (!isLast)
-                Expanded(
-                  child: CustomPaint(
-                    painter: _DashedLinePainter(
-                      color: step.isCompleted
-                          ? HomeColors.violet.withValues(alpha: 0.5)
-                          : colorScheme.outline.withValues(alpha: 0.4),
+          SizedBox(
+            width: 38,
+            child: Column(
+              children: [
+                circle,
+                if (!isLast)
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: nextDone
+                          ? Container(
+                              width: 3,
+                              decoration: BoxDecoration(
+                                color: indigo,
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                            )
+                          : CustomPaint(
+                              painter: _DashedLinePainter(
+                                color: HomeColors.borderOf(context),
+                              ),
+                              child: const SizedBox(width: 3),
+                            ),
                     ),
-                    child: const SizedBox(width: 2),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 14),
           Expanded(
             child: Padding(
-              padding: EdgeInsets.only(bottom: isLast ? 0 : 16),
+              padding: EdgeInsets.only(top: 8, bottom: isLast ? 0 : 18),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     step.title,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: step.isCompleted
-                              ? FontWeight.w600
-                              : FontWeight.w400,
-                          color: step.isCompleted
-                              ? colorScheme.onSurface
-                              : colorScheme.onSurfaceVariant,
-                        ),
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight:
+                          step.isCompleted ? FontWeight.w800 : FontWeight.w600,
+                      color: step.isCompleted
+                          ? HomeColors.textPrimaryOf(context)
+                          : muted,
+                    ),
                   ),
-                  if (step.time != null)
+                  if (step.time != null) ...[
+                    const SizedBox(height: 2),
                     Text(
                       step.time!,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: muted,
+                      ),
                     ),
+                  ],
                 ],
               ),
             ),
@@ -363,17 +702,18 @@ class _DashedLinePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = color
-      ..strokeWidth = 2
+      ..strokeWidth = 3
+      ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
 
     const dashHeight = 4.0;
-    const dashSpace = 4.0;
+    const dashSpace = 5.0;
     double startY = 0;
 
     while (startY < size.height) {
       canvas.drawLine(
         Offset(size.width / 2, startY),
-        Offset(size.width / 2, startY + dashHeight),
+        Offset(size.width / 2, (startY + dashHeight).clamp(0, size.height)),
         paint,
       );
       startY += dashHeight + dashSpace;
@@ -381,7 +721,8 @@ class _DashedLinePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _DashedLinePainter oldDelegate) =>
+      oldDelegate.color != color;
 }
 
 class TimelineStep {
@@ -410,61 +751,24 @@ class PackageInfoCard extends StatelessWidget {
     final l10n = context.l10n;
     final itemCount = order.items.length;
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppColors.spaceMD),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.labelPackage,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-            ),
-            const SizedBox(height: 12),
-            _infoRow(context, l10n.labelType, order.vendor.name),
-            _infoRow(
-              context,
-              l10n.labelWeight,
-              '$itemCount',
-            ),
-            if (order.items.isNotEmpty)
-              _infoRow(
-                context,
-                l10n.labelDescription,
-                order.items.first.product?.name ?? order.items.first.productName,
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _infoRow(BuildContext context, String label, String value) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
+    return _DetailCard(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-            ),
+          _CardHeader(
+            icon: Icons.inventory_2_rounded,
+            title: l10n.labelPackage,
+            color: AppColors.brandOrange,
           ),
-          Expanded(
-            child: Text(
-              value,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
+          const SizedBox(height: 10),
+          _InfoRow(label: l10n.labelType, value: order.vendor.name),
+          _InfoRow(label: l10n.labelWeight, value: '$itemCount'),
+          if (order.items.isNotEmpty)
+            _InfoRow(
+              label: l10n.labelDescription,
+              value: order.items.first.product?.name ??
+                  order.items.first.productName,
             ),
-          ),
         ],
       ),
     );
@@ -478,70 +782,54 @@ class VendorInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppColors.spaceMD),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              vendor.name,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-            ),
-            const SizedBox(height: 12),
-            Row(
+    final muted = HomeColors.textMutedOf(context);
+    return _DetailCard(
+      child: Row(
+        children: [
+          _PersonAvatar(url: vendor.avatar, name: vendor.name, radius: 26),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CircleAvatar(
-                  radius: 24,
-                  backgroundImage: NetworkImage(vendor.avatar),
-                  backgroundColor:
-                      Theme.of(context).colorScheme.surfaceContainerHighest,
+                Text(
+                  vendor.name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.3,
+                    color: HomeColors.textPrimaryOf(context),
+                  ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                if (vendor.phone.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Row(
                     children: [
-                      Text(
-                        vendor.name,
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyMedium
-                            ?.copyWith(fontWeight: FontWeight.w600),
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.phone_outlined,
-                            size: 14,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurfaceVariant,
+                      Icon(Icons.phone_rounded, size: 16, color: muted),
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Text(
+                          vendor.phone,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: muted,
                           ),
-                          const SizedBox(width: 4),
-                          Text(
-                            vendor.phone,
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                        ],
+                        ),
                       ),
                     ],
                   ),
-                ),
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(
-                    Icons.call_rounded,
-                    color: AppColors.successColor,
-                  ),
-                ),
+                ],
               ],
             ),
-          ],
-        ),
+          ),
+          const SizedBox(width: 8),
+          const _CallButton(),
+        ],
       ),
     );
   }
@@ -555,48 +843,66 @@ class OrderItemsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppColors.spaceMD),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '${l10n.orders} (${items.length})',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+    return _DetailCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _CardHeader(
+            icon: Icons.shopping_bag_rounded,
+            title: l10n.orders,
+            color: AppColors.brandOrange,
+            trailing: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: HomeColors.surfaceElevatedOf(context),
+                borderRadius: BorderRadius.circular(AppColors.radiusFull),
+              ),
+              child: Text(
+                '${items.length}',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  color: HomeColors.textPrimaryOf(context),
+                ),
+              ),
             ),
-            const SizedBox(height: 12),
-            ...items.map((item) => _buildOrderItem(context, item)),
-          ],
-        ),
+          ),
+          const SizedBox(height: 8),
+          ...List.generate(items.length, (i) {
+            return Column(
+              children: [
+                if (i > 0)
+                  Divider(height: 1, color: HomeColors.borderOf(context)),
+                _buildOrderItem(context, items[i]),
+              ],
+            );
+          }),
+        ],
       ),
     );
   }
 
   Widget _buildOrderItem(BuildContext context, OrderItemModel item) {
-    final colorScheme = Theme.of(context).colorScheme;
     final imageUrl = item.product?.imagePath ?? '';
     final name = item.product?.name ?? item.productName;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(14),
             child: imageUrl.isNotEmpty
                 ? Image.network(
                     imageUrl,
-                    width: 50,
-                    height: 50,
+                    width: 56,
+                    height: 56,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
-                      return _itemPlaceholder(colorScheme);
+                      return _itemPlaceholder(context);
                     },
                   )
-                : _itemPlaceholder(colorScheme),
+                : _itemPlaceholder(context),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -605,37 +911,59 @@ class OrderItemsCard extends StatelessWidget {
               children: [
                 Text(
                   name,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: HomeColors.textPrimaryOf(context),
+                  ),
                 ),
-                Text(
-                  'Qty: ${item.quantity}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
+                const SizedBox(height: 4),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: HomeColors.surfaceElevatedOf(context),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    'Qty: ${item.quantity}',
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w700,
+                      color: HomeColors.textSecondaryOf(context),
+                    ),
+                  ),
                 ),
               ],
             ),
           ),
+          const SizedBox(width: 8),
           Text(
             item.formattedPrice,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: HomeColors.violet,
-                ),
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              color: HomeColors.textPrimaryOf(context),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _itemPlaceholder(ColorScheme colorScheme) {
+  Widget _itemPlaceholder(BuildContext context) {
+    final dark = HomeColors.isDark(context);
     return Container(
-      width: 50,
-      height: 50,
-      color: colorScheme.surfaceContainerHighest,
-      child: Icon(Icons.fastfood_rounded, color: colorScheme.onSurfaceVariant),
+      width: 56,
+      height: 56,
+      color: dark ? AppColors.orangeTintDark : AppColors.orangeTint,
+      child: const Icon(
+        Icons.fastfood_rounded,
+        color: AppColors.brandOrange,
+        size: 26,
+      ),
     );
   }
 }
@@ -648,117 +976,117 @@ class DeliveryInfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colorScheme = Theme.of(context).colorScheme;
+    final muted = HomeColors.textMutedOf(context);
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppColors.spaceMD),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    l10n.deliveryDetailsPickup,
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: HomeColors.violet,
-                        ),
-                  ),
-                ),
-                Icon(
-                  Icons.arrow_forward_rounded,
-                  size: 16,
-                  color: colorScheme.onSurfaceVariant,
-                ),
-                Expanded(
-                  child: Text(
-                    l10n.deliveryDetailsDropoff,
-                    textAlign: TextAlign.end,
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: HomeColors.violet,
-                        ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: HomeColors.violet.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(
-                    Icons.map_outlined,
-                    color: HomeColors.violet,
-                    size: 20,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Icon(
-                  Icons.location_on_rounded,
-                  color: HomeColors.violet,
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    order.deliveryAddress,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ),
-              ],
-            ),
-            if (order.driver != null) ...[
-              const SizedBox(height: 16),
-              const Divider(),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 20,
-                    backgroundImage: NetworkImage(order.driver!.avatar),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+    return _DetailCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const _IconTile(
+                icon: Icons.location_on_rounded,
+                color: AppColors.brandOrange,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
                       children: [
-                        Text(
-                          order.driver!.name,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.copyWith(fontWeight: FontWeight.w600),
+                        Flexible(
+                          child: Text(
+                            l10n.deliveryDetailsPickup,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: muted,
+                            ),
+                          ),
                         ),
-                        Text(
-                          order.driver!.phone,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
-                              ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 6),
+                          child: Icon(
+                            Icons.arrow_forward_rounded,
+                            size: 16,
+                            color: muted,
+                          ),
+                        ),
+                        Flexible(
+                          child: Text(
+                            l10n.deliveryDetailsDropoff,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: muted,
+                            ),
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                  IconButton(
-                    onPressed: () {},
-                    icon: const Icon(
-                      Icons.call_rounded,
-                      color: AppColors.successColor,
+                    const SizedBox(height: 4),
+                    Text(
+                      order.deliveryAddress,
+                      style: TextStyle(
+                        fontSize: 15,
+                        height: 1.35,
+                        fontWeight: FontWeight.w700,
+                        color: HomeColors.textPrimaryOf(context),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
+          ),
+          if (order.driver != null) ...[
+            const SizedBox(height: 14),
+            Divider(height: 1, color: HomeColors.borderOf(context)),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                _PersonAvatar(
+                  url: order.driver!.avatar,
+                  name: order.driver!.name,
+                  radius: 22,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        order.driver!.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          color: HomeColors.textPrimaryOf(context),
+                        ),
+                      ),
+                      Text(
+                        order.driver!.phone,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: muted,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const _CallButton(),
+              ],
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
@@ -772,49 +1100,49 @@ class PaymentInfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colorScheme = Theme.of(context).colorScheme;
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppColors.spaceMD),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.paymentAndCost,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                StatusChip(status: order.paymentMethod),
-                const Spacer(),
-                Text(
-                  order.formattedTotal,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: HomeColors.violet,
-                      ),
+    return _DetailCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _CardHeader(
+            icon: Icons.account_balance_wallet_rounded,
+            title: l10n.paymentAndCost,
+            color: AppColors.successColor,
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              StatusChip(status: order.paymentMethod),
+              const Spacer(),
+              Text(
+                order.formattedTotal,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.3,
+                  color: HomeColors.textPrimaryOf(context),
                 ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
                   l10n.labelPaymentStatus,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: HomeColors.textMutedOf(context),
+                  ),
                 ),
-                StatusChip(status: order.paymentStatus),
-              ],
-            ),
-          ],
-        ),
+              ),
+              StatusChip(status: order.paymentStatus),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -828,39 +1156,60 @@ class OrderSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppColors.spaceMD),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.paymentAndCost,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-            ),
-            const SizedBox(height: 12),
-            _buildSummaryRow(context, 'Subtotal', order.formattedSubtotal),
-            _buildSummaryRow(
-                context, 'Delivery', order.formattedDeliveryFee),
-            _buildSummaryRow(context, 'Tax', order.formattedTax),
-            if (order.discount > 0)
-              _buildSummaryRow(
-                context,
-                'Discount',
-                '-${order.formattedDiscount}',
-                color: AppColors.successColor,
-              ),
-            const Divider(),
+    final dark = HomeColors.isDark(context);
+    return _DetailCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _CardHeader(
+            icon: Icons.receipt_long_rounded,
+            title: l10n.paymentAndCost,
+          ),
+          const SizedBox(height: 10),
+          _buildSummaryRow(context, 'Subtotal', order.formattedSubtotal),
+          _buildSummaryRow(context, 'Delivery', order.formattedDeliveryFee),
+          _buildSummaryRow(context, 'Tax', order.formattedTax),
+          if (order.discount > 0)
             _buildSummaryRow(
               context,
-              'Total',
-              order.formattedTotal,
-              isTotal: true,
+              'Discount',
+              '-${order.formattedDiscount}',
+              color: AppColors.successColor,
             ),
-          ],
-        ),
+          const _DashedDivider(),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: HomeColors.violetTintOf(context),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Total',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: HomeColors.textPrimaryOf(context),
+                    ),
+                  ),
+                ),
+                Text(
+                  order.formattedTotal,
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.5,
+                    color: dark
+                        ? HomeColors.textPrimaryOf(context)
+                        : AppColors.brandInk,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -870,26 +1219,28 @@ class OrderSummaryCard extends StatelessWidget {
     String label,
     String value, {
     Color? color,
-    bool isTotal = false,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: isTotal ? FontWeight.w700 : FontWeight.w400,
-                ),
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: HomeColors.textMutedOf(context),
+              ),
+            ),
           ),
           Text(
             value,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: isTotal ? FontWeight.w700 : FontWeight.w500,
-                  color: color ??
-                      (isTotal ? HomeColors.violet : null),
-                ),
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: color ?? HomeColors.textPrimaryOf(context),
+            ),
           ),
         ],
       ),
@@ -925,72 +1276,85 @@ class _RateOrderCardState extends State<RateOrderCard> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppColors.spaceMD),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.addReviewOptional,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(5, (index) {
-                final starValue = index + 1;
-                return IconButton(
-                  icon: Icon(
-                    _rating >= starValue
-                        ? Icons.star_rounded
-                        : Icons.star_border_rounded,
-                    color: AppColors.ratingFilled,
-                    size: 36,
-                  ),
-                  onPressed: _isSubmitting
-                      ? null
-                      : () => setState(() => _rating = starValue),
-                );
-              }),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _reviewController,
-              decoration: InputDecoration(
-                hintText: l10n.addReviewOptional,
-              ),
-              maxLines: 3,
-              enabled: !_isSubmitting,
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _isSubmitting || _rating == 0
+    return _DetailCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _CardHeader(
+            icon: Icons.star_rounded,
+            title: l10n.addReviewOptional,
+            color: AppColors.ratingFilled,
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(5, (index) {
+              final starValue = index + 1;
+              return IconButton(
+                iconSize: 40,
+                icon: Icon(
+                  _rating >= starValue
+                      ? Icons.star_rounded
+                      : Icons.star_outline_rounded,
+                  color: _rating >= starValue
+                      ? AppColors.ratingFilled
+                      : HomeColors.textMutedOf(context).withValues(alpha: 0.5),
+                ),
+                onPressed: _isSubmitting
                     ? null
-                    : () async {
-                        setState(() => _isSubmitting = true);
-                        widget.onRate(
-                          _rating,
-                          _reviewController.text.trim().isEmpty
-                              ? null
-                              : _reviewController.text.trim(),
-                        );
-                      },
-                child: _isSubmitting
-                    ? const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Text(l10n.actionSave),
-              ),
+                    : () => setState(() => _rating = starValue),
+              );
+            }),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _reviewController,
+            decoration: InputDecoration(
+              hintText: l10n.addReviewOptional,
             ),
-          ],
-        ),
+            maxLines: 3,
+            enabled: !_isSubmitting,
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.brandOrange,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                textStyle: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              onPressed: _isSubmitting || _rating == 0
+                  ? null
+                  : () async {
+                      setState(() => _isSubmitting = true);
+                      widget.onRate(
+                        _rating,
+                        _reviewController.text.trim().isEmpty
+                            ? null
+                            : _reviewController.text.trim(),
+                      );
+                    },
+              child: _isSubmitting
+                  ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.4,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Text(l10n.actionSave),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1025,65 +1389,157 @@ class _CancelOrderDialogState extends State<CancelOrderDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final indigo = HomeColors.violetOf(context);
     return AlertDialog(
-      title: Text(l10n.orderStatusCancelled),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.orderAppBarTitle(widget.order.orderNumber),
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          const SizedBox(height: 16),
-          ..._cancelReasons.map(
-            (reason) {
-              final selected = _selectedReason == reason;
-              return ListTile(
-                title: Text(reason),
-                contentPadding: EdgeInsets.zero,
-                trailing: selected
-                    ? const Icon(Icons.check_circle, color: HomeColors.violet)
-                    : Icon(
-                        Icons.circle_outlined,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                onTap: () => setState(() => _selectedReason = reason),
-              );
-            },
-          ),
-          if (_selectedReason == 'Other') ...[
-            const SizedBox(height: 8),
-            TextField(
-              controller: _reasonController,
-              decoration: InputDecoration(
-                hintText: l10n.pleaseSpecify,
+      backgroundColor: HomeColors.surfaceOf(context),
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+      icon: const _IconTile(
+        icon: Icons.cancel_rounded,
+        color: AppColors.errorColor,
+        size: 56,
+        iconSize: 30,
+      ),
+      title: Text(
+        l10n.orderStatusCancelled,
+        style: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.w800,
+          color: HomeColors.textPrimaryOf(context),
+        ),
+      ),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.orderAppBarTitle(widget.order.orderNumber),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: HomeColors.textMutedOf(context),
               ),
-              maxLines: 2,
+            ),
+            const SizedBox(height: 12),
+            ..._cancelReasons.map(
+              (reason) {
+                final selected = _selectedReason == reason;
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Material(
+                    color: selected
+                        ? HomeColors.violetTintOf(context)
+                        : HomeColors.surfaceElevatedOf(context),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      side: BorderSide(
+                        color: selected ? indigo : Colors.transparent,
+                        width: 1.5,
+                      ),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: InkWell(
+                      onTap: () => setState(() => _selectedReason = reason),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 13,
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                reason,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                  color: HomeColors.textPrimaryOf(context),
+                                ),
+                              ),
+                            ),
+                            Icon(
+                              selected
+                                  ? Icons.check_circle_rounded
+                                  : Icons.circle_outlined,
+                              color: selected
+                                  ? indigo
+                                  : HomeColors.textMutedOf(context),
+                              size: 24,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+            if (_selectedReason == 'Other') ...[
+              const SizedBox(height: 4),
+              TextField(
+                controller: _reasonController,
+                decoration: InputDecoration(
+                  hintText: l10n.pleaseSpecify,
+                ),
+                maxLines: 2,
+              ),
+            ],
+          ],
+        ),
+      ),
+      actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+      actions: [
+        Row(
+          children: [
+            Expanded(
+              child: SizedBox(
+                height: 52,
+                child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: HomeColors.textPrimaryOf(context),
+                    side: BorderSide(color: HomeColors.borderOf(context)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text(l10n.actionCancel),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: SizedBox(
+                height: 52,
+                child: FilledButton(
+                  onPressed: _selectedReason != null
+                      ? () {
+                          final reason = _selectedReason == 'Other'
+                              ? _reasonController.text
+                              : _selectedReason;
+                          widget.onCancel(reason);
+                          Navigator.of(context).pop();
+                        }
+                      : null,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.errorColor,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: Text(
+                    l10n.orderStatusCancelled,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
             ),
           ],
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(l10n.actionCancel),
-        ),
-        ElevatedButton(
-          onPressed: _selectedReason != null
-              ? () {
-                  final reason = _selectedReason == 'Other'
-                      ? _reasonController.text
-                      : _selectedReason;
-                  widget.onCancel(reason);
-                  Navigator.of(context).pop();
-                }
-              : null,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.errorColor,
-            foregroundColor: AppColors.lightOnPrimary,
-          ),
-          child: Text(l10n.orderStatusCancelled),
         ),
       ],
     );

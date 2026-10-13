@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/widgets/user_avatar.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
 
@@ -16,33 +17,53 @@ class ProfileImagePicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onImageTap,
-      child: Stack(
-        children: [
-          UserAvatar(
-            radius: 40,
-            imageUrl: networkImageUrl,
-            localImagePath: localImagePath,
-          ),
-          Positioned(
-            bottom: 0,
-            right: 0,
-            child: Container(
-              padding: EdgeInsets.all(4),
+    final indigo = AuthScreenColors.isDark(context)
+        ? AppColors.brandIndigoBright
+        : AppColors.brandIndigo;
+    return Semantics(
+      button: true,
+      child: GestureDetector(
+        onTap: onImageTap,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
-                color: AuthScreenColors.surfaceOf(context),
                 shape: BoxShape.circle,
-                border: Border.all(color: AuthScreenColors.surfaceBorderOf(context)),
+                color: AuthScreenColors.surfaceOf(context),
+                border: Border.all(color: indigo, width: 2.5),
+                boxShadow: AppColors.softShadow(context),
               ),
-              child: Icon(
-                Icons.camera_alt,
-                size: 20,
-                color: AuthScreenColors.textMutedOf(context),
+              child: UserAvatar(
+                radius: 50,
+                imageUrl: networkImageUrl,
+                localImagePath: localImagePath,
               ),
             ),
-          ),
-        ],
+            Positioned(
+              bottom: 2,
+              right: 2,
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: AuthScreenColors.orange,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: AuthScreenColors.backgroundOf(context),
+                    width: 3,
+                  ),
+                ),
+                child: const Icon(
+                  Icons.photo_camera_rounded,
+                  size: 20,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -64,37 +85,56 @@ class ProfileTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(16);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 14,
-            color: AuthScreenColors.textSecondaryOf(context),
+        Padding(
+          padding: const EdgeInsets.only(left: 4),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: AuthScreenColors.textSecondaryOf(context),
+            ),
           ),
         ),
-        SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            color: AuthScreenColors.surfaceOf(context),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AuthScreenColors.surfaceBorderOf(context)),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          readOnly: readOnly,
+          keyboardType: keyboardType,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: AuthScreenColors.textPrimaryOf(context),
           ),
-          child: TextFormField(
-            controller: controller,
-            readOnly: readOnly,
-            keyboardType: keyboardType,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: AuthScreenColors.textPrimaryOf(context),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: AuthScreenColors.surfaceOf(context),
+            isDense: false,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 17,
             ),
-            decoration: const InputDecoration(
-              border: InputBorder.none,
-              contentPadding: EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 12,
+            border: OutlineInputBorder(
+              borderRadius: radius,
+              borderSide: BorderSide(
+                color: AuthScreenColors.surfaceBorderOf(context),
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: radius,
+              borderSide: BorderSide(
+                color: AuthScreenColors.surfaceBorderOf(context),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: radius,
+              borderSide: const BorderSide(
+                color: AuthScreenColors.orange,
+                width: 1.6,
               ),
             ),
           ),
@@ -118,43 +158,43 @@ class UpdateButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          gradient: const LinearGradient(
-            colors: AuthScreenColors.signInGradient,
+      height: 56,
+      child: FilledButton(
+        onPressed: isLoading ? null : onPressed,
+        style: FilledButton.styleFrom(
+          backgroundColor: AuthScreenColors.orange,
+          foregroundColor: Colors.white,
+          disabledBackgroundColor:
+              AuthScreenColors.orange.withValues(alpha: 0.6),
+          disabledForegroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
           ),
         ),
-        child: ElevatedButton(
-          onPressed: isLoading ? null : onPressed,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.transparent,
-            shadowColor: Colors.transparent,
-            foregroundColor: Colors.white,
-            disabledForegroundColor: Colors.white70,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-          child: isLoading
-              ? const SizedBox(
-                  height: 22,
-                  width: 22,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
-                  ),
-                )
-              : const Text(
-                  'Update',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+        child: isLoading
+            ? const SizedBox(
+                height: 24,
+                width: 24,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.4,
+                  color: Colors.white,
                 ),
-        ),
+              )
+            : const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.check_rounded, size: 22),
+                  SizedBox(width: 8),
+                  Text(
+                    'Update',
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
       ),
     );
   }

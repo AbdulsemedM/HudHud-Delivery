@@ -2,19 +2,19 @@ import 'dart:async';
 
 import 'package:country_picker/country_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/app/services/phone_enrollment_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/utils/phone_util.dart';
 import 'package:hudhud_delivery/features/chat/presentation/screens/support_chat_start_screen.dart';
 import 'package:hudhud_delivery/features/dashboard/presentation/screen/dashboard_screen.dart';
 import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_dark_scaffold.dart';
-import 'package:hudhud_delivery/features/login/presentation/widgets/auth_field_decoration.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_gradient_button.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_phone_number_field.dart';
+import 'package:hudhud_delivery/features/login/presentation/widgets/auth_ui.dart';
 import 'package:hudhud_delivery/features/login/utils/phone_enrollment_navigation.dart';
 import 'package:hudhud_delivery/features/settings/presentation/widgets/auth_feedback.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
@@ -69,7 +69,8 @@ class _PhoneEnrollmentScreenState extends State<PhoneEnrollmentScreen> {
   }
 
   Future<void> _prefillFromSession() async {
-    final user = AuthService().currentUser ?? await AuthService().getStoredUser();
+    final user =
+        AuthService().currentUser ?? await AuthService().getStoredUser();
     final phone = user?.phone;
     if (phone == null || phone.trim().isEmpty) return;
     final parts = splitPhoneForDisplay(phone);
@@ -301,43 +302,38 @@ class _PhoneEnrollmentScreenState extends State<PhoneEnrollmentScreen> {
       child: AuthDarkScaffold(
         showBackButton: false,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              onOtp ? l10n.phoneEnrollmentOtpTitle : l10n.phoneEnrollmentTitle,
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.w700,
-                color: AuthScreenColors.textPrimaryOf(context),
-              ),
-            ),
             const SizedBox(height: 8),
-            Text(
-              onOtp
+            AuthHeading(
+              icon: onOtp ? Icons.sms_rounded : Icons.phone_iphone_rounded,
+              indigoIcon: !onOtp,
+              title: onOtp
+                  ? l10n.phoneEnrollmentOtpTitle
+                  : l10n.phoneEnrollmentTitle,
+              subtitle: onOtp
                   ? l10n.phoneEnrollmentOtpSubtitle(displayPhone)
                   : l10n.phoneEnrollmentSubtitle,
-              style: TextStyle(
-                fontSize: 14,
-                color: AuthScreenColors.textSecondaryOf(context),
-                height: 1.45,
-              ),
             ),
             const SizedBox(height: 28),
             if (!onOtp) _buildPhoneStep(l10n) else _buildOtpStep(l10n),
-            const SizedBox(height: 24),
-            TextButton(
-              onPressed: _loading ? null : _openSupport,
-              child: Text(
-                l10n.phoneEnrollmentContactSupport,
-                style: TextStyle(color: AuthScreenColors.textSecondaryOf(context)),
-              ),
+            const SizedBox(height: 28),
+            Divider(
+              color: AuthScreenColors.surfaceBorderOf(context),
+              height: 1,
             ),
-            TextButton(
+            const SizedBox(height: 12),
+            _SecondaryLink(
+              icon: Icons.support_agent_rounded,
+              label: l10n.phoneEnrollmentContactSupport,
+              color: AuthScreenColors.textSecondaryOf(context),
+              onPressed: _loading ? null : _openSupport,
+            ),
+            _SecondaryLink(
+              icon: Icons.logout_rounded,
+              label: l10n.phoneEnrollmentSignOut,
+              color: AppColors.errorColor,
               onPressed: _loading ? null : _signOut,
-              child: Text(
-                l10n.phoneEnrollmentSignOut,
-                style: const TextStyle(color: AuthScreenColors.orange),
-              ),
             ),
           ],
         ),
@@ -351,6 +347,7 @@ class _PhoneEnrollmentScreenState extends State<PhoneEnrollmentScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          AuthFieldLabel(l10n.phoneNumber),
           AuthPhoneNumberField(
             countryCode: _countryCode,
             countryIsoCode: _countryIso,
@@ -370,22 +367,21 @@ class _PhoneEnrollmentScreenState extends State<PhoneEnrollmentScreen> {
               return null;
             },
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 28),
           AuthGradientButton(
             label: _showDeliveryRetry
                 ? l10n.phoneEnrollmentRetry
                 : l10n.phoneEnrollmentSendCode,
             loading: _loading,
-            onPressed: _loading || _resendSeconds > 0
-                ? null
-                : () => _requestOtp(),
+            onPressed:
+                _loading || _resendSeconds > 0 ? null : () => _requestOtp(),
           ),
           if (_resendSeconds > 0) ...[
-            const SizedBox(height: 12),
-            Text(
-              l10n.phoneEnrollmentResendIn(_resendSeconds),
-              textAlign: TextAlign.center,
-              style: TextStyle(color: AuthScreenColors.textSecondaryOf(context)),
+            const SizedBox(height: 14),
+            Center(
+              child: AuthPill(
+                label: l10n.phoneEnrollmentResendIn(_resendSeconds),
+              ),
             ),
           ],
         ],
@@ -402,28 +398,11 @@ class _PhoneEnrollmentScreenState extends State<PhoneEnrollmentScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            l10n.forgotPasswordOtpLabel,
-            style: TextStyle(
-              fontSize: 13,
-              color: AuthScreenColors.textSecondaryOf(context),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 6),
-          TextFormField(
+          AuthFieldLabel(l10n.forgotPasswordOtpLabel),
+          AuthCodeField(
             controller: _otpController,
-            keyboardType: TextInputType.number,
-            maxLength: 6,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            length: 6,
             enabled: canVerify,
-            style: TextStyle(
-              color: AuthScreenColors.textPrimaryOf(context),
-              fontSize: 18,
-              letterSpacing: 8,
-              fontWeight: FontWeight.w600,
-            ),
-            decoration: authFieldDecoration(context).copyWith(counterText: ''),
             validator: (v) {
               final t = v?.trim() ?? '';
               if (t.length != 6) return l10n.validationOtpLength;
@@ -436,40 +415,84 @@ class _PhoneEnrollmentScreenState extends State<PhoneEnrollmentScreen> {
             loading: _loading,
             onPressed: canVerify ? _verifyOtp : null,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           if (_showDeliveryRetry)
-            TextButton(
-              onPressed: _loading ? null : () => _requestOtp(isResend: true),
-              child: Text(l10n.phoneEnrollmentRetry),
+            Center(
+              child: TextButton.icon(
+                onPressed: _loading ? null : () => _requestOtp(isResend: true),
+                style: _linkStyle(AuthScreenColors.orange),
+                icon: const Icon(Icons.refresh_rounded, size: 20),
+                label: Text(l10n.phoneEnrollmentRetry),
+              ),
+            )
+          else if (_resendSeconds > 0)
+            Center(
+              child: AuthPill(
+                label: l10n.phoneEnrollmentResendIn(_resendSeconds),
+              ),
             )
           else
-            TextButton(
-              onPressed: canResend ? () => _requestOtp(isResend: true) : null,
-              child: Text(
-                _resendSeconds > 0
-                    ? l10n.phoneEnrollmentResendIn(_resendSeconds)
-                    : l10n.phoneEnrollmentResend,
-                style: TextStyle(
-                  color: canResend
-                      ? AuthScreenColors.orange
-                      : AuthScreenColors.textSecondaryOf(context),
-                ),
+            Center(
+              child: TextButton.icon(
+                onPressed: canResend ? () => _requestOtp(isResend: true) : null,
+                style: _linkStyle(AuthScreenColors.orange),
+                icon: const Icon(Icons.refresh_rounded, size: 20),
+                label: Text(l10n.phoneEnrollmentResend),
               ),
             ),
-          TextButton(
-            onPressed: _loading
-                ? null
-                : () => setState(() {
-                      _step = _EnrollmentStep.phone;
-                      _otpController.clear();
-                    }),
-            child: Text(
-              l10n.phoneEnrollmentChangeNumber,
-              style: TextStyle(color: AuthScreenColors.textSecondaryOf(context)),
+          const SizedBox(height: 4),
+          Center(
+            child: TextButton.icon(
+              onPressed: _loading
+                  ? null
+                  : () => setState(() {
+                        _step = _EnrollmentStep.phone;
+                        _otpController.clear();
+                      }),
+              style: _linkStyle(AuthScreenColors.textSecondaryOf(context)),
+              icon: const Icon(Icons.edit_rounded, size: 18),
+              label: Text(l10n.phoneEnrollmentChangeNumber),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  ButtonStyle _linkStyle(Color color) => TextButton.styleFrom(
+        foregroundColor: color,
+        minimumSize: const Size(48, 48),
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      );
+}
+
+class _SecondaryLink extends StatelessWidget {
+  const _SecondaryLink({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton.icon(
+      onPressed: onPressed,
+      style: TextButton.styleFrom(
+        foregroundColor: color,
+        minimumSize: const Size.fromHeight(48),
+        textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      ),
+      icon: Icon(icon, size: 22),
+      label: Text(label),
     );
   }
 }

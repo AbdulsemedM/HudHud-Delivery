@@ -86,8 +86,7 @@ class _DeliveryHistoryScreenState extends State<DeliveryHistoryScreen> {
     setState(() => _isLoadingMore = true);
     try {
       final nextPage = _currentPage + 1;
-      final result =
-          await _courierRepository.getUserDeliveries(page: nextPage);
+      final result = await _courierRepository.getUserDeliveries(page: nextPage);
       if (!mounted) return;
       setState(() {
         _isLoadingMore = false;
@@ -127,11 +126,26 @@ class _DeliveryHistoryScreenState extends State<DeliveryHistoryScreen> {
         appBar: AppBar(
           backgroundColor: HomeColors.backgroundOf(context),
           foregroundColor: HomeColors.textPrimaryOf(context),
+          surfaceTintColor: Colors.transparent,
           elevation: 0,
-          title: Text(l10n.history),
+          scrolledUnderElevation: 0,
+          centerTitle: true,
+          iconTheme: IconThemeData(
+            color: HomeColors.textPrimaryOf(context),
+            size: 26,
+          ),
+          title: Text(
+            l10n.history,
+            style: TextStyle(
+              color: HomeColors.textPrimaryOf(context),
+              fontWeight: FontWeight.w800,
+              fontSize: 19,
+              letterSpacing: -0.3,
+            ),
+          ),
         ),
         body: RefreshIndicator(
-          color: HomeColors.violet,
+          color: HomeColors.orange,
           backgroundColor: HomeColors.surfaceOf(context),
           onRefresh: () => _fetchDeliveries(refresh: true),
           child: CustomScrollView(
@@ -147,34 +161,39 @@ class _DeliveryHistoryScreenState extends State<DeliveryHistoryScreen> {
                   ),
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
+                    clipBehavior: Clip.none,
                     child: Row(
                       children: [
                         _HistoryFilterChip(
                           label: l10n.orders,
+                          icon: Icons.apps_rounded,
                           selected:
                               _selectedFilter == kDeliveryHistoryFilterAll,
                           onTap: () => setState(() =>
                               _selectedFilter = kDeliveryHistoryFilterAll),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 10),
                         _HistoryFilterChip(
                           label: l10n.courierActiveDelivery,
-                          selected: _selectedFilter ==
-                              kDeliveryHistoryFilterActive,
+                          icon: Icons.local_shipping_rounded,
+                          selected:
+                              _selectedFilter == kDeliveryHistoryFilterActive,
                           onTap: () => setState(() =>
                               _selectedFilter = kDeliveryHistoryFilterActive),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 10),
                         _HistoryFilterChip(
                           label: l10n.orderStatusDelivered,
+                          icon: Icons.check_circle_rounded,
                           selected: _selectedFilter ==
                               kDeliveryHistoryFilterCompleted,
                           onTap: () => setState(() => _selectedFilter =
                               kDeliveryHistoryFilterCompleted),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 10),
                         _HistoryFilterChip(
                           label: l10n.orderStatusCancelled,
+                          icon: Icons.cancel_rounded,
                           selected: _selectedFilter ==
                               kDeliveryHistoryFilterCancelled,
                           onTap: () => setState(() => _selectedFilter =
@@ -201,25 +220,43 @@ class _DeliveryHistoryScreenState extends State<DeliveryHistoryScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.wifi_off_rounded,
-                          size: 48,
-                          color: HomeColors.textMutedOf(context),
+                        Container(
+                          width: 96,
+                          height: 96,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: HomeColors.violetTintOf(context),
+                          ),
+                          child: Icon(
+                            Icons.wifi_off_rounded,
+                            size: 46,
+                            color: HomeColors.violetOf(context),
+                          ),
                         ),
-                        const SizedBox(height: AppColors.spaceMD),
+                        const SizedBox(height: 20),
                         Text(
                           _error!,
                           textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: HomeColors.textSecondaryOf(context),
-                              ),
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.2,
+                            height: 1.35,
+                            color: HomeColors.textPrimaryOf(context),
+                          ),
                         ),
+                        const SizedBox(height: 12),
                         TextButton.icon(
                           onPressed: _fetchDeliveries,
-                          icon: const Icon(Icons.refresh),
+                          icon: const Icon(Icons.refresh_rounded, size: 24),
                           label: Text(l10n.actionRetry),
                           style: TextButton.styleFrom(
-                            foregroundColor: HomeColors.violet,
+                            foregroundColor: HomeColors.violetOf(context),
+                            minimumSize: const Size(48, 48),
+                            textStyle: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                            ),
                           ),
                         ),
                       ],
@@ -255,19 +292,29 @@ class _DeliveryHistoryScreenState extends State<DeliveryHistoryScreen> {
                             child: Center(
                               child: _isLoadingMore
                                   ? const SizedBox(
-                                      width: 24,
-                                      height: 24,
+                                      width: 28,
+                                      height: 28,
                                       child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: HomeColors.violet,
+                                        strokeWidth: 2.5,
+                                        color: HomeColors.orange,
                                       ),
                                     )
-                                  : TextButton(
+                                  : TextButton.icon(
                                       onPressed: _loadMore,
-                                      style: TextButton.styleFrom(
-                                        foregroundColor: HomeColors.orange,
+                                      icon: const Icon(
+                                        Icons.expand_more_rounded,
+                                        size: 24,
                                       ),
-                                      child: Text(l10n.showMore),
+                                      label: Text(l10n.showMore),
+                                      style: TextButton.styleFrom(
+                                        foregroundColor:
+                                            HomeColors.violetOf(context),
+                                        minimumSize: const Size(48, 48),
+                                        textStyle: const TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                      ),
                                     ),
                             ),
                           );
@@ -279,15 +326,13 @@ class _DeliveryHistoryScreenState extends State<DeliveryHistoryScreen> {
                           orderId: id != null ? 'DEL-$id' : '—',
                           recipient: d['receiver_name']?.toString() ?? '—',
                           location: d['dropoff_location']?.toString() ?? '—',
-                          dateTime:
-                              formatDeliveryHistoryDate(d['created_at']),
+                          dateTime: formatDeliveryHistoryDate(d['created_at']),
                           status: resolveDeliveryStatusLabel(d),
                           borderColor: borderColor,
                           onTap: id != null ? () => _openDetails(id) : null,
                         );
                       },
-                      childCount:
-                          filtered.length + (canLoadMore ? 1 : 0),
+                      childCount: filtered.length + (canLoadMore ? 1 : 0),
                     ),
                   ),
                 ),
@@ -301,34 +346,68 @@ class _DeliveryHistoryScreenState extends State<DeliveryHistoryScreen> {
 
 class _HistoryFilterChip extends StatelessWidget {
   final String label;
+  final IconData icon;
   final bool selected;
   final VoidCallback onTap;
 
   const _HistoryFilterChip({
     required this.label,
+    required this.icon,
     required this.selected,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return FilterChip(
-      label: Text(label),
+    final accent = HomeColors.violetOf(context);
+    final dark = HomeColors.isDark(context);
+    final radius = BorderRadius.circular(AppColors.radiusFull);
+    final fg = selected ? Colors.white : HomeColors.textPrimaryOf(context);
+
+    return Semantics(
+      button: true,
       selected: selected,
-      onSelected: (_) => onTap(),
-      showCheckmark: false,
-      labelStyle: TextStyle(
-        fontSize: 12,
-        fontWeight: FontWeight.w600,
-        color: selected ? Theme.of(context).colorScheme.onSecondary : HomeColors.textMutedOf(context),
-      ),
-      backgroundColor: HomeColors.surfaceOf(context),
-      selectedColor: HomeColors.violet,
-      side: BorderSide(
-        color: selected ? HomeColors.violet : HomeColors.borderOf(context),
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppColors.radiusFull),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: radius,
+          boxShadow: selected ? const [] : AppColors.softShadow(context),
+        ),
+        child: Material(
+          color: selected ? accent : HomeColors.surfaceOf(context),
+          shape: RoundedRectangleBorder(
+            borderRadius: radius,
+            side: selected || !dark
+                ? BorderSide.none
+                : BorderSide(color: HomeColors.borderOf(context)),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: onTap,
+            child: Container(
+              height: 48,
+              padding: const EdgeInsets.fromLTRB(12, 0, 16, 0),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    icon,
+                    size: 22,
+                    color: selected ? Colors.white : accent,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: fg,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

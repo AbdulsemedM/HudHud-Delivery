@@ -20,7 +20,6 @@ import 'package:hudhud_delivery/features/products/data/products_data_provider.da
 import 'package:hudhud_delivery/features/products/data/products_repository.dart';
 import 'package:hudhud_delivery/features/products/model/popular_product_model.dart';
 import 'package:hudhud_delivery/features/products/presentation/screens/product_search_results_screen.dart';
-import 'package:hudhud_delivery/features/products/presentation/widgets/product_search_field.dart';
 import 'package:hudhud_delivery/features/vendors/data/data_provider/vendors_data_provider.dart';
 import 'package:hudhud_delivery/features/vendors/data/repository/vendors_repository.dart';
 
@@ -38,7 +37,8 @@ class AllCategoriesScreen extends StatelessWidget {
       ),
     );
     final productsRepository = ProductsRepository(
-      productsDataProvider: ProductsDataProvider(apiService: ApiService.instance),
+      productsDataProvider:
+          ProductsDataProvider(apiService: ApiService.instance),
     );
     return BlocProvider(
       create: (context) => CategoriesBloc(repository, productsRepository)
@@ -75,7 +75,8 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
       vendorsDataProvider: VendorsDataProvider(apiService: ApiService.instance),
     );
     _productsRepository = ProductsRepository(
-      productsDataProvider: ProductsDataProvider(apiService: ApiService.instance),
+      productsDataProvider:
+          ProductsDataProvider(apiService: ApiService.instance),
     );
     _loadVendors();
     _loadPopularProducts();
@@ -145,13 +146,9 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final textTheme = theme.textTheme;
     final embedded = widget.embedded;
-    final searchHint = embedded
-        ? context.l10n.homeSearchHint
-        : 'Search products everywhere';
+    final searchHint =
+        embedded ? context.l10n.homeSearchHint : 'Search products everywhere';
 
     final gridBody = BlocBuilder<CategoriesBloc, CategoriesState>(
       buildWhen: (prev, curr) =>
@@ -236,12 +233,9 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SizedBox(height: 8),
-        ProductSearchField(
+        const SizedBox(height: 12),
+        _SearchBarButton(
           hint: searchHint,
-          readOnly: true,
-          fillColor: embedded ? HomeColors.surfaceElevatedOf(context) : null,
-          hintColor: embedded ? HomeColors.textMutedOf(context) : null,
           onTap: () {
             Navigator.push(
               context,
@@ -250,51 +244,45 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
               ),
             );
           },
-          onSearchChanged: (_) {},
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 4),
         Expanded(child: gridBody),
       ],
     );
 
-    if (embedded) {
-      final themed = Theme(
-        data: HomeColors.themeFor(context),
-        child: ColoredBox(
-          color: HomeColors.backgroundOf(context),
-          child: body,
-        ),
-      );
-      return themed;
-    }
+    final themed = Theme(
+      data: HomeColors.themeFor(context),
+      child: ColoredBox(
+        color: HomeColors.backgroundOf(context),
+        child: body,
+      ),
+    );
+    if (embedded) return themed;
 
     return Scaffold(
-      backgroundColor: colorScheme.surface,
+      backgroundColor: HomeColors.backgroundOf(context),
       appBar: AppBar(
+        centerTitle: true,
         title: Text(
           'All categories',
-          style: textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            fontSize: 18,
+          style: TextStyle(
+            fontWeight: FontWeight.w800,
+            fontSize: 19,
+            letterSpacing: -0.3,
+            color: HomeColors.textPrimaryOf(context),
           ),
         ),
-        backgroundColor: colorScheme.surface,
+        backgroundColor: HomeColors.backgroundOf(context),
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
-        scrolledUnderElevation: 2,
+        scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-          color: colorScheme.onSurface,
+          icon: const Icon(Icons.arrow_back_rounded, size: 26),
+          color: HomeColors.textPrimaryOf(context),
           onPressed: () => Navigator.pop(context),
         ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(
-            color: colorScheme.outline.withValues(alpha: 0.35),
-            height: 1,
-          ),
-        ),
       ),
-      body: body,
+      body: themed,
     );
   }
 
@@ -317,119 +305,226 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Shared visuals
+// ---------------------------------------------------------------------------
+
+/// Tint palette cycled through for picture-less tiles (orange, indigo,
+/// green, amber) so each category/store reads as its own "picture".
+Color _tileAccent(BuildContext context, int index) {
+  switch (index % 4) {
+    case 0:
+      return AppColors.brandOrange;
+    case 1:
+      return HomeColors.violetOf(context);
+    case 2:
+      return AppColors.successColor;
+    default:
+      return AppColors.warningColor;
+  }
+}
+
+/// First letter(s) of a name for picture-less tiles ("Fresh Food" -> "FF").
+String _initialsOf(String name) {
+  final words =
+      name.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+  if (words.isEmpty) return '?';
+  if (words.length == 1) return words.first.characters.first.toUpperCase();
+  return (words[0].characters.first + words[1].characters.first).toUpperCase();
+}
+
+/// Tinted rounded square showing either an icon or initials.
+class _TintedMonogram extends StatelessWidget {
+  const _TintedMonogram({
+    required this.color,
+    required this.label,
+    this.icon,
+    this.fontSize = 22,
+  });
+
+  final Color color;
+  final String label;
+  final IconData? icon;
+  final double fontSize;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = HomeColors.isDark(context);
+    return Container(
+      color: color.withValues(alpha: dark ? 0.2 : 0.12),
+      alignment: Alignment.center,
+      child: icon != null
+          ? Icon(icon, color: color, size: fontSize * 1.4)
+          : Text(
+              label,
+              maxLines: 1,
+              style: TextStyle(
+                fontSize: fontSize,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.4,
+                color: color,
+              ),
+            ),
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader(this.title);
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.w800,
+          letterSpacing: -0.4,
+          color: HomeColors.textPrimaryOf(context),
+        ),
+      ),
+    );
+  }
+}
+
+/// Read-only 56px search pill; tapping opens the search screen.
+class _SearchBarButton extends StatelessWidget {
+  const _SearchBarButton({required this.hint, required this.onTap});
+
+  final String hint;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = HomeColors.isDark(context);
+    final radius = BorderRadius.circular(18);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: radius,
+          boxShadow: AppColors.softShadow(context),
+        ),
+        child: Material(
+          color: HomeColors.surfaceOf(context),
+          shape: RoundedRectangleBorder(
+            borderRadius: radius,
+            side: dark
+                ? BorderSide(color: HomeColors.borderOf(context))
+                : BorderSide.none,
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: onTap,
+            child: SizedBox(
+              height: 56,
+              child: Row(
+                children: [
+                  const SizedBox(width: 16),
+                  Icon(
+                    Icons.search_rounded,
+                    size: 26,
+                    color: HomeColors.textPrimaryOf(context),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      hint,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: HomeColors.textMutedOf(context),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Loading / error / empty
+// ---------------------------------------------------------------------------
+
 class _LoadingState extends StatelessWidget {
   const _LoadingState();
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final shimmerBase = isDark ? const Color(0xFF2B2B2B) : Colors.grey[300]!;
-    final shimmerHighlight = isDark ? const Color(0xFF3A3A3A) : Colors.grey[100]!;
-    final blockColor = isDark ? const Color(0xFF1F1F1F) : Colors.white;
+    final shimmerBase = HomeColors.surfaceElevatedOf(context);
+    final shimmerHighlight = HomeColors.surfaceOf(context);
+    final blockColor = HomeColors.surfaceElevatedOf(context);
+    Widget block(double w, double h, {double r = 8}) => Container(
+          width: w,
+          height: h,
+          decoration: BoxDecoration(
+            color: blockColor,
+            borderRadius: BorderRadius.circular(r),
+          ),
+        );
     return Shimmer.fromColors(
       baseColor: shimmerBase,
       highlightColor: shimmerHighlight,
       child: CustomScrollView(
         slivers: [
-          // Categories title
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
-              child: Container(
-                height: 24,
-                width: 160,
-                decoration: BoxDecoration(
-                  color: blockColor,
-                  borderRadius: BorderRadius.circular(6),
-                ),
+              padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: block(150, 22),
               ),
             ),
           ),
-          // Categories grid
           SliverPadding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             sliver: SliverGrid(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 4,
                 crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 0.72,
+                mainAxisSpacing: 16,
+                // Square tile + two lines of 13px label.
+                childAspectRatio: 0.64,
               ),
               delegate: SliverChildBuilderDelegate(
                 (context, index) => _CategorySkeleton(),
-                childCount: 8,
+                childCount: 4,
               ),
             ),
           ),
-          const SliverToBoxAdapter(child: SizedBox(height: 8)),
-          // Vendors section title
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-              child: Container(
-                height: 20,
-                width: 140,
-                decoration: BoxDecoration(
-                  color: blockColor,
-                  borderRadius: BorderRadius.circular(6),
-                ),
+              padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: block(170, 22),
               ),
             ),
           ),
-          // Vendors horizontal row
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: 130,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                itemCount: 6,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 72,
-                          height: 72,
-                          decoration: BoxDecoration(
-                            color: blockColor,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Container(
-                          width: 70,
-                          height: 10,
-                          decoration: BoxDecoration(
-                            color: blockColor,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
+          const SliverToBoxAdapter(
+            child: SizedBox(height: 140, child: _VendorsSliderShimmerBody()),
           ),
-          const SliverToBoxAdapter(child: SizedBox(height: 16)),
-          // Most Popular title
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-              child: Container(
-                height: 20,
-                width: 160,
-                decoration: BoxDecoration(
-                  color: blockColor,
-                  borderRadius: BorderRadius.circular(6),
-                ),
+              padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: block(160, 22),
               ),
             ),
           ),
-          // Popular Orders card skeletons
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             sliver: SliverList(
@@ -442,7 +537,6 @@ class _LoadingState extends StatelessWidget {
               ),
             ),
           ),
-          const SliverToBoxAdapter(child: SizedBox(height: 24)),
         ],
       ),
     );
@@ -452,37 +546,28 @@ class _LoadingState extends StatelessWidget {
 class _PopularOrderSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cardColor = isDark ? const Color(0xFF1F1F1F) : Colors.white;
+    final blockColor = HomeColors.surfaceElevatedOf(context);
     return Container(
       decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: HomeColors.surfaceOf(context),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            height: 160,
+            height: 170,
             width: double.infinity,
             decoration: BoxDecoration(
-              color: cardColor,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
+              color: blockColor,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
               ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(14),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -490,17 +575,17 @@ class _PopularOrderSkeleton extends StatelessWidget {
                   height: 16,
                   width: 180,
                   decoration: BoxDecoration(
-                    color: cardColor,
-                    borderRadius: BorderRadius.circular(4),
+                    color: blockColor,
+                    borderRadius: BorderRadius.circular(6),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
                 Container(
                   height: 12,
-                  width: 220,
+                  width: 120,
                   decoration: BoxDecoration(
-                    color: cardColor,
-                    borderRadius: BorderRadius.circular(4),
+                    color: blockColor,
+                    borderRadius: BorderRadius.circular(6),
                   ),
                 ),
               ],
@@ -515,51 +600,116 @@ class _PopularOrderSkeleton extends StatelessWidget {
 class _CategorySkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cardColor = isDark ? const Color(0xFF1F1F1F) : Colors.white;
-    return Container(
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 40,
-            height: 40,
+    final blockColor = HomeColors.surfaceElevatedOf(context);
+    return Column(
+      children: [
+        AspectRatio(
+          aspectRatio: 1,
+          child: Container(
             decoration: BoxDecoration(
-              color: cardColor,
-              borderRadius: BorderRadius.circular(10),
+              color: blockColor,
+              borderRadius: BorderRadius.circular(22),
             ),
           ),
-          const SizedBox(height: 6),
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 8),
-            height: 8,
-            decoration: BoxDecoration(
-              color: cardColor,
-              borderRadius: BorderRadius.circular(4),
-            ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 8),
+          height: 10,
+          decoration: BoxDecoration(
+            color: blockColor,
+            borderRadius: BorderRadius.circular(5),
           ),
-          const SizedBox(height: 4),
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 12),
-            height: 6,
-            decoration: BoxDecoration(
-              color: cardColor,
-              borderRadius: BorderRadius.circular(4),
+        ),
+      ],
+    );
+  }
+}
+
+class _StateMessage extends StatelessWidget {
+  const _StateMessage({
+    required this.icon,
+    required this.color,
+    required this.title,
+    required this.message,
+    this.actionLabel,
+    this.onAction,
+  });
+
+  final IconData icon;
+  final Color color;
+  final String title;
+  final String message;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = HomeColors.isDark(context);
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 96,
+              height: 96,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: dark ? 0.2 : 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 46, color: color),
             ),
-          ),
-        ],
+            const SizedBox(height: 20),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 19,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.3,
+                color: HomeColors.textPrimaryOf(context),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 14,
+                height: 1.4,
+                fontWeight: FontWeight.w600,
+                color: HomeColors.textMutedOf(context),
+              ),
+            ),
+            if (actionLabel != null && onAction != null) ...[
+              const SizedBox(height: 24),
+              SizedBox(
+                height: 56,
+                child: FilledButton.icon(
+                  onPressed: onAction,
+                  icon: const Icon(Icons.refresh_rounded, size: 22),
+                  label: Text(actionLabel!),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.brandOrange,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 28),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    textStyle: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
@@ -573,63 +723,13 @@ class _ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-    final colorScheme = theme.colorScheme;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppColors.errorColor.withValues(alpha: 0.08),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.error_outline_rounded,
-                size: 48,
-                color: AppColors.errorColor,
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Something went wrong',
-              style: textTheme.titleMedium?.copyWith(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: textTheme.bodyMedium?.copyWith(
-                fontSize: 14,
-                color: colorScheme.onSurface.withValues(alpha: 0.75),
-                height: 1.4,
-              ),
-            ),
-            const SizedBox(height: 24),
-            FilledButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: Text(context.l10n.actionTryAgain),
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.primaryColor,
-                foregroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+    return _StateMessage(
+      icon: Icons.wifi_off_rounded,
+      color: AppColors.errorColor,
+      title: 'Something went wrong',
+      message: message,
+      actionLabel: context.l10n.actionTryAgain,
+      onAction: onRetry,
     );
   }
 }
@@ -639,49 +739,18 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-    final colorScheme = theme.colorScheme;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: colorScheme.onSurface.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.category_outlined,
-                size: 56,
-                color: colorScheme.onSurface.withValues(alpha: 0.55),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'No categories yet',
-              style: textTheme.titleMedium?.copyWith(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Check back later for new categories',
-              textAlign: TextAlign.center,
-              style: textTheme.bodyMedium?.copyWith(
-                fontSize: 14,
-              ),
-            ),
-          ],
-        ),
-      ),
+    return _StateMessage(
+      icon: Icons.storefront_rounded,
+      color: HomeColors.violetOf(context),
+      title: 'No categories yet',
+      message: 'Check back later for new categories',
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Main content
+// ---------------------------------------------------------------------------
 
 class _CategoriesGrid extends StatelessWidget {
   final List<CategoryTreeModel> categories;
@@ -718,67 +787,31 @@ class _CategoriesGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-    final displayCategories = showAll ? categories : categories.take(3).toList();
+    final displayCategories =
+        showAll ? categories : categories.take(3).toList();
     final hasMore = categories.length > 3 && !showAll;
-    final titleColor = embedded ? HomeColors.textPrimaryOf(context) : null;
-    final accentColor = embedded ? HomeColors.orange : AppColors.primaryColor;
-
-    TextStyle? sectionTitle(TextStyle? base, {double? fontSize}) =>
-        base?.copyWith(
-          fontSize: fontSize,
-          fontWeight: FontWeight.bold,
-          color: titleColor,
-        );
 
     final popularSlivers = <Widget>[
       if (popularLoading) ...[
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-            child: Text(
-              'Most Popular',
-              style: sectionTitle(textTheme.titleLarge, fontSize: 20),
-            ),
-          ),
-        ),
+        const SliverToBoxAdapter(child: _SectionHeader('Most Popular')),
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate(
               (_, __) => Padding(
                 padding: const EdgeInsets.only(bottom: 16),
-                child: _PopularOrderSkeleton(),
+                child: Shimmer.fromColors(
+                  baseColor: HomeColors.surfaceElevatedOf(context),
+                  highlightColor: HomeColors.surfaceOf(context),
+                  child: _PopularOrderSkeleton(),
+                ),
               ),
               childCount: 2,
             ),
           ),
         ),
       ] else if (popularProducts.isNotEmpty) ...[
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'Most Popular',
-                    style: sectionTitle(textTheme.titleLarge, fontSize: 20),
-                  ),
-                ),
-                if (embedded)
-                  Text(
-                    'View all',
-                    style: textTheme.labelLarge?.copyWith(
-                      color: accentColor,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
+        const SliverToBoxAdapter(child: _SectionHeader('Most Popular')),
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           sliver: SliverList(
@@ -827,58 +860,32 @@ class _CategoriesGrid extends StatelessWidget {
     ];
 
     final view = CustomScrollView(
-      physics: usePullToRefresh
-          ? const AlwaysScrollableScrollPhysics()
-          : null,
+      physics: usePullToRefresh ? const AlwaysScrollableScrollPhysics() : null,
       slivers: [
         if (categoriesError != null) ...[
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Could not load categories',
-                    style: sectionTitle(textTheme.titleMedium, fontSize: 16),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    categoriesError!,
-                    style: textTheme.bodySmall?.copyWith(
-                      color: embedded ? HomeColors.textMutedOf(context) : null,
-                    ),
-                  ),
-                  if (onCategoriesRetry != null) ...[
-                    const SizedBox(height: 8),
-                    TextButton(
-                      onPressed: onCategoriesRetry,
-                      child: Text(context.l10n.actionRetry),
-                    ),
-                  ],
-                ],
+              child: _InlineError(
+                title: 'Could not load categories',
+                message: categoriesError!,
+                onRetry: onCategoriesRetry,
               ),
             ),
           ),
         ] else if (categories.isNotEmpty) ...[
           SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
-              child: Text(
-                showAll ? 'All categories' : 'Categories',
-                style: sectionTitle(textTheme.titleLarge, fontSize: 20),
-              ),
-            ),
+            child: _SectionHeader(showAll ? 'All categories' : 'Categories'),
           ),
           SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             sliver: SliverGrid(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 4,
                 crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                // Taller cells so product PNGs show full height with contain.
-                childAspectRatio: 0.72,
+                mainAxisSpacing: 16,
+                // Square tile + two lines of 13px label.
+                childAspectRatio: 0.64,
               ),
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
@@ -888,6 +895,7 @@ class _CategoriesGrid extends StatelessWidget {
                   final category = displayCategories[index];
                   return _CategoryCard(
                     category: category,
+                    index: index,
                     onTap: () => onCategoryTap(category),
                     embedded: embedded,
                   );
@@ -897,93 +905,61 @@ class _CategoriesGrid extends StatelessWidget {
             ),
           ),
         ],
-        const SliverToBoxAdapter(child: SizedBox(height: 8)),
         if (vendorsLoading) ...[
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-              child: Text(
-                'Browse by store',
-                style: sectionTitle(textTheme.titleMedium, fontSize: 18),
-              ),
-            ),
-          ),
+          const SliverToBoxAdapter(child: _SectionHeader('Browse by store')),
           SliverToBoxAdapter(
             child: SizedBox(
-              height: 130,
+              height: 140,
               child: _VendorsSliderShimmer(),
             ),
           ),
         ] else if (vendorsError != null || vendors.isEmpty) ...[
           // Hide section for cleaner UI
         ] else ...[
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Browse by store',
-                      style: sectionTitle(textTheme.titleMedium, fontSize: 18),
-                    ),
-                  ),
-                  if (embedded)
-                    Text(
-                      'View all',
-                      style: textTheme.labelLarge?.copyWith(
-                        color: accentColor,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ),
+          const SliverToBoxAdapter(child: _SectionHeader('Browse by store')),
           SliverToBoxAdapter(
             child: SizedBox(
-              height: 130,
-              child: ListView.builder(
+              height: 140,
+              child: ListView.separated(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 itemCount: vendors.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 12),
                 itemBuilder: (context, index) {
                   final vendor = vendors[index];
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: _VendorSliderCard(
-                      name: vendor.name,
-                      avatarUrl: vendor.avatar,
-                      embedded: embedded,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => StoreDetailScreen(
-                              storeName: vendor.name,
-                              storeImage:
-                                  vendor.avatar.isNotEmpty ? vendor.avatar : null,
-                              vendorId: vendor.id,
-                              vendor: vendor,
-                            ),
+                  return _VendorSliderCard(
+                    name: vendor.name,
+                    avatarUrl: vendor.avatar,
+                    index: index,
+                    embedded: embedded,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => StoreDetailScreen(
+                            storeName: vendor.name,
+                            storeImage:
+                                vendor.avatar.isNotEmpty ? vendor.avatar : null,
+                            vendorId: vendor.id,
+                            vendor: vendor,
                           ),
-                        );
-                      },
-                    ),
+                        ),
+                      );
+                    },
                   );
                 },
               ),
             ),
           ),
         ],
-        const SliverToBoxAdapter(child: SizedBox(height: 16)),
+        const SliverToBoxAdapter(child: SizedBox(height: 4)),
         ...popularSlivers,
         const SliverToBoxAdapter(child: SizedBox(height: 24)),
       ],
     );
     if (usePullToRefresh) {
       return RefreshIndicator(
-        color: embedded ? HomeColors.orange : AppColors.primaryColor,
+        color: AppColors.brandOrange,
         onRefresh: onPullToRefresh,
         child: view,
       );
@@ -992,48 +968,142 @@ class _CategoriesGrid extends StatelessWidget {
   }
 }
 
-class _VendorsSliderShimmer extends StatelessWidget {
+/// Compact inline error card (used when categories fail but other content
+/// can still be shown).
+class _InlineError extends StatelessWidget {
+  const _InlineError({
+    required this.title,
+    required this.message,
+    this.onRetry,
+  });
+
+  final String title;
+  final String message;
+  final VoidCallback? onRetry;
+
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final shimmerBase = isDark ? const Color(0xFF2B2B2B) : Colors.grey[300]!;
-    final shimmerHighlight = isDark ? const Color(0xFF3A3A3A) : Colors.grey[100]!;
-    final blockColor = isDark ? const Color(0xFF1F1F1F) : Colors.white;
-    return Shimmer.fromColors(
-      baseColor: shimmerBase,
-      highlightColor: shimmerHighlight,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        itemCount: 6,
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
+    final dark = HomeColors.isDark(context);
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: HomeColors.surfaceOf(context),
+        borderRadius: BorderRadius.circular(20),
+        border: dark ? Border.all(color: HomeColors.borderOf(context)) : null,
+        boxShadow: AppColors.softShadow(context),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: AppColors.errorColor.withValues(alpha: dark ? 0.2 : 0.1),
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: const Icon(
+              Icons.wifi_off_rounded,
+              color: AppColors.errorColor,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
             child: Column(
-              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 72,
-                  height: 72,
-                  decoration: BoxDecoration(
-                    color: blockColor,
-                    shape: BoxShape.circle,
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: HomeColors.textPrimaryOf(context),
                   ),
                 ),
-                const SizedBox(height: 8),
-                Container(
-                  width: 70,
-                  height: 10,
-                  decoration: BoxDecoration(
-                    color: blockColor,
-                    borderRadius: BorderRadius.circular(4),
+                const SizedBox(height: 2),
+                Text(
+                  message,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: HomeColors.textMutedOf(context),
                   ),
                 ),
               ],
             ),
-          );
-        },
+          ),
+          if (onRetry != null) ...[
+            const SizedBox(width: 8),
+            IconButton.filledTonal(
+              onPressed: onRetry,
+              tooltip: context.l10n.actionRetry,
+              style: IconButton.styleFrom(
+                minimumSize: const Size(48, 48),
+                backgroundColor:
+                    dark ? AppColors.orangeTintDark : AppColors.orangeTint,
+                foregroundColor: AppColors.brandOrange,
+              ),
+              icon: const Icon(Icons.refresh_rounded),
+            ),
+          ],
+        ],
       ),
+    );
+  }
+}
+
+class _VendorsSliderShimmer extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: HomeColors.surfaceElevatedOf(context),
+      highlightColor: HomeColors.surfaceOf(context),
+      child: const _VendorsSliderShimmerBody(),
+    );
+  }
+}
+
+class _VendorsSliderShimmerBody extends StatelessWidget {
+  const _VendorsSliderShimmerBody();
+
+  @override
+  Widget build(BuildContext context) {
+    final blockColor = HomeColors.surfaceElevatedOf(context);
+    return ListView.separated(
+      scrollDirection: Axis.horizontal,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      itemCount: 6,
+      separatorBuilder: (_, __) => const SizedBox(width: 12),
+      itemBuilder: (context, index) {
+        return SizedBox(
+          width: 92,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: blockColor,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Container(
+                width: 70,
+                height: 10,
+                decoration: BoxDecoration(
+                  color: blockColor,
+                  borderRadius: BorderRadius.circular(5),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -1041,6 +1111,7 @@ class _VendorsSliderShimmer extends StatelessWidget {
 class _VendorSliderCard extends StatelessWidget {
   final String name;
   final String avatarUrl;
+  final int index;
   final VoidCallback onTap;
   final bool embedded;
 
@@ -1048,66 +1119,66 @@ class _VendorSliderCard extends StatelessWidget {
     required this.name,
     required this.avatarUrl,
     required this.onTap,
+    this.index = 0,
     this.embedded = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    return Material(
-      color: Colors.transparent,
+    final dark = HomeColors.isDark(context);
+    final radius = BorderRadius.circular(24);
+    return Semantics(
+      button: true,
+      label: name,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          width: 100,
-          padding: const EdgeInsets.symmetric(vertical: 8),
+        borderRadius: BorderRadius.circular(20),
+        child: SizedBox(
+          width: 92,
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                width: 72,
-                height: 72,
+                width: 80,
+                height: 80,
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: embedded
+                  color: HomeColors.surfaceOf(context),
+                  borderRadius: radius,
+                  border: dark
                       ? Border.all(color: HomeColors.borderOf(context))
                       : null,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: embedded ? 0.35 : 0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+                  boxShadow: AppColors.softShadow(context),
                 ),
-                child: ClipOval(
+                child: ClipRRect(
+                  borderRadius: radius,
                   child: avatarUrl.isNotEmpty &&
                           (avatarUrl.startsWith('http') ||
                               avatarUrl.contains('/storage/'))
                       ? FallbackNetworkImage(
                           url: avatarUrl,
+                          width: 80,
+                          height: 80,
                           fit: BoxFit.cover,
                           errorBuilder: (_) => _avatarPlaceholder(context),
                         )
                       : (avatarUrl.isNotEmpty
-                            ? Image.asset(
-                                avatarUrl,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) =>
-                                    _avatarPlaceholder(context),
-                              )
-                            : _avatarPlaceholder(context)),
+                          ? Image.asset(
+                              avatarUrl,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) =>
+                                  _avatarPlaceholder(context),
+                            )
+                          : _avatarPlaceholder(context)),
                 ),
               ),
               const SizedBox(height: 8),
               Text(
                 name,
-                style: textTheme.bodySmall?.copyWith(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: embedded ? HomeColors.textPrimaryOf(context) : null,
+                style: TextStyle(
+                  fontSize: 13,
+                  height: 1.2,
+                  fontWeight: FontWeight.w700,
+                  color: HomeColors.textPrimaryOf(context),
                 ),
                 maxLines: 2,
                 textAlign: TextAlign.center,
@@ -1121,12 +1192,13 @@ class _VendorSliderCard extends StatelessWidget {
   }
 
   Widget _avatarPlaceholder(BuildContext context) {
-    return Container(
-      color: embedded ? HomeColors.surfaceElevatedOf(context) : Colors.grey[200],
-      child: Icon(
-        Icons.store_rounded,
-        size: 36,
-        color: embedded ? HomeColors.textMutedOf(context) : Colors.grey,
+    return SizedBox(
+      width: 80,
+      height: 80,
+      child: _TintedMonogram(
+        color: _tileAccent(context, index),
+        label: _initialsOf(name),
+        fontSize: 24,
       ),
     );
   }
@@ -1147,58 +1219,48 @@ class _PopularProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
     final imageUrl = item.displayImage;
     final shopName = item.shopName;
     final rating = item.shopRating;
     final deliveryFee = item.deliveryFee;
     final promoText = item.promoLabel;
-    final accent = embedded ? HomeColors.orange : AppColors.primaryColor;
-    final cardBg = embedded ? HomeColors.surfaceOf(context) : colorScheme.surface;
-    final titleColor = embedded ? HomeColors.textPrimaryOf(context) : null;
-    final mutedColor =
-        embedded ? HomeColors.textMutedOf(context) : colorScheme.onSurface.withValues(alpha: 0.72);
+    final dark = HomeColors.isDark(context);
+    final ink = HomeColors.textPrimaryOf(context);
+    final muted = HomeColors.textMutedOf(context);
+    final radius = BorderRadius.circular(20);
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          decoration: BoxDecoration(
-            color: cardBg,
-            borderRadius: BorderRadius.circular(12),
-            border: embedded ? Border.all(color: HomeColors.borderOf(context)) : null,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: embedded ? 0.35 : 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: radius,
+        boxShadow: AppColors.softShadow(context),
+      ),
+      child: Material(
+        color: HomeColors.surfaceOf(context),
+        shape: RoundedRectangleBorder(
+          borderRadius: radius,
+          side: dark
+              ? BorderSide(color: HomeColors.borderOf(context))
+              : BorderSide.none,
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
               Stack(
                 children: [
-                  ClipRRect(
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(12),
-                      topRight: Radius.circular(12),
-                    ),
-                    child: imageUrl.startsWith('http')
-                        ? Image.network(
-                            imageUrl,
-                            height: 160,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => _imagePlaceholder(context),
-                          )
-                        : _imagePlaceholder(context),
-                  ),
+                  imageUrl.startsWith('http')
+                      ? Image.network(
+                          imageUrl,
+                          height: 170,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) =>
+                              _imagePlaceholder(context),
+                        )
+                      : _imagePlaceholder(context),
                   if (promoText != null)
                     Positioned(
                       top: 12,
@@ -1209,95 +1271,142 @@ class _PopularProductCard extends StatelessWidget {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.green,
+                          color: AppColors.successColor,
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: Text(
-                          promoText,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.local_offer_rounded,
+                              size: 14,
+                              color: Colors.white,
+                            ),
+                            const SizedBox(width: 5),
+                            Text(
+                              promoText,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
                 ],
               ),
               Padding(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      item.product.name ?? '',
-                      style: textTheme.titleSmall?.copyWith(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: titleColor,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'ETB ${item.displayPrice}',
-                      style: textTheme.titleSmall?.copyWith(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: accent,
-                      ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            item.product.name ?? '',
+                            style: TextStyle(
+                              fontSize: 17,
+                              height: 1.25,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.3,
+                              color: ink,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'ETB ${item.displayPrice}',
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.3,
+                            color: ink,
+                          ),
+                        ),
+                      ],
                     ),
                     if (shopName != null && shopName.isNotEmpty) ...[
-                      const SizedBox(height: 6),
-                      GestureDetector(
+                      const SizedBox(height: 8),
+                      InkWell(
                         onTap: onShopTap,
-                        child: Text(
-                          shopName,
-                          style: textTheme.bodySmall?.copyWith(
-                            fontSize: 13,
-                            color: accent,
-                            fontWeight: FontWeight.w500,
+                        borderRadius: BorderRadius.circular(8),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 2),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.storefront_rounded,
+                                size: 18,
+                                color: HomeColors.violetOf(context),
+                              ),
+                              const SizedBox(width: 6),
+                              Flexible(
+                                child: Text(
+                                  shopName,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: HomeColors.violetOf(context),
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        if (rating > 0) ...[
-                          Icon(
-                            Icons.star,
-                            size: 16,
-                            color: Colors.amber[700],
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            rating.toStringAsFixed(1),
-                            style: textTheme.bodyMedium?.copyWith(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: titleColor,
+                    if (rating > 0 || deliveryFee > 0) ...[
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          if (rating > 0) ...[
+                            const Icon(
+                              Icons.star_rounded,
+                              size: 18,
+                              color: AppColors.ratingFilled,
                             ),
-                          ),
-                          const SizedBox(width: 12),
-                        ],
-                        if (deliveryFee > 0)
-                          Expanded(
-                            child: Text(
-                              'ETB $deliveryFee delivery',
-                              style: textTheme.bodySmall?.copyWith(
-                                fontSize: 12,
-                                color: mutedColor,
+                            const SizedBox(width: 3),
+                            Text(
+                              rating.toStringAsFixed(1),
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: ink,
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
                             ),
-                          ),
-                      ],
-                    ),
+                            const SizedBox(width: 14),
+                          ],
+                          if (deliveryFee > 0) ...[
+                            Icon(
+                              Icons.delivery_dining_rounded,
+                              size: 18,
+                              color: muted,
+                            ),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                'ETB $deliveryFee delivery',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: muted,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -1309,14 +1418,15 @@ class _PopularProductCard extends StatelessWidget {
   }
 
   Widget _imagePlaceholder(BuildContext context) {
+    final dark = HomeColors.isDark(context);
     return Container(
-      height: 160,
+      height: 170,
       width: double.infinity,
-      color: embedded ? HomeColors.surfaceElevatedOf(context) : Colors.grey[200],
-      child: Icon(
-        Icons.shopping_bag_outlined,
-        size: 48,
-        color: embedded ? HomeColors.textMutedOf(context) : Colors.grey,
+      color: dark ? AppColors.orangeTintDark : AppColors.orangeTint,
+      child: const Icon(
+        Icons.shopping_bag_rounded,
+        size: 52,
+        color: AppColors.brandOrange,
       ),
     );
   }
@@ -1330,40 +1440,72 @@ class _MoreButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accent = embedded ? HomeColors.orange : AppColors.primaryColor;
-    return Material(
-      color: Colors.transparent,
+    final dark = HomeColors.isDark(context);
+    final indigo = HomeColors.violetOf(context);
+    return _TileShell(
+      onTap: onTap,
+      label: context.l10n.categoryMore,
+      picture: Container(
+        color: dark ? AppColors.indigoTintDark : AppColors.indigoTint,
+        alignment: Alignment.center,
+        child: Icon(Icons.grid_view_rounded, size: 32, color: indigo),
+      ),
+    );
+  }
+}
+
+/// Picture tile + label below, used for categories and "More".
+class _TileShell extends StatelessWidget {
+  const _TileShell({
+    required this.picture,
+    required this.label,
+    required this.onTap,
+  });
+
+  final Widget picture;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = HomeColors.isDark(context);
+    final radius = BorderRadius.circular(22);
+    return Semantics(
+      button: true,
+      label: label,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          decoration: BoxDecoration(
-            color: accent.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: accent.withValues(alpha: 0.4),
-              width: 1.5,
-            ),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.grid_view_rounded,
-                size: 36,
-                color: accent,
-              ),
-              const SizedBox(height: 6),
-              Text(
-                'More',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: accent,
+        borderRadius: BorderRadius.circular(18),
+        child: Column(
+          children: [
+            AspectRatio(
+              aspectRatio: 1,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: HomeColors.surfaceOf(context),
+                  borderRadius: radius,
+                  border: dark
+                      ? Border.all(color: HomeColors.borderOf(context))
+                      : null,
+                  boxShadow: AppColors.softShadow(context),
                 ),
+                child: ClipRRect(borderRadius: radius, child: picture),
               ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                height: 1.2,
+                fontWeight: FontWeight.w700,
+                color: HomeColors.textPrimaryOf(context),
+              ),
+              maxLines: 2,
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ),
       ),
     );
@@ -1372,82 +1514,48 @@ class _MoreButton extends StatelessWidget {
 
 class _CategoryCard extends StatelessWidget {
   final CategoryTreeModel category;
+  final int index;
   final VoidCallback onTap;
   final bool embedded;
 
   const _CategoryCard({
     required this.category,
     required this.onTap,
+    this.index = 0,
     this.embedded = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
     final icon = _iconFromMeta(category.meta);
     final imageUrl = category.displayImageUrl;
-    final cardBg = embedded ? HomeColors.surfaceElevatedOf(context) : colorScheme.surface;
+    final fallback = _TintedMonogram(
+      color: _tileAccent(context, index),
+      label: _initialsOf(category.name),
+      icon: icon,
+    );
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          decoration: BoxDecoration(
-            color: cardBg,
-            borderRadius: BorderRadius.circular(12),
-            border: embedded ? Border.all(color: HomeColors.borderOf(context)) : null,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: embedded ? 0.35 : 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(6, 10, 6, 0),
-                  child: imageUrl != null && imageUrl.isNotEmpty
-                      ? Image.network(
-                          imageUrl,
-                          fit: BoxFit.contain,
-                          alignment: Alignment.center,
-                          errorBuilder: (_, __, ___) => _IconPlaceholder(
-                            icon: icon,
-                            embedded: embedded,
-                          ),
-                        )
-                      : _IconPlaceholder(icon: icon, embedded: embedded),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(6, 6, 6, 10),
-                child: Text(
-                  category.name,
-                  style: textTheme.bodySmall?.copyWith(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: embedded ? HomeColors.textPrimaryOf(context) : null,
-                  ),
-                  maxLines: 2,
-                  textAlign: TextAlign.center,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+    return _TileShell(
+      onTap: onTap,
+      label: category.name,
+      picture: imageUrl != null && imageUrl.isNotEmpty
+          ? Image.network(
+              imageUrl,
+              fit: BoxFit.contain,
+              alignment: Alignment.center,
+              // Inset only real images; the fallback must fill the tile.
+              frameBuilder: (_, child, __, ___) =>
+                  Padding(padding: const EdgeInsets.all(8), child: child),
+              errorBuilder: (_, __, ___) => fallback,
+            )
+          : fallback,
     );
   }
 
-  static IconData _iconFromMeta(Map<String, dynamic>? meta) {
-    if (meta == null) return Icons.category_rounded;
+  /// Meaningful icon when the backend supplies one; otherwise null so the
+  /// tile shows the category's initials.
+  static IconData? _iconFromMeta(Map<String, dynamic>? meta) {
+    if (meta == null) return null;
     final name = (meta['icon'] as String?)?.toLowerCase();
     const map = {
       'tv': Icons.tv_rounded,
@@ -1474,39 +1582,6 @@ class _CategoryCard extends StatelessWidget {
       'directions_car': Icons.directions_car_rounded,
       'cake': Icons.cake_rounded,
     };
-    return map[name ?? ''] ?? Icons.category_rounded;
-  }
-}
-
-class _IconPlaceholder extends StatelessWidget {
-  final IconData icon;
-  final bool embedded;
-
-  const _IconPlaceholder({required this.icon, this.embedded = false});
-
-  @override
-  Widget build(BuildContext context) {
-    final accent = embedded ? HomeColors.orange : AppColors.primaryColor;
-    return Container(
-      width: 64,
-      height: 64,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            accent.withValues(alpha: 0.15),
-            (embedded ? HomeColors.orange : AppColors.primaryLightColor)
-                .withValues(alpha: 0.08),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Icon(
-        icon,
-        size: 32,
-        color: accent,
-      ),
-    );
+    return map[name ?? ''];
   }
 }

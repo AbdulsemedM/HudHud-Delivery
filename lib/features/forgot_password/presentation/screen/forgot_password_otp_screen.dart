@@ -1,16 +1,16 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/forgot_password/bloc/forgot_password_otp_cubit.dart';
 import 'package:hudhud_delivery/features/forgot_password/data/repository/forgot_password_repository.dart';
 import 'package:hudhud_delivery/features/forgot_password/presentation/screen/forgot_password_new_password_screen.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_dark_scaffold.dart';
-import 'package:hudhud_delivery/features/login/presentation/widgets/auth_field_decoration.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_gradient_button.dart';
+import 'package:hudhud_delivery/features/login/presentation/widgets/auth_ui.dart';
 
 String _formatMmSs(int totalSeconds) {
   final s = totalSeconds < 0 ? 0 : totalSeconds;
@@ -120,7 +120,7 @@ class _ForgotPasswordOtpScreenState extends State<ForgotPasswordOtpScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(state.error!),
-                      backgroundColor: AuthScreenColors.orange,
+                      backgroundColor: AppColors.errorColor,
                     ),
                   );
                 }
@@ -132,64 +132,33 @@ class _ForgotPasswordOtpScreenState extends State<ForgotPasswordOtpScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        l10n.forgotPasswordVerifyTitle,
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.w700,
-                          color: AuthScreenColors.textPrimaryOf(context),
-                        ),
-                      ),
                       const SizedBox(height: 8),
-                      Text(
-                        l10n.forgotPasswordVerifySubtitle(masked),
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: AuthScreenColors.textSecondaryOf(context),
-                          height: 1.45,
+                      AuthHeading(
+                        icon: Icons.sms_rounded,
+                        title: l10n.forgotPasswordVerifyTitle,
+                        subtitle: l10n.forgotPasswordVerifySubtitle(masked),
+                      ),
+                      const SizedBox(height: 16),
+                      Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: AuthPill(
+                          error: _expired,
+                          icon: _expired
+                              ? Icons.timer_off_rounded
+                              : Icons.schedule_rounded,
+                          label: _expired
+                              ? l10n.forgotPasswordCodeExpired
+                              : l10n.forgotPasswordTimeRemaining(
+                                  _formatMmSs(_remainingSeconds),
+                                ),
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        _expired
-                            ? l10n.forgotPasswordCodeExpired
-                            : l10n.forgotPasswordTimeRemaining(
-                                _formatMmSs(_remainingSeconds),
-                              ),
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: _expired
-                              ? const Color(0xFFEF5350)
-                              : AuthScreenColors.textSecondaryOf(context),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Text(
-                        l10n.forgotPasswordOtpLabel,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: AuthScreenColors.textSecondaryOf(context),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      TextFormField(
+                      const SizedBox(height: 28),
+                      AuthFieldLabel(l10n.forgotPasswordOtpLabel),
+                      AuthCodeField(
                         controller: _otpController,
-                        keyboardType: TextInputType.number,
-                        maxLength: 6,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                        ],
+                        length: 6,
                         enabled: !state.verifyLoading && !state.resendLoading,
-                        style: TextStyle(
-                          color: AuthScreenColors.textPrimaryOf(context),
-                          fontSize: 18,
-                          letterSpacing: 8,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        decoration: authFieldDecoration(context).copyWith(
-                          counterText: '',
-                        ),
                         validator: (v) {
                           final t = v?.trim() ?? '';
                           if (t.length != 6) {
@@ -200,13 +169,24 @@ class _ForgotPasswordOtpScreenState extends State<ForgotPasswordOtpScreen> {
                       ),
                       const SizedBox(height: 12),
                       Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed:
-                              state.resendLoading || state.verifyLoading
-                                  ? null
-                                  : () => _resend(cubit),
-                          child: state.resendLoading
+                        alignment: AlignmentDirectional.centerEnd,
+                        child: TextButton.icon(
+                          style: TextButton.styleFrom(
+                            foregroundColor: AuthScreenColors.orange,
+                            minimumSize: const Size(48, 48),
+                            textStyle: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          icon: const Icon(Icons.refresh_rounded, size: 20),
+                          onPressed: state.resendLoading || state.verifyLoading
+                              ? null
+                              : () => _resend(cubit),
+                          label: state.resendLoading
                               ? const SizedBox(
                                   height: 18,
                                   width: 18,
@@ -215,13 +195,7 @@ class _ForgotPasswordOtpScreenState extends State<ForgotPasswordOtpScreen> {
                                     color: AuthScreenColors.orange,
                                   ),
                                 )
-                              : Text(
-                                  l10n.forgotPasswordResend,
-                                  style: const TextStyle(
-                                    color: AuthScreenColors.orange,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
+                              : Text(l10n.forgotPasswordResend),
                         ),
                       ),
                       const SizedBox(height: 16),

@@ -61,6 +61,16 @@ class _FallbackNetworkImageState extends State<FallbackNetworkImage> {
       width: widget.width,
       height: widget.height,
       fit: widget.fit,
+      // Soft fade-in instead of a hard pop when the image arrives.
+      frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+        if (wasSynchronouslyLoaded) return child;
+        return AnimatedOpacity(
+          opacity: frame == null ? 0 : 1,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOut,
+          child: child,
+        );
+      },
       errorBuilder: (context, error, stackTrace) {
         if (_index + 1 < _candidates.length) {
           WidgetsBinding.instance.addPostFrameCallback((_) {

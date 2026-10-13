@@ -7,6 +7,12 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/status_chip.dart';
 import '../../../../models/user_model.dart';
 import '../../../dashboard/presentation/screen/dashboard_screen.dart';
+import '../../../home/presentation/theme/home_colors.dart';
+import '../../../login/presentation/theme/auth_screen_colors.dart';
+import '../../../login/presentation/widgets/auth_dark_scaffold.dart';
+import '../../../login/presentation/widgets/auth_field_decoration.dart';
+import '../../../login/presentation/widgets/auth_gradient_button.dart';
+import '../../../login/presentation/widgets/auth_ui.dart';
 
 class VerifyContactScreen extends StatefulWidget {
   final bool resumeAfterAuth;
@@ -150,8 +156,7 @@ class _VerifyContactScreenState extends State<VerifyContactScreen> {
     }
 
     setState(() => _isVerifyingPhone = true);
-    final response =
-        await _authService.verifyPhone(phone: _phone!, code: code);
+    final response = await _authService.verifyPhone(phone: _phone!, code: code);
     if (!mounted) return;
 
     setState(() {
@@ -188,240 +193,133 @@ class _VerifyContactScreenState extends State<VerifyContactScreen> {
     );
   }
 
-  Color _cardBorderColor(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return isDark ? const Color(0xFF2A2A2A) : const Color(0xFFEEEEEE);
-  }
-
-  InputDecoration _codeFieldDecoration(BuildContext context, String hint) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    return InputDecoration(
-      hintText: hint,
-      hintStyle: TextStyle(
-        color: theme.colorScheme.onSurfaceVariant,
-        fontSize: 14,
-      ),
-      filled: true,
-      fillColor: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFF4F4F4),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide.none,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide.none,
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
-      ),
-      contentPadding:
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final allVerified = _emailVerified && _phoneVerified;
-    final screenHeight = MediaQuery.of(context).size.height;
 
-    return Scaffold(
-      backgroundColor: colorScheme.surface,
-      body: Column(
-        children: [
-          SizedBox(
-            height: screenHeight * 0.22,
-            width: double.infinity,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    AppColors.primaryColor,
-                    AppColors.primaryColor.withValues(alpha: 0.0),
-                  ],
-                ),
-              ),
-              child: SafeArea(
-                bottom: false,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.18),
-                          borderRadius: BorderRadius.circular(14),
+    return AuthScaffold(
+      showBackButton: false,
+      child: _isLoadingUser
+          ? const _VerifyContactShimmer()
+          : _loadError != null
+              ? _VerifyContactErrorView(
+                  message: l10n.profileLoadFailed(_loadError!),
+                  onRetry: _initializeVerificationState,
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AuthHeroIcon(
+                          icon: allVerified
+                              ? Icons.verified_rounded
+                              : Icons.verified_user_rounded,
+                          indigo: !allVerified,
                         ),
-                        child: const Icon(
-                          Icons.verified_user_outlined,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          l10n.verificationStatus,
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
+                        const Spacer(),
+                        if (!allVerified)
+                          TextButton(
+                            onPressed: _goToDashboard,
+                            style: TextButton.styleFrom(
+                              foregroundColor:
+                                  AuthScreenColors.textSecondaryOf(context),
+                              minimumSize: const Size(48, 48),
+                              textStyle: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            child: Text(l10n.actionSkip),
                           ),
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: _goToDashboard,
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.white,
-                        ),
-                        child: Text(l10n.actionSkip),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: colorScheme.surface,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(32),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: colorScheme.shadow.withValues(alpha: 0.08),
-                    blurRadius: 24,
-                    offset: const Offset(0, -4),
-                  ),
-                ],
-              ),
-              child: SafeArea(
-                top: false,
-                child: _isLoadingUser
-                    ? const _VerifyContactShimmer()
-                    : _loadError != null
-                        ? _VerifyContactErrorView(
-                            message: l10n.profileLoadFailed(_loadError!),
-                            onRetry: _initializeVerificationState,
-                          )
-                        : SingleChildScrollView(
-                            padding:
-                                const EdgeInsets.fromLTRB(24, 24, 24, 20),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  l10n.codeSentEmailDefault,
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: colorScheme.onSurfaceVariant,
-                                    height: 1.4,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  l10n.codeSentPhoneDefault,
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: colorScheme.onSurfaceVariant,
-                                    height: 1.4,
-                                  ),
-                                ),
-                                const SizedBox(height: AppColors.spaceLG),
-                                _VerificationCard(
-                                  title: l10n.emailVerificationTitle,
-                                  subtitle:
-                                      _email ?? l10n.noEmailAvailable,
-                                  icon: Icons.email_outlined,
-                                  isVerified: _emailVerified,
-                                  controller: _emailCodeController,
-                                  hintText: l10n.enterEmailCode,
-                                  verifyLabel: l10n.verifyEmail,
-                                  resendLabel: l10n.actionResend,
-                                  onVerify: _verifyEmail,
-                                  onResend: _sendEmailCode,
-                                  isVerifying: _isVerifyingEmail,
-                                  isResending: _isSendingEmailCode,
-                                  borderColor: _cardBorderColor(context),
-                                  fieldDecoration: _codeFieldDecoration(
-                                    context,
-                                    l10n.enterEmailCode,
-                                  ),
-                                ),
-                                const SizedBox(height: AppColors.spaceMD),
-                                _VerificationCard(
-                                  title: l10n.phoneVerificationTitle,
-                                  subtitle:
-                                      _phone ?? l10n.noPhoneAvailable,
-                                  icon: Icons.sms_outlined,
-                                  isVerified: _phoneVerified,
-                                  controller: _phoneCodeController,
-                                  hintText: l10n.enterSmsCode,
-                                  verifyLabel: l10n.verifyPhone,
-                                  resendLabel: l10n.actionResend,
-                                  onVerify: _verifyPhone,
-                                  onResend: _sendPhoneCode,
-                                  isVerifying: _isVerifyingPhone,
-                                  isResending: _isSendingPhoneCode,
-                                  borderColor: _cardBorderColor(context),
-                                  fieldDecoration: _codeFieldDecoration(
-                                    context,
-                                    l10n.enterSmsCode,
-                                  ),
-                                ),
-                                const SizedBox(height: AppColors.spaceLG),
-                                SizedBox(
-                                  width: double.infinity,
-                                  height: 52,
-                                  child: DecoratedBox(
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: allVerified
-                                            ? [
-                                                AppColors.successColor,
-                                                AppColors.successLightColor,
-                                              ]
-                                            : AppColors.primaryGradient,
-                                      ),
-                                      borderRadius: BorderRadius.circular(14),
-                                    ),
-                                    child: ElevatedButton(
-                                      onPressed: _goToDashboard,
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.transparent,
-                                        shadowColor: Colors.transparent,
-                                        foregroundColor: Colors.white,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(14),
-                                        ),
-                                      ),
-                                      child: Text(
-                                        allVerified
-                                            ? l10n.actionContinue
-                                            : l10n.actionSkip,
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
+                      ],
+                    ),
+                    const SizedBox(height: 22),
+                    AuthHeading(
+                      title: l10n.verificationStatus,
+                      subtitle:
+                          '${l10n.codeSentEmailDefault}\n${l10n.codeSentPhoneDefault}',
+                    ),
+                    const SizedBox(height: 24),
+                    _VerificationCard(
+                      title: l10n.emailVerificationTitle,
+                      subtitle: _email ?? l10n.noEmailAvailable,
+                      icon: Icons.mark_email_unread_rounded,
+                      isVerified: _emailVerified,
+                      controller: _emailCodeController,
+                      hintText: l10n.enterEmailCode,
+                      verifyLabel: l10n.verifyEmail,
+                      resendLabel: l10n.actionResend,
+                      onVerify: _verifyEmail,
+                      onResend: _sendEmailCode,
+                      isVerifying: _isVerifyingEmail,
+                      isResending: _isSendingEmailCode,
+                    ),
+                    const SizedBox(height: 16),
+                    _VerificationCard(
+                      title: l10n.phoneVerificationTitle,
+                      subtitle: _phone ?? l10n.noPhoneAvailable,
+                      icon: Icons.sms_rounded,
+                      isVerified: _phoneVerified,
+                      controller: _phoneCodeController,
+                      hintText: l10n.enterSmsCode,
+                      verifyLabel: l10n.verifyPhone,
+                      resendLabel: l10n.actionResend,
+                      onVerify: _verifyPhone,
+                      onResend: _sendPhoneCode,
+                      isVerifying: _isVerifyingPhone,
+                      isResending: _isSendingPhoneCode,
+                    ),
+                    const SizedBox(height: 28),
+                    if (allVerified)
+                      SizedBox(
+                        height: 56,
+                        child: FilledButton.icon(
+                          onPressed: _goToDashboard,
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AppColors.successColor,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            textStyle: const TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w800,
                             ),
                           ),
-              ),
-            ),
-          ),
-        ],
-      ),
+                          icon: const Icon(Icons.check_rounded, size: 22),
+                          label: Text(l10n.actionContinue),
+                        ),
+                      )
+                    else
+                      SizedBox(
+                        height: 56,
+                        child: OutlinedButton(
+                          onPressed: _goToDashboard,
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor:
+                                AuthScreenColors.textPrimaryOf(context),
+                            backgroundColor:
+                                AuthScreenColors.surfaceOf(context),
+                            side: BorderSide(
+                              color: AuthScreenColors.surfaceBorderOf(context),
+                              width: 1.2,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            textStyle: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          child: Text(l10n.actionSkip),
+                        ),
+                      ),
+                  ],
+                ),
     );
   }
 }
@@ -431,49 +329,38 @@ class _VerifyContactShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final base = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE8E8E8);
-    final highlight = isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF4F4F4);
+    final base = HomeColors.surfaceElevatedOf(context);
+    final highlight = HomeColors.surfaceOf(context);
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
-      child: Shimmer.fromColors(
-        baseColor: base,
-        highlightColor: highlight,
-        child: Column(
-          children: [
-            Container(
-              height: 14,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            const SizedBox(height: AppColors.spaceMD),
-            ...List.generate(2, (index) {
-              return Padding(
-                padding: EdgeInsets.only(bottom: index == 0 ? 16 : 0),
-                child: Container(
-                  height: 200,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-              );
-            }),
-            const SizedBox(height: AppColors.spaceLG),
-            Container(
-              height: 52,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-              ),
-            ),
-          ],
+    Widget block(double height, {double? width, double radius = 16}) {
+      return Container(
+        height: height,
+        width: width ?? double.infinity,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(radius),
         ),
+      );
+    }
+
+    return Shimmer.fromColors(
+      baseColor: base,
+      highlightColor: highlight,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          block(72, width: 72, radius: 36),
+          const SizedBox(height: 22),
+          block(28, width: 220, radius: 10),
+          const SizedBox(height: 12),
+          block(14, radius: 8),
+          const SizedBox(height: 24),
+          block(230, radius: 24),
+          const SizedBox(height: 16),
+          block(230, radius: 24),
+          const SizedBox(height: 28),
+          block(56, radius: 18),
+        ],
       ),
     );
   }
@@ -491,34 +378,43 @@ class _VerifyContactErrorView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
+    return Padding(
+      padding: const EdgeInsets.only(top: 48),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 96,
+            height: 96,
+            decoration: BoxDecoration(
+              color: HomeColors.violetTintOf(context),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
               Icons.wifi_off_rounded,
-              size: 48,
-              color: colorScheme.onSurfaceVariant,
+              size: 44,
+              color: HomeColors.violetOf(context),
             ),
-            const SizedBox(height: AppColors.spaceMD),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 20),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 15,
+              height: 1.45,
+              fontWeight: FontWeight.w600,
+              color: AuthScreenColors.textSecondaryOf(context),
             ),
-            const SizedBox(height: AppColors.spaceMD),
-            TextButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh),
-              label: Text(l10n.actionRetry),
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 20),
+          AuthGradientButton(
+            label: l10n.actionRetry,
+            showArrow: false,
+            onPressed: onRetry,
+          ),
+        ],
       ),
     );
   }
@@ -537,8 +433,6 @@ class _VerificationCard extends StatelessWidget {
   final VoidCallback onResend;
   final bool isVerifying;
   final bool isResending;
-  final Color borderColor;
-  final InputDecoration fieldDecoration;
 
   const _VerificationCard({
     required this.title,
@@ -553,148 +447,182 @@ class _VerificationCard extends StatelessWidget {
     required this.onResend,
     required this.isVerifying,
     required this.isResending,
-    required this.borderColor,
-    required this.fieldDecoration,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final dark = HomeColors.isDark(context);
+    final accent = isVerified ? AppColors.successColor : authIndigoOf(context);
+    final tint = isVerified
+        ? AppColors.successColor.withValues(alpha: 0.12)
+        : authIndigoTintOf(context);
 
     return Container(
-      padding: const EdgeInsets.all(AppColors.spaceMD),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isVerified
-              ? AppColors.successColor.withValues(alpha: 0.4)
-              : borderColor,
-        ),
+        color: HomeColors.surfaceOf(context),
+        borderRadius: BorderRadius.circular(24),
+        border: isVerified
+            ? Border.all(
+                color: AppColors.successColor.withValues(alpha: 0.45),
+                width: 1.4,
+              )
+            : (dark ? Border.all(color: HomeColors.borderOf(context)) : null),
+        boxShadow: AppColors.softShadow(context),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                width: 52,
+                height: 52,
                 decoration: BoxDecoration(
-                  color: isVerified
-                      ? AppColors.successColor.withValues(alpha: 0.12)
-                      : AppColors.primaryColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10),
+                  color: tint,
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: Icon(
-                  isVerified ? Icons.check_circle_outline : icon,
-                  color: isVerified
-                      ? AppColors.successColor
-                      : AppColors.primaryColor,
+                  isVerified ? Icons.check_circle_rounded : icon,
+                  color: accent,
+                  size: 28,
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       title,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: colorScheme.onSurface,
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.3,
+                        color: HomeColors.textPrimaryOf(context),
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 3),
                     Text(
                       subtitle,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: HomeColors.textMutedOf(context),
                       ),
                     ),
                   ],
                 ),
               ),
-              if (isVerified)
+              if (isVerified) ...[
+                const SizedBox(width: 8),
                 const StatusChip(status: 'completed'),
+              ],
             ],
           ),
-          const SizedBox(height: AppColors.spaceMD),
-          TextField(
-            controller: controller,
-            enabled: !isVerified,
-            keyboardType: TextInputType.number,
-            style: TextStyle(
-              color: colorScheme.onSurface,
-              fontSize: 14,
+          if (!isVerified) ...[
+            const SizedBox(height: 18),
+            TextField(
+              controller: controller,
+              keyboardType: TextInputType.number,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: HomeColors.textPrimaryOf(context),
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 8,
+              ),
+              decoration: authFieldDecoration(context, hint: hintText).copyWith(
+                hintStyle: TextStyle(
+                  color: AuthScreenColors.textMutedOf(context),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0,
+                ),
+                prefixIcon: const Icon(Icons.pin_rounded, size: 22),
+              ),
             ),
-            decoration: fieldDecoration.copyWith(hintText: hintText),
-          ),
-          const SizedBox(height: AppColors.spaceMD),
-          Row(
-            children: [
-              Expanded(
-                child: SizedBox(
-                  height: 48,
-                  child: OutlinedButton(
-                    onPressed: isVerified || isResending ? null : onResend,
-                    style: OutlinedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 52,
+                    child: OutlinedButton.icon(
+                      onPressed: isResending ? null : onResend,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: authIndigoOf(context),
+                        side: BorderSide(
+                          color: authIndigoOf(context).withValues(alpha: 0.4),
+                          width: 1.2,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        textStyle: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                      side: const BorderSide(color: AppColors.primaryColor),
+                      icon: isResending
+                          ? SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: authIndigoOf(context),
+                              ),
+                            )
+                          : const Icon(Icons.refresh_rounded, size: 20),
+                      label: Text(
+                        resendLabel,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                    child: isResending
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: AppColors.primaryColor,
-                            ),
-                          )
-                        : Text(resendLabel),
                   ),
                 ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: SizedBox(
-                  height: 48,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: AppColors.primaryGradient,
-                      ),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: ElevatedButton(
-                      onPressed:
-                          isVerified || isVerifying ? null : onVerify,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        shadowColor: Colors.transparent,
+                const SizedBox(width: 10),
+                Expanded(
+                  child: SizedBox(
+                    height: 52,
+                    child: FilledButton(
+                      onPressed: isVerifying ? null : onVerify,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppColors.brandOrange,
                         foregroundColor: Colors.white,
+                        disabledBackgroundColor:
+                            AppColors.brandOrange.withValues(alpha: 0.6),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        textStyle: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                       child: isVerifying
                           ? const SizedBox(
-                              width: 16,
-                              height: 16,
+                              width: 18,
+                              height: 18,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
                                 color: Colors.white,
                               ),
                             )
-                          : Text(verifyLabel),
+                          : Text(
+                              verifyLabel,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
+          ],
         ],
       ),
     );

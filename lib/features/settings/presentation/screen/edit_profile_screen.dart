@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/controllers/auth_controller.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/utils/avatar_util.dart';
 import 'package:hudhud_delivery/core/utils/phone_util.dart';
 import 'package:hudhud_delivery/core/widgets/phone_number_field.dart';
@@ -61,8 +62,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       if (!mounted) return;
       setState(() {
         final nameParts = user?.name?.split(' ') ?? [];
-        _firstNameController.text =
-            nameParts.isNotEmpty ? nameParts[0] : '';
+        _firstNameController.text = nameParts.isNotEmpty ? nameParts[0] : '';
         _lastNameController.text =
             nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
         _applyPhoneFromUser(user?.phone);
@@ -104,20 +104,31 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Future<void> _pickAvatar() async {
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
+      showDragHandle: true,
       builder: (ctx) => SafeArea(
-        child: Wrap(
-          children: [
-            ListTile(
-              leading: Icon(Icons.photo_library_outlined),
-            title: Text(ctx.l10n.gallery),
-              onTap: () => Navigator.pop(ctx, ImageSource.gallery),
-            ),
-            ListTile(
-              leading: Icon(Icons.camera_alt_outlined),
-              title: Text(ctx.l10n.camera),
-              onTap: () => Navigator.pop(ctx, ImageSource.camera),
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          child: Row(
+            children: [
+              Expanded(
+                child: _PickSourceTile(
+                  icon: Icons.photo_library_rounded,
+                  label: ctx.l10n.gallery,
+                  color: AppColors.brandIndigo,
+                  onTap: () => Navigator.pop(ctx, ImageSource.gallery),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _PickSourceTile(
+                  icon: Icons.photo_camera_rounded,
+                  label: ctx.l10n.camera,
+                  color: AppColors.brandOrange,
+                  onTap: () => Navigator.pop(ctx, ImageSource.camera),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -165,8 +176,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   String _fullPhone() {
-    final code =
-        countryCode.startsWith('+') ? countryCode : '+$countryCode';
+    final code = countryCode.startsWith('+') ? countryCode : '+$countryCode';
     final national = cleanNationalPhoneDigits(_phoneController.text);
     return normalizePhoneToBackend('$code$national');
   }
@@ -215,39 +225,44 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return ProfileDarkPage(
       title: l10n.profileMenuAccountSettings,
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.brandOrange),
+            )
           : SingleChildScrollView(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
               child: Column(
                 children: [
                   Center(
                     child: ProfileImagePicker(
-                      networkImageUrl: _avatarLocalPath == null
-                          ? _avatarNetworkUrl
-                          : null,
+                      networkImageUrl:
+                          _avatarLocalPath == null ? _avatarNetworkUrl : null,
                       localImagePath: _avatarLocalPath,
                       onImageTap: _pickAvatar,
                     ),
                   ),
-                  SizedBox(height: 32),
+                  const SizedBox(height: 28),
                   ProfileTextField(
                     label: 'First Name',
                     controller: _firstNameController,
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 18),
                   ProfileTextField(
                     label: 'Last Name',
                     controller: _lastNameController,
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 18),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Mobile Number',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: AuthScreenColors.textSecondaryOf(context),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 4),
+                        child: Text(
+                          'Mobile Number',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: AuthScreenColors.textSecondaryOf(context),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -262,7 +277,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 18),
                   ProfileTextField(
                     label: 'Email',
                     controller: _emailController,
@@ -276,6 +291,55 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ],
               ),
             ),
+    );
+  }
+}
+
+/// Big picture-first choice used in the photo source sheet.
+class _PickSourceTile extends StatelessWidget {
+  const _PickSourceTile({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = AuthScreenColors.isDark(context);
+    final tint = dark && color == AppColors.brandIndigo
+        ? AppColors.brandIndigoBright
+        : color;
+    return Material(
+      color: tint.withValues(alpha: dark ? 0.18 : 0.08),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          child: Column(
+            children: [
+              Icon(icon, size: 36, color: tint),
+              const SizedBox(height: 10),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  color: AuthScreenColors.textPrimaryOf(context),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

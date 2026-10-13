@@ -107,7 +107,8 @@ class _OrderDetailsHeroBackground extends StatelessWidget {
               end: Alignment.bottomRight,
               colors: [
                 AppColors.primaryColor,
-                Color.lerp(AppColors.primaryColor, AppColors.primaryDarkColor, 0.55)!,
+                Color.lerp(
+                    AppColors.primaryColor, AppColors.primaryDarkColor, 0.55)!,
                 AppColors.primaryDarkColor,
               ],
             ),
@@ -156,10 +157,12 @@ class _OrderDetailsHeroBackground extends StatelessWidget {
                           width: compact ? 44 : 52,
                           height: compact ? 44 : 52,
                           decoration: BoxDecoration(
-                            color: AppColors.lightOnPrimary.withValues(alpha: 0.18),
+                            color: AppColors.lightOnPrimary
+                                .withValues(alpha: 0.18),
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: AppColors.lightOnPrimary.withValues(alpha: 0.28),
+                              color: AppColors.lightOnPrimary
+                                  .withValues(alpha: 0.28),
                             ),
                           ),
                           child: Icon(
@@ -175,9 +178,14 @@ class _OrderDetailsHeroBackground extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                l10n.orderAppBarTitle('').split('#').first.trim(),
+                                l10n
+                                    .orderAppBarTitle('')
+                                    .split('#')
+                                    .first
+                                    .trim(),
                                 style: theme.textTheme.labelMedium?.copyWith(
-                                  color: AppColors.lightOnPrimary.withValues(alpha: 0.82),
+                                  color: AppColors.lightOnPrimary
+                                      .withValues(alpha: 0.82),
                                   fontWeight: FontWeight.w500,
                                   letterSpacing: 0.4,
                                 ),
@@ -210,7 +218,8 @@ class _OrderDetailsHeroBackground extends StatelessWidget {
                                     ),
                                     Text(
                                       order.formattedTotal,
-                                      style: theme.textTheme.titleSmall?.copyWith(
+                                      style:
+                                          theme.textTheme.titleSmall?.copyWith(
                                         color: AppColors.lightOnPrimary,
                                         fontWeight: FontWeight.w700,
                                       ),
@@ -233,7 +242,8 @@ class _OrderDetailsHeroBackground extends StatelessWidget {
                           children: [
                             _HeaderActionChip(
                               icon: Icons.chat_bubble_rounded,
-                              label: AppLocalizations.of(context)!.chatOrderTitle,
+                              label:
+                                  AppLocalizations.of(context)!.chatOrderTitle,
                               filled: true,
                               onTap: onChat,
                             ),
@@ -426,7 +436,8 @@ class _OrderHeaderMenu extends StatelessWidget {
           color: AppColors.semiTransparent.withValues(alpha: 0.22),
           shape: BoxShape.circle,
         ),
-        child: const Icon(Icons.more_vert_rounded, color: AppColors.lightOnPrimary, size: 22),
+        child: const Icon(Icons.more_vert_rounded,
+            color: AppColors.lightOnPrimary, size: 22),
       ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       onSelected: (value) async {
@@ -454,7 +465,8 @@ class _OrderHeaderMenu extends StatelessWidget {
             contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.copy_rounded, size: 22),
             title: Text(l10n.copyOrderId),
-            subtitle: Text('#${order.id}', style: const TextStyle(fontSize: 12)),
+            subtitle:
+                Text('#${order.id}', style: const TextStyle(fontSize: 12)),
           ),
         ),
         PopupMenuItem(
@@ -470,10 +482,12 @@ class _OrderHeaderMenu extends StatelessWidget {
             value: 'cancel',
             child: ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: Icon(Icons.cancel_outlined, size: 22, color: scheme.error),
+              leading:
+                  Icon(Icons.cancel_outlined, size: 22, color: scheme.error),
               title: Text(
                 l10n.cancelOrder,
-                style: TextStyle(color: scheme.error, fontWeight: FontWeight.w600),
+                style:
+                    TextStyle(color: scheme.error, fontWeight: FontWeight.w600),
               ),
             ),
           ),

@@ -6,14 +6,14 @@ class SplashColors {
   SplashColors._();
 
   // Dark palette
-  static const Color bgDeep = Color(0xFF140B1A);
-  static const Color bgOuter = Color(0xFF0C0710);
-  static const Color orange = Color(0xFFFF7A3D);
-  static const Color orangeDeep = Color(0xFFE85A1F);
-  static const Color violet = Color(0xFF9D86F7);
-  static const Color violetDeep = Color(0xFF6F56E8);
-  static const Color textPrimary = Color(0xFFF8F3EE);
-  static const Color textMuted = Color(0xFF726A86);
+  static const Color bgDeep = AppColors.darkBackground;
+  static const Color bgOuter = Color(0xFF0A0614);
+  static const Color orange = AppColors.primaryLightColor;
+  static const Color orangeDeep = AppColors.brandOrange;
+  static const Color violet = AppColors.brandIndigoBright;
+  static const Color violetDeep = AppColors.brandIndigo;
+  static const Color textPrimary = AppColors.darkTextPrimary;
+  static const Color textMuted = AppColors.darkTextHint;
 
   // Light palette
   static const Color lightBgDeep = AppColors.lightBackground;

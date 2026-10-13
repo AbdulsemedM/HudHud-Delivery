@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
 import 'package:lottie/lottie.dart';
@@ -131,10 +132,14 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
       return l10n.trackingStatusArrived;
     }
     if (key.contains('deliver') &&
-        (key.contains('ed') || key.contains('complete') || key.contains('done'))) {
+        (key.contains('ed') ||
+            key.contains('complete') ||
+            key.contains('done'))) {
       return l10n.trackingStatusDone;
     }
-    if (key.contains('complete') || key.contains('done') || key.contains('finish')) {
+    if (key.contains('complete') ||
+        key.contains('done') ||
+        key.contains('finish')) {
       return l10n.trackingStatusDone;
     }
     return l10n.trackingStatusOnTheWay;
@@ -187,7 +192,9 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
 
     final direct = fromCoords(
       data['current_latitude'] ?? data['driver_latitude'] ?? data['latitude'],
-      data['current_longitude'] ?? data['driver_longitude'] ?? data['longitude'],
+      data['current_longitude'] ??
+          data['driver_longitude'] ??
+          data['longitude'],
     );
     if (direct != null) return direct;
 
@@ -245,8 +252,7 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
       return;
     }
     final uri = Uri(scheme: 'tel', path: phone);
-    final launched =
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
+    final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!launched && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Could not open the phone dialer')),
@@ -422,9 +428,8 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
     GeoPoint? destination = live.routeDestination ?? live.destination;
     if (destination == null) {
       final label = live.effectiveDestinationLabel;
-      final fallback = label == 'dropoff'
-          ? widget.deliveryPosition
-          : widget.pickupPosition;
+      final fallback =
+          label == 'dropoff' ? widget.deliveryPosition : widget.pickupPosition;
       if (fallback != null) {
         destination = GeoPoint(
           latitude: fallback.latitude,
@@ -443,8 +448,11 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
     LatLng mapCenter = const LatLng(9.0222, 38.7468);
     if (widget.pickupPosition != null && widget.deliveryPosition != null) {
       mapCenter = LatLng(
-        (widget.pickupPosition!.latitude + widget.deliveryPosition!.latitude) / 2,
-        (widget.pickupPosition!.longitude + widget.deliveryPosition!.longitude) / 2,
+        (widget.pickupPosition!.latitude + widget.deliveryPosition!.latitude) /
+            2,
+        (widget.pickupPosition!.longitude +
+                widget.deliveryPosition!.longitude) /
+            2,
       );
     } else if (widget.pickupPosition != null) {
       mapCenter = widget.pickupPosition!;
@@ -459,7 +467,7 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
           markerId: const gmaps.MarkerId('pickup'),
           position: _toG(widget.pickupPosition!),
           icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-            gmaps.BitmapDescriptor.hueOrange,
+            22.0,
           ),
         ),
       );
@@ -482,7 +490,7 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
           markerId: const gmaps.MarkerId('delivery'),
           position: _toG(widget.deliveryPosition!),
           icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-            gmaps.BitmapDescriptor.hueGreen,
+            266.0,
           ),
         ),
       );
@@ -504,10 +512,11 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
       polylines.add(
         gmaps.Polyline(
           polylineId: const gmaps.PolylineId('route'),
-          points: _routePolylinePoints != null && _routePolylinePoints!.length >= 2
-              ? _routePolylinePoints!.map(_toG).toList()
-              : [_toG(routeStart), _toG(routeEnd)],
-          color: HomeColors.violet,
+          points:
+              _routePolylinePoints != null && _routePolylinePoints!.length >= 2
+                  ? _routePolylinePoints!.map(_toG).toList()
+                  : [_toG(routeStart), _toG(routeEnd)],
+          color: HomeColors.violetOf(context),
           width: 4,
         ),
       );
@@ -519,337 +528,563 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
     );
     final friendlyStatus = _friendlyStatus(context, statusText);
     final statusIcon = _statusIcon(statusText);
+    final pickupLabel =
+        _trackData?['pickup_location']?.toString() ?? widget.pickupLocation;
+    final etaMinutes = _etaMinutes();
     return CourierTheme.wrap(
       context,
       child: Builder(
         builder: (context) {
+          final dark = HomeColors.isDark(context);
           final borderColor = HomeColors.borderOf(context);
-          return Scaffold(
-            backgroundColor: HomeColors.backgroundOf(context),
-            body: Stack(
-              children: [
-                gmaps.GoogleMap(
-                  initialCameraPosition: gmaps.CameraPosition(
-                    target: _toG(mapCenter),
-                    zoom: 13.0,
-                  ),
-                  markers: markers,
-                  polylines: polylines,
-                  onMapCreated: (controller) {
-                    _mapController = controller;
-                    _fitBounds();
-                  },
-                ),
-                // Back + call support
-                Positioned(
-                  top: 40,
-                  left: 16,
-                  child: Row(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          color: HomeColors.surfaceElevatedOf(context),
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.25),
-                              blurRadius: 4,
-                            ),
-                          ],
-                        ),
-                        child: IconButton(
-                          icon: Icon(Icons.arrow_back,
-                              color: HomeColors.textPrimaryOf(context)),
-                          onPressed: () => Navigator.pop(context),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: HomeColors.surfaceElevatedOf(context),
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.25),
-                              blurRadius: 4,
-                            ),
-                          ],
-                        ),
-                        child: const CallSupportButton(compact: true),
-                      ),
-                    ],
-                  ),
-                ),
-                // Status badge
-                Positioned(
-                  top: 40,
-                  right: 16,
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: HomeColors.surfaceElevatedOf(context),
-                      borderRadius: BorderRadius.circular(AppColors.radiusFull),
-                      border: Border.all(color: borderColor),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.15),
-                          blurRadius: 4,
-                        ),
-                      ],
+          final topInset = MediaQuery.paddingOf(context).top + 10;
+          final hasDriver = _trackingAvailable &&
+              (_liveTracking?.driver != null || _trackData?['driver'] != null);
+          return AnnotatedRegion<SystemUiOverlayStyle>(
+            // Map is always light: keep status bar icons dark.
+            value: SystemUiOverlayStyle.dark.copyWith(
+              statusBarColor: Colors.transparent,
+            ),
+            child: Scaffold(
+              backgroundColor: HomeColors.backgroundOf(context),
+              body: Stack(
+                children: [
+                  gmaps.GoogleMap(
+                    initialCameraPosition: gmaps.CameraPosition(
+                      target: _toG(mapCenter),
+                      zoom: 13.0,
                     ),
-                    child: StatusChip(status: statusText),
+                    markers: markers,
+                    polylines: polylines,
+                    onMapCreated: (controller) {
+                      _mapController = controller;
+                      _fitBounds();
+                    },
                   ),
-                ),
-                if (!_isLoadingTrack &&
-                    _trackError == null &&
-                    !_trackingAvailable)
+                  // Back
                   Positioned(
-                    top: 96,
+                    top: topInset,
                     left: 16,
-                    right: 16,
-                    child: Material(
-                      color: HomeColors.surfaceElevatedOf(context).withValues(alpha: 0.95),
-                      borderRadius: BorderRadius.circular(AppColors.radiusLG),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 10,
+                    child: _MapCircleButton(
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.arrow_back_rounded,
+                          size: 26,
+                          color: HomeColors.textPrimaryOf(context),
                         ),
-                        child: Text(
-                          _liveTracking?.message ??
-                              context.l10n.courierFindingNearestDrivers,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: HomeColors.textPrimaryOf(context),
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                        onPressed: () => Navigator.pop(context),
                       ),
                     ),
                   ),
-                // Bottom Sheet Modal
-                DraggableScrollableSheet(
-                  initialChildSize: 0.5,
-                  minChildSize: 0.35,
-                  maxChildSize: 0.85,
-                  builder: (context, scrollController) {
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: HomeColors.surfaceOf(context),
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(AppColors.radiusLG),
-                          topRight: Radius.circular(AppColors.radiusLG),
+                  // Call support
+                  Positioned(
+                    top: topInset,
+                    right: 16,
+                    child: const _MapCircleButton(
+                      child: CallSupportButton(compact: true),
+                    ),
+                  ),
+                  if (!_isLoadingTrack &&
+                      _trackError == null &&
+                      !_trackingAvailable)
+                    Positioned(
+                      top: topInset + 64,
+                      left: 16,
+                      right: 16,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(18),
+                          boxShadow: AppColors.softShadow(context),
                         ),
-                        border: Border(
-                          top: BorderSide(color: borderColor),
-                          left: BorderSide(color: borderColor),
-                          right: BorderSide(color: borderColor),
-                        ),
-                      ),
-                      child: Column(
-                        children: [
-                          // Drag handle
-                          Container(
-                            margin: const EdgeInsets.only(top: 8),
-                            width: 40,
-                            height: 4,
-                            decoration: BoxDecoration(
-                              color: HomeColors.borderOf(context),
-                              borderRadius: BorderRadius.circular(2),
-                            ),
+                        child: Material(
+                          color: HomeColors.surfaceOf(context),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18),
+                            side: dark
+                                ? BorderSide(color: borderColor)
+                                : BorderSide.none,
                           ),
-                          // Current Status Banner
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(AppColors.spaceMD),
-                            decoration: const BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  HomeColors.violet,
-                                  Color(0xFF6F56E8),
-                                ],
-                              ),
-                              borderRadius: BorderRadius.vertical(
-                                top: Radius.circular(AppColors.radiusLG),
-                              ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 10,
                             ),
                             child: Row(
                               children: [
                                 Container(
-                                  width: 56,
-                                  height: 56,
+                                  width: 40,
+                                  height: 40,
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.2),
-                                    shape: BoxShape.circle,
+                                    color: HomeColors.isDark(context)
+                                        ? AppColors.orangeTintDark
+                                        : AppColors.orangeTint,
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
-                                  child: Icon(statusIcon,
-                                      color: Colors.white, size: 32),
+                                  child: const Icon(
+                                    Icons.radar_rounded,
+                                    size: 22,
+                                    color: AppColors.brandOrange,
+                                  ),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        friendlyStatus,
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w800,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        (_trackData?['pickup_location']
-                                                        ?.toString() ??
-                                                    widget.pickupLocation)
-                                                .length >
-                                            40
-                                            ? '${(_trackData?['pickup_location']?.toString() ?? widget.pickupLocation).substring(0, 40)}...'
-                                            : (_trackData?['pickup_location']
-                                                    ?.toString() ??
-                                                widget.pickupLocation),
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 13,
-                                        ),
-                                      ),
-                                    ],
+                                  child: Text(
+                                    _liveTracking?.message ??
+                                        context
+                                            .l10n.courierFindingNearestDrivers,
+                                    style: TextStyle(
+                                      color: HomeColors.textPrimaryOf(context),
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                    ),
                                   ),
-                                ),
-                                IconButton(
-                                  tooltip: context.l10n.easySpeakHint,
-                                  icon: const Icon(Icons.volume_up_rounded,
-                                      color: Colors.white),
-                                  onPressed: () {
-                                    VoiceHintService.instance
-                                        .speak(friendlyStatus);
-                                  },
                                 ),
                               ],
                             ),
                           ),
-                          // Content
-                          Expanded(
-                            child: _isLoadingTrack
-                                ? const Padding(
-                                    padding:
-                                        EdgeInsets.all(AppColors.spaceMD),
-                                    child: ShimmerListView(itemCount: 3),
-                                  )
-                                : _trackError != null
-                                    ? Center(
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(24),
-                                          child: Text(
-                                            _trackError!,
-                                            style: TextStyle(
-                                              color: HomeColors.textMutedOf(context),
-                                              fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  // Bottom sheet
+                  DraggableScrollableSheet(
+                    initialChildSize: 0.5,
+                    minChildSize: 0.35,
+                    maxChildSize: 0.85,
+                    builder: (context, scrollController) {
+                      return Container(
+                        decoration: BoxDecoration(
+                          color: HomeColors.backgroundOf(context),
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(28),
+                          ),
+                          border: dark
+                              ? Border(
+                                  top: BorderSide(color: borderColor),
+                                  left: BorderSide(color: borderColor),
+                                  right: BorderSide(color: borderColor),
+                                )
+                              : null,
+                          boxShadow: dark
+                              ? null
+                              : const [
+                                  BoxShadow(
+                                    color: Color(0x1A1B1530),
+                                    blurRadius: 24,
+                                    offset: Offset(0, -6),
+                                  ),
+                                ],
+                        ),
+                        child: Column(
+                          children: [
+                            // Drag handle
+                            Container(
+                              margin: const EdgeInsets.only(top: 10),
+                              width: 44,
+                              height: 5,
+                              decoration: BoxDecoration(
+                                color: borderColor,
+                                borderRadius: BorderRadius.circular(3),
+                              ),
+                            ),
+                            // Current status header
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(20, 16, 12, 8),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 56,
+                                    height: 56,
+                                    decoration: BoxDecoration(
+                                      color: dark
+                                          ? AppColors.orangeTintDark
+                                          : AppColors.orangeTint,
+                                      borderRadius: BorderRadius.circular(18),
+                                    ),
+                                    child: Icon(
+                                      statusIcon,
+                                      color: AppColors.brandOrange,
+                                      size: 30,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 14),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          friendlyStatus,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            color: HomeColors.textPrimaryOf(
+                                              context,
                                             ),
-                                            textAlign: TextAlign.center,
+                                            fontSize: 20,
+                                            height: 1.2,
+                                            fontWeight: FontWeight.w800,
+                                            letterSpacing: -0.4,
                                           ),
                                         ),
-                                      )
-                                    : SingleChildScrollView(
-                                        controller: scrollController,
-                                        padding: const EdgeInsets.all(20),
-                                        child: Column(
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          pickupLabel,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            color: HomeColors.textMutedOf(
+                                              context,
+                                            ),
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Wrap(
+                                          spacing: 8,
+                                          runSpacing: 6,
+                                          crossAxisAlignment:
+                                              WrapCrossAlignment.center,
                                           children: [
-                                            // Driver Information (only when driver assigned)
-                                            if (_trackingAvailable &&
-                                                (_liveTracking?.driver !=
-                                                        null ||
-                                                    _trackData?['driver'] !=
-                                                        null)) ...[
-                                              DriverContactCard(
-                                                driverName: _liveTracking
-                                                        ?.driver?.name ??
-                                                    (_trackData!['driver']
-                                                            is Map<String,
-                                                                dynamic>
-                                                        ? ((_trackData![
-                                                                        'driver']
-                                                                    as Map<
-                                                                        String,
-                                                                        dynamic>)[
-                                                                'name']
-                                                            ?.toString() ??
-                                                            'Driver')
-                                                        : _trackData!['driver']
-                                                            .toString()),
-                                                details: [
-                                                  _liveTracking?.driver
-                                                      ?.vehiclePlateNumber,
-                                                  _driverPhone(),
-                                                ].whereType<String>().where((s) => s.isNotEmpty).join(' · '),
-                                                borderColor: borderColor,
-                                                onCall: _driverPhone() != null
-                                                    ? _callDriver
-                                                    : null,
-                                                onMessage: _messageDriver,
+                                            StatusChip(status: statusText),
+                                            if (etaMinutes != null)
+                                              _EtaPill(
+                                                label: context.l10n
+                                                    .courierEstimateMinutes(
+                                                  etaMinutes,
+                                                ),
                                               ),
-                                              const SizedBox(height: 16),
-                                            ],
-                                            // Review Order
-                                            _ReviewOrderCard(
-                                              courierNumber: _trackData?[
-                                                          'tracking_number']
-                                                      ?.toString() ??
-                                                  (widget.deliveryId != null
-                                                      ? '#DEL-${widget.deliveryId}'
-                                                      : '—'),
-                                              from: _trackData?[
-                                                          'pickup_location']
-                                                      ?.toString() ??
-                                                  widget.pickupLocation,
-                                              to: _trackData?[
-                                                          'dropoff_location']
-                                                      ?.toString() ??
-                                                  widget.deliveryLocation,
-                                              createdDate: _trackData?['created_at']
-                                                      ?.toString() ??
-                                                  '—',
-                                              borderColor: borderColor,
-                                            ),
-                                            const SizedBox(height: 16),
-                                            // Tracking Order (timeline from API)
-                                            _TrackingOrderCard(
-                                              timeline: _trackData?[
-                                                          'timeline'] !=
-                                                      null
-                                                  ? List<
-                                                      Map<String,
-                                                          dynamic>>.from(
-                                                      (_trackData![
-                                                                  'timeline']
-                                                              as List)
-                                                          .map((e) => e is Map<
-                                                                  String,
-                                                                  dynamic>
-                                                              ? e
-                                                              : <String,
-                                                                  dynamic>{}))
-                                                  : null,
-                                              borderColor: borderColor,
-                                            ),
                                           ],
                                         ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Material(
+                                    color: HomeColors.violetTintOf(context),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    clipBehavior: Clip.antiAlias,
+                                    child: IconButton(
+                                      tooltip: context.l10n.easySpeakHint,
+                                      iconSize: 26,
+                                      constraints: const BoxConstraints(
+                                        minWidth: 52,
+                                        minHeight: 52,
                                       ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ],
+                                      icon: Icon(
+                                        Icons.volume_up_rounded,
+                                        color: HomeColors.violetOf(context),
+                                      ),
+                                      onPressed: () {
+                                        VoiceHintService.instance.speak(
+                                          friendlyStatus,
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            // Content
+                            Expanded(
+                              child: _isLoadingTrack
+                                  ? const Padding(
+                                      padding:
+                                          EdgeInsets.all(AppColors.spaceMD),
+                                      child: ShimmerListView(itemCount: 3),
+                                    )
+                                  : _trackError != null
+                                      ? Center(
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(24),
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Container(
+                                                  width: 72,
+                                                  height: 72,
+                                                  decoration: BoxDecoration(
+                                                    color: AppColors.errorColor
+                                                        .withValues(
+                                                      alpha: dark ? 0.2 : 0.1,
+                                                    ),
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: const Icon(
+                                                    Icons.wifi_off_rounded,
+                                                    size: 34,
+                                                    color: AppColors.errorColor,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 12),
+                                                Text(
+                                                  _trackError!,
+                                                  style: TextStyle(
+                                                    color:
+                                                        HomeColors.textMutedOf(
+                                                      context,
+                                                    ),
+                                                    fontSize: 15,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        )
+                                      : SingleChildScrollView(
+                                          controller: scrollController,
+                                          padding: EdgeInsets.fromLTRB(
+                                            16,
+                                            8,
+                                            16,
+                                            24 +
+                                                MediaQuery.paddingOf(
+                                                  context,
+                                                ).bottom,
+                                          ),
+                                          child: Column(
+                                            children: [
+                                              if (hasDriver) ...[
+                                                DriverContactCard(
+                                                  driverName: _driverName(),
+                                                  vehicle: _driverVehicle(),
+                                                  rating: _driverRating(),
+                                                  details: [
+                                                    _liveTracking?.driver
+                                                        ?.vehiclePlateNumber,
+                                                    _driverPhone(),
+                                                  ]
+                                                      .whereType<String>()
+                                                      .where(
+                                                        (s) => s.isNotEmpty,
+                                                      )
+                                                      .join(' · '),
+                                                  borderColor: borderColor,
+                                                  onCall: _driverPhone() != null
+                                                      ? _callDriver
+                                                      : null,
+                                                  onMessage: _messageDriver,
+                                                ),
+                                                const SizedBox(height: 14),
+                                              ],
+                                              _ReviewOrderCard(
+                                                courierNumber: _trackData?[
+                                                            'tracking_number']
+                                                        ?.toString() ??
+                                                    (widget.deliveryId != null
+                                                        ? '#DEL-${widget.deliveryId}'
+                                                        : '—'),
+                                                from: _trackData?[
+                                                            'pickup_location']
+                                                        ?.toString() ??
+                                                    widget.pickupLocation,
+                                                to: _trackData?[
+                                                            'dropoff_location']
+                                                        ?.toString() ??
+                                                    widget.deliveryLocation,
+                                                createdDate:
+                                                    _trackData?['created_at']
+                                                            ?.toString() ??
+                                                        '—',
+                                                borderColor: borderColor,
+                                              ),
+                                              const SizedBox(height: 14),
+                                              _TrackingOrderCard(
+                                                timeline: _timeline(),
+                                                borderColor: borderColor,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
           );
         },
       ),
+    );
+  }
+
+  Map<String, dynamic>? get _driverMap {
+    final driver = _trackData?['driver'];
+    return driver is Map<String, dynamic> ? driver : null;
+  }
+
+  String _driverName() {
+    final live = _liveTracking?.driver?.name;
+    if (live != null) return live;
+    final map = _driverMap;
+    if (map != null) return map['name']?.toString() ?? 'Driver';
+    return _trackData?['driver']?.toString() ?? 'Driver';
+  }
+
+  String? _driverVehicle() {
+    final live = _liveTracking?.driver;
+    final map = _driverMap;
+    final parts = [
+      live?.vehicleColor ?? map?['vehicle_color']?.toString(),
+      live?.vehicleType ?? map?['vehicle_type']?.toString(),
+    ]
+        .whereType<String>()
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty && !s.startsWith('#'));
+    final text = parts.join(' ');
+    return text.isEmpty ? null : text;
+  }
+
+  double? _driverRating() {
+    final live = _liveTracking?.driver?.rating;
+    if (live != null) return live;
+    return double.tryParse(_driverMap?['rating']?.toString() ?? '');
+  }
+
+  int? _etaMinutes() {
+    final live = _liveTracking?.estimatedArrivalMinutes;
+    if (live != null && live > 0) return live;
+    final raw = int.tryParse(
+      _trackData?['estimated_arrival_minutes']?.toString() ?? '',
+    );
+    return (raw != null && raw > 0) ? raw : null;
+  }
+
+  List<Map<String, dynamic>>? _timeline() {
+    final raw = _trackData?['timeline'];
+    if (raw == null) return null;
+    return List<Map<String, dynamic>>.from(
+      (raw as List).map(
+        (e) => e is Map<String, dynamic> ? e : <String, dynamic>{},
+      ),
+    );
+  }
+}
+
+/// Floating round control over the map (shadow outside the Material).
+class _MapCircleButton extends StatelessWidget {
+  const _MapCircleButton({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = HomeColors.isDark(context);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        boxShadow: AppColors.softShadow(context),
+      ),
+      child: Material(
+        color: HomeColors.surfaceOf(context),
+        shape: CircleBorder(
+          side: dark
+              ? BorderSide(color: HomeColors.borderOf(context))
+              : BorderSide.none,
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: SizedBox(width: 52, height: 52, child: Center(child: child)),
+      ),
+    );
+  }
+}
+
+class _EtaPill extends StatelessWidget {
+  const _EtaPill({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = HomeColors.violetOf(context);
+    return Container(
+      padding: const EdgeInsets.fromLTRB(8, 4, 10, 4),
+      decoration: BoxDecoration(
+        color: HomeColors.violetTintOf(context),
+        borderRadius: BorderRadius.circular(AppColors.radiusFull),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.schedule_rounded, size: 15, color: accent),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w800,
+              color: accent,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Shared card shell: surface + soft shadow (light) / hairline border (dark).
+class _SheetCard extends StatelessWidget {
+  const _SheetCard({required this.borderColor, required this.child});
+
+  final Color borderColor;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = HomeColors.isDark(context);
+    final radius = BorderRadius.circular(22);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: radius,
+        boxShadow: AppColors.softShadow(context),
+      ),
+      child: Material(
+        color: HomeColors.surfaceOf(context),
+        shape: RoundedRectangleBorder(
+          borderRadius: radius,
+          side: dark ? BorderSide(color: borderColor) : BorderSide.none,
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: SizedBox(width: double.infinity, child: child),
+        ),
+      ),
+    );
+  }
+}
+
+class _CardTitle extends StatelessWidget {
+  const _CardTitle({required this.icon, required this.text});
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 22, color: HomeColors.violetOf(context)),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.3,
+              color: HomeColors.textPrimaryOf(context),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -871,38 +1106,50 @@ class _ReviewOrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppColors.spaceMD),
-      decoration: BoxDecoration(
-        color: HomeColors.surfaceElevatedOf(context),
-        borderRadius: BorderRadius.circular(AppColors.radiusLG),
-        border: Border.all(color: borderColor),
-      ),
+    final l10n = context.l10n;
+    final dark = HomeColors.isDark(context);
+    final orangeFill = dark ? AppColors.orangeTintDark : AppColors.orangeTint;
+    return _SheetCard(
+      borderColor: borderColor,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Review Order',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: HomeColors.textPrimaryOf(context),
-            ),
+          const _CardTitle(
+            icon: Icons.receipt_long_rounded,
+            text: 'Review Order',
           ),
-          const SizedBox(height: 16),
-          _DetailItem(label: 'Courier Number', value: courierNumber),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           _DetailItem(
-            label: 'From',
-            value: from.length > 30 ? '${from.substring(0, 30)}...' : from,
+            icon: Icons.trip_origin_rounded,
+            iconColor: AppColors.brandOrange,
+            tileColor: orangeFill,
+            label: l10n.from,
+            value: from,
           ),
           const SizedBox(height: 12),
           _DetailItem(
-            label: 'To',
-            value: to.length > 30 ? '${to.substring(0, 30)}...' : to,
+            icon: Icons.location_on_rounded,
+            iconColor: HomeColors.violetOf(context),
+            tileColor: HomeColors.violetTintOf(context),
+            label: l10n.to,
+            value: to,
           ),
           const SizedBox(height: 12),
-          _DetailItem(label: 'Created', value: createdDate),
+          _DetailItem(
+            icon: Icons.tag_rounded,
+            iconColor: HomeColors.textMutedOf(context),
+            tileColor: HomeColors.surfaceElevatedOf(context),
+            label: l10n.courierNumber,
+            value: courierNumber,
+          ),
+          const SizedBox(height: 12),
+          _DetailItem(
+            icon: Icons.event_rounded,
+            iconColor: HomeColors.textMutedOf(context),
+            tileColor: HomeColors.surfaceElevatedOf(context),
+            label: l10n.created,
+            value: createdDate,
+          ),
         ],
       ),
     );
@@ -922,8 +1169,18 @@ class _TrackingOrderCard extends StatelessWidget {
       final dt = DateTime.tryParse(str);
       if (dt != null) {
         const months = [
-          'January', 'February', 'March', 'April', 'May', 'June',
-          'July', 'August', 'September', 'October', 'November', 'December'
+          'January',
+          'February',
+          'March',
+          'April',
+          'May',
+          'June',
+          'July',
+          'August',
+          'September',
+          'October',
+          'November',
+          'December'
         ];
         return '${months[dt.month - 1]} ${dt.day}, ${dt.year} '
             '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
@@ -935,53 +1192,44 @@ class _TrackingOrderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = timeline ?? [];
-    return Container(
-      padding: const EdgeInsets.all(AppColors.spaceMD),
-      decoration: BoxDecoration(
-        color: HomeColors.surfaceElevatedOf(context),
-        borderRadius: BorderRadius.circular(AppColors.radiusLG),
-        border: Border.all(color: borderColor),
-      ),
+    return _SheetCard(
+      borderColor: borderColor,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Tracking Order',
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: HomeColors.textPrimaryOf(context),
-                ),
+          const _CardTitle(
+            icon: Icons.timeline_rounded,
+            text: 'Tracking Order',
           ),
           const SizedBox(height: 16),
           if (items.isEmpty)
-            Column(
-              children: [
-                Lottie.asset('assets/animations/browse.json', width: 120),
-                const SizedBox(height: 8),
-                Text(
-                  'No tracking updates yet',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: HomeColors.textMutedOf(context),
-                      ),
-                ),
-              ],
+            Center(
+              child: Column(
+                children: [
+                  Lottie.asset('assets/animations/browse.json', width: 120),
+                  const SizedBox(height: 8),
+                  Text(
+                    'No tracking updates yet',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: HomeColors.textMutedOf(context),
+                    ),
+                  ),
+                ],
+              ),
             )
           else
             ...items.asMap().entries.map((entry) {
               final i = entry.key;
               final item = entry.value;
-              final isCurrent = item['status'] == 'current';
-              final isCompleted = item['status'] == 'completed';
-              return Padding(
-                padding: EdgeInsets.only(
-                  bottom: i < items.length - 1 ? 16 : 0,
-                ),
-                child: _TrackingItem(
-                  title: item['event']?.toString() ?? '—',
-                  date: _formatTimestamp(item['timestamp']),
-                  isActive: isCurrent,
-                  isCompleted: isCompleted,
-                ),
+              return _TrackingItem(
+                title: item['event']?.toString() ?? '—',
+                date: _formatTimestamp(item['timestamp']),
+                isActive: item['status'] == 'current',
+                isCompleted: item['status'] == 'completed',
+                isLast: i == items.length - 1,
               );
             }),
         ],
@@ -995,30 +1243,149 @@ class _TrackingItem extends StatelessWidget {
   final String date;
   final bool isActive;
   final bool isCompleted;
+  final bool isLast;
 
   const _TrackingItem({
     required this.title,
     required this.date,
     this.isActive = false,
     this.isCompleted = true,
+    this.isLast = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    Color dotColor = HomeColors.textMutedOf(context);
-    if (isActive) dotColor = HomeColors.violet;
-    if (isCompleted) dotColor = AppColors.delivered;
+    final indigo = HomeColors.violetOf(context);
+    final border = HomeColors.borderOf(context);
+    final Color nodeColor;
+    final Color nodeFill;
+    final IconData? nodeIcon;
+    if (isCompleted) {
+      nodeColor = indigo;
+      nodeFill = indigo;
+      nodeIcon = Icons.check_rounded;
+    } else if (isActive) {
+      nodeColor = AppColors.brandOrange;
+      nodeFill = HomeColors.isDark(context)
+          ? AppColors.orangeTintDark
+          : AppColors.orangeTint;
+      nodeIcon = null;
+    } else {
+      nodeColor = border;
+      nodeFill = HomeColors.surfaceOf(context);
+      nodeIcon = null;
+    }
 
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(
+            width: 26,
+            child: Column(
+              children: [
+                Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: nodeFill,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: nodeColor, width: 2),
+                  ),
+                  child: nodeIcon != null
+                      ? Icon(nodeIcon, size: 15, color: Colors.white)
+                      : isActive
+                          ? Center(
+                              child: Container(
+                                width: 8,
+                                height: 8,
+                                decoration: const BoxDecoration(
+                                  color: AppColors.brandOrange,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            )
+                          : null,
+                ),
+                if (!isLast)
+                  Expanded(
+                    child: Container(
+                      width: 2,
+                      margin: const EdgeInsets.symmetric(vertical: 4),
+                      decoration: BoxDecoration(
+                        color: isCompleted
+                            ? indigo.withValues(alpha: 0.35)
+                            : border,
+                        borderRadius: BorderRadius.circular(1),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(top: 1, bottom: isLast ? 0 : 18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: isActive ? FontWeight.w800 : FontWeight.w700,
+                      color: isActive || isCompleted
+                          ? HomeColors.textPrimaryOf(context)
+                          : HomeColors.textMutedOf(context),
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    date,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: HomeColors.textMutedOf(context),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DetailItem extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final Color tileColor;
+  final String label;
+  final String value;
+
+  const _DetailItem({
+    required this.icon,
+    required this.iconColor,
+    required this.tileColor,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          width: 12,
-          height: 12,
+          width: 44,
+          height: 44,
           decoration: BoxDecoration(
-            color: dotColor,
-            shape: BoxShape.circle,
+            color: tileColor,
+            borderRadius: BorderRadius.circular(14),
           ),
+          child: Icon(icon, size: 22, color: iconColor),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -1026,18 +1393,23 @@ class _TrackingItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                title,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-                      color: HomeColors.textPrimaryOf(context),
-                    ),
+                label,
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w700,
+                  color: HomeColors.textMutedOf(context),
+                ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 2),
               Text(
-                date,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: HomeColors.textMutedOf(context),
-                    ),
+                value,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: HomeColors.textPrimaryOf(context),
+                ),
               ),
             ],
           ),
@@ -1046,42 +1418,3 @@ class _TrackingItem extends StatelessWidget {
     );
   }
 }
-
-class _DetailItem extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _DetailItem({
-    required this.label,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 100,
-          child: Text(
-            label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: HomeColors.textMutedOf(context),
-                ),
-          ),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: HomeColors.textPrimaryOf(context),
-                ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-

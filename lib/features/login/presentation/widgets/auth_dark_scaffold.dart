@@ -11,7 +11,7 @@ class AuthScaffold extends StatelessWidget {
     this.showBackButton = false,
     this.onBack,
     this.showThemeToggle = true,
-    this.padding = const EdgeInsets.fromLTRB(24, 8, 24, 28),
+    this.padding = const EdgeInsets.fromLTRB(24, 16, 24, 32),
   });
 
   final Widget child;
@@ -37,17 +37,13 @@ class AuthScaffold extends StatelessWidget {
               children: [
                 if (showBackButton || showThemeToggle)
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    padding: const EdgeInsets.fromLTRB(16, 8, 12, 0),
                     child: Row(
                       children: [
                         if (showBackButton)
-                          IconButton(
-                            onPressed:
-                                onBack ?? () => Navigator.of(context).maybePop(),
-                            icon: Icon(
-                              Icons.arrow_back_rounded,
-                              color: scheme.onSurface,
-                            ),
+                          _AuthBackButton(
+                            onPressed: onBack ??
+                                () => Navigator.of(context).maybePop(),
                           )
                         else
                           const SizedBox(width: 48),
@@ -69,6 +65,41 @@ class AuthScaffold extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AuthBackButton extends StatelessWidget {
+  const _AuthBackButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(16);
+    return Semantics(
+      button: true,
+      label: MaterialLocalizations.of(context).backButtonTooltip,
+      child: Material(
+        color: AuthScreenColors.surfaceOf(context),
+        shape: RoundedRectangleBorder(
+          borderRadius: radius,
+          side: BorderSide(color: AuthScreenColors.surfaceBorderOf(context)),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onPressed,
+          child: SizedBox(
+            width: 48,
+            height: 48,
+            child: Icon(
+              Icons.arrow_back_rounded,
+              size: 26,
+              color: AuthScreenColors.textPrimaryOf(context),
             ),
           ),
         ),

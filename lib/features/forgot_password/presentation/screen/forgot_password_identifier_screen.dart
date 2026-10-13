@@ -2,17 +2,18 @@ import 'package:country_picker/country_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/utils/phone_util.dart';
 import 'package:hudhud_delivery/core/validation/email_or_phone_validator.dart';
 import 'package:hudhud_delivery/features/forgot_password/bloc/forgot_password_request_cubit.dart';
 import 'package:hudhud_delivery/features/forgot_password/data/repository/forgot_password_repository.dart';
 import 'package:hudhud_delivery/features/forgot_password/presentation/screen/forgot_password_otp_screen.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
-import 'package:hudhud_delivery/features/login/presentation/widgets/auth_brand_header.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_dark_scaffold.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_field_decoration.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_gradient_button.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_phone_number_field.dart';
+import 'package:hudhud_delivery/features/login/presentation/widgets/auth_ui.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/login_method_tabs.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
 
@@ -102,14 +103,15 @@ class _ForgotPasswordIdentifierViewState
     final l10n = context.l10n;
     return AuthDarkScaffold(
       showBackButton: true,
-      child: BlocConsumer<ForgotPasswordRequestCubit, ForgotPasswordRequestState>(
+      child:
+          BlocConsumer<ForgotPasswordRequestCubit, ForgotPasswordRequestState>(
         listenWhen: (p, c) => p.error != c.error && c.error != null,
         listener: (context, state) {
           if (state.error != null) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.error!),
-                backgroundColor: AuthScreenColors.orange,
+                backgroundColor: AppColors.errorColor,
               ),
             );
           }
@@ -120,33 +122,21 @@ class _ForgotPasswordIdentifierViewState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const AuthDashedCurve(),
-                const SizedBox(height: 12),
-                Text(
-                  l10n.forgotPasswordRequestTitle,
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w700,
-                    color: AuthScreenColors.textPrimaryOf(context),
-                  ),
-                ),
                 const SizedBox(height: 8),
-                Text(
-                  l10n.forgotPasswordRequestSubtitle,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: AuthScreenColors.textSecondaryOf(context),
-                    height: 1.45,
-                  ),
+                AuthHeading(
+                  icon: Icons.lock_reset_rounded,
+                  title: l10n.forgotPasswordRequestTitle,
+                  subtitle: l10n.forgotPasswordRequestSubtitle,
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 28),
                 LoginMethodTabs(
                   selected: _method,
                   authStyle: true,
                   onChanged: (m) => setState(() => _method = m),
                 ),
-                const SizedBox(height: 20),
-                if (_method == LoginMethod.phone)
+                const SizedBox(height: 24),
+                if (_method == LoginMethod.phone) ...[
+                  AuthFieldLabel(l10n.phoneNumber),
                   AuthPhoneNumberField(
                     countryCode: _dialCode,
                     countryIsoCode: _countryIso,
@@ -160,32 +150,24 @@ class _ForgotPasswordIdentifierViewState
                       });
                     },
                     validator: (v) => _validatePhone(v, l10n),
-                  )
-                else ...[
-                  Text(
-                    l10n.labelEmail,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: AuthScreenColors.textSecondaryOf(context),
-                      fontWeight: FontWeight.w500,
-                    ),
                   ),
-                  const SizedBox(height: 6),
+                ] else ...[
+                  AuthFieldLabel(l10n.labelEmail),
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     enabled: !state.loading,
                     style: TextStyle(
                       color: AuthScreenColors.textPrimaryOf(context),
-                      fontSize: 15,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
                     ),
                     decoration: authFieldDecoration(
                       context,
                       hint: l10n.hintEmail,
-                      prefixIcon: Icon(
-                        Icons.mail_outline_rounded,
-                        color: AuthScreenColors.textSecondaryOf(context),
-                        size: 20,
+                      prefixIcon: const Icon(
+                        Icons.alternate_email_rounded,
+                        size: 22,
                       ),
                     ),
                     validator: (v) => _validateEmail(v, l10n),

@@ -91,37 +91,33 @@ class _OrdersScreenBodyState extends State<_OrdersScreenBody> {
                 }
 
                 return RefreshIndicator(
-                  color: HomeColors.violet,
+                  color: AppColors.brandOrange,
                   onRefresh: () async {
-                    context
-                        .read<OrdersBloc>()
-                        .add(const RefreshOrdersEvent());
+                    context.read<OrdersBloc>().add(const RefreshOrdersEvent());
                   },
                   child: CustomScrollView(
                     controller: _scrollController,
                     physics: const AlwaysScrollableScrollPhysics(),
                     slivers: [
-                      SliverPadding(
-                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                        sliver: SliverToBoxAdapter(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              OrdersHeader(user: _user),
-                              const SizedBox(height: 16),
-                              const OrdersTitle(),
-                              const SizedBox(height: 12),
-                              OrderFilterChips(
-                                selectedStatus: filter,
-                                onFilterChanged: (status) {
-                                  context.read<OrdersBloc>().add(
-                                        FilterOrdersByStatusEvent(status),
-                                      );
-                                },
-                              ),
-                              const SizedBox(height: 12),
-                            ],
-                          ),
+                      SliverToBoxAdapter(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                              child: OrdersHeader(user: _user),
+                            ),
+                            const SizedBox(height: 18),
+                            OrderFilterChips(
+                              selectedStatus: filter,
+                              onFilterChanged: (status) {
+                                context.read<OrdersBloc>().add(
+                                      FilterOrdersByStatusEvent(status),
+                                    );
+                              },
+                            ),
+                            const SizedBox(height: 16),
+                          ],
                         ),
                       ),
                       ..._buildOrderSlivers(context, state),
@@ -151,30 +147,13 @@ class _OrdersScreenBodyState extends State<_OrdersScreenBody> {
       return [
         SliverFillRemaining(
           hasScrollBody: false,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.wifi_off_rounded,
-                  size: 48,
-                  color: HomeColors.textMutedOf(context),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  state.message,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: HomeColors.textSecondaryOf(context)),
-                ),
-                const SizedBox(height: 16),
-                TextButton(
-                  onPressed: () => context
-                      .read<OrdersBloc>()
-                      .add(const RefreshOrdersEvent()),
-                  child: Text(l10n.actionRetry),
-                ),
-              ],
-            ),
+          child: _OrdersStateMessage(
+            icon: Icons.wifi_off_rounded,
+            color: AppColors.errorColor,
+            title: state.message,
+            actionLabel: l10n.actionRetry,
+            onAction: () =>
+                context.read<OrdersBloc>().add(const RefreshOrdersEvent()),
           ),
         ),
       ];
@@ -191,18 +170,10 @@ class _OrdersScreenBodyState extends State<_OrdersScreenBody> {
       return [
         SliverFillRemaining(
           hasScrollBody: false,
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Text(
-                l10n.noOrdersYetStore,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: HomeColors.textMutedOf(context),
-                  fontSize: 15,
-                ),
-              ),
-            ),
+          child: _OrdersStateMessage(
+            icon: Icons.receipt_long_rounded,
+            color: HomeColors.violetOf(context),
+            title: l10n.noOrdersYetStore,
           ),
         ),
       ];
@@ -210,14 +181,18 @@ class _OrdersScreenBodyState extends State<_OrdersScreenBody> {
 
     return [
       SliverPadding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
         sliver: SliverList(
           delegate: SliverChildBuilderDelegate(
             (context, index) {
               if (index >= orders.length) {
                 return const Padding(
                   padding: EdgeInsets.symmetric(vertical: 16),
-                  child: Center(child: CircularProgressIndicator()),
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.brandOrange,
+                    ),
+                  ),
                 );
               }
               final order = orders[index];
@@ -237,5 +212,79 @@ class _OrdersScreenBodyState extends State<_OrdersScreenBody> {
         ),
       ),
     ];
+  }
+}
+
+/// Empty / error message: big tinted icon circle, bold title, optional
+/// orange action.
+class _OrdersStateMessage extends StatelessWidget {
+  const _OrdersStateMessage({
+    required this.icon,
+    required this.color,
+    required this.title,
+    this.actionLabel,
+    this.onAction,
+  });
+
+  final IconData icon;
+  final Color color;
+  final String title;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = HomeColors.isDark(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(32, 24, 32, 64),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 96,
+            height: 96,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: color.withValues(alpha: dark ? 0.2 : 0.1),
+            ),
+            child: Icon(icon, size: 46, color: color),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 19,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.3,
+              color: HomeColors.textPrimaryOf(context),
+            ),
+          ),
+          if (actionLabel != null && onAction != null) ...[
+            const SizedBox(height: 24),
+            SizedBox(
+              height: 56,
+              child: FilledButton.icon(
+                onPressed: onAction,
+                icon: const Icon(Icons.refresh_rounded, size: 22),
+                label: Text(actionLabel!),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.brandOrange,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 28),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  textStyle: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
   }
 }

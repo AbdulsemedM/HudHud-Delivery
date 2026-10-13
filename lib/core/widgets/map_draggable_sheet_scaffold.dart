@@ -130,15 +130,14 @@ class MapSheetDragHandle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final handleColor =
-        color ?? Theme.of(context).colorScheme.outlineVariant;
+    final handleColor = color ?? Theme.of(context).colorScheme.outlineVariant;
     return Container(
-      margin: const EdgeInsets.only(top: 8),
-      width: 40,
-      height: 4,
+      margin: const EdgeInsets.only(top: 10),
+      width: 44,
+      height: 5,
       decoration: BoxDecoration(
         color: handleColor,
-        borderRadius: BorderRadius.circular(2),
+        borderRadius: BorderRadius.circular(3),
       ),
     );
   }

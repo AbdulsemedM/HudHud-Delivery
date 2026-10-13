@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
 import 'package:shimmer/shimmer.dart';
@@ -14,6 +15,7 @@ import 'package:hudhud_delivery/core/widgets/call_support_button.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/models/create_delivery_result.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
+import 'package:hudhud_delivery/features/courier/easy_mode/package_item_catalog.dart';
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
 import 'package:hudhud_delivery/features/courier/utils/courier_vehicle_display.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_estimate.dart';
@@ -102,9 +104,8 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
   static const _minSheetSize = 0.28;
   double _sheetExtent = _initialSheetSize;
 
-  /// Fixed footer: Edit Details + Look for Courier (always visible above home indicator).
-  static const double _footerContentHeight =
-      8 + 48 + AppColors.spaceSM + AppColors.buttonHeightMD + 12;
+  /// Fixed footer: estimated fee + Look for Courier (always visible above home indicator).
+  static const double _footerContentHeight = 12 + 36 + 12 + 56 + 12;
 
   /// After create succeeds, keep delivery so pay can retry without re-creating.
   CreateDeliveryResult? _pendingCreatedDelivery;
@@ -421,7 +422,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(context.l10n.pickupOutsideDeliveryServiceArea),
-        backgroundColor: Colors.red,
+        backgroundColor: AppColors.errorColor,
       ),
     );
   }
@@ -457,7 +458,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(context.l10n.pickupOutsideDeliveryServiceArea),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.errorColor,
           ),
         );
       }
@@ -512,7 +513,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(context.l10n.waitForPriceEstimate),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.errorColor,
         ),
       );
       return;
@@ -532,7 +533,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(context.l10n.pleaseEnterValidSenderPhone),
-              backgroundColor: Colors.red,
+              backgroundColor: AppColors.errorColor,
             ),
           );
           return;
@@ -623,7 +624,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(context.l10n.chooseValidFuturePickup),
-                backgroundColor: Colors.red,
+                backgroundColor: AppColors.errorColor,
               ),
             );
             return;
@@ -638,7 +639,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(context.l10n.refreshQuoteRouteDistance),
-                backgroundColor: Colors.red,
+                backgroundColor: AppColors.errorColor,
               ),
             );
             await _fetchEstimate();
@@ -648,7 +649,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
             SnackBar(
               content: Text(result['message']?.toString() ??
                   'Failed to create delivery request'),
-              backgroundColor: Colors.red,
+              backgroundColor: AppColors.errorColor,
             ),
           );
           return;
@@ -662,7 +663,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(context.l10n.invalidDeliveryId),
-              backgroundColor: Colors.red,
+              backgroundColor: AppColors.errorColor,
             ),
           );
           return;
@@ -682,7 +683,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
             content: Text(
               'Server did not return a payment total. Refresh and try again.',
             ),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.errorColor,
           ),
         );
         return;
@@ -814,7 +815,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                 ? parsed.displayMessage
                 : 'Payment amount changed. Review the updated total and try again.',
           ),
-          backgroundColor: Colors.orange,
+          backgroundColor: AppColors.warningColor,
         ),
       );
       return;
@@ -827,7 +828,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
           content: Text(
             '${userFacingApiError(error)} Tap pay again to retry safely.',
           ),
-          backgroundColor: Colors.orange,
+          backgroundColor: AppColors.warningColor,
         ),
       );
       return;
@@ -838,7 +839,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(userFacingApiError(error)),
-        backgroundColor: Colors.red,
+        backgroundColor: AppColors.errorColor,
       ),
     );
   }
@@ -918,6 +919,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
       context,
       child: Builder(
         builder: (context) {
+          final l10n = context.l10n;
           LatLng mapCenter = const LatLng(9.0222, 38.7468);
           if (widget.pickupPosition != null &&
               widget.deliveryPosition != null) {
@@ -945,247 +947,306 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
             }
           }
 
-          final theme = Theme.of(context);
-          final borderColor = HomeColors.borderOf(context);
-          return Scaffold(
-            resizeToAvoidBottomInset: false,
-            backgroundColor: HomeColors.backgroundOf(context),
-            body: LayoutBuilder(
-              builder: (context, constraints) {
-                final bottomInset = MediaQuery.paddingOf(context).bottom;
-                final footerHeight = _footerContentHeight + bottomInset;
-                final sheetAreaHeight = constraints.maxHeight - footerHeight;
-                final mapBottomPadding =
-                    footerHeight + sheetAreaHeight * _sheetExtent;
-                return NotificationListener<DraggableScrollableNotification>(
-                  onNotification: _onSheetNotification,
-                  child: Stack(
-                  children: [
-                    Positioned.fill(
-                      child: _buildMapOrFallback(
-                        mapCenter,
-                        bottomPadding: mapBottomPadding,
-                      ),
-                    ),
-                    Positioned(
-                      top: 40,
-                      left: 16,
-                      child: Row(
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              color: HomeColors.surfaceElevatedOf(context),
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.25),
-                                  blurRadius: 4,
-                                ),
-                              ],
-                            ),
-                            child: IconButton(
-                              icon: Icon(Icons.arrow_back,
-                                  color: HomeColors.textPrimaryOf(context)),
-                              onPressed: () => Navigator.pop(context),
-                            ),
+          final itemLabel = PackageItemCatalog.allIds.contains(widget.itemType)
+              ? PackageItemCatalog.labelFor(widget.itemType, l10n)
+              : widget.itemType;
+          final paymentLabel = _isWalletPayment
+              ? l10n.paymentWallet
+              : l10n.paymentCashOnDelivery;
+          final scheduledAt = widget.scheduledPickup;
+          final materialL10n = MaterialLocalizations.of(context);
+          final scheduledText = scheduledAt == null
+              ? null
+              : '${materialL10n.formatMediumDate(scheduledAt)} · '
+                  '${materialL10n.formatTimeOfDay(TimeOfDay.fromDateTime(scheduledAt))}';
+          final topPad = MediaQuery.paddingOf(context).top;
+
+          return AnnotatedRegion<SystemUiOverlayStyle>(
+            // Map is always light: keep status bar icons dark.
+            value: SystemUiOverlayStyle.dark.copyWith(
+              statusBarColor: Colors.transparent,
+            ),
+            child: Scaffold(
+              resizeToAvoidBottomInset: false,
+              backgroundColor: HomeColors.backgroundOf(context),
+              body: LayoutBuilder(
+                builder: (context, constraints) {
+                  final bottomInset = MediaQuery.paddingOf(context).bottom;
+                  final footerHeight = _footerContentHeight + bottomInset;
+                  final sheetAreaHeight = constraints.maxHeight - footerHeight;
+                  final mapBottomPadding =
+                      footerHeight + sheetAreaHeight * _sheetExtent;
+                  return NotificationListener<DraggableScrollableNotification>(
+                    onNotification: _onSheetNotification,
+                    child: Stack(
+                      children: [
+                        Positioned.fill(
+                          child: _buildMapOrFallback(
+                            mapCenter,
+                            bottomPadding: mapBottomPadding,
                           ),
-                          const SizedBox(width: 8),
-                          Container(
-                            decoration: BoxDecoration(
-                              color: HomeColors.surfaceElevatedOf(context),
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.25),
-                                  blurRadius: 4,
-                                ),
-                              ],
-                            ),
-                            child: const CallSupportButton(compact: true),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Positioned(
-                      top: 40,
-                      right: 16,
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: HomeColors.surfaceElevatedOf(context),
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.25),
-                              blurRadius: 4,
-                            ),
-                          ],
                         ),
-                        child: const Icon(
-                          Icons.pedal_bike,
-                          color: HomeColors.violet,
-                          size: 24,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: footerHeight,
-                      child: DraggableScrollableSheet(
-                      initialChildSize: _initialSheetSize,
-                      minChildSize: _minSheetSize,
-                      maxChildSize: 0.85,
-                      builder: (context, scrollController) {
-                        return Container(
-                          decoration: BoxDecoration(
-                            color: HomeColors.surfaceOf(context),
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(AppColors.radiusLG),
-                              topRight: Radius.circular(AppColors.radiusLG),
-                            ),
-                            border: Border(
-                              top: BorderSide(color: borderColor),
-                              left: BorderSide(color: borderColor),
-                              right: BorderSide(color: borderColor),
-                            ),
-                          ),
-                          child: Column(
+                        Positioned(
+                          top: topPad + 8,
+                          left: 16,
+                          child: Row(
                             children: [
-                              Container(
-                                margin: const EdgeInsets.only(top: 8),
-                                width: 40,
-                                height: 4,
-                                decoration: BoxDecoration(
-                                  color: HomeColors.borderOf(context),
-                                  borderRadius: BorderRadius.circular(2),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                  20,
-                                  12,
-                                  20,
-                                  0,
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Confirm Details',
-                                      style: theme.textTheme.headlineSmall
-                                          ?.copyWith(
-                                        fontWeight: FontWeight.w700,
-                                        color:
-                                            HomeColors.textPrimaryOf(context),
-                                      ),
-                                    ),
-                                    const SizedBox(height: AppColors.spaceMD),
-                                    _EstimatedFeeCard(
-                                      borderColor: borderColor,
-                                      isLoading: _isLoadingEstimate,
-                                      feeText: estimatedFeeText,
-                                      errorText: _estimateError,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Expanded(
-                                child: SingleChildScrollView(
-                                  controller: scrollController,
-                                  padding: const EdgeInsets.fromLTRB(
-                                    20,
-                                    AppColors.spaceMD,
-                                    20,
-                                    AppColors.spaceMD,
+                              _MapCircle(
+                                child: IconButton(
+                                  tooltip: MaterialLocalizations.of(context)
+                                      .backButtonTooltip,
+                                  iconSize: 26,
+                                  constraints: const BoxConstraints(
+                                    minWidth: 52,
+                                    minHeight: 52,
                                   ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      _DetailCard(
-                                        borderColor: borderColor,
-                                        child: Column(
-                                          children: [
-                                            _DetailRow(
-                                              icon: Icons.location_on,
-                                              iconColor: Theme.of(context)
-                                                  .colorScheme
-                                                  .error,
-                                              label: 'Pickup Location',
-                                              value: widget.pickupLocation,
-                                            ),
-                                            const Divider(height: 24),
-                                            _DetailRow(
-                                              icon: Icons.location_on,
-                                              iconColor: AppColors.delivered,
-                                              label: 'Delivery Location',
-                                              value: widget.deliveryLocation,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      const SizedBox(height: AppColors.spaceMD),
-                                      _DetailCard(
-                                        borderColor: borderColor,
-                                        child: Column(
-                                          children: [
-                                            _DetailRow(
-                                              label: 'What you are sending',
-                                              value: widget.itemType,
-                                            ),
-                                            const SizedBox(height: 12),
-                                            _DetailRow(
-                                              label: 'Sender phone',
-                                              value: formatPhoneForDisplay(
-                                                widget.senderPhone,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 12),
-                                            _DetailRow(
-                                              label: 'Recipient',
-                                              value: widget.recipientName,
-                                            ),
-                                            const SizedBox(height: 12),
-                                            _DetailRow(
-                                              label: 'Recipient contact number',
-                                              value: widget.recipientPhone,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
+                                  icon: Icon(
+                                    Icons.arrow_back_rounded,
+                                    color: HomeColors.textPrimaryOf(context),
+                                  ),
+                                  onPressed: () => Navigator.pop(context),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              const _MapCircle(
+                                child: SizedBox(
+                                  width: 52,
+                                  height: 52,
+                                  child: Center(
+                                    child: CallSupportButton(compact: true),
                                   ),
                                 ),
                               ),
                             ],
                           ),
-                        );
-                      },
+                        ),
+                        Positioned(
+                          top: topPad + 8,
+                          right: 16,
+                          child: _MapCircle(
+                            child: SizedBox(
+                              width: 52,
+                              height: 52,
+                              child: Icon(
+                                courierVehicleIcon(_selectedVehicle),
+                                color: HomeColors.violetOf(context),
+                                size: 26,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          bottom: footerHeight,
+                          child: DraggableScrollableSheet(
+                            initialChildSize: _initialSheetSize,
+                            minChildSize: _minSheetSize,
+                            maxChildSize: 0.85,
+                            builder: (context, scrollController) {
+                              return DecoratedBox(
+                                decoration: BoxDecoration(
+                                  color: HomeColors.backgroundOf(context),
+                                  borderRadius: const BorderRadius.vertical(
+                                    top: Radius.circular(28),
+                                  ),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Color(0x261B1530),
+                                      blurRadius: 24,
+                                      offset: Offset(0, -6),
+                                    ),
+                                  ],
+                                ),
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      margin: const EdgeInsets.only(top: 10),
+                                      width: 44,
+                                      height: 5,
+                                      decoration: BoxDecoration(
+                                        color: HomeColors.textMutedOf(context)
+                                            .withValues(alpha: 0.35),
+                                        borderRadius: BorderRadius.circular(3),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                        16,
+                                        12,
+                                        12,
+                                        0,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              'Confirm Details',
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                fontSize: 24,
+                                                fontWeight: FontWeight.w800,
+                                                letterSpacing: -0.5,
+                                                color: HomeColors.textPrimaryOf(
+                                                  context,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          _EditPill(
+                                            onTap: () => Navigator.pop(context),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: SingleChildScrollView(
+                                        controller: scrollController,
+                                        padding: const EdgeInsets.fromLTRB(
+                                          16,
+                                          14,
+                                          16,
+                                          20,
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.stretch,
+                                          children: [
+                                            if (_estimateError != null &&
+                                                !_isLoadingEstimate) ...[
+                                              _ErrorNote(text: _estimateError!),
+                                              const SizedBox(height: 12),
+                                            ],
+                                            _DetailCard(
+                                              child: _RouteSummary(
+                                                pickupLabel:
+                                                    l10n.pickupLocationLabel,
+                                                pickup: widget.pickupLocation,
+                                                dropoffLabel:
+                                                    l10n.deliveryLocationLabel,
+                                                dropoff:
+                                                    widget.deliveryLocation,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 14),
+                                            _DetailCard(
+                                              child: Column(
+                                                children: [
+                                                  _DetailRow(
+                                                    icon: PackageItemCatalog
+                                                        .iconFor(
+                                                            widget.itemType),
+                                                    label:
+                                                        'What you are sending',
+                                                    value: itemLabel,
+                                                  ),
+                                                  const _Hairline(),
+                                                  _DetailRow(
+                                                    icon: Icons.scale_rounded,
+                                                    label: l10n.labelWeight,
+                                                    value:
+                                                        '${widget.quantity} × ${_formatWeight(widget.packageWeight)} kg',
+                                                  ),
+                                                  const _Hairline(),
+                                                  _DetailRow(
+                                                    icon: courierVehicleIcon(
+                                                      _selectedVehicle,
+                                                    ),
+                                                    label: l10n.vehicleType,
+                                                    value: courierVehicleLabel(
+                                                      _selectedVehicle,
+                                                      l10n,
+                                                    ),
+                                                  ),
+                                                  if (scheduledText !=
+                                                      null) ...[
+                                                    const _Hairline(),
+                                                    _DetailRow(
+                                                      icon: Icons.event_rounded,
+                                                      label: l10n
+                                                          .labelScheduledPickup,
+                                                      value: scheduledText,
+                                                    ),
+                                                  ],
+                                                  const _Hairline(),
+                                                  _DetailRow(
+                                                    icon: Icons.phone_rounded,
+                                                    label: 'Sender phone',
+                                                    value:
+                                                        formatPhoneForDisplay(
+                                                      widget.senderPhone,
+                                                    ),
+                                                  ),
+                                                  const _Hairline(),
+                                                  _DetailRow(
+                                                    icon: Icons.person_rounded,
+                                                    label: 'Recipient',
+                                                    value: widget.recipientName,
+                                                  ),
+                                                  const _Hairline(),
+                                                  _DetailRow(
+                                                    icon: Icons
+                                                        .phone_in_talk_rounded,
+                                                    label:
+                                                        'Recipient contact number',
+                                                    value:
+                                                        widget.recipientPhone,
+                                                  ),
+                                                  const _Hairline(),
+                                                  _DetailRow(
+                                                    icon: _isWalletPayment
+                                                        ? Icons
+                                                            .account_balance_wallet_rounded
+                                                        : Icons
+                                                            .payments_rounded,
+                                                    label:
+                                                        l10n.labelPaymentMethod,
+                                                    value: paymentLabel,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          child: _ConfirmDetailsFooter(
+                            bottomInset: bottomInset,
+                            isLoadingRequest: _isLoadingRequest,
+                            hasServerEstimate: _hasServerEstimate,
+                            isLoadingEstimate: _isLoadingEstimate,
+                            feeText: estimatedFeeText,
+                            onLookForCourier: _createDeliveryRequest,
+                          ),
+                        ),
+                      ],
                     ),
-                    ),
-                    Positioned(
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      child: _ConfirmDetailsFooter(
-                        bottomInset: bottomInset,
-                        isLoadingRequest: _isLoadingRequest,
-                        hasServerEstimate: _hasServerEstimate,
-                        onEditDetails: () => Navigator.pop(context),
-                        onLookForCourier: _createDeliveryRequest,
-                      ),
-                    ),
-                  ],
-                ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           );
         },
       ),
     );
+  }
+
+  static String _formatWeight(double kg) {
+    if (kg == kg.roundToDouble()) return kg.toStringAsFixed(0);
+    return kg.toStringAsFixed(1);
   }
 
   Widget _buildMapOrFallback(
@@ -1195,8 +1256,8 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
     if (_hasGoogleMapsApiKey == null) {
       return ColoredBox(
         color: HomeColors.backgroundOf(context),
-        child: Center(
-          child: CircularProgressIndicator(color: HomeColors.violet),
+        child: const Center(
+          child: CircularProgressIndicator(color: HomeColors.orange),
         ),
       );
     }
@@ -1205,9 +1266,9 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
         color: HomeColors.backgroundOf(context),
         child: Center(
           child: Padding(
-            padding: EdgeInsets.all(24),
+            padding: const EdgeInsets.all(24),
             child: Text(
-              'Google Maps is not configured on iOS. Add GOOGLE_MAPS_API_KEY and restart the app.',
+              context.l10n.taxiGoogleMapsNotConfigured,
               textAlign: TextAlign.center,
               style: TextStyle(color: HomeColors.textPrimaryOf(context)),
             ),
@@ -1235,7 +1296,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
               snippet: widget.pickupLocation,
             ),
             icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-              gmaps.BitmapDescriptor.hueRed,
+              22.0,
             ),
           ),
         if (widget.deliveryPosition != null)
@@ -1247,7 +1308,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
               snippet: widget.deliveryLocation,
             ),
             icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-              gmaps.BitmapDescriptor.hueGreen,
+              266.0,
             ),
           ),
       },
@@ -1263,7 +1324,7 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                             _toG(widget.pickupPosition!),
                             _toG(widget.deliveryPosition!),
                           ],
-                    color: HomeColors.violet,
+                    color: HomeColors.violetOf(context),
                     width: 4,
                   ),
                 }
@@ -1278,84 +1339,66 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
   }
 }
 
-class _ConfirmDetailsFooter extends StatelessWidget {
-  const _ConfirmDetailsFooter({
-    required this.bottomInset,
-    required this.isLoadingRequest,
-    required this.hasServerEstimate,
-    required this.onEditDetails,
-    required this.onLookForCourier,
-  });
+/// Round surface wrapper for floating map controls (soft shadow, no clipping
+/// artefacts).
+class _MapCircle extends StatelessWidget {
+  const _MapCircle({required this.child});
 
-  final double bottomInset;
-  final bool isLoadingRequest;
-  final bool hasServerEstimate;
-  final VoidCallback onEditDetails;
-  final VoidCallback onLookForCourier;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: HomeColors.surfaceOf(context),
-      elevation: 8,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: HomeColors.surfaceOf(context),
-          border: Border(
-            top: BorderSide(color: HomeColors.borderOf(context)),
-          ),
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        boxShadow: AppColors.softShadow(context),
+      ),
+      child: Material(
+        color: HomeColors.surfaceOf(context),
+        shape: CircleBorder(
+          side: BorderSide(color: HomeColors.borderOf(context)),
         ),
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(20, 8, 20, 12 + bottomInset),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextButton(
-                onPressed: onEditDetails,
-                child: const Text(
+        clipBehavior: Clip.antiAlias,
+        child: child,
+      ),
+    );
+  }
+}
+
+/// Small indigo "Edit Details" pill next to the sheet title.
+class _EditPill extends StatelessWidget {
+  const _EditPill({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = HomeColors.violetOf(context);
+    return Material(
+      color: HomeColors.violetTintOf(context),
+      borderRadius: BorderRadius.circular(999),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(999),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 44),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.edit_rounded, size: 18, color: accent),
+                const SizedBox(width: 6),
+                Text(
                   'Edit Details',
                   style: TextStyle(
-                    color: HomeColors.violet,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: accent,
                   ),
                 ),
-              ),
-              const SizedBox(height: AppColors.spaceSM),
-              SizedBox(
-                width: double.infinity,
-                height: AppColors.buttonHeightMD,
-                child: ElevatedButton(
-                  onPressed: (isLoadingRequest || !hasServerEstimate)
-                      ? null
-                      : onLookForCourier,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: HomeColors.violet,
-                    foregroundColor:
-                        Theme.of(context).colorScheme.onSecondary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppColors.radiusLG),
-                    ),
-                  ),
-                  child: isLoadingRequest
-                      ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text(
-                          'Look for Courier',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -1363,55 +1406,145 @@ class _ConfirmDetailsFooter extends StatelessWidget {
   }
 }
 
-class _EstimatedFeeCard extends StatelessWidget {
-  const _EstimatedFeeCard({
-    required this.borderColor,
-    required this.isLoading,
-    this.feeText,
-    this.errorText,
+/// Fixed footer: estimated total + one full-width orange primary button.
+class _ConfirmDetailsFooter extends StatelessWidget {
+  const _ConfirmDetailsFooter({
+    required this.bottomInset,
+    required this.isLoadingRequest,
+    required this.hasServerEstimate,
+    required this.isLoadingEstimate,
+    required this.feeText,
+    required this.onLookForCourier,
   });
 
-  final Color borderColor;
-  final bool isLoading;
+  final double bottomInset;
+  final bool isLoadingRequest;
+  final bool hasServerEstimate;
+  final bool isLoadingEstimate;
   final String? feeText;
-  final String? errorText;
+  final VoidCallback onLookForCourier;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return _DetailCard(
-      borderColor: borderColor,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Estimated fee',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: HomeColors.textMutedOf(context),
-            ),
-          ),
-          const SizedBox(height: 4),
-          if (isLoading)
-            const _EstimateFeeLoading()
-          else
-            Text(
-              feeText ?? 'N/A',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: HomeColors.violet,
-              ),
-            ),
-          if (errorText != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(
-                errorText!,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: AppColors.errorColor,
+    final dark = HomeColors.isDark(context);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: HomeColors.surfaceOf(context),
+        border: Border(
+          top: BorderSide(color: HomeColors.borderOf(context)),
+        ),
+        boxShadow: dark
+            ? null
+            : const [
+                BoxShadow(
+                  color: Color(0x141B1530),
+                  blurRadius: 16,
+                  offset: Offset(0, -4),
                 ),
+              ],
+      ),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(16, 12, 16, 12 + bottomInset),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              height: 36,
+              child: Row(
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: dark
+                          ? AppColors.orangeTintDark
+                          : AppColors.orangeTint,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.payments_rounded,
+                      size: 18,
+                      color: HomeColors.orange,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Estimated fee',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: HomeColors.textMutedOf(context),
+                      ),
+                    ),
+                  ),
+                  if (isLoadingEstimate)
+                    const _EstimateFeeLoading()
+                  else
+                    Text(
+                      feeText ?? 'N/A',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.6,
+                        color: HomeColors.textPrimaryOf(context),
+                      ),
+                    ),
+                ],
               ),
             ),
-        ],
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
+                onPressed: (isLoadingRequest || !hasServerEstimate)
+                    ? null
+                    : onLookForCourier,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: HomeColors.orange,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  disabledBackgroundColor:
+                      HomeColors.surfaceElevatedOf(context),
+                  disabledForegroundColor: HomeColors.textMutedOf(context),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                ),
+                child: isLoadingRequest
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          color: HomeColors.orange,
+                        ),
+                      )
+                    : const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.search_rounded, size: 22),
+                          SizedBox(width: 8),
+                          Flexible(
+                            child: Text(
+                              'Look for Courier',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1423,112 +1556,300 @@ class _EstimateFeeLoading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final baseColor = isDark
-        ? AppColors.darkSurfaceVariant
-        : AppColors.lightBorder;
+    final baseColor =
+        isDark ? AppColors.darkSurfaceVariant : AppColors.lightBorder;
     final highlightColor =
         isDark ? AppColors.darkBorder : AppColors.lightInputFill;
 
-    return Row(
-      children: [
-        SizedBox(
-          width: 18,
-          height: 18,
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-            color: HomeColors.violet,
-          ),
+    return Shimmer.fromColors(
+      baseColor: baseColor,
+      highlightColor: highlightColor,
+      child: Container(
+        width: 110,
+        height: 26,
+        decoration: BoxDecoration(
+          color: baseColor,
+          borderRadius: BorderRadius.circular(8),
         ),
-        const SizedBox(width: 10),
-        Shimmer.fromColors(
-          baseColor: baseColor,
-          highlightColor: highlightColor,
-          child: Container(
-            width: 96,
-            height: 24,
-            decoration: BoxDecoration(
-              color: baseColor,
-              borderRadius: BorderRadius.circular(4),
-            ),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Text(
-          'Calculating…',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: HomeColors.textMutedOf(context),
-              ),
-        ),
-      ],
+      ),
     );
   }
 }
 
+/// Receipt-style card surface.
 class _DetailCard extends StatelessWidget {
   final Widget child;
-  final Color borderColor;
 
-  const _DetailCard({required this.child, required this.borderColor});
+  const _DetailCard({required this.child});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppColors.spaceMD),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       decoration: BoxDecoration(
-        color: HomeColors.surfaceElevatedOf(context),
-        borderRadius: BorderRadius.circular(AppColors.radiusLG),
-        border: Border.all(color: borderColor),
+        color: HomeColors.surfaceOf(context),
+        borderRadius: BorderRadius.circular(22),
+        border: HomeColors.isDark(context)
+            ? Border.all(color: HomeColors.borderOf(context))
+            : null,
+        boxShadow: AppColors.softShadow(context),
       ),
       child: child,
     );
   }
 }
 
-class _DetailRow extends StatelessWidget {
-  final IconData? icon;
-  final Color? iconColor;
-  final String label;
-  final String value;
+/// Hairline divider between receipt rows (indented past the icon tile).
+class _Hairline extends StatelessWidget {
+  const _Hairline();
 
-  const _DetailRow({
-    this.icon,
-    this.iconColor,
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 52),
+      child: Divider(
+        height: 1,
+        thickness: 1,
+        color: HomeColors.borderOf(context),
+      ),
+    );
+  }
+}
+
+/// Pickup → drop-off summary with a dotted connector.
+class _RouteSummary extends StatelessWidget {
+  const _RouteSummary({
+    required this.pickupLabel,
+    required this.pickup,
+    required this.dropoffLabel,
+    required this.dropoff,
+  });
+
+  final String pickupLabel;
+  final String pickup;
+  final String dropoffLabel;
+  final String dropoff;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = HomeColors.isDark(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Column(
+        children: [
+          _RouteStop(
+            icon: Icons.my_location_rounded,
+            color: HomeColors.orange,
+            tint: dark ? AppColors.orangeTintDark : AppColors.orangeTint,
+            label: pickupLabel,
+            value: pickup,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 19),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Column(
+                children: [
+                  for (var i = 0; i < 3; i++)
+                    Container(
+                      width: 3,
+                      height: 3,
+                      margin: const EdgeInsets.symmetric(vertical: 2),
+                      decoration: BoxDecoration(
+                        color: HomeColors.textMutedOf(context)
+                            .withValues(alpha: 0.5),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          _RouteStop(
+            icon: Icons.location_on_rounded,
+            color: HomeColors.violetOf(context),
+            tint: HomeColors.violetTintOf(context),
+            label: dropoffLabel,
+            value: dropoff,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RouteStop extends StatelessWidget {
+  const _RouteStop({
+    required this.icon,
+    required this.color,
+    required this.tint,
     required this.label,
     required this.value,
   });
 
+  final IconData icon;
+  final Color color;
+  final Color tint;
+  final String label;
+  final String value;
+
   @override
   Widget build(BuildContext context) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (icon != null) ...[
-          Icon(icon, color: iconColor, size: 20),
-          const SizedBox(width: 12),
-        ],
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: tint,
+            borderRadius: BorderRadius.circular(13),
+          ),
+          child: Icon(icon, size: 22, color: color),
+        ),
+        const SizedBox(width: 12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 label,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: HomeColors.textMutedOf(context),
-                    ),
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w700,
+                  color: HomeColors.textMutedOf(context),
+                ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 2),
               Text(
                 value,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: HomeColors.textPrimaryOf(context),
-                    ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 15,
+                  height: 1.25,
+                  fontWeight: FontWeight.w700,
+                  color: HomeColors.textPrimaryOf(context),
+                ),
               ),
             ],
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Receipt row: icon tile + muted label on the left, bold value on the right.
+class _DetailRow extends StatelessWidget {
+  final IconData? icon;
+  final String label;
+  final String value;
+
+  const _DetailRow({
+    this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = HomeColors.violetOf(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Row(
+        children: [
+          if (icon != null) ...[
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: HomeColors.violetTintOf(context),
+                borderRadius: BorderRadius.circular(13),
+              ),
+              child: Icon(icon, color: accent, size: 22),
+            ),
+            const SizedBox(width: 12),
+          ],
+          Expanded(
+            child: Text(
+              label,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 13.5,
+                fontWeight: FontWeight.w600,
+                color: HomeColors.textMutedOf(context),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.2,
+                color: HomeColors.textPrimaryOf(context),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Soft error banner: icon tile + text.
+class _ErrorNote extends StatelessWidget {
+  const _ErrorNote({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.errorColor.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppColors.errorColor.withValues(alpha: 0.25),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: AppColors.errorColor.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.error_outline_rounded,
+              size: 22,
+              color: AppColors.errorColor,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 14,
+                height: 1.3,
+                fontWeight: FontWeight.w600,
+                color: HomeColors.textPrimaryOf(context),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

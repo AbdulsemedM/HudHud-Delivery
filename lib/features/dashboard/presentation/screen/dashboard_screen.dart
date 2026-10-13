@@ -107,20 +107,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final l10n = AppLocalizations.of(context)!;
     final navInactive = AuthScreenColors.textMutedOf(context);
     final navActive = AuthScreenColors.orange;
-    final navIndicator = AuthScreenColors.orange.withValues(alpha: 0.22);
+    final navIndicator = AuthScreenColors.orange
+        .withValues(alpha: AuthScreenColors.isDark(context) ? 0.22 : 0.13);
+    final navSurface = AuthScreenColors.surfaceOf(context);
 
     return Scaffold(
       body: _screens[_selectedIndex],
-      bottomNavigationBar: Material(
-        color: AuthScreenColors.backgroundOf(context),
+      bottomNavigationBar: DecoratedBox(
+        decoration: BoxDecoration(
+          color: navSurface,
+          border: Border(
+            top: BorderSide(color: AuthScreenColors.surfaceBorderOf(context)),
+          ),
+        ),
         child: SafeArea(
           top: false,
           child: Theme(
             data: Theme.of(context).copyWith(
               navigationBarTheme: NavigationBarThemeData(
-                height: 68,
+                height: 74,
                 elevation: 0,
-                backgroundColor: AuthScreenColors.backgroundOf(context),
+                backgroundColor: navSurface,
                 indicatorColor: navIndicator,
                 indicatorShape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
@@ -130,8 +137,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 labelTextStyle: WidgetStateProperty.resolveWith((states) {
                   final selected = states.contains(WidgetState.selected);
                   return TextStyle(
-                    fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-                    fontSize: 11.5,
+                    fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                    fontSize: 12.5,
                     letterSpacing: 0.1,
                     color: selected ? navActive : navInactive,
                   );
@@ -139,7 +146,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 iconTheme: WidgetStateProperty.resolveWith((states) {
                   final selected = states.contains(WidgetState.selected);
                   return IconThemeData(
-                    size: 24,
+                    size: 27,
                     color: selected ? navActive : navInactive,
                   );
                 }),
@@ -148,9 +155,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: NavigationBar(
               selectedIndex: _selectedIndex,
               labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-              height: 68,
+              height: 74,
               elevation: 0,
-              backgroundColor: AuthScreenColors.backgroundOf(context),
+              backgroundColor: navSurface,
               surfaceTintColor: Colors.transparent,
               indicatorColor: navIndicator,
               indicatorShape: RoundedRectangleBorder(

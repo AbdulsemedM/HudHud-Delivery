@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
 import 'package:hudhud_delivery/features/settings/presentation/widgets/profile_dark_page.dart';
@@ -42,7 +43,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Please fill all fields'),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.errorColor,
         ),
       );
       return;
@@ -51,7 +52,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Passwords do not match'),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.errorColor,
         ),
       );
       return;
@@ -75,7 +76,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(result['message'] ?? 'Failed to change password'),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.errorColor,
         ),
       );
     }
@@ -93,7 +94,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             children: [
               Text(
                 'Update your account password',
-                style: TextStyle(color: AuthScreenColors.textSecondaryOf(context)),
+                style:
+                    TextStyle(color: AuthScreenColors.textSecondaryOf(context)),
               ),
               SizedBox(height: 24),
               _PasswordField(
@@ -150,10 +152,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                           height: 24,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(
-                                  Theme.of(context).colorScheme.onPrimary,
-                                ),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Theme.of(context).colorScheme.onPrimary,
+                            ),
                           ),
                         )
                       : Text(
@@ -208,7 +209,8 @@ class _PasswordField extends StatelessWidget {
           style: TextStyle(color: AuthScreenColors.textPrimaryOf(context)),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TextStyle(color: AuthScreenColors.textSecondaryOf(context)),
+            hintStyle:
+                TextStyle(color: AuthScreenColors.textSecondaryOf(context)),
             filled: true,
             fillColor: AuthScreenColors.surfaceOf(context),
             suffixIcon: IconButton(

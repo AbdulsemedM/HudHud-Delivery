@@ -6,6 +6,7 @@ import 'package:hudhud_delivery/app/navigation/app_navigator.dart';
 import 'package:hudhud_delivery/app/navigation/fcm_notification_router.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/models/notification_model.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
 import 'package:hudhud_delivery/features/notifications/bloc/notifications_bloc.dart';
@@ -51,9 +52,17 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       .read<NotificationsBloc>()
                       .add(MarkAllNotificationsReadEvent());
                 },
-                child: Text(
+                style: TextButton.styleFrom(
+                  foregroundColor: AuthScreenColors.orange,
+                  minimumSize: const Size(48, 48),
+                ),
+                child: const Text(
                   'Mark all read',
-                  style: TextStyle(color: AuthScreenColors.orange),
+                  style: TextStyle(
+                    color: AuthScreenColors.orange,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
           ],
@@ -71,36 +80,56 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       );
     }
     if (state is NotificationsFailure) {
+      final dark = AuthScreenColors.isDark(context);
       return Center(
         child: Padding(
-          padding: EdgeInsets.all(24),
+          padding: const EdgeInsets.fromLTRB(32, 24, 32, 64),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.error_outline,
-                size: 48,
-                color: AuthScreenColors.textMutedOf(context),
+              Container(
+                width: 96,
+                height: 96,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color:
+                      AppColors.errorColor.withValues(alpha: dark ? 0.2 : 0.1),
+                ),
+                child: const Icon(
+                  Icons.cloud_off_rounded,
+                  size: 46,
+                  color: AppColors.errorColor,
+                ),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 20),
               Text(
                 state.message,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 16,
-                  color: AuthScreenColors.textSecondaryOf(context),
+                  fontSize: 17,
+                  fontWeight: FontWeight.w800,
+                  color: AuthScreenColors.textPrimaryOf(context),
                 ),
               ),
-              SizedBox(height: 24),
-              TextButton.icon(
-                onPressed: () => _refetch(state),
-                icon: Icon(
-                  Icons.refresh,
-                  color: AuthScreenColors.orange,
-                ),
-                label: Text(
-                  'Retry',
-                  style: TextStyle(color: AuthScreenColors.orange),
+              const SizedBox(height: 24),
+              SizedBox(
+                height: 56,
+                child: FilledButton.icon(
+                  onPressed: () => _refetch(state),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AuthScreenColors.orange,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 28),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    textStyle: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  icon: const Icon(Icons.refresh_rounded),
+                  label: const Text('Retry'),
                 ),
               ),
             ],
@@ -116,13 +145,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Lottie.asset('assets/animations/browse.json', width: 160),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Text(
                 'No notifications yet',
                 style: TextStyle(
                   color: AuthScreenColors.textPrimaryOf(context),
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 19,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.3,
                 ),
               ),
             ],
@@ -130,20 +160,26 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         );
       }
       return RefreshIndicator(
+        color: AuthScreenColors.orange,
         onRefresh: () async => _refetch(state),
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: EdgeInsets.symmetric(vertical: 16),
+          padding: const EdgeInsets.fromLTRB(0, 8, 0, 24),
           children: [
             if (state.temporaryError != null)
               Padding(
                 padding: EdgeInsets.fromLTRB(16, 0, 16, 12),
                 child: Material(
                   color: AuthScreenColors.surfaceOf(context),
-                  borderRadius: BorderRadius.circular(12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: BorderSide(
+                      color: AuthScreenColors.surfaceBorderOf(context),
+                    ),
+                  ),
                   child: ListTile(
-                    leading: Icon(
-                      Icons.cloud_off_outlined,
+                    leading: const Icon(
+                      Icons.cloud_off_rounded,
                       color: AuthScreenColors.orange,
                     ),
                     title: Text(
@@ -223,22 +259,23 @@ class _NotificationSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 16),
+      padding: const EdgeInsets.only(top: 12, bottom: 4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 22),
             child: Text(
-              title,
+              title.toUpperCase(),
               style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: AuthScreenColors.textPrimaryOf(context),
+                fontSize: 12.5,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.1,
+                color: AuthScreenColors.textMutedOf(context),
               ),
             ),
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 10),
           ...notifications.map((n) => _NotificationItem(notification: n)),
         ],
       ),
@@ -253,73 +290,116 @@ class _NotificationItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final iconColor = notification.isRead
-        ? AuthScreenColors.textMutedOf(context)
-        : AuthScreenColors.orange;
+    final dark = AuthScreenColors.isDark(context);
+    final unread = !notification.isRead;
+    final iconColor = unread
+        ? AuthScreenColors.orange
+        : AuthScreenColors.textMutedOf(context);
     final timeAgo = _formatTimeAgo(notification.createdAt);
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: () => _onTap(context),
-        child: Container(
-      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AuthScreenColors.surfaceOf(context),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AuthScreenColors.surfaceBorderOf(context)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.notifications_outlined,
-              color: iconColor,
-              size: 24,
+    final radius = BorderRadius.circular(20);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: radius,
+          boxShadow: AppColors.softShadow(context),
+        ),
+        child: Material(
+          color: AuthScreenColors.surfaceOf(context),
+          shape: RoundedRectangleBorder(
+            borderRadius: radius,
+            side: dark
+                ? BorderSide(color: AuthScreenColors.surfaceBorderOf(context))
+                : BorderSide.none,
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: () => _onTap(context),
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: unread
+                          ? (dark
+                              ? AppColors.orangeTintDark
+                              : AppColors.orangeTint)
+                          : AuthScreenColors.surfaceBorderOf(context)
+                              .withValues(alpha: 0.6),
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Icon(
+                      unread
+                          ? Icons.notifications_active_rounded
+                          : Icons.notifications_rounded,
+                      color: iconColor,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                notification.title,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: unread
+                                      ? FontWeight.w800
+                                      : FontWeight.w700,
+                                  letterSpacing: -0.2,
+                                  color:
+                                      AuthScreenColors.textPrimaryOf(context),
+                                ),
+                              ),
+                            ),
+                            if (unread)
+                              Container(
+                                width: 10,
+                                height: 10,
+                                margin: const EdgeInsets.only(left: 8, top: 5),
+                                decoration: const BoxDecoration(
+                                  color: AuthScreenColors.orange,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          notification.message,
+                          style: TextStyle(
+                            fontSize: 14,
+                            height: 1.35,
+                            fontWeight: FontWeight.w500,
+                            color: AuthScreenColors.textSecondaryOf(context),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          timeAgo,
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w600,
+                            color: AuthScreenColors.textMutedOf(context),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-          SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  notification.title,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight:
-                        notification.isRead ? FontWeight.w500 : FontWeight.w600,
-                    color: AuthScreenColors.textPrimaryOf(context),
-                  ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  notification.message,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: AuthScreenColors.textSecondaryOf(context),
-                  ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  timeAgo,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AuthScreenColors.textMutedOf(context),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
         ),
       ),
     );
@@ -372,13 +452,13 @@ class _NotificationsShimmer extends StatelessWidget {
         return Padding(
           padding: EdgeInsets.only(bottom: 12),
           child: Shimmer.fromColors(
-            baseColor: AuthScreenColors.surfaceOf(context),
-            highlightColor: AuthScreenColors.surfaceBorderOf(context),
+            baseColor: AuthScreenColors.surfaceBorderOf(context),
+            highlightColor: AuthScreenColors.surfaceOf(context),
             child: Container(
-              height: 72,
+              height: 84,
               decoration: BoxDecoration(
-                color: AuthScreenColors.surfaceOf(context),
-                borderRadius: BorderRadius.circular(16),
+                color: AuthScreenColors.surfaceBorderOf(context),
+                borderRadius: BorderRadius.circular(20),
               ),
             ),
           ),

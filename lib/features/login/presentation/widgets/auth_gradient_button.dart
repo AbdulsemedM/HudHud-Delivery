@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
 
 class AuthGradientButton extends StatelessWidget {
@@ -18,30 +19,22 @@ class AuthGradientButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final enabled = onPressed != null && !loading;
-    return Container(
+    final dark = AuthScreenColors.isDark(context);
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
       width: double.infinity,
-      height: 52,
+      height: 56,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        gradient: LinearGradient(
-          colors: enabled
-              ? AuthScreenColors.signInGradient
-              : [
-                  AuthScreenColors.orange.withValues(alpha: 0.45),
-                  AuthScreenColors.purple.withValues(alpha: 0.45),
-                ],
-        ),
+        borderRadius: BorderRadius.circular(18),
+        color: enabled || loading
+            ? AuthScreenColors.orange
+            : (dark ? AppColors.darkSurfaceVariant : AppColors.disabledButton),
         boxShadow: enabled
             ? [
                 BoxShadow(
-                  color: AuthScreenColors.orange.withValues(alpha: 0.35),
-                  blurRadius: 16,
-                  offset: const Offset(0, 6),
-                ),
-                BoxShadow(
-                  color: AuthScreenColors.purple.withValues(alpha: 0.22),
-                  blurRadius: 16,
-                  offset: const Offset(0, 6),
+                  color: AuthScreenColors.orange.withValues(alpha: 0.28),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
                 ),
               ]
             : null,
@@ -50,7 +43,9 @@ class AuthGradientButton extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: enabled ? onPressed : null,
-          borderRadius: BorderRadius.circular(16),
+          splashColor: Colors.white.withValues(alpha: 0.18),
+          highlightColor: Colors.white.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(18),
           child: Center(
             child: loading
                 ? const SizedBox(
@@ -58,7 +53,7 @@ class AuthGradientButton extends StatelessWidget {
                     width: 22,
                     child: CircularProgressIndicator(
                       strokeWidth: 2.2,
-                      color: Colors.black,
+                      color: Colors.white,
                     ),
                   )
                 : Row(
@@ -67,18 +62,23 @@ class AuthGradientButton extends StatelessWidget {
                     children: [
                       Text(
                         label,
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
+                        style: TextStyle(
+                          color: enabled
+                              ? Colors.white
+                              : AuthScreenColors.textMutedOf(context),
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.1,
                         ),
                       ),
                       if (showArrow) ...[
                         const SizedBox(width: 8),
-                        const Icon(
+                        Icon(
                           Icons.arrow_forward_rounded,
-                          color: Colors.black,
-                          size: 20,
+                          color: enabled
+                              ? Colors.white
+                              : AuthScreenColors.textMutedOf(context),
+                          size: 22,
                         ),
                       ],
                     ],

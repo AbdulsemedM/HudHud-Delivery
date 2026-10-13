@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
@@ -15,6 +16,7 @@ import 'package:hudhud_delivery/features/courier/data/repository/courier_reposit
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
 import 'package:hudhud_delivery/features/courier/presentation/widgets/delivery_estimate_banner.dart';
 import 'package:hudhud_delivery/features/courier/presentation/widgets/nearby_driver_markers.dart';
+import 'package:hudhud_delivery/features/courier/presentation/widgets/send_package_location_row.dart';
 import 'package:hudhud_delivery/features/courier/utils/courier_vehicle_display.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_estimate.dart';
 import 'package:hudhud_delivery/features/courier/utils/nearby_drivers_poller.dart';
@@ -178,7 +180,8 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
     if (!mounted) return;
 
     final rawTypes = result['success'] == true
-        ? List<String>.from(result['supportedVehicleTypes'] as List? ?? const [])
+        ? List<String>.from(
+            result['supportedVehicleTypes'] as List? ?? const [])
         : const <String>[];
     final applied = applyCourierSupportedVehicleTypes(
       supportedVehicleTypes: rawTypes,
@@ -252,9 +255,8 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
         _estimatedCurrency = result['currency'] as String? ?? 'ETB';
         _quotedScheduledPickup =
             result['scheduledPickup'] as String? ?? scheduledPickup;
-        _estimateError = _estimatedCost == null
-            ? 'Estimate did not include a cost'
-            : null;
+        _estimateError =
+            _estimatedCost == null ? 'Estimate did not include a cost' : null;
         if (_estimateError != null) {
           _quotedScheduledPickup = null;
         }
@@ -283,7 +285,8 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
         _supportedVehicleTypes = const [];
         _selectedVehicle = null;
       });
-    } else if ((result['error'] as ApiErrorResult?)?.isCityVehicleNotSupported ==
+    } else if ((result['error'] as ApiErrorResult?)
+            ?.isCityVehicleNotSupported ==
         true) {
       await _fetchServiceArea(quoteAfter: false);
     }
@@ -480,7 +483,8 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: Icon(Icons.location_on, color: cs.error),
+                leading: const Icon(Icons.my_location_rounded,
+                    color: HomeColors.orange),
                 title: Text(
                   l10n.pickupLocationLabel,
                   style: TextStyle(color: cs.onSurface),
@@ -491,7 +495,8 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
                 },
               ),
               ListTile(
-                leading: Icon(Icons.location_on, color: cs.primary),
+                leading: Icon(Icons.location_on_rounded,
+                    color: HomeColors.violetOf(dialogContext)),
                 title: Text(
                   l10n.deliveryLocationLabel,
                   style: TextStyle(color: cs.onSurface),
@@ -559,12 +564,74 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
     }
   }
 
+  /// Brand-styled date / time pickers: orange selection, indigo accents,
+  /// token surfaces, rounded dialog.
+  Widget _pickerThemeBuilder(BuildContext context, Widget? child) {
+    final base = Theme.of(context);
+    final surface = HomeColors.surfaceOf(context);
+    final textPrimary = HomeColors.textPrimaryOf(context);
+    final dialogShape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(28),
+    );
+    return Theme(
+      data: base.copyWith(
+        colorScheme: base.colorScheme.copyWith(
+          primary: HomeColors.orange,
+          onPrimary: Colors.white,
+          secondary: HomeColors.violetOf(context),
+          surface: surface,
+          onSurface: textPrimary,
+        ),
+        dialogTheme: base.dialogTheme.copyWith(
+          backgroundColor: surface,
+          shape: dialogShape,
+        ),
+        datePickerTheme: base.datePickerTheme.copyWith(
+          backgroundColor: surface,
+          surfaceTintColor: Colors.transparent,
+          headerBackgroundColor: HomeColors.violetOf(context),
+          headerForegroundColor: Colors.white,
+          shape: dialogShape,
+          todayForegroundColor: WidgetStatePropertyAll(
+            HomeColors.violetOf(context),
+          ),
+          dayStyle: const TextStyle(fontWeight: FontWeight.w700),
+        ),
+        timePickerTheme: base.timePickerTheme.copyWith(
+          backgroundColor: surface,
+          shape: dialogShape,
+          dialHandColor: HomeColors.orange,
+          dialBackgroundColor: HomeColors.violetTintOf(context),
+          hourMinuteColor: HomeColors.violetTintOf(context),
+          hourMinuteTextColor: textPrimary,
+          dayPeriodColor: HomeColors.violetOf(context),
+          dayPeriodTextColor: WidgetStateColor.resolveWith(
+            (states) => states.contains(WidgetState.selected)
+                ? Colors.white
+                : textPrimary,
+          ),
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            foregroundColor: HomeColors.orange,
+            textStyle: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      ),
+      child: child ?? const SizedBox.shrink(),
+    );
+  }
+
   Future<void> _selectDate() async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365)),
+      builder: _pickerThemeBuilder,
     );
     if (picked != null) {
       setState(() {
@@ -579,6 +646,7 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
+      builder: _pickerThemeBuilder,
     );
     if (picked != null) {
       setState(() {
@@ -590,6 +658,75 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
     }
   }
 
+  void _onContinuePressed(BuildContext context) {
+    final l10n = context.l10n;
+    final colorScheme = Theme.of(context).colorScheme;
+    if (_pickupLocation.isEmpty || _deliveryLocation.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.selectPickupAndDelivery),
+          backgroundColor: colorScheme.error,
+        ),
+      );
+      return;
+    }
+    if (_supportedVehicleTypes.isEmpty || _selectedVehicle == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.pickupOutsideDeliveryServiceArea),
+          backgroundColor: colorScheme.error,
+        ),
+      );
+      return;
+    }
+    if (_dateController.text.isEmpty || _timeController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.scheduleSelectDateTime),
+          backgroundColor: colorScheme.error,
+        ),
+      );
+      return;
+    }
+
+    final scheduledDateTime = _parseScheduledDateTime();
+    if (scheduledDateTime == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.scheduleInvalidDateTime),
+          backgroundColor: colorScheme.error,
+        ),
+      );
+      return;
+    }
+
+    if (!_hasServerEstimate) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.waitForEstimateBeforeContinue),
+          backgroundColor: colorScheme.error,
+        ),
+      );
+      return;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PackageDetailsScreen(
+          pickupLocation: _pickupLocation,
+          deliveryLocation: _deliveryLocation,
+          pickupPosition: _pickupPosition,
+          deliveryPosition: _deliveryPosition,
+          selectedVehicle: _selectedVehicle!,
+          isInstantDelivery: false,
+          scheduledPickup: scheduledDateTime,
+          scheduledDelivery: scheduledDateTime,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return CourierTheme.wrap(
@@ -597,513 +734,329 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
       child: Builder(
         builder: (context) {
           final l10n = context.l10n;
-          final theme = Theme.of(context);
-          final colorScheme = theme.colorScheme;
           final topPad = MediaQuery.paddingOf(context).top;
           const initialSheetSize = 0.5;
 
-          return Scaffold(
-            backgroundColor: HomeColors.backgroundOf(context),
-            body: Stack(
-              children: [
-                Positioned.fill(
-                  child: _buildMapOrFallback(context),
-                ),
-                Positioned(
-                  top: topPad + 8,
-                  left: 16,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: HomeColors.surfaceElevatedOf(context),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.25),
-                          blurRadius: 4,
-                        ),
-                      ],
-                    ),
-                    child: IconButton(
-                      icon: Icon(Icons.arrow_back,
-                          color: HomeColors.textPrimaryOf(context)),
+          return AnnotatedRegion<SystemUiOverlayStyle>(
+            // Map is always light: keep status bar icons dark.
+            value: SystemUiOverlayStyle.dark.copyWith(
+              statusBarColor: Colors.transparent,
+            ),
+            child: Scaffold(
+              backgroundColor: HomeColors.backgroundOf(context),
+              body: Stack(
+                children: [
+                  Positioned.fill(
+                    child: _buildMapOrFallback(context),
+                  ),
+                  Positioned(
+                    top: topPad + 8,
+                    left: 16,
+                    child: _MapCircleButton(
+                      icon: Icons.arrow_back_rounded,
+                      color: HomeColors.textPrimaryOf(context),
+                      tooltip:
+                          MaterialLocalizations.of(context).backButtonTooltip,
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ),
-                ),
-                Positioned(
-                  top: topPad + 8,
-                  right: 16,
-                  child: FloatingActionButton(
-                    heroTag: 'schedule_delivery_my_location',
-                    mini: true,
-                    backgroundColor: HomeColors.surfaceElevatedOf(context),
-                    onPressed: () async {
-                      await _getCurrentLocation();
-                      if (_pickupPosition != null && mounted) {
-                        _mapController?.moveCamera(
-                          gmaps.CameraUpdate.newLatLngZoom(
-                            _toG(_pickupPosition!),
-                            15,
-                          ),
-                        );
-                      }
-                    },
-                    child: Icon(
-                      Icons.my_location,
+                  Positioned(
+                    top: topPad + 8,
+                    right: 16,
+                    child: _MapCircleButton(
+                      icon: Icons.my_location_rounded,
                       color: _isLoadingLocation
                           ? HomeColors.textMutedOf(context)
-                          : HomeColors.violet,
+                          : HomeColors.violetOf(context),
+                      onPressed: () async {
+                        await _getCurrentLocation();
+                        if (_pickupPosition != null && mounted) {
+                          _mapController?.moveCamera(
+                            gmaps.CameraUpdate.newLatLngZoom(
+                              _toG(_pickupPosition!),
+                              15,
+                            ),
+                          );
+                        }
+                      },
                     ),
                   ),
-                ),
-                DraggableScrollableSheet(
-                  initialChildSize: initialSheetSize,
-                  minChildSize: 0.35,
-                  maxChildSize: 0.85,
-                  builder: (context, scrollController) {
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: HomeColors.surfaceOf(context),
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(AppColors.radiusLG),
-                          topRight: Radius.circular(AppColors.radiusLG),
-                        ),
-                      ),
-                      child: Column(
-                        children: [
-                          Container(
-                            margin: const EdgeInsets.only(top: 8),
-                            width: 40,
-                            height: 4,
-                            decoration: BoxDecoration(
-                              color: HomeColors.borderOf(context),
-                              borderRadius: BorderRadius.circular(2),
-                            ),
+                  DraggableScrollableSheet(
+                    initialChildSize: initialSheetSize,
+                    minChildSize: 0.35,
+                    maxChildSize: 0.85,
+                    builder: (context, scrollController) {
+                      final bottomInset = MediaQuery.paddingOf(context).bottom;
+                      return DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: HomeColors.backgroundOf(context),
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(28),
                           ),
-                          Expanded(
-                            child: SingleChildScrollView(
-                              controller: scrollController,
-                              padding: const EdgeInsets.all(20),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    l10n.courierScheduleTitle,
-                                    style: theme.textTheme.headlineSmall
-                                            ?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          color: HomeColors.textPrimaryOf(context),
-                                        ) ??
-                                        TextStyle(
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.bold,
-                                          color: HomeColors.textPrimaryOf(context),
-                                        ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    l10n.courierScheduleSubtitle,
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      color: HomeColors.textMutedOf(context),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Color(0x261B1530),
+                              blurRadius: 24,
+                              offset: Offset(0, -6),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            Container(
+                              margin: const EdgeInsets.only(top: 10),
+                              width: 44,
+                              height: 5,
+                              decoration: BoxDecoration(
+                                color: HomeColors.textMutedOf(context)
+                                    .withValues(alpha: 0.35),
+                                borderRadius: BorderRadius.circular(3),
+                              ),
+                            ),
+                            Expanded(
+                              child: SingleChildScrollView(
+                                controller: scrollController,
+                                padding:
+                                    const EdgeInsets.fromLTRB(16, 14, 16, 20),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      l10n.courierScheduleTitle,
+                                      style: TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: -0.5,
+                                        color:
+                                            HomeColors.textPrimaryOf(context),
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(height: 24),
-                                  _LocationField(
-                                    label: l10n.pickupLocationLabel,
-                                    value: _isLoadingLocation
-                                        ? l10n.locationGetting
-                                        : (_pickupResolveFailed
-                                            ? l10n.locationUnable
-                                            : (_pickupLocation.isEmpty
-                                                ? l10n.tapToSelectPickup
-                                                : _pickupLocation)),
-                                    icon: Icons.location_on,
-                                    iconColor: colorScheme.error,
-                                    isReadOnly: false,
-                                    onTap: _selectPickupLocation,
-                                  ),
-                                  const SizedBox(height: 16),
-                                  _LocationField(
-                                    label: l10n.deliveryLocationLabel,
-                                    value: _deliveryLocation.isEmpty
-                                        ? l10n.tapToSelectDelivery
-                                        : _deliveryLocation,
-                                    icon: Icons.location_on,
-                                    iconColor: HomeColors.violet,
-                                    isReadOnly: false,
-                                    onTap: _selectDeliveryLocation,
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              l10n.labelDate,
-                                              style: theme.textTheme.labelLarge
-                                                  ?.copyWith(
-                                                color: HomeColors.textPrimaryOf(context),
-                                              ),
-                                            ),
-                                            const SizedBox(height: 8),
-                                            GestureDetector(
-                                              onTap: _selectDate,
-                                              child: Container(
-                                                padding:
-                                                    const EdgeInsets.all(16),
-                                                decoration: BoxDecoration(
-                                                  color: HomeColors
-                                                      .surfaceElevated,
-                                                  borderRadius:
-                                                      BorderRadius.circular(12),
-                                                  border: Border.all(
-                                                    color: HomeColors.borderOf(context),
-                                                  ),
-                                                ),
-                                                child: Row(
-                                                  children: [
-                                                    Expanded(
-                                                      child: Text(
-                                                        _dateController
-                                                                .text.isEmpty
-                                                            ? l10n
-                                                                .hintDateFormat
-                                                            : _dateController
-                                                                .text,
-                                                        style: TextStyle(
-                                                          fontSize: 14,
-                                                          color: _dateController
-                                                                  .text.isEmpty
-                                                              ? HomeColors
-                                                                  .textMuted
-                                                              : HomeColors
-                                                                  .textPrimary,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    Icon(
-                                                      Icons.calendar_today,
-                                                      size: 20,
-                                                      color:
-                                                          HomeColors.textMutedOf(context),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          ],
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      l10n.courierScheduleSubtitle,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        height: 1.35,
+                                        fontWeight: FontWeight.w600,
+                                        color: HomeColors.textMutedOf(context),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    _LocationField(
+                                      label: l10n.pickupLocationLabel,
+                                      value: _isLoadingLocation
+                                          ? l10n.locationGetting
+                                          : (_pickupResolveFailed
+                                              ? l10n.locationUnable
+                                              : (_pickupLocation.isEmpty
+                                                  ? l10n.tapToSelectPickup
+                                                  : _pickupLocation)),
+                                      isPlaceholder: _pickupLocation.isEmpty,
+                                      icon: Icons.my_location_rounded,
+                                      iconColor: HomeColors.orange,
+                                      isReadOnly: false,
+                                      onTap: _selectPickupLocation,
+                                    ),
+                                    _LocationField(
+                                      label: l10n.deliveryLocationLabel,
+                                      value: _deliveryLocation.isEmpty
+                                          ? l10n.tapToSelectDelivery
+                                          : _deliveryLocation,
+                                      isPlaceholder: _deliveryLocation.isEmpty,
+                                      icon: Icons.location_on_rounded,
+                                      iconColor: HomeColors.violetOf(context),
+                                      isReadOnly: false,
+                                      onTap: _selectDeliveryLocation,
+                                    ),
+                                    const SizedBox(height: 22),
+                                    _SectionTitle(
+                                      icon: Icons.event_rounded,
+                                      text: l10n.labelDate,
+                                    ),
+                                    const SizedBox(height: 10),
+                                    _PickerTile(
+                                      icon: Icons.calendar_month_rounded,
+                                      value: _dateController.text.isEmpty
+                                          ? l10n.hintDateFormat
+                                          : _dateController.text,
+                                      isPlaceholder:
+                                          _dateController.text.isEmpty,
+                                      onTap: _selectDate,
+                                    ),
+                                    const SizedBox(height: 18),
+                                    _SectionTitle(
+                                      icon: Icons.schedule_rounded,
+                                      text: l10n.labelTime,
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: _PickerTile(
+                                            icon: Icons.access_time_rounded,
+                                            value: _timeController.text.isEmpty
+                                                ? l10n.hintTimeFormat
+                                                : _timeController.text,
+                                            isPlaceholder:
+                                                _timeController.text.isEmpty,
+                                            onTap: _selectTime,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        _MeridiemToggle(
+                                          value: _timePeriod,
+                                          amLabel: l10n.meridiemAm,
+                                          pmLabel: l10n.meridiemPm,
+                                          onChanged: (value) {
+                                            setState(() {
+                                              _timePeriod = value;
+                                            });
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 24),
+                                    _SectionTitle(
+                                      icon: Icons.local_shipping_rounded,
+                                      text: l10n.vehicleType,
+                                    ),
+                                    const SizedBox(height: 12),
+                                    if (_pickupLocation.isNotEmpty &&
+                                        !_isLoadingServiceArea &&
+                                        _supportedVehicleTypes.isEmpty)
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(bottom: 12),
+                                        child: _ErrorNote(
+                                          text: l10n
+                                              .pickupOutsideDeliveryServiceArea,
                                         ),
                                       ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              l10n.labelTime,
-                                              style: theme.textTheme.labelLarge
-                                                  ?.copyWith(
-                                                color: HomeColors.textPrimaryOf(context),
-                                              ),
-                                            ),
-                                            const SizedBox(height: 8),
-                                            Row(
+                                    if (_supportedVehicleTypes.isNotEmpty)
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(bottom: 16),
+                                        child: LayoutBuilder(
+                                          builder: (context, constraints) {
+                                            const gap = 12.0;
+                                            final tileWidth =
+                                                (constraints.maxWidth -
+                                                        gap * 2) /
+                                                    3;
+                                            return Wrap(
+                                              spacing: gap,
+                                              runSpacing: gap,
                                               children: [
-                                                Expanded(
-                                                  child: GestureDetector(
-                                                    onTap: _selectTime,
-                                                    child: Container(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                              16),
-                                                      decoration: BoxDecoration(
-                                                        color: HomeColors
-                                                            .surfaceElevated,
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(12),
-                                                        border: Border.all(
-                                                          color: HomeColors
-                                                              .border,
-                                                        ),
+                                                for (final vehicleId
+                                                    in _supportedVehicleTypes)
+                                                  SizedBox(
+                                                    width: tileWidth,
+                                                    child: _VehicleTypeOption(
+                                                      icon: courierVehicleIcon(
+                                                        vehicleId,
                                                       ),
-                                                      child: Text(
-                                                        _timeController
-                                                                .text.isEmpty
-                                                            ? l10n
-                                                                .hintTimeFormat
-                                                            : _timeController
-                                                                .text,
-                                                        style: TextStyle(
-                                                          fontSize: 14,
-                                                          color: _timeController
-                                                                  .text.isEmpty
-                                                              ? HomeColors
-                                                                  .textMuted
-                                                              : HomeColors
-                                                                  .textPrimary,
-                                                        ),
+                                                      label:
+                                                          courierVehicleLabel(
+                                                        vehicleId,
+                                                        l10n,
                                                       ),
-                                                    ),
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 8),
-                                                Container(
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
-                                                      horizontal: 8,
-                                                      vertical: 4),
-                                                  decoration: BoxDecoration(
-                                                    color: HomeColors
-                                                        .surfaceElevated,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            12),
-                                                    border: Border.all(
-                                                      color: HomeColors.borderOf(context),
-                                                    ),
-                                                  ),
-                                                  child:
-                                                      DropdownButtonHideUnderline(
-                                                    child:
-                                                        DropdownButton<String>(
-                                                      value: _timePeriod,
-                                                      dropdownColor: HomeColors
-                                                          .surfaceElevated,
-                                                      style: const TextStyle(
-                                                        color: HomeColors
-                                                            .textPrimary,
-                                                        fontSize: 14,
-                                                      ),
-                                                      items: [
-                                                        DropdownMenuItem(
-                                                          value: 'am',
-                                                          child: Text(
-                                                              l10n.meridiemAm),
-                                                        ),
-                                                        DropdownMenuItem(
-                                                          value: 'pm',
-                                                          child: Text(
-                                                              l10n.meridiemPm),
-                                                        ),
-                                                      ],
-                                                      onChanged: (value) {
-                                                        if (value == null) {
-                                                          return;
-                                                        }
+                                                      isSelected:
+                                                          _selectedVehicle ==
+                                                              vehicleId,
+                                                      onTap: () {
                                                         setState(() {
-                                                          _timePeriod = value;
+                                                          _selectedVehicle =
+                                                              vehicleId;
                                                         });
+                                                        _scheduleEstimateFetch();
+                                                        _syncNearbyDrivers();
                                                       },
                                                     ),
                                                   ),
-                                                ),
                                               ],
-                                            ),
-                                          ],
+                                            );
+                                          },
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 24),
-                                  Text(
-                                    l10n.vehicleType,
-                                    style: theme.textTheme.titleMedium
-                                            ?.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                          color: HomeColors.textPrimaryOf(context),
-                                        ) ??
-                                        TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                          color: HomeColors.textPrimaryOf(context),
-                                        ),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  if (_pickupLocation.isNotEmpty &&
-                                      !_isLoadingServiceArea &&
-                                      _supportedVehicleTypes.isEmpty)
-                                    Padding(
-                                      padding: const EdgeInsets.only(bottom: 12),
-                                      child: Text(
-                                        l10n.pickupOutsideDeliveryServiceArea,
-                                        style: TextStyle(
-                                          color: colorScheme.error,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
+                                    DeliveryEstimateBanner(
+                                      isVisible: _canFetchEstimate ||
+                                          _isLoadingEstimate ||
+                                          _estimateError != null ||
+                                          _estimatedCost != null,
+                                      isLoading: _isLoadingEstimate,
+                                      error: _estimateError,
+                                      estimatedCost: _estimatedCost,
+                                      estimatedDistance: _estimatedDistance,
+                                      estimatedDuration: _estimatedDuration,
+                                      currency: _estimatedCurrency,
                                     ),
-                                  if (_supportedVehicleTypes.isNotEmpty)
-                                    Wrap(
-                                      spacing: 12,
-                                      runSpacing: 12,
-                                      children: [
-                                        for (final vehicleId
-                                            in _supportedVehicleTypes)
-                                          SizedBox(
-                                            width: 110,
-                                            child: _VehicleTypeOption(
-                                              icon: courierVehicleIcon(
-                                                vehicleId,
-                                              ),
-                                              label: courierVehicleLabel(
-                                                vehicleId,
-                                                l10n,
-                                              ),
-                                              isSelected:
-                                                  _selectedVehicle ==
-                                                      vehicleId,
-                                              onTap: () {
-                                                setState(() {
-                                                  _selectedVehicle = vehicleId;
-                                                });
-                                                _scheduleEstimateFetch();
-                                                _syncNearbyDrivers();
-                                              },
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                  DeliveryEstimateBanner(
-                                    isVisible: _canFetchEstimate ||
-                                        _isLoadingEstimate ||
-                                        _estimateError != null ||
-                                        _estimatedCost != null,
-                                    isLoading: _isLoadingEstimate,
-                                    error: _estimateError,
-                                    estimatedCost: _estimatedCost,
-                                    estimatedDistance: _estimatedDistance,
-                                    estimatedDuration: _estimatedDuration,
-                                    currency: _estimatedCurrency,
-                                  ),
-                                  const SizedBox(height: 16),
-                                  SizedBox(
-                                    width: double.infinity,
-                                    height: 50,
-                                    child: ElevatedButton(
-                                      onPressed: () {
-                                        if (_pickupLocation.isEmpty ||
-                                            _deliveryLocation.isEmpty) {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            SnackBar(
-                                              content: Text(l10n
-                                                  .selectPickupAndDelivery),
-                                              backgroundColor:
-                                                  colorScheme.error,
-                                            ),
-                                          );
-                                          return;
-                                        }
-                                        if (_supportedVehicleTypes.isEmpty ||
-                                            _selectedVehicle == null) {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            SnackBar(
-                                              content: Text(l10n
-                                                  .pickupOutsideDeliveryServiceArea),
-                                              backgroundColor:
-                                                  colorScheme.error,
-                                            ),
-                                          );
-                                          return;
-                                        }
-                                        if (_dateController.text.isEmpty ||
-                                            _timeController.text.isEmpty) {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            SnackBar(
-                                              content: Text(l10n
-                                                  .scheduleSelectDateTime),
-                                              backgroundColor:
-                                                  colorScheme.error,
-                                            ),
-                                          );
-                                          return;
-                                        }
-
-                                        final scheduledDateTime =
-                                            _parseScheduledDateTime();
-                                        if (scheduledDateTime == null) {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            SnackBar(
-                                              content: Text(l10n
-                                                  .scheduleInvalidDateTime),
-                                              backgroundColor:
-                                                  colorScheme.error,
-                                            ),
-                                          );
-                                          return;
-                                        }
-
-                                        if (!_hasServerEstimate) {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            SnackBar(
-                                              content: Text(l10n
-                                                  .waitForEstimateBeforeContinue),
-                                              backgroundColor:
-                                                  colorScheme.error,
-                                            ),
-                                          );
-                                          return;
-                                        }
-
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                PackageDetailsScreen(
-                                              pickupLocation: _pickupLocation,
-                                              deliveryLocation:
-                                                  _deliveryLocation,
-                                              pickupPosition: _pickupPosition,
-                                              deliveryPosition:
-                                                  _deliveryPosition,
-                                              selectedVehicle:
-                                                  _selectedVehicle!,
-                                              isInstantDelivery: false,
-                                              scheduledPickup:
-                                                  scheduledDateTime,
-                                              scheduledDelivery:
-                                                  scheduledDateTime,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: HomeColors.violet,
-                                        foregroundColor: Theme.of(context).colorScheme.onSecondary,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                              AppColors.radiusLG),
-                                        ),
-                                      ),
-                                      child: Text(
-                                        l10n.actionContinue,
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 20),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ],
+                            DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: HomeColors.surfaceOf(context),
+                                border: Border(
+                                  top: BorderSide(
+                                    color: HomeColors.borderOf(context),
+                                  ),
+                                ),
+                              ),
+                              child: Padding(
+                                padding: EdgeInsets.fromLTRB(
+                                  16,
+                                  12,
+                                  16,
+                                  12 + bottomInset,
+                                ),
+                                child: SizedBox(
+                                  width: double.infinity,
+                                  height: 56,
+                                  child: ElevatedButton(
+                                    onPressed: () =>
+                                        _onContinuePressed(context),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: HomeColors.orange,
+                                      foregroundColor: Colors.white,
+                                      elevation: 0,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(18),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Flexible(
+                                          child: Text(
+                                            l10n.actionContinue,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                              fontSize: 17,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        const Icon(
+                                          Icons.arrow_forward_rounded,
+                                          size: 22,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
           );
         },
@@ -1117,8 +1070,8 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
     if (_hasGoogleMapsApiKey == null) {
       return ColoredBox(
         color: HomeColors.backgroundOf(context),
-        child: Center(
-          child: CircularProgressIndicator(color: HomeColors.violet),
+        child: const Center(
+          child: CircularProgressIndicator(color: HomeColors.orange),
         ),
       );
     }
@@ -1144,77 +1097,93 @@ class _ScheduleDeliveryScreenState extends State<ScheduleDeliveryScreen> {
     return Stack(
       children: [
         gmaps.GoogleMap(
-      initialCameraPosition: gmaps.CameraPosition(
-        target: _toG(_currentPosition),
-        zoom: 15.0,
-      ),
-      myLocationEnabled: true,
-      myLocationButtonEnabled: false,
-      mapType: gmaps.MapType.normal,
-      markers: {
-        if (_pickupPosition != null)
-          gmaps.Marker(
-            markerId: const gmaps.MarkerId('pickup'),
-            position: _toG(_pickupPosition!),
-            icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-              gmaps.BitmapDescriptor.hueAzure,
-            ),
+          initialCameraPosition: gmaps.CameraPosition(
+            target: _toG(_currentPosition),
+            zoom: 15.0,
           ),
-        if (_deliveryPosition != null)
-          gmaps.Marker(
-            markerId: const gmaps.MarkerId('delivery'),
-            position: _toG(_deliveryPosition!),
-            icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-              gmaps.BitmapDescriptor.hueRed,
-            ),
-          ),
-        ...nearbyDriverMapMarkers(
-          _nearbyPoller.result.drivers,
-          iconsByAsset: _nearbyIconsByAsset,
-        ),
-      },
-      polylines: _pickupPosition != null && _deliveryPosition != null
-          ? {
-              gmaps.Polyline(
-                polylineId: const gmaps.PolylineId('route'),
-                points: _routePolylinePoints != null &&
-                        _routePolylinePoints!.length >= 2
-                    ? _routePolylinePoints!.map(_toG).toList()
-                    : [_toG(_pickupPosition!), _toG(_deliveryPosition!)],
-                color: HomeColors.violet,
-                width: 3,
+          myLocationEnabled: true,
+          myLocationButtonEnabled: false,
+          mapType: gmaps.MapType.normal,
+          markers: {
+            if (_pickupPosition != null)
+              gmaps.Marker(
+                markerId: const gmaps.MarkerId('pickup'),
+                position: _toG(_pickupPosition!),
+                icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+                  22.0,
+                ),
               ),
+            if (_deliveryPosition != null)
+              gmaps.Marker(
+                markerId: const gmaps.MarkerId('delivery'),
+                position: _toG(_deliveryPosition!),
+                icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+                  266.0,
+                ),
+              ),
+            ...nearbyDriverMapMarkers(
+              _nearbyPoller.result.drivers,
+              iconsByAsset: _nearbyIconsByAsset,
+            ),
+          },
+          polylines: _pickupPosition != null && _deliveryPosition != null
+              ? {
+                  gmaps.Polyline(
+                    polylineId: const gmaps.PolylineId('route'),
+                    points: _routePolylinePoints != null &&
+                            _routePolylinePoints!.length >= 2
+                        ? _routePolylinePoints!.map(_toG).toList()
+                        : [_toG(_pickupPosition!), _toG(_deliveryPosition!)],
+                    color: HomeColors.violetOf(context),
+                    width: 3,
+                  ),
+                }
+              : {},
+          onMapCreated: (controller) {
+            _mapController = controller;
+            if (!_isLoadingLocation) {
+              controller.moveCamera(
+                gmaps.CameraUpdate.newLatLngZoom(_toG(_currentPosition), 15),
+              );
             }
-          : {},
-      onMapCreated: (controller) {
-        _mapController = controller;
-        if (!_isLoadingLocation) {
-          controller.moveCamera(
-            gmaps.CameraUpdate.newLatLngZoom(_toG(_currentPosition), 15),
-          );
-        }
-      },
-      onTap: (point) {
-        _showLocationSelectionDialog(LatLng(point.latitude, point.longitude));
-      },
-    ),
+          },
+          onTap: (point) {
+            _showLocationSelectionDialog(
+                LatLng(point.latitude, point.longitude));
+          },
+        ),
         if (privacy != null && privacy.isNotEmpty)
           Positioned(
             left: 12,
             right: 12,
             bottom: 12,
             child: Material(
-              color: HomeColors.surfaceElevatedOf(context).withValues(alpha: 0.92),
-              borderRadius: BorderRadius.circular(8),
+              color: HomeColors.surfaceOf(context).withValues(alpha: 0.94),
+              borderRadius: BorderRadius.circular(14),
               child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: Text(
-                  privacy,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: HomeColors.textMutedOf(context),
-                  ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.shield_outlined,
+                      size: 18,
+                      color: HomeColors.violetOf(context),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        privacy,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                          color: HomeColors.textMutedOf(context),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -1230,6 +1199,7 @@ class _LocationField extends StatelessWidget {
   final IconData icon;
   final Color iconColor;
   final bool isReadOnly;
+  final bool isPlaceholder;
   final VoidCallback onTap;
 
   const _LocationField({
@@ -1238,56 +1208,195 @@ class _LocationField extends StatelessWidget {
     required this.icon,
     required this.iconColor,
     this.isReadOnly = false,
+    this.isPlaceholder = false,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: HomeColors.surfaceElevatedOf(context),
-          borderRadius: BorderRadius.circular(AppColors.radiusLG),
-          border: Border.all(color: HomeColors.borderOf(context)),
+    return SendPackageLocationRow(
+      icon: icon,
+      label: label,
+      accent: iconColor,
+      text: value,
+      isPlaceholder: isPlaceholder,
+      onTap: isReadOnly ? () {} : onTap,
+    );
+  }
+}
+
+/// Small section heading with a leading icon (picture-first).
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle({required this.icon, required this.text});
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 20, color: HomeColors.violetOf(context)),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.3,
+              color: HomeColors.textPrimaryOf(context),
+            ),
+          ),
         ),
-        child: Row(
-          children: [
-            Icon(icon, color: iconColor, size: 24),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      ],
+    );
+  }
+}
+
+/// Tappable date / time field: tinted icon tile + value + chevron.
+class _PickerTile extends StatelessWidget {
+  const _PickerTile({
+    required this.icon,
+    required this.value,
+    required this.isPlaceholder,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String value;
+  final bool isPlaceholder;
+  final VoidCallback onTap;
+
+  static const _radius = BorderRadius.all(Radius.circular(18));
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = HomeColors.violetOf(context);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: _radius,
+        boxShadow: AppColors.softShadow(context),
+      ),
+      child: Material(
+        color: HomeColors.surfaceOf(context),
+        shape: RoundedRectangleBorder(
+          borderRadius: _radius,
+          side: BorderSide(color: HomeColors.borderOf(context)),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: SizedBox(
+            height: 64,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Row(
                 children: [
-                  Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: HomeColors.textMutedOf(context),
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: HomeColors.violetTintOf(context),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Icon(icon, size: 24, color: accent),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      value,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight:
+                            isPlaceholder ? FontWeight.w600 : FontWeight.w800,
+                        letterSpacing: isPlaceholder ? 0 : -0.2,
+                        color: isPlaceholder
+                            ? HomeColors.textMutedOf(context)
+                            : HomeColors.textPrimaryOf(context),
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    value,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: HomeColors.textPrimaryOf(context),
-                    ),
+                  Icon(
+                    Icons.expand_more_rounded,
+                    size: 24,
+                    color: HomeColors.textMutedOf(context),
                   ),
                 ],
               ),
             ),
-            if (!isReadOnly)
-              Icon(Icons.chevron_right, color: HomeColors.textMutedOf(context)),
-          ],
+          ),
         ),
       ),
     );
   }
 }
 
+/// AM / PM segmented toggle.
+class _MeridiemToggle extends StatelessWidget {
+  const _MeridiemToggle({
+    required this.value,
+    required this.amLabel,
+    required this.pmLabel,
+    required this.onChanged,
+  });
+
+  final String value;
+  final String amLabel;
+  final String pmLabel;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 64,
+      padding: const EdgeInsets.all(5),
+      decoration: BoxDecoration(
+        color: HomeColors.surfaceOf(context),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: HomeColors.borderOf(context)),
+        boxShadow: AppColors.softShadow(context),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _segment(context, 'am', amLabel),
+          const SizedBox(width: 4),
+          _segment(context, 'pm', pmLabel),
+        ],
+      ),
+    );
+  }
+
+  Widget _segment(BuildContext context, String id, String label) {
+    final selected = value == id;
+    return Material(
+      color: selected ? HomeColors.violetOf(context) : Colors.transparent,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: () => onChanged(id),
+        child: Container(
+          constraints: const BoxConstraints(minWidth: 52),
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              color: selected ? Colors.white : HomeColors.textMutedOf(context),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Big picture-first vehicle choice tile.
 class _VehicleTypeOption extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -1301,41 +1410,179 @@ class _VehicleTypeOption extends StatelessWidget {
     required this.onTap,
   });
 
+  static const _radius = BorderRadius.all(Radius.circular(20));
+
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16),
+    final accent = HomeColors.violetOf(context);
+    final tint = HomeColors.violetTintOf(context);
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: label,
+      child: DecoratedBox(
         decoration: BoxDecoration(
-          color: isSelected
-              ? HomeColors.violet.withValues(alpha: 0.12)
-              : HomeColors.surfaceElevatedOf(context),
-          borderRadius: BorderRadius.circular(AppColors.radiusLG),
-          border: Border.all(
-            color: isSelected ? HomeColors.violet : HomeColors.borderOf(context),
-            width: isSelected ? 2 : 1,
+          borderRadius: _radius,
+          boxShadow: isSelected ? const [] : AppColors.softShadow(context),
+        ),
+        child: Material(
+          color: isSelected ? tint : HomeColors.surfaceOf(context),
+          shape: RoundedRectangleBorder(
+            borderRadius: _radius,
+            side: BorderSide(
+              color: isSelected ? accent : HomeColors.borderOf(context),
+              width: isSelected ? 2 : 1,
+            ),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: onTap,
+            child: Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 16, 8, 14),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 52,
+                          height: 52,
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? HomeColors.surfaceOf(context)
+                                : tint,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Icon(icon, size: 30, color: accent),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                          color: HomeColors.textPrimaryOf(context),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (isSelected)
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Container(
+                      width: 22,
+                      height: 22,
+                      decoration: BoxDecoration(
+                        color: accent,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.check_rounded,
+                        size: 15,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
-        child: Column(
-          children: [
-            Icon(
-              icon,
-              size: 32,
-              color: isSelected ? HomeColors.violet : HomeColors.textMutedOf(context),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                color: isSelected ? HomeColors.violet : HomeColors.textMutedOf(context),
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
+      ),
+    );
+  }
+}
+
+/// Round floating map control (back / my-location) with a soft shadow.
+class _MapCircleButton extends StatelessWidget {
+  const _MapCircleButton({
+    required this.icon,
+    required this.color,
+    required this.onPressed,
+    this.tooltip,
+  });
+
+  final IconData icon;
+  final Color color;
+  final VoidCallback onPressed;
+  final String? tooltip;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        boxShadow: AppColors.softShadow(context),
+      ),
+      child: Material(
+        color: HomeColors.surfaceOf(context),
+        shape: CircleBorder(
+          side: BorderSide(color: HomeColors.borderOf(context)),
         ),
+        clipBehavior: Clip.antiAlias,
+        child: IconButton(
+          tooltip: tooltip,
+          iconSize: 26,
+          constraints: const BoxConstraints(minWidth: 52, minHeight: 52),
+          icon: Icon(icon, color: color),
+          onPressed: onPressed,
+        ),
+      ),
+    );
+  }
+}
+
+/// Soft error banner: icon tile + text.
+class _ErrorNote extends StatelessWidget {
+  const _ErrorNote({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.errorColor.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppColors.errorColor.withValues(alpha: 0.25),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: AppColors.errorColor.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.wrong_location_rounded,
+              size: 22,
+              color: AppColors.errorColor,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 14,
+                height: 1.3,
+                fontWeight: FontWeight.w600,
+                color: HomeColors.textPrimaryOf(context),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

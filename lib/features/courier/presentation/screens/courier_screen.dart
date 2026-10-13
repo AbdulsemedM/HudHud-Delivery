@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:hudhud_delivery/core/easy_mode/easy_mode_controller.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/widgets/call_support_button.dart';
@@ -41,6 +42,9 @@ class _CourierScreenState extends State<CourierScreen> {
   Map<String, dynamic>? _activeDelivery;
   bool _isLoadingActiveDelivery = true;
   int _deliveriesLastPage = 1;
+
+  /// Call FAB collapses to an icon while scrolling down so it never hides content.
+  bool _fabExtended = true;
   late final void Function() _homeRefreshListener;
 
   @override
@@ -190,7 +194,7 @@ class _CourierScreenState extends State<CourierScreen> {
             onTap: _openInstantDelivery,
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 14),
         Expanded(
           child: _ScheduleDeliveryCard(
             l10n: l10n,
@@ -206,11 +210,11 @@ class _CourierScreenState extends State<CourierScreen> {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final borderColor = HomeColors.borderOf(context);
-    final hasActive =
-        !_isLoadingActiveDelivery && _activeDelivery != null;
+    final hasActive = !_isLoadingActiveDelivery && _activeDelivery != null;
 
     return Scaffold(
-      backgroundColor: HomeColors.backgroundOf(context),
+      // Transparent so the home service tiles' shadow isn't painted over.
+      backgroundColor: Colors.transparent,
       floatingActionButton: hasActive
           ? Column(
               mainAxisSize: MainAxisSize.min,
@@ -231,132 +235,131 @@ class _CourierScreenState extends State<CourierScreen> {
                 ),
               ],
             )
-          : CallSupportFab(
-              heroTag: 'courier_call_support_fab',
-              label: l10n.orderByCall,
+          : AnimatedSize(
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeOutCubic,
+              child: CallSupportFab(
+                heroTag: 'courier_call_support_fab',
+                label: l10n.orderByCall,
+                extended: _fabExtended,
+              ),
             ),
       body: SafeArea(
-        child: RefreshIndicator(
-          color: HomeColors.violet,
-          backgroundColor: HomeColors.surfaceOf(context),
-          onRefresh: _refreshData,
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(AppColors.spaceMD),
-            child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (hasActive) ...[
-                Text(
-                  l10n.courierActiveDelivery,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: HomeColors.textPrimaryOf(context),
-                  ),
-                ),
-                const SizedBox(height: AppColors.spaceMD),
-                ActiveDeliveryCard(
-                  delivery: _activeDelivery!,
-                  onTrack: () => _navigateToTracking(_activeDelivery!),
-                ),
-              ] else ...[
-                Text(
-                  l10n.courierWhatToDo,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: HomeColors.textPrimaryOf(context),
-                  ),
-                ),
-                const SizedBox(height: AppColors.spaceMD),
-                _buildCreateDeliveryRow(l10n),
-              ],
-              const SizedBox(height: AppColors.spaceLG),
-              Row(
+        child: NotificationListener<UserScrollNotification>(
+          onNotification: (n) {
+            final extend =
+                n.direction == ScrollDirection.forward || n.metrics.pixels <= 0;
+            final collapse = n.direction == ScrollDirection.reverse;
+            if (collapse && _fabExtended) {
+              setState(() => _fabExtended = false);
+            } else if (extend && !_fabExtended) {
+              setState(() => _fabExtended = true);
+            }
+            return false;
+          },
+          child: RefreshIndicator(
+            color: HomeColors.violetOf(context),
+            backgroundColor: HomeColors.surfaceOf(context),
+            onRefresh: _refreshData,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Text(
-                      l10n.history,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: HomeColors.textPrimaryOf(context),
-                      ),
+                  if (hasActive) ...[
+                    _SectionTitle(l10n.courierActiveDelivery),
+                    const SizedBox(height: AppColors.spaceMD),
+                    ActiveDeliveryCard(
+                      delivery: _activeDelivery!,
+                      onTrack: () => _navigateToTracking(_activeDelivery!),
                     ),
+                  ] else ...[
+                    _SectionTitle(l10n.courierWhatToDo),
+                    const SizedBox(height: AppColors.spaceMD),
+                    _buildCreateDeliveryRow(l10n),
+                  ],
+                  const SizedBox(height: 28),
+                  _SectionTitle(
+                    l10n.history,
+                    trailing: _hasMoreHistory
+                        ? TextButton.icon(
+                            onPressed: _openFullHistory,
+                            iconAlignment: IconAlignment.end,
+                            icon: const Icon(Icons.chevron_right_rounded,
+                                size: 22),
+                            label: Text(l10n.showMore),
+                            style: TextButton.styleFrom(
+                              foregroundColor: AuthScreenColors.orange,
+                              padding: const EdgeInsets.fromLTRB(12, 6, 4, 6),
+                              minimumSize: const Size(0, 40),
+                            ),
+                          )
+                        : null,
                   ),
-                  if (_hasMoreHistory)
-                    TextButton(
-                      onPressed: _openFullHistory,
-                      style: TextButton.styleFrom(
-                        foregroundColor: AuthScreenColors.orange,
-                        padding: EdgeInsets.zero,
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  const SizedBox(height: 12),
+                  if (_isLoadingDeliveries)
+                    const ShimmerListView(itemCount: 3)
+                  else if (_deliveriesError != null)
+                    SizedBox(
+                      width: double.infinity,
+                      child: Column(
+                        children: [
+                          Text(
+                            _deliveriesError!,
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: HomeColors.textSecondaryOf(context),
+                            ),
+                          ),
+                          TextButton.icon(
+                            onPressed: () {
+                              setState(() => _isLoadingDeliveries = true);
+                              _fetchDeliveries();
+                            },
+                            icon: const Icon(Icons.refresh),
+                            label: Text(l10n.actionRetry),
+                            style: TextButton.styleFrom(
+                              foregroundColor: HomeColors.violetOf(context),
+                            ),
+                          ),
+                        ],
                       ),
-                      child: Text(l10n.showMore),
-                    ),
+                    )
+                  else if (_recentDeliveries.isEmpty)
+                    CourierHistoryEmptyState(
+                      compact: true,
+                      onPrimaryAction: hasActive ? null : _openInstantDelivery,
+                      primaryActionLabel: l10n.courierInstantTitle,
+                    )
+                  else
+                    ..._recentDeliveries.map((d) {
+                      final id = d['id'] as int?;
+                      return DeliveryHistoryCard(
+                        orderId: id != null ? 'DEL-$id' : '—',
+                        recipient: d['receiver_name']?.toString() ?? '—',
+                        location: d['dropoff_location']?.toString() ?? '—',
+                        dateTime: formatDeliveryHistoryDate(d['created_at']),
+                        status: resolveDeliveryStatusLabel(d),
+                        borderColor: borderColor,
+                        onTap: id != null
+                            ? () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        DeliveryDetailsScreen(deliveryId: id),
+                                  ),
+                                );
+                              }
+                            : null,
+                      );
+                    }),
+                  const SizedBox(height: 96),
                 ],
               ),
-              const SizedBox(height: AppColors.spaceMD),
-              if (_isLoadingDeliveries)
-                const ShimmerListView(itemCount: 3)
-              else if (_deliveriesError != null)
-                SizedBox(
-                  width: double.infinity,
-                  child: Column(
-                    children: [
-                      Text(
-                        _deliveriesError!,
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: HomeColors.textSecondaryOf(context),
-                        ),
-                      ),
-                      TextButton.icon(
-                        onPressed: () {
-                          setState(() => _isLoadingDeliveries = true);
-                          _fetchDeliveries();
-                        },
-                        icon: const Icon(Icons.refresh),
-                        label: Text(l10n.actionRetry),
-                        style: TextButton.styleFrom(
-                          foregroundColor: HomeColors.violet,
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              else if (_recentDeliveries.isEmpty)
-                CourierHistoryEmptyState(
-                  compact: true,
-                  onPrimaryAction: hasActive ? null : _openInstantDelivery,
-                  primaryActionLabel: l10n.courierInstantTitle,
-                )
-              else
-                ..._recentDeliveries.map((d) {
-                  final id = d['id'] as int?;
-                  return DeliveryHistoryCard(
-                    orderId: id != null ? 'DEL-$id' : '—',
-                    recipient: d['receiver_name']?.toString() ?? '—',
-                    location: d['dropoff_location']?.toString() ?? '—',
-                    dateTime: formatDeliveryHistoryDate(d['created_at']),
-                    status: resolveDeliveryStatusLabel(d),
-                    borderColor: borderColor,
-                    onTap: id != null
-                        ? () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    DeliveryDetailsScreen(deliveryId: id),
-                              ),
-                            );
-                          }
-                        : null,
-                  );
-                }),
-              const SizedBox(height: 80),
-            ],
+            ),
           ),
-        ),
         ),
       ),
     );
@@ -371,52 +374,12 @@ class _InstantDeliveryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppColors.radiusLG),
-        child: Container(
-          height: 168,
-          padding: const EdgeInsets.all(AppColors.spaceMD),
-          decoration: BoxDecoration(
-            color: AuthScreenColors.orange,
-            borderRadius: BorderRadius.circular(AppColors.radiusLG),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(
-                Icons.flash_on_rounded,
-                color: Theme.of(context).colorScheme.onPrimary,
-                size: 44,
-              ),
-              const Spacer(),
-              Text(
-                l10n.courierNowTitle,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onPrimary,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                l10n.courierNowSubtitle,
-                style: TextStyle(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .onPrimary
-                      .withValues(alpha: 0.9),
-                  fontSize: 13,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ),
-      ),
+    return _BookingCard(
+      icon: Icons.bolt_rounded,
+      title: l10n.courierNowTitle,
+      subtitle: l10n.courierNowSubtitle,
+      onTap: onTap,
+      filled: true,
     );
   }
 }
@@ -429,50 +392,193 @@ class _ScheduleDeliveryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppColors.radiusLG),
-        child: Container(
-          height: 168,
-          padding: const EdgeInsets.all(AppColors.spaceMD),
-          decoration: BoxDecoration(
-            color: HomeColors.surfaceOf(context),
-            borderRadius: BorderRadius.circular(AppColors.radiusLG),
-            border: Border.all(color: HomeColors.borderOf(context)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(
-                Icons.calendar_month_rounded,
-                color: HomeColors.violet,
-                size: 44,
+    return _BookingCard(
+      icon: Icons.event_rounded,
+      title: l10n.courierLaterTitle,
+      subtitle: l10n.courierLaterSubtitle,
+      onTap: onTap,
+      filled: false,
+    );
+  }
+}
+
+/// Big, picture-first booking choice. [filled] = the primary (orange) option.
+class _BookingCard extends StatelessWidget {
+  const _BookingCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+    required this.filled,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+  final bool filled;
+
+  static const _radius = BorderRadius.all(Radius.circular(24));
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = HomeColors.isDark(context);
+    final accent = filled ? Colors.white : HomeColors.violetOf(context);
+    final titleColor =
+        filled ? Colors.white : HomeColors.textPrimaryOf(context);
+    final subColor = filled
+        ? Colors.white.withValues(alpha: 0.88)
+        : HomeColors.textMutedOf(context);
+    final chipBg = filled
+        ? Colors.white.withValues(alpha: 0.18)
+        : HomeColors.violetTintOf(context);
+
+    return Semantics(
+      button: true,
+      label: '$title. $subtitle',
+      child: Container(
+        height: 184,
+        decoration: BoxDecoration(
+          borderRadius: _radius,
+          color: filled ? null : HomeColors.surfaceOf(context),
+          gradient: filled
+              ? const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: AppColors.primaryGradient,
+                )
+              : null,
+          border: filled
+              ? null
+              : Border.all(color: HomeColors.borderOf(context), width: 1.2),
+          boxShadow: filled && !dark
+              ? [
+                  BoxShadow(
+                    color: AppColors.brandOrange.withValues(alpha: 0.32),
+                    blurRadius: 24,
+                    offset: const Offset(0, 12),
+                  ),
+                ]
+              : AppColors.softShadow(context),
+        ),
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: _radius,
+            child: ClipRRect(
+              borderRadius: _radius,
+              child: Stack(
+                children: [
+                  // Oversized watermark icon gives the primary card depth.
+                  if (filled)
+                    Positioned(
+                      right: -26,
+                      bottom: -30,
+                      child: Icon(
+                        icon,
+                        size: 150,
+                        color: Colors.white.withValues(alpha: 0.13),
+                      ),
+                    ),
+                  Padding(
+                    padding: const EdgeInsets.all(18),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 54,
+                              height: 54,
+                              decoration: BoxDecoration(
+                                color: chipBg,
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                              child: Icon(icon, color: accent, size: 32),
+                            ),
+                            const Spacer(),
+                            Container(
+                              width: 34,
+                              height: 34,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: filled
+                                    ? Colors.white
+                                    : HomeColors.violetTintOf(context),
+                              ),
+                              child: Icon(
+                                Icons.arrow_forward_rounded,
+                                size: 20,
+                                color: filled
+                                    ? AppColors.brandOrange
+                                    : HomeColors.violetOf(context),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const Spacer(),
+                        Text(
+                          title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: titleColor,
+                            fontSize: 26,
+                            height: 1.1,
+                            letterSpacing: -0.6,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          subtitle,
+                          style: TextStyle(
+                            color: subColor,
+                            fontSize: 14,
+                            height: 1.3,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-              const Spacer(),
-              Text(
-                l10n.courierLaterTitle,
-                style: TextStyle(
-                  color: HomeColors.textPrimaryOf(context),
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                l10n.courierLaterSubtitle,
-                style: TextStyle(
-                  color: HomeColors.textMutedOf(context),
-                  fontSize: 13,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+            ),
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Section title used on the courier home.
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle(this.text, {this.trailing});
+
+  final String text;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 19,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.3,
+              color: HomeColors.textPrimaryOf(context),
+            ),
+          ),
+        ),
+        if (trailing != null) trailing!,
+      ],
     );
   }
 }

@@ -1,4 +1,4 @@
-﻿import 'dart:ui';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/app/navigation/cart_navigation.dart';
@@ -12,6 +12,7 @@ import 'package:hudhud_delivery/features/categories/presentation/widgets/categor
 import 'package:hudhud_delivery/features/delivery/presentation/screens/product_detail_screen.dart';
 import 'package:hudhud_delivery/features/guest/data/branches_repository.dart';
 import 'package:hudhud_delivery/features/guest/model/branch_model.dart';
+import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/features/orders/data/models/vendor_model.dart';
 import 'package:hudhud_delivery/features/products/data/products_data_provider.dart';
 import 'package:hudhud_delivery/features/products/data/products_repository.dart';
@@ -23,6 +24,7 @@ class StoreDetailScreen extends StatefulWidget {
   final String storeName;
   final String? storeImage;
   final int? vendorId;
+
   /// When provided, a rich vendor header (banner, logo, description, hours) is shown.
   final VendorModel? vendor;
 
@@ -94,12 +96,14 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
     final vendorId = widget.vendorId;
     if (vendorId == null) return;
     try {
-      final branches = await _branchesRepository.getBranches(vendorId: vendorId);
+      final branches =
+          await _branchesRepository.getBranches(vendorId: vendorId);
       if (mounted) setState(() => _branches = branches);
-      final active = branches.where((b) => b.id > 0 && (b.isActive || branches.length == 1)).toList();
-      final candidates = active.isNotEmpty
-          ? active
-          : branches.where((b) => b.id > 0).toList();
+      final active = branches
+          .where((b) => b.id > 0 && (b.isActive || branches.length == 1))
+          .toList();
+      final candidates =
+          active.isNotEmpty ? active : branches.where((b) => b.id > 0).toList();
       if (candidates.length == 1) {
         CartService().setSelectedBranchId(candidates.first.id);
       }
@@ -115,7 +119,8 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
     return _productsLoading;
   }
 
-  Future<void> _loadVendorProducts({int page = 1, bool loadMore = false}) async {
+  Future<void> _loadVendorProducts(
+      {int page = 1, bool loadMore = false}) async {
     final vendorId = widget.vendorId;
     if (vendorId == null) return;
     setState(() {
@@ -267,8 +272,9 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final ink = HomeColors.textPrimaryOf(context);
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: HomeColors.backgroundOf(context),
       body: SafeArea(
         child: Column(
           children: [
@@ -281,20 +287,25 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
               )
             else
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.fromLTRB(4, 8, 16, 8),
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back),
+                      icon:
+                          Icon(Icons.arrow_back_rounded, size: 26, color: ink),
                       onPressed: () => Navigator.pop(context),
                     ),
+                    const SizedBox(width: 4),
                     Expanded(
                       child: Text(
                         _displayName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(context).colorScheme.onSurface,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.4,
+                          color: ink,
                         ),
                       ),
                     ),
@@ -302,7 +313,10 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                 ),
               ),
             if (widget.vendorId != null) ...[
+              const SizedBox(height: 12),
               ProductSearchField(
+                fillColor: HomeColors.surfaceOf(context),
+                hintColor: HomeColors.textMutedOf(context),
                 hint: 'Search in $_displayName',
                 onSearchChanged: _onSearchChanged,
                 onFilterTap: _openPriceFilter,
@@ -312,22 +326,26 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   child: Text(
-                    'Price: ${_minPrice ?? 'â€”'} â€“ ${_maxPrice ?? 'â€”'}',
+                    'Price: ${_minPrice ?? '\u2014'} \u2013 ${_maxPrice ?? '\u2014'}',
                     style: TextStyle(
-                      fontSize: 12,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: HomeColors.textMutedOf(context),
                     ),
                   ),
                 ),
             ],
             const SizedBox(height: 16),
             // Category Tabs
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
+            SizedBox(
+              height: 48,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 children: [
                   _CategoryTab(
                     label: 'Featured',
+                    icon: Icons.star_rounded,
                     isSelected: _selectedTab == 'Featured',
                     onTap: () {
                       setState(() {
@@ -335,9 +353,10 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                       });
                     },
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 8),
                   _CategoryTab(
                     label: 'Categories',
+                    icon: Icons.grid_view_rounded,
                     isSelected: _selectedTab == 'Categories',
                     onTap: () {
                       setState(() {
@@ -345,9 +364,10 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                       });
                     },
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 8),
                   _CategoryTab(
                     label: 'Orders',
+                    icon: Icons.receipt_long_rounded,
                     isSelected: _selectedTab == 'Orders',
                     onTap: () {
                       setState(() {
@@ -362,49 +382,33 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
             // Content
             Expanded(
               child: widget.vendorId == null
-                  ? const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(24),
-                        child: Text(
-                          'Store not available',
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
+                  ? const _StoreMessage(
+                      icon: Icons.store_mall_directory_rounded,
+                      title: 'Store not available',
                     )
                   : _selectedTab == 'Orders'
-                      ? Center(child: Text(context.l10n.noOrdersYetStore))
+                      ? _StoreMessage(
+                          icon: Icons.receipt_long_rounded,
+                          title: context.l10n.noOrdersYetStore,
+                        )
                       : _isLoadingActiveProducts
-                          ? const Center(child: CircularProgressIndicator())
+                          ? const Center(
+                              child: CircularProgressIndicator(
+                                color: AppColors.brandOrange,
+                              ),
+                            )
                           : _productsError != null
-                              ? Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(24),
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          _productsError!,
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .onSurfaceVariant,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 16),
-                                        TextButton(
-                                          onPressed: _loadVendorProducts,
-                                          child: Text(context.l10n.actionRetry),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
+                              ? _StoreMessage(
+                                  icon: Icons.wifi_off_rounded,
+                                  color: AppColors.errorColor,
+                                  title: _productsError!,
+                                  actionLabel: context.l10n.actionRetry,
+                                  onAction: _loadVendorProducts,
                                 )
                               : _activeProducts.isEmpty
-                                  ? Center(
-                                      child: Text(context.l10n.noProductsYet),
+                                  ? _StoreMessage(
+                                      icon: Icons.shopping_basket_rounded,
+                                      title: context.l10n.noProductsYet,
                                     )
                                   : _buildProductsContent(),
             ),
@@ -420,7 +424,12 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
       grouped.putIfAbsent(p.category_id, () => []).add(p);
     }
     final sections = grouped.entries.toList();
-    if (sections.isEmpty) return Center(child: Text(context.l10n.noProducts));
+    if (sections.isEmpty) {
+      return _StoreMessage(
+        icon: Icons.shopping_basket_rounded,
+        title: context.l10n.noProducts,
+      );
+    }
     return Stack(
       children: [
         SingleChildScrollView(
@@ -430,13 +439,17 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
               if (widget.vendor == null &&
                   widget.storeImage != null &&
                   widget.storeImage!.isNotEmpty)
-                ClipRRect(
-                  child: FallbackNetworkImage(
-                    url: widget.storeImage!,
-                    height: 150,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_) => const SizedBox.shrink(),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: FallbackNetworkImage(
+                      url: widget.storeImage!,
+                      height: 150,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_) => const SizedBox.shrink(),
+                    ),
                   ),
                 )
               else if (widget.vendor == null)
@@ -444,26 +457,42 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Builder(
                     builder: (context) {
-                      final scheme = Theme.of(context).colorScheme;
-                      final isDark =
-                          Theme.of(context).brightness == Brightness.dark;
+                      final dark = HomeColors.isDark(context);
                       return Container(
-                        height: 100,
+                        padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: isDark
-                              ? AppColors.darkSurfaceVariant
-                              : AppColors.lightInputFill,
-                          borderRadius: BorderRadius.circular(12),
+                          color: dark
+                              ? AppColors.orangeTintDark
+                              : AppColors.orangeTint,
+                          borderRadius: BorderRadius.circular(20),
                         ),
-                        child: Center(
-                          child: Text(
-                            'ETB 0 Delivery Fee with selected products',
-                            style: TextStyle(
-                              color: scheme.onSurfaceVariant,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 48,
+                              height: 48,
+                              decoration: BoxDecoration(
+                                color: AppColors.brandOrange,
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                              child: const Icon(
+                                Icons.delivery_dining_rounded,
+                                color: Colors.white,
+                                size: 26,
+                              ),
                             ),
-                          ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'ETB 0 Delivery Fee with selected products',
+                                style: TextStyle(
+                                  color: HomeColors.textPrimaryOf(context),
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       );
                     },
@@ -473,7 +502,7 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
               ...sections.map((e) {
                 final title = e.key != null ? 'Category ${e.key}' : 'Products';
                 return Padding(
-                  padding: const EdgeInsets.only(bottom: 24),
+                  padding: const EdgeInsets.only(bottom: 12),
                   child: _ProductSectionFromModel(
                     title: title,
                     products: e.value,
@@ -491,8 +520,18 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                   padding: const EdgeInsets.all(16),
                   child: Center(
                     child: _productsLoadingMore
-                        ? const CircularProgressIndicator()
+                        ? const CircularProgressIndicator(
+                            color: AppColors.brandOrange,
+                          )
                         : TextButton(
+                            style: TextButton.styleFrom(
+                              foregroundColor: HomeColors.violetOf(context),
+                              minimumSize: const Size(120, 48),
+                              textStyle: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
                             onPressed: () => _loadVendorProducts(
                               page: _currentPage + 1,
                               loadMore: true,
@@ -501,7 +540,7 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                           ),
                   ),
                 ),
-              if (_totalItems > 0) const SizedBox(height: 80),
+              if (_totalItems > 0) const SizedBox(height: 96),
               const SizedBox(height: 24),
             ],
           ),
@@ -511,74 +550,10 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
             left: 0,
             right: 0,
             bottom: 0,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              decoration: BoxDecoration(
-                color: AppColors.primaryColor,
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.lightShadow,
-                    blurRadius: 10,
-                    offset: const Offset(0, -5),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.shopping_bag_outlined,
-                    color: AppColors.lightOnPrimary,
-                    size: 22,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'TOTAL ITEMS: $_totalItems',
-                      style: const TextStyle(
-                        color: AppColors.lightOnPrimary,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'ETB ${_totalPrice.toStringAsFixed(1)}',
-                    style: const TextStyle(
-                      color: AppColors.lightOnPrimary,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    maxLines: 1,
-                  ),
-                  const SizedBox(width: 8),
-                  TextButton(
-                    onPressed: _goToCart,
-                    style: TextButton.styleFrom(
-                      backgroundColor: AppColors.lightSurface,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    child: const FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        'Go to Checkout',
-                        style: TextStyle(
-                          color: AppColors.primaryColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            child: _StoreCheckoutBar(
+              totalItems: _totalItems,
+              totalPrice: _totalPrice,
+              onCheckout: _goToCart,
             ),
           ),
       ],
@@ -657,21 +632,20 @@ class _VendorDetailHeader extends StatelessWidget {
           Positioned(
             top: 8,
             left: 8,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(24),
+            child: ClipOval(
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                 child: Material(
-                  color: Colors.black.withValues(alpha: 0.28),
+                  color: Colors.black.withValues(alpha: 0.3),
                   child: InkWell(
                     onTap: onBack,
-                    borderRadius: BorderRadius.circular(24),
-                    child: const Padding(
-                      padding: EdgeInsets.all(10),
+                    child: const SizedBox(
+                      width: 48,
+                      height: 48,
                       child: Icon(
-                        Icons.arrow_back_ios_new_rounded,
-                        color: AppColors.lightOnPrimary,
-                        size: 20,
+                        Icons.arrow_back_rounded,
+                        color: Colors.white,
+                        size: 26,
                       ),
                     ),
                   ),
@@ -721,10 +695,11 @@ class _VendorDetailHeader extends StatelessWidget {
                 if (branches.isNotEmpty) ...[
                   const SizedBox(height: 10),
                   Text(
-                    branches.map((b) => b.name).join(' Â· '),
+                    branches.map((b) => b.name).join(' \u00b7 '),
                     style: TextStyle(
-                      fontSize: 12,
-                      color: AppColors.lightOnPrimary.withValues(alpha: 0.85),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.lightOnPrimary.withValues(alpha: 0.88),
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -743,10 +718,12 @@ class _VendorDetailHeader extends StatelessWidget {
                           vertical: 12,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.lightOnPrimary.withValues(alpha: 0.14),
+                          color:
+                              AppColors.lightOnPrimary.withValues(alpha: 0.14),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: AppColors.lightOnPrimary.withValues(alpha: 0.22),
+                            color: AppColors.lightOnPrimary
+                                .withValues(alpha: 0.22),
                           ),
                         ),
                         child: Row(
@@ -772,8 +749,8 @@ class _VendorDetailHeader extends StatelessWidget {
                                   Text(
                                     'Opening hours',
                                     style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
                                       color: AppColors.lightOnPrimary
                                           .withValues(alpha: 0.75),
                                       letterSpacing: 0.4,
@@ -781,7 +758,7 @@ class _VendorDetailHeader extends StatelessWidget {
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
-                                    '${vendor.openingTime ?? 'â€”'}  â†’  ${vendor.closingTime ?? 'â€”'}',
+                                    '${vendor.openingTime ?? '\u2014'}  \u2192  ${vendor.closingTime ?? '\u2014'}',
                                     style: const TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.w700,
@@ -803,8 +780,9 @@ class _VendorDetailHeader extends StatelessWidget {
                   Text(
                     vendor.description!,
                     style: TextStyle(
-                      fontSize: 13,
-                      color: AppColors.lightOnPrimary.withValues(alpha: 0.88),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.lightOnPrimary.withValues(alpha: 0.9),
                       height: 1.4,
                     ),
                     maxLines: 2,
@@ -824,19 +802,22 @@ class _VendorDetailHeader extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              AppColors.primaryLightColor,
-              AppColors.primaryColor,
-              AppColors.primaryDarkColor,
-            ],
+            colors: AppColors.brandHeroGradient,
           ),
         ),
-        child: Center(
-          child: Icon(
-            Icons.storefront_rounded,
-            size: 88,
-            color: AppColors.lightOnPrimary.withValues(alpha: 0.38),
-          ),
+        // Watermark sits top-right so it never collides with the store name.
+        child: Stack(
+          children: [
+            Positioned(
+              right: -24,
+              top: 8,
+              child: Icon(
+                Icons.storefront_rounded,
+                size: 170,
+                color: AppColors.lightOnPrimary.withValues(alpha: 0.08),
+              ),
+            ),
+          ],
         ),
       );
 }
@@ -869,7 +850,7 @@ class _VendorInfoChip extends StatelessWidget {
           Text(
             label,
             style: const TextStyle(
-              fontSize: 12,
+              fontSize: 13,
               fontWeight: FontWeight.w700,
               color: AppColors.lightOnPrimary,
             ),
@@ -882,38 +863,253 @@ class _VendorInfoChip extends StatelessWidget {
 
 class _CategoryTab extends StatelessWidget {
   final String label;
+  final IconData icon;
   final bool isSelected;
   final VoidCallback onTap;
 
   const _CategoryTab({
     required this.label,
+    required this.icon,
     required this.isSelected,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryColor : scheme.surface,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? AppColors.primaryColor : AppColors.primaryColor,
-            width: 1.5,
+    final indigo = HomeColors.violetOf(context);
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      child: Material(
+        color: isSelected ? indigo : HomeColors.surfaceOf(context),
+        shape: StadiumBorder(
+          side: BorderSide(
+            color: isSelected ? indigo : HomeColors.borderOf(context),
           ),
         ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: isSelected ? AppColors.lightOnPrimary : AppColors.primaryColor,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(14, 0, 18, 0),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  icon,
+                  size: 20,
+                  color: isSelected ? Colors.white : indigo,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: isSelected
+                        ? Colors.white
+                        : HomeColors.textPrimaryOf(context),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Centered icon + message (+ optional orange action) for empty/error states.
+class _StoreMessage extends StatelessWidget {
+  const _StoreMessage({
+    required this.icon,
+    required this.title,
+    this.color,
+    this.actionLabel,
+    this.onAction,
+  });
+
+  final IconData icon;
+  final String title;
+  final Color? color;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = HomeColors.isDark(context);
+    final tint = color ?? HomeColors.violetOf(context);
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(32, 16, 32, 48),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 96,
+              height: 96,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: tint.withValues(alpha: dark ? 0.2 : 0.1),
+              ),
+              child: Icon(icon, size: 46, color: tint),
+            ),
+            const SizedBox(height: 18),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              maxLines: 4,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.3,
+                color: HomeColors.textPrimaryOf(context),
+              ),
+            ),
+            if (actionLabel != null && onAction != null) ...[
+              const SizedBox(height: 22),
+              SizedBox(
+                height: 56,
+                child: FilledButton.icon(
+                  onPressed: onAction,
+                  icon: const Icon(Icons.refresh_rounded, size: 22),
+                  label: Text(actionLabel!),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.brandOrange,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 28),
+                    textStyle: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Floating cart summary with a clear white-on-orange checkout button.
+class _StoreCheckoutBar extends StatelessWidget {
+  const _StoreCheckoutBar({
+    required this.totalItems,
+    required this.totalPrice,
+    required this.onCheckout,
+  });
+
+  final int totalItems;
+  final double totalPrice;
+  final VoidCallback onCheckout;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = HomeColors.isDark(context);
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+      decoration: BoxDecoration(
+        color: HomeColors.surfaceOf(context),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        border: dark
+            ? Border(top: BorderSide(color: HomeColors.borderOf(context)))
+            : null,
+        boxShadow: dark
+            ? null
+            : const [
+                BoxShadow(
+                  color: AppColors.lightShadow,
+                  blurRadius: 18,
+                  offset: Offset(0, -6),
+                ),
+              ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: dark ? AppColors.orangeTintDark : AppColors.orangeTint,
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: const Icon(
+              Icons.shopping_bag_rounded,
+              color: AppColors.brandOrange,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'TOTAL ITEMS: $totalItems',
+                  style: TextStyle(
+                    color: HomeColors.textMutedOf(context),
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.3,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'ETB ${totalPrice.toStringAsFixed(1)}',
+                  maxLines: 1,
+                  style: TextStyle(
+                    color: HomeColors.textPrimaryOf(context),
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.3,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          SizedBox(
+            height: 52,
+            child: FilledButton(
+              onPressed: onCheckout,
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.brandOrange,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 18),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              child: const FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Go to Checkout',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 15,
+                      ),
+                    ),
+                    SizedBox(width: 6),
+                    Icon(Icons.arrow_forward_rounded, size: 20),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -942,77 +1138,51 @@ class _ProductSectionFromModel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: scheme.onSurface,
-                ),
-              ),
-              TextButton(
-                onPressed: () {},
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      context.l10n.actionSeeAll,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: scheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(
-                      Icons.arrow_forward,
-                      size: 16,
-                      color: scheme.onSurfaceVariant,
-                    ),
-                  ],
-                ),
-              ),
-            ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            title,
+            style: TextStyle(
+              fontSize: 19,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.3,
+              color: HomeColors.textPrimaryOf(context),
+            ),
           ),
-          const SizedBox(height: 12),
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: products.length,
-            itemBuilder: (context, index) {
-              final product = products[index];
-              final productId = product.id.toString();
-              final quantity = cartItems[productId] ?? 0;
-              final isAdded = quantity > 0;
-              return ProductItem(
-                product: product,
-                name: product.name ?? 'Unknown Product',
-                description: product.description ?? 'No description available',
-                imageUrl: product.image_path ?? '',
-                price: product.price ?? '0',
-                discountPrice: product.discount_price?.isNotEmpty == true
-                    ? product.discount_price
-                    : null,
-                isAdded: isAdded,
-                quantity: quantity,
-                onAddPressed: () => onAddToCart(productId),
-                onRemovePressed: () => onRemoveFromCart(productId),
-                onIncrementPressed: () => onIncrementQuantity(productId),
-                onDecrementPressed: () => onDecrementQuantity(productId),
-                onTap: () => onShowProductDetails(product),
-              );
-            },
-          ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 12),
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: products.length,
+          itemBuilder: (context, index) {
+            final product = products[index];
+            final productId = product.id.toString();
+            final quantity = cartItems[productId] ?? 0;
+            final isAdded = quantity > 0;
+            return ProductItem(
+              product: product,
+              name: product.name ?? 'Unknown Product',
+              description: product.description ?? 'No description available',
+              imageUrl: product.image_path ?? '',
+              price: product.price ?? '0',
+              discountPrice: product.discount_price?.isNotEmpty == true
+                  ? product.discount_price
+                  : null,
+              isAdded: isAdded,
+              quantity: quantity,
+              onAddPressed: () => onAddToCart(productId),
+              onRemovePressed: () => onRemoveFromCart(productId),
+              onIncrementPressed: () => onIncrementQuantity(productId),
+              onDecrementPressed: () => onDecrementQuantity(productId),
+              onTap: () => onShowProductDetails(product),
+            );
+          },
+        ),
+      ],
     );
   }
 }

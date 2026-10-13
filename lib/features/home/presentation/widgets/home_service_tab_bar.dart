@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/theme/service_tab_palette.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/features/onboarding_tour/presentation/onboarding_tour_keys.dart';
@@ -26,20 +27,18 @@ class HomeServiceTabBar extends StatelessWidget {
     final l10n = context.l10n;
 
     final courier = _TabSpec(
-      mode: HomeServiceMode.courier,
       label: l10n.homeSendPackage,
       assetPath: 'assets/images/home_service_tabs/courier.png',
       fallbackIcon: Icons.inventory_2_rounded,
-      brand: ServiceTabPalette.courier,
-      unselectedWell: const Color(0xFF2A2040),
+      gradient: AppColors.brandHeroGradient,
+      glow: AppColors.brandIndigo,
     );
     final delivery = _TabSpec(
-      mode: HomeServiceMode.foodGroceries,
       label: l10n.homeTabDelivery,
       assetPath: 'assets/images/home_service_tabs/food_groceries.png',
       fallbackIcon: Icons.restaurant_rounded,
-      brand: ServiceTabPalette.foodGroceries,
-      unselectedWell: const Color(0xFF3A2418),
+      gradient: const [Color(0xFFFF7A2E), ServiceTabPalette.foodGroceries],
+      glow: ServiceTabPalette.foodGroceries,
     );
 
     final effectiveSelected =
@@ -50,7 +49,7 @@ class HomeServiceTabBar extends StatelessWidget {
     return KeyedSubtree(
       key: tourKeys?.serviceTabsKey,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
         child: Row(
           children: [
             Expanded(
@@ -61,7 +60,7 @@ class HomeServiceTabBar extends StatelessWidget {
                 onTap: () => onSelected(HomeServiceMode.courier),
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 12),
             Expanded(
               child: _ServiceTile(
                 key: tourKeys?.foodTabKey,
@@ -79,20 +78,18 @@ class HomeServiceTabBar extends StatelessWidget {
 
 class _TabSpec {
   const _TabSpec({
-    required this.mode,
     required this.label,
     required this.assetPath,
     required this.fallbackIcon,
-    required this.brand,
-    required this.unselectedWell,
+    required this.gradient,
+    required this.glow,
   });
 
-  final HomeServiceMode mode;
   final String label;
   final String assetPath;
   final IconData fallbackIcon;
-  final Color brand;
-  final Color unselectedWell;
+  final List<Color> gradient;
+  final Color glow;
 }
 
 class _ServiceTile extends StatelessWidget {
@@ -107,65 +104,145 @@ class _ServiceTile extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
 
+  static const double _height = 108;
+  static const _radius = BorderRadius.all(Radius.circular(22));
+
   @override
   Widget build(BuildContext context) {
-    final bg = selected ? spec.brand : spec.unselectedWell;
-    final labelColor = selected
-        ? HomeColors.textPrimaryOf(context)
-        : HomeColors.textMutedOf(context);
+    final dark = HomeColors.isDark(context);
+    final labelColor =
+        selected ? Colors.white : HomeColors.textPrimaryOf(context);
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: spec.label,
+      child: GestureDetector(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AspectRatio(
-              aspectRatio: 1.7,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: bg,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: selected
-                      ? [
-                          BoxShadow(
-                            color: spec.brand.withValues(alpha: 0.35),
-                            blurRadius: 10,
-                            offset: const Offset(0, 3),
-                          ),
-                        ]
-                      : null,
-                ),
-                padding: const EdgeInsets.all(10),
-                child: Image.asset(
-                  spec.assetPath,
-                  fit: BoxFit.contain,
-                  gaplessPlayback: true,
-                  errorBuilder: (_, __, ___) => Icon(
-                    spec.fallbackIcon,
-                    size: 36,
-                    color: selected
-                        ? Theme.of(context).colorScheme.onPrimary
-                        : spec.brand,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 260),
+          curve: Curves.easeOutCubic,
+          height: _height,
+          decoration: BoxDecoration(
+            borderRadius: _radius,
+            color: selected ? null : HomeColors.surfaceOf(context),
+            gradient: selected
+                ? LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: spec.gradient,
+                  )
+                : null,
+            border: Border.all(
+              color: selected
+                  ? Colors.transparent
+                  : HomeColors.borderOf(context),
+              width: 1.2,
+            ),
+            boxShadow: selected && !dark
+                ? [
+                    BoxShadow(
+                      color: spec.glow.withValues(alpha: 0.30),
+                      blurRadius: 22,
+                      offset: const Offset(0, 10),
+                    ),
+                  ]
+                : AppColors.softShadow(context),
+          ),
+          child: ClipRRect(
+            borderRadius: _radius,
+            child: Stack(
+              children: [
+                // Soft light bloom behind the illustration.
+                if (selected)
+                  Positioned(
+                    right: -30,
+                    top: -30,
+                    child: Container(
+                      width: 130,
+                      height: 130,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: RadialGradient(
+                          colors: [
+                            Colors.white.withValues(alpha: 0.22),
+                            Colors.white.withValues(alpha: 0),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                Positioned(
+                  right: -6,
+                  bottom: -4,
+                  top: 6,
+                  child: AnimatedScale(
+                    duration: const Duration(milliseconds: 260),
+                    curve: Curves.easeOutBack,
+                    scale: selected ? 1.0 : 0.88,
+                    alignment: Alignment.bottomRight,
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 200),
+                      opacity: selected ? 1 : 0.9,
+                      child: Image.asset(
+                        spec.assetPath,
+                        width: 92,
+                        fit: BoxFit.contain,
+                        gaplessPlayback: true,
+                        errorBuilder: (_, __, ___) => Icon(
+                          spec.fallbackIcon,
+                          size: 44,
+                          color: selected ? Colors.white : spec.glow,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              ),
+                Positioned(
+                  left: 14,
+                  top: 14,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    width: 24,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: selected
+                          ? Colors.white
+                          : Colors.transparent,
+                      border: Border.all(
+                        color: selected
+                            ? Colors.white
+                            : HomeColors.textMutedOf(context)
+                                .withValues(alpha: 0.5),
+                        width: 2,
+                      ),
+                    ),
+                    child: selected
+                        ? Icon(Icons.check_rounded, size: 16, color: spec.glow)
+                        : null,
+                  ),
+                ),
+                Positioned(
+                  left: 14,
+                  right: 84,
+                  bottom: 14,
+                  child: Text(
+                    spec.label,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 16,
+                      height: 1.15,
+                      letterSpacing: -0.2,
+                      color: labelColor,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 6),
-            Text(
-              spec.label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                fontSize: 13,
-                color: labelColor,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

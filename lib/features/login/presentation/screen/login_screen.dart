@@ -9,6 +9,7 @@ import 'package:hudhud_delivery/features/login/data/repository/login_repository.
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_brand_header.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_dark_scaffold.dart';
+import 'package:hudhud_delivery/features/login/presentation/widgets/auth_ui.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/login_widget.dart';
 import 'package:hudhud_delivery/features/login/utils/phone_enrollment_navigation.dart';
 import 'package:hudhud_delivery/features/signup/presentation/screen/signup_screen.dart';
@@ -53,30 +54,34 @@ class _LoginScreenState extends State<LoginScreen> {
         backgroundColor: AuthScreenColors.surfaceOf(dialogContext),
         title: Text(
           l10n.exitAppTitle,
-          style: TextStyle(color: AuthScreenColors.textPrimaryOf(dialogContext)),
+          style:
+              TextStyle(color: AuthScreenColors.textPrimaryOf(dialogContext)),
         ),
         content: Text(
           l10n.exitAppMessage,
-          style: TextStyle(color: AuthScreenColors.textSecondaryOf(dialogContext)),
+          style:
+              TextStyle(color: AuthScreenColors.textSecondaryOf(dialogContext)),
         ),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(28),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
             child: Text(
               l10n.actionCancel,
-              style: TextStyle(color: AuthScreenColors.textSecondaryOf(dialogContext)),
+              style: TextStyle(
+                  color: AuthScreenColors.textSecondaryOf(dialogContext)),
             ),
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
             style: ElevatedButton.styleFrom(
               backgroundColor: AuthScreenColors.orange,
-              foregroundColor: Colors.black,
+              foregroundColor: Colors.white,
+              elevation: 0,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(14),
               ),
             ),
             child: Text(l10n.actionExit),
@@ -157,13 +162,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const SizedBox(height: 8),
-                    const AuthBrandHeader(),
-                    const SizedBox(height: 20),
+                    const AuthBrandHeader(height: 40),
+                    const SizedBox(height: 32),
                     const LoginTitle(),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 28),
                     const LoginForm(),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 28),
                     _SignUpPrompt(onPressed: () => _openSignup(context)),
                   ],
                 );
@@ -185,32 +189,58 @@ class _SignUpPrompt extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final label = '${l10n.loginNoAccountPrompt}${l10n.actionSignUp}';
+    final radius = BorderRadius.circular(18);
     return Semantics(
       label: label,
       button: true,
+      excludeSemantics: true,
       onTap: onPressed,
-      child: GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onTap: onPressed,
-        child: Text.rich(
-          TextSpan(
-            style: TextStyle(
-              color: AuthScreenColors.textMutedOf(context),
-              fontSize: 14,
-              height: 1.35,
-            ),
-            children: [
-              TextSpan(text: l10n.loginNoAccountPrompt),
-              TextSpan(
-                text: l10n.actionSignUp,
-                style: const TextStyle(
-                  color: AuthScreenColors.orange,
-                  fontWeight: FontWeight.w700,
+      child: Material(
+        color: AuthScreenColors.surfaceOf(context),
+        shape: RoundedRectangleBorder(
+          borderRadius: radius,
+          side: BorderSide(color: AuthScreenColors.surfaceBorderOf(context)),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onPressed,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.person_add_alt_1_rounded,
+                  size: 22,
+                  color: authIndigoOf(context),
                 ),
-              ),
-            ],
+                const SizedBox(width: 10),
+                Flexible(
+                  child: Text.rich(
+                    TextSpan(
+                      style: TextStyle(
+                        color: AuthScreenColors.textSecondaryOf(context),
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        height: 1.3,
+                      ),
+                      children: [
+                        TextSpan(text: l10n.loginNoAccountPrompt),
+                        TextSpan(
+                          text: l10n.actionSignUp,
+                          style: const TextStyle(
+                            color: AuthScreenColors.orange,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            ),
           ),
-          textAlign: TextAlign.center,
         ),
       ),
     );

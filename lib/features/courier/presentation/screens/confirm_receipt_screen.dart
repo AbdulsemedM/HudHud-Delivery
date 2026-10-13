@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/widgets/status_chip.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/courier/presentation/screens/rate_delivery_screen.dart';
@@ -86,19 +87,253 @@ class _ConfirmReceiptScreenState extends State<ConfirmReceiptScreen> {
     );
   }
 
+  Widget _buildError(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 96,
+              height: 96,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.errorColor.withValues(
+                  alpha: HomeColors.isDark(context) ? 0.2 : 0.1,
+                ),
+              ),
+              child: const Icon(
+                Icons.wifi_off_rounded,
+                size: 46,
+                color: AppColors.errorColor,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              _error!,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                height: 1.4,
+                color: HomeColors.textPrimaryOf(context),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextButton.icon(
+              onPressed: _loadDelivery,
+              icon: const Icon(Icons.refresh_rounded, size: 24),
+              label: Text(context.l10n.actionRetry),
+              style: TextButton.styleFrom(
+                foregroundColor: HomeColors.violetOf(context),
+                minimumSize: const Size(48, 48),
+                textStyle: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
+    final l10n = context.l10n;
+    final delivery = _delivery;
+    final dark = HomeColors.isDark(context);
+    final tracking = delivery?['tracking_number']?.toString();
+
+    return SafeArea(
+      top: false,
+      child: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Hero: package + check badge, readable without words.
+                  Center(
+                    child: SizedBox(
+                      width: 128,
+                      height: 128,
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Container(
+                            width: 128,
+                            height: 128,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: AppColors.successColor.withValues(
+                                alpha: dark ? 0.2 : 0.12,
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.inventory_2_rounded,
+                              size: 62,
+                              color: AppColors.successColor,
+                            ),
+                          ),
+                          Positioned(
+                            right: 4,
+                            bottom: 4,
+                            child: Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: AppColors.successColor,
+                                border: Border.all(
+                                  color: HomeColors.backgroundOf(context),
+                                  width: 3,
+                                ),
+                              ),
+                              child: const Icon(
+                                Icons.check_rounded,
+                                size: 24,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Did you receive your package?',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: HomeColors.textPrimaryOf(context),
+                      fontWeight: FontWeight.w800,
+                      fontSize: 24,
+                      letterSpacing: -0.5,
+                      height: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    tracking ?? 'Delivery #${widget.deliveryId}',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: HomeColors.textMutedOf(context),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  // Summary card
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: AppColors.softShadow(context),
+                    ),
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: HomeColors.surfaceOf(context),
+                        borderRadius: BorderRadius.circular(24),
+                        border: dark
+                            ? Border.all(color: HomeColors.borderOf(context))
+                            : null,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _InfoRow(
+                            icon: Icons.trip_origin_rounded,
+                            iconColor: HomeColors.violetOf(context),
+                            tint: HomeColors.violetTintOf(context),
+                            label: l10n.from,
+                            value:
+                                delivery?['pickup_location']?.toString() ?? '—',
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 25),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Container(
+                                width: 2,
+                                height: 14,
+                                color: HomeColors.borderOf(context),
+                              ),
+                            ),
+                          ),
+                          _InfoRow(
+                            icon: Icons.location_on_rounded,
+                            iconColor: AppColors.successColor,
+                            tint: AppColors.successColor.withValues(
+                              alpha: dark ? 0.2 : 0.1,
+                            ),
+                            label: l10n.to,
+                            value: delivery?['dropoff_location']?.toString() ??
+                                '—',
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            child: Divider(
+                              height: 1,
+                              color: HomeColors.borderOf(context),
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                l10n.deliveryDetailsStatus,
+                                style: TextStyle(
+                                  color: HomeColors.textMutedOf(context),
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const Spacer(),
+                              StatusChip(
+                                status: resolveDeliveryStatusLabel(delivery),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+            child: _PrimaryButton(
+              label: 'Yes, I received it',
+              icon: Icons.check_circle_rounded,
+              loading: _isSubmitting,
+              onPressed: _isSubmitting ? null : _confirmReceipt,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final delivery = _delivery;
-
     return CourierTheme.wrap(
       context,
       child: Scaffold(
         backgroundColor: HomeColors.backgroundOf(context),
         appBar: AppBar(
-          backgroundColor: HomeColors.surfaceOf(context),
+          backgroundColor: HomeColors.backgroundOf(context),
+          surfaceTintColor: Colors.transparent,
           elevation: 0,
+          scrolledUnderElevation: 0,
+          centerTitle: true,
           leading: IconButton(
-            icon: Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+            icon: const Icon(Icons.arrow_back_rounded, size: 26),
             color: HomeColors.textPrimaryOf(context),
             onPressed: () => Navigator.pop(context),
           ),
@@ -106,150 +341,160 @@ class _ConfirmReceiptScreenState extends State<ConfirmReceiptScreen> {
             'Confirm receipt',
             style: TextStyle(
               color: HomeColors.textPrimaryOf(context),
-              fontWeight: FontWeight.w600,
-              fontSize: 17,
+              fontWeight: FontWeight.w800,
+              fontSize: 19,
+              letterSpacing: -0.3,
             ),
           ),
         ),
         body: _isLoading
-            ? const Center(child: CircularProgressIndicator())
+            ? const Center(
+                child: CircularProgressIndicator(color: HomeColors.orange),
+              )
             : _error != null
-                ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            _error!,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: HomeColors.textSecondaryOf(context),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          TextButton(onPressed: _loadDelivery, child: Text(context.l10n.actionRetry)),
-                        ],
-                      ),
-                    ),
-                  )
-                : Padding(
-                    padding: const EdgeInsets.all(AppColors.spaceMD),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(AppColors.spaceMD),
-                          decoration: BoxDecoration(
-                            color: HomeColors.surfaceOf(context),
-                            borderRadius: BorderRadius.circular(AppColors.radiusLG),
-                            border: Border.all(color: HomeColors.borderOf(context)),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Did you receive your package?',
-                                style: TextStyle(
-                                  color: HomeColors.textPrimaryOf(context),
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 18,
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                delivery?['tracking_number']?.toString() ??
-                                    'Delivery #${widget.deliveryId}',
-                                style: TextStyle(
-                                  color: HomeColors.textSecondaryOf(context),
-                                  fontSize: 14,
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              _InfoRow(
-                                label: 'From',
-                                value: delivery?['pickup_location']?.toString() ?? '—',
-                              ),
-                              const SizedBox(height: 8),
-                              _InfoRow(
-                                label: 'To',
-                                value: delivery?['dropoff_location']?.toString() ?? '—',
-                              ),
-                              const SizedBox(height: 8),
-                              _InfoRow(
-                                label: 'Status',
-                                value: resolveDeliveryStatusLabel(delivery),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Spacer(),
-                        SizedBox(
-                          height: AppColors.buttonHeightMD,
-                          child: FilledButton(
-                            onPressed: _isSubmitting ? null : _confirmReceipt,
-                            style: FilledButton.styleFrom(
-                              backgroundColor: HomeColors.violet,
-                              shape: RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.circular(AppColors.radiusLG),
-                              ),
-                            ),
-                            child: _isSubmitting
-                                ? const SizedBox(
-                                    width: 22,
-                                    height: 22,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                : const Text(
-                                    'Yes, I received it',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
-                                  ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                ? _buildError(context)
+                : _buildContent(context),
       ),
     );
   }
 }
 
 class _InfoRow extends StatelessWidget {
-  const _InfoRow({required this.label, required this.value});
+  const _InfoRow({
+    required this.icon,
+    required this.iconColor,
+    required this.tint,
+    required this.label,
+    required this.value,
+  });
 
+  final IconData icon;
+  final Color iconColor;
+  final Color tint;
   final String label;
   final String value;
 
   @override
   Widget build(BuildContext context) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          width: 56,
-          child: Text(
-            label,
-            style: TextStyle(
-              color: HomeColors.textMutedOf(context),
-              fontSize: 13,
-            ),
+        Container(
+          width: 52,
+          height: 52,
+          decoration: BoxDecoration(
+            color: tint,
+            borderRadius: BorderRadius.circular(16),
           ),
+          child: Icon(icon, color: iconColor, size: 26),
         ),
+        const SizedBox(width: 14),
         Expanded(
-          child: Text(
-            value,
-            style: TextStyle(
-              color: HomeColors.textPrimaryOf(context),
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  color: HomeColors.textMutedOf(context),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: HomeColors.textPrimaryOf(context),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  height: 1.3,
+                ),
+              ),
+            ],
           ),
         ),
       ],
+    );
+  }
+}
+
+/// The screen's single orange call to action (56px, radius 18).
+class _PrimaryButton extends StatelessWidget {
+  const _PrimaryButton({
+    required this.label,
+    required this.icon,
+    required this.onPressed,
+    this.loading = false,
+  });
+
+  final String label;
+  final IconData icon;
+  final VoidCallback? onPressed;
+  final bool loading;
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(18);
+    final active = onPressed != null || loading;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: radius,
+        boxShadow: active && !HomeColors.isDark(context)
+            ? [
+                BoxShadow(
+                  color: AppColors.brandOrange.withValues(alpha: 0.28),
+                  blurRadius: 18,
+                  offset: const Offset(0, 8),
+                ),
+              ]
+            : const [],
+      ),
+      child: SizedBox(
+        width: double.infinity,
+        height: 56,
+        child: Material(
+          color: active
+              ? HomeColors.orange
+              : HomeColors.orange.withValues(alpha: 0.5),
+          shape: RoundedRectangleBorder(borderRadius: radius),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: onPressed,
+            child: Center(
+              child: loading
+                  ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(icon, color: Colors.white, size: 24),
+                        const SizedBox(width: 10),
+                        Flexible(
+                          child: Text(
+                            label,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 17,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

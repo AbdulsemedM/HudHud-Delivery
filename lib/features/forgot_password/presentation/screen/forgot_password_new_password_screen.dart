@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/validation/password_validator.dart';
 import 'package:hudhud_delivery/features/forgot_password/bloc/forgot_password_reset_cubit.dart';
 import 'package:hudhud_delivery/features/forgot_password/data/repository/forgot_password_repository.dart';
@@ -9,6 +10,7 @@ import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_co
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_dark_scaffold.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_field_decoration.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_gradient_button.dart';
+import 'package:hudhud_delivery/features/login/presentation/widgets/auth_ui.dart';
 
 class ForgotPasswordNewPasswordScreen extends StatelessWidget {
   const ForgotPasswordNewPasswordScreen({
@@ -67,21 +69,42 @@ class _ForgotPasswordNewPasswordViewState
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
         backgroundColor: AuthScreenColors.surfaceOf(ctx),
+        icon: Container(
+          width: 72,
+          height: 72,
+          decoration: BoxDecoration(
+            color: AppColors.successColor.withValues(alpha: 0.12),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(
+            Icons.check_circle_rounded,
+            color: AppColors.successColor,
+            size: 40,
+          ),
+        ),
         title: Text(
           l10n.snackbarSuccessLabel,
-          style: TextStyle(color: AuthScreenColors.textPrimaryOf(ctx)),
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: AuthScreenColors.textPrimaryOf(ctx),
+            fontWeight: FontWeight.w800,
+          ),
         ),
         content: Text(
           message.isNotEmpty ? message : l10n.forgotPasswordSuccessMessage,
-          style: TextStyle(color: AuthScreenColors.textSecondaryOf(ctx)),
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: AuthScreenColors.textSecondaryOf(ctx),
+            fontSize: 15,
+            height: 1.45,
+          ),
         ),
+        actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
         actions: [
-          TextButton(
+          AuthGradientButton(
+            label: l10n.actionOk,
+            showArrow: false,
             onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(
-              l10n.actionOk,
-              style: const TextStyle(color: AuthScreenColors.orange),
-            ),
           ),
         ],
       ),
@@ -105,7 +128,7 @@ class _ForgotPasswordNewPasswordViewState
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.error!),
-                backgroundColor: AuthScreenColors.orange,
+                backgroundColor: AppColors.errorColor,
               ),
             );
           }
@@ -116,48 +139,30 @@ class _ForgotPasswordNewPasswordViewState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  l10n.forgotPasswordNewTitle,
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w700,
-                    color: AuthScreenColors.textPrimaryOf(context),
-                  ),
-                ),
                 const SizedBox(height: 8),
-                Text(
-                  l10n.forgotPasswordNewSubtitle,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: AuthScreenColors.textSecondaryOf(context),
-                    height: 1.45,
-                  ),
+                AuthHeading(
+                  icon: Icons.key_rounded,
+                  indigoIcon: true,
+                  title: l10n.forgotPasswordNewTitle,
+                  subtitle: l10n.forgotPasswordNewSubtitle,
                 ),
-                const SizedBox(height: 24),
-                Text(
-                  l10n.labelPassword,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: AuthScreenColors.textSecondaryOf(context),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 28),
+                AuthFieldLabel(l10n.labelPassword),
                 TextFormField(
                   controller: _passwordController,
                   obscureText: _obscure1,
                   enabled: !state.loading,
                   style: TextStyle(
                     color: AuthScreenColors.textPrimaryOf(context),
-                    fontSize: 15,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
                   ),
                   decoration: authFieldDecoration(
                     context,
                     hint: l10n.hintPassword,
-                    prefixIcon: Icon(
+                    prefixIcon: const Icon(
                       Icons.lock_outline_rounded,
-                      color: AuthScreenColors.textSecondaryOf(context),
-                      size: 20,
+                      size: 22,
                     ),
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -171,31 +176,23 @@ class _ForgotPasswordNewPasswordViewState
                   ),
                   validator: (v) => validatePasswordStrength(v, l10n),
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  l10n.forgotPasswordLabelConfirmPassword,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: AuthScreenColors.textSecondaryOf(context),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 20),
+                AuthFieldLabel(l10n.forgotPasswordLabelConfirmPassword),
                 TextFormField(
                   controller: _confirmController,
                   obscureText: _obscure2,
                   enabled: !state.loading,
                   style: TextStyle(
                     color: AuthScreenColors.textPrimaryOf(context),
-                    fontSize: 15,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
                   ),
                   decoration: authFieldDecoration(
                     context,
                     hint: l10n.forgotPasswordHintConfirmPassword,
-                    prefixIcon: Icon(
+                    prefixIcon: const Icon(
                       Icons.lock_outline_rounded,
-                      color: AuthScreenColors.textSecondaryOf(context),
-                      size: 20,
+                      size: 22,
                     ),
                     suffixIcon: IconButton(
                       icon: Icon(

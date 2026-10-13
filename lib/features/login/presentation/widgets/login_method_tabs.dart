@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
-import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
+import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
 
 enum LoginMethod { email, phone }
 
+/// Soft pill segmented control: tinted track with a sliding white thumb.
 class LoginMethodTabs extends StatelessWidget {
   final LoginMethod selected;
   final ValueChanged<LoginMethod> onChanged;
 
-  /// When true, uses auth screen styling (orange selected pill).
+  /// Kept for API compatibility; both styles now share the pill look.
   final bool authStyle;
 
   const LoginMethodTabs({
@@ -19,49 +20,78 @@ class LoginMethodTabs extends StatelessWidget {
     this.authStyle = false,
   });
 
+  static const double _height = 56;
+  static const double _inset = 5;
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    final trackColor = authStyle
-        ? AuthScreenColors.surfaceOf(context)
-        : (theme.brightness == Brightness.dark
-            ? theme.colorScheme.surfaceContainerHighest
-            : const Color(0xFFE8EEF4));
+    final dark = HomeColors.isDark(context);
+    final thumbColor = dark ? AppColors.darkBorder : AppColors.lightSurface;
+    final thumbRadius = BorderRadius.circular(_height / 2 - _inset);
 
     return Semantics(
       container: true,
       label: 'Sign in method',
       child: Container(
-        padding: const EdgeInsets.all(4),
+        height: _height,
+        padding: const EdgeInsets.all(_inset),
         decoration: BoxDecoration(
-          color: trackColor,
-          borderRadius: BorderRadius.circular(14),
-          border: authStyle
-              ? Border.all(color: AuthScreenColors.surfaceBorderOf(context))
-              : null,
+          color: HomeColors.surfaceElevatedOf(context),
+          borderRadius: BorderRadius.circular(_height / 2),
+          border: Border.all(color: HomeColors.borderOf(context)),
         ),
-        child: Row(
+        child: Stack(
           children: [
-            Expanded(
-              child: _TabSegment(
-                label: l10n.loginTabPhone,
-                icon: Icons.phone_outlined,
-                isSelected: selected == LoginMethod.phone,
-                semanticsLabel: l10n.loginTabPhoneSemantics,
-                authStyle: authStyle,
-                onTap: () => onChanged(LoginMethod.phone),
+            AnimatedAlign(
+              duration: const Duration(milliseconds: 260),
+              curve: Curves.easeOutCubic,
+              alignment: selected == LoginMethod.phone
+                  ? AlignmentDirectional.centerStart
+                  : AlignmentDirectional.centerEnd,
+              child: FractionallySizedBox(
+                widthFactor: 0.5,
+                heightFactor: 1,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: thumbColor,
+                    borderRadius: thumbRadius,
+                    boxShadow: dark
+                        ? null
+                        : const [
+                            BoxShadow(
+                              color: Color(0x1A1B1530),
+                              blurRadius: 12,
+                              offset: Offset(0, 3),
+                            ),
+                          ],
+                  ),
+                ),
               ),
             ),
-            Expanded(
-              child: _TabSegment(
-                label: l10n.loginTabEmail,
-                icon: Icons.mail_outline_rounded,
-                isSelected: selected == LoginMethod.email,
-                semanticsLabel: l10n.loginTabEmailSemantics,
-                authStyle: authStyle,
-                onTap: () => onChanged(LoginMethod.email),
-              ),
+            Row(
+              children: [
+                Expanded(
+                  child: _TabSegment(
+                    label: l10n.loginTabPhone,
+                    icon: Icons.phone_iphone_rounded,
+                    isSelected: selected == LoginMethod.phone,
+                    semanticsLabel: l10n.loginTabPhoneSemantics,
+                    radius: thumbRadius,
+                    onTap: () => onChanged(LoginMethod.phone),
+                  ),
+                ),
+                Expanded(
+                  child: _TabSegment(
+                    label: l10n.loginTabEmail,
+                    icon: Icons.alternate_email_rounded,
+                    isSelected: selected == LoginMethod.email,
+                    semanticsLabel: l10n.loginTabEmailSemantics,
+                    radius: thumbRadius,
+                    onTap: () => onChanged(LoginMethod.email),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -75,7 +105,7 @@ class _TabSegment extends StatelessWidget {
   final IconData icon;
   final String semanticsLabel;
   final bool isSelected;
-  final bool authStyle;
+  final BorderRadius radius;
   final VoidCallback onTap;
 
   const _TabSegment({
@@ -83,71 +113,54 @@ class _TabSegment extends StatelessWidget {
     required this.icon,
     required this.semanticsLabel,
     required this.isSelected,
-    required this.authStyle,
+    required this.radius,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final Color activeColor;
-    final Color activeFg;
-    final Color inactiveFg;
-
-    if (authStyle) {
-      activeColor = AuthScreenColors.orange;
-      activeFg = Colors.black;
-      inactiveFg = AuthScreenColors.textMutedOf(context);
-    } else {
-      activeColor = theme.brightness == Brightness.dark
-          ? AppColors.primaryLightColor
-          : AppColors.primaryColor;
-      activeFg = Colors.white;
-      inactiveFg = theme.colorScheme.onSurfaceVariant;
-    }
+    final activeIcon = HomeColors.violetOf(context);
+    final activeText = HomeColors.textPrimaryOf(context);
+    final inactive = HomeColors.textMutedOf(context);
 
     return Semantics(
       button: true,
       selected: isSelected,
       label: semanticsLabel,
       child: Material(
-        color: Colors.transparent,
+        type: MaterialType.transparency,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(10),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeOutCubic,
-            height: 44,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: isSelected ? activeColor : Colors.transparent,
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: isSelected && !authStyle
-                  ? [
-                      BoxShadow(
-                        color: activeColor.withValues(alpha: 0.28),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ]
-                  : null,
-            ),
+          borderRadius: radius,
+          child: Center(
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  icon,
-                  size: 18,
-                  color: isSelected ? activeFg : inactiveFg,
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  child: Icon(
+                    icon,
+                    key: ValueKey(isSelected),
+                    size: 20,
+                    color: isSelected ? activeIcon : inactive,
+                  ),
                 ),
-                const SizedBox(width: 6),
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: isSelected ? activeFg : inactiveFg,
+                const SizedBox(width: 8),
+                Flexible(
+                  child: AnimatedDefaultTextStyle(
+                    duration: const Duration(milliseconds: 200),
+                    style: DefaultTextStyle.of(context).style.copyWith(
+                          fontSize: 15,
+                          fontWeight:
+                              isSelected ? FontWeight.w800 : FontWeight.w600,
+                          letterSpacing: -0.1,
+                          color: isSelected ? activeText : inactive,
+                        ),
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ),
               ],

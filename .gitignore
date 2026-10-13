@@ -59,3 +59,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# JVM heap dumps (created by -XX:+HeapDumpOnOutOfMemoryError)
+*.hprof

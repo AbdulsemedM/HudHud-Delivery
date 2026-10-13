@@ -10,6 +10,7 @@ import 'package:hudhud_delivery/core/utils/money_format.dart';
 import 'package:hudhud_delivery/features/categories/data/data_provider/categories_data_provider.dart';
 import 'package:hudhud_delivery/features/categories/data/repository/categories_repository.dart';
 import 'package:hudhud_delivery/features/categories/model/categories_products_model.dart';
+import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/features/wishlist/presentation/widgets/wishlist_toggle_button.dart';
 
 class ProductDetailScreen extends StatefulWidget {
@@ -166,9 +167,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
     final l10n = context.l10n;
+    final dark = HomeColors.isDark(context);
+    final ink = HomeColors.textPrimaryOf(context);
 
     return ListenableBuilder(
       listenable: _cart,
@@ -178,35 +179,34 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         final canOrder = product?.canOrder ?? false;
 
         return Scaffold(
-          backgroundColor: colorScheme.surface,
+          backgroundColor: HomeColors.backgroundOf(context),
           appBar: AppBar(
-            backgroundColor: colorScheme.surface,
+            backgroundColor: HomeColors.backgroundOf(context),
+            surfaceTintColor: Colors.transparent,
             elevation: 0,
             scrolledUnderElevation: 0,
+            centerTitle: true,
             leading: IconButton(
-              icon: Icon(Icons.arrow_back_ios_new_rounded,
-                  color: colorScheme.onSurface, size: 20),
+              icon: Icon(Icons.arrow_back_rounded, color: ink, size: 26),
               onPressed: () => Navigator.pop(context),
             ),
             actions: [
               if (product != null && product.id != null)
-                WishlistToggleButton(product: product, size: 22),
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: WishlistToggleButton(product: product, size: 24),
+                ),
             ],
             title: Text(
               product?.name ?? 'Product',
-              style: textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: colorScheme.onSurface,
+              style: TextStyle(
+                fontSize: 19,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.3,
+                color: ink,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-            ),
-            bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(1),
-              child: Container(
-                color: colorScheme.outline.withValues(alpha: 0.2),
-                height: 1,
-              ),
             ),
           ),
           bottomNavigationBar: _cart.isEmpty
@@ -232,215 +232,237 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           onRetry: _loadProduct,
                         )
                       : SingleChildScrollView(
+                          padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              if (product.image_path != null &&
-                                  product.image_path!.isNotEmpty)
-                                ClipRRect(
-                                  child: Image.network(
-                                    product.image_path!,
-                                    height: 280,
-                                    width: double.infinity,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) =>
-                                        _imagePlaceholder(colorScheme),
-                                  ),
-                                )
-                              else
-                                _imagePlaceholder(colorScheme),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.all(AppColors.spaceMD),
-                                child: Container(
-                                  padding:
-                                      const EdgeInsets.all(AppColors.spaceMD),
-                                  decoration: BoxDecoration(
-                                    color: colorScheme.surface,
-                                    borderRadius: BorderRadius.circular(
-                                        AppColors.radiusLG),
-                                    border: Border.all(
-                                      color: colorScheme.outline
-                                          .withValues(alpha: 0.2),
-                                    ),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        product.name ?? 'Product',
-                                        style:
-                                            textTheme.headlineSmall?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          color: colorScheme.onSurface,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 12),
-                                      Row(
-                                        children: [
-                                          Text(
-                                            formatEtbPriceString(
-                                              product.formatted_price ??
-                                                  product.price,
-                                            ),
-                                            style: const TextStyle(
-                                              fontSize: 22,
-                                              fontWeight: FontWeight.bold,
-                                              color: AppColors.primaryColor,
-                                            ),
-                                          ),
-                                          if (product.is_on_discount == true &&
-                                              product.formatted_original_price !=
-                                                  null) ...[
-                                            const SizedBox(width: 12),
-                                            Text(
-                                              formatEtbPriceString(
-                                                product.formatted_original_price,
-                                              ),
-                                              style: textTheme.bodyMedium
-                                                  ?.copyWith(
-                                                color: colorScheme
-                                                    .onSurfaceVariant,
-                                                decoration:
-                                                    TextDecoration.lineThrough,
-                                              ),
-                                            ),
-                                          ],
-                                        ],
-                                      ),
-                                      if (product.description != null &&
-                                          product.description!.isNotEmpty) ...[
-                                        const SizedBox(height: 16),
-                                        Text(
-                                          product.description!,
-                                          style: textTheme.bodyMedium?.copyWith(
-                                            color: colorScheme.onSurfaceVariant,
-                                            height: 1.5,
-                                          ),
-                                        ),
-                                      ],
-                                      if (_variants.isNotEmpty) ...[
-                                        const SizedBox(height: 20),
-                                        Text(
-                                          'Options',
-                                          style: textTheme.titleSmall?.copyWith(
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Wrap(
-                                          spacing: 8,
-                                          runSpacing: 8,
-                                          children: _variants.map((variant) {
-                                            final id = variant['id'] is int
-                                                ? variant['id'] as int
-                                                : int.tryParse(
-                                                    '${variant['id']}');
-                                            final label = variant['name']
-                                                    ?.toString() ??
-                                                variant['label']?.toString() ??
-                                                'Option';
-                                            final selected =
-                                                id != null &&
-                                                    id == _selectedVariantId;
-                                            return ChoiceChip(
-                                              label: Text(label),
-                                              selected: selected,
-                                              onSelected: id == null
-                                                  ? null
-                                                  : (_) => setState(() =>
-                                                      _selectedVariantId = id),
-                                            );
-                                          }).toList(),
-                                        ),
-                                      ],
-                                      if (_modifierOptions.isNotEmpty) ...[
-                                        const SizedBox(height: 16),
-                                        Text(
-                                          'Add-ons',
-                                          style: textTheme.titleSmall?.copyWith(
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Wrap(
-                                          spacing: 8,
-                                          runSpacing: 8,
-                                          children:
-                                              _modifierOptions.map((opt) {
-                                            final id = opt['id'] is int
-                                                ? opt['id'] as int
-                                                : int.tryParse('${opt['id']}');
-                                            final label = opt['name']
-                                                    ?.toString() ??
-                                                opt['label']?.toString() ??
-                                                'Add-on';
-                                            final selected = id != null &&
-                                                _selectedModifierIds
-                                                    .contains(id);
-                                            return FilterChip(
-                                              label: Text(label),
-                                              selected: selected,
-                                              onSelected: id == null
-                                                  ? null
-                                                  : (value) {
-                                                      setState(() {
-                                                        if (value) {
-                                                          _selectedModifierIds
-                                                              .add(id);
-                                                        } else {
-                                                          _selectedModifierIds
-                                                              .remove(id);
-                                                        }
-                                                      });
-                                                    },
-                                            );
-                                          }).toList(),
-                                        ),
-                                      ],
-                                      const SizedBox(height: 24),
-                                      if (cartQuantity > 0)
-                                        _CartQuantityControls(
-                                          quantity: cartQuantity,
-                                          onDecrement: () => _cart.decrement(
-                                            product.id!.toString(),
-                                          ),
-                                          onIncrement: canOrder
-                                              ? () => _cart.increment(
-                                                    product.id!.toString(),
-                                                  )
-                                              : null,
-                                        )
-                                      else
-                                        SizedBox(
+                              Container(
+                                height: 280,
+                                decoration: BoxDecoration(
+                                  color: HomeColors.surfaceOf(context),
+                                  borderRadius: BorderRadius.circular(24),
+                                  boxShadow: AppColors.softShadow(context),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(24),
+                                  child: product.image_path != null &&
+                                          product.image_path!.isNotEmpty
+                                      ? Image.network(
+                                          product.image_path!,
+                                          height: 280,
                                           width: double.infinity,
-                                          height: AppColors.buttonHeightMD,
-                                          child: FilledButton.icon(
-                                            onPressed:
-                                                canOrder ? _addToCart : null,
-                                            icon: const Icon(
-                                                Icons.add_shopping_cart),
-                                            label: Text(l10n.actionAddToCart),
-                                            style: FilledButton.styleFrom(
-                                              backgroundColor:
-                                                  AppColors.primaryColor,
-                                              foregroundColor:
-                                                  AppColors.lightOnPrimary,
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                  AppColors.radiusLG,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                    ],
-                                  ),
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (_, __, ___) =>
+                                              _imagePlaceholder(context),
+                                        )
+                                      : _imagePlaceholder(context),
                                 ),
                               ),
-                              SizedBox(height: _cart.isEmpty ? 16 : 96),
+                              const SizedBox(height: 16),
+                              Container(
+                                padding: const EdgeInsets.all(18),
+                                decoration: BoxDecoration(
+                                  color: HomeColors.surfaceOf(context),
+                                  borderRadius: BorderRadius.circular(24),
+                                  border: dark
+                                      ? Border.all(
+                                          color: HomeColors.borderOf(context),
+                                        )
+                                      : null,
+                                  boxShadow: AppColors.softShadow(context),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      product.name ?? 'Product',
+                                      style: TextStyle(
+                                        fontSize: 24,
+                                        height: 1.2,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: -0.5,
+                                        color: ink,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Wrap(
+                                      crossAxisAlignment:
+                                          WrapCrossAlignment.center,
+                                      spacing: 10,
+                                      runSpacing: 4,
+                                      children: [
+                                        Text(
+                                          formatEtbPriceString(
+                                            product.formatted_price ??
+                                                product.price,
+                                          ),
+                                          style: TextStyle(
+                                            fontSize: 26,
+                                            fontWeight: FontWeight.w800,
+                                            letterSpacing: -0.5,
+                                            color: ink,
+                                          ),
+                                        ),
+                                        if (product.is_on_discount == true &&
+                                            product.formatted_original_price !=
+                                                null)
+                                          Text(
+                                            formatEtbPriceString(
+                                              product.formatted_original_price,
+                                            ),
+                                            style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w600,
+                                              color: HomeColors.textMutedOf(
+                                                context,
+                                              ),
+                                              decoration:
+                                                  TextDecoration.lineThrough,
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                    if (product.description != null &&
+                                        product.description!.isNotEmpty) ...[
+                                      const SizedBox(height: 14),
+                                      Text(
+                                        product.description!,
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          height: 1.5,
+                                          fontWeight: FontWeight.w500,
+                                          color: HomeColors.textSecondaryOf(
+                                            context,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                    if (_variants.isNotEmpty) ...[
+                                      const SizedBox(height: 22),
+                                      const _OptionsLabel(
+                                        icon: Icons.tune_rounded,
+                                        text: 'Options',
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Wrap(
+                                        spacing: 8,
+                                        runSpacing: 8,
+                                        children: _variants.map((variant) {
+                                          final id = variant['id'] is int
+                                              ? variant['id'] as int
+                                              : int.tryParse(
+                                                  '${variant['id']}',
+                                                );
+                                          final label = variant['name']
+                                                  ?.toString() ??
+                                              variant['label']?.toString() ??
+                                              'Option';
+                                          final selected = id != null &&
+                                              id == _selectedVariantId;
+                                          return _OptionPill(
+                                            label: label,
+                                            selected: selected,
+                                            onTap: id == null
+                                                ? null
+                                                : () => setState(
+                                                      () => _selectedVariantId =
+                                                          id,
+                                                    ),
+                                          );
+                                        }).toList(),
+                                      ),
+                                    ],
+                                    if (_modifierOptions.isNotEmpty) ...[
+                                      const SizedBox(height: 18),
+                                      const _OptionsLabel(
+                                        icon: Icons.add_circle_rounded,
+                                        text: 'Add-ons',
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Wrap(
+                                        spacing: 8,
+                                        runSpacing: 8,
+                                        children: _modifierOptions.map((opt) {
+                                          final id = opt['id'] is int
+                                              ? opt['id'] as int
+                                              : int.tryParse('${opt['id']}');
+                                          final label =
+                                              opt['name']?.toString() ??
+                                                  opt['label']?.toString() ??
+                                                  'Add-on';
+                                          final selected = id != null &&
+                                              _selectedModifierIds.contains(id);
+                                          return _OptionPill(
+                                            label: label,
+                                            selected: selected,
+                                            showCheck: true,
+                                            onTap: id == null
+                                                ? null
+                                                : () {
+                                                    setState(() {
+                                                      if (!selected) {
+                                                        _selectedModifierIds
+                                                            .add(id);
+                                                      } else {
+                                                        _selectedModifierIds
+                                                            .remove(id);
+                                                      }
+                                                    });
+                                                  },
+                                          );
+                                        }).toList(),
+                                      ),
+                                    ],
+                                    const SizedBox(height: 24),
+                                    if (cartQuantity > 0)
+                                      _CartQuantityControls(
+                                        quantity: cartQuantity,
+                                        onDecrement: () => _cart.decrement(
+                                          product.id!.toString(),
+                                        ),
+                                        onIncrement: canOrder
+                                            ? () => _cart.increment(
+                                                  product.id!.toString(),
+                                                )
+                                            : null,
+                                      )
+                                    else
+                                      SizedBox(
+                                        width: double.infinity,
+                                        height: 56,
+                                        child: FilledButton.icon(
+                                          onPressed:
+                                              canOrder ? _addToCart : null,
+                                          icon: const Icon(
+                                            Icons.add_shopping_cart_rounded,
+                                            size: 24,
+                                          ),
+                                          label: Text(l10n.actionAddToCart),
+                                          style: FilledButton.styleFrom(
+                                            backgroundColor:
+                                                AppColors.brandOrange,
+                                            foregroundColor: Colors.white,
+                                            disabledBackgroundColor:
+                                                HomeColors.surfaceElevatedOf(
+                                              context,
+                                            ),
+                                            disabledForegroundColor:
+                                                HomeColors.textMutedOf(context),
+                                            textStyle: const TextStyle(
+                                              fontSize: 17,
+                                              fontWeight: FontWeight.w800,
+                                            ),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(18),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(height: _cart.isEmpty ? 24 : 104),
                             ],
                           ),
                         ),
@@ -449,12 +471,108 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
-  Widget _imagePlaceholder(ColorScheme colorScheme) {
+  Widget _imagePlaceholder(BuildContext context) {
+    final dark = HomeColors.isDark(context);
     return Container(
       height: 280,
-      color: colorScheme.surfaceContainerHighest,
-      child: Icon(Icons.shopping_bag_outlined,
-          size: 80, color: colorScheme.onSurfaceVariant),
+      color: dark ? AppColors.orangeTintDark : AppColors.orangeTint,
+      child: const Icon(
+        Icons.shopping_bag_rounded,
+        size: 80,
+        color: AppColors.brandOrange,
+      ),
+    );
+  }
+}
+
+class _OptionsLabel extends StatelessWidget {
+  const _OptionsLabel({required this.icon, required this.text});
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 20, color: HomeColors.violetOf(context)),
+        const SizedBox(width: 8),
+        Text(
+          text,
+          style: TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.2,
+            color: HomeColors.textPrimaryOf(context),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Large selectable option pill (indigo when selected).
+class _OptionPill extends StatelessWidget {
+  const _OptionPill({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    this.showCheck = false,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback? onTap;
+  final bool showCheck;
+
+  @override
+  Widget build(BuildContext context) {
+    final indigo = HomeColors.violetOf(context);
+    return Material(
+      color: selected ? indigo : HomeColors.surfaceOf(context),
+      shape: StadiumBorder(
+        side: BorderSide(
+          color: selected ? indigo : HomeColors.borderOf(context),
+          width: 1.4,
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 46),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (showCheck || selected) ...[
+                  Icon(
+                    selected
+                        ? Icons.check_circle_rounded
+                        : Icons.add_circle_outline_rounded,
+                    size: 20,
+                    color: selected
+                        ? Colors.white
+                        : HomeColors.textMutedOf(context),
+                  ),
+                  const SizedBox(width: 6),
+                ],
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: selected
+                        ? Colors.white
+                        : HomeColors.textPrimaryOf(context),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -472,34 +590,44 @@ class _CartQuantityControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dark = HomeColors.isDark(context);
+    Widget roundButton(IconData icon, VoidCallback? onTap) => Material(
+          color: onTap == null
+              ? AppColors.brandOrange.withValues(alpha: 0.4)
+              : AppColors.brandOrange,
+          shape: const CircleBorder(),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: onTap,
+            child: SizedBox(
+              width: 46,
+              height: 46,
+              child: Icon(icon, color: Colors.white, size: 24),
+            ),
+          ),
+        );
     return Container(
-      height: AppColors.buttonHeightMD,
+      height: 58,
+      padding: const EdgeInsets.symmetric(horizontal: 6),
       decoration: BoxDecoration(
-        border: Border.all(color: AppColors.primaryColor),
-        borderRadius: BorderRadius.circular(AppColors.radiusLG),
+        color: dark ? AppColors.orangeTintDark : AppColors.orangeTint,
+        borderRadius: BorderRadius.circular(18),
       ),
       child: Row(
         children: [
-          IconButton(
-            onPressed: onDecrement,
-            icon: const Icon(Icons.remove),
-            color: AppColors.primaryColor,
-          ),
+          roundButton(Icons.remove_rounded, onDecrement),
           Expanded(
             child: Text(
               '$quantity in cart',
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                color: AppColors.primaryColor,
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w800,
+                color: HomeColors.textPrimaryOf(context),
               ),
             ),
           ),
-          IconButton(
-            onPressed: onIncrement,
-            icon: const Icon(Icons.add),
-            color: AppColors.primaryColor,
-          ),
+          roundButton(Icons.add_rounded, onIncrement),
         ],
       ),
     );
@@ -519,62 +647,99 @@ class _CartCheckoutBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final dark = HomeColors.isDark(context);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
       decoration: BoxDecoration(
-        color: AppColors.primaryColor,
-        boxShadow: [
-          BoxShadow(
-            color: isDark ? AppColors.darkShadow : AppColors.lightShadow,
-            blurRadius: 10,
-            offset: const Offset(0, -5),
-          ),
-        ],
+        color: HomeColors.surfaceOf(context),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        border: dark
+            ? Border(top: BorderSide(color: HomeColors.borderOf(context)))
+            : null,
+        boxShadow: dark
+            ? null
+            : const [
+                BoxShadow(
+                  color: AppColors.lightShadow,
+                  blurRadius: 18,
+                  offset: Offset(0, -6),
+                ),
+              ],
       ),
       child: SafeArea(
         top: false,
         child: Row(
           children: [
-            const Icon(Icons.shopping_bag_outlined,
-                color: AppColors.lightOnPrimary, size: 22),
-            const SizedBox(width: 8),
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: dark ? AppColors.orangeTintDark : AppColors.orangeTint,
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: const Icon(
+                Icons.shopping_bag_rounded,
+                color: AppColors.brandOrange,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
             Expanded(
-              child: Text(
-                'TOTAL ITEMS: $totalItems',
-                style: const TextStyle(
-                  color: AppColors.lightOnPrimary,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'TOTAL ITEMS: $totalItems',
+                    style: TextStyle(
+                      color: HomeColors.textMutedOf(context),
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.3,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'ETB ${subtotal.toStringAsFixed(1)}',
+                    maxLines: 1,
+                    style: TextStyle(
+                      color: HomeColors.textPrimaryOf(context),
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.3,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 10),
+            SizedBox(
+              height: 52,
+              child: FilledButton(
+                onPressed: onCheckout,
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.brandOrange,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 18),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'ETB ${subtotal.toStringAsFixed(1)}',
-              style: const TextStyle(
-                color: AppColors.lightOnPrimary,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(width: 8),
-            TextButton(
-              onPressed: onCheckout,
-              style: TextButton.styleFrom(
-                backgroundColor: AppColors.lightSurface,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: const Text(
-                'Go to Checkout',
-                style: TextStyle(
-                  color: AppColors.primaryColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Go to Checkout',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 15,
+                      ),
+                    ),
+                    SizedBox(width: 6),
+                    Icon(Icons.arrow_forward_rounded, size: 20),
+                  ],
                 ),
               ),
             ),
@@ -590,68 +755,48 @@ class _ProductDetailShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final base = isDark ? AppColors.darkSurfaceVariant : AppColors.lightBorder;
-    final highlight =
-        isDark ? AppColors.darkBorder : AppColors.lightInputFill;
-    final block = Theme.of(context).colorScheme.surface;
+    final base = HomeColors.surfaceElevatedOf(context);
+    final highlight = HomeColors.surfaceOf(context);
+    Widget block({double? w, required double h, double r = 8}) => Container(
+          width: w,
+          height: h,
+          decoration: BoxDecoration(
+            color: base,
+            borderRadius: BorderRadius.circular(r),
+          ),
+        );
 
     return Shimmer.fromColors(
       baseColor: base,
       highlightColor: highlight,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Container(height: 280, color: block),
-          Padding(
-            padding: const EdgeInsets.all(AppColors.spaceMD),
-            child: Container(
-              padding: const EdgeInsets.all(AppColors.spaceMD),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            block(h: 280, r: 24),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                color: block,
-                borderRadius: BorderRadius.circular(AppColors.radiusLG),
+                color: highlight,
+                borderRadius: BorderRadius.circular(24),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    height: 24,
-                    width: 200,
-                    decoration: BoxDecoration(
-                      color: block,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                  ),
+                  block(w: 200, h: 24),
                   const SizedBox(height: 12),
-                  Container(
-                    height: 20,
-                    width: 120,
-                    decoration: BoxDecoration(
-                      color: block,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                  ),
+                  block(w: 120, h: 24),
                   const SizedBox(height: 16),
-                  Container(
-                    height: 60,
-                    decoration: BoxDecoration(
-                      color: block,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                  ),
+                  block(h: 60),
                   const SizedBox(height: 24),
-                  Container(
-                    height: AppColors.buttonHeightMD,
-                    decoration: BoxDecoration(
-                      color: block,
-                      borderRadius: BorderRadius.circular(AppColors.radiusLG),
-                    ),
-                  ),
+                  block(h: 56, r: 18),
                 ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -669,12 +814,11 @@ class _ProductErrorState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colorScheme = Theme.of(context).colorScheme;
     return Center(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(32),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Lottie.asset('assets/animations/browse.json', width: 180),
             const SizedBox(height: 16),
@@ -682,20 +826,29 @@ class _ProductErrorState extends StatelessWidget {
               message,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 14,
-                color: colorScheme.onSurfaceVariant,
+                fontSize: 17,
+                fontWeight: FontWeight.w800,
+                color: HomeColors.textPrimaryOf(context),
               ),
             ),
             const SizedBox(height: 24),
-            FilledButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: Text(l10n.actionTryAgain),
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.primaryColor,
-                foregroundColor: AppColors.lightOnPrimary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppColors.radiusLG),
+            SizedBox(
+              height: 56,
+              child: FilledButton.icon(
+                onPressed: onRetry,
+                icon: const Icon(Icons.refresh_rounded, size: 22),
+                label: Text(l10n.actionTryAgain),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.brandOrange,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 28),
+                  textStyle: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
+                  ),
                 ),
               ),
             ),

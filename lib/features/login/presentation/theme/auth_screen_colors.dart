@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/theme/app_theme.dart';
 
 /// Colors for auth screens (login + forgot password) in light and dark modes.
 class AuthScreenColors {
   AuthScreenColors._();
 
   // Dark tokens
-  static const Color background = Color(0xFF0D0B14);
-  static const Color surface = Color(0xFF1A1625);
-  static const Color surfaceBorder = Color(0xFF2A2438);
-  static const Color orange = Color(0xFFF27121);
-  static const Color orangeBright = Color(0xFFFF7A33);
-  static const Color purple = Color(0xFF8E6CEF);
-  static const Color lavender = Color(0xFFA294F9);
-  static const Color textPrimary = Color(0xFFFFFFFF);
-  static const Color textSecondary = Color(0xFF706E7A);
-  static const Color textMuted = Color(0xFF9A97A5);
+  static const Color background = AppColors.darkBackground;
+  static const Color surface = AppColors.darkSurfaceVariant;
+  static const Color surfaceBorder = AppColors.darkBorder;
+  static const Color orange = AppColors.brandOrange;
+  static const Color orangeBright = AppColors.primaryLightColor;
+  static const Color purple = AppColors.brandIndigo;
+  static const Color lavender = AppColors.brandIndigoBright;
+  static const Color textPrimary = AppColors.darkTextPrimary;
+  static const Color textSecondary = AppColors.darkTextSecondary;
+  static const Color textMuted = AppColors.darkTextHint;
 
   // Light tokens
   static const Color lightBackground = AppColors.lightBackground;
@@ -25,7 +26,8 @@ class AuthScreenColors {
   static const Color lightTextSecondary = AppColors.lightTextSecondary;
   static const Color lightTextMuted = AppColors.lightTextHint;
 
-  static const List<Color> signInGradient = [orange, purple];
+  /// Solid brand orange (the old orange→purple gradient read as generic).
+  static const List<Color> signInGradient = [orange, orange];
 
   static bool isDark(BuildContext context) =>
       Theme.of(context).brightness == Brightness.dark;
@@ -59,9 +61,9 @@ class AuthScreenColors {
       scaffoldBackgroundColor: background,
       colorScheme: const ColorScheme.dark(
         primary: orange,
-        secondary: purple,
+        secondary: lavender,
         surface: surface,
-        onPrimary: Colors.black,
+        onPrimary: Colors.white,
         onSecondary: Colors.white,
         onSurface: textPrimary,
         onSurfaceVariant: textSecondary,
@@ -146,8 +148,12 @@ class AuthScreenColors {
     return InputDecorationTheme(
       filled: true,
       fillColor: fillColor,
-      hintStyle: TextStyle(color: hintColor, fontSize: 14),
-      labelStyle: TextStyle(color: labelColor),
+      hintStyle: TextStyle(
+        fontFamily: AppTheme.fontFamily,
+        color: hintColor,
+        fontSize: 14,
+      ),
+      labelStyle: TextStyle(fontFamily: AppTheme.fontFamily, color: labelColor),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
         borderSide: BorderSide.none,
@@ -179,6 +185,8 @@ class AuthScreenColors {
     return SnackBarThemeData(
       backgroundColor: backgroundColor,
       contentTextStyle: TextStyle(
+        fontFamily: AppTheme.fontFamily,
+        fontFamilyFallback: AppTheme.fontFallback,
         color: textColor,
         fontSize: 14,
         fontWeight: FontWeight.w500,
@@ -208,11 +216,15 @@ class AuthScreenColors {
         side: BorderSide(color: borderColor),
       ),
       titleTextStyle: TextStyle(
+        fontFamily: AppTheme.fontFamily,
+        fontFamilyFallback: AppTheme.fontFallback,
         color: titleColor,
         fontSize: 18,
         fontWeight: FontWeight.w700,
       ),
       contentTextStyle: TextStyle(
+        fontFamily: AppTheme.fontFamily,
+        fontFamilyFallback: AppTheme.fontFallback,
         color: contentColor,
         fontSize: 14,
         height: 1.4,

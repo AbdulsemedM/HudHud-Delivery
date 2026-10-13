@@ -33,6 +33,7 @@ class _RetryPaymentChoice {
   final String method;
   final String phone;
 }
+
 class DeliveryDetailsScreen extends StatefulWidget {
   final int deliveryId;
 
@@ -268,24 +269,20 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
   List<Map<String, dynamic>> _retryPaymentMethods(
     List<Map<String, dynamic>> methods,
   ) {
-    final filtered = filterAllowedPaymentMethods(methods)
-        .where((m) {
-          final id = m['id']?.toString() ?? '';
-          return id.isNotEmpty &&
-              id != 'cash_on_delivery' &&
-              id != 'cash' &&
-              m['enabled'] != false;
-        })
-        .toList(growable: false);
+    final filtered = filterAllowedPaymentMethods(methods).where((m) {
+      final id = m['id']?.toString() ?? '';
+      return id.isNotEmpty &&
+          id != 'cash_on_delivery' &&
+          id != 'cash' &&
+          m['enabled'] != false;
+    }).toList(growable: false);
     if (filtered.isNotEmpty) return filtered;
     return filterAllowedPaymentMethods(
       List<Map<String, dynamic>>.from(kDefaultAllowedPaymentMethods),
-    )
-        .where((m) {
-          final id = m['id']?.toString() ?? '';
-          return id != 'cash_on_delivery' && id != 'cash';
-        })
-        .toList(growable: false);
+    ).where((m) {
+      final id = m['id']?.toString() ?? '';
+      return id != 'cash_on_delivery' && id != 'cash';
+    }).toList(growable: false);
   }
 
   Future<_RetryPaymentChoice?> _promptRetryPaymentSelection({
@@ -297,7 +294,7 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
       isScrollControlled: true,
       backgroundColor: HomeColors.surfaceOf(context),
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       builder: (sheetContext) {
         return PaymentMethodsLoader(
@@ -367,7 +364,7 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
                   ? error.displayMessage
                   : 'Payment amount changed. Review the updated total and try again.',
             ),
-            backgroundColor: Colors.orange,
+            backgroundColor: AppColors.warningColor,
           ),
         );
         return;
@@ -381,14 +378,15 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
                   ? error.displayMessage
                   : 'Delivery payment could not be initiated. Please try again.',
             ),
-            backgroundColor: Colors.orange,
+            backgroundColor: AppColors.warningColor,
           ),
         );
         return;
       }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(result['message']?.toString() ?? 'Failed to retry payment'),
+          content:
+              Text(result['message']?.toString() ?? 'Failed to retry payment'),
           backgroundColor: AppColors.errorColor,
         ),
       );
@@ -434,12 +432,12 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
       children: [
         Expanded(
           child: RefreshIndicator(
-            color: HomeColors.violet,
+            color: AppColors.brandOrange,
             backgroundColor: HomeColors.surfaceOf(context),
             onRefresh: () => _fetchDetails(refresh: true),
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(AppColors.spaceMD),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -451,76 +449,90 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
                     trackingNumber: d['tracking_number']?.toString(),
                     borderColor: borderColor,
                   ),
-                  const SizedBox(height: AppColors.spaceMD),
+                  const SizedBox(height: 14),
                   _RouteCard(
                     pickupLabel: l10n.deliveryDetailsPickup,
                     dropoffLabel: l10n.deliveryDetailsDropoff,
                     pickupLocation: d['pickup_location']?.toString(),
                     dropoffLocation: d['dropoff_location']?.toString(),
                     pickupInstructions: d['pickup_instructions']?.toString(),
-                    deliveryInstructions: d['delivery_instructions']?.toString(),
+                    deliveryInstructions:
+                        d['delivery_instructions']?.toString(),
                     recipientName: d['receiver_name']?.toString(),
                     recipientPhone: d['receiver_phone']?.toString(),
                     borderColor: borderColor,
                   ),
-                  const SizedBox(height: AppColors.spaceMD),
+                  const SizedBox(height: 14),
                   _SectionCard(
                     title: 'Package',
+                    icon: Icons.inventory_2_rounded,
+                    accent: AppColors.brandOrange,
                     borderColor: borderColor,
                     children: [
                       _DetailField(
+                        icon: Icons.category_rounded,
                         label: 'Type',
                         value: d['package_type']?.toString(),
                       ),
                       _DetailField(
+                        icon: Icons.notes_rounded,
                         label: 'Description',
                         value: d['package_description']?.toString(),
                       ),
                       _DetailField(
+                        icon: Icons.scale_rounded,
                         label: 'Weight',
                         value: d['package_weight'] != null
                             ? '${d['package_weight']} kg'
                             : null,
                       ),
                       _DetailField(
+                        icon: Icons.info_outline_rounded,
                         label: 'Special instructions',
                         value: d['special_instructions']?.toString(),
                       ),
                     ],
                   ),
-                  const SizedBox(height: AppColors.spaceMD),
+                  const SizedBox(height: 14),
                   _SectionCard(
                     title: 'Payment',
+                    icon: Icons.payments_rounded,
+                    accent: HomeColors.violetOf(context),
                     borderColor: borderColor,
                     children: [
                       _DetailField(
+                        icon: Icons.account_balance_wallet_rounded,
                         label: 'Payment method',
                         value: formatPaymentMethodLabel(
                           d['payment_method']?.toString(),
                         ),
                       ),
                       _DetailField(
+                        icon: Icons.verified_rounded,
                         label: 'Payment status',
                         value: d['payment_status']?.toString(),
+                        trailingStatus: true,
                       ),
                       _DetailField(
+                        icon: Icons.event_rounded,
                         label: 'Scheduled pickup',
                         value: _formatDate(d['scheduled_pickup']),
                         hideWhenEmpty: true,
                       ),
                       _DetailField(
+                        icon: Icons.event_available_rounded,
                         label: 'Scheduled delivery',
                         value: _formatDate(d['scheduled_delivery']),
                         hideWhenEmpty: true,
                       ),
                       _DetailField(
+                        icon: Icons.check_circle_rounded,
                         label: 'Delivered',
                         value: _formatDate(d['delivered_at']),
                         hideWhenEmpty: true,
                       ),
                     ],
                   ),
-                  const SizedBox(height: AppColors.spaceMD),
                 ],
               ),
             ),
@@ -544,6 +556,58 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
     );
   }
 
+  Widget _stateMessage(
+    BuildContext context, {
+    required IconData icon,
+    required Color color,
+    required Color tint,
+    required String title,
+    String? subtitle,
+    Widget? action,
+  }) {
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(AppColors.spaceLG),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 96,
+              height: 96,
+              decoration: BoxDecoration(shape: BoxShape.circle, color: tint),
+              child: Icon(icon, size: 46, color: color),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.3,
+                color: HomeColors.textPrimaryOf(context),
+              ),
+            ),
+            if (subtitle != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                subtitle,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  height: 1.4,
+                  fontWeight: FontWeight.w600,
+                  color: HomeColors.textMutedOf(context),
+                ),
+              ),
+            ],
+            if (action != null) ...[const SizedBox(height: 20), action],
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return CourierTheme.wrap(
@@ -551,22 +615,30 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
       child: Builder(
         builder: (context) {
           final l10n = context.l10n;
-          final theme = Theme.of(context);
+          final dark = HomeColors.isDark(context);
+          final bg = HomeColors.backgroundOf(context);
 
           return Scaffold(
-            backgroundColor: HomeColors.backgroundOf(context),
+            backgroundColor: bg,
             appBar: AppBar(
-              backgroundColor: HomeColors.surfaceOf(context),
+              backgroundColor: bg,
               elevation: 0,
+              scrolledUnderElevation: 0,
               surfaceTintColor: Colors.transparent,
               leading: IconButton(
-                icon: Icon(Icons.arrow_back, color: HomeColors.textPrimaryOf(context)),
+                icon: Icon(
+                  Icons.arrow_back_rounded,
+                  size: 26,
+                  color: HomeColors.textPrimaryOf(context),
+                ),
                 onPressed: () => Navigator.pop(context),
               ),
               title: Text(
                 _deliveryLabel,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
+                style: TextStyle(
+                  fontSize: 19,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.3,
                   color: HomeColors.textPrimaryOf(context),
                 ),
               ),
@@ -578,88 +650,150 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
                     child: ShimmerListView(itemCount: 4),
                   )
                 : _error != null
-                    ? Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(AppColors.spaceLG),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.wifi_off_rounded,
-                                size: 48,
-                                color: HomeColors.textMutedOf(context),
+                    ? _stateMessage(
+                        context,
+                        icon: Icons.wifi_off_rounded,
+                        color: AppColors.errorColor,
+                        tint: AppColors.errorColor.withValues(
+                          alpha: dark ? 0.2 : 0.1,
+                        ),
+                        title: _error!,
+                        action: SizedBox(
+                          height: 52,
+                          child: FilledButton.icon(
+                            onPressed: () {
+                              setState(() => _isLoading = true);
+                              _fetchDetails();
+                            },
+                            style: FilledButton.styleFrom(
+                              backgroundColor: AppColors.brandOrange,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 28,
                               ),
-                              const SizedBox(height: AppColors.spaceMD),
-                              Text(
-                                _error!,
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: HomeColors.textPrimaryOf(context),
-                                ),
-                                textAlign: TextAlign.center,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18),
                               ),
-                              TextButton.icon(
-                                onPressed: () {
-                                  setState(() => _isLoading = true);
-                                  _fetchDetails();
-                                },
-                                icon: const Icon(Icons.refresh,
-                                    color: HomeColors.violet),
-                                label: Text(
-                                  l10n.actionRetry,
-                                  style: TextStyle(color: HomeColors.violet),
-                                ),
+                            ),
+                            icon: const Icon(Icons.refresh_rounded, size: 24),
+                            label: Text(
+                              l10n.actionRetry,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w800,
                               ),
-                            ],
+                            ),
                           ),
                         ),
                       )
                     : _delivery == null
-                        ? Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(AppColors.spaceLG),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    width: 112,
-                                    height: 112,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: HomeColors.violet
-                                          .withValues(alpha: 0.12),
-                                    ),
-                                    child: Icon(
-                                      Icons.local_shipping_outlined,
-                                      size: 56,
-                                      color: HomeColors.violet
-                                          .withValues(alpha: 0.9),
-                                    ),
-                                  ),
-                                  const SizedBox(height: AppColors.spaceLG),
-                                  Text(
-                                    'Delivery not found',
-                                    textAlign: TextAlign.center,
-                                    style: theme.textTheme.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      color: HomeColors.textPrimaryOf(context),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    'This delivery may have been removed or is no longer available.',
-                                    textAlign: TextAlign.center,
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: HomeColors.textMutedOf(context),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                        ? _stateMessage(
+                            context,
+                            icon: Icons.local_shipping_rounded,
+                            color: HomeColors.violetOf(context),
+                            tint: HomeColors.violetTintOf(context),
+                            title: 'Delivery not found',
+                            subtitle:
+                                'This delivery may have been removed or is no longer available.',
                           )
                         : _buildContent(context),
           );
         },
       ),
+    );
+  }
+}
+
+/// Surface card with soft shadow (light) or hairline border (dark).
+class _CardShell extends StatelessWidget {
+  const _CardShell({required this.borderColor, required this.child});
+
+  final Color borderColor;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = HomeColors.isDark(context);
+    final radius = BorderRadius.circular(22);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: radius,
+        boxShadow: AppColors.softShadow(context),
+      ),
+      child: Material(
+        color: HomeColors.surfaceOf(context),
+        shape: RoundedRectangleBorder(
+          borderRadius: radius,
+          side: dark ? BorderSide(color: borderColor) : BorderSide.none,
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: SizedBox(width: double.infinity, child: child),
+        ),
+      ),
+    );
+  }
+}
+
+/// 52px rounded icon tile with a soft tint of [color].
+class _IconTile extends StatelessWidget {
+  const _IconTile({
+    required this.icon,
+    required this.color,
+    this.size = 52,
+    this.iconSize = 26,
+  });
+
+  final IconData icon;
+  final Color color;
+  final double size;
+  final double iconSize;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = HomeColors.isDark(context);
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: dark ? 0.2 : 0.1),
+        borderRadius: BorderRadius.circular(size * 0.31),
+      ),
+      child: Icon(icon, size: iconSize, color: color),
+    );
+  }
+}
+
+class _CardHeader extends StatelessWidget {
+  const _CardHeader({
+    required this.icon,
+    required this.color,
+    required this.title,
+  });
+
+  final IconData icon;
+  final Color color;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        _IconTile(icon: icon, color: color, size: 44, iconSize: 24),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            title,
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.3,
+              color: HomeColors.textPrimaryOf(context),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -683,78 +817,123 @@ class _SummaryHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final tracking = trackingNumber?.trim();
+    final muted = HomeColors.textMutedOf(context);
+    final statusColor = StatusChip.colorForStatus(status);
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppColors.spaceMD),
-      decoration: BoxDecoration(
-        color: HomeColors.surfaceElevatedOf(context),
-        borderRadius: BorderRadius.circular(AppColors.radiusLG),
-        border: Border.all(color: borderColor),
-      ),
+    return _CardShell(
+      borderColor: borderColor,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
+              _IconTile(icon: Icons.inventory_2_rounded, color: statusColor),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      deliveryLabel,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.4,
+                        color: HomeColors.textPrimaryOf(context),
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      createdAt,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: muted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              StatusChip(status: status),
+            ],
+          ),
+          if (tracking != null && tracking.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.fromLTRB(14, 10, 4, 10),
+              decoration: BoxDecoration(
+                color: HomeColors.surfaceElevatedOf(context),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.qr_code_2_rounded, size: 24, color: muted),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Tracking code',
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w700,
+                            color: muted,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          tracking,
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.6,
+                            color: HomeColors.textPrimaryOf(context),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => _copyTrackingCode(context, tracking),
+                    iconSize: 24,
+                    constraints: const BoxConstraints(
+                      minWidth: 48,
+                      minHeight: 48,
+                    ),
+                    icon: Icon(
+                      Icons.copy_rounded,
+                      color: HomeColors.violetOf(context),
+                    ),
+                    tooltip: 'Copy tracking code',
+                  ),
+                ],
+              ),
+            ),
+          ],
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Icon(Icons.payments_rounded, size: 24, color: muted),
+              const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  deliveryLabel,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
+                  cost,
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.6,
                     color: HomeColors.textPrimaryOf(context),
                   ),
                 ),
               ),
-              StatusChip(status: status),
             ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            createdAt,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: HomeColors.textMutedOf(context),
-            ),
-          ),
-          if (tracking != null && tracking.isNotEmpty) ...[
-            const SizedBox(height: AppColors.spaceMD),
-            Text(
-              'Tracking code',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: HomeColors.textMutedOf(context),
-              ),
-            ),
-            const SizedBox(height: 6),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Text(
-                    tracking,
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: HomeColors.textPrimaryOf(context),
-                      letterSpacing: 0.4,
-                    ),
-                  ),
-                ),
-                IconButton(
-                  onPressed: () => _copyTrackingCode(context, tracking),
-                  icon: const Icon(Icons.copy_rounded, color: HomeColors.violet),
-                  tooltip: 'Copy tracking code',
-                ),
-              ],
-            ),
-          ],
-          const SizedBox(height: AppColors.spaceMD),
-          Text(
-            cost,
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: HomeColors.violet,
-            ),
           ),
         ],
       ),
@@ -795,48 +974,48 @@ class _RouteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final phone = recipientPhone?.trim();
-    final displayPhone = phone != null && phone.isNotEmpty
-        ? formatPhoneForDisplay(phone)
-        : null;
+    final displayPhone =
+        phone != null && phone.isNotEmpty ? formatPhoneForDisplay(phone) : null;
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppColors.spaceMD),
-      decoration: BoxDecoration(
-        color: HomeColors.surfaceElevatedOf(context),
-        borderRadius: BorderRadius.circular(AppColors.radiusLG),
-        border: Border.all(color: borderColor),
-      ),
+    return _CardShell(
+      borderColor: borderColor,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Route',
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: HomeColors.textPrimaryOf(context),
-            ),
+          _CardHeader(
+            icon: Icons.route_rounded,
+            color: HomeColors.violetOf(context),
+            title: 'Route',
           ),
-          const SizedBox(height: AppColors.spaceMD),
+          const SizedBox(height: 16),
           _RouteStop(
-            dotColor: HomeColors.violet,
+            icon: Icons.trip_origin_rounded,
+            color: AppColors.brandOrange,
             label: pickupLabel,
             address: pickupLocation ?? '—',
             instructions: pickupInstructions,
             showConnector: true,
           ),
           _RouteStop(
-            dotColor: HomeColors.orange,
+            icon: Icons.location_on_rounded,
+            color: HomeColors.violetOf(context),
             label: dropoffLabel,
             address: dropoffLocation ?? '—',
             instructions: deliveryInstructions,
             showConnector: false,
           ),
-          Divider(height: AppColors.spaceLG, color: HomeColors.borderOf(context)),
-          _DetailField(label: 'Recipient', value: recipientName),
-          _DetailField(label: 'Phone', value: displayPhone),
+          Divider(height: 28, color: HomeColors.borderOf(context)),
+          _DetailField(
+            icon: Icons.person_rounded,
+            label: 'Recipient',
+            value: recipientName,
+          ),
+          _DetailField(
+            icon: Icons.phone_rounded,
+            label: 'Phone',
+            value: displayPhone,
+          ),
         ],
       ),
     );
@@ -845,14 +1024,16 @@ class _RouteCard extends StatelessWidget {
 
 class _RouteStop extends StatelessWidget {
   const _RouteStop({
-    required this.dotColor,
+    required this.icon,
+    required this.color,
     required this.label,
     required this.address,
     this.instructions,
     required this.showConnector,
   });
 
-  final Color dotColor;
+  final IconData icon;
+  final Color color;
   final String label;
   final String address;
   final String? instructions;
@@ -860,52 +1041,53 @@ class _RouteStop extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final extra = instructions?.trim();
 
     return IntrinsicHeight(
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Column(
-            children: [
-              Container(
-                width: 12,
-                height: 12,
-                margin: const EdgeInsets.only(top: 4),
-                decoration: BoxDecoration(
-                  color: dotColor,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              if (showConnector)
-                Expanded(
-                  child: Container(
-                    width: 2,
-                    margin: const EdgeInsets.symmetric(vertical: 4),
-                    color: HomeColors.borderOf(context),
+          SizedBox(
+            width: 44,
+            child: Column(
+              children: [
+                _IconTile(icon: icon, color: color, size: 44, iconSize: 22),
+                if (showConnector)
+                  Expanded(
+                    child: Container(
+                      width: 2,
+                      margin: const EdgeInsets.symmetric(vertical: 6),
+                      decoration: BoxDecoration(
+                        color: HomeColors.borderOf(context),
+                        borderRadius: BorderRadius.circular(1),
+                      ),
+                    ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Padding(
-              padding: EdgeInsets.only(bottom: showConnector ? 16 : 0),
+              padding: EdgeInsets.only(top: 2, bottom: showConnector ? 18 : 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     label,
-                    style: theme.textTheme.bodySmall?.copyWith(
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w700,
                       color: HomeColors.textMutedOf(context),
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 3),
                   Text(
                     address,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
+                    style: TextStyle(
+                      fontSize: 15.5,
+                      height: 1.3,
+                      fontWeight: FontWeight.w700,
                       color: HomeColors.textPrimaryOf(context),
                     ),
                   ),
@@ -913,7 +1095,9 @@ class _RouteStop extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       extra,
-                      style: theme.textTheme.bodySmall?.copyWith(
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
                         color: HomeColors.textSecondaryOf(context),
                       ),
                     ),
@@ -931,35 +1115,27 @@ class _RouteStop extends StatelessWidget {
 class _SectionCard extends StatelessWidget {
   const _SectionCard({
     required this.title,
+    required this.icon,
+    required this.accent,
     required this.children,
     required this.borderColor,
   });
 
   final String title;
+  final IconData icon;
+  final Color accent;
   final List<Widget> children;
   final Color borderColor;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppColors.spaceMD),
-      decoration: BoxDecoration(
-        color: HomeColors.surfaceElevatedOf(context),
-        borderRadius: BorderRadius.circular(AppColors.radiusLG),
-        border: Border.all(color: borderColor),
-      ),
+    return _CardShell(
+      borderColor: borderColor,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: HomeColors.textPrimaryOf(context),
-                ),
-          ),
-          const SizedBox(height: 12),
+          _CardHeader(icon: icon, color: accent, title: title),
+          const SizedBox(height: 16),
           ...children,
         ],
       ),
@@ -969,14 +1145,20 @@ class _SectionCard extends StatelessWidget {
 
 class _DetailField extends StatelessWidget {
   const _DetailField({
+    required this.icon,
     required this.label,
     this.value,
     this.hideWhenEmpty = false,
+    this.trailingStatus = false,
   });
 
+  final IconData icon;
   final String label;
   final String? value;
   final bool hideWhenEmpty;
+
+  /// Render the value as a [StatusChip] instead of plain text.
+  final bool trailingStatus;
 
   @override
   Widget build(BuildContext context) {
@@ -987,25 +1169,50 @@ class _DetailField extends StatelessWidget {
     if (!hideWhenEmpty && (v == null || v.isEmpty || v == 'null')) {
       return const SizedBox.shrink();
     }
+    final muted = HomeColors.textMutedOf(context);
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Column(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: HomeColors.textMutedOf(context),
-                ),
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: HomeColors.surfaceElevatedOf(context),
+              borderRadius: BorderRadius.circular(11),
+            ),
+            child: Icon(icon, size: 20, color: muted),
           ),
-          const SizedBox(height: 4),
-          Text(
-            v!,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: HomeColors.textPrimaryOf(context),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w700,
+                    color: muted,
+                  ),
                 ),
+                const SizedBox(height: 3),
+                if (trailingStatus)
+                  StatusChip(status: v!)
+                else
+                  Text(
+                    v!,
+                    style: TextStyle(
+                      fontSize: 15.5,
+                      height: 1.3,
+                      fontWeight: FontWeight.w700,
+                      color: HomeColors.textPrimaryOf(context),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ],
       ),
@@ -1034,117 +1241,145 @@ class _BottomActions extends StatelessWidget {
   final VoidCallback onTrack;
   final VoidCallback onCancel;
 
+  static final _shape = RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(18),
+  );
+  static const _labelStyle = TextStyle(
+    fontSize: 17,
+    fontWeight: FontWeight.w800,
+  );
+
+  Widget _spinner(Color color) => SizedBox(
+        width: 22,
+        height: 22,
+        child: CircularProgressIndicator(strokeWidth: 2.4, color: color),
+      );
+
   @override
   Widget build(BuildContext context) {
     final busy = isRetrying || isCancelling;
     if (!canRetry && !canTrack && !canCancel) {
       return const SizedBox.shrink();
     }
+    final dark = HomeColors.isDark(context);
+    final indigo = HomeColors.violetOf(context);
+    // Only one orange primary: tracking wins; otherwise retry payment.
+    final retryIsPrimary = canRetry && !canTrack;
+
+    Widget primary({
+      required VoidCallback onPressed,
+      required IconData icon,
+      required String label,
+      required bool loading,
+    }) {
+      return SizedBox(
+        width: double.infinity,
+        height: 56,
+        child: FilledButton.icon(
+          onPressed: busy ? null : onPressed,
+          style: FilledButton.styleFrom(
+            backgroundColor: AppColors.brandOrange,
+            foregroundColor: Colors.white,
+            disabledBackgroundColor:
+                AppColors.brandOrange.withValues(alpha: 0.45),
+            disabledForegroundColor: Colors.white,
+            elevation: 0,
+            shape: _shape,
+          ),
+          icon: loading ? _spinner(Colors.white) : Icon(icon, size: 24),
+          label: Text(label, style: _labelStyle),
+        ),
+      );
+    }
+
     return Container(
       padding: EdgeInsets.fromLTRB(
-        AppColors.spaceMD,
-        AppColors.spaceSM,
-        AppColors.spaceMD,
-        AppColors.spaceMD + MediaQuery.paddingOf(context).bottom,
+        16,
+        12,
+        16,
+        12 + MediaQuery.paddingOf(context).bottom,
       ),
       decoration: BoxDecoration(
         color: HomeColors.surfaceOf(context),
-        border: Border(top: BorderSide(color: HomeColors.borderOf(context))),
+        border: dark
+            ? Border(top: BorderSide(color: HomeColors.borderOf(context)))
+            : null,
+        boxShadow: dark
+            ? null
+            : const [
+                BoxShadow(
+                  color: Color(0x121B1530),
+                  blurRadius: 20,
+                  offset: Offset(0, -4),
+                ),
+              ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (canRetry) ...[
-            SizedBox(
-              width: double.infinity,
-              height: AppColors.buttonHeightMD,
-              child: OutlinedButton(
-                onPressed: busy ? null : onRetry,
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: HomeColors.violet,
-                  side: const BorderSide(color: HomeColors.violet, width: 1.5),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppColors.radiusLG),
-                  ),
-                ),
-                child: isRetrying
-                    ? const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: HomeColors.violet,
-                        ),
-                      )
-                    : Text(
-                        context.l10n.retryPaymentTitle,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-              ),
-            ),
-            if (canTrack || canCancel) const SizedBox(height: AppColors.spaceSM),
-          ],
           if (canTrack) ...[
-            SizedBox(
-              width: double.infinity,
-              height: AppColors.buttonHeightMD,
-              child: ElevatedButton(
-                onPressed: busy ? null : onTrack,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: HomeColors.violet,
-                  foregroundColor: Theme.of(context).colorScheme.onSecondary,
-                  disabledBackgroundColor:
-                      HomeColors.violet.withValues(alpha: 0.4),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppColors.radiusLG),
+            primary(
+              onPressed: onTrack,
+              icon: Icons.near_me_rounded,
+              label: context.l10n.courierTrackDeliveryCta,
+              loading: false,
+            ),
+            if (canRetry || canCancel) const SizedBox(height: 10),
+          ],
+          if (canRetry) ...[
+            if (retryIsPrimary)
+              primary(
+                onPressed: onRetry,
+                icon: Icons.payments_rounded,
+                label: context.l10n.retryPaymentTitle,
+                loading: isRetrying,
+              )
+            else
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: OutlinedButton.icon(
+                  onPressed: busy ? null : onRetry,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: indigo,
+                    side: BorderSide(color: indigo, width: 1.5),
+                    shape: _shape,
                   ),
-                ),
-                child: const Text(
-                  'Track delivery',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                  icon: isRetrying
+                      ? _spinner(indigo)
+                      : const Icon(Icons.payments_rounded, size: 24),
+                  label: Text(
+                    context.l10n.retryPaymentTitle,
+                    style: _labelStyle,
                   ),
                 ),
               ),
-            ),
-            if (canCancel) const SizedBox(height: AppColors.spaceSM),
+            if (canCancel) const SizedBox(height: 10),
           ],
           if (canCancel)
             SizedBox(
               width: double.infinity,
-              height: AppColors.buttonHeightMD,
-              child: OutlinedButton(
+              height: 52,
+              child: TextButton.icon(
                 onPressed: busy ? null : onCancel,
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(
-                    color: AppColors.errorColor,
-                    width: 1.5,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppColors.radiusLG),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.errorColor,
+                  shape: _shape,
+                  side: BorderSide(
+                    color: AppColors.errorColor.withValues(alpha: 0.4),
+                    width: 1.2,
                   ),
                 ),
-                child: isCancelling
-                    ? const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: AppColors.errorColor,
-                        ),
-                      )
-                    : const Text(
-                        'Cancel delivery',
-                        style: TextStyle(
-                          color: AppColors.errorColor,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                icon: isCancelling
+                    ? _spinner(AppColors.errorColor)
+                    : const Icon(Icons.close_rounded, size: 24),
+                label: Text(
+                  context.l10n.cancelDeliveryTitle,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
             ),
         ],
@@ -1287,8 +1522,9 @@ class _RetryPaymentSheetState extends State<_RetryPaymentSheet> {
               context.l10n.retryPaymentTitle,
               style: TextStyle(
                 color: HomeColors.textPrimaryOf(context),
-                fontWeight: FontWeight.w700,
-                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.3,
+                fontSize: 19,
               ),
             ),
             const SizedBox(height: 4),
@@ -1347,12 +1583,20 @@ class _RetryPaymentSheetState extends State<_RetryPaymentSheet> {
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
-              height: AppColors.buttonHeightMD,
+              height: 56,
               child: ElevatedButton(
                 onPressed: widget.isLoading ? null : _submit,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: HomeColors.violet,
-                  foregroundColor: Theme.of(context).colorScheme.onSecondary,
+                  backgroundColor: HomeColors.orange,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  textStyle: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
                 child: Text(context.l10n.actionContinue),
               ),

@@ -22,9 +22,19 @@ class StatusChip extends StatelessWidget {
         return AppColors.onTheWay;
       case 'delivered':
       case 'completed':
+      case 'paid':
+      case 'success':
+      case 'successful':
         return AppColors.delivered;
+      case 'unpaid':
+      case 'awaiting_payment':
+      case 'payment_pending':
+        return AppColors.pending;
       case 'cancelled':
       case 'canceled':
+      case 'failed':
+      case 'rejected':
+      case 'expired':
         return AppColors.cancelled;
       case 'active':
       case 'in_progress':
@@ -34,25 +44,42 @@ class StatusChip extends StatelessWidget {
     }
   }
 
+  /// "out_for_delivery" -> "Out for delivery".
+  static String displayLabel(String status) {
+    final t = status.replaceAll('_', ' ').trim();
+    if (t.isEmpty) return t;
+    return t[0].toUpperCase() + t.substring(1);
+  }
+
   @override
   Widget build(BuildContext context) {
     final chipColor = colorForStatus(status);
-    final displayStatus = status.replaceAll('_', ' ');
+    final dark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      padding: const EdgeInsets.fromLTRB(9, 5, 11, 5),
       decoration: BoxDecoration(
-        color: chipColor.withValues(alpha: 0.12),
+        color: chipColor.withValues(alpha: dark ? 0.2 : 0.11),
         borderRadius: BorderRadius.circular(AppColors.radiusFull),
-        border: Border.all(color: chipColor.withValues(alpha: 0.35)),
       ),
-      child: Text(
-        displayStatus,
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-          color: chipColor,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 7,
+            height: 7,
+            decoration: BoxDecoration(color: chipColor, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            displayLabel(status),
+            style: TextStyle(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w700,
+              color: dark ? Color.lerp(chipColor, Colors.white, 0.25) : chipColor,
+            ),
+          ),
+        ],
       ),
     );
   }

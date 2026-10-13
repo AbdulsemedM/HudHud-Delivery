@@ -96,7 +96,7 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
   static const double _searchOuterRadiusM = 480;
   static const double _pickupZoom = 14.8;
   static const int _nearbyRadiusKm = 10;
-  static const double _sheetFraction = 0.36;
+  static const double _sheetFraction = 0.42;
 
   @override
   void initState() {
@@ -246,7 +246,7 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
             snippet: widget.pickupLocation,
           ),
           icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-            gmaps.BitmapDescriptor.hueAzure,
+            22.0,
           ),
         ),
       if (widget.deliveryPosition != null)
@@ -258,7 +258,7 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
             snippet: widget.deliveryLocation,
           ),
           icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-            gmaps.BitmapDescriptor.hueRed,
+            266.0,
           ),
         ),
       ...nearbyDriverMapMarkers(
@@ -275,7 +275,7 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
       gmaps.Polyline(
         polylineId: const gmaps.PolylineId('route'),
         points: points.map(_toG).toList(),
-        color: HomeColors.violet,
+        color: HomeColors.violetOf(context),
         width: 4,
       ),
     };
@@ -290,16 +290,16 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
         circleId: const gmaps.CircleId('search_ring_outer'),
         center: center,
         radius: _searchOuterRadiusM,
-        fillColor: HomeColors.violet.withValues(alpha: 0.08),
-        strokeColor: HomeColors.violet.withValues(alpha: 0.28),
+        fillColor: AppColors.brandOrange.withValues(alpha: 0.06),
+        strokeColor: AppColors.brandOrange.withValues(alpha: 0.25),
         strokeWidth: 1,
       ),
       gmaps.Circle(
         circleId: const gmaps.CircleId('search_ring_inner'),
         center: center,
         radius: _searchInnerRadiusM,
-        fillColor: HomeColors.violet.withValues(alpha: 0.12),
-        strokeColor: HomeColors.violet.withValues(alpha: 0.35),
+        fillColor: AppColors.brandOrange.withValues(alpha: 0.1),
+        strokeColor: AppColors.brandOrange.withValues(alpha: 0.4),
         strokeWidth: 1,
       ),
     };
@@ -357,7 +357,8 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
 
     Map<String, dynamic>? data;
     if (widget.deliveryId != null) {
-      final track = await _courierRepository.getDeliveryTrack(widget.deliveryId!);
+      final track =
+          await _courierRepository.getDeliveryTrack(widget.deliveryId!);
       if (track['success'] == true) {
         data = track['data'] as Map<String, dynamic>?;
       }
@@ -428,7 +429,7 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
             onPressed: () => Navigator.pop(context, true),
             child: Text(
               context.l10n.actionYesCancel,
-              style: TextStyle(color: Colors.red[700]),
+              style: const TextStyle(color: AppColors.errorColor),
             ),
           ),
         ],
@@ -456,7 +457,7 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
           content: Text(
             result['message']?.toString() ?? "You can't cancel this delivery",
           ),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.errorColor,
         ),
       );
       return;
@@ -473,7 +474,7 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(successMessage),
-        backgroundColor: Colors.green,
+        backgroundColor: AppColors.successColor,
       ),
     );
     _goToHome();
@@ -486,16 +487,75 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
     Navigator.of(context).popUntil((route) => route.isFirst);
   }
 
+  Widget _floatingCircleButton({
+    required BuildContext context,
+    required Widget child,
+  }) {
+    final dark = HomeColors.isDark(context);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        boxShadow: AppColors.softShadow(context),
+      ),
+      child: Material(
+        color: HomeColors.surfaceOf(context),
+        shape: CircleBorder(
+          side: dark
+              ? BorderSide(color: HomeColors.borderOf(context))
+              : BorderSide.none,
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: SizedBox(width: 52, height: 52, child: Center(child: child)),
+      ),
+    );
+  }
+
+  Widget _infoLine(BuildContext context, IconData icon, String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: HomeColors.surfaceElevatedOf(context),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: HomeColors.violetTintOf(context),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, size: 20, color: HomeColors.violetOf(context)),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 13.5,
+                height: 1.35,
+                fontWeight: FontWeight.w600,
+                color: HomeColors.textMutedOf(context),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return CourierTheme.wrap(
       context,
       child: Builder(
         builder: (context) {
-          final theme = Theme.of(context);
+          final dark = HomeColors.isDark(context);
           final borderColor = HomeColors.borderOf(context);
           final privacy = _nearbyPoller.result.privacyMessage;
           final nearbyEmpty = _nearbyPoller.result.drivers.isEmpty;
+          final topInset = MediaQuery.paddingOf(context).top + 10;
 
           return PopScope(
             canPop: false,
@@ -508,15 +568,14 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
                 children: [
                   _buildMapOrFallback(context),
                   Positioned(
-                    top: MediaQuery.paddingOf(context).top + 8,
+                    top: topInset,
                     left: 16,
-                    child: Material(
-                      color: HomeColors.surfaceElevatedOf(context),
-                      shape: const CircleBorder(),
-                      elevation: 2,
+                    child: _floatingCircleButton(
+                      context: context,
                       child: IconButton(
                         icon: Icon(
-                          Icons.close,
+                          Icons.close_rounded,
+                          size: 26,
                           color: HomeColors.textPrimaryOf(context),
                         ),
                         onPressed: _goToHome,
@@ -525,58 +584,72 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
                     ),
                   ),
                   Positioned(
-                    top: MediaQuery.paddingOf(context).top + 8,
+                    top: topInset,
                     right: 16,
-                    child: Material(
-                      color: HomeColors.surfaceElevatedOf(context),
-                      shape: const CircleBorder(),
-                      elevation: 2,
+                    child: _floatingCircleButton(
+                      context: context,
                       child: const CallSupportButton(compact: true),
                     ),
                   ),
                   DraggableScrollableSheet(
                     initialChildSize: _sheetFraction,
-                    minChildSize: 0.28,
-                    maxChildSize: 0.55,
+                    minChildSize: 0.3,
+                    maxChildSize: 0.62,
                     builder: (context, scrollController) {
                       return Container(
                         decoration: BoxDecoration(
                           color: HomeColors.surfaceOf(context),
-                          borderRadius: BorderRadius.vertical(
-                            top: Radius.circular(AppColors.radiusLG),
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(28),
                           ),
-                          border: Border(
-                            top: BorderSide(color: borderColor),
-                            left: BorderSide(color: borderColor),
-                            right: BorderSide(color: borderColor),
-                          ),
+                          border: dark
+                              ? Border(
+                                  top: BorderSide(color: borderColor),
+                                  left: BorderSide(color: borderColor),
+                                  right: BorderSide(color: borderColor),
+                                )
+                              : null,
+                          boxShadow: dark
+                              ? null
+                              : const [
+                                  BoxShadow(
+                                    color: Color(0x1A1B1530),
+                                    blurRadius: 24,
+                                    offset: Offset(0, -6),
+                                  ),
+                                ],
                         ),
                         child: ListView(
                           controller: scrollController,
-                          padding: const EdgeInsets.fromLTRB(
-                            AppColors.spaceMD,
-                            8,
-                            AppColors.spaceMD,
-                            AppColors.spaceMD,
+                          padding: EdgeInsets.fromLTRB(
+                            20,
+                            10,
+                            20,
+                            20 + MediaQuery.paddingOf(context).bottom,
                           ),
                           children: [
                             Center(
                               child: Container(
-                                width: 40,
-                                height: 4,
+                                width: 44,
+                                height: 5,
                                 decoration: BoxDecoration(
-                                  color: HomeColors.borderOf(context),
-                                  borderRadius: BorderRadius.circular(2),
+                                  color: borderColor,
+                                  borderRadius: BorderRadius.circular(3),
                                 ),
                               ),
                             ),
-                            const SizedBox(height: AppColors.spaceMD),
+                            const SizedBox(height: 18),
+                            const Center(child: _SearchRadar(size: 124)),
+                            const SizedBox(height: 18),
                             Text(
                               context.l10n.courierFindingNearestDrivers,
                               textAlign: TextAlign.center,
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: HomeColors.violet,
+                              style: TextStyle(
+                                fontSize: 21,
+                                height: 1.25,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.4,
+                                color: HomeColors.textPrimaryOf(context),
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -585,51 +658,51 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
                                   context.l10n
                                       .courierFindingNearestDriversSubtitle,
                               textAlign: TextAlign.center,
-                              style: theme.textTheme.bodyMedium?.copyWith(
+                              style: TextStyle(
+                                fontSize: 15,
+                                height: 1.4,
+                                fontWeight: FontWeight.w500,
                                 color: HomeColors.textMutedOf(context),
                               ),
                             ),
                             if (nearbyEmpty) ...[
-                              const SizedBox(height: 8),
-                              Text(
+                              const SizedBox(height: 16),
+                              _infoLine(
+                                context,
+                                Icons.radar_rounded,
                                 'No drivers nearby yet — still searching',
-                                textAlign: TextAlign.center,
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: HomeColors.textMutedOf(context),
-                                ),
                               ),
                             ],
                             if (privacy != null && privacy.isNotEmpty) ...[
-                              const SizedBox(height: 8),
-                              Text(
+                              const SizedBox(height: 10),
+                              _infoLine(
+                                context,
+                                Icons.lock_outline_rounded,
                                 privacy,
-                                textAlign: TextAlign.center,
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: HomeColors.textMutedOf(context),
-                                ),
                               ),
                             ],
-                            const SizedBox(height: AppColors.spaceMD),
-                            const _LoadingDots(),
-                            const SizedBox(height: AppColors.spaceLG),
+                            const SizedBox(height: 24),
                             SizedBox(
                               width: double.infinity,
-                              height: AppColors.buttonHeightMD,
-                              child: OutlinedButton(
-                                onPressed:
-                                    _isCancelling ? null : _cancelOrder,
+                              height: 56,
+                              child: OutlinedButton.icon(
+                                onPressed: _isCancelling ? null : _cancelOrder,
                                 style: OutlinedButton.styleFrom(
-                                  side: const BorderSide(
-                                    color: AppColors.errorColor,
+                                  foregroundColor: AppColors.errorColor,
+                                  backgroundColor: HomeColors.surfaceOf(
+                                    context,
+                                  ),
+                                  side: BorderSide(
+                                    color: AppColors.errorColor.withValues(
+                                      alpha: 0.55,
+                                    ),
                                     width: 1.5,
                                   ),
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(
-                                      AppColors.radiusLG,
-                                    ),
+                                    borderRadius: BorderRadius.circular(18),
                                   ),
                                 ),
-                                child: _isCancelling
+                                icon: _isCancelling
                                     ? const SizedBox(
                                         width: 20,
                                         height: 20,
@@ -638,24 +711,37 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
                                           color: AppColors.errorColor,
                                         ),
                                       )
-                                    : const Text(
-                                        'Cancel delivery',
-                                        style: TextStyle(
-                                          color: AppColors.errorColor,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                        ),
+                                    : const Icon(
+                                        Icons.close_rounded,
+                                        size: 24,
                                       ),
+                                label: Text(
+                                  context.l10n.cancelDeliveryTitle,
+                                  style: const TextStyle(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
                               ),
                             ),
                             const SizedBox(height: 8),
-                            TextButton(
-                              onPressed: _goToHome,
-                              child: Text(
-                                'Go to home',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: HomeColors.violet,
-                                  fontWeight: FontWeight.w600,
+                            SizedBox(
+                              height: 52,
+                              child: TextButton.icon(
+                                onPressed: _goToHome,
+                                style: TextButton.styleFrom(
+                                  foregroundColor: HomeColors.violetOf(context),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(18),
+                                  ),
+                                ),
+                                icon: const Icon(Icons.home_rounded, size: 24),
+                                label: const Text(
+                                  'Go to home',
+                                  style: TextStyle(
+                                    fontSize: 15.5,
+                                    fontWeight: FontWeight.w700,
+                                  ),
                                 ),
                               ),
                             ),
@@ -678,8 +764,8 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
     if (_hasGoogleMapsApiKey == null) {
       return ColoredBox(
         color: HomeColors.backgroundOf(context),
-        child: Center(
-          child: CircularProgressIndicator(color: HomeColors.violet),
+        child: const Center(
+          child: CircularProgressIndicator(color: AppColors.brandOrange),
         ),
       );
     }
@@ -701,8 +787,7 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
       );
     }
 
-    final bottomPadding =
-        MediaQuery.sizeOf(context).height * _sheetFraction;
+    final bottomPadding = MediaQuery.sizeOf(context).height * _sheetFraction;
 
     return gmaps.GoogleMap(
       initialCameraPosition: gmaps.CameraPosition(
@@ -728,22 +813,25 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
   }
 }
 
-class _LoadingDots extends StatefulWidget {
-  const _LoadingDots();
+/// Calm, slow radar pulse: soft orange rings expanding from a brand core.
+class _SearchRadar extends StatefulWidget {
+  const _SearchRadar({required this.size});
+
+  final double size;
 
   @override
-  State<_LoadingDots> createState() => _LoadingDotsState();
+  State<_SearchRadar> createState() => _SearchRadarState();
 }
 
-class _LoadingDotsState extends State<_LoadingDots>
+class _SearchRadarState extends State<_SearchRadar>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
+  late final AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 1200),
+      duration: const Duration(milliseconds: 2600),
       vsync: this,
     )..repeat();
   }
@@ -756,28 +844,90 @@ class _LoadingDotsState extends State<_LoadingDots>
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(3, (index) {
-        return AnimatedBuilder(
-          animation: _controller,
-          builder: (context, child) {
-            final delay = index * 0.2;
-            final value = ((_controller.value + delay) % 1.0);
-            final opacity = (value < 0.5) ? value * 2 : (1 - value) * 2;
+    final dark = HomeColors.isDark(context);
+    final size = widget.size;
+    final coreSize = size * 0.48;
+    const ringColor = AppColors.brandOrange;
 
-            return Container(
-              margin: const EdgeInsets.symmetric(horizontal: 4),
-              width: 10,
-              height: 10,
-              decoration: BoxDecoration(
-                color: HomeColors.violet.withValues(alpha: opacity),
-                shape: BoxShape.circle,
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Static faint guide rings (indigo tint) for a calm structure.
+          Container(
+            width: size,
+            height: size,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: HomeColors.violetOf(
+                  context,
+                ).withValues(alpha: dark ? 0.22 : 0.1),
               ),
-            );
-          },
-        );
-      }),
+            ),
+          ),
+          Container(
+            width: size * 0.74,
+            height: size * 0.74,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: HomeColors.violetTintOf(
+                context,
+              ).withValues(alpha: dark ? 0.6 : 0.7),
+            ),
+          ),
+          // Two staggered expanding pulses.
+          for (var i = 0; i < 2; i++)
+            AnimatedBuilder(
+              animation: _controller,
+              builder: (context, _) {
+                final t = (_controller.value + i * 0.5) % 1.0;
+                final eased = Curves.easeOut.transform(t);
+                final d = coreSize + (size - coreSize) * eased;
+                return Container(
+                  width: d,
+                  height: d,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: ringColor.withValues(alpha: 0.10 * (1 - t)),
+                    border: Border.all(
+                      color: ringColor.withValues(alpha: 0.45 * (1 - t)),
+                      width: 1.5,
+                    ),
+                  ),
+                );
+              },
+            ),
+          Container(
+            width: coreSize,
+            height: coreSize,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.brandOrange,
+              border: Border.all(
+                color: HomeColors.surfaceOf(context),
+                width: 4,
+              ),
+              boxShadow: dark
+                  ? null
+                  : [
+                      BoxShadow(
+                        color: AppColors.brandOrange.withValues(alpha: 0.3),
+                        blurRadius: 18,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+            ),
+            child: Icon(
+              Icons.delivery_dining_rounded,
+              color: Colors.white,
+              size: coreSize * 0.5,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

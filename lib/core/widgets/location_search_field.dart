@@ -10,6 +10,9 @@ import 'package:hudhud_delivery/l10n/app_localizations.dart';
 class LocationSearchField extends StatefulWidget {
   final String? hintText;
   final TextEditingController? controller;
+
+  /// Optional external focus node (e.g. to open search from a "Change" link).
+  final FocusNode? focusNode;
   final Function(PlaceResult) onLocationSelected;
   final String? initialLocation;
   final bool autofocus;
@@ -27,6 +30,7 @@ class LocationSearchField extends StatefulWidget {
     Key? key,
     this.hintText,
     this.controller,
+    this.focusNode,
     required this.onLocationSelected,
     this.initialLocation,
     this.autofocus = false,
@@ -73,7 +77,7 @@ class LocationSearchField extends StatefulWidget {
         final subtitle =
             useFormattedAddress ? place.suggestionSubtitle : place.displayName;
         return ListTile(
-          leading: Icon(Icons.location_on, color: colorScheme.primary),
+          leading: _suggestionLeading(colorScheme),
           title: _highlightedTitle(title, query, colorScheme),
           subtitle: title.toLowerCase() != subtitle.toLowerCase()
               ? Text(
@@ -86,6 +90,23 @@ class LocationSearchField extends StatefulWidget {
           onTap: () => onLocationSelected(place),
         );
       },
+    );
+  }
+
+  /// Tinted pin tile used in front of every suggestion row.
+  static Widget _suggestionLeading(ColorScheme colorScheme) {
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: colorScheme.primary.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Icon(
+        Icons.location_on_rounded,
+        color: colorScheme.primary,
+        size: 24,
+      ),
     );
   }
 
@@ -148,7 +169,10 @@ class LocationSearchField extends StatefulWidget {
 }
 
 class _LocationSearchFieldState extends State<LocationSearchField> {
-  final FocusNode _focusNode = FocusNode();
+  FocusNode? _ownFocusNode;
+  FocusNode get _focusNode =>
+      widget.focusNode ?? (_ownFocusNode ??= FocusNode());
+  late final FocusNode _boundFocusNode;
   late TextEditingController _controller;
   List<PlaceResult> _suggestions = [];
   bool _isLoading = false;
@@ -164,7 +188,8 @@ class _LocationSearchFieldState extends State<LocationSearchField> {
     }
 
     _controller.addListener(_onSearchChanged);
-    _focusNode.addListener(_onFocusChanged);
+    _boundFocusNode = _focusNode;
+    _boundFocusNode.addListener(_onFocusChanged);
   }
 
   @override
@@ -173,8 +198,8 @@ class _LocationSearchFieldState extends State<LocationSearchField> {
       _controller.dispose();
     }
     _controller.removeListener(_onSearchChanged);
-    _focusNode.removeListener(_onFocusChanged);
-    _focusNode.dispose();
+    _boundFocusNode.removeListener(_onFocusChanged);
+    _ownFocusNode?.dispose();
     super.dispose();
   }
 
@@ -203,8 +228,7 @@ class _LocationSearchFieldState extends State<LocationSearchField> {
   }
 
   void _updateSearchActive() {
-    final active =
-        _focusNode.hasFocus && _controller.text.trim().length >= 2;
+    final active = _focusNode.hasFocus && _controller.text.trim().length >= 2;
     widget.onSearchActiveChanged?.call(active);
   }
 
@@ -279,28 +303,40 @@ class _LocationSearchFieldState extends State<LocationSearchField> {
           controller: _controller,
           focusNode: _focusNode,
           autofocus: widget.autofocus,
-          style: TextStyle(color: colorScheme.onSurface),
+          style: TextStyle(
+            color: colorScheme.onSurface,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
-            prefixIcon: Icon(Icons.search, color: colorScheme.onSurfaceVariant),
+            hintStyle: TextStyle(
+              color: colorScheme.onSurfaceVariant,
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+            ),
+            prefixIcon: Icon(
+              Icons.search_rounded,
+              color: colorScheme.secondary,
+              size: 24,
+            ),
             suffixIcon: _buildSuffixIcon(colorScheme),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(16),
               borderSide: BorderSide(color: colorScheme.outlineVariant),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(16),
               borderSide: BorderSide(color: colorScheme.outlineVariant),
             ),
-            focusedBorder: const OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(12)),
-              borderSide: BorderSide(color: AppColors.primaryColor, width: 2),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: const BorderRadius.all(Radius.circular(16)),
+              borderSide: BorderSide(color: colorScheme.secondary, width: 1.8),
             ),
             filled: true,
-            fillColor: colorScheme.surfaceContainerHighest,
+            fillColor: colorScheme.surface,
             contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           ),
           onTap: () {
             if (_controller.text.isNotEmpty) {
@@ -333,7 +369,10 @@ class _LocationSearchFieldState extends State<LocationSearchField> {
       );
     } else if (_controller.text.isNotEmpty) {
       return IconButton(
-        icon: Icon(Icons.clear, color: colorScheme.onSurfaceVariant),
+        icon: Icon(
+          Icons.close_rounded,
+          color: colorScheme.onSurfaceVariant,
+        ),
         onPressed: () {
           _controller.clear();
           setState(() {
@@ -356,24 +395,26 @@ class _LocationSearchFieldState extends State<LocationSearchField> {
     return Material(
       elevation: 2,
       color: colorScheme.surface,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(16),
       shadowColor: colorScheme.shadow.withValues(alpha: 0.18),
       child: Builder(
         builder: (context) {
           final screenHeight = MediaQuery.sizeOf(context).height;
           final listMaxHeight = _suggestions.isEmpty
               ? 250.0
-              : math.min(
-                  _suggestions.length * 72.0 + 8,
-                  screenHeight * 0.55,
-                ).clamp(250.0, screenHeight * 0.55);
+              : math
+                  .min(
+                    _suggestions.length * 72.0 + 8,
+                    screenHeight * 0.55,
+                  )
+                  .clamp(250.0, screenHeight * 0.55);
 
           return Container(
             constraints: BoxConstraints(maxHeight: listMaxHeight),
             margin: const EdgeInsets.only(top: 4),
             decoration: BoxDecoration(
               color: colorScheme.surface,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(16),
               border: Border.all(color: colorScheme.outlineVariant),
             ),
             child: _buildSuggestionsList(colorScheme, l10n, query),
@@ -420,11 +461,9 @@ class _LocationSearchFieldState extends State<LocationSearchField> {
             ? place.suggestionSubtitle
             : place.displayName;
         return ListTile(
-          leading: Icon(
-            Icons.location_on,
-            color: colorScheme.primary,
-          ),
-          title: LocationSearchField._highlightedTitle(title, query, colorScheme),
+          leading: LocationSearchField._suggestionLeading(colorScheme),
+          title:
+              LocationSearchField._highlightedTitle(title, query, colorScheme),
           subtitle: title.toLowerCase() != subtitle.toLowerCase()
               ? Text(
                   subtitle,

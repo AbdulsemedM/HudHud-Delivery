@@ -11,6 +11,7 @@ import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_co
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_field_decoration.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_gradient_button.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_phone_number_field.dart';
+import 'package:hudhud_delivery/features/login/presentation/widgets/auth_ui.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/login_method_tabs.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
 
@@ -41,28 +42,9 @@ class LoginTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.welcomeTitle,
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.w700,
-            color: AuthScreenColors.textPrimaryOf(context),
-            height: 1.2,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          l10n.loginSubtitle,
-          style: TextStyle(
-            color: AuthScreenColors.textSecondaryOf(context),
-            fontSize: 14,
-            height: 1.45,
-          ),
-        ),
-      ],
+    return AuthHeading(
+      title: l10n.welcomeTitle,
+      subtitle: l10n.loginSubtitle,
     );
   }
 }
@@ -250,8 +232,9 @@ class _LoginFormState extends State<LoginForm> {
                 _refreshBiometricVisibility();
               },
             ),
-            const SizedBox(height: 20),
-            if (_method == LoginMethod.phone)
+            const SizedBox(height: 24),
+            if (_method == LoginMethod.phone) ...[
+              AuthFieldLabel(l10n.phoneNumber),
               AuthPhoneNumberField(
                 countryCode: _dialCode,
                 countryIsoCode: _countryIso,
@@ -265,68 +248,41 @@ class _LoginFormState extends State<LoginForm> {
                   _refreshBiometricVisibility();
                 },
                 validator: (v) => _validatePhone(v, l10n),
-              )
-            else ...[
-              Text(
-                l10n.labelEmail,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: AuthScreenColors.textSecondaryOf(context),
-                  fontWeight: FontWeight.w500,
-                ),
               ),
-              const SizedBox(height: 6),
+            ] else ...[
+              AuthFieldLabel(l10n.labelEmail),
               TextFormField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 autofillHints: const [AutofillHints.email],
-                style: TextStyle(
-                  color: AuthScreenColors.textPrimaryOf(context),
-                  fontSize: 15,
-                ),
+                style: _fieldTextStyle(context),
                 decoration: authFieldDecoration(
                   context,
                   hint: l10n.hintEmail,
-                  prefixIcon: Icon(
-                    Icons.mail_outline_rounded,
-                    color: AuthScreenColors.textSecondaryOf(context),
-                    size: 20,
+                  prefixIcon: const Icon(
+                    Icons.alternate_email_rounded,
+                    size: 22,
                   ),
                 ),
                 validator: (v) => _validateEmail(v, l10n),
               ),
             ],
-            const SizedBox(height: 16),
-            Text(
-              l10n.labelPassword,
-              style: TextStyle(
-                fontSize: 13,
-                color: AuthScreenColors.textSecondaryOf(context),
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 20),
+            AuthFieldLabel(l10n.labelPassword),
             TextFormField(
               controller: _passwordController,
               obscureText: !_isPasswordVisible,
-              style: TextStyle(
-                color: AuthScreenColors.textPrimaryOf(context),
-                fontSize: 15,
-              ),
+              style: _fieldTextStyle(context),
               decoration: authFieldDecoration(
                 context,
                 hint: l10n.hintPassword,
-                prefixIcon: Icon(
-                  Icons.lock_outline_rounded,
-                  color: AuthScreenColors.textSecondaryOf(context),
-                  size: 20,
-                ),
+                prefixIcon: const Icon(Icons.lock_outline_rounded, size: 22),
                 suffixIcon: IconButton(
                   icon: Icon(
                     _isPasswordVisible
                         ? Icons.visibility_rounded
                         : Icons.visibility_off_rounded,
-                    color: AuthScreenColors.textSecondaryOf(context),
+                    size: 22,
                   ),
                   onPressed: () {
                     setState(() => _isPasswordVisible = !_isPasswordVisible);
@@ -343,35 +299,62 @@ class _LoginFormState extends State<LoginForm> {
                 return null;
               },
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                SizedBox(
-                  height: 24,
-                  width: 24,
-                  child: Checkbox(
-                    value: _rememberMe,
-                    onChanged: (value) {
-                      setState(() => _rememberMe = value ?? false);
-                    },
-                    activeColor: AuthScreenColors.orange,
-                    side: BorderSide(
-                      color: AuthScreenColors.textSecondaryOf(context),
+                Flexible(
+                  child: InkWell(
+                    onTap: () => setState(() => _rememberMe = !_rememberMe),
+                    borderRadius: BorderRadius.circular(12),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(minHeight: 48),
+                      child: Padding(
+                        padding: const EdgeInsetsDirectional.only(
+                          start: 2,
+                          end: 8,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: Checkbox(
+                                value: _rememberMe,
+                                onChanged: (value) {
+                                  setState(() => _rememberMe = value ?? false);
+                                },
+                                activeColor: AuthScreenColors.orange,
+                                checkColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(7),
+                                ),
+                                side: BorderSide(
+                                  color: AuthScreenColors.textMutedOf(context),
+                                  width: 1.6,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Flexible(
+                              child: Text(
+                                l10n.loginRememberMe,
+                                style: TextStyle(
+                                  color:
+                                      AuthScreenColors.textSecondaryOf(context),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 4),
-                GestureDetector(
-                  onTap: () => setState(() => _rememberMe = !_rememberMe),
-                  child: Text(
-                    l10n.loginRememberMe,
-                    style: TextStyle(
-                      color: AuthScreenColors.textSecondaryOf(context),
-                      fontSize: 13,
-                    ),
-                  ),
-                ),
-                const Spacer(),
+                const SizedBox(width: 8),
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).push(
@@ -381,22 +364,24 @@ class _LoginFormState extends State<LoginForm> {
                     );
                   },
                   style: TextButton.styleFrom(
-                    padding: EdgeInsets.zero,
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    foregroundColor: AuthScreenColors.orange,
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    minimumSize: const Size(48, 48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   child: Text(
                     l10n.forgotPasswordLink,
                     style: const TextStyle(
-                      color: AuthScreenColors.orange,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
             BlocBuilder<LoginBloc, LoginState>(
               builder: (context, state) {
                 return AuthGradientButton(
@@ -407,34 +392,9 @@ class _LoginFormState extends State<LoginForm> {
               },
             ),
             if (_showBiometric) ...[
+              const SizedBox(height: 24),
+              AuthOrDivider(label: l10n.loginBiometricOrDivider),
               const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: Divider(
-                      color: AuthScreenColors.textSecondaryOf(context),
-                      thickness: 0.6,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Text(
-                      l10n.loginBiometricOrDivider,
-                      style: TextStyle(
-                        color: AuthScreenColors.textSecondaryOf(context),
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Divider(
-                      color: AuthScreenColors.textSecondaryOf(context),
-                      thickness: 0.6,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
               BlocBuilder<LoginBloc, LoginState>(
                 builder: (context, state) {
                   final loading = state.isLoginLoading(LoginAction.biometric);
@@ -442,26 +402,36 @@ class _LoginFormState extends State<LoginForm> {
                     child: Semantics(
                       button: true,
                       label: l10n.loginBiometricButtonSemantics,
-                      child: IconButton(
-                        onPressed:
-                            state.isAnyLoginLoading ? null : _onBiometricTap,
-                        iconSize: 40,
-                        color: AuthScreenColors.orange,
-                        icon: loading
-                            ? const SizedBox(
-                                width: 28,
-                                height: 28,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: AuthScreenColors.orange,
-                                ),
-                              )
-                            : Icon(
-                                _useFaceIcon
-                                    ? Icons.face_outlined
-                                    : Icons.fingerprint_outlined,
-                                size: 40,
-                              ),
+                      child: Material(
+                        color: authOrangeTintOf(context),
+                        shape: const CircleBorder(),
+                        clipBehavior: Clip.antiAlias,
+                        child: InkWell(
+                          onTap:
+                              state.isAnyLoginLoading ? null : _onBiometricTap,
+                          child: SizedBox(
+                            width: 64,
+                            height: 64,
+                            child: Center(
+                              child: loading
+                                  ? const SizedBox(
+                                      width: 26,
+                                      height: 26,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.4,
+                                        color: AuthScreenColors.orange,
+                                      ),
+                                    )
+                                  : Icon(
+                                      _useFaceIcon
+                                          ? Icons.face_rounded
+                                          : Icons.fingerprint_rounded,
+                                      size: 34,
+                                      color: AuthScreenColors.orange,
+                                    ),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   );
@@ -473,6 +443,12 @@ class _LoginFormState extends State<LoginForm> {
       ),
     );
   }
+
+  TextStyle _fieldTextStyle(BuildContext context) => TextStyle(
+        color: AuthScreenColors.textPrimaryOf(context),
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+      );
 
   void _submitForm() {
     if (!_formKey.currentState!.validate()) return;

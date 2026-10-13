@@ -107,14 +107,14 @@ class _CenteredPinMapState extends State<CenteredPinMap> {
 
     final pin = widget.centerIndicator ??
         Icon(
-          Icons.location_on,
-          size: 48,
+          Icons.location_on_rounded,
+          size: 52,
           color: primary,
           shadows: const [
             Shadow(
-              blurRadius: 4,
-              color: Colors.black26,
-              offset: Offset(0, 2),
+              blurRadius: 10,
+              color: Color(0x401B1530),
+              offset: Offset(0, 4),
             ),
           ],
         );
@@ -158,7 +158,7 @@ class _CenteredPinMapState extends State<CenteredPinMap> {
           child: Align(
             alignment: Alignment.center,
             child: Padding(
-              padding: const EdgeInsets.only(bottom: 28),
+              padding: const EdgeInsets.only(bottom: 30),
               child: pin,
             ),
           ),

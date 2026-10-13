@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/utils/support_launcher.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
@@ -31,22 +32,25 @@ class CallSupportFab extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = label ?? context.l10n.callSupport;
     if (extended) {
+      // Green = "phone call" everywhere; keeps it distinct from the orange
+      // primary action on the same screen.
       return FloatingActionButton.extended(
         heroTag: heroTag,
-        backgroundColor: AuthScreenColors.orange,
-        foregroundColor: Theme.of(context).colorScheme.onSecondary,
-        icon: const Icon(Icons.phone_in_talk_rounded),
+        backgroundColor: AppColors.successColor,
+        foregroundColor: Colors.white,
+        elevation: 3,
+        icon: const Icon(Icons.call_rounded, size: 24),
         label: Text(text),
         onPressed: () => _call(context),
       );
     }
     return FloatingActionButton(
       heroTag: heroTag,
-      backgroundColor: AuthScreenColors.orange,
-      foregroundColor: Theme.of(context).colorScheme.onSecondary,
+      backgroundColor: AppColors.successColor,
+      foregroundColor: Colors.white,
       tooltip: text,
       onPressed: () => _call(context),
-      child: const Icon(Icons.phone_in_talk_rounded),
+      child: const Icon(Icons.call_rounded),
     );
   }
 }

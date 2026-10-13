@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
 import 'package:hudhud_delivery/features/settings/presentation/widgets/profile_dark_page.dart';
 
@@ -22,7 +23,7 @@ class TermsConditionsScreen extends StatelessWidget {
                   'and delivery information. Misuse of the platform may result in '
                   'account suspension.',
             ),
-            SizedBox(height: 24),
+            const SizedBox(height: 14),
             _LegalSection(
               title: 'Privacy Policy',
               content:
@@ -31,7 +32,7 @@ class TermsConditionsScreen extends StatelessWidget {
                   'are shared with assigned drivers or couriers only as needed to '
                   'complete your request.',
             ),
-            SizedBox(height: 24),
+            const SizedBox(height: 14),
             _LegalSection(
               title: 'Contact',
               content:
@@ -57,30 +58,53 @@ class _LegalSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dark = AuthScreenColors.isDark(context);
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: AuthScreenColors.surfaceOf(context),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AuthScreenColors.surfaceBorderOf(context)),
+        borderRadius: BorderRadius.circular(20),
+        border: dark
+            ? Border.all(color: AuthScreenColors.surfaceBorderOf(context))
+            : null,
+        boxShadow: AppColors.softShadow(context),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-              color: AuthScreenColors.orange,
-            ),
+          Row(
+            children: [
+              Container(
+                width: 6,
+                height: 22,
+                decoration: BoxDecoration(
+                  color: AuthScreenColors.orange,
+                  borderRadius: BorderRadius.circular(3),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.3,
+                    color: AuthScreenColors.textPrimaryOf(context),
+                  ),
+                ),
+              ),
+            ],
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           Text(
             content,
             style: TextStyle(
+              fontSize: 15,
               height: 1.6,
-              color: AuthScreenColors.textMutedOf(context),
+              fontWeight: FontWeight.w500,
+              color: AuthScreenColors.textSecondaryOf(context),
             ),
           ),
         ],

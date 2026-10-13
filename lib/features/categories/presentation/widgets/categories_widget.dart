@@ -74,22 +74,20 @@ class CategoryDetailHeader extends StatelessWidget {
           Positioned(
             top: MediaQuery.of(context).padding.top + 8,
             left: 8,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(24),
+            child: ClipOval(
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
                 child: Material(
-                  color: Colors.white.withValues(alpha: 0.25),
-                  borderRadius: BorderRadius.circular(24),
+                  color: Colors.black.withValues(alpha: 0.28),
                   child: InkWell(
                     onTap: onBack,
-                    borderRadius: BorderRadius.circular(24),
-                    child: const Padding(
-                      padding: EdgeInsets.all(10),
+                    child: const SizedBox(
+                      width: 48,
+                      height: 48,
                       child: Icon(
-                        Icons.arrow_back_ios_new_rounded,
+                        Icons.arrow_back_rounded,
                         color: Colors.white,
-                        size: 20,
+                        size: 26,
                       ),
                     ),
                   ),
@@ -112,7 +110,8 @@ class CategoryDetailHeader extends StatelessWidget {
                     width: 64,
                     height: 64,
                     decoration: BoxDecoration(
-                      shape: BoxShape.circle,
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
                       border: Border.all(color: Colors.white, width: 2.5),
                       boxShadow: [
                         BoxShadow(
@@ -122,7 +121,8 @@ class CategoryDetailHeader extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: ClipOval(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(17),
                       child: hasImage && imageUrl.startsWith('http')
                           ? Image.network(
                               imageUrl,
@@ -137,7 +137,8 @@ class CategoryDetailHeader extends StatelessWidget {
                                   fit: BoxFit.cover,
                                   width: 64,
                                   height: 64,
-                                  errorBuilder: (_, __, ___) => _iconPlaceholder(),
+                                  errorBuilder: (_, __, ___) =>
+                                      _iconPlaceholder(),
                                 )
                               : _iconPlaceholder(),
                     ),
@@ -151,10 +152,10 @@ class CategoryDetailHeader extends StatelessWidget {
                         Text(
                           name,
                           style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
+                            fontSize: 24,
+                            fontWeight: FontWeight.w800,
                             color: Colors.white,
-                            letterSpacing: -0.3,
+                            letterSpacing: -0.5,
                             shadows: [
                               Shadow(
                                 color: Colors.black26,
@@ -179,8 +180,8 @@ class CategoryDetailHeader extends StatelessWidget {
                               Text(
                                 '$productsCount ${productsCount == 1 ? 'product' : 'products'}',
                                 style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
                                   color: Colors.white.withValues(alpha: 0.95),
                                 ),
                               ),
@@ -192,7 +193,8 @@ class CategoryDetailHeader extends StatelessWidget {
                           Text(
                             description!,
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
                               color: Colors.white.withValues(alpha: 0.9),
                               height: 1.35,
                             ),
@@ -217,21 +219,23 @@ class CategoryDetailHeader extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              AppColors.primaryColor.withValues(alpha: 0.92),
-              AppColors.primaryColor,
-              AppColors.primaryDarkColor,
-            ],
+            colors: AppColors.brandHeroGradient,
           ),
         ),
       );
 
   Widget _iconPlaceholder() => Container(
-        color: Colors.white.withValues(alpha: 0.3),
-        child: const Icon(
-          Icons.category_rounded,
-          size: 32,
-          color: Colors.white70,
+        color: AppColors.orangeTint,
+        alignment: Alignment.center,
+        child: Text(
+          name.trim().isEmpty
+              ? '?'
+              : name.trim().characters.first.toUpperCase(),
+          style: const TextStyle(
+            fontSize: 26,
+            fontWeight: FontWeight.w800,
+            color: AppColors.brandOrange,
+          ),
         ),
       );
 }
@@ -312,18 +316,19 @@ class ProductDetailsModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final ink = HomeColors.textPrimaryOf(context);
+    final muted = HomeColors.textMutedOf(context);
+    final sectionStyle = TextStyle(
+      fontSize: 18,
+      fontWeight: FontWeight.w800,
+      letterSpacing: -0.3,
+      color: ink,
+    );
+    final dark = HomeColors.isDark(context);
     return Container(
       decoration: BoxDecoration(
         color: HomeColors.surfaceOf(context),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.onSurface.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, -5),
-          ),
-        ],
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
       height: MediaQuery.of(context).size.height * 0.6,
       child: Column(
@@ -331,9 +336,8 @@ class ProductDetailsModal extends StatelessWidget {
           // Modal Header with handle and title
           Container(
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-            decoration: BoxDecoration(
-              color: Colors.grey[50],
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
             ),
             child: Column(
               children: [
@@ -343,7 +347,7 @@ class ProductDetailsModal extends StatelessWidget {
                   height: 4,
                   margin: const EdgeInsets.only(bottom: 12),
                   decoration: BoxDecoration(
-                    color: Colors.grey[400],
+                    color: HomeColors.borderOf(context),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -352,13 +356,13 @@ class ProductDetailsModal extends StatelessWidget {
                   'Product Details',
                   style: TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                        color: Colors.grey[700],
-                      ),
-                    ),
-                  ],
+                    fontWeight: FontWeight.w800,
+                    color: muted,
+                  ),
                 ),
-              ),
+              ],
+            ),
+          ),
           // Modal Content
           Expanded(
             child: SingleChildScrollView(
@@ -366,356 +370,361 @@ class ProductDetailsModal extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
-                // Product Image
-                if (product.image_path != null &&
-                    product.image_path!.isNotEmpty)
-                  Container(
-                    height: 200,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      image: DecorationImage(
-                        image: product.image_path!.startsWith('http')
-                            ? NetworkImage(product.image_path!) as ImageProvider
-                            : AssetImage(product.image_path!),
-                        fit: BoxFit.cover,
+                  // Product Image
+                  if (product.image_path != null &&
+                      product.image_path!.isNotEmpty)
+                    Container(
+                      height: 200,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        image: DecorationImage(
+                          image: product.image_path!.startsWith('http')
+                              ? NetworkImage(product.image_path!)
+                                  as ImageProvider
+                              : AssetImage(product.image_path!),
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
-                  ),
-                const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-                if (!product.canOrder) ...[
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade200,
-                      borderRadius: BorderRadius.circular(8),
+                  if (!product.canOrder) ...[
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: HomeColors.surfaceElevatedOf(context),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.block_rounded, size: 20, color: muted),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Currently unavailable',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: ink,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.block, size: 18, color: Colors.grey[700]),
+                    const SizedBox(height: 12),
+                  ],
+
+                  // Product Name
+                  Text(
+                    product.name ?? 'Unknown Product',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.5,
+                      color: ink,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Price Section
+                  Row(
+                    children: [
+                      if (product.discount_price != null &&
+                          product.discount_price!.isNotEmpty) ...[
+                        Text(
+                          formatEtbPriceString(product.discount_price),
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w800,
+                            color: ink,
+                          ),
+                        ),
                         const SizedBox(width: 8),
                         Text(
-                          'Currently unavailable',
+                          formatEtbPriceString(product.price),
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: 15,
                             fontWeight: FontWeight.w600,
-                            color: Colors.grey[800],
+                            decoration: TextDecoration.lineThrough,
+                            color: muted,
+                          ),
+                        ),
+                      ] else ...[
+                        Text(
+                          formatEtbPriceString(product.price),
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w800,
+                            color: ink,
                           ),
                         ),
                       ],
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                ],
-
-                // Product Name
-                Text(
-                  product.name ?? 'Unknown Product',
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-
-                // Price Section
-                Row(
-                  children: [
-                    if (product.discount_price != null &&
-                        product.discount_price!.isNotEmpty) ...[
-                      Text(
-                        formatEtbPriceString(product.discount_price),
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        formatEtbPriceString(product.price),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          decoration: TextDecoration.lineThrough,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ] else ...[
-                      Text(
-                        formatEtbPriceString(product.price),
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
                     ],
-                  ],
-                ),
-                const SizedBox(height: 16),
-
-                // Description
-                if (product.description != null &&
-                    product.description!.isNotEmpty) ...[
-                  const Text(
-                    'Description',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    product.description!,
-                    style: const TextStyle(fontSize: 16),
                   ),
                   const SizedBox(height: 16),
-                ],
 
-                // Preparation Time
-                if (product.preparation_time != null) ...[
-                  _buildInfoRow('Preparation Time',
-                      '${product.preparation_time} minutes', Icons.timer),
-                  const SizedBox(height: 12),
-                ],
-
-                // Nutrition Info
-                if (product.calories != null || product.protein != null) ...[
-                  const Text(
-                    'Nutrition Information',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        if (product.calories != null)
-                          Column(
-                            children: [
-                              const Icon(Icons.local_fire_department,
-                                  color: Colors.orange),
-                              const SizedBox(height: 4),
-                              Text('${product.calories}',
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold)),
-                              Text(context.l10n.calories,
-                                  style: const TextStyle(fontSize: 12)),
-                            ],
-                          ),
-                        if (product.protein != null)
-                          Column(
-                            children: [
-                              const Icon(Icons.fitness_center,
-                                  color: Colors.blue),
-                              const SizedBox(height: 4),
-                              Text('${product.protein}g',
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold)),
-                              Text(context.l10n.protein,
-                                  style: const TextStyle(fontSize: 12)),
-                            ],
-                          ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                ],
-
-                // Ingredients
-                if (product.ingredients != null &&
-                    product.ingredients!.isNotEmpty) ...[
-                  const Text(
-                    'Ingredients',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: product.ingredients!
-                        .map(
-                          (ingredient) => Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: Colors.green[100],
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              ingredient,
-                              style: TextStyle(color: Colors.green[800]),
-                            ),
-                          ),
-                        )
-                        .toList(),
-                  ),
-                  const SizedBox(height: 16),
-                ],
-
-                // Allergens
-                if (product.allergens != null &&
-                    product.allergens!.isNotEmpty) ...[
-                  const Text(
-                    'Allergens',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: product.allergens!
-                        .map(
-                          (allergen) => Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: Colors.red[100],
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.warning,
-                                    size: 16, color: Colors.red[800]),
-                                const SizedBox(width: 4),
-                                Text(
-                                  allergen,
-                                  style: TextStyle(color: Colors.red[800]),
-                                ),
-                              ],
-                            ),
-                          ),
-                        )
-                        .toList(),
-                  ),
-                  const SizedBox(height: 16),
-                ],
-
-                // Addons
-                if (product.addons != null && product.addons!.isNotEmpty) ...[
-                  const Text(
-                    'Available Add-ons',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Column(
-                    children: product.addons!
-                        .map(
-                          (addon) => Container(
-                            margin: const EdgeInsets.only(bottom: 8),
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey[300]!),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(Icons.add_circle_outline,
-                                    color: Colors.blue[600]),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
-                                    addon,
-                                    style: const TextStyle(fontSize: 16),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        )
-                        .toList(),
-                  ),
-                  const SizedBox(height: 16),
-                ],
-
-                // Additional Info
-                if (product.sku != null || product.quantity != null) ...[
-                  const Text(
-                    'Product Details',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  if (product.sku != null)
-                    _buildInfoRow('SKU', product.sku!, Icons.qr_code),
-                  if (product.quantity != null)
-                    _buildInfoRow('Available Quantity', '${product.quantity}',
-                        Icons.inventory),
-                  const SizedBox(height: 20),
-                ],
-
-                // Close Button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF4A148C),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: Text(
-                      'Close',
+                  // Description
+                  if (product.description != null &&
+                      product.description!.isNotEmpty) ...[
+                    Text('Description', style: sectionStyle),
+                    const SizedBox(height: 8),
+                    Text(
+                      product.description!,
                       style: TextStyle(
-                        color: colorScheme.onSecondary,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        height: 1.5,
+                        fontWeight: FontWeight.w500,
+                        color: HomeColors.textSecondaryOf(context),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+
+                  // Preparation Time
+                  if (product.preparation_time != null) ...[
+                    _buildInfoRow(
+                        context,
+                        'Preparation Time',
+                        '${product.preparation_time} minutes',
+                        Icons.timer_rounded),
+                    const SizedBox(height: 12),
+                  ],
+
+                  // Nutrition Info
+                  if (product.calories != null || product.protein != null) ...[
+                    Text('Nutrition Information', style: sectionStyle),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: HomeColors.surfaceElevatedOf(context),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          if (product.calories != null)
+                            Column(
+                              children: [
+                                const Icon(Icons.local_fire_department_rounded,
+                                    color: AppColors.brandOrange),
+                                const SizedBox(height: 4),
+                                Text('${product.calories}',
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold)),
+                                Text(context.l10n.calories,
+                                    style: const TextStyle(fontSize: 12)),
+                              ],
+                            ),
+                          if (product.protein != null)
+                            Column(
+                              children: [
+                                Icon(Icons.fitness_center_rounded,
+                                    color: HomeColors.violetOf(context)),
+                                const SizedBox(height: 4),
+                                Text('${product.protein}g',
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold)),
+                                Text(context.l10n.protein,
+                                    style: const TextStyle(fontSize: 12)),
+                              ],
+                            ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+
+                  // Ingredients
+                  if (product.ingredients != null &&
+                      product.ingredients!.isNotEmpty) ...[
+                    Text('Ingredients', style: sectionStyle),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: product.ingredients!
+                          .map(
+                            (ingredient) => Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: AppColors.successColor
+                                    .withValues(alpha: dark ? 0.2 : 0.1),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                ingredient,
+                                style: const TextStyle(
+                                  color: AppColors.successColor,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+
+                  // Allergens
+                  if (product.allergens != null &&
+                      product.allergens!.isNotEmpty) ...[
+                    Text('Allergens', style: sectionStyle),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: product.allergens!
+                          .map(
+                            (allergen) => Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: AppColors.errorColor
+                                    .withValues(alpha: dark ? 0.2 : 0.1),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.warning_rounded,
+                                      size: 16, color: AppColors.errorColor),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    allergen,
+                                    style: const TextStyle(
+                                      color: AppColors.errorColor,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+
+                  // Addons
+                  if (product.addons != null && product.addons!.isNotEmpty) ...[
+                    Text('Available Add-ons', style: sectionStyle),
+                    const SizedBox(height: 8),
+                    Column(
+                      children: product.addons!
+                          .map(
+                            (addon) => Container(
+                              margin: const EdgeInsets.only(bottom: 8),
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: HomeColors.borderOf(context),
+                                ),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.add_circle_rounded,
+                                      color: HomeColors.violetOf(context)),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      addon,
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                        color: ink,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+
+                  // Additional Info
+                  if (product.sku != null || product.quantity != null) ...[
+                    Text('Product Details', style: sectionStyle),
+                    const SizedBox(height: 8),
+                    if (product.sku != null)
+                      _buildInfoRow(
+                          context, 'SKU', product.sku!, Icons.qr_code_rounded),
+                    if (product.quantity != null)
+                      _buildInfoRow(context, 'Available Quantity',
+                          '${product.quantity}', Icons.inventory_2_rounded),
+                    const SizedBox(height: 20),
+                  ],
+
+                  // Close Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: ink,
+                        side: BorderSide(color: HomeColors.borderOf(context)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                      ),
+                      child: const Text(
+                        'Close',
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-      )],
+          )
+        ],
       ),
     );
   }
 
-  Widget _buildInfoRow(String label, String value, IconData icon) {
-    return Row(
-      children: [
-        Icon(icon, size: 20, color: Colors.grey[600]),
-        const SizedBox(width: 8),
-        Text(
-          '$label: ',
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
+  Widget _buildInfoRow(
+    BuildContext context,
+    String label,
+    String value,
+    IconData icon,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Icon(icon, size: 22, color: HomeColors.violetOf(context)),
+          const SizedBox(width: 10),
+          Text(
+            '$label: ',
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 15,
+              color: HomeColors.textMutedOf(context),
+            ),
           ),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            style: const TextStyle(fontSize: 16),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+                color: HomeColors.textPrimaryOf(context),
+              ),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -843,120 +852,99 @@ class ProductFilters extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (filters.isEmpty) return const SizedBox.shrink();
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+    final indigo = HomeColors.violetOf(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.tune_rounded, size: 20, color: AppColors.primaryColor),
-              SizedBox(width: 8),
+              Icon(Icons.tune_rounded, size: 22, color: indigo),
+              const SizedBox(width: 8),
               Text(
                 'Filter',
                 style: TextStyle(
                   fontSize: 17,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.lightTextPrimary,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.2,
+                  color: HomeColors.textPrimaryOf(context),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 12),
           Wrap(
-            spacing: 10,
-            runSpacing: 10,
+            spacing: 8,
+            runSpacing: 8,
             children: filters.map((filter) {
               final isSelected = selectedFilters.contains(filter);
-              return GestureDetector(
-                onTap: () {
-                  List<String> newSelectedFilters = List.from(selectedFilters);
-                  if (isSelected) {
-                    newSelectedFilters.remove(filter);
-                  } else {
-                    newSelectedFilters.add(filter);
-                  }
-                  onFiltersChanged(newSelectedFilters);
-                },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: isSelected ? AppColors.primaryColor : Colors.grey[50],
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                      color: isSelected ? AppColors.primaryColor : Colors.grey[300]!,
-                      width: 1.5,
-                    ),
-                    boxShadow: isSelected
-                        ? [
-                            BoxShadow(
-                              color: AppColors.primaryColor.withValues(alpha: 0.3),
-                              spreadRadius: 1,
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ]
-                        : null,
+              return Material(
+                color: isSelected ? indigo : HomeColors.surfaceOf(context),
+                shape: StadiumBorder(
+                  side: BorderSide(
+                    color: isSelected ? indigo : HomeColors.borderOf(context),
+                    width: 1.4,
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (isSelected) ...[
-                        const Icon(
-                          Icons.check_circle,
-                          color: Colors.white,
-                          size: 16,
-                        ),
-                        const SizedBox(width: 6),
-                      ],
-                      Text(
-                        filter,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight:
-                              isSelected ? FontWeight.w600 : FontWeight.w500,
-                          color: isSelected ? Colors.white : Colors.black87,
-                        ),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  onTap: () {
+                    List<String> newSelectedFilters =
+                        List.from(selectedFilters);
+                    if (isSelected) {
+                      newSelectedFilters.remove(filter);
+                    } else {
+                      newSelectedFilters.add(filter);
+                    }
+                    onFiltersChanged(newSelectedFilters);
+                  },
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minHeight: 44),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (isSelected) ...[
+                            const Icon(
+                              Icons.check_circle_rounded,
+                              color: Colors.white,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 6),
+                          ],
+                          Text(
+                            filter,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: isSelected
+                                  ? Colors.white
+                                  : HomeColors.textPrimaryOf(context),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               );
             }).toList(),
           ),
           if (selectedFilters.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            GestureDetector(
-              onTap: () => onFiltersChanged([]),
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.red[50],
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.red[200]!),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.clear_all,
-                      color: Colors.red[600],
-                      size: 16,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Clear All Filters',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.red[600],
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
+            const SizedBox(height: 8),
+            TextButton.icon(
+              onPressed: () => onFiltersChanged([]),
+              style: TextButton.styleFrom(
+                foregroundColor: HomeColors.textMutedOf(context),
+                minimumSize: const Size(48, 44),
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+              ),
+              icon: const Icon(Icons.clear_all_rounded, size: 20),
+              label: const Text(
+                'Clear All Filters',
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
               ),
             ),
           ],
@@ -980,163 +968,165 @@ class ProductCard extends StatelessWidget {
       child: Opacity(
         opacity: canOrder ? 1 : 0.65,
         child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withValues(alpha: 0.1),
-              spreadRadius: 1,
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Product Image
-            Stack(
-              children: [
-                Container(
-              height: 120,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(12)),
-                color: Colors.grey[200],
-                image: product.image_path != null &&
-                        product.image_path!.isNotEmpty
-                    ? DecorationImage(
-                        image: product.image_path!.startsWith('http')
-                            ? NetworkImage(product.image_path!) as ImageProvider
-                            : AssetImage(product.image_path!),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
+          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withValues(alpha: 0.1),
+                spreadRadius: 1,
+                blurRadius: 4,
+                offset: const Offset(0, 2),
               ),
-              child: product.image_path == null || product.image_path!.isEmpty
-                  ? const Center(
-                      child: Icon(
-                        Icons.shopping_bag_outlined,
-                        size: 40,
-                        color: Colors.grey,
-                      ),
-                    )
-                  : null,
-            ),
-                if (!canOrder)
-                  Positioned(
-                    top: 8,
-                    left: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.65),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: const Text(
-                        'Unavailable',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Product Image
+              Stack(
+                children: [
+                  Container(
+                    height: 120,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius:
+                          const BorderRadius.vertical(top: Radius.circular(12)),
+                      color: Colors.grey[200],
+                      image: product.image_path != null &&
+                              product.image_path!.isNotEmpty
+                          ? DecorationImage(
+                              image: product.image_path!.startsWith('http')
+                                  ? NetworkImage(product.image_path!)
+                                      as ImageProvider
+                                  : AssetImage(product.image_path!),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
+                    ),
+                    child: product.image_path == null ||
+                            product.image_path!.isEmpty
+                        ? const Center(
+                            child: Icon(
+                              Icons.shopping_bag_outlined,
+                              size: 40,
+                              color: Colors.grey,
+                            ),
+                          )
+                        : null,
+                  ),
+                  if (!canOrder)
+                    Positioned(
+                      top: 8,
+                      left: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.65),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: const Text(
+                          'Unavailable',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-              ],
-            ),
+                ],
+              ),
 
-            // Product Info
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    product.name ?? 'Unknown Product',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  if (product.description != null &&
-                      product.description!.isNotEmpty)
+              // Product Info
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Text(
-                      product.description!,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
+                      product.name ?? 'Unknown Product',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (product.discount_price != null &&
-                                product.discount_price!.isNotEmpty) ...[
-                              Text(
-                                formatEtbPriceString(product.discount_price),
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.green,
+                    const SizedBox(height: 4),
+                    if (product.description != null &&
+                        product.description!.isNotEmpty)
+                      Text(
+                        product.description!,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (product.discount_price != null &&
+                                  product.discount_price!.isNotEmpty) ...[
+                                Text(
+                                  formatEtbPriceString(product.discount_price),
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.green,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                formatEtbPriceString(product.price),
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  decoration: TextDecoration.lineThrough,
-                                  color: Colors.grey,
+                                Text(
+                                  formatEtbPriceString(product.price),
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    decoration: TextDecoration.lineThrough,
+                                    color: Colors.grey,
+                                  ),
                                 ),
-                              ),
-                            ] else ...[
-                              Text(
-                                formatEtbPriceString(product.price),
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
+                              ] else ...[
+                                Text(
+                                  formatEtbPriceString(product.price),
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                              ),
+                              ],
                             ],
-                          ],
+                          ),
                         ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: canOrder
-                              ? const Color(0xFF4A148C)
-                              : Colors.grey.shade400,
-                          borderRadius: BorderRadius.circular(8),
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: canOrder
+                                ? const Color(0xFF4A148C)
+                                : Colors.grey.shade400,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            canOrder ? Icons.add : Icons.block,
+                            color: Colors.white,
+                            size: 20,
+                          ),
                         ),
-                        child: Icon(
-                          canOrder ? Icons.add : Icons.block,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
@@ -1157,6 +1147,9 @@ class ProductItem extends StatelessWidget {
   final int quantity;
   final VoidCallback? onTap;
 
+  /// Outer spacing around the card (16px gutters by default).
+  final EdgeInsetsGeometry margin;
+
   const ProductItem({
     super.key,
     this.product,
@@ -1172,207 +1165,306 @@ class ProductItem extends StatelessWidget {
     required this.onIncrementPressed,
     required this.quantity,
     this.onTap,
+    this.margin = const EdgeInsets.fromLTRB(16, 0, 16, 12),
   });
 
   @override
   Widget build(BuildContext context) {
     final canOrder = product?.canOrder ?? true;
-    return GestureDetector(
-        onTap: onTap,
-        child: Opacity(
-          opacity: canOrder ? 1 : 0.6,
-          child: Container(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  imageUrl,
-                  width: 80,
-                  height: 80,
-                  fit: BoxFit.cover,
-                  color: canOrder ? null : Colors.grey,
-                  colorBlendMode: canOrder ? null : BlendMode.saturation,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      width: 80,
-                      height: 80,
-                      color: Colors.grey[300],
-                      child: const Icon(Icons.image_not_supported),
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
+    final dark = HomeColors.isDark(context);
+    final ink = HomeColors.textPrimaryOf(context);
+    final muted = HomeColors.textMutedOf(context);
+    final radius = BorderRadius.circular(20);
+
+    Widget imageFallback() => Container(
+          width: 92,
+          height: 92,
+          color: dark ? AppColors.orangeTintDark : AppColors.orangeTint,
+          child: const Icon(
+            Icons.fastfood_rounded,
+            color: AppColors.brandOrange,
+            size: 34,
+          ),
+        );
+
+    return Padding(
+      padding: margin,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: radius,
+          boxShadow: AppColors.softShadow(context),
+        ),
+        child: Material(
+          color: HomeColors.surfaceOf(context),
+          shape: RoundedRectangleBorder(
+            borderRadius: radius,
+            side: dark
+                ? BorderSide(color: HomeColors.borderOf(context))
+                : BorderSide.none,
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: onTap,
+            child: Opacity(
+              opacity: canOrder ? 1 : 0.6,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      name,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: imageUrl.isEmpty
+                          ? imageFallback()
+                          : Image.network(
+                              imageUrl,
+                              width: 92,
+                              height: 92,
+                              fit: BoxFit.cover,
+                              color: canOrder ? null : Colors.grey,
+                              colorBlendMode:
+                                  canOrder ? null : BlendMode.saturation,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  imageFallback(),
+                            ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      description,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    if (!canOrder) ...[
-                      const SizedBox(height: 6),
-                      Text(
-                        'Unavailable',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey[700],
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              if (discountPrice != null) ...[
-                                Flexible(
-                                  child: Text(
-                                    formatEtbPriceString(discountPrice),
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.orange,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
+                              Expanded(
+                                child: Text(
+                                  name,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    height: 1.25,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: -0.2,
+                                    color: ink,
                                   ),
                                 ),
-                                const SizedBox(width: 8),
-                                Flexible(
-                                  child: Text(
-                                    formatEtbPriceString(price),
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      decoration: TextDecoration.lineThrough,
-                                      color: Colors.grey,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ] else
-                                Flexible(
-                                  child: Text(
-                                    formatEtbPriceString(price),
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
+                              ),
+                              if (product != null && product!.id != null)
+                                WishlistToggleButton(
+                                  product: product!,
+                                  size: 22,
                                 ),
                             ],
                           ),
-                        ),
-                        const SizedBox(width: 8),
-                        if (product != null && product!.id != null)
-                          WishlistToggleButton(
-                            product: product!,
-                            size: 20,
-                          ),
-                        const SizedBox(width: 4),
-                        if (!isAdded)
-                          TextButton(
-                            onPressed: canOrder ? onAddPressed : null,
-                            style: TextButton.styleFrom(
-                              backgroundColor: canOrder
-                                  ? const Color(0xFFFFEEE5)
-                                  : Colors.grey.shade200,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 8),
-                              disabledForegroundColor: Colors.grey,
-                            ),
-                            child: Text(
-                              canOrder ? 'ADD' : 'UNAVAILABLE',
+                          if (description.isNotEmpty) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              description,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                color: canOrder ? Colors.orange : Colors.grey,
-                                fontWeight: FontWeight.bold,
-                                fontSize: canOrder ? null : 11,
+                                fontSize: 13.5,
+                                height: 1.3,
+                                fontWeight: FontWeight.w500,
+                                color: muted,
                               ),
                             ),
-                          )
-                        else
-                          Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey[300]!),
-                              borderRadius: BorderRadius.circular(4),
+                          ],
+                          if (!canOrder) ...[
+                            const SizedBox(height: 6),
+                            Text(
+                              'Unavailable',
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w800,
+                                color: muted,
+                              ),
                             ),
-                            child: Row(
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.remove, size: 16),
-                                  onPressed: onDecrementPressed,
-                                  padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(
-                                    minWidth: 32,
-                                    minHeight: 32,
-                                  ),
+                          ],
+                          const SizedBox(height: 10),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                child: Wrap(
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  spacing: 6,
+                                  children: [
+                                    Text(
+                                      formatEtbPriceString(
+                                        discountPrice ?? price,
+                                      ),
+                                      style: TextStyle(
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: -0.3,
+                                        color: ink,
+                                      ),
+                                    ),
+                                    if (discountPrice != null)
+                                      Text(
+                                        formatEtbPriceString(price),
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                          decoration:
+                                              TextDecoration.lineThrough,
+                                          color: muted,
+                                        ),
+                                      ),
+                                  ],
                                 ),
-                                Text(
-                                  quantity.toString(),
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.add, size: 16),
-                                  onPressed:
+                              ),
+                              const SizedBox(width: 8),
+                              if (!isAdded)
+                                _AddPill(
+                                  canOrder: canOrder,
+                                  onPressed: canOrder ? onAddPressed : null,
+                                )
+                              else
+                                _QuantityStepper(
+                                  quantity: quantity,
+                                  onDecrement: onDecrementPressed,
+                                  onIncrement:
                                       canOrder ? onIncrementPressed : null,
-                                  padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(
-                                    minWidth: 32,
-                                    minHeight: 32,
+                                ),
+                            ],
+                          ),
+                          if (isAdded)
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton.icon(
+                                onPressed: onRemovePressed,
+                                style: TextButton.styleFrom(
+                                  foregroundColor: muted,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                  ),
+                                  minimumSize: const Size(48, 40),
+                                ),
+                                icon: const Icon(
+                                  Icons.delete_outline_rounded,
+                                  size: 18,
+                                ),
+                                label: const Text(
+                                  'REMOVE',
+                                  style: TextStyle(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 0.3,
                                   ),
                                 ),
-                              ],
+                              ),
                             ),
-                          ),
-                      ],
-                    ),
-                    if (isAdded)
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: onRemovePressed,
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            minimumSize: Size.zero,
-                          ),
-                          child: const Text(
-                            'REMOVE',
-                            style: TextStyle(
-                              color: Colors.orange,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
+                        ],
                       ),
+                    ),
                   ],
                 ),
               ),
-            ],
+            ),
           ),
         ),
-        ));
+      ),
+    );
+  }
+}
+
+/// White-on-orange "ADD" pill (grey when the product can't be ordered).
+class _AddPill extends StatelessWidget {
+  const _AddPill({required this.canOrder, required this.onPressed});
+
+  final bool canOrder;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 44,
+      child: FilledButton.icon(
+        onPressed: onPressed,
+        style: FilledButton.styleFrom(
+          backgroundColor: AppColors.brandOrange,
+          foregroundColor: Colors.white,
+          disabledBackgroundColor: HomeColors.surfaceElevatedOf(context),
+          disabledForegroundColor: HomeColors.textMutedOf(context),
+          padding: const EdgeInsets.fromLTRB(12, 0, 16, 0),
+          shape: const StadiumBorder(),
+        ),
+        icon: Icon(
+          canOrder ? Icons.add_rounded : Icons.block_rounded,
+          size: 20,
+        ),
+        label: Text(
+          canOrder ? 'ADD' : 'UNAVAILABLE',
+          style: TextStyle(
+            fontWeight: FontWeight.w800,
+            fontSize: canOrder ? 14 : 12,
+            letterSpacing: 0.3,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Compact − qty + stepper with orange round buttons.
+class _QuantityStepper extends StatelessWidget {
+  const _QuantityStepper({
+    required this.quantity,
+    required this.onDecrement,
+    required this.onIncrement,
+  });
+
+  final int quantity;
+  final VoidCallback onDecrement;
+  final VoidCallback? onIncrement;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = HomeColors.isDark(context);
+    Widget round(IconData icon, VoidCallback? onTap) => Material(
+          color: onTap == null
+              ? AppColors.brandOrange.withValues(alpha: 0.4)
+              : AppColors.brandOrange,
+          shape: const CircleBorder(),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: onTap,
+            child: SizedBox(
+              width: 36,
+              height: 36,
+              child: Icon(icon, size: 20, color: Colors.white),
+            ),
+          ),
+        );
+    return Container(
+      height: 44,
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      decoration: BoxDecoration(
+        color: dark ? AppColors.orangeTintDark : AppColors.orangeTint,
+        borderRadius: BorderRadius.circular(AppColors.radiusFull),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          round(Icons.remove_rounded, onDecrement),
+          SizedBox(
+            width: 32,
+            child: Text(
+              quantity.toString(),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+                color: HomeColors.textPrimaryOf(context),
+              ),
+            ),
+          ),
+          round(Icons.add_rounded, onIncrement),
+        ],
+      ),
+    );
   }
 }

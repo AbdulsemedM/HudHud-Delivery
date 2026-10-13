@@ -9,21 +9,23 @@ class HomeColors {
   // Dark tokens
   static const Color background = SplashColors.bgDeep;
   static const Color backgroundOuter = SplashColors.bgOuter;
-  static const Color surface = Color(0xFF1D1224);
-  static const Color surfaceElevated = Color(0xFF2A1C34);
+  static const Color surface = AppColors.darkSurface;
+  static const Color surfaceElevated = AppColors.darkSurfaceVariant;
   static const Color border = Color(0x17FFFFFF);
-  static const Color orange = SplashColors.orange;
-  static const Color violet = SplashColors.violet;
+  static const Color orange = AppColors.brandOrange;
+  /// Brand indigo accent. Prefer [violetOf] so dark mode stays legible.
+  static const Color violet = AppColors.brandIndigo;
+  static const Color violetDark = AppColors.brandIndigoBright;
   static const Color textPrimary = SplashColors.textPrimary;
   static const Color textMuted = SplashColors.textMuted;
-  static const Color textSecondary = Color(0xFFB6ADC6);
+  static const Color textSecondary = AppColors.darkTextSecondary;
 
   // Light tokens
   static const Color lightBackground = AppColors.lightBackground;
   static const Color lightBackgroundOuter = AppColors.lightSurface;
   static const Color lightSurface = AppColors.lightSurface;
-  static const Color lightSurfaceElevated = Color(0xFFF5F5F5);
-  static const Color lightBorder = Color(0x1A000000);
+  static const Color lightSurfaceElevated = AppColors.lightInputFill;
+  static const Color lightBorder = AppColors.lightBorder;
   static const Color lightTextPrimary = AppColors.lightTextPrimary;
   static const Color lightTextMuted = AppColors.lightTextSecondary;
   static const Color lightTextSecondary = AppColors.lightTextSecondary;
@@ -49,6 +51,14 @@ class HomeColors {
   static Color textSecondaryOf(BuildContext context) =>
       isDark(context) ? textSecondary : lightTextSecondary;
 
+  /// Brand accent (indigo) tuned for the current brightness.
+  static Color violetOf(BuildContext context) =>
+      isDark(context) ? violetDark : violet;
+
+  /// Soft accent fill behind icons / selected tiles.
+  static Color violetTintOf(BuildContext context) =>
+      isDark(context) ? AppColors.indigoTintDark : AppColors.indigoTint;
+
   static Color borderOf(BuildContext context) =>
       isDark(context) ? border : lightBorder;
 
@@ -63,14 +73,14 @@ class HomeColors {
       scaffoldBackgroundColor: background,
       colorScheme: const ColorScheme.dark(
         primary: orange,
-        secondary: violet,
+        secondary: violetDark,
         surface: surface,
-        onPrimary: Colors.black,
+        onPrimary: Colors.white,
         onSecondary: Colors.white,
         onSurface: textPrimary,
         onSurfaceVariant: textMuted,
-        outline: Color(0xFF2A2438),
-        outlineVariant: Color(0xFF2A2438),
+        outline: AppColors.darkBorder,
+        outlineVariant: AppColors.darkBorder,
       ).copyWith(
         surfaceContainerHighest: surfaceElevated,
         surfaceContainerHigh: surfaceElevated,

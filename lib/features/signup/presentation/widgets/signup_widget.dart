@@ -3,11 +3,13 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
+import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/utils/phone_util.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_field_decoration.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_gradient_button.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_phone_number_field.dart';
+import 'package:hudhud_delivery/features/login/presentation/widgets/auth_ui.dart';
 import 'package:hudhud_delivery/features/settings/presentation/screen/terms_conditions_screen.dart';
 import 'package:hudhud_delivery/features/signup/bloc/signup_bloc.dart';
 import 'package:hudhud_delivery/features/signup/presentation/screen/verify_contact_screen.dart';
@@ -19,28 +21,9 @@ class SignupTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.signupTitle,
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.w700,
-            color: AuthScreenColors.textPrimaryOf(context),
-            height: 1.2,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          l10n.signupSubtitle,
-          style: TextStyle(
-            color: AuthScreenColors.textSecondaryOf(context),
-            fontSize: 14,
-            height: 1.45,
-          ),
-        ),
-      ],
+    return AuthHeading(
+      title: l10n.signupTitle,
+      subtitle: l10n.signupSubtitle,
     );
   }
 }
@@ -155,16 +138,7 @@ class SignupFormState extends State<SignupForm> {
     super.dispose();
   }
 
-  Widget _buildLabel(String label) {
-    return Text(
-      label,
-      style: TextStyle(
-        fontSize: 13,
-        color: AuthScreenColors.textSecondaryOf(context),
-        fontWeight: FontWeight.w500,
-      ),
-    );
-  }
+  Widget _buildLabel(String label) => AuthFieldLabel(label);
 
   void _openTerms() {
     Navigator.of(context).push(
@@ -178,15 +152,16 @@ class SignupFormState extends State<SignupForm> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final checkboxStyle = TextStyle(
-      color: AuthScreenColors.textMutedOf(context),
-      fontSize: 13,
-      height: 1.4,
+      color: AuthScreenColors.textSecondaryOf(context),
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+      height: 1.45,
     );
     const linkStyle = TextStyle(
       color: AuthScreenColors.orange,
-      fontWeight: FontWeight.w600,
-      fontSize: 13,
-      height: 1.4,
+      fontWeight: FontWeight.w700,
+      fontSize: 14,
+      height: 1.45,
     );
 
     return Form(
@@ -202,15 +177,16 @@ class SignupFormState extends State<SignupForm> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildLabel(l10n.firstName),
-                    const SizedBox(height: 6),
                     TextFormField(
                       controller: _firstNameController,
                       textCapitalization: TextCapitalization.words,
                       style: TextStyle(
                         color: AuthScreenColors.textPrimaryOf(context),
-                        fontSize: 15,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
                       ),
-                      decoration: authFieldDecoration(context, hint: l10n.hintFirstName),
+                      decoration: authFieldDecoration(context,
+                          hint: l10n.hintFirstName),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
                           return l10n.pleaseEnterRecipientName;
@@ -227,15 +203,16 @@ class SignupFormState extends State<SignupForm> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildLabel(l10n.lastName),
-                    const SizedBox(height: 6),
                     TextFormField(
                       controller: _lastNameController,
                       textCapitalization: TextCapitalization.words,
                       style: TextStyle(
                         color: AuthScreenColors.textPrimaryOf(context),
-                        fontSize: 15,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
                       ),
-                      decoration: authFieldDecoration(context, hint: l10n.hintLastName),
+                      decoration:
+                          authFieldDecoration(context, hint: l10n.hintLastName),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
                           return l10n.pleaseEnterRecipientName;
@@ -248,25 +225,21 @@ class SignupFormState extends State<SignupForm> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           _buildLabel(l10n.emailAddress),
-          const SizedBox(height: 6),
           TextFormField(
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
             autofillHints: const [AutofillHints.email],
             style: TextStyle(
               color: AuthScreenColors.textPrimaryOf(context),
-              fontSize: 15,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
             ),
             decoration: authFieldDecoration(
               context,
               hint: l10n.hintEmailExample,
-              prefixIcon: Icon(
-                Icons.mail_outline_rounded,
-                color: AuthScreenColors.textSecondaryOf(context),
-                size: 20,
-              ),
+              prefixIcon: const Icon(Icons.alternate_email_rounded, size: 22),
             ),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
@@ -279,9 +252,8 @@ class SignupFormState extends State<SignupForm> {
               return null;
             },
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           _buildLabel(l10n.phoneNumber),
-          const SizedBox(height: 6),
           AuthPhoneNumberField(
             countryCode: _dialCode,
             countryIsoCode: _countryIso,
@@ -304,43 +276,43 @@ class SignupFormState extends State<SignupForm> {
               return null;
             },
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           _buildLabel(l10n.referralCodeOptional),
-          const SizedBox(height: 6),
           TextFormField(
             controller: _referralController,
             textCapitalization: TextCapitalization.characters,
             style: TextStyle(
               color: AuthScreenColors.textPrimaryOf(context),
-              fontSize: 15,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
             ),
-            decoration: authFieldDecoration(context, hint: l10n.hintReferralCode),
+            decoration: authFieldDecoration(
+              context,
+              hint: l10n.hintReferralCode,
+              prefixIcon: const Icon(Icons.card_giftcard_rounded, size: 22),
+            ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           _buildLabel(l10n.labelPassword),
-          const SizedBox(height: 6),
           TextFormField(
             controller: _passwordController,
             obscureText: !_isPasswordVisible,
             onChanged: (_) => setState(() {}),
             style: TextStyle(
               color: AuthScreenColors.textPrimaryOf(context),
-              fontSize: 15,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
             ),
             decoration: authFieldDecoration(
               context,
               hint: l10n.hintCreatePassword,
-              prefixIcon: Icon(
-                Icons.lock_outline_rounded,
-                color: AuthScreenColors.textSecondaryOf(context),
-                size: 20,
-              ),
+              prefixIcon: const Icon(Icons.lock_outline_rounded, size: 22),
               suffixIcon: IconButton(
                 icon: Icon(
                   _isPasswordVisible
                       ? Icons.visibility_rounded
                       : Icons.visibility_off_rounded,
-                  color: AuthScreenColors.textSecondaryOf(context),
+                  size: 22,
                 ),
                 onPressed: () {
                   setState(() => _isPasswordVisible = !_isPasswordVisible);
@@ -365,34 +337,31 @@ class SignupFormState extends State<SignupForm> {
           Text(
             l10n.passwordStrengthHint,
             style: TextStyle(
-              color: AuthScreenColors.textSecondaryOf(context),
-              fontSize: 12,
+              color: AuthScreenColors.textMutedOf(context),
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           _buildLabel(l10n.confirmNewPassword),
-          const SizedBox(height: 6),
           TextFormField(
             controller: _confirmPasswordController,
             obscureText: !_isConfirmPasswordVisible,
             style: TextStyle(
               color: AuthScreenColors.textPrimaryOf(context),
-              fontSize: 15,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
             ),
             decoration: authFieldDecoration(
               context,
               hint: l10n.hintReenterPassword,
-              prefixIcon: Icon(
-                Icons.lock_outline_rounded,
-                color: AuthScreenColors.textSecondaryOf(context),
-                size: 20,
-              ),
+              prefixIcon: const Icon(Icons.lock_outline_rounded, size: 22),
               suffixIcon: IconButton(
                 icon: Icon(
                   _isConfirmPasswordVisible
                       ? Icons.visibility_rounded
                       : Icons.visibility_off_rounded,
-                  color: AuthScreenColors.textSecondaryOf(context),
+                  size: 22,
                 ),
                 onPressed: () {
                   setState(
@@ -463,20 +432,26 @@ class _PasswordStrengthMeter extends StatelessWidget {
 
   final int score;
 
+  Color get _color {
+    if (score <= 1) return AppColors.errorColor;
+    if (score == 2) return AppColors.warningColor;
+    return AppColors.successColor;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Row(
       children: List.generate(4, (index) {
         final filled = index < score;
         return Expanded(
-          child: Container(
-            height: 4,
-            margin: EdgeInsets.only(right: index == 3 ? 0 : 6),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            height: 6,
+            margin: EdgeInsetsDirectional.only(end: index == 3 ? 0 : 6),
             decoration: BoxDecoration(
-              color: filled
-                  ? AuthScreenColors.lavender
-                  : AuthScreenColors.surfaceBorderOf(context),
-              borderRadius: BorderRadius.circular(2),
+              color:
+                  filled ? _color : AuthScreenColors.surfaceBorderOf(context),
+              borderRadius: BorderRadius.circular(3),
             ),
           ),
         );
@@ -508,13 +483,13 @@ class _SignupCheckboxRow extends StatelessWidget {
             value: value,
             onChanged: onChanged,
             activeColor: AuthScreenColors.orange,
-            checkColor: Colors.black,
+            checkColor: Colors.white,
             side: BorderSide(
-              color: AuthScreenColors.textSecondaryOf(context),
-              width: 1.4,
+              color: AuthScreenColors.textMutedOf(context),
+              width: 1.6,
             ),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(5),
+              borderRadius: BorderRadius.circular(7),
             ),
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             visualDensity: VisualDensity.compact,
@@ -605,7 +580,7 @@ class SignupButton extends StatelessWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.message),
-              backgroundColor: const Color(0xFFEF5350),
+              backgroundColor: AppColors.errorColor,
             ),
           );
         }

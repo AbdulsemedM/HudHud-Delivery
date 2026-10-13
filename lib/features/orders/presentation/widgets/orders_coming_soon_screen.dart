@@ -108,8 +108,7 @@ class _OrdersComingSoonScreenState extends State<OrdersComingSoonScreen>
                   ),
                   SizedBox(height: 28),
                   Container(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                    padding: EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
@@ -192,7 +191,8 @@ class _OrdersComingSoonScreenState extends State<OrdersComingSoonScreen>
                     l10n.ordersComingSoonFootnote,
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: HomeColors.textMutedOf(context).withValues(alpha: 0.85),
+                      color: HomeColors.textMutedOf(context)
+                          .withValues(alpha: 0.85),
                       fontSize: 12,
                       height: 1.4,
                     ),
@@ -232,7 +232,7 @@ class _OrdersHero extends StatelessWidget {
                     spreadRadius: 2,
                   ),
                   BoxShadow(
-                    color: HomeColors.violet.withValues(alpha: 0.24),
+                    color: HomeColors.violetOf(context).withValues(alpha: 0.24),
                     blurRadius: 48,
                     spreadRadius: -4,
                   ),
@@ -253,7 +253,7 @@ class _OrdersHero extends StatelessWidget {
                   ],
                 ),
                 border: Border.all(
-                  color: HomeColors.violet.withValues(alpha: 0.35),
+                  color: HomeColors.violetOf(context).withValues(alpha: 0.35),
                 ),
               ),
               child: Stack(
@@ -262,7 +262,7 @@ class _OrdersHero extends StatelessWidget {
                   Icon(
                     Icons.receipt_long_rounded,
                     size: 64,
-                    color: HomeColors.violet.withValues(alpha: 0.95),
+                    color: HomeColors.violetOf(context).withValues(alpha: 0.95),
                   ),
                   Positioned(
                     bottom: 28,
@@ -274,8 +274,8 @@ class _OrdersHero extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10),
                         boxShadow: [
                           BoxShadow(
-                            color: AuthScreenColors.orange
-                                .withValues(alpha: 0.45),
+                            color:
+                                AuthScreenColors.orange.withValues(alpha: 0.45),
                             blurRadius: 12,
                             offset: const Offset(0, 4),
                           ),
@@ -426,22 +426,24 @@ class _ProgressCard extends StatelessWidget {
                             colors: AuthScreenColors.signInGradient,
                           )
                         : null,
-                    color: i == 0
-                        ? null
-                        : HomeColors.surfaceElevatedOf(context),
+                    color:
+                        i == 0 ? null : HomeColors.surfaceElevatedOf(context),
                     border: i == 0
                         ? null
                         : Border.all(
-                            color: HomeColors.violet.withValues(alpha: 0.35),
+                            color: HomeColors.violetOf(context)
+                                .withValues(alpha: 0.35),
                           ),
                   ),
                   alignment: Alignment.center,
                   child: i == 0
-                      ? Icon(Icons.check_rounded, size: 14, color: AppColors.lightOnPrimary)
+                      ? Icon(Icons.check_rounded,
+                          size: 14, color: AppColors.lightOnPrimary)
                       : Text(
                           '${i + 1}',
                           style: TextStyle(
-                            color: HomeColors.textMutedOf(context).withValues(alpha: 0.9),
+                            color: HomeColors.textMutedOf(context)
+                                .withValues(alpha: 0.9),
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
                           ),
@@ -458,8 +460,7 @@ class _ProgressCard extends StatelessWidget {
                             ? HomeColors.textPrimaryOf(context)
                             : HomeColors.textMutedOf(context),
                         fontSize: 13,
-                        fontWeight:
-                            i == 0 ? FontWeight.w600 : FontWeight.w500,
+                        fontWeight: i == 0 ? FontWeight.w600 : FontWeight.w500,
                         height: 1.35,
                       ),
                     ),

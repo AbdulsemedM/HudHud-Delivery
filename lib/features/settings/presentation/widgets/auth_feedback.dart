@@ -279,7 +279,8 @@ class AuthAlertDialog extends StatelessWidget {
               ),
               if (content != null) ...[
                 SizedBox(height: 12),
-                DefaultTextStyle(
+                // merge keeps the app font family from the ambient style.
+                DefaultTextStyle.merge(
                   style: TextStyle(
                     color: AuthScreenColors.textSecondaryOf(context),
                     fontSize: 14,

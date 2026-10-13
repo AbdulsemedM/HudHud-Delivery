@@ -301,7 +301,7 @@ class _PaymentInitiateResultScreenState
                                   height: 16,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
-                                    color: HomeColors.violet,
+                                    color: HomeColors.violetOf(context),
                                   ),
                                 )
                               : Icon(Icons.refresh),
@@ -315,10 +315,10 @@ class _PaymentInitiateResultScreenState
                       height: AppColors.buttonHeightMD,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: HomeColors.violet,
+                          backgroundColor: HomeColors.orange,
                           foregroundColor: theme.colorScheme.onPrimary,
                           disabledBackgroundColor:
-                              HomeColors.violet.withValues(alpha: 0.4),
+                              HomeColors.violetOf(context).withValues(alpha: 0.4),
                           shape: RoundedRectangleBorder(
                             borderRadius:
                                 BorderRadius.circular(AppColors.radiusLG),
@@ -370,7 +370,7 @@ class _PaymentInitiateResultScreenState
       if (_isWalletTopUp && isWalletTopUpSettled(polled)) {
         return _StatusContent(
           icon: Icons.check_circle,
-          iconColor: HomeColors.violet,
+          iconColor: HomeColors.violetOf(context),
           title: 'Wallet credited',
           message: 'Your wallet balance has been updated.',
           children: [
@@ -409,7 +409,7 @@ class _PaymentInitiateResultScreenState
         if (polled.isCompleted) {
           return _StatusContent(
             icon: Icons.check_circle,
-            iconColor: HomeColors.violet,
+            iconColor: HomeColors.violetOf(context),
             title: 'Payment successful',
             message: 'Your payment was confirmed.',
             children: [
@@ -466,7 +466,7 @@ class _PaymentInitiateResultScreenState
                 height: 14,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: HomeColors.violet,
+                  color: HomeColors.violetOf(context),
                 ),
               )
             else
@@ -498,7 +498,7 @@ class _PaymentInitiateResultScreenState
       case PaymentInitiateUiMode.userActionRequired:
         return _StatusContent(
           icon: Icons.phone_android,
-          iconColor: HomeColors.violet,
+          iconColor: HomeColors.violetOf(context),
           title: 'Complete on your phone',
           message: result.customerMessage ??
               result.message ??
@@ -535,7 +535,7 @@ class _PaymentInitiateResultScreenState
       case PaymentInitiateUiMode.redirectToHpp:
         return _StatusContent(
           icon: Icons.open_in_browser,
-          iconColor: HomeColors.violet,
+          iconColor: HomeColors.violetOf(context),
           title: 'Hosted payment',
           message: result.customerMessage ??
               result.message ??
@@ -594,7 +594,7 @@ class _PaymentInitiateResultScreenState
                     : 'Your order is processing while payment confirms.'));
         return _StatusContent(
           icon: isCompleted ? Icons.check_circle : Icons.receipt_long,
-          iconColor: HomeColors.violet,
+          iconColor: HomeColors.violetOf(context),
           title: isCompleted
               ? 'Payment successful'
               : (isCod
@@ -817,7 +817,7 @@ class _QpayQrImage extends StatelessWidget {
     );
 
     if (payload.isEmpty) {
-      return Icon(Icons.qr_code_2, size: 120, color: HomeColors.violet);
+      return Icon(Icons.qr_code_2, size: 120, color: HomeColors.violetOf(context));
     }
 
     switch (payload.kind) {
@@ -842,7 +842,7 @@ class _QpayQrImage extends StatelessWidget {
             height: 260,
             fit: BoxFit.contain,
             errorBuilder: (_, __, ___) =>
-                Icon(Icons.qr_code_2, size: 120, color: HomeColors.violet),
+                Icon(Icons.qr_code_2, size: 120, color: HomeColors.violetOf(context)),
           ),
         );
       case QpayQrDisplayKind.dataUrl:
@@ -855,7 +855,7 @@ class _QpayQrImage extends StatelessWidget {
           } catch (_) {}
         }
         if (imageBytes == null) {
-          return Icon(Icons.qr_code_2, size: 120, color: HomeColors.violet);
+          return Icon(Icons.qr_code_2, size: 120, color: HomeColors.violetOf(context));
         }
         return Container(
           padding: EdgeInsets.all(AppColors.spaceMD),

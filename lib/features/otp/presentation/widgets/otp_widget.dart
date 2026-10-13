@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'dart:async';
 import '../../../../core/theme/app_colors.dart';
+import '../../../home/presentation/theme/home_colors.dart';
+import '../../../login/presentation/widgets/auth_ui.dart';
 
 class OtpInputFields extends StatefulWidget {
   final Function(String)? onCompleted;
@@ -86,28 +88,27 @@ class OtpInputFieldsState extends State<OtpInputFields> {
   }
 
   InputDecoration _otpDecoration(BuildContext context, bool isFocused) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final borderColor =
-        isDark ? AppColors.darkBorder : AppColors.lightBorder;
+    final borderColor = HomeColors.borderOf(context);
+    final radius = BorderRadius.circular(18);
 
     return InputDecoration(
       counterText: '',
       filled: true,
-      fillColor: isDark ? AppColors.darkInputFill : AppColors.lightInputFill,
+      fillColor: HomeColors.surfaceOf(context),
+      contentPadding: EdgeInsets.zero,
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: borderColor),
+        borderRadius: radius,
+        borderSide: BorderSide(color: borderColor, width: 1.2),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: borderColor),
+        borderRadius: radius,
+        borderSide: BorderSide(color: borderColor, width: 1.2),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: radius,
         borderSide: BorderSide(
           color: isFocused ? AppColors.primaryColor : borderColor,
-          width: isFocused ? 2 : 1,
+          width: isFocused ? 2 : 1.2,
         ),
       ),
     );
@@ -121,8 +122,8 @@ class OtpInputFieldsState extends State<OtpInputFields> {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: List.generate(4, (index) {
         return SizedBox(
-          width: 64,
-          height: 64,
+          width: 66,
+          height: 70,
           child: TextField(
             controller: _controllers[index],
             focusNode: _focusNodes[index],
@@ -130,8 +131,8 @@ class OtpInputFieldsState extends State<OtpInputFields> {
             keyboardType: TextInputType.none,
             maxLength: 1,
             style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
+              fontSize: 30,
+              fontWeight: FontWeight.w800,
               color: colorScheme.onSurface,
             ),
             decoration: _otpDecoration(
@@ -245,39 +246,32 @@ class _OtpResendTimerState extends State<OtpResendTimer> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        if (!_canResend) ...[
+    if (!_canResend) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
           Text(
-            '${l10n.actionResend} ',
+            l10n.actionResend,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
             ),
           ),
-          Text(
-            _formatTime(_remainingSeconds),
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: AppColors.primaryColor,
-            ),
-          ),
-        ] else
-          GestureDetector(
-            onTap: _resendCode,
-            child: Text(
-              l10n.actionResend,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: AppColors.primaryColor,
-                decoration: TextDecoration.underline,
-                decorationColor: AppColors.primaryColor,
-              ),
-            ),
-          ),
-      ],
+          const SizedBox(height: 8),
+          AuthPill(label: _formatTime(_remainingSeconds)),
+        ],
+      );
+    }
+    return TextButton.icon(
+      onPressed: _resendCode,
+      style: TextButton.styleFrom(
+        foregroundColor: AppColors.primaryColor,
+        minimumSize: const Size(48, 48),
+        textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      ),
+      icon: const Icon(Icons.refresh_rounded, size: 20),
+      label: Text(l10n.actionResend),
     );
   }
 }
@@ -313,20 +307,15 @@ class OtpNumericKeyboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final keyBg = isDark ? AppColors.darkInputFill : AppColors.lightSurface;
-    final keyBorder =
-        isDark ? AppColors.darkBorder : AppColors.lightBorder;
-    final panelBg = isDark ? AppColors.darkSurface : AppColors.lightBackground;
+    final keyBg = HomeColors.surfaceOf(context);
+    final keyBorder = HomeColors.borderOf(context);
+    final panelBg = HomeColors.surfaceElevatedOf(context);
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(12, 14, 12, 14),
       decoration: BoxDecoration(
         color: panelBg,
-        border: Border(
-          top: BorderSide(color: keyBorder, width: 1),
-        ),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
       child: Column(
         children: [
@@ -361,7 +350,7 @@ class OtpNumericKeyboard extends StatelessWidget {
               const SizedBox(width: 8),
               _SpecialKey(
                 Icons.remove,
-                color: isDark ? AppColors.darkBorder : AppColors.lightInputFill,
+                color: keyBorder,
                 onPressed: () => _handleKeyPress('-', context),
               ),
             ],
@@ -398,7 +387,7 @@ class OtpNumericKeyboard extends StatelessWidget {
               const SizedBox(width: 8),
               _SpecialKey(
                 Icons.code,
-                color: isDark ? AppColors.darkBorder : AppColors.lightInputFill,
+                color: keyBorder,
                 onPressed: () => _handleKeyPress(']', context),
               ),
             ],
@@ -435,7 +424,7 @@ class OtpNumericKeyboard extends StatelessWidget {
               const SizedBox(width: 8),
               _SpecialKey(
                 Icons.backspace_outlined,
-                color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                color: keyBorder,
                 onPressed: () => _handleKeyPress('backspace', context),
               ),
             ],
@@ -500,22 +489,21 @@ class _NumberKey extends StatelessWidget {
 
     return Material(
       color: keyBg,
-      borderRadius: BorderRadius.circular(14),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: keyBorder),
+      ),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onPressed,
-        borderRadius: BorderRadius.circular(14),
         child: Container(
-          height: 50,
+          height: 54,
           alignment: Alignment.center,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: keyBorder, width: 1),
-          ),
           child: Text(
             number,
             style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w500,
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
               color: colorScheme.onSurface,
             ),
           ),
@@ -540,18 +528,18 @@ class _SpecialKey extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: color,
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(16),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onPressed,
-        borderRadius: BorderRadius.circular(14),
         child: Container(
-          width: 50,
-          height: 50,
+          width: 54,
+          height: 54,
           alignment: Alignment.center,
           child: Icon(
             icon,
             color: Theme.of(context).colorScheme.onSurfaceVariant,
-            size: 20,
+            size: 24,
           ),
         ),
       ),
@@ -567,26 +555,18 @@ class _SubmitKey extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      borderRadius: BorderRadius.circular(14),
+      color: AppColors.brandOrange,
+      borderRadius: BorderRadius.circular(16),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onPressed,
-        borderRadius: BorderRadius.circular(14),
-        child: Ink(
-          width: 50,
-          height: 50,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: AppColors.primaryGradient,
-            ),
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: Transform.rotate(
-            angle: 3.14159,
-            child: const Icon(
-              Icons.arrow_forward,
-              color: AppColors.lightOnPrimary,
-              size: 20,
-            ),
+        child: const SizedBox(
+          width: 54,
+          height: 54,
+          child: Icon(
+            Icons.check_rounded,
+            color: Colors.white,
+            size: 26,
           ),
         ),
       ),

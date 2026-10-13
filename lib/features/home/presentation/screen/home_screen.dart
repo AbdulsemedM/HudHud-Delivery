@@ -456,7 +456,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                   child: UserProfileHeader(
                     name: _currentUser?.name ?? l10n.userDefault,
                     location: _currentLocation,
@@ -481,7 +481,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     ),
                   ),
                 ],
-                const SizedBox(height: 10),
+                const SizedBox(height: 16),
                 HomeServiceTabBar(
                   selected: _serviceMode,
                   tourKeys: _tourKeys,

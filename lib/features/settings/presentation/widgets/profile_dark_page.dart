@@ -14,7 +14,7 @@ class ProfilePage extends StatelessWidget {
     this.floatingActionButton,
     this.bottomNavigationBar,
     this.leading,
-    this.centerTitle = false,
+    this.centerTitle = true,
   }) : assert(title != null || titleWidget != null);
 
   final String? title;
@@ -36,12 +36,13 @@ class ProfilePage extends StatelessWidget {
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: systemUiOverlayFor(context),
         child: Scaffold(
-          backgroundColor: scheme.surface,
+          backgroundColor: authTheme.scaffoldBackgroundColor,
           appBar: AppBar(
             backgroundColor: authTheme.scaffoldBackgroundColor,
             foregroundColor: scheme.onSurface,
             surfaceTintColor: Colors.transparent,
             elevation: 0,
+            scrolledUnderElevation: 0,
             centerTitle: centerTitle,
             leading: leading,
             title: titleWidget ??
@@ -49,10 +50,12 @@ class ProfilePage extends StatelessWidget {
                   title!,
                   style: TextStyle(
                     color: scheme.onSurface,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 19,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.3,
                   ),
                 ),
-            iconTheme: IconThemeData(color: scheme.onSurface),
+            iconTheme: IconThemeData(color: scheme.onSurface, size: 26),
             actions: actions,
           ),
           body: body,

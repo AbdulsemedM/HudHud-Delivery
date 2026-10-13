@@ -13,10 +13,7 @@ String activeDeliveryStatusMessage(
   AppLocalizations l10n,
   String? rawStatus,
 ) {
-  final status = (rawStatus ?? '')
-      .toLowerCase()
-      .trim()
-      .replaceAll(' ', '_');
+  final status = (rawStatus ?? '').toLowerCase().trim().replaceAll(' ', '_');
 
   switch (status) {
     case 'pending_payment':
@@ -154,28 +151,35 @@ class _ActiveDeliveryCardState extends State<ActiveDeliveryCard> {
     final orderId = id != null ? 'DEL-$id' : '—';
     final rawStatus = resolveDeliveryStatus(delivery);
     final statusMessage = activeDeliveryStatusMessage(l10n, rawStatus);
-    final pickupAddress =
-        delivery['pickup_location']?.toString() ?? '';
-    final dropoffAddress =
-        delivery['dropoff_location']?.toString() ?? '';
+    final pickupAddress = delivery['pickup_location']?.toString() ?? '';
+    final dropoffAddress = delivery['dropoff_location']?.toString() ?? '';
 
-    return Material(
-      color: HomeColors.surfaceOf(context),
-      borderRadius: BorderRadius.circular(AppColors.radiusLG),
-      child: InkWell(
-        onTap: widget.onTrack,
-        borderRadius: BorderRadius.circular(AppColors.radiusLG),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppColors.radiusLG),
-            border: Border.all(color: HomeColors.borderOf(context)),
-          ),
-          clipBehavior: Clip.antiAlias,
+    final dark = HomeColors.isDark(context);
+    final radius = BorderRadius.circular(24);
+    final statusColor = StatusChip.colorForStatus(rawStatus ?? '');
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: radius,
+        boxShadow: AppColors.softShadow(context),
+      ),
+      child: Material(
+        color: HomeColors.surfaceOf(context),
+        shape: RoundedRectangleBorder(
+          borderRadius: radius,
+          side: dark
+              ? BorderSide(color: HomeColors.borderOf(context))
+              : BorderSide.none,
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: widget.onTrack,
+          borderRadius: radius,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(
-                height: 190,
+                height: 180,
                 width: double.infinity,
                 child: _hasMapCoords
                     ? _MiniMap(
@@ -192,66 +196,106 @@ class _ActiveDeliveryCardState extends State<ActiveDeliveryCard> {
                     : _MapPlaceholder(onTap: widget.onTrack),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Expanded(
-                          child: Text(
-                            statusMessage,
-                            style: TextStyle(
-                              color: HomeColors.textPrimaryOf(context),
-                              fontWeight: FontWeight.w700,
-                              fontSize: 16,
+                        Container(
+                          width: 52,
+                          height: 52,
+                          decoration: BoxDecoration(
+                            color: statusColor.withValues(
+                              alpha: dark ? 0.2 : 0.1,
                             ),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Icon(
+                            Icons.delivery_dining_rounded,
+                            size: 28,
+                            color: statusColor,
                           ),
                         ),
-                        if (rawStatus != null && rawStatus.isNotEmpty)
-                          StatusChip(status: rawStatus),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                statusMessage,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: HomeColors.textPrimaryOf(context),
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: -0.3,
+                                  fontSize: 17,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Row(
+                                children: [
+                                  if (rawStatus != null &&
+                                      rawStatus.isNotEmpty) ...[
+                                    StatusChip(status: rawStatus),
+                                    const SizedBox(width: 8),
+                                  ],
+                                  Flexible(
+                                    child: Text(
+                                      orderId,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        color: HomeColors.textMutedOf(context),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: 0.3,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 6),
-                    Text(
-                      orderId,
-                      style: TextStyle(
-                        color: HomeColors.textSecondaryOf(context),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 16),
                     _AddressLine(
                       label: l10n.pickupLocationLabel,
                       value: _truncateAddress(pickupAddress),
                       icon: Icons.trip_origin_rounded,
                       iconColor: HomeColors.orange,
+                      showConnector: true,
                     ),
-                    const SizedBox(height: 8),
                     _AddressLine(
                       label: l10n.deliveryDetailsDropoff,
                       value: _truncateAddress(dropoffAddress),
                       icon: Icons.location_on_rounded,
-                      iconColor: HomeColors.violet,
+                      iconColor: HomeColors.violetOf(context),
                     ),
                     const SizedBox(height: 16),
                     SizedBox(
                       width: double.infinity,
-                      height: 44,
-                      child: ElevatedButton(
+                      height: 56,
+                      child: FilledButton.icon(
                         onPressed: widget.onTrack,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: HomeColors.violet,
-                          foregroundColor: Theme.of(context).colorScheme.onSecondary,
+                        style: FilledButton.styleFrom(
+                          backgroundColor: HomeColors.orange,
+                          foregroundColor: Colors.white,
                           elevation: 0,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(18),
                           ),
                         ),
-                        child: Text(
+                        icon: const Icon(Icons.near_me_rounded, size: 24),
+                        label: Text(
                           l10n.courierTrackDeliveryCta,
-                          style: const TextStyle(fontWeight: FontWeight.w600),
+                          style: const TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
                       ),
                     ),
@@ -293,14 +337,14 @@ class _MiniMap extends StatelessWidget {
               markerId: const gmaps.MarkerId('pickup'),
               position: pickup,
               icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-                gmaps.BitmapDescriptor.hueOrange,
+                22.0,
               ),
             ),
             gmaps.Marker(
               markerId: const gmaps.MarkerId('dropoff'),
               position: dropoff,
               icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-                gmaps.BitmapDescriptor.hueViolet,
+                266.0,
               ),
             ),
           },
@@ -334,25 +378,33 @@ class _MapPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: HomeColors.surfaceElevatedOf(context),
+      color: HomeColors.violetTintOf(context),
       child: InkWell(
         onTap: onTap,
         child: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.map_outlined,
-                color: HomeColors.violet,
-                size: 40,
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: HomeColors.surfaceOf(context),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.map_rounded,
+                  color: HomeColors.violetOf(context),
+                  size: 32,
+                ),
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 10),
               Text(
                 'Open map to track',
                 style: TextStyle(
                   color: HomeColors.textSecondaryOf(context),
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
                 ),
               ),
             ],
@@ -369,44 +421,76 @@ class _AddressLine extends StatelessWidget {
     required this.value,
     required this.icon,
     required this.iconColor,
+    this.showConnector = false,
   });
 
   final String label;
   final String value;
   final IconData icon;
   final Color iconColor;
+  final bool showConnector;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, size: 18, color: iconColor),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  color: HomeColors.textMutedOf(context),
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
+    final dark = HomeColors.isDark(context);
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(
+            width: 40,
+            child: Column(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: iconColor.withValues(alpha: dark ? 0.2 : 0.1),
+                    borderRadius: BorderRadius.circular(13),
+                  ),
+                  child: Icon(icon, size: 22, color: iconColor),
                 ),
-              ),
-              Text(
-                value,
-                style: TextStyle(
-                  color: HomeColors.textPrimaryOf(context),
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
+                if (showConnector)
+                  Expanded(
+                    child: Container(
+                      width: 2,
+                      margin: const EdgeInsets.symmetric(vertical: 4),
+                      color: HomeColors.borderOf(context),
+                    ),
+                  ),
+              ],
+            ),
           ),
-        ),
-      ],
+          const SizedBox(width: 12),
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(top: 1, bottom: showConnector ? 12 : 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      color: HomeColors.textMutedOf(context),
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    value,
+                    style: TextStyle(
+                      color: HomeColors.textPrimaryOf(context),
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

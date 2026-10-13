@@ -1,10 +1,8 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/features/splash/presentation/theme/splash_colors.dart';
 
-/// Full splash content: routes, halo, logo, status.
+/// Full splash content: soft brand glow, logo, status.
 class SplashIntroContent extends StatelessWidget {
   const SplashIntroContent({
     super.key,
@@ -17,6 +15,8 @@ class SplashIntroContent extends StatelessWidget {
   /// 0 → 1 intro timeline (~2s).
   final Animation<double> intro;
   final Animation<double> halo;
+
+  /// Kept for API compatibility; the decorative route lines were removed.
   final Animation<double> routesTwinkle;
   final Animation<double> dotsBounce;
 
@@ -40,14 +40,6 @@ class SplashIntroContent extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        AnimatedBuilder(
-          animation: routesTwinkle,
-          builder: (context, _) {
-            return CustomPaint(
-              painter: SplashRoutesPainter(twinkle: routesTwinkle.value),
-            );
-          },
-        ),
         SafeArea(
           child: Column(
             children: [
@@ -60,24 +52,34 @@ class SplashIntroContent extends StatelessWidget {
                     animation: halo,
                     builder: (context, _) {
                       final t = halo.value;
-                      final scale = 0.92 + (t * 0.16);
-                      final opacity = 0.75 + (t * 0.25);
-                      return Transform.scale(
-                        scale: scale,
-                        child: Opacity(
-                          opacity: opacity,
-                          child: Container(
-                            width: 220,
-                            height: 160,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(80),
-                              gradient: RadialGradient(
-                                colors: [
-                                  SplashColors.orange.withValues(alpha: 0.30),
-                                  SplashColors.violet.withValues(alpha: 0.14),
-                                  Colors.transparent,
-                                ],
-                                stops: const [0.0, 0.55, 0.75],
+                      final scale = 0.96 + (t * 0.08);
+                      final opacity = 0.7 + (t * 0.3);
+                      return SizedBox(
+                        width: 240,
+                        height: 140,
+                        child: OverflowBox(
+                          maxWidth: 340,
+                          maxHeight: 340,
+                          child: Transform.scale(
+                            scale: scale,
+                            child: Opacity(
+                              opacity: opacity,
+                              child: Container(
+                                width: 340,
+                                height: 340,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: RadialGradient(
+                                    colors: [
+                                      SplashColors.orange
+                                          .withValues(alpha: 0.16),
+                                      SplashColors.orange
+                                          .withValues(alpha: 0.05),
+                                      SplashColors.orange.withValues(alpha: 0),
+                                    ],
+                                    stops: const [0.0, 0.5, 1.0],
+                                  ),
+                                ),
                               ),
                             ),
                           ),
@@ -126,8 +128,8 @@ class SplashLogoMark extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return SizedBox(
-      width: 260,
-      height: 120,
+      width: 232,
+      height: 96,
       child: Image.asset(
         isDark ? darkAssetPath : assetPath,
         fit: BoxFit.contain,
@@ -158,9 +160,10 @@ class SplashStatus extends StatelessWidget {
         Text(
           context.l10n.splashStatus,
           style: TextStyle(
-            fontSize: 12,
+            fontSize: 13,
             color: SplashColors.textMutedOf(context),
-            fontWeight: FontWeight.w400,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.2,
           ),
         ),
       ],
@@ -192,15 +195,11 @@ class SplashBouncingDots extends StatelessWidget {
                 child: Opacity(
                   opacity: opacity.clamp(0.5, 1.0),
                   child: Container(
-                    width: 7,
-                    height: 7,
+                    width: 8,
+                    height: 8,
                     decoration: const BoxDecoration(
                       shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [SplashColors.orange, SplashColors.violet],
-                      ),
+                      color: SplashColors.orangeDeep,
                     ),
                   ),
                 ),
@@ -224,76 +223,8 @@ class SplashBouncingDots extends StatelessWidget {
   }
 }
 
-class SplashRoutesPainter extends CustomPainter {
-  SplashRoutesPainter({required this.twinkle});
-
-  final double twinkle;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final opacity = 0.08 + (0.5 - (twinkle - 0.5).abs()) * 2 * 0.27;
-
-    final orangePaint = Paint()
-      ..color = SplashColors.orange.withValues(alpha: opacity)
-      ..strokeWidth = 1.2
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-
-    final violetPaint = Paint()
-      ..color = SplashColors.violet.withValues(alpha: opacity)
-      ..strokeWidth = 1.2
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-
-    final orangeFill = Paint()
-      ..color = SplashColors.orange.withValues(alpha: opacity);
-    final violetFill = Paint()
-      ..color = SplashColors.violet.withValues(alpha: opacity);
-
-    // Design coords: 375 x 660 — scale to size.
-    final sx = size.width / 375;
-    final sy = size.height / 660;
-
-    Offset p(double x, double y) => Offset(x * sx, y * sy);
-
-    void line(List<Offset> pts, Paint paint) {
-      final path = Path()..moveTo(pts.first.dx, pts.first.dy);
-      for (var i = 1; i < pts.length; i++) {
-        path.lineTo(pts[i].dx, pts[i].dy);
-      }
-      canvas.drawPath(path, paint);
-    }
-
-    line([p(40, 120), p(140, 180), p(110, 300)], orangePaint);
-    line([p(330, 90), p(250, 200), p(300, 320)], violetPaint);
-    line([p(60, 520), p(150, 470), p(90, 400)], violetPaint);
-    line([p(320, 560), p(260, 480), p(310, 420)], orangePaint);
-
-    void node(Offset c, double r, Paint fill) {
-      canvas.drawCircle(c, r * math.min(sx, sy), fill);
-    }
-
-    node(p(40, 120), 3, orangeFill);
-    node(p(140, 180), 2.5, orangeFill);
-    node(p(110, 300), 2.5, orangeFill);
-    node(p(330, 90), 3, violetFill);
-    node(p(250, 200), 2.5, violetFill);
-    node(p(300, 320), 2.5, violetFill);
-    node(p(60, 520), 3, violetFill);
-    node(p(150, 470), 2.5, violetFill);
-    node(p(90, 400), 2.5, violetFill);
-    node(p(320, 560), 3, orangeFill);
-    node(p(260, 480), 2.5, orangeFill);
-    node(p(310, 420), 2.5, orangeFill);
-  }
-
-  @override
-  bool shouldRepaint(covariant SplashRoutesPainter oldDelegate) {
-    return oldDelegate.twinkle != twinkle;
-  }
-}
-
-/// Soft outer glow layers behind the main screen (fixed radials).
+/// Calm brand backdrop: the page colour with two large, very soft blurred
+/// blobs (orange top-left, indigo bottom-right).
 class SplashGlowBackground extends StatelessWidget {
   const SplashGlowBackground({super.key, required this.child});
 
@@ -301,73 +232,36 @@ class SplashGlowBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       height: double.infinity,
-      decoration: BoxDecoration(
-        color: SplashColors.bgOuterOf(context),
-      ),
+      color: SplashColors.bgDeepOf(context),
       child: Stack(
         fit: StackFit.expand,
         children: [
           DecoratedBox(
             decoration: BoxDecoration(
               gradient: RadialGradient(
-                center: const Alignment(-0.7, -0.75),
+                center: const Alignment(-1.1, -1.0),
+                radius: 1.0,
+                colors: [
+                  SplashColors.orange.withValues(alpha: dark ? 0.14 : 0.12),
+                  SplashColors.orange.withValues(alpha: 0),
+                ],
+              ),
+            ),
+          ),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                center: const Alignment(1.1, 1.0),
                 radius: 1.1,
                 colors: [
-                  SplashColors.orange.withValues(alpha: 0.16),
-                  Colors.transparent,
+                  (dark ? SplashColors.violet : SplashColors.violetDeep)
+                      .withValues(alpha: dark ? 0.16 : 0.08),
+                  SplashColors.violetDeep.withValues(alpha: 0),
                 ],
-              ),
-            ),
-          ),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: RadialGradient(
-                center: const Alignment(0.85, 0.8),
-                radius: 1.15,
-                colors: [
-                  SplashColors.violet.withValues(alpha: 0.16),
-                  Colors.transparent,
-                ],
-              ),
-            ),
-          ),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: RadialGradient(
-                center: const Alignment(0, -0.35),
-                radius: 0.85,
-                colors: [
-                  SplashColors.violet.withValues(alpha: 0.14),
-                  Colors.transparent,
-                ],
-              ),
-            ),
-          ),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: RadialGradient(
-                center: const Alignment(0, 0.55),
-                radius: 0.75,
-                colors: [
-                  SplashColors.orange.withValues(alpha: 0.10),
-                  Colors.transparent,
-                ],
-              ),
-            ),
-          ),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  SplashColors.bgDeepOf(context).withValues(alpha: 0),
-                  SplashColors.bgDeepOf(context),
-                ],
-                stops: const [0.0, 0.55],
               ),
             ),
           ),

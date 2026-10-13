@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
@@ -41,6 +42,7 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
   String _deliveryLocation = '';
   bool _pickupResolveFailed = false;
   String? _selectedVehicle;
+
   /// Default map center (Addis Ababa) — same as taxi / location flows until GPS resolves.
   LatLng _currentPosition = const LatLng(9.0222, 38.7468);
   LatLng? _pickupPosition;
@@ -151,7 +153,8 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
     if (!mounted) return;
 
     final rawTypes = result['success'] == true
-        ? List<String>.from(result['supportedVehicleTypes'] as List? ?? const [])
+        ? List<String>.from(
+            result['supportedVehicleTypes'] as List? ?? const [])
         : const <String>[];
     final applied = applyCourierSupportedVehicleTypes(
       supportedVehicleTypes: rawTypes,
@@ -400,247 +403,283 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
           final topPad = MediaQuery.paddingOf(context).top;
           const initialSheetSize = 0.5;
 
-          return Scaffold(
-            backgroundColor: HomeColors.backgroundOf(context),
-            body: Stack(
-              children: [
-                Positioned.fill(
-                  child: _buildMapOrFallback(context),
-                ),
-                Positioned(
-                  top: topPad + 8,
-                  left: 16,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: HomeColors.surfaceElevatedOf(context),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.25),
-                          blurRadius: 4,
-                        ),
-                      ],
-                    ),
-                    child: IconButton(
-                      icon: Icon(Icons.arrow_back,
-                          color: HomeColors.textPrimaryOf(context)),
+          return AnnotatedRegion<SystemUiOverlayStyle>(
+            // Map is always light: keep status bar icons dark.
+            value: SystemUiOverlayStyle.dark.copyWith(
+              statusBarColor: Colors.transparent,
+            ),
+            child: Scaffold(
+              backgroundColor: HomeColors.backgroundOf(context),
+              body: Stack(
+                children: [
+                  Positioned.fill(
+                    child: _buildMapOrFallback(context),
+                  ),
+                  Positioned(
+                    top: topPad + 8,
+                    left: 16,
+                    child: _MapCircleButton(
+                      icon: Icons.arrow_back_rounded,
+                      color: HomeColors.textPrimaryOf(context),
+                      tooltip:
+                          MaterialLocalizations.of(context).backButtonTooltip,
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ),
-                ),
-                Positioned(
-                  top: topPad + 8,
-                  right: 16,
-                  child: FloatingActionButton(
-                    heroTag: 'instant_delivery_my_location',
-                    mini: true,
-                    backgroundColor: HomeColors.surfaceElevatedOf(context),
-                    onPressed: () async {
-                      await _getCurrentLocation();
-                      if (_pickupPosition != null && mounted) {
-                        _mapController?.moveCamera(
-                          gmaps.CameraUpdate.newLatLngZoom(
-                            _toG(_pickupPosition!),
-                            15,
-                          ),
-                        );
-                      }
-                    },
-                    child: Icon(
-                      Icons.my_location,
+                  Positioned(
+                    top: topPad + 8,
+                    right: 16,
+                    child: _MapCircleButton(
+                      icon: Icons.my_location_rounded,
                       color: _isLoadingLocation
                           ? HomeColors.textMutedOf(context)
-                          : HomeColors.violet,
+                          : HomeColors.violetOf(context),
+                      onPressed: () async {
+                        await _getCurrentLocation();
+                        if (_pickupPosition != null && mounted) {
+                          _mapController?.moveCamera(
+                            gmaps.CameraUpdate.newLatLngZoom(
+                              _toG(_pickupPosition!),
+                              15,
+                            ),
+                          );
+                        }
+                      },
                     ),
                   ),
-                ),
-                DraggableScrollableSheet(
-                  initialChildSize: initialSheetSize,
-                  minChildSize: 0.38,
-                  maxChildSize: 0.85,
-                  builder: (context, scrollController) {
-                    final pickupText = _isLoadingLocation
-                        ? l10n.locationGetting
-                        : (_pickupResolveFailed
-                            ? l10n.locationUnable
-                            : (_pickupLocation.isEmpty
-                                ? l10n.tapToSelectPickup
-                                : _pickupLocation));
-                    final dropoffEmpty = _deliveryLocation.isEmpty;
-                    final canContinue = _pickupLocation.isNotEmpty &&
-                        _deliveryLocation.isNotEmpty &&
-                        _supportedVehicleTypes.isNotEmpty &&
-                        _selectedVehicle != null;
-                    final bottomInset = MediaQuery.paddingOf(context).bottom;
+                  DraggableScrollableSheet(
+                    initialChildSize: initialSheetSize,
+                    minChildSize: 0.38,
+                    maxChildSize: 0.85,
+                    builder: (context, scrollController) {
+                      final pickupText = _isLoadingLocation
+                          ? l10n.locationGetting
+                          : (_pickupResolveFailed
+                              ? l10n.locationUnable
+                              : (_pickupLocation.isEmpty
+                                  ? l10n.tapToSelectPickup
+                                  : _pickupLocation));
+                      final dropoffEmpty = _deliveryLocation.isEmpty;
+                      final canContinue = _pickupLocation.isNotEmpty &&
+                          _deliveryLocation.isNotEmpty &&
+                          _supportedVehicleTypes.isNotEmpty &&
+                          _selectedVehicle != null;
+                      final bottomInset = MediaQuery.paddingOf(context).bottom;
 
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: HomeColors.surfaceOf(context),
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(AppColors.radiusLG),
-                          topRight: Radius.circular(AppColors.radiusLG),
-                        ),
-                      ),
-                      child: Column(
-                        children: [
-                          Container(
-                            margin: const EdgeInsets.only(top: 8),
-                            width: 40,
-                            height: 4,
-                            decoration: BoxDecoration(
-                              color: HomeColors.borderOf(context),
-                              borderRadius: BorderRadius.circular(2),
-                            ),
+                      return DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: HomeColors.backgroundOf(context),
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(28),
                           ),
-                          Expanded(
-                            child: ListView(
-                              controller: scrollController,
-                              padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
-                              children: [
-                                Text(
-                                  l10n.sendAPackageTitle,
-                                  style: theme.textTheme.titleLarge?.copyWith(
-                                        fontWeight: FontWeight.w800,
-                                        color: HomeColors.textPrimaryOf(context),
-                                        letterSpacing: 0.4,
-                                      ) ??
-                                      TextStyle(
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.w800,
-                                        color: HomeColors.textPrimaryOf(context),
-                                      ),
-                                ),
-                                const SizedBox(height: 8),
-                                SendPackageLocationRow(
-                                  icon: Icons.place,
-                                  text: pickupText,
-                                  isPlaceholder: _pickupLocation.isEmpty,
-                                  onTap: _selectPickupLocation,
-                                ),
-                                SendPackageLocationRow(
-                                  icon: Icons.flag,
-                                  text: dropoffEmpty
-                                      ? l10n.courierDeliveryAddressPlaceholder
-                                      : _deliveryLocation,
-                                  isPlaceholder: dropoffEmpty,
-                                  onTap: _selectDeliveryLocation,
-                                ),
-                                const SizedBox(height: 16),
-                                if (_pickupLocation.isNotEmpty &&
-                                    !_isLoadingServiceArea &&
-                                    _supportedVehicleTypes.isEmpty) ...[
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Color(0x261B1530),
+                              blurRadius: 24,
+                              offset: Offset(0, -6),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            Container(
+                              margin: const EdgeInsets.only(top: 10),
+                              width: 44,
+                              height: 5,
+                              decoration: BoxDecoration(
+                                color: HomeColors.textMutedOf(context)
+                                    .withValues(alpha: 0.35),
+                                borderRadius: BorderRadius.circular(3),
+                              ),
+                            ),
+                            Expanded(
+                              child: ListView(
+                                controller: scrollController,
+                                padding:
+                                    const EdgeInsets.fromLTRB(16, 14, 16, 12),
+                                children: [
                                   Text(
-                                    l10n.pickupOutsideDeliveryServiceArea,
-                                    style: TextStyle(
-                                      color: Theme.of(context).colorScheme.error,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                    l10n.sendAPackageTitle,
+                                    style: theme.textTheme.titleLarge?.copyWith(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.w800,
+                                          color:
+                                              HomeColors.textPrimaryOf(context),
+                                          letterSpacing: -0.5,
+                                        ) ??
+                                        TextStyle(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.w800,
+                                          letterSpacing: -0.5,
+                                          color:
+                                              HomeColors.textPrimaryOf(context),
+                                        ),
                                   ),
                                   const SizedBox(height: 12),
-                                ],
-                                if (_supportedVehicleTypes.isNotEmpty)
-                                  SizedBox(
-                                    height: 148,
-                                    child: ListView.separated(
-                                      scrollDirection: Axis.horizontal,
-                                      itemCount: _supportedVehicleTypes.length,
-                                      separatorBuilder: (_, __) =>
-                                          const SizedBox(width: 10),
-                                      itemBuilder: (context, index) {
-                                        final vehicleId =
-                                            _supportedVehicleTypes[index];
-                                        return CourierVehicleEstimateCard(
-                                          icon: courierVehicleIcon(vehicleId),
-                                          label: courierVehicleLabel(
-                                            vehicleId,
-                                            l10n,
-                                          ),
-                                          isSelected:
-                                              _selectedVehicle == vehicleId,
-                                          isLoading: (_isLoadingEstimate ||
-                                                  _isLoadingServiceArea) &&
-                                              _canFetchEstimate,
-                                          estimate:
-                                              _vehicleEstimates[vehicleId],
-                                          etaMinutes: _isLoadingEstimate
-                                              ? null
-                                              : _etaMinutesFor(vehicleId),
-                                          onTap: () {
-                                            setState(() {
-                                              _selectedVehicle = vehicleId;
-                                            });
-                                            _syncNearbyDrivers();
-                                          },
-                                        );
-                                      },
-                                    ),
+                                  SendPackageLocationRow(
+                                    icon: Icons.my_location_rounded,
+                                    label: l10n.pickupLocationLabel,
+                                    accent: HomeColors.orange,
+                                    text: pickupText,
+                                    isPlaceholder: _pickupLocation.isEmpty,
+                                    onTap: _selectPickupLocation,
                                   ),
-                              ],
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.fromLTRB(
-                              20,
-                              8,
-                              20,
-                              12 + bottomInset,
-                            ),
-                            child: SizedBox(
-                              width: double.infinity,
-                              height: 50,
-                              child: ElevatedButton(
-                                onPressed: canContinue
-                                    ? () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                PackageDetailsScreen(
-                                              pickupLocation: _pickupLocation,
-                                              deliveryLocation:
-                                                  _deliveryLocation,
-                                              pickupPosition: _pickupPosition,
-                                              deliveryPosition:
-                                                  _deliveryPosition,
-                                              selectedVehicle:
-                                                  _selectedVehicle!,
-                                              isInstantDelivery: true,
-                                              scheduledPickup: null,
-                                              scheduledDelivery: null,
-                                            ),
-                                          ),
-                                        );
-                                      }
-                                    : null,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: HomeColors.violet,
-                                  foregroundColor: Theme.of(context).colorScheme.onSecondary,
-                                  disabledBackgroundColor:
-                                      HomeColors.surfaceElevatedOf(context),
-                                  disabledForegroundColor:
-                                      HomeColors.textMutedOf(context),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(
-                                      AppColors.radiusLG,
+                                  SendPackageLocationRow(
+                                    icon: Icons.location_on_rounded,
+                                    label: l10n.deliveryLocationLabel,
+                                    accent: HomeColors.violetOf(context),
+                                    text: dropoffEmpty
+                                        ? l10n.courierDeliveryAddressPlaceholder
+                                        : _deliveryLocation,
+                                    isPlaceholder: dropoffEmpty,
+                                    onTap: _selectDeliveryLocation,
+                                  ),
+                                  const SizedBox(height: 18),
+                                  if (_pickupLocation.isNotEmpty &&
+                                      !_isLoadingServiceArea &&
+                                      _supportedVehicleTypes.isEmpty) ...[
+                                    _ErrorNote(
+                                      text:
+                                          l10n.pickupOutsideDeliveryServiceArea,
                                     ),
+                                    const SizedBox(height: 12),
+                                  ],
+                                  if (_supportedVehicleTypes.isNotEmpty)
+                                    SizedBox(
+                                      height:
+                                          CourierVehicleEstimateCard.height +
+                                              16,
+                                      child: ListView.separated(
+                                        scrollDirection: Axis.horizontal,
+                                        clipBehavior: Clip.none,
+                                        padding:
+                                            const EdgeInsets.only(bottom: 16),
+                                        itemCount:
+                                            _supportedVehicleTypes.length,
+                                        separatorBuilder: (_, __) =>
+                                            const SizedBox(width: 12),
+                                        itemBuilder: (context, index) {
+                                          final vehicleId =
+                                              _supportedVehicleTypes[index];
+                                          return CourierVehicleEstimateCard(
+                                            icon: courierVehicleIcon(vehicleId),
+                                            label: courierVehicleLabel(
+                                              vehicleId,
+                                              l10n,
+                                            ),
+                                            isSelected:
+                                                _selectedVehicle == vehicleId,
+                                            isLoading: (_isLoadingEstimate ||
+                                                    _isLoadingServiceArea) &&
+                                                _canFetchEstimate,
+                                            estimate:
+                                                _vehicleEstimates[vehicleId],
+                                            etaMinutes: _isLoadingEstimate
+                                                ? null
+                                                : _etaMinutesFor(vehicleId),
+                                            onTap: () {
+                                              setState(() {
+                                                _selectedVehicle = vehicleId;
+                                              });
+                                              _syncNearbyDrivers();
+                                            },
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                            DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: HomeColors.surfaceOf(context),
+                                border: Border(
+                                  top: BorderSide(
+                                    color: HomeColors.borderOf(context),
                                   ),
                                 ),
-                                child: Text(
-                                  l10n.addInfoAboutDelivery,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w700,
+                              ),
+                              child: Padding(
+                                padding: EdgeInsets.fromLTRB(
+                                  16,
+                                  12,
+                                  16,
+                                  12 + bottomInset,
+                                ),
+                                child: SizedBox(
+                                  width: double.infinity,
+                                  height: 56,
+                                  child: ElevatedButton(
+                                    onPressed: canContinue
+                                        ? () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    PackageDetailsScreen(
+                                                  pickupLocation:
+                                                      _pickupLocation,
+                                                  deliveryLocation:
+                                                      _deliveryLocation,
+                                                  pickupPosition:
+                                                      _pickupPosition,
+                                                  deliveryPosition:
+                                                      _deliveryPosition,
+                                                  selectedVehicle:
+                                                      _selectedVehicle!,
+                                                  isInstantDelivery: true,
+                                                  scheduledPickup: null,
+                                                  scheduledDelivery: null,
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                        : null,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: HomeColors.orange,
+                                      foregroundColor: Colors.white,
+                                      elevation: 0,
+                                      disabledBackgroundColor:
+                                          HomeColors.surfaceElevatedOf(context),
+                                      disabledForegroundColor:
+                                          HomeColors.textMutedOf(context),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(18),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Flexible(
+                                          child: Text(
+                                            l10n.addInfoAboutDelivery,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                              fontSize: 17,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        const Icon(
+                                          Icons.arrow_forward_rounded,
+                                          size: 22,
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ],
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
           );
         },
@@ -710,7 +749,10 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: Icon(Icons.location_on, color: cs.error),
+                leading: const Icon(
+                  Icons.my_location_rounded,
+                  color: HomeColors.orange,
+                ),
                 title: Text(
                   l10n.pickupLocationLabel,
                   style: TextStyle(color: cs.onSurface),
@@ -721,7 +763,10 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                 },
               ),
               ListTile(
-                leading: Icon(Icons.location_on, color: cs.primary),
+                leading: Icon(
+                  Icons.location_on_rounded,
+                  color: HomeColors.violetOf(dialogContext),
+                ),
                 title: Text(
                   l10n.deliveryLocationLabel,
                   style: TextStyle(color: cs.onSurface),
@@ -769,8 +814,8 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
     if (_hasGoogleMapsApiKey == null) {
       return ColoredBox(
         color: HomeColors.backgroundOf(context),
-        child: Center(
-          child: CircularProgressIndicator(color: HomeColors.violet),
+        child: const Center(
+          child: CircularProgressIndicator(color: HomeColors.orange),
         ),
       );
     }
@@ -809,7 +854,7 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                 markerId: const gmaps.MarkerId('pickup'),
                 position: _toG(_pickupPosition!),
                 icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-                  gmaps.BitmapDescriptor.hueAzure,
+                  22.0,
                 ),
               ),
             if (_deliveryPosition != null)
@@ -817,7 +862,7 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                 markerId: const gmaps.MarkerId('delivery'),
                 position: _toG(_deliveryPosition!),
                 icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
-                  gmaps.BitmapDescriptor.hueRed,
+                  266.0,
                 ),
               ),
             ...nearbyDriverMapMarkers(
@@ -833,7 +878,7 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                             _routePolylinePoints!.length >= 2
                         ? _routePolylinePoints!.map(_toG).toList()
                         : [_toG(_pickupPosition!), _toG(_deliveryPosition!)],
-                    color: HomeColors.violet,
+                    color: HomeColors.violetOf(context),
                     width: 3,
                   ),
                 }
@@ -858,22 +903,126 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
             right: 12,
             bottom: 12,
             child: Material(
-              color: HomeColors.surfaceElevatedOf(context).withValues(alpha: 0.92),
-              borderRadius: BorderRadius.circular(8),
+              color: HomeColors.surfaceOf(context).withValues(alpha: 0.94),
+              borderRadius: BorderRadius.circular(14),
               child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: Text(
-                  privacy,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: HomeColors.textMutedOf(context),
-                  ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.shield_outlined,
+                      size: 18,
+                      color: HomeColors.violetOf(context),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        privacy,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                          color: HomeColors.textMutedOf(context),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
       ],
+    );
+  }
+}
+
+/// Round floating map control (back / my-location) with a soft shadow.
+class _MapCircleButton extends StatelessWidget {
+  const _MapCircleButton({
+    required this.icon,
+    required this.color,
+    required this.onPressed,
+    this.tooltip,
+  });
+
+  final IconData icon;
+  final Color color;
+  final VoidCallback onPressed;
+  final String? tooltip;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        boxShadow: AppColors.softShadow(context),
+      ),
+      child: Material(
+        color: HomeColors.surfaceOf(context),
+        shape: CircleBorder(
+          side: BorderSide(color: HomeColors.borderOf(context)),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: IconButton(
+          tooltip: tooltip,
+          iconSize: 26,
+          constraints: const BoxConstraints(minWidth: 52, minHeight: 52),
+          icon: Icon(icon, color: color),
+          onPressed: onPressed,
+        ),
+      ),
+    );
+  }
+}
+
+/// Soft error banner: icon tile + text.
+class _ErrorNote extends StatelessWidget {
+  const _ErrorNote({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.errorColor.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppColors.errorColor.withValues(alpha: 0.25),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: AppColors.errorColor.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.wrong_location_rounded,
+              size: 22,
+              color: AppColors.errorColor,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 14,
+                height: 1.3,
+                fontWeight: FontWeight.w600,
+                color: HomeColors.textPrimaryOf(context),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/easy_mode/voice_hint_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
-import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
 
 /// Speaker control that reads [text] aloud (Easy Mode).
+///
+/// Compact: a 48px round button with a soft brand-indigo tint.
+/// Large: a full-width tinted pill with icon + "Listen" label.
 class SpeakButton extends StatelessWidget {
   const SpeakButton({
     super.key,
@@ -18,37 +20,67 @@ class SpeakButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final label = context.l10n.easySpeakHint;
+    final accent = HomeColors.violetOf(context);
+    final tint = HomeColors.violetTintOf(context);
+    final enabled = text.trim().isNotEmpty;
+    void speak() => VoiceHintService.instance.speak(text);
+
     if (large) {
       return SizedBox(
         height: 56,
-        child: OutlinedButton.icon(
-          onPressed: text.trim().isEmpty
-              ? null
-              : () => VoiceHintService.instance.speak(text),
-          icon: const Icon(Icons.volume_up_rounded, size: 28),
-          label: Text(
-            label,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        child: Material(
+          color: tint,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
           ),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: AuthScreenColors.orange,
-            side: BorderSide(color: AuthScreenColors.orange),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: enabled ? speak : null,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.volume_up_rounded, size: 26, color: accent),
+                const SizedBox(width: 10),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: accent,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
       );
     }
-    return IconButton(
-      tooltip: label,
-      onPressed: text.trim().isEmpty
-          ? null
-          : () => VoiceHintService.instance.speak(text),
-      icon: Icon(
-        Icons.volume_up_rounded,
-        color: HomeColors.violet,
-        size: 28,
+
+    return Semantics(
+      button: true,
+      label: label,
+      child: Tooltip(
+        message: label,
+        child: Padding(
+          padding: const EdgeInsets.all(4),
+          child: Material(
+            color: tint,
+            shape: const CircleBorder(),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: enabled ? speak : null,
+              child: SizedBox(
+                width: 48,
+                height: 48,
+                child: Icon(
+                  Icons.volume_up_rounded,
+                  color: enabled ? accent : accent.withValues(alpha: 0.4),
+                  size: 26,
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
