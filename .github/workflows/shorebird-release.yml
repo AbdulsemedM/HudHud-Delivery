@@ -4,8 +4,14 @@
 # Android runs on ubuntu. iOS requires macos and signing setup.
 # Upload the produced artifact to Play / App Store Connect as usual.
 #
-# Signing: ensure android/key.properties (or CI secrets that generate it)
-# is available on the runner before release.
+# Signing: android/key.properties is generated from repository secrets
+# ANDROID_KEYSTORE_BASE64, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD,
+# ANDROID_STORE_PASSWORD. Release builds fail without it (no debug-key fallback).
+#
+# App config: BASE_URL / SUPPORT_PHONE are compile-time dart-defines with
+# production defaults (lib/app/config/app_env.dart). To override, append e.g.
+#   args: --no-confirm -- --dart-define=BASE_URL=https://...
+# No .env file is needed or bundled.
 
 name: Shorebird Release
 
@@ -52,6 +58,28 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+
+      - name: Create android/key.properties from secrets
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+        run: |
+          set -euo pipefail
+          for v in ANDROID_KEYSTORE_BASE64 ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD ANDROID_STORE_PASSWORD; do
+            if [[ -z "${!v:-}" ]]; then
+              echo "::error::Missing repository secret ${v}; release builds require the upload keystore."
+              exit 1
+            fi
+          done
+          echo "${ANDROID_KEYSTORE_BASE64}" | base64 --decode > "${RUNNER_TEMP}/upload-keystore.jks"
+          {
+            echo "storeFile=${RUNNER_TEMP}/upload-keystore.jks"
+            echo "storePassword=${ANDROID_STORE_PASSWORD}"
+            echo "keyAlias=${ANDROID_KEY_ALIAS}"
+            echo "keyPassword=${ANDROID_KEY_PASSWORD}"
+          } > android/key.properties
 
       - name: Shorebird release Android
         uses: shorebirdtech/shorebird-release@v1

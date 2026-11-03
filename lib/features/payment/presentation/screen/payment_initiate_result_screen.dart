@@ -123,11 +123,27 @@ class _PaymentInitiateResultScreenState
     if (polled != null && polled.isSuccess && polled.isCompleted) return true;
     if (!result.isSuccess) return false;
     if (result.uiMode != PaymentInitiateUiMode.success) return false;
-    return result.status == 'completed' ||
-        result.method == 'wallet' ||
-        result.method == 'cash_on_delivery' ||
-        result.nextAction == null;
+    // Cash on delivery: the order/delivery is placed (not paid) — terminal for
+    // navigation, but the UI never labels it "Payment successful".
+    if (_isCod) return true;
+    // Everything else (including wallet) needs a server-confirmed status from
+    // the initiate response or from polling payments/{id}/status.
+    return _isServerPaidStatus(result.status);
   }
+
+  bool get _isCod => result.method == 'cash_on_delivery';
+
+  static bool _isServerPaidStatus(String? status) {
+    final s = status?.toLowerCase();
+    return s == 'completed' || s == 'paid';
+  }
+
+  /// Wallet initiate normally returns payment.status == 'completed'. If it
+  /// does not, poll payments/{id}/status instead of assuming success.
+  bool get _walletNeedsConfirmation =>
+      result.isSuccess &&
+      result.method == 'wallet' &&
+      !_isServerPaidStatus(result.status);
 
   bool _shouldStopPolling(PaymentStatusResult status) {
     if (_isWalletTopUp) {
@@ -136,12 +152,14 @@ class _PaymentInitiateResultScreenState
     return status.isTerminal;
   }
 
-  bool get _shouldPoll => shouldPollPaymentStatus(
+  bool get _shouldPoll =>
+      shouldPollPaymentStatus(
         isSuccess: result.isSuccess,
         nextAction: result.nextAction,
         status: result.status,
         method: result.method,
-      );
+      ) ||
+      _walletNeedsConfirmation;
 
   bool get _isPollingActive {
     if (!_shouldPoll || result.paymentId == null) return false;
@@ -576,9 +594,8 @@ class _PaymentInitiateResultScreenState
           ],
         );
       case PaymentInitiateUiMode.success:
-        final isCompleted =
-            result.status == 'completed' || result.method == 'wallet';
-        final isCod = result.method == 'cash_on_delivery';
+        final isCod = _isCod;
+        final isCompleted = !isCod && _isServerPaidStatus(result.status);
         final orderStatus =
             result.orderStatus ?? _expectedStatus(result.method);
         final successMessage = _isDeliveryContext
@@ -600,9 +617,13 @@ class _PaymentInitiateResultScreenState
               : (isCod
                   ? (_isDeliveryContext
                       ? 'Delivery confirmed'
-                      : 'Order confirmed')
+                      : context.l10n.timelineOrderPlaced)
                   : 'Payment initiated'),
-          message: result.customerMessage ?? result.message ?? successMessage,
+          // For COD the backend's generic message ("Payment completed
+          // successfully") is misleading, so show the pay-on-delivery copy.
+          message: isCod
+              ? (result.customerMessage ?? successMessage)
+              : (result.customerMessage ?? result.message ?? successMessage),
           children: [
             if (_shouldPoll) ...waitingChildren,
             _InfoRow(label: _statusLabel, value: orderStatus),

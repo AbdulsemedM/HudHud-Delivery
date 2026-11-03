@@ -68,7 +68,7 @@ class NotificationsDataProvider {
     }
   }
 
-  /// POST /api/notifications/read
+  /// POST /api/notifications/mark-read
   Future<Map<String, dynamic>> markRead(String notificationId) async {
     try {
       final response = await apiService.post(
@@ -83,7 +83,7 @@ class NotificationsDataProvider {
     }
   }
 
-  /// POST /api/notifications/read-all
+  /// POST /api/notifications/mark-all-read
   Future<Map<String, dynamic>> markAllRead() async {
     try {
       final response = await apiService.post(

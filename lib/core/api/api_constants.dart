@@ -1,7 +1,7 @@
 import 'package:hudhud_delivery/app/config/app_env.dart';
 
 class ApiConstants {
-  /// Resolved from root `.env` (`BASE_URL`) only.
+  /// `BASE_URL` dart-define, defaulting to production (see app_env.dart).
   static String get baseUrl => ApiEnv.baseUrl;
 
   // Timeout values (in milliseconds)
@@ -165,8 +165,10 @@ class ApiConstants {
   // Notifications endpoints (GET /api/notifications, GET /api/notifications/{id})
   static const String notificationsList = 'notifications';
   static const String notificationDetails = 'notifications/{id}';
-  static const String notificationsRead = 'notifications/read';
-  static const String notificationsReadAll = 'notifications/read-all';
+  /// POST {notification_id} — backend canonical route (routes/api_shared.php).
+  static const String notificationsRead = 'notifications/mark-read';
+  /// POST (no body) — backend canonical route.
+  static const String notificationsReadAll = 'notifications/mark-all-read';
 
   // Service types endpoints
   static const String serviceTypes = 'service-types';
@@ -184,7 +186,9 @@ class ApiConstants {
       'services/delivery/{id}/retry-payment';
   static const String deliveryConfirmReceipt =
       'services/delivery/{id}/confirm-receipt';
-  static const String deliveryRate = 'services/delivery/{id}/rate';
+  /// POST {rating: 1-5, comment?} — backend canonical route
+  /// (RideMessengerController@rateDelivery; delivery must be delivered).
+  static const String deliveryRate = 'user/deliveries/{id}/rate';
 
   // Ride/Taxi endpoints
   static const String rideEstimate = 'services/ride/estimate';

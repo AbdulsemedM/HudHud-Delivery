@@ -120,7 +120,8 @@ flutter:
     - assets/images/home_service_tabs/
     - assets/animations/
     - assets/sound/
-    - .env
+    # .env is intentionally NOT bundled — config comes from --dart-define
+    # (see lib/app/config/app_env.dart and ENV_SETUP_NATIVE.md).
     - shorebird.yaml
 
   fonts:

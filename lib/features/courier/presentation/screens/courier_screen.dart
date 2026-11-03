@@ -263,7 +263,10 @@ class _CourierScreenState extends State<CourierScreen> {
             onRefresh: _refreshData,
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
+              // Reserve room under the content for the floating call / add
+              // buttons so they never cover the last card's primary action
+              // (e.g. "Track delivery") once the user scrolls to the end.
+              padding: EdgeInsets.fromLTRB(16, 20, 16, hasActive ? 160 : 96),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

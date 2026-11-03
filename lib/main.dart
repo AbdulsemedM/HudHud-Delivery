@@ -57,7 +57,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   _configureAndroidPhotoPicker();
 
-  // Env (BASE_URL, etc.) before any Dio / ApiService access.
+  // Config is compile-time (--dart-define); kept as a no-op hook.
   await loadAppEnv();
 
   // Must exist before FCM tap handlers so they can push routes.

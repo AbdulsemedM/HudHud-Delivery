@@ -369,14 +369,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return null;
   }
 
-  void _onPromoCodeApplied(String promoCode) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(context.l10n.promoCodeApplied(promoCode)),
-        backgroundColor: AppColors.primaryColor,
-      ),
-    );
-  }
+  // Phase-1: promo codes are not validated or applied server-side yet
+  // (orders are sent with 'discount_amount': 0.0), so the entry section is
+  // hidden and the old "promo applied" snackbar was removed to avoid
+  // misleading customers. Re-enable PromoCodeSection below once a backend
+  // validate/apply endpoint exists and the discount is reflected in totals.
 
   void _onChangeAddress() async {
     final Map<String, dynamic>? result =
@@ -789,13 +786,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           },
                         ),
                       ),
-                      CheckoutSectionCard(
-                        icon: Icons.local_offer_outlined,
-                        title: 'Promo code',
-                        child: PromoCodeSection(
-                          onPromoCodeApplied: _onPromoCodeApplied,
-                        ),
-                      ),
+                      // Promo code entry hidden for Phase-1 (see note above
+                      // _onChangeAddress). To restore, wire a real
+                      // validate/apply flow and re-add:
+                      // CheckoutSectionCard(
+                      //   icon: Icons.local_offer_outlined,
+                      //   title: 'Promo code',
+                      //   child: PromoCodeSection(
+                      //     onPromoCodeApplied: <apply handler>,
+                      //   ),
+                      // ),
                       CheckoutSectionCard(
                         icon: Icons.account_balance_wallet_outlined,
                         title: 'Payment method',

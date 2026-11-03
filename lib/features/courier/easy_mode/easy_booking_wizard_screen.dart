@@ -144,7 +144,15 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
         point.latitude,
         point.longitude,
       );
-      return HumanReadableAddress.pickBestPlace(places);
+      // Sanity check: a reverse-geocode result must describe the pin itself.
+      // Drop anything far from the queried point (e.g. a stale simulator
+      // default in San Francisco) so it can never label a pin in Addis.
+      const distance = Distance();
+      final nearby = places
+          .where((r) =>
+              distance.as(LengthUnit.Kilometer, point, r.coordinates) <= 50)
+          .toList();
+      return HumanReadableAddress.pickBestPlace(nearby);
     } catch (_) {}
     return null;
   }
@@ -159,9 +167,17 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
     return segments.length > 1;
   }
 
+  // Reverse-geocode responses can arrive out of order (e.g. a slow lookup for
+  // the simulator's default GPS fix in San Francisco finishing after the user
+  // already moved the pin in Addis). Only the latest request may update the
+  // address label.
+  int _pickupGeocodeSeq = 0;
+  int _dropoffGeocodeSeq = 0;
+
   Future<void> _reverseGeocodePickup() async {
+    final seq = ++_pickupGeocodeSeq;
     final place = await _reverseGeocodePlace(_pickupPosition);
-    if (!mounted) return;
+    if (!mounted || seq != _pickupGeocodeSeq) return;
     if (place != null) {
       setState(() {
         _pickupPlace = place;
@@ -177,8 +193,9 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
   }
 
   Future<void> _reverseGeocodeDropoff() async {
+    final seq = ++_dropoffGeocodeSeq;
     final place = await _reverseGeocodePlace(_dropoffPosition);
-    if (!mounted) return;
+    if (!mounted || seq != _dropoffGeocodeSeq) return;
     if (place != null) {
       setState(() {
         _dropoffPlace = place;
@@ -481,6 +498,8 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
             unawaited(_reverseGeocodePickup());
           },
           onPlaceSelected: (place) {
+            // Invalidate any in-flight reverse geocode for the old pin.
+            _pickupGeocodeSeq++;
             setState(() {
               _pickupPosition = place.coordinates;
               _pickupAddress = place.formattedAddress;
@@ -509,6 +528,8 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
             unawaited(_reverseGeocodeDropoff());
           },
           onPlaceSelected: (place) {
+            // Invalidate any in-flight reverse geocode for the old pin.
+            _dropoffGeocodeSeq++;
             setState(() {
               _dropoffPosition = place.coordinates;
               _dropoffAddress = place.formattedAddress;

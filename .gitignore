@@ -62,3 +62,6 @@ app.*.map.json
 
 # JVM heap dumps (created by -XX:+HeapDumpOnOutOfMemoryError)
 *.hprof
+
+# Windows/MSYS crash dumps
+*.stackdump
