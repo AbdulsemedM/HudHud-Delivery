@@ -3,12 +3,21 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:hudhud_delivery/app/navigation/fcm_order_navigation.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
+import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
+import 'package:hudhud_delivery/features/delivery/presentation/screens/store_detail_screen.dart';
 
 import 'data/models/hudhud_deep_link.dart';
 
 export 'data/models/hudhud_deep_link.dart';
 
-/// Handles HudHud app links (`/r/{code}`, `/o/{orderId}`).
+/// Handles HudHud app links (`/r/{code}`, `/o/{orderId}`, `/v/{vendorOwnerId}`,
+/// `hudhud://vendor/{vendorOwnerId}`).
+///
+/// Vendor links use the founding-vendor QR id (`v<vendorOwnerUserId>`, see
+/// [HudhudDeepLink.vendorId]). The Android intent-filter lists `/r/`, `/o/`
+/// and `/v/`; iOS uses the `applinks:hudhuddelivery.com` entitlement (paths
+/// come from the server's apple-app-site-association). The `hudhud://`
+/// scheme is parsed but has no native registration yet.
 ///
 /// Native config is in place (Android intent-filter with autoVerify and the
 /// iOS `applinks:hudhuddelivery.com` entitlement), but no Dart deep-link
@@ -48,7 +57,45 @@ class DeepLinkService {
       return;
     }
     final orderId = link.orderId;
-    if (orderId != null) await _openOrder(orderId);
+    if (orderId != null) {
+      await _openOrder(orderId);
+      return;
+    }
+    final vendorId = link.vendorId;
+    if (vendorId != null) _openVendor(vendorId);
+  }
+
+  int? _pendingVendorId;
+
+  /// Vendor link received before the navigator was ready; the dashboard
+  /// opens it once shown.
+  int? takePendingVendorId() {
+    final id = _pendingVendorId;
+    _pendingVendorId = null;
+    return id;
+  }
+
+  /// Store pages are public, so no sign-in is needed.
+  void _openVendor(int vendorId) {
+    final nav = _navigatorKey?.currentState;
+    if (nav == null || !nav.mounted) {
+      _pendingVendorId = vendorId;
+      return;
+    }
+    openVendorStore(nav.context, vendorId);
+  }
+
+  /// Opens the store screen for a vendor OWNER user id.
+  static void openVendorStore(BuildContext context, int vendorId) {
+    if (!context.mounted || vendorId <= 0) return;
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (c) => StoreDetailScreen(
+          storeName: c.l10n.growthStoreFallbackName,
+          vendorId: vendorId,
+        ),
+      ),
+    );
   }
 
   Future<void> _openOrder(int orderId) async {
