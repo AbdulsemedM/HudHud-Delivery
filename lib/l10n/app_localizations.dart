@@ -6302,6 +6302,354 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Card'**
   String get paymentCard;
+
+  /// No description provided for @growthPromoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Promo code'**
+  String get growthPromoTitle;
+
+  /// No description provided for @growthPromoSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Have a code? Apply it here'**
+  String get growthPromoSubtitle;
+
+  /// No description provided for @growthPromoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter promo code'**
+  String get growthPromoHint;
+
+  /// No description provided for @growthPromoApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get growthPromoApply;
+
+  /// No description provided for @growthPromoRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get growthPromoRemove;
+
+  /// No description provided for @growthPromoApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'Promo code applied'**
+  String get growthPromoApplied;
+
+  /// No description provided for @growthPromoInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'This promo code cannot be used'**
+  String get growthPromoInvalid;
+
+  /// No description provided for @growthPromoSavedForCheckout.
+  ///
+  /// In en, this message translates to:
+  /// **'Code {code} will be applied at checkout'**
+  String growthPromoSavedForCheckout(String code);
+
+  /// No description provided for @growthPointsToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use {points} points (−{amount} on delivery)'**
+  String growthPointsToggle(int points, String amount);
+
+  /// No description provided for @growthPointsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Points reduce the delivery fee only'**
+  String get growthPointsSubtitle;
+
+  /// No description provided for @growthPointsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{points} points'**
+  String growthPointsCount(int points);
+
+  /// No description provided for @growthPointsDiscount.
+  ///
+  /// In en, this message translates to:
+  /// **'Points discount'**
+  String get growthPointsDiscount;
+
+  /// No description provided for @growthCouponDiscount.
+  ///
+  /// In en, this message translates to:
+  /// **'Promo discount'**
+  String get growthCouponDiscount;
+
+  /// No description provided for @growthCouponDiscountWithCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Promo ({code})'**
+  String growthCouponDiscountWithCode(String code);
+
+  /// No description provided for @growthDeliveryFeeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery fee'**
+  String get growthDeliveryFeeLabel;
+
+  /// No description provided for @growthFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get growthFree;
+
+  /// No description provided for @growthFreeDeliveryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {amount} more for free delivery'**
+  String growthFreeDeliveryHint(String amount);
+
+  /// No description provided for @growthFreeDeliveryUnlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'You unlocked free delivery!'**
+  String get growthFreeDeliveryUnlocked;
+
+  /// No description provided for @growthRewardsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rewards'**
+  String get growthRewardsTitle;
+
+  /// No description provided for @growthRewardsWorth.
+  ///
+  /// In en, this message translates to:
+  /// **'Worth {amount}'**
+  String growthRewardsWorth(String amount);
+
+  /// No description provided for @growthRewardsHowItWorks.
+  ///
+  /// In en, this message translates to:
+  /// **'How it works'**
+  String get growthRewardsHowItWorks;
+
+  /// No description provided for @growthRewardsEarnLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Earn points on every completed order.'**
+  String get growthRewardsEarnLine;
+
+  /// No description provided for @growthRewardsRateLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{points} points = {amount} off your delivery fee.'**
+  String growthRewardsRateLine(int points, String amount);
+
+  /// No description provided for @growthRewardsUseLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Use them at checkout once you have {points} points.'**
+  String growthRewardsUseLine(int points);
+
+  /// No description provided for @growthRewardsHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get growthRewardsHistory;
+
+  /// No description provided for @growthRewardsHistoryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No points activity yet.'**
+  String get growthRewardsHistoryEmpty;
+
+  /// No description provided for @growthRewardsLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load your rewards.'**
+  String get growthRewardsLoadError;
+
+  /// No description provided for @growthRewardsTypeEarned.
+  ///
+  /// In en, this message translates to:
+  /// **'Points earned'**
+  String get growthRewardsTypeEarned;
+
+  /// No description provided for @growthRewardsTypeRedeemed.
+  ///
+  /// In en, this message translates to:
+  /// **'Points used'**
+  String get growthRewardsTypeRedeemed;
+
+  /// No description provided for @growthRewardsTypeRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Points returned'**
+  String get growthRewardsTypeRestored;
+
+  /// No description provided for @growthRewardsTypeExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Points expired'**
+  String get growthRewardsTypeExpired;
+
+  /// No description provided for @growthReferralTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite friends, get {amount}'**
+  String growthReferralTitle(String amount);
+
+  /// No description provided for @growthReferralSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You and your friend each get {amount} after their first order.'**
+  String growthReferralSubtitle(String amount);
+
+  /// No description provided for @growthReferralCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get growthReferralCopy;
+
+  /// No description provided for @growthReferralCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Referral code copied'**
+  String get growthReferralCopied;
+
+  /// No description provided for @growthReferralShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share invite'**
+  String get growthReferralShare;
+
+  /// No description provided for @growthReferralShareSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Join me on HudHud Delivery'**
+  String get growthReferralShareSubject;
+
+  /// No description provided for @growthReferralShareFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Get {amount} on HudHud Delivery with my code {code}: {link}'**
+  String growthReferralShareFallback(String amount, String code, String link);
+
+  /// No description provided for @growthReferralInvited.
+  ///
+  /// In en, this message translates to:
+  /// **'Invited'**
+  String get growthReferralInvited;
+
+  /// No description provided for @growthReferralRewarded.
+  ///
+  /// In en, this message translates to:
+  /// **'Rewarded'**
+  String get growthReferralRewarded;
+
+  /// No description provided for @growthReferralPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get growthReferralPending;
+
+  /// No description provided for @growthReferralEarned.
+  ///
+  /// In en, this message translates to:
+  /// **'Earned'**
+  String get growthReferralEarned;
+
+  /// No description provided for @growthReorderButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Reorder'**
+  String get growthReorderButton;
+
+  /// No description provided for @growthReorderFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not reorder. Please try again.'**
+  String get growthReorderFailed;
+
+  /// No description provided for @growthReorderReplaceMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your cart has items from another store. Replace them with this order?'**
+  String get growthReorderReplaceMessage;
+
+  /// No description provided for @growthReorderUnavailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Some items are unavailable'**
+  String get growthReorderUnavailableTitle;
+
+  /// No description provided for @growthReorderNothingAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'None of these items are available now'**
+  String get growthReorderNothingAvailable;
+
+  /// No description provided for @growthReorderContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with available items'**
+  String get growthReorderContinue;
+
+  /// No description provided for @growthReorderReasonOutOfStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of stock'**
+  String get growthReorderReasonOutOfStock;
+
+  /// No description provided for @growthReorderReasonRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'No longer sold'**
+  String get growthReorderReasonRemoved;
+
+  /// No description provided for @growthReorderReasonVendorClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Store is closed'**
+  String get growthReorderReasonVendorClosed;
+
+  /// No description provided for @growthReorderReasonUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable'**
+  String get growthReorderReasonUnavailable;
+
+  /// No description provided for @growthOrderAgainTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Order again'**
+  String get growthOrderAgainTitle;
+
+  /// No description provided for @growthOrderAgainOrderLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Order #{order}'**
+  String growthOrderAgainOrderLabel(String order);
+
+  /// No description provided for @growthSeeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See all'**
+  String get growthSeeAll;
+
+  /// No description provided for @growthClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get growthClosed;
+
+  /// No description provided for @growthCollectionFallbackTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection'**
+  String get growthCollectionFallbackTitle;
+
+  /// No description provided for @growthStoreFallbackName.
+  ///
+  /// In en, this message translates to:
+  /// **'Store'**
+  String get growthStoreFallbackName;
 }
 
 class _AppLocalizationsDelegate

@@ -1447,5 +1447,127 @@
   },
   "paymentCash": "Cash",
   "paymentWallet": "Wallet",
-  "paymentCard": "Card"
+  "paymentCard": "Card",
+  "growthPromoTitle": "Koodii hir'isaa",
+  "growthPromoSubtitle": "Koodii qabdaa? Asitti galchi",
+  "growthPromoHint": "Koodii hir'isaa galchi",
+  "growthPromoApply": "Fayyadami",
+  "growthPromoRemove": "Haqi",
+  "growthPromoApplied": "Koodiin hir'isaa hojiirra oole",
+  "growthPromoInvalid": "Koodii kana fayyadamuun hin danda'amu",
+  "growthPromoSavedForCheckout": "Koodiin {code} yeroo kaffaltii ni hojiirra oola",
+  "@growthPromoSavedForCheckout": {
+    "placeholders": {
+      "code": {"type": "String"}
+    }
+  },
+  "growthPointsToggle": "Qabxii {points} fayyadami (geejjiba irratti −{amount})",
+  "@growthPointsToggle": {
+    "placeholders": {
+      "points": {"type": "int"},
+      "amount": {"type": "String"}
+    }
+  },
+  "growthPointsSubtitle": "Qabxiin kaffaltii geejjibaa qofa hir'isa",
+  "growthPointsCount": "Qabxii {points}",
+  "@growthPointsCount": {
+    "placeholders": {
+      "points": {"type": "int"}
+    }
+  },
+  "growthPointsDiscount": "Hir'isa qabxii",
+  "growthCouponDiscount": "Hir'isa koodii",
+  "growthCouponDiscountWithCode": "Hir'isa ({code})",
+  "@growthCouponDiscountWithCode": {
+    "placeholders": {
+      "code": {"type": "String"}
+    }
+  },
+  "growthDeliveryFeeLabel": "Kaffaltii geejjibaa",
+  "growthFree": "Bilisa",
+  "growthFreeDeliveryHint": "Geejjiba bilisaaf {amount} dabalataa ida'i",
+  "@growthFreeDeliveryHint": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "growthFreeDeliveryUnlocked": "Geejjiba bilisaa argattee!",
+  "growthRewardsTitle": "Badhaasa",
+  "growthRewardsWorth": "Gatiin isaa {amount}",
+  "@growthRewardsWorth": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "growthRewardsHowItWorks": "Akkamitti akka hojjetu",
+  "growthRewardsEarnLine": "Ajaja xumurame hundaan qabxii argadhu.",
+  "growthRewardsRateLine": "Qabxii {points} = kaffaltii geejjibaa irraa {amount} hir'isa.",
+  "@growthRewardsRateLine": {
+    "placeholders": {
+      "points": {"type": "int"},
+      "amount": {"type": "String"}
+    }
+  },
+  "growthRewardsUseLine": "Yeroo qabxii {points} qabaattu kaffaltii irratti fayyadami.",
+  "@growthRewardsUseLine": {
+    "placeholders": {
+      "points": {"type": "int"}
+    }
+  },
+  "growthRewardsHistory": "Seenaa",
+  "growthRewardsHistoryEmpty": "Ammaaf sochiin qabxii hin jiru.",
+  "growthRewardsLoadError": "Badhaasa kee fe'uu hin dandeenye.",
+  "growthRewardsTypeEarned": "Qabxii argame",
+  "growthRewardsTypeRedeemed": "Qabxii itti fayyadame",
+  "growthRewardsTypeRestored": "Qabxii deebi'e",
+  "growthRewardsTypeExpired": "Qabxii yeroon isaa darbe",
+  "growthReferralTitle": "Hiriyoota affeeri, {amount} argadhu",
+  "@growthReferralTitle": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "growthReferralSubtitle": "Ajaja isaanii jalqabaa booda atii fi hiriyaan kee tokkoon tokkoon {amount} argattu.",
+  "@growthReferralSubtitle": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "growthReferralCopy": "Garagalchi",
+  "growthReferralCopied": "Koodiin affeerraa garagalfame",
+  "growthReferralShare": "Affeerraa qoodi",
+  "growthReferralShareSubject": "HudHud Delivery irratti na bira dhufi",
+  "growthReferralShareFallback": "Koodii koo {code} fayyadamuun HudHud Delivery irratti {amount} argadhu: {link}",
+  "@growthReferralShareFallback": {
+    "placeholders": {
+      "amount": {"type": "String"},
+      "code": {"type": "String"},
+      "link": {"type": "String"}
+    }
+  },
+  "growthReferralInvited": "Kan affeeraman",
+  "growthReferralRewarded": "Kan badhaafaman",
+  "growthReferralPending": "Eegaa jiru",
+  "growthReferralEarned": "Kan argame",
+  "growthReorderButton": "Irra deebi'ii ajaji",
+  "growthReorderFailed": "Irra deebi'anii ajajuun hin danda'amne. Maaloo irra deebi'ii yaali.",
+  "growthReorderReplaceMessage": "Gaariin kee meeshaalee suuqa biraa qaba. Ajaja kanaan bakka buusi?",
+  "growthReorderUnavailableTitle": "Meeshaaleen tokko tokko hin argaman",
+  "growthReorderNothingAvailable": "Meeshaalee kana keessaa tokkollee amma hin argamu",
+  "growthReorderContinue": "Meeshaalee jiraniin itti fufi",
+  "growthReorderReasonOutOfStock": "Kuusaa keessaa dhumeera",
+  "growthReorderReasonRemoved": "Kana booda hin gurguramu",
+  "growthReorderReasonVendorClosed": "Suuqni cufameera",
+  "growthReorderReasonUnavailable": "Hin argamu",
+  "growthOrderAgainTitle": "Ammas ajaji",
+  "growthOrderAgainOrderLabel": "Ajaja #{order}",
+  "@growthOrderAgainOrderLabel": {
+    "placeholders": {
+      "order": {"type": "String"}
+    }
+  },
+  "growthSeeAll": "Hunda ilaali",
+  "growthClosed": "Cufaa",
+  "growthCollectionFallbackTitle": "Walitti qabama",
+  "growthStoreFallbackName": "Suuqa"
 }

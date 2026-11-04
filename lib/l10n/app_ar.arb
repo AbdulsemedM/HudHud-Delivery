@@ -1447,5 +1447,127 @@
   },
   "paymentCash": "Cash",
   "paymentWallet": "Wallet",
-  "paymentCard": "Card"
+  "paymentCard": "Card",
+  "growthPromoTitle": "رمز الخصم",
+  "growthPromoSubtitle": "لديك رمز؟ أدخله هنا",
+  "growthPromoHint": "أدخل رمز الخصم",
+  "growthPromoApply": "تطبيق",
+  "growthPromoRemove": "إزالة",
+  "growthPromoApplied": "تم تطبيق رمز الخصم",
+  "growthPromoInvalid": "لا يمكن استخدام رمز الخصم هذا",
+  "growthPromoSavedForCheckout": "سيتم تطبيق الرمز {code} عند الدفع",
+  "@growthPromoSavedForCheckout": {
+    "placeholders": {
+      "code": {"type": "String"}
+    }
+  },
+  "growthPointsToggle": "استخدم {points} نقطة (−{amount} من رسوم التوصيل)",
+  "@growthPointsToggle": {
+    "placeholders": {
+      "points": {"type": "int"},
+      "amount": {"type": "String"}
+    }
+  },
+  "growthPointsSubtitle": "النقاط تخفض رسوم التوصيل فقط",
+  "growthPointsCount": "{points} نقطة",
+  "@growthPointsCount": {
+    "placeholders": {
+      "points": {"type": "int"}
+    }
+  },
+  "growthPointsDiscount": "خصم النقاط",
+  "growthCouponDiscount": "خصم الرمز",
+  "growthCouponDiscountWithCode": "خصم ({code})",
+  "@growthCouponDiscountWithCode": {
+    "placeholders": {
+      "code": {"type": "String"}
+    }
+  },
+  "growthDeliveryFeeLabel": "رسوم التوصيل",
+  "growthFree": "مجاني",
+  "growthFreeDeliveryHint": "أضف {amount} للحصول على توصيل مجاني",
+  "@growthFreeDeliveryHint": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "growthFreeDeliveryUnlocked": "لقد حصلت على توصيل مجاني!",
+  "growthRewardsTitle": "المكافآت",
+  "growthRewardsWorth": "بقيمة {amount}",
+  "@growthRewardsWorth": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "growthRewardsHowItWorks": "كيف تعمل",
+  "growthRewardsEarnLine": "اكسب نقاطًا مع كل طلب مكتمل.",
+  "growthRewardsRateLine": "{points} نقطة = خصم {amount} من رسوم التوصيل.",
+  "@growthRewardsRateLine": {
+    "placeholders": {
+      "points": {"type": "int"},
+      "amount": {"type": "String"}
+    }
+  },
+  "growthRewardsUseLine": "استخدمها عند الدفع عندما يكون لديك {points} نقطة.",
+  "@growthRewardsUseLine": {
+    "placeholders": {
+      "points": {"type": "int"}
+    }
+  },
+  "growthRewardsHistory": "السجل",
+  "growthRewardsHistoryEmpty": "لا يوجد نشاط نقاط بعد.",
+  "growthRewardsLoadError": "تعذر تحميل مكافآتك.",
+  "growthRewardsTypeEarned": "نقاط مكتسبة",
+  "growthRewardsTypeRedeemed": "نقاط مستخدمة",
+  "growthRewardsTypeRestored": "نقاط مستردة",
+  "growthRewardsTypeExpired": "نقاط منتهية الصلاحية",
+  "growthReferralTitle": "ادعُ أصدقاءك واحصل على {amount}",
+  "@growthReferralTitle": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "growthReferralSubtitle": "تحصل أنت وصديقك على {amount} لكل منكما بعد طلبه الأول.",
+  "@growthReferralSubtitle": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "growthReferralCopy": "نسخ",
+  "growthReferralCopied": "تم نسخ رمز الإحالة",
+  "growthReferralShare": "مشاركة الدعوة",
+  "growthReferralShareSubject": "انضم إليّ في هدهد للتوصيل",
+  "growthReferralShareFallback": "احصل على {amount} في هدهد للتوصيل باستخدام رمزي {code}: {link}",
+  "@growthReferralShareFallback": {
+    "placeholders": {
+      "amount": {"type": "String"},
+      "code": {"type": "String"},
+      "link": {"type": "String"}
+    }
+  },
+  "growthReferralInvited": "المدعوون",
+  "growthReferralRewarded": "تمت مكافأتهم",
+  "growthReferralPending": "قيد الانتظار",
+  "growthReferralEarned": "المكتسب",
+  "growthReorderButton": "إعادة الطلب",
+  "growthReorderFailed": "تعذرت إعادة الطلب. يرجى المحاولة مرة أخرى.",
+  "growthReorderReplaceMessage": "تحتوي سلتك على منتجات من متجر آخر. هل تريد استبدالها بهذا الطلب؟",
+  "growthReorderUnavailableTitle": "بعض المنتجات غير متوفرة",
+  "growthReorderNothingAvailable": "لا يتوفر أي من هذه المنتجات الآن",
+  "growthReorderContinue": "المتابعة بالمنتجات المتوفرة",
+  "growthReorderReasonOutOfStock": "نفد من المخزون",
+  "growthReorderReasonRemoved": "لم يعد متاحًا للبيع",
+  "growthReorderReasonVendorClosed": "المتجر مغلق",
+  "growthReorderReasonUnavailable": "غير متوفر",
+  "growthOrderAgainTitle": "اطلب مرة أخرى",
+  "growthOrderAgainOrderLabel": "الطلب #{order}",
+  "@growthOrderAgainOrderLabel": {
+    "placeholders": {
+      "order": {"type": "String"}
+    }
+  },
+  "growthSeeAll": "عرض الكل",
+  "growthClosed": "مغلق",
+  "growthCollectionFallbackTitle": "مجموعة",
+  "growthStoreFallbackName": "متجر"
 }

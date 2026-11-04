@@ -85,6 +85,7 @@ class CheckoutRepository {
     double? pickupLongitude,
     int? branchId,
     String? idempotencyKey,
+    int? redeemPoints,
   }) async {
     try {
       final response = await checkoutDataProvider.createOrder(
@@ -105,6 +106,7 @@ class CheckoutRepository {
         pickupLongitude: pickupLongitude,
         branchId: branchId,
         idempotencyKey: idempotencyKey,
+        redeemPoints: redeemPoints,
       );
 
       if (response['statusCode'] == 200 || response['statusCode'] == 201) {

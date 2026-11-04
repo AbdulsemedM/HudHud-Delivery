@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/app/services/startup_location_service.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
@@ -14,6 +15,11 @@ import 'package:hudhud_delivery/features/categories/model/category_tree_model.da
 import 'package:hudhud_delivery/features/categories/presentation/screens/categories_screen.dart';
 import 'package:hudhud_delivery/features/delivery/presentation/screens/product_detail_screen.dart';
 import 'package:hudhud_delivery/features/delivery/presentation/screens/store_detail_screen.dart';
+import 'package:hudhud_delivery/features/growth/data/growth_repository.dart';
+import 'package:hudhud_delivery/features/growth/data/models/home_feed.dart';
+import 'package:hudhud_delivery/features/growth/data/models/reorder.dart';
+import 'package:hudhud_delivery/features/growth/growth_scope.dart';
+import 'package:hudhud_delivery/features/growth/presentation/widgets/home_feed_widgets.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/features/orders/data/models/vendor_model.dart';
 import 'package:hudhud_delivery/features/products/data/products_data_provider.dart';
@@ -68,6 +74,70 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
   late final VendorsRepository _vendorsRepository;
   late final ProductsRepository _productsRepository;
 
+  // Phase 2 growth (Food tab only; hidden unless enabled by /growth/config).
+  final GrowthRepository _growthRepository = GrowthRepository.create();
+  HomeFeed _homeFeed = HomeFeed.empty;
+  List<ReorderSuggestion> _reorderSuggestions = const [];
+  bool _homeFeedWasEnabled = false;
+  bool _reorderWasEnabled = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!widget.embedded) return;
+    final controller = growthControllerOf(context, listen: true);
+    final feedEnabled = controller?.homeFeedEnabled ?? false;
+    final reorderEnabled = controller?.reorderEnabled ?? false;
+    if (feedEnabled && !_homeFeedWasEnabled) _loadHomeFeed();
+    if (reorderEnabled && !_reorderWasEnabled) _loadReorderSuggestions();
+    _homeFeedWasEnabled = feedEnabled;
+    _reorderWasEnabled = reorderEnabled;
+  }
+
+  Future<void> _loadHomeFeed() async {
+    final feed = await _growthRepository.fetchHomeFeed(serviceType: 'food');
+    if (!mounted) return;
+    setState(() => _homeFeed = feed);
+  }
+
+  Future<void> _loadReorderSuggestions() async {
+    // Customer-only endpoint: skip for guests so a 401 never logs anyone out.
+    if (!await AuthService().isAuthenticated()) return;
+    final list = await _growthRepository.fetchReorderSuggestions();
+    if (!mounted) return;
+    setState(() => _reorderSuggestions = list);
+  }
+
+  /// Slivers placed above categories; empty (no layout change) when off.
+  List<Widget> _growthSlivers() {
+    if (!widget.embedded) return const [];
+    final controller = growthControllerOf(context, listen: false);
+    final feedOn = controller?.homeFeedEnabled ?? false;
+    final reorderOn = controller?.reorderEnabled ?? false;
+    final slivers = <Widget>[];
+    if (feedOn && _homeFeed.banners.isNotEmpty) {
+      slivers.add(SliverToBoxAdapter(
+        child: HomeFeedBannerCarousel(
+          banners: _homeFeed.banners,
+          collections: _homeFeed.collections,
+        ),
+      ));
+    }
+    if (reorderOn && _reorderSuggestions.isNotEmpty) {
+      slivers.add(SliverToBoxAdapter(
+        child: OrderAgainRow(suggestions: _reorderSuggestions),
+      ));
+    }
+    if (feedOn) {
+      for (final collection in _homeFeed.collections) {
+        slivers.add(SliverToBoxAdapter(
+          child: HomeFeedCollectionRow(collection: collection),
+        ));
+      }
+    }
+    return slivers;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -88,6 +158,8 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
     await Future.wait([
       _loadVendors(),
       _loadPopularProducts(),
+      if (_homeFeedWasEnabled) _loadHomeFeed(),
+      if (_reorderWasEnabled) _loadReorderSuggestions(),
     ]);
   }
 
@@ -147,6 +219,7 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
   @override
   Widget build(BuildContext context) {
     final embedded = widget.embedded;
+    final growthSlivers = _growthSlivers();
     final searchHint =
         embedded ? context.l10n.homeSearchHint : 'Search products everywhere';
 
@@ -175,6 +248,7 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
               usePullToRefresh: true,
               onPullToRefresh: _onPullToRefresh,
               embedded: embedded,
+              leadingSlivers: growthSlivers,
               categoriesError: state.errorMessage,
               onCategoriesRetry: () => context
                   .read<CategoriesBloc>()
@@ -207,6 +281,7 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
             usePullToRefresh: true,
             onPullToRefresh: _onPullToRefresh,
             embedded: embedded,
+            leadingSlivers: growthSlivers,
           );
         }
         // Initial / other states: still surface popular if already loaded.
@@ -224,6 +299,7 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
             usePullToRefresh: true,
             onPullToRefresh: _onPullToRefresh,
             embedded: embedded,
+            leadingSlivers: growthSlivers,
           );
         }
         return const SizedBox.shrink();
@@ -768,6 +844,9 @@ class _CategoriesGrid extends StatelessWidget {
   final String? categoriesError;
   final VoidCallback? onCategoriesRetry;
 
+  /// Phase 2 growth slivers (banners, order again, collections).
+  final List<Widget> leadingSlivers;
+
   const _CategoriesGrid({
     required this.categories,
     required this.showAll,
@@ -783,6 +862,7 @@ class _CategoriesGrid extends StatelessWidget {
     this.embedded = false,
     this.categoriesError,
     this.onCategoriesRetry,
+    this.leadingSlivers = const [],
   });
 
   @override
@@ -862,6 +942,7 @@ class _CategoriesGrid extends StatelessWidget {
     final view = CustomScrollView(
       physics: usePullToRefresh ? const AlwaysScrollableScrollPhysics() : null,
       slivers: [
+        ...leadingSlivers,
         if (categoriesError != null) ...[
           SliverToBoxAdapter(
             child: Padding(

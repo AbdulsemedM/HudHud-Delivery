@@ -3368,4 +3368,208 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get paymentCard => 'Card';
+
+  @override
+  String get growthPromoTitle => 'Koodii hir\'isaa';
+
+  @override
+  String get growthPromoSubtitle => 'Koodii qabdaa? Asitti galchi';
+
+  @override
+  String get growthPromoHint => 'Koodii hir\'isaa galchi';
+
+  @override
+  String get growthPromoApply => 'Fayyadami';
+
+  @override
+  String get growthPromoRemove => 'Haqi';
+
+  @override
+  String get growthPromoApplied => 'Koodiin hir\'isaa hojiirra oole';
+
+  @override
+  String get growthPromoInvalid => 'Koodii kana fayyadamuun hin danda\'amu';
+
+  @override
+  String growthPromoSavedForCheckout(String code) {
+    return 'Koodiin $code yeroo kaffaltii ni hojiirra oola';
+  }
+
+  @override
+  String growthPointsToggle(int points, String amount) {
+    return 'Qabxii $points fayyadami (geejjiba irratti −$amount)';
+  }
+
+  @override
+  String get growthPointsSubtitle =>
+      'Qabxiin kaffaltii geejjibaa qofa hir\'isa';
+
+  @override
+  String growthPointsCount(int points) {
+    return 'Qabxii $points';
+  }
+
+  @override
+  String get growthPointsDiscount => 'Hir\'isa qabxii';
+
+  @override
+  String get growthCouponDiscount => 'Hir\'isa koodii';
+
+  @override
+  String growthCouponDiscountWithCode(String code) {
+    return 'Hir\'isa ($code)';
+  }
+
+  @override
+  String get growthDeliveryFeeLabel => 'Kaffaltii geejjibaa';
+
+  @override
+  String get growthFree => 'Bilisa';
+
+  @override
+  String growthFreeDeliveryHint(String amount) {
+    return 'Geejjiba bilisaaf $amount dabalataa ida\'i';
+  }
+
+  @override
+  String get growthFreeDeliveryUnlocked => 'Geejjiba bilisaa argattee!';
+
+  @override
+  String get growthRewardsTitle => 'Badhaasa';
+
+  @override
+  String growthRewardsWorth(String amount) {
+    return 'Gatiin isaa $amount';
+  }
+
+  @override
+  String get growthRewardsHowItWorks => 'Akkamitti akka hojjetu';
+
+  @override
+  String get growthRewardsEarnLine => 'Ajaja xumurame hundaan qabxii argadhu.';
+
+  @override
+  String growthRewardsRateLine(int points, String amount) {
+    return 'Qabxii $points = kaffaltii geejjibaa irraa $amount hir\'isa.';
+  }
+
+  @override
+  String growthRewardsUseLine(int points) {
+    return 'Yeroo qabxii $points qabaattu kaffaltii irratti fayyadami.';
+  }
+
+  @override
+  String get growthRewardsHistory => 'Seenaa';
+
+  @override
+  String get growthRewardsHistoryEmpty => 'Ammaaf sochiin qabxii hin jiru.';
+
+  @override
+  String get growthRewardsLoadError => 'Badhaasa kee fe\'uu hin dandeenye.';
+
+  @override
+  String get growthRewardsTypeEarned => 'Qabxii argame';
+
+  @override
+  String get growthRewardsTypeRedeemed => 'Qabxii itti fayyadame';
+
+  @override
+  String get growthRewardsTypeRestored => 'Qabxii deebi\'e';
+
+  @override
+  String get growthRewardsTypeExpired => 'Qabxii yeroon isaa darbe';
+
+  @override
+  String growthReferralTitle(String amount) {
+    return 'Hiriyoota affeeri, $amount argadhu';
+  }
+
+  @override
+  String growthReferralSubtitle(String amount) {
+    return 'Ajaja isaanii jalqabaa booda atii fi hiriyaan kee tokkoon tokkoon $amount argattu.';
+  }
+
+  @override
+  String get growthReferralCopy => 'Garagalchi';
+
+  @override
+  String get growthReferralCopied => 'Koodiin affeerraa garagalfame';
+
+  @override
+  String get growthReferralShare => 'Affeerraa qoodi';
+
+  @override
+  String get growthReferralShareSubject =>
+      'HudHud Delivery irratti na bira dhufi';
+
+  @override
+  String growthReferralShareFallback(String amount, String code, String link) {
+    return 'Koodii koo $code fayyadamuun HudHud Delivery irratti $amount argadhu: $link';
+  }
+
+  @override
+  String get growthReferralInvited => 'Kan affeeraman';
+
+  @override
+  String get growthReferralRewarded => 'Kan badhaafaman';
+
+  @override
+  String get growthReferralPending => 'Eegaa jiru';
+
+  @override
+  String get growthReferralEarned => 'Kan argame';
+
+  @override
+  String get growthReorderButton => 'Irra deebi\'ii ajaji';
+
+  @override
+  String get growthReorderFailed =>
+      'Irra deebi\'anii ajajuun hin danda\'amne. Maaloo irra deebi\'ii yaali.';
+
+  @override
+  String get growthReorderReplaceMessage =>
+      'Gaariin kee meeshaalee suuqa biraa qaba. Ajaja kanaan bakka buusi?';
+
+  @override
+  String get growthReorderUnavailableTitle =>
+      'Meeshaaleen tokko tokko hin argaman';
+
+  @override
+  String get growthReorderNothingAvailable =>
+      'Meeshaalee kana keessaa tokkollee amma hin argamu';
+
+  @override
+  String get growthReorderContinue => 'Meeshaalee jiraniin itti fufi';
+
+  @override
+  String get growthReorderReasonOutOfStock => 'Kuusaa keessaa dhumeera';
+
+  @override
+  String get growthReorderReasonRemoved => 'Kana booda hin gurguramu';
+
+  @override
+  String get growthReorderReasonVendorClosed => 'Suuqni cufameera';
+
+  @override
+  String get growthReorderReasonUnavailable => 'Hin argamu';
+
+  @override
+  String get growthOrderAgainTitle => 'Ammas ajaji';
+
+  @override
+  String growthOrderAgainOrderLabel(String order) {
+    return 'Ajaja #$order';
+  }
+
+  @override
+  String get growthSeeAll => 'Hunda ilaali';
+
+  @override
+  String get growthClosed => 'Cufaa';
+
+  @override
+  String get growthCollectionFallbackTitle => 'Walitti qabama';
+
+  @override
+  String get growthStoreFallbackName => 'Suuqa';
 }

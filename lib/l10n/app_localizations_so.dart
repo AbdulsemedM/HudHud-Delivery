@@ -3374,4 +3374,207 @@ class AppLocalizationsSo extends AppLocalizations {
 
   @override
   String get paymentCard => 'Card';
+
+  @override
+  String get growthPromoTitle => 'Koodhka dhimista';
+
+  @override
+  String get growthPromoSubtitle => 'Kood ma haysaa? Halkan ku dar';
+
+  @override
+  String get growthPromoHint => 'Geli koodhka dhimista';
+
+  @override
+  String get growthPromoApply => 'Codso';
+
+  @override
+  String get growthPromoRemove => 'Ka saar';
+
+  @override
+  String get growthPromoApplied => 'Koodhka dhimista waa la dabaqay';
+
+  @override
+  String get growthPromoInvalid => 'Koodhkan lama isticmaali karo';
+
+  @override
+  String growthPromoSavedForCheckout(String code) {
+    return 'Koodhka $code waxaa lagu dabaqi doonaa marka aad bixinayso';
+  }
+
+  @override
+  String growthPointsToggle(int points, String amount) {
+    return 'Isticmaal $points dhibcood (−$amount gaarsiinta)';
+  }
+
+  @override
+  String get growthPointsSubtitle =>
+      'Dhibcuhu waxay dhimaan kharashka gaarsiinta oo keliya';
+
+  @override
+  String growthPointsCount(int points) {
+    return '$points dhibcood';
+  }
+
+  @override
+  String get growthPointsDiscount => 'Dhimista dhibcaha';
+
+  @override
+  String get growthCouponDiscount => 'Dhimista koodhka';
+
+  @override
+  String growthCouponDiscountWithCode(String code) {
+    return 'Dhimis ($code)';
+  }
+
+  @override
+  String get growthDeliveryFeeLabel => 'Kharashka gaarsiinta';
+
+  @override
+  String get growthFree => 'Bilaash';
+
+  @override
+  String growthFreeDeliveryHint(String amount) {
+    return 'Ku dar $amount kale si aad u hesho gaarsiin bilaash ah';
+  }
+
+  @override
+  String get growthFreeDeliveryUnlocked => 'Waxaad heshay gaarsiin bilaash ah!';
+
+  @override
+  String get growthRewardsTitle => 'Abaalmarinno';
+
+  @override
+  String growthRewardsWorth(String amount) {
+    return 'Qiimihiisu waa $amount';
+  }
+
+  @override
+  String get growthRewardsHowItWorks => 'Sida ay u shaqeyso';
+
+  @override
+  String get growthRewardsEarnLine =>
+      'Ku hel dhibco dalab kasta oo dhammaystiran.';
+
+  @override
+  String growthRewardsRateLine(int points, String amount) {
+    return '$points dhibcood = $amount dhimis kharashka gaarsiinta.';
+  }
+
+  @override
+  String growthRewardsUseLine(int points) {
+    return 'Isticmaal marka aad bixinayso markaad haysato $points dhibcood.';
+  }
+
+  @override
+  String get growthRewardsHistory => 'Taariikhda';
+
+  @override
+  String get growthRewardsHistoryEmpty => 'Wali ma jiro dhaqdhaqaaq dhibco.';
+
+  @override
+  String get growthRewardsLoadError => 'Lama soo rari karin abaalmarinnadaada.';
+
+  @override
+  String get growthRewardsTypeEarned => 'Dhibco la helay';
+
+  @override
+  String get growthRewardsTypeRedeemed => 'Dhibco la isticmaalay';
+
+  @override
+  String get growthRewardsTypeRestored => 'Dhibco la soo celiyay';
+
+  @override
+  String get growthRewardsTypeExpired => 'Dhibco dhacay';
+
+  @override
+  String growthReferralTitle(String amount) {
+    return 'Casuun saaxiibbada, hel $amount';
+  }
+
+  @override
+  String growthReferralSubtitle(String amount) {
+    return 'Adiga iyo saaxiibkaa mid walba wuxuu helayaa $amount kadib dalabkooda ugu horreeya.';
+  }
+
+  @override
+  String get growthReferralCopy => 'Koobiyee';
+
+  @override
+  String get growthReferralCopied => 'Koodhka casuumaadda waa la koobiyeeyay';
+
+  @override
+  String get growthReferralShare => 'Wadaag casuumaadda';
+
+  @override
+  String get growthReferralShareSubject => 'Igu soo biir HudHud Delivery';
+
+  @override
+  String growthReferralShareFallback(String amount, String code, String link) {
+    return 'Hel $amount HudHud Delivery adigoo isticmaalaya koodhkayga $code: $link';
+  }
+
+  @override
+  String get growthReferralInvited => 'La casuumay';
+
+  @override
+  String get growthReferralRewarded => 'La abaalmariyay';
+
+  @override
+  String get growthReferralPending => 'Sugaya';
+
+  @override
+  String get growthReferralEarned => 'La helay';
+
+  @override
+  String get growthReorderButton => 'Dib u dalbo';
+
+  @override
+  String get growthReorderFailed =>
+      'Dib u dalbashadu way fashilantay. Fadlan isku day mar kale.';
+
+  @override
+  String get growthReorderReplaceMessage =>
+      'Gaadhigaagu wuxuu leeyahay alaab dukaan kale. Ku beddel dalabkan?';
+
+  @override
+  String get growthReorderUnavailableTitle => 'Alaabo qaar lama heli karo';
+
+  @override
+  String get growthReorderNothingAvailable =>
+      'Alaabtan midkoodna hadda lama heli karo';
+
+  @override
+  String get growthReorderContinue => 'Ku sii wad alaabta la heli karo';
+
+  @override
+  String get growthReorderReasonOutOfStock => 'Wuu dhammaaday';
+
+  @override
+  String get growthReorderReasonRemoved => 'Lama iibiyo mar dambe';
+
+  @override
+  String get growthReorderReasonVendorClosed => 'Dukaanku wuu xiran yahay';
+
+  @override
+  String get growthReorderReasonUnavailable => 'Lama heli karo';
+
+  @override
+  String get growthOrderAgainTitle => 'Mar kale dalbo';
+
+  @override
+  String growthOrderAgainOrderLabel(String order) {
+    return 'Dalab #$order';
+  }
+
+  @override
+  String get growthSeeAll => 'Arag dhammaan';
+
+  @override
+  String get growthClosed => 'Xiran';
+
+  @override
+  String get growthCollectionFallbackTitle => 'Ururin';
+
+  @override
+  String get growthStoreFallbackName => 'Dukaan';
 }

@@ -3343,4 +3343,204 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get paymentCard => 'Card';
+
+  @override
+  String get growthPromoTitle => 'Promo code';
+
+  @override
+  String get growthPromoSubtitle => 'Have a code? Apply it here';
+
+  @override
+  String get growthPromoHint => 'Enter promo code';
+
+  @override
+  String get growthPromoApply => 'Apply';
+
+  @override
+  String get growthPromoRemove => 'Remove';
+
+  @override
+  String get growthPromoApplied => 'Promo code applied';
+
+  @override
+  String get growthPromoInvalid => 'This promo code cannot be used';
+
+  @override
+  String growthPromoSavedForCheckout(String code) {
+    return 'Code $code will be applied at checkout';
+  }
+
+  @override
+  String growthPointsToggle(int points, String amount) {
+    return 'Use $points points (−$amount on delivery)';
+  }
+
+  @override
+  String get growthPointsSubtitle => 'Points reduce the delivery fee only';
+
+  @override
+  String growthPointsCount(int points) {
+    return '$points points';
+  }
+
+  @override
+  String get growthPointsDiscount => 'Points discount';
+
+  @override
+  String get growthCouponDiscount => 'Promo discount';
+
+  @override
+  String growthCouponDiscountWithCode(String code) {
+    return 'Promo ($code)';
+  }
+
+  @override
+  String get growthDeliveryFeeLabel => 'Delivery fee';
+
+  @override
+  String get growthFree => 'Free';
+
+  @override
+  String growthFreeDeliveryHint(String amount) {
+    return 'Add $amount more for free delivery';
+  }
+
+  @override
+  String get growthFreeDeliveryUnlocked => 'You unlocked free delivery!';
+
+  @override
+  String get growthRewardsTitle => 'Rewards';
+
+  @override
+  String growthRewardsWorth(String amount) {
+    return 'Worth $amount';
+  }
+
+  @override
+  String get growthRewardsHowItWorks => 'How it works';
+
+  @override
+  String get growthRewardsEarnLine => 'Earn points on every completed order.';
+
+  @override
+  String growthRewardsRateLine(int points, String amount) {
+    return '$points points = $amount off your delivery fee.';
+  }
+
+  @override
+  String growthRewardsUseLine(int points) {
+    return 'Use them at checkout once you have $points points.';
+  }
+
+  @override
+  String get growthRewardsHistory => 'History';
+
+  @override
+  String get growthRewardsHistoryEmpty => 'No points activity yet.';
+
+  @override
+  String get growthRewardsLoadError => 'Could not load your rewards.';
+
+  @override
+  String get growthRewardsTypeEarned => 'Points earned';
+
+  @override
+  String get growthRewardsTypeRedeemed => 'Points used';
+
+  @override
+  String get growthRewardsTypeRestored => 'Points returned';
+
+  @override
+  String get growthRewardsTypeExpired => 'Points expired';
+
+  @override
+  String growthReferralTitle(String amount) {
+    return 'Invite friends, get $amount';
+  }
+
+  @override
+  String growthReferralSubtitle(String amount) {
+    return 'You and your friend each get $amount after their first order.';
+  }
+
+  @override
+  String get growthReferralCopy => 'Copy';
+
+  @override
+  String get growthReferralCopied => 'Referral code copied';
+
+  @override
+  String get growthReferralShare => 'Share invite';
+
+  @override
+  String get growthReferralShareSubject => 'Join me on HudHud Delivery';
+
+  @override
+  String growthReferralShareFallback(String amount, String code, String link) {
+    return 'Get $amount on HudHud Delivery with my code $code: $link';
+  }
+
+  @override
+  String get growthReferralInvited => 'Invited';
+
+  @override
+  String get growthReferralRewarded => 'Rewarded';
+
+  @override
+  String get growthReferralPending => 'Pending';
+
+  @override
+  String get growthReferralEarned => 'Earned';
+
+  @override
+  String get growthReorderButton => 'Reorder';
+
+  @override
+  String get growthReorderFailed => 'Could not reorder. Please try again.';
+
+  @override
+  String get growthReorderReplaceMessage =>
+      'Your cart has items from another store. Replace them with this order?';
+
+  @override
+  String get growthReorderUnavailableTitle => 'Some items are unavailable';
+
+  @override
+  String get growthReorderNothingAvailable =>
+      'None of these items are available now';
+
+  @override
+  String get growthReorderContinue => 'Continue with available items';
+
+  @override
+  String get growthReorderReasonOutOfStock => 'Out of stock';
+
+  @override
+  String get growthReorderReasonRemoved => 'No longer sold';
+
+  @override
+  String get growthReorderReasonVendorClosed => 'Store is closed';
+
+  @override
+  String get growthReorderReasonUnavailable => 'Unavailable';
+
+  @override
+  String get growthOrderAgainTitle => 'Order again';
+
+  @override
+  String growthOrderAgainOrderLabel(String order) {
+    return 'Order #$order';
+  }
+
+  @override
+  String get growthSeeAll => 'See all';
+
+  @override
+  String get growthClosed => 'Closed';
+
+  @override
+  String get growthCollectionFallbackTitle => 'Collection';
+
+  @override
+  String get growthStoreFallbackName => 'Store';
 }

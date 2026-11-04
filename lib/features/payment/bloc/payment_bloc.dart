@@ -174,6 +174,7 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
             (orderDetails['pickup_longitude'] as num?)?.toDouble(),
         branchId: branchId,
         idempotencyKey: _orderIdempotencyKey,
+        redeemPoints: _parseRedeemPoints(orderDetails['redeem_points']),
       );
 
       if (orderResult['success'] != true) {
@@ -249,6 +250,13 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
     } catch (e) {
       emit(PaymentFailure(error: userFacingApiError(e)));
     }
+  }
+
+  static int? _parseRedeemPoints(dynamic raw) {
+    if (raw == null) return null;
+    final parsed = raw is int ? raw : int.tryParse(raw.toString());
+    if (parsed == null || parsed <= 0) return null;
+    return parsed;
   }
 
   Future<void> _onGetPaymentMethods(

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/app/notifications/notification_events.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/features/forgot_password/presentation/screen/forgot_password_identifier_screen.dart';
+import 'package:hudhud_delivery/features/wallet/presentation/screens/wallet_screen.dart';
 import 'fcm_delivery_navigation.dart';
 import 'fcm_order_navigation.dart';
 
@@ -112,6 +113,17 @@ Future<void> _routeFromPayload(
   final chatId = _parseConversationId(data);
   if (chatId != null) {
     await openChatRoomFromFcm(navigatorKey, conversationId: chatId);
+    return;
+  }
+
+  // Phase 2 wallet credits (on-time guarantee / referral reward). Checked
+  // before delivery/order routing because these payloads may also carry an
+  // order_id or delivery_id.
+  if (isWalletCreditPayload(data)) {
+    if (!context.mounted) return;
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (_) => const WalletScreen()),
+    );
     return;
   }
 

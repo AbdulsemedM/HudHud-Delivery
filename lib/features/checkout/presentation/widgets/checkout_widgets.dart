@@ -807,6 +807,13 @@ class OrderSummarySection extends StatelessWidget {
   final double? distanceKm;
   final int? estimatedDurationMinutes;
 
+  /// Phase 2 (server quote): original fee shown struck through when the
+  /// delivery fee was discounted. Null keeps the pre-Phase-2 rendering.
+  final double? deliveryFeeBeforeDiscounts;
+  final double couponDiscount;
+  final String? couponCode;
+  final double pointsDiscount;
+
   const OrderSummarySection({
     super.key,
     required this.subtotal,
@@ -821,7 +828,16 @@ class OrderSummarySection extends StatelessWidget {
     this.onRetryDeliveryFee,
     this.distanceKm,
     this.estimatedDurationMinutes,
+    this.deliveryFeeBeforeDiscounts,
+    this.couponDiscount = 0,
+    this.couponCode,
+    this.pointsDiscount = 0,
   });
+
+  bool get _deliveryFeeStruck =>
+      deliveryFee != null &&
+      deliveryFeeBeforeDiscounts != null &&
+      deliveryFeeBeforeDiscounts! > deliveryFee! + 0.009;
 
   String _formatAmount(double amount) {
     final symbol = currencySymbol?.trim();
@@ -902,6 +918,15 @@ class OrderSummarySection extends StatelessWidget {
                 ],
               ),
             )
+          else if (_deliveryFeeStruck)
+            _SummaryRow(
+              label: context.l10n.growthDeliveryFeeLabel,
+              amountLabel: deliveryFee! <= 0.009
+                  ? context.l10n.growthFree
+                  : _formatAmount(deliveryFee!),
+              struckAmountLabel: _formatAmount(deliveryFeeBeforeDiscounts!),
+              muted: deliveryFee! <= 0.009,
+            )
           else
             _SummaryRow(
               label: 'Delivery fee',
@@ -934,6 +959,20 @@ class OrderSummarySection extends StatelessWidget {
                   ),
                 ),
               ),
+            ),
+          if (couponDiscount > 0.009)
+            _SummaryRow(
+              label: couponCode != null && couponCode!.isNotEmpty
+                  ? context.l10n.growthCouponDiscountWithCode(couponCode!)
+                  : context.l10n.growthCouponDiscount,
+              amountLabel: '−${_formatAmount(couponDiscount)}',
+              muted: true,
+            ),
+          if (pointsDiscount > 0.009)
+            _SummaryRow(
+              label: context.l10n.growthPointsDiscount,
+              amountLabel: '−${_formatAmount(pointsDiscount)}',
+              muted: true,
             ),
           if (tipAmount > 0)
             _SummaryRow(
@@ -990,10 +1029,14 @@ class _SummaryRow extends StatelessWidget {
   final String amountLabel;
   final bool muted;
 
+  /// Optional original amount rendered with a strikethrough before [amountLabel].
+  final String? struckAmountLabel;
+
   const _SummaryRow({
     required this.label,
     required this.amountLabel,
     this.muted = false,
+    this.struckAmountLabel,
   });
 
   @override
@@ -1013,13 +1056,30 @@ class _SummaryRow extends StatelessWidget {
               fontWeight: FontWeight.w500,
             ),
           ),
-          Text(
-            amountLabel,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: muted ? AppColors.successColor : scheme.onSurface,
-            ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (struckAmountLabel != null) ...[
+                Text(
+                  struckAmountLabel!,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: scheme.onSurfaceVariant,
+                    decoration: TextDecoration.lineThrough,
+                  ),
+                ),
+                const SizedBox(width: 6),
+              ],
+              Text(
+                amountLabel,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: muted ? AppColors.successColor : scheme.onSurface,
+                ),
+              ),
+            ],
           ),
         ],
       ),

@@ -27,6 +27,10 @@ import 'package:hudhud_delivery/features/chat/presentation/screens/support_chat_
 import 'package:hudhud_delivery/features/chat/chat_bloc_provider.dart';
 import 'package:hudhud_delivery/features/chat/presentation/widgets/chat_unread_badge.dart';
 import 'package:hudhud_delivery/features/chat/utils/chat_polling_config.dart';
+import 'package:hudhud_delivery/features/growth/data/growth_repository.dart';
+import 'package:hudhud_delivery/features/growth/growth_scope.dart';
+import 'package:hudhud_delivery/features/growth/presentation/screens/rewards_screen.dart';
+import 'package:hudhud_delivery/features/growth/presentation/widgets/referral_card.dart';
 import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
 // import 'package:hudhud_delivery/features/onboarding_tour/presentation/onboarding_tour_controller.dart';
 import 'package:hudhud_delivery/features/wallet/data/providers/wallet_data_provider.dart';
@@ -81,6 +85,43 @@ class _SettingsScreenState extends State<SettingsScreen>
   Timer? _chatUnreadTimer;
   final BiometricCredentialService _biometricService =
       BiometricCredentialService();
+
+  // Phase 2: rewards points (only fetched when rewards are enabled).
+  int? _rewardPoints;
+  bool _rewardsWasEnabled = false;
+  bool _referralWasEnabled = false;
+  final GlobalKey<ReferralCardState> _referralCardKey =
+      GlobalKey<ReferralCardState>();
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final growth = growthConfigOf(context);
+    if (growth.rewardsEnabled && !_rewardsWasEnabled) {
+      unawaited(_loadRewardPoints());
+    }
+    if (!growth.rewardsEnabled) _rewardPoints = null;
+    _rewardsWasEnabled = growth.rewardsEnabled;
+    _referralWasEnabled = growth.referralEnabled;
+  }
+
+  Future<void> _loadRewardPoints() async {
+    if (!mounted) return;
+    if (!growthConfigOf(context, listen: false).rewardsEnabled) return;
+    try {
+      final summary = await GrowthRepository.create().fetchRewardsSummary();
+      if (mounted) setState(() => _rewardPoints = summary.points);
+    } catch (_) {
+      if (mounted) setState(() => _rewardPoints = null);
+    }
+  }
+
+  void _openRewards() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const RewardsScreen()),
+    ).then((_) => _loadRewardPoints());
+  }
 
   @override
   void initState() {
@@ -138,6 +179,9 @@ class _SettingsScreenState extends State<SettingsScreen>
       _loadWalletSummary(),
       _loadPackageInfo(),
       _loadBiometricState(),
+      if (_rewardsWasEnabled) _loadRewardPoints(),
+      if (_referralWasEnabled && _referralCardKey.currentState != null)
+        _referralCardKey.currentState!.reload(),
     ]);
   }
 
@@ -424,6 +468,11 @@ class _SettingsScreenState extends State<SettingsScreen>
         : '${l10n.currencyEtb} ${_walletTotal!.toStringAsFixed(2)}';
 
     final indigo = _accentIndigo(context);
+    final growth = growthConfigOf(context);
+    final showRewards = growth.rewardsEnabled;
+    final rewardsValue = _rewardPoints == null
+        ? l10n.emDash
+        : l10n.growthPointsCount(_rewardPoints!);
 
     return Theme(
       data: authTheme,
@@ -444,6 +493,9 @@ class _SettingsScreenState extends State<SettingsScreen>
                     displayName: displayName,
                     phone: phone,
                     user: _user,
+                    rewardsLabel:
+                        showRewards && _rewardPoints != null ? rewardsValue : null,
+                    onRewardsTap: showRewards ? _openRewards : null,
                     onEdit: () {
                       Navigator.push(
                         context,
@@ -476,22 +528,35 @@ class _SettingsScreenState extends State<SettingsScreen>
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: _ProfileStatCard(
-                            icon: Icons.local_activity_rounded,
-                            iconColor: AuthScreenColors.orange,
-                            title: l10n.profileCoupons,
-                            value: '0',
-                            onTap: () {
-                              AuthSnackBar.comingSoon(
-                                context,
-                                l10n.profileCouponsComingSoon,
-                              );
-                            },
-                          ),
+                          child: showRewards
+                              ? _ProfileStatCard(
+                                  icon: Icons.stars_rounded,
+                                  iconColor: AuthScreenColors.orange,
+                                  title: l10n.growthRewardsTitle,
+                                  value: rewardsValue,
+                                  onTap: _openRewards,
+                                )
+                              : _ProfileStatCard(
+                                  icon: Icons.local_activity_rounded,
+                                  iconColor: AuthScreenColors.orange,
+                                  title: l10n.profileCoupons,
+                                  value: '0',
+                                  onTap: () {
+                                    AuthSnackBar.comingSoon(
+                                      context,
+                                      l10n.profileCouponsComingSoon,
+                                    );
+                                  },
+                                ),
                         ),
                       ],
                     ),
                   ),
+                  if (growth.referralEnabled)
+                    ReferralCard(
+                      key: _referralCardKey,
+                      padding: const EdgeInsets.only(top: 14),
+                    ),
                   const SizedBox(height: 26),
                   _ProfileSectionLabel(title: l10n.settingsAccount),
                   _ProfileGroupCard(
@@ -1249,11 +1314,17 @@ class _ProfileHeaderCard extends StatelessWidget {
   final UserModel? user;
   final VoidCallback onEdit;
 
+  /// Phase 2 rewards badge text (e.g. "340 points"); hidden when null.
+  final String? rewardsLabel;
+  final VoidCallback? onRewardsTap;
+
   const _ProfileHeaderCard({
     required this.displayName,
     required this.phone,
     required this.user,
     required this.onEdit,
+    this.rewardsLabel,
+    this.onRewardsTap,
   });
 
   String get _initial {
@@ -1361,6 +1432,42 @@ class _ProfileHeaderCard extends StatelessWidget {
                             ),
                           ],
                         ),
+                        if (rewardsLabel != null) ...[
+                          const SizedBox(height: 8),
+                          Material(
+                            color: AppColors.brandOrange,
+                            shape: const StadiumBorder(),
+                            clipBehavior: Clip.antiAlias,
+                            child: InkWell(
+                              onTap: onRewardsTap,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 5,
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.stars_rounded,
+                                      size: 16,
+                                      color: Colors.white,
+                                    ),
+                                    const SizedBox(width: 5),
+                                    Text(
+                                      rewardsLabel!,
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w800,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                         const SizedBox(height: 12),
                         Material(
                           color: Colors.white.withValues(alpha: 0.18),

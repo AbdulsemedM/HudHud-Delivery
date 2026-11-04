@@ -109,6 +109,26 @@ class ApiConstants {
   /// POST /api/customer/delivery-fee/quote — checkout delivery-fee preview.
   static const String customerDeliveryFeeQuote = 'customer/delivery-fee/quote';
 
+  // Phase 2 growth endpoints (see phase-2 contract).
+  /// GET /api/growth/config — public feature flags (optional auth).
+  static const String growthConfig = 'growth/config';
+  /// GET /api/home/feed?service_type= — public banners + collections.
+  static const String homeFeed = 'home/feed';
+  /// POST /api/customer/checkout/quote — server-side price breakdown.
+  static const String customerCheckoutQuote = 'customer/checkout/quote';
+  /// POST /api/customer/growth/promo-preview {code, subtotal, vendor_id?, service_type?}
+  static const String customerPromoPreview = 'customer/growth/promo-preview';
+  /// GET /api/customer/growth/referral-summary
+  static const String customerReferralSummary =
+      'customer/growth/referral-summary';
+  /// GET /api/customer/rewards/summary
+  static const String customerRewardsSummary = 'customer/rewards/summary';
+  /// GET /api/customer/retention/reorder-suggestions
+  static const String customerReorderSuggestions =
+      'customer/retention/reorder-suggestions';
+  /// POST /api/customer/orders/{id}/reorder
+  static const String customerOrderReorder = 'customer/orders/{id}/reorder';
+
   // Delivery endpoints
   static const String delivery = '/delivery';
   static const String trackOrder = '$delivery/track/{orderId}';

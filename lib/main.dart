@@ -26,6 +26,8 @@ import 'controllers/locale_controller.dart';
 import 'controllers/service_accent_controller.dart';
 import 'core/easy_mode/easy_mode_controller.dart';
 import 'core/easy_mode/voice_hint_service.dart';
+import 'features/growth/deep_link_service.dart';
+import 'features/growth/growth_config_controller.dart';
 
 // Services
 import 'app/services/fcm_service.dart';
@@ -63,6 +65,8 @@ void main() async {
   // Must exist before FCM tap handlers so they can push routes.
   final navigatorKey = GlobalKey<NavigatorState>();
   AppNavigator.key = navigatorKey;
+  // App links (/r/{code}, /o/{id}); see DeepLinkService TODO.
+  DeepLinkService.instance.start(navigatorKey);
 
   // Initialize FCM (non-blocking: app starts even if Firebase/FCM fails)
   FcmService? fcmService;
@@ -185,6 +189,11 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (_) => ServiceAccentController()),
         ChangeNotifierProvider(
           create: (_) => AuthController(),
+        ),
+        // Phase 2 growth flags; everything stays hidden until this loads.
+        ChangeNotifierProvider(
+          create: (_) => GrowthConfigController()..start(),
+          lazy: false,
         ),
         Provider<OrdersRepository>.value(value: widget.ordersRepository),
       ],

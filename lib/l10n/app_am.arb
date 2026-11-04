@@ -1454,5 +1454,127 @@
   },
   "paymentCash": "Cash",
   "paymentWallet": "Wallet",
-  "paymentCard": "Card"
+  "paymentCard": "Card",
+  "growthPromoTitle": "የማስተዋወቂያ ኮድ",
+  "growthPromoSubtitle": "ኮድ አለዎት? እዚህ ያስገቡ",
+  "growthPromoHint": "የማስተዋወቂያ ኮድ ያስገቡ",
+  "growthPromoApply": "ተግብር",
+  "growthPromoRemove": "አስወግድ",
+  "growthPromoApplied": "የማስተዋወቂያ ኮዱ ተተግብሯል",
+  "growthPromoInvalid": "ይህ ኮድ ጥቅም ላይ ሊውል አይችልም",
+  "growthPromoSavedForCheckout": "ኮድ {code} በክፍያ ጊዜ ይተገበራል",
+  "@growthPromoSavedForCheckout": {
+    "placeholders": {
+      "code": {"type": "String"}
+    }
+  },
+  "growthPointsToggle": "{points} ነጥቦችን ተጠቀም (በማድረሻ ላይ −{amount})",
+  "@growthPointsToggle": {
+    "placeholders": {
+      "points": {"type": "int"},
+      "amount": {"type": "String"}
+    }
+  },
+  "growthPointsSubtitle": "ነጥቦች የማድረሻ ክፍያን ብቻ ይቀንሳሉ",
+  "growthPointsCount": "{points} ነጥቦች",
+  "@growthPointsCount": {
+    "placeholders": {
+      "points": {"type": "int"}
+    }
+  },
+  "growthPointsDiscount": "የነጥብ ቅናሽ",
+  "growthCouponDiscount": "የማስተዋወቂያ ቅናሽ",
+  "growthCouponDiscountWithCode": "ማስተዋወቂያ ({code})",
+  "@growthCouponDiscountWithCode": {
+    "placeholders": {
+      "code": {"type": "String"}
+    }
+  },
+  "growthDeliveryFeeLabel": "የማድረሻ ክፍያ",
+  "growthFree": "ነፃ",
+  "growthFreeDeliveryHint": "ለነፃ ማድረሻ {amount} ተጨማሪ ይጨምሩ",
+  "@growthFreeDeliveryHint": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "growthFreeDeliveryUnlocked": "ነፃ ማድረሻ አግኝተዋል!",
+  "growthRewardsTitle": "ሽልማቶች",
+  "growthRewardsWorth": "ዋጋው {amount}",
+  "@growthRewardsWorth": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "growthRewardsHowItWorks": "እንዴት እንደሚሰራ",
+  "growthRewardsEarnLine": "በእያንዳንዱ የተጠናቀቀ ትዕዛዝ ነጥብ ያግኙ።",
+  "growthRewardsRateLine": "{points} ነጥቦች = ከማድረሻ ክፍያዎ {amount} ቅናሽ።",
+  "@growthRewardsRateLine": {
+    "placeholders": {
+      "points": {"type": "int"},
+      "amount": {"type": "String"}
+    }
+  },
+  "growthRewardsUseLine": "{points} ነጥቦች ሲኖርዎት በክፍያ ጊዜ ይጠቀሙባቸው።",
+  "@growthRewardsUseLine": {
+    "placeholders": {
+      "points": {"type": "int"}
+    }
+  },
+  "growthRewardsHistory": "ታሪክ",
+  "growthRewardsHistoryEmpty": "እስካሁን የነጥብ እንቅስቃሴ የለም።",
+  "growthRewardsLoadError": "ሽልማቶችዎን መጫን አልተቻለም።",
+  "growthRewardsTypeEarned": "የተገኙ ነጥቦች",
+  "growthRewardsTypeRedeemed": "ጥቅም ላይ የዋሉ ነጥቦች",
+  "growthRewardsTypeRestored": "የተመለሱ ነጥቦች",
+  "growthRewardsTypeExpired": "ጊዜያቸው ያለፈ ነጥቦች",
+  "growthReferralTitle": "ጓደኞችን ይጋብዙ፣ {amount} ያግኙ",
+  "@growthReferralTitle": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "growthReferralSubtitle": "ከመጀመሪያ ትዕዛዛቸው በኋላ እርስዎና ጓደኛዎ እያንዳንዳችሁ {amount} ታገኛላችሁ።",
+  "@growthReferralSubtitle": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "growthReferralCopy": "ቅዳ",
+  "growthReferralCopied": "የግብዣ ኮድ ተቀድቷል",
+  "growthReferralShare": "ግብዣ አጋራ",
+  "growthReferralShareSubject": "በሁድሁድ መላኪያ ይቀላቀሉኝ",
+  "growthReferralShareFallback": "በኮዴ {code} በሁድሁድ መላኪያ {amount} ያግኙ፦ {link}",
+  "@growthReferralShareFallback": {
+    "placeholders": {
+      "amount": {"type": "String"},
+      "code": {"type": "String"},
+      "link": {"type": "String"}
+    }
+  },
+  "growthReferralInvited": "የተጋበዙ",
+  "growthReferralRewarded": "የተሸለሙ",
+  "growthReferralPending": "በመጠባበቅ ላይ",
+  "growthReferralEarned": "የተገኘ",
+  "growthReorderButton": "እንደገና እዘዝ",
+  "growthReorderFailed": "እንደገና ማዘዝ አልተቻለም። እባክዎ እንደገና ይሞክሩ።",
+  "growthReorderReplaceMessage": "ጋሪዎ ከሌላ መደብር እቃዎች አሉት። በዚህ ትዕዛዝ ይተኩ?",
+  "growthReorderUnavailableTitle": "አንዳንድ እቃዎች አይገኙም",
+  "growthReorderNothingAvailable": "ከእነዚህ እቃዎች አንዳቸውም አሁን አይገኙም",
+  "growthReorderContinue": "ባሉት እቃዎች ቀጥል",
+  "growthReorderReasonOutOfStock": "ከክምችት ውጭ",
+  "growthReorderReasonRemoved": "ከእንግዲህ አይሸጥም",
+  "growthReorderReasonVendorClosed": "መደብሩ ተዘግቷል",
+  "growthReorderReasonUnavailable": "አይገኝም",
+  "growthOrderAgainTitle": "እንደገና ይዘዙ",
+  "growthOrderAgainOrderLabel": "ትዕዛዝ #{order}",
+  "@growthOrderAgainOrderLabel": {
+    "placeholders": {
+      "order": {"type": "String"}
+    }
+  },
+  "growthSeeAll": "ሁሉንም ይመልከቱ",
+  "growthClosed": "ዝግ",
+  "growthCollectionFallbackTitle": "ስብስብ",
+  "growthStoreFallbackName": "መደብር"
 }

@@ -7,6 +7,8 @@ import 'package:shimmer/shimmer.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/theme/system_ui_style.dart';
+import 'package:hudhud_delivery/features/growth/growth_scope.dart';
+import 'package:hudhud_delivery/features/growth/presentation/reorder_flow.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import '../../bloc/orders_bloc.dart';
 import '../../data/models/order_model.dart';
@@ -262,6 +264,34 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 OrderItemsCard(items: order.items),
                 const SizedBox(height: 14),
                 OrderSummaryCard(order: order),
+                // Phase 2: rebuild the cart from this past order.
+                if (order.isDelivered &&
+                    (growthControllerOf(context, listen: true)
+                            ?.reorderEnabled ??
+                        false)) ...[
+                  const SizedBox(height: 14),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppColors.brandOrange,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        textStyle: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      onPressed: () =>
+                          runReorderFlow(context, orderId: order.id),
+                      icon: const Icon(Icons.replay_rounded),
+                      label: Text(context.l10n.growthReorderButton),
+                    ),
+                  ),
+                ],
                 if (order.isDelivered) ...[
                   const SizedBox(height: 14),
                   RateOrderCard(

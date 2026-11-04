@@ -67,6 +67,7 @@ class CheckoutDataProvider {
     double? pickupLongitude,
     int? branchId,
     String? idempotencyKey,
+    int? redeemPoints,
   }) async {
     try {
       final Map<String, dynamic> orderData = {
@@ -127,6 +128,11 @@ class CheckoutDataProvider {
       }
       if (couponCode != null && couponCode.trim().isNotEmpty) {
         orderData['coupon_code'] = couponCode.trim();
+      }
+      // Phase 2: points to redeem against the delivery fee. The server
+      // recomputes and caps the discount; no client totals are trusted.
+      if (redeemPoints != null && redeemPoints > 0) {
+        orderData['redeem_points'] = redeemPoints;
       }
       if (pickupLocation != null && pickupLocation.trim().isNotEmpty) {
         orderData['pickup_location'] = pickupLocation.trim();

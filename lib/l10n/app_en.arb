@@ -1399,5 +1399,127 @@
   },
   "paymentCash": "Cash",
   "paymentWallet": "Wallet",
-  "paymentCard": "Card"
+  "paymentCard": "Card",
+  "growthPromoTitle": "Promo code",
+  "growthPromoSubtitle": "Have a code? Apply it here",
+  "growthPromoHint": "Enter promo code",
+  "growthPromoApply": "Apply",
+  "growthPromoRemove": "Remove",
+  "growthPromoApplied": "Promo code applied",
+  "growthPromoInvalid": "This promo code cannot be used",
+  "growthPromoSavedForCheckout": "Code {code} will be applied at checkout",
+  "@growthPromoSavedForCheckout": {
+    "placeholders": {
+      "code": {"type": "String"}
+    }
+  },
+  "growthPointsToggle": "Use {points} points (−{amount} on delivery)",
+  "@growthPointsToggle": {
+    "placeholders": {
+      "points": {"type": "int"},
+      "amount": {"type": "String"}
+    }
+  },
+  "growthPointsSubtitle": "Points reduce the delivery fee only",
+  "growthPointsCount": "{points} points",
+  "@growthPointsCount": {
+    "placeholders": {
+      "points": {"type": "int"}
+    }
+  },
+  "growthPointsDiscount": "Points discount",
+  "growthCouponDiscount": "Promo discount",
+  "growthCouponDiscountWithCode": "Promo ({code})",
+  "@growthCouponDiscountWithCode": {
+    "placeholders": {
+      "code": {"type": "String"}
+    }
+  },
+  "growthDeliveryFeeLabel": "Delivery fee",
+  "growthFree": "Free",
+  "growthFreeDeliveryHint": "Add {amount} more for free delivery",
+  "@growthFreeDeliveryHint": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "growthFreeDeliveryUnlocked": "You unlocked free delivery!",
+  "growthRewardsTitle": "Rewards",
+  "growthRewardsWorth": "Worth {amount}",
+  "@growthRewardsWorth": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "growthRewardsHowItWorks": "How it works",
+  "growthRewardsEarnLine": "Earn points on every completed order.",
+  "growthRewardsRateLine": "{points} points = {amount} off your delivery fee.",
+  "@growthRewardsRateLine": {
+    "placeholders": {
+      "points": {"type": "int"},
+      "amount": {"type": "String"}
+    }
+  },
+  "growthRewardsUseLine": "Use them at checkout once you have {points} points.",
+  "@growthRewardsUseLine": {
+    "placeholders": {
+      "points": {"type": "int"}
+    }
+  },
+  "growthRewardsHistory": "History",
+  "growthRewardsHistoryEmpty": "No points activity yet.",
+  "growthRewardsLoadError": "Could not load your rewards.",
+  "growthRewardsTypeEarned": "Points earned",
+  "growthRewardsTypeRedeemed": "Points used",
+  "growthRewardsTypeRestored": "Points returned",
+  "growthRewardsTypeExpired": "Points expired",
+  "growthReferralTitle": "Invite friends, get {amount}",
+  "@growthReferralTitle": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "growthReferralSubtitle": "You and your friend each get {amount} after their first order.",
+  "@growthReferralSubtitle": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "growthReferralCopy": "Copy",
+  "growthReferralCopied": "Referral code copied",
+  "growthReferralShare": "Share invite",
+  "growthReferralShareSubject": "Join me on HudHud Delivery",
+  "growthReferralShareFallback": "Get {amount} on HudHud Delivery with my code {code}: {link}",
+  "@growthReferralShareFallback": {
+    "placeholders": {
+      "amount": {"type": "String"},
+      "code": {"type": "String"},
+      "link": {"type": "String"}
+    }
+  },
+  "growthReferralInvited": "Invited",
+  "growthReferralRewarded": "Rewarded",
+  "growthReferralPending": "Pending",
+  "growthReferralEarned": "Earned",
+  "growthReorderButton": "Reorder",
+  "growthReorderFailed": "Could not reorder. Please try again.",
+  "growthReorderReplaceMessage": "Your cart has items from another store. Replace them with this order?",
+  "growthReorderUnavailableTitle": "Some items are unavailable",
+  "growthReorderNothingAvailable": "None of these items are available now",
+  "growthReorderContinue": "Continue with available items",
+  "growthReorderReasonOutOfStock": "Out of stock",
+  "growthReorderReasonRemoved": "No longer sold",
+  "growthReorderReasonVendorClosed": "Store is closed",
+  "growthReorderReasonUnavailable": "Unavailable",
+  "growthOrderAgainTitle": "Order again",
+  "growthOrderAgainOrderLabel": "Order #{order}",
+  "@growthOrderAgainOrderLabel": {
+    "placeholders": {
+      "order": {"type": "String"}
+    }
+  },
+  "growthSeeAll": "See all",
+  "growthClosed": "Closed",
+  "growthCollectionFallbackTitle": "Collection",
+  "growthStoreFallbackName": "Store"
 }

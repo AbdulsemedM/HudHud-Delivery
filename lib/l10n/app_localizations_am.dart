@@ -3291,4 +3291,203 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get paymentCard => 'Card';
+
+  @override
+  String get growthPromoTitle => 'የማስተዋወቂያ ኮድ';
+
+  @override
+  String get growthPromoSubtitle => 'ኮድ አለዎት? እዚህ ያስገቡ';
+
+  @override
+  String get growthPromoHint => 'የማስተዋወቂያ ኮድ ያስገቡ';
+
+  @override
+  String get growthPromoApply => 'ተግብር';
+
+  @override
+  String get growthPromoRemove => 'አስወግድ';
+
+  @override
+  String get growthPromoApplied => 'የማስተዋወቂያ ኮዱ ተተግብሯል';
+
+  @override
+  String get growthPromoInvalid => 'ይህ ኮድ ጥቅም ላይ ሊውል አይችልም';
+
+  @override
+  String growthPromoSavedForCheckout(String code) {
+    return 'ኮድ $code በክፍያ ጊዜ ይተገበራል';
+  }
+
+  @override
+  String growthPointsToggle(int points, String amount) {
+    return '$points ነጥቦችን ተጠቀም (በማድረሻ ላይ −$amount)';
+  }
+
+  @override
+  String get growthPointsSubtitle => 'ነጥቦች የማድረሻ ክፍያን ብቻ ይቀንሳሉ';
+
+  @override
+  String growthPointsCount(int points) {
+    return '$points ነጥቦች';
+  }
+
+  @override
+  String get growthPointsDiscount => 'የነጥብ ቅናሽ';
+
+  @override
+  String get growthCouponDiscount => 'የማስተዋወቂያ ቅናሽ';
+
+  @override
+  String growthCouponDiscountWithCode(String code) {
+    return 'ማስተዋወቂያ ($code)';
+  }
+
+  @override
+  String get growthDeliveryFeeLabel => 'የማድረሻ ክፍያ';
+
+  @override
+  String get growthFree => 'ነፃ';
+
+  @override
+  String growthFreeDeliveryHint(String amount) {
+    return 'ለነፃ ማድረሻ $amount ተጨማሪ ይጨምሩ';
+  }
+
+  @override
+  String get growthFreeDeliveryUnlocked => 'ነፃ ማድረሻ አግኝተዋል!';
+
+  @override
+  String get growthRewardsTitle => 'ሽልማቶች';
+
+  @override
+  String growthRewardsWorth(String amount) {
+    return 'ዋጋው $amount';
+  }
+
+  @override
+  String get growthRewardsHowItWorks => 'እንዴት እንደሚሰራ';
+
+  @override
+  String get growthRewardsEarnLine => 'በእያንዳንዱ የተጠናቀቀ ትዕዛዝ ነጥብ ያግኙ።';
+
+  @override
+  String growthRewardsRateLine(int points, String amount) {
+    return '$points ነጥቦች = ከማድረሻ ክፍያዎ $amount ቅናሽ።';
+  }
+
+  @override
+  String growthRewardsUseLine(int points) {
+    return '$points ነጥቦች ሲኖርዎት በክፍያ ጊዜ ይጠቀሙባቸው።';
+  }
+
+  @override
+  String get growthRewardsHistory => 'ታሪክ';
+
+  @override
+  String get growthRewardsHistoryEmpty => 'እስካሁን የነጥብ እንቅስቃሴ የለም።';
+
+  @override
+  String get growthRewardsLoadError => 'ሽልማቶችዎን መጫን አልተቻለም።';
+
+  @override
+  String get growthRewardsTypeEarned => 'የተገኙ ነጥቦች';
+
+  @override
+  String get growthRewardsTypeRedeemed => 'ጥቅም ላይ የዋሉ ነጥቦች';
+
+  @override
+  String get growthRewardsTypeRestored => 'የተመለሱ ነጥቦች';
+
+  @override
+  String get growthRewardsTypeExpired => 'ጊዜያቸው ያለፈ ነጥቦች';
+
+  @override
+  String growthReferralTitle(String amount) {
+    return 'ጓደኞችን ይጋብዙ፣ $amount ያግኙ';
+  }
+
+  @override
+  String growthReferralSubtitle(String amount) {
+    return 'ከመጀመሪያ ትዕዛዛቸው በኋላ እርስዎና ጓደኛዎ እያንዳንዳችሁ $amount ታገኛላችሁ።';
+  }
+
+  @override
+  String get growthReferralCopy => 'ቅዳ';
+
+  @override
+  String get growthReferralCopied => 'የግብዣ ኮድ ተቀድቷል';
+
+  @override
+  String get growthReferralShare => 'ግብዣ አጋራ';
+
+  @override
+  String get growthReferralShareSubject => 'በሁድሁድ መላኪያ ይቀላቀሉኝ';
+
+  @override
+  String growthReferralShareFallback(String amount, String code, String link) {
+    return 'በኮዴ $code በሁድሁድ መላኪያ $amount ያግኙ፦ $link';
+  }
+
+  @override
+  String get growthReferralInvited => 'የተጋበዙ';
+
+  @override
+  String get growthReferralRewarded => 'የተሸለሙ';
+
+  @override
+  String get growthReferralPending => 'በመጠባበቅ ላይ';
+
+  @override
+  String get growthReferralEarned => 'የተገኘ';
+
+  @override
+  String get growthReorderButton => 'እንደገና እዘዝ';
+
+  @override
+  String get growthReorderFailed => 'እንደገና ማዘዝ አልተቻለም። እባክዎ እንደገና ይሞክሩ።';
+
+  @override
+  String get growthReorderReplaceMessage =>
+      'ጋሪዎ ከሌላ መደብር እቃዎች አሉት። በዚህ ትዕዛዝ ይተኩ?';
+
+  @override
+  String get growthReorderUnavailableTitle => 'አንዳንድ እቃዎች አይገኙም';
+
+  @override
+  String get growthReorderNothingAvailable => 'ከእነዚህ እቃዎች አንዳቸውም አሁን አይገኙም';
+
+  @override
+  String get growthReorderContinue => 'ባሉት እቃዎች ቀጥል';
+
+  @override
+  String get growthReorderReasonOutOfStock => 'ከክምችት ውጭ';
+
+  @override
+  String get growthReorderReasonRemoved => 'ከእንግዲህ አይሸጥም';
+
+  @override
+  String get growthReorderReasonVendorClosed => 'መደብሩ ተዘግቷል';
+
+  @override
+  String get growthReorderReasonUnavailable => 'አይገኝም';
+
+  @override
+  String get growthOrderAgainTitle => 'እንደገና ይዘዙ';
+
+  @override
+  String growthOrderAgainOrderLabel(String order) {
+    return 'ትዕዛዝ #$order';
+  }
+
+  @override
+  String get growthSeeAll => 'ሁሉንም ይመልከቱ';
+
+  @override
+  String get growthClosed => 'ዝግ';
+
+  @override
+  String get growthCollectionFallbackTitle => 'ስብስብ';
+
+  @override
+  String get growthStoreFallbackName => 'መደብር';
 }

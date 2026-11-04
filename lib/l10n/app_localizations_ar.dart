@@ -3325,4 +3325,205 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get paymentCard => 'Card';
+
+  @override
+  String get growthPromoTitle => 'رمز الخصم';
+
+  @override
+  String get growthPromoSubtitle => 'لديك رمز؟ أدخله هنا';
+
+  @override
+  String get growthPromoHint => 'أدخل رمز الخصم';
+
+  @override
+  String get growthPromoApply => 'تطبيق';
+
+  @override
+  String get growthPromoRemove => 'إزالة';
+
+  @override
+  String get growthPromoApplied => 'تم تطبيق رمز الخصم';
+
+  @override
+  String get growthPromoInvalid => 'لا يمكن استخدام رمز الخصم هذا';
+
+  @override
+  String growthPromoSavedForCheckout(String code) {
+    return 'سيتم تطبيق الرمز $code عند الدفع';
+  }
+
+  @override
+  String growthPointsToggle(int points, String amount) {
+    return 'استخدم $points نقطة (−$amount من رسوم التوصيل)';
+  }
+
+  @override
+  String get growthPointsSubtitle => 'النقاط تخفض رسوم التوصيل فقط';
+
+  @override
+  String growthPointsCount(int points) {
+    return '$points نقطة';
+  }
+
+  @override
+  String get growthPointsDiscount => 'خصم النقاط';
+
+  @override
+  String get growthCouponDiscount => 'خصم الرمز';
+
+  @override
+  String growthCouponDiscountWithCode(String code) {
+    return 'خصم ($code)';
+  }
+
+  @override
+  String get growthDeliveryFeeLabel => 'رسوم التوصيل';
+
+  @override
+  String get growthFree => 'مجاني';
+
+  @override
+  String growthFreeDeliveryHint(String amount) {
+    return 'أضف $amount للحصول على توصيل مجاني';
+  }
+
+  @override
+  String get growthFreeDeliveryUnlocked => 'لقد حصلت على توصيل مجاني!';
+
+  @override
+  String get growthRewardsTitle => 'المكافآت';
+
+  @override
+  String growthRewardsWorth(String amount) {
+    return 'بقيمة $amount';
+  }
+
+  @override
+  String get growthRewardsHowItWorks => 'كيف تعمل';
+
+  @override
+  String get growthRewardsEarnLine => 'اكسب نقاطًا مع كل طلب مكتمل.';
+
+  @override
+  String growthRewardsRateLine(int points, String amount) {
+    return '$points نقطة = خصم $amount من رسوم التوصيل.';
+  }
+
+  @override
+  String growthRewardsUseLine(int points) {
+    return 'استخدمها عند الدفع عندما يكون لديك $points نقطة.';
+  }
+
+  @override
+  String get growthRewardsHistory => 'السجل';
+
+  @override
+  String get growthRewardsHistoryEmpty => 'لا يوجد نشاط نقاط بعد.';
+
+  @override
+  String get growthRewardsLoadError => 'تعذر تحميل مكافآتك.';
+
+  @override
+  String get growthRewardsTypeEarned => 'نقاط مكتسبة';
+
+  @override
+  String get growthRewardsTypeRedeemed => 'نقاط مستخدمة';
+
+  @override
+  String get growthRewardsTypeRestored => 'نقاط مستردة';
+
+  @override
+  String get growthRewardsTypeExpired => 'نقاط منتهية الصلاحية';
+
+  @override
+  String growthReferralTitle(String amount) {
+    return 'ادعُ أصدقاءك واحصل على $amount';
+  }
+
+  @override
+  String growthReferralSubtitle(String amount) {
+    return 'تحصل أنت وصديقك على $amount لكل منكما بعد طلبه الأول.';
+  }
+
+  @override
+  String get growthReferralCopy => 'نسخ';
+
+  @override
+  String get growthReferralCopied => 'تم نسخ رمز الإحالة';
+
+  @override
+  String get growthReferralShare => 'مشاركة الدعوة';
+
+  @override
+  String get growthReferralShareSubject => 'انضم إليّ في هدهد للتوصيل';
+
+  @override
+  String growthReferralShareFallback(String amount, String code, String link) {
+    return 'احصل على $amount في هدهد للتوصيل باستخدام رمزي $code: $link';
+  }
+
+  @override
+  String get growthReferralInvited => 'المدعوون';
+
+  @override
+  String get growthReferralRewarded => 'تمت مكافأتهم';
+
+  @override
+  String get growthReferralPending => 'قيد الانتظار';
+
+  @override
+  String get growthReferralEarned => 'المكتسب';
+
+  @override
+  String get growthReorderButton => 'إعادة الطلب';
+
+  @override
+  String get growthReorderFailed =>
+      'تعذرت إعادة الطلب. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get growthReorderReplaceMessage =>
+      'تحتوي سلتك على منتجات من متجر آخر. هل تريد استبدالها بهذا الطلب؟';
+
+  @override
+  String get growthReorderUnavailableTitle => 'بعض المنتجات غير متوفرة';
+
+  @override
+  String get growthReorderNothingAvailable =>
+      'لا يتوفر أي من هذه المنتجات الآن';
+
+  @override
+  String get growthReorderContinue => 'المتابعة بالمنتجات المتوفرة';
+
+  @override
+  String get growthReorderReasonOutOfStock => 'نفد من المخزون';
+
+  @override
+  String get growthReorderReasonRemoved => 'لم يعد متاحًا للبيع';
+
+  @override
+  String get growthReorderReasonVendorClosed => 'المتجر مغلق';
+
+  @override
+  String get growthReorderReasonUnavailable => 'غير متوفر';
+
+  @override
+  String get growthOrderAgainTitle => 'اطلب مرة أخرى';
+
+  @override
+  String growthOrderAgainOrderLabel(String order) {
+    return 'الطلب #$order';
+  }
+
+  @override
+  String get growthSeeAll => 'عرض الكل';
+
+  @override
+  String get growthClosed => 'مغلق';
+
+  @override
+  String get growthCollectionFallbackTitle => 'مجموعة';
+
+  @override
+  String get growthStoreFallbackName => 'متجر';
 }

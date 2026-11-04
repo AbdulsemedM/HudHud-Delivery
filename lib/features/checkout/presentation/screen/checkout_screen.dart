@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../app/services/cart_service.dart';
@@ -6,6 +8,12 @@ import '../../../../app/services/saved_location_service.dart';
 import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/api/api_service.dart';
+import '../../../growth/data/growth_repository.dart';
+import '../../../growth/data/models/checkout_quote.dart';
+import '../../../growth/data/models/checkout_quote_request.dart';
+import '../../../growth/data/models/growth_config.dart';
+import '../../../growth/growth_scope.dart';
+import '../../../growth/presentation/widgets/checkout_growth_widgets.dart';
 import '../../../guest/data/branches_repository.dart';
 import '../../../home/presentation/screen/map_location_screen.dart';
 import '../../../payment/bloc/payment_bloc.dart';
@@ -63,6 +71,26 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   bool _quoteRetryable = false;
   int _quoteRequestId = 0;
 
+  // ── Phase 2 growth (server-priced checkout) ─────────────────────────────
+  // Everything below is inert unless GET /growth/config enables a feature.
+  final GrowthRepository _growthRepository = GrowthRepository.create();
+  CheckoutQuote? _growthQuote;
+  String? _growthQuoteKey;
+  int _growthQuoteRequestId = 0;
+  Timer? _growthQuoteDebounce;
+
+  /// True while a re-quote is scheduled or in flight; the previous quote
+  /// stays on screen meanwhile to avoid flicker.
+  bool _growthQuotePending = false;
+  String? _appliedPromoCode;
+  bool _promoApplying = false;
+  String? _promoMessage;
+  bool _promoMessageIsError = false;
+  bool _redeemPoints = false;
+
+  /// Points requested when the toggle is on (the server's max_redeemable).
+  int _redeemPointsAmount = 0;
+
   @override
   void initState() {
     super.initState();
@@ -76,6 +104,180 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         .toList();
     _branchId = _cart.selectedBranchId;
     _loadDeliveryAddress();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _applyPendingPromo());
+  }
+
+  GrowthConfig get _growth => growthConfigOf(context, listen: false);
+
+  bool _growthQuoteWasEnabled = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Listen to config so a late-loading config enables the quote.
+    final enabled = growthConfigOf(context).checkoutQuoteEnabled;
+    if (enabled && !_growthQuoteWasEnabled) {
+      _scheduleGrowthQuote(immediate: true);
+    }
+    _growthQuoteWasEnabled = enabled;
+  }
+
+  /// Server quote is shown only when it matches the current inputs.
+  CheckoutQuote? get _activeGrowthQuote {
+    final quote = _growthQuote;
+    if (quote == null || !_growth.checkoutQuoteEnabled) return null;
+    if (_growthQuotePending) return quote;
+    if (_growthQuoteKey != _currentGrowthRequest()?.cacheKey) return null;
+    return quote;
+  }
+
+  int? get _requestedRedeemPoints {
+    if (!_redeemPoints || !_growth.rewardsEnabled) return null;
+    return _redeemPointsAmount > 0 ? _redeemPointsAmount : null;
+  }
+
+  CheckoutQuoteRequest? _currentGrowthRequest() {
+    final vendorId = _vendorId;
+    final lat = _deliveryLatitude;
+    final lng = _deliveryLongitude;
+    if (vendorId == null || lat == null || lng == null) return null;
+    final items = _orderItems();
+    if (items.isEmpty) return null;
+    return CheckoutQuoteRequest(
+      vendorId: vendorId,
+      branchId: _branchId,
+      items: items,
+      deliveryAddress: _deliveryAddress.trim(),
+      deliveryLatitude: lat,
+      deliveryLongitude: lng,
+      couponCode: _growth.promoCodesEnabled ? _appliedPromoCode : null,
+      redeemPoints: _requestedRedeemPoints,
+    );
+  }
+
+  /// Debounced re-quote whenever cart, address, coupon or points change.
+  void _scheduleGrowthQuote({bool immediate = false}) {
+    _growthQuoteDebounce?.cancel();
+    if (!mounted || !_growth.checkoutQuoteEnabled) return;
+    _growthQuotePending = true;
+    _growthQuoteDebounce = Timer(
+      immediate ? Duration.zero : const Duration(milliseconds: 450),
+      _refreshGrowthQuote,
+    );
+  }
+
+  Future<void> _refreshGrowthQuote() async {
+    if (!mounted) return;
+    final request =
+        _growth.checkoutQuoteEnabled ? _currentGrowthRequest() : null;
+    if (request == null) {
+      setState(() => _growthQuotePending = false);
+      return;
+    }
+    final key = request.cacheKey;
+    if (_growthQuote != null && _growthQuoteKey == key) {
+      setState(() => _growthQuotePending = false);
+      return;
+    }
+    final requestId = ++_growthQuoteRequestId;
+    final quote = await _growthRepository.fetchCheckoutQuote(request);
+    if (!mounted || requestId != _growthQuoteRequestId) return;
+    // A newer change may have been scheduled while this was in flight.
+    final stillPending = _growthQuoteDebounce?.isActive ?? false;
+    if (quote == null) {
+      // Fall back to the client-side display.
+      setState(() {
+        _growthQuote = null;
+        _growthQuoteKey = null;
+        _growthQuotePending = stillPending;
+      });
+      return;
+    }
+    final coupon = quote.coupon;
+    final couponRejected =
+        coupon != null && !coupon.valid && _appliedPromoCode != null;
+    final invalidMessage = context.l10n.growthPromoInvalid;
+    setState(() {
+      _growthQuote = quote;
+      _growthQuoteKey = key;
+      _growthQuotePending = stillPending;
+      if (couponRejected) {
+        // Code became invalid (e.g. cart dropped below a minimum).
+        _promoMessage = coupon?.message ?? invalidMessage;
+        _promoMessageIsError = true;
+        _appliedPromoCode = null;
+      }
+    });
+    // Keep the requested points in step with what the server allows
+    // (max_redeemable does not depend on the request, so this settles).
+    final maxPoints = quote.points.maxRedeemable;
+    var pointsChanged = false;
+    if (_redeemPoints && maxPoints != _redeemPointsAmount) {
+      setState(() {
+        if (maxPoints <= 0) {
+          _redeemPoints = false;
+          _redeemPointsAmount = 0;
+        } else {
+          _redeemPointsAmount = maxPoints;
+        }
+      });
+      pointsChanged = true;
+    }
+    if (couponRejected || pointsChanged) _scheduleGrowthQuote(immediate: true);
+  }
+
+  void _applyPendingPromo() {
+    if (!mounted) return;
+    final controller = growthControllerOf(context);
+    if (controller == null || !controller.promoCodesEnabled) return;
+    final code = controller.takePendingPromoCode();
+    if (code != null) _applyPromo(code);
+  }
+
+  Future<void> _applyPromo(String code) async {
+    final trimmed = code.trim().toUpperCase();
+    if (trimmed.isEmpty || !_growth.promoCodesEnabled) return;
+    setState(() {
+      _promoApplying = true;
+      _promoMessage = null;
+    });
+    final result = await _growthRepository.previewPromo(
+      code: trimmed,
+      subtotal: _subtotal,
+      vendorId: _vendorId,
+    );
+    if (!mounted) return;
+    final l10n = context.l10n;
+    setState(() {
+      _promoApplying = false;
+      if (result.valid) {
+        _appliedPromoCode = result.code.toUpperCase();
+        _promoMessage = result.message ?? l10n.growthPromoApplied;
+        _promoMessageIsError = false;
+      } else {
+        _promoMessage = result.message ?? l10n.growthPromoInvalid;
+        _promoMessageIsError = true;
+      }
+    });
+    if (result.valid) _scheduleGrowthQuote(immediate: true);
+  }
+
+  void _removePromo() {
+    setState(() {
+      _appliedPromoCode = null;
+      _promoMessage = null;
+      _promoMessageIsError = false;
+    });
+    _scheduleGrowthQuote(immediate: true);
+  }
+
+  void _onRedeemPointsChanged(bool value) {
+    final max = _growthQuote?.points.maxRedeemable ?? 0;
+    setState(() {
+      _redeemPoints = value && max > 0;
+      _redeemPointsAmount = _redeemPoints ? max : 0;
+    });
+    _scheduleGrowthQuote(immediate: true);
   }
 
   String _productId(Map<String, dynamic> item) {
@@ -102,7 +304,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return quote.deliveryFee < 0 ? 0 : quote.deliveryFee;
   }
 
-  double get _total => _subtotal + _tipAmount + _quotedDeliveryFee;
+  double get _clientTotal => _subtotal + _tipAmount + _quotedDeliveryFee;
+
+  /// Display total. Uses the server quote when available (tip is not part
+  /// of the quote, so it is added on top), else the pre-Phase-2 math.
+  double get _total {
+    final quote = _activeGrowthQuote;
+    if (quote == null) return _clientTotal;
+    return quote.total + _tipAmount;
+  }
 
   bool get _hasValidQuote =>
       _deliveryFeeQuote != null &&
@@ -137,6 +347,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       _cartItems[index]['quantity'] = next;
       _syncSharedCart(productId, next);
     });
+    _scheduleGrowthQuote();
   }
 
   void _decrementItem(String productId) {
@@ -152,6 +363,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       _cartItems[index]['quantity'] = next;
       _syncSharedCart(productId, next);
     });
+    _scheduleGrowthQuote();
   }
 
   void _removeItem(String productId) {
@@ -164,7 +376,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         SnackBar(content: Text(context.l10n.cartEmpty)),
       );
       Navigator.of(context).pop();
+      return;
     }
+    _scheduleGrowthQuote();
   }
 
   Future<void> _loadDeliveryAddress() async {
@@ -319,6 +533,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         _quoteRetryable = false;
         _branchName = quote.restaurant?.name ?? _branchName;
       });
+      _scheduleGrowthQuote(immediate: true);
     } on DeliveryFeeQuoteException catch (e) {
       if (!mounted || requestId != _quoteRequestId) return;
       setState(() {
@@ -369,11 +584,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return null;
   }
 
-  // Phase-1: promo codes are not validated or applied server-side yet
-  // (orders are sent with 'discount_amount': 0.0), so the entry section is
-  // hidden and the old "promo applied" snackbar was removed to avoid
-  // misleading customers. Re-enable PromoCodeSection below once a backend
-  // validate/apply endpoint exists and the discount is reflected in totals.
+  // Phase 2: promo codes are shown only when GET /growth/config reports
+  // promo_codes.enabled. Codes are validated by POST /customer/growth/
+  // promo-preview and priced by POST /customer/checkout/quote; the order is
+  // sent with `coupon_code` and the server recomputes every discount.
 
   void _onChangeAddress() async {
     final Map<String, dynamic>? result =
@@ -443,30 +657,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       return;
     }
 
-    final List<Map<String, dynamic>> orderItems = _cartItems
-        .map((item) {
-          final productId =
-              item['productId'] ?? item['product_id'] ?? item['id'];
-          final quantity = item['quantity'] ?? 1;
-          final pid = productId is int
-              ? productId
-              : int.tryParse(productId.toString()) ?? 0;
-          final qty = quantity is int
-              ? quantity
-              : int.tryParse(quantity.toString()) ?? 1;
-          final variantRaw =
-              item['variant_id'] ?? item['variantId'] ?? item['variant'];
-          final variantId = variantRaw is int
-              ? variantRaw
-              : int.tryParse(variantRaw?.toString() ?? '');
-          return {
-            'product_id': pid,
-            'quantity': qty,
-            if (variantId != null && variantId > 0) 'variant_id': variantId,
-          };
-        })
-        .where((e) => (e['product_id'] as int) > 0)
-        .toList();
+    final List<Map<String, dynamic>> orderItems = _orderItems();
 
     if (orderItems.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -584,11 +775,46 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     : _notesController.text.trim(),
                 'subtotal': _subtotal,
                 // Comparison only — never trusted by the backend as fee authority.
-                'quoted_delivery_fee': _quotedDeliveryFee,
+                'quoted_delivery_fee': _activeGrowthQuote?.deliveryFee ??
+                    _quotedDeliveryFee,
+                // Phase 2 inputs; the server validates and prices them.
+                if (_growth.promoCodesEnabled && _appliedPromoCode != null)
+                  'coupon_code': _appliedPromoCode,
+                // Only when the toggle is visible (server quote present).
+                if (_requestedRedeemPoints != null &&
+                    _activeGrowthQuote != null)
+                  'redeem_points': _requestedRedeemPoints,
               },
             },
           ),
         );
+  }
+
+  List<Map<String, dynamic>> _orderItems() {
+    return _cartItems
+        .map((item) {
+          final productId =
+              item['productId'] ?? item['product_id'] ?? item['id'];
+          final quantity = item['quantity'] ?? 1;
+          final pid = productId is int
+              ? productId
+              : int.tryParse(productId.toString()) ?? 0;
+          final qty = quantity is int
+              ? quantity
+              : int.tryParse(quantity.toString()) ?? 1;
+          final variantRaw =
+              item['variant_id'] ?? item['variantId'] ?? item['variant'];
+          final variantId = variantRaw is int
+              ? variantRaw
+              : int.tryParse(variantRaw?.toString() ?? '');
+          return <String, dynamic>{
+            'product_id': pid,
+            'quantity': qty,
+            if (variantId != null && variantId > 0) 'variant_id': variantId,
+          };
+        })
+        .where((e) => (e['product_id'] as int) > 0)
+        .toList();
   }
 
   int get _itemCount {
@@ -598,8 +824,72 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
+  /// Promo / points / free-delivery widgets; all empty when features are off.
+  List<Widget> _growthSections(BuildContext context, GrowthConfig growth) {
+    final l10n = context.l10n;
+    final quote = _activeGrowthQuote;
+    final sections = <Widget>[];
+
+    if (growth.freeDeliveryEnabled && quote != null) {
+      final free = quote.freeDelivery;
+      if (free.showHint) {
+        sections.add(FreeDeliveryHint(
+          remainingLabel: _formatMoney(free.remaining),
+          progress: free.progress,
+        ));
+      } else if (free.enabled && free.applied) {
+        sections.add(const FreeDeliveryUnlockedBanner());
+      }
+    }
+
+    if (growth.promoCodesEnabled) {
+      sections.add(CheckoutSectionCard(
+        icon: Icons.local_offer_outlined,
+        title: l10n.growthPromoTitle,
+        subtitle: l10n.growthPromoSubtitle,
+        child: GrowthPromoCodeSection(
+          appliedCode: _appliedPromoCode,
+          applying: _promoApplying,
+          message: _promoMessage,
+          messageIsError: _promoMessageIsError,
+          onApply: _applyPromo,
+          onRemove: _removePromo,
+        ),
+      ));
+    }
+
+    // Points: shown when rewards are on and the server says some can be
+    // redeemed (balance ≥ minimum is enforced server-side via max_redeemable).
+    final points = _growthQuote?.points;
+    if (growth.rewardsEnabled &&
+        points != null &&
+        points.balance >= growth.rewardsMinRedeemPoints &&
+        points.maxRedeemable > 0) {
+      final redeemable = points.maxRedeemable;
+      final value = _redeemPoints && quote != null && quote.pointsDiscount > 0
+          ? quote.pointsDiscount
+          : pointsToEtb(
+              redeemable,
+              redeemPoints: growth.rewardsRedeemPoints,
+              redeemValue: growth.rewardsRedeemValue,
+            );
+      sections.add(Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: GrowthPointsToggle(
+          points: redeemable,
+          amountLabel: _formatMoney(value),
+          value: _redeemPoints,
+          onChanged: _onRedeemPointsChanged,
+        ),
+      ));
+    }
+    return sections;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final growth = growthConfigOf(context);
+    final growthQuote = _activeGrowthQuote;
     return BlocProvider(
       create: (context) => PaymentBloc(
         paymentRepository: PaymentRepository(
@@ -786,16 +1076,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           },
                         ),
                       ),
-                      // Promo code entry hidden for Phase-1 (see note above
-                      // _onChangeAddress). To restore, wire a real
-                      // validate/apply flow and re-add:
-                      // CheckoutSectionCard(
-                      //   icon: Icons.local_offer_outlined,
-                      //   title: 'Promo code',
-                      //   child: PromoCodeSection(
-                      //     onPromoCodeApplied: <apply handler>,
-                      //   ),
-                      // ),
+                      // Phase 2: promo code, points and free-delivery hint
+                      // (each hidden unless enabled by GET /growth/config).
+                      ..._growthSections(context, growth),
                       CheckoutSectionCard(
                         icon: Icons.account_balance_wallet_outlined,
                         title: 'Payment method',
@@ -835,12 +1118,19 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         icon: Icons.receipt_outlined,
                         title: 'Order summary',
                         child: OrderSummarySection(
-                          subtotal: _subtotal,
+                          subtotal: growthQuote?.subtotal ?? _subtotal,
                           tipAmount: _tipAmount,
                           total: _total,
-                          deliveryFee: _deliveryFeeQuote?.deliveryFee,
-                          formattedDeliveryFee:
-                              _deliveryFeeQuote?.formattedDeliveryFee,
+                          deliveryFee: growthQuote?.deliveryFee ??
+                              _deliveryFeeQuote?.deliveryFee,
+                          formattedDeliveryFee: growthQuote != null
+                              ? null
+                              : _deliveryFeeQuote?.formattedDeliveryFee,
+                          deliveryFeeBeforeDiscounts:
+                              growthQuote?.deliveryFeeBeforeDiscounts,
+                          couponDiscount: growthQuote?.couponDiscount ?? 0,
+                          couponCode: growthQuote?.coupon?.code,
+                          pointsDiscount: growthQuote?.pointsDiscount ?? 0,
                           currencyCode: _deliveryFeeQuote?.currency,
                           currencySymbol: _deliveryFeeQuote?.currencySymbol,
                           deliveryFeeLoading: _quoteLoading,
@@ -866,6 +1156,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   @override
   void dispose() {
+    _growthQuoteDebounce?.cancel();
     _notesController.dispose();
     super.dispose();
   }
