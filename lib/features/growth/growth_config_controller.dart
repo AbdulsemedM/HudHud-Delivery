@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 
 import 'data/growth_repository.dart';
 import 'data/models/growth_config.dart';
+import 'market_controller.dart';
 
 /// App-wide Phase 2 growth flags from `GET /api/growth/config`.
 ///
@@ -45,6 +46,7 @@ class GrowthConfigController extends ChangeNotifier
   bool get onTimeEnabled => _config.onTimeEnabled;
   bool get homeFeedEnabled => _config.homeFeedEnabled;
   bool get reorderEnabled => _config.loaded && _config.reorderEnabled;
+  bool get adsEnabled => _config.loaded && _config.adsEnabled;
 
   String? get pendingPromoCode => _pendingPromoCode;
 
@@ -83,7 +85,10 @@ class GrowthConfigController extends ChangeNotifier
 
   Future<void> _fetch() async {
     try {
-      final next = await _repo.fetchConfig();
+      // Phase 3: `?market=` only once a market is known (never on a
+      // pre-Phase-3 backend, so that request stays unchanged).
+      final market = MarketController.instance?.selectedCode;
+      final next = await _repo.fetchConfig(market: market);
       if (_disposed) return;
       _lastFetch = DateTime.now();
       // Keep the last good config when a refresh fails.

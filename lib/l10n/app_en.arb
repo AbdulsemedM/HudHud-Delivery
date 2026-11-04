@@ -1521,5 +1521,84 @@
   "growthSeeAll": "See all",
   "growthClosed": "Closed",
   "growthCollectionFallbackTitle": "Collection",
-  "growthStoreFallbackName": "Store"
+  "growthStoreFallbackName": "Store",
+  "p3Sponsored": "Sponsored",
+  "p3PlusTitle": "HudHud Plus",
+  "p3PlusBadge": "Plus",
+  "p3PlusTagline": "Free delivery and savings on every order.",
+  "p3PlusPricePerPeriod": "{price} / {days} days",
+  "@p3PlusPricePerPeriod": {
+    "placeholders": {
+      "price": {"type": "String"},
+      "days": {"type": "int"}
+    }
+  },
+  "p3PlusBenefitsTitle": "Your benefits",
+  "p3PlusBenefitFreeDelivery": "Free delivery on food and grocery orders over {amount}",
+  "@p3PlusBenefitFreeDelivery": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p3PlusBenefitFreeDeliveryAll": "Free delivery on food and grocery orders",
+  "p3PlusBenefitParcelDiscount": "{percent}% off parcel delivery",
+  "@p3PlusBenefitParcelDiscount": {
+    "placeholders": {
+      "percent": {"type": "String"}
+    }
+  },
+  "p3PlusSubscribe": "Join HudHud Plus",
+  "p3PlusCancel": "Cancel Plus",
+  "p3PlusResume": "Keep my Plus",
+  "p3PlusActive": "Your membership is active",
+  "p3PlusRenewsOn": "Renews on {date}",
+  "@p3PlusRenewsOn": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "p3PlusEndsOn": "Ends on {date} — you can keep it",
+  "@p3PlusEndsOn": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "p3PlusPastDue": "Renewal payment failed. Top up your wallet to keep Plus.",
+  "p3PlusSavings": "You saved about {amount} in the last 30 days",
+  "@p3PlusSavings": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p3PlusPaidFromWallet": "Paid from your HudHud wallet. Cancel anytime.",
+  "p3PlusSubscribed": "Welcome to HudHud Plus!",
+  "p3PlusCancelled": "Plus will end at the end of this period",
+  "p3PlusResumed": "Plus will keep renewing",
+  "p3PlusCancelConfirmTitle": "Cancel HudHud Plus?",
+  "p3PlusCancelConfirmMessage": "You keep your benefits until the end of this period.",
+  "p3PlusInsufficientTitle": "Not enough wallet balance",
+  "p3PlusInsufficientMessage": "Add {amount} to your wallet to join Plus.",
+  "@p3PlusInsufficientMessage": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p3PlusTopUp": "Top up wallet",
+  "p3PlusActionFailed": "Could not update Plus. Please try again.",
+  "p3PlusLoadError": "Could not load HudHud Plus.",
+  "p3PlusUnavailable": "HudHud Plus is not available right now.",
+  "p3PlusUpsell": "Get free delivery with HudHud Plus",
+  "p3PlusMenuJoin": "Get HudHud Plus",
+  "p3PlusMenuMember": "My HudHud Plus",
+  "p3QuotePlusFreeDelivery": "Plus: free delivery",
+  "p3MarketSettingTitle": "City",
+  "p3MarketPickerTitle": "Choose your city",
+  "p3MarketChanged": "City changed to {market}",
+  "@p3MarketChanged": {
+    "placeholders": {
+      "market": {"type": "String"}
+    }
+  },
+  "p3MarketChangeBlocked": "You can't change city while your wallet has a balance in another currency. Use or withdraw it first.",
+  "p3MarketChangeFailed": "Could not change city. Please try again."
 }

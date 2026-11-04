@@ -102,6 +102,13 @@ class NotificationTypes {
   static const referralReward = 'referral_reward';
 
   static const walletCreditTypes = {onTimeCredit, referralReward};
+
+  // Phase 3 HudHud Plus lifecycle (tap → Plus screen).
+  static const plusRenewed = 'plus_renewed';
+  static const plusPaymentFailed = 'plus_payment_failed';
+  static const plusExpired = 'plus_expired';
+
+  static const plusTypes = {plusRenewed, plusPaymentFailed, plusExpired};
 }
 
 class NotificationScreens {
@@ -169,6 +176,14 @@ bool isWalletCreditPayload(Map<String, String> data) {
   if (NotificationTypes.walletCreditTypes.contains(type)) return true;
   return NotificationTypes.walletCreditTypes
       .contains(normalizeEvent(data['event']));
+}
+
+/// Phase 3 Plus pushes (`plus_renewed`, `plus_payment_failed`,
+/// `plus_expired`), matched on `type` or `event`.
+bool isPlusPayload(Map<String, String> data) {
+  final type = normalizeEvent(data['type']);
+  if (NotificationTypes.plusTypes.contains(type)) return true;
+  return NotificationTypes.plusTypes.contains(normalizeEvent(data['event']));
 }
 
 bool isOtpRequiredPayload(Map<String, String> data) {

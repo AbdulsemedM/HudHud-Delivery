@@ -1569,5 +1569,84 @@
   "growthSeeAll": "Hunda ilaali",
   "growthClosed": "Cufaa",
   "growthCollectionFallbackTitle": "Walitti qabama",
-  "growthStoreFallbackName": "Suuqa"
+  "growthStoreFallbackName": "Suuqa",
+  "p3Sponsored": "Deeggarame",
+  "p3PlusTitle": "HudHud Plus",
+  "p3PlusBadge": "Plus",
+  "p3PlusTagline": "Ajaja hunda irratti geejjiba bilisaa fi qusannaa.",
+  "p3PlusPricePerPeriod": "{price} / guyyaa {days}",
+  "@p3PlusPricePerPeriod": {
+    "placeholders": {
+      "price": {"type": "String"},
+      "days": {"type": "int"}
+    }
+  },
+  "p3PlusBenefitsTitle": "Faayidaa kee",
+  "p3PlusBenefitFreeDelivery": "Ajajoota nyaataa fi meeshaalee {amount} ol ta'aniif geejjiba bilisaa",
+  "@p3PlusBenefitFreeDelivery": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p3PlusBenefitFreeDeliveryAll": "Ajajoota nyaataa fi meeshaaleetiif geejjiba bilisaa",
+  "p3PlusBenefitParcelDiscount": "Geejjiba paakeejii irratti {percent}% hir'isa",
+  "@p3PlusBenefitParcelDiscount": {
+    "placeholders": {
+      "percent": {"type": "String"}
+    }
+  },
+  "p3PlusSubscribe": "HudHud Plus makamaa",
+  "p3PlusCancel": "Plus haqi",
+  "p3PlusResume": "Plus koo itti fufi",
+  "p3PlusActive": "Miseensummaan kee hojii irra jira",
+  "p3PlusRenewsOn": "Guyyaa {date} haaromfama",
+  "@p3PlusRenewsOn": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "p3PlusEndsOn": "Guyyaa {date} xumurama — itti fufsiisuu dandeessa",
+  "@p3PlusEndsOn": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "p3PlusPastDue": "Kaffaltiin haaromsaa hin milkoofne. Plus itti fufsiisuuf waaletii kee guuti.",
+  "p3PlusSavings": "Guyyoota 30 darban keessatti gara {amount} qusatteetta",
+  "@p3PlusSavings": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p3PlusPaidFromWallet": "Waaletii HudHud kee irraa kaffalama. Yeroo barbaadde haquu dandeessa.",
+  "p3PlusSubscribed": "Baga gara HudHud Plus dhuftan!",
+  "p3PlusCancelled": "Plus xumura yeroo kanaa irratti dhaabbata",
+  "p3PlusResumed": "Plus haaromfamuu itti fufa",
+  "p3PlusCancelConfirmTitle": "HudHud Plus haqamuu?",
+  "p3PlusCancelConfirmMessage": "Hanga xumura yeroo kanaatti faayidaa kee ni qabaatta.",
+  "p3PlusInsufficientTitle": "Haftee waaletii gahaa hin jiru",
+  "p3PlusInsufficientMessage": "Plus makamuuf waaletii keetti {amount} dabali.",
+  "@p3PlusInsufficientMessage": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p3PlusTopUp": "Waaletii guuti",
+  "p3PlusActionFailed": "Plus haaromsuun hin danda'amne. Maaloo irra deebi'ii yaali.",
+  "p3PlusLoadError": "HudHud Plus fe'uu hin dandeenye.",
+  "p3PlusUnavailable": "HudHud Plus amma hin argamu.",
+  "p3PlusUpsell": "HudHud Plus waliin geejjiba bilisaa argadhu",
+  "p3PlusMenuJoin": "HudHud Plus argadhu",
+  "p3PlusMenuMember": "HudHud Plus koo",
+  "p3QuotePlusFreeDelivery": "Plus: geejjiba bilisaa",
+  "p3MarketSettingTitle": "Magaalaa",
+  "p3MarketPickerTitle": "Magaalaa kee filadhu",
+  "p3MarketChanged": "Magaalaan gara {market} jijjiirameera",
+  "@p3MarketChanged": {
+    "placeholders": {
+      "market": {"type": "String"}
+    }
+  },
+  "p3MarketChangeBlocked": "Yeroo waaletiin kee haftee maallaqa biraa qabutti magaalaa jijjiiruu hin dandeessu. Dura itti fayyadami ykn baasi.",
+  "p3MarketChangeFailed": "Magaalaa jijjiiruun hin danda'amne. Maaloo irra deebi'ii yaali."
 }

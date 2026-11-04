@@ -3490,4 +3490,135 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get growthStoreFallbackName => 'መደብር';
+
+  @override
+  String get p3Sponsored => 'ስፖንሰር የተደረገ';
+
+  @override
+  String get p3PlusTitle => 'ሁድሁድ ፕላስ';
+
+  @override
+  String get p3PlusBadge => 'ፕላስ';
+
+  @override
+  String get p3PlusTagline => 'በእያንዳንዱ ትዕዛዝ ነፃ ማድረሻ እና ቁጠባ።';
+
+  @override
+  String p3PlusPricePerPeriod(String price, int days) {
+    return '$price / $days ቀናት';
+  }
+
+  @override
+  String get p3PlusBenefitsTitle => 'የእርስዎ ጥቅሞች';
+
+  @override
+  String p3PlusBenefitFreeDelivery(String amount) {
+    return 'ከ$amount በላይ ለሆኑ የምግብና የሸቀጣሸቀጥ ትዕዛዞች ነፃ ማድረሻ';
+  }
+
+  @override
+  String get p3PlusBenefitFreeDeliveryAll => 'ለምግብና ለሸቀጣሸቀጥ ትዕዛዞች ነፃ ማድረሻ';
+
+  @override
+  String p3PlusBenefitParcelDiscount(String percent) {
+    return 'በጥቅል ማድረሻ ላይ $percent% ቅናሽ';
+  }
+
+  @override
+  String get p3PlusSubscribe => 'ሁድሁድ ፕላስን ይቀላቀሉ';
+
+  @override
+  String get p3PlusCancel => 'ፕላስን ሰርዝ';
+
+  @override
+  String get p3PlusResume => 'ፕላሴን ቀጥል';
+
+  @override
+  String get p3PlusActive => 'አባልነትዎ ንቁ ነው';
+
+  @override
+  String p3PlusRenewsOn(String date) {
+    return 'በ$date ይታደሳል';
+  }
+
+  @override
+  String p3PlusEndsOn(String date) {
+    return 'በ$date ያበቃል — ማቆየት ይችላሉ';
+  }
+
+  @override
+  String get p3PlusPastDue => 'የእድሳት ክፍያ አልተሳካም። ፕላስን ለማቆየት ዋሌትዎን ይሙሉ።';
+
+  @override
+  String p3PlusSavings(String amount) {
+    return 'ባለፉት 30 ቀናት ወደ $amount ገደማ ቆጥበዋል';
+  }
+
+  @override
+  String get p3PlusPaidFromWallet => 'ከሁድሁድ ዋሌትዎ ይከፈላል። በማንኛውም ጊዜ መሰረዝ ይችላሉ።';
+
+  @override
+  String get p3PlusSubscribed => 'ወደ ሁድሁድ ፕላስ እንኳን ደህና መጡ!';
+
+  @override
+  String get p3PlusCancelled => 'ፕላስ በዚህ ጊዜ መጨረሻ ያበቃል';
+
+  @override
+  String get p3PlusResumed => 'ፕላስ መታደሱን ይቀጥላል';
+
+  @override
+  String get p3PlusCancelConfirmTitle => 'ሁድሁድ ፕላስ ይሰረዝ?';
+
+  @override
+  String get p3PlusCancelConfirmMessage => 'ጥቅሞችዎ እስከዚህ ጊዜ መጨረሻ ድረስ ይቆያሉ።';
+
+  @override
+  String get p3PlusInsufficientTitle => 'በቂ የዋሌት ቀሪ ሂሳብ የለም';
+
+  @override
+  String p3PlusInsufficientMessage(String amount) {
+    return 'ፕላስን ለመቀላቀል $amount ወደ ዋሌትዎ ይጨምሩ።';
+  }
+
+  @override
+  String get p3PlusTopUp => 'ዋሌት ሙላ';
+
+  @override
+  String get p3PlusActionFailed => 'ፕላስን ማዘመን አልተቻለም። እባክዎ እንደገና ይሞክሩ።';
+
+  @override
+  String get p3PlusLoadError => 'ሁድሁድ ፕላስን መጫን አልተቻለም።';
+
+  @override
+  String get p3PlusUnavailable => 'ሁድሁድ ፕላስ አሁን አይገኝም።';
+
+  @override
+  String get p3PlusUpsell => 'በሁድሁድ ፕላስ ነፃ ማድረሻ ያግኙ';
+
+  @override
+  String get p3PlusMenuJoin => 'ሁድሁድ ፕላስ ያግኙ';
+
+  @override
+  String get p3PlusMenuMember => 'የእኔ ሁድሁድ ፕላስ';
+
+  @override
+  String get p3QuotePlusFreeDelivery => 'ፕላስ፦ ነፃ ማድረሻ';
+
+  @override
+  String get p3MarketSettingTitle => 'ከተማ';
+
+  @override
+  String get p3MarketPickerTitle => 'ከተማዎን ይምረጡ';
+
+  @override
+  String p3MarketChanged(String market) {
+    return 'ከተማ ወደ $market ተቀይሯል';
+  }
+
+  @override
+  String get p3MarketChangeBlocked =>
+      'ዋሌትዎ በሌላ ገንዘብ ቀሪ ሂሳብ እያለው ከተማ መቀየር አይችሉም። መጀመሪያ ይጠቀሙበት ወይም ያውጡት።';
+
+  @override
+  String get p3MarketChangeFailed => 'ከተማ መቀየር አልተቻለም። እባክዎ እንደገና ይሞክሩ።';
 }

@@ -1,15 +1,26 @@
 import 'growth_json.dart';
+import 'sponsored.dart';
 
 /// `GET /api/home/feed`
 class HomeFeed {
   final List<HomeFeedBanner> banners;
   final List<HomeFeedCollection> collections;
 
-  const HomeFeed({required this.banners, required this.collections});
+  /// Phase 3: sponsored vendors (present only when ads are enabled).
+  final List<SponsoredItem> sponsored;
+
+  const HomeFeed({
+    required this.banners,
+    required this.collections,
+    this.sponsored = const [],
+  });
 
   static const HomeFeed empty = HomeFeed(banners: [], collections: []);
 
-  bool get isEmpty => banners.isEmpty && collections.every((c) => c.items.isEmpty);
+  bool get isEmpty =>
+      banners.isEmpty &&
+      collections.every((c) => c.items.isEmpty) &&
+      sponsored.isEmpty;
 
   factory HomeFeed.fromJson(Map<String, dynamic> json) {
     final banners = growthList(json['banners'])
@@ -25,7 +36,14 @@ class HomeFeed {
         .map(HomeFeedCollection.fromJson)
         .where((c) => c.items.isNotEmpty)
         .toList();
-    return HomeFeed(banners: banners, collections: collections);
+    return HomeFeed(
+      banners: banners,
+      collections: collections,
+      sponsored: SponsoredItem.listFromJson(
+        json['sponsored'],
+        placement: SponsoredPlacement.home,
+      ),
+    );
   }
 }
 

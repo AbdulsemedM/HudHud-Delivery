@@ -6,9 +6,12 @@ import 'models/checkout_quote_request.dart';
 import 'models/growth_config.dart';
 import 'models/growth_json.dart';
 import 'models/home_feed.dart';
+import 'models/market.dart';
+import 'models/plus.dart';
 import 'models/referral_summary.dart';
 import 'models/reorder.dart';
 import 'models/rewards_summary.dart';
+import 'models/sponsored.dart';
 
 /// Error surfaced by growth calls; [message] is the server's text when given.
 class GrowthException implements Exception {
@@ -41,6 +44,34 @@ class PromoPreviewResult {
   });
 }
 
+/// Outcome of `PUT /api/customer/market`.
+class MarketChangeResult {
+  final bool ok;
+  final String? code;
+  final String? message;
+
+  const MarketChangeResult({required this.ok, this.code, this.message});
+
+  bool get isBlocked => code == 'MARKET_CHANGE_BLOCKED';
+}
+
+/// Outcome of a Plus subscribe / cancel / resume call.
+class PlusActionResult {
+  final bool ok;
+  final String? code;
+  final String? message;
+  final PlusInsufficientFunds? insufficientFunds;
+
+  const PlusActionResult({
+    required this.ok,
+    this.code,
+    this.message,
+    this.insufficientFunds,
+  });
+
+  bool get isInsufficientFunds => code == 'INSUFFICIENT_FUNDS';
+}
+
 /// Phase 2 growth API. All reads return safe fallbacks rather than throwing
 /// unless documented otherwise.
 class GrowthRepository {
@@ -58,8 +89,8 @@ class GrowthRepository {
   }
 
   /// Never throws. Returns [GrowthConfig.disabled] on any failure.
-  Future<GrowthConfig> fetchConfig() async {
-    final r = await dataProvider.getConfig();
+  Future<GrowthConfig> fetchConfig({String? market}) async {
+    final r = await dataProvider.getConfig(market: market);
     if (!_ok(r)) return GrowthConfig.disabled;
     return GrowthConfig.fromResponseBody(r['data']);
   }
@@ -165,5 +196,130 @@ class GrowthRepository {
       );
     }
     return result;
+  }
+
+  // ── Phase 3: markets ───────────────────────────────────────────────────
+
+  /// Never throws; empty on failure (pre-Phase-3 backend → single market).
+  Future<List<Market>> fetchMarkets() async {
+    final r = await dataProvider.getMarkets();
+    if (!_ok(r)) return const [];
+    try {
+      return Market.listFromResponseBody(r['data']);
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  /// Never throws; `null` when no market is within range or on failure.
+  Future<Market?> resolveMarket({
+    required double lat,
+    required double lng,
+  }) async {
+    final r = await dataProvider.getResolveMarket(lat: lat, lng: lng);
+    if (!_ok(r)) return null;
+    try {
+      return Market.tryParseResolveBody(r['data']);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Never throws.
+  Future<MarketChangeResult> updateCustomerMarket(String marketCode) async {
+    final r = await dataProvider.putCustomerMarket(marketCode);
+    final body = growthMap(r['data']);
+    if (_ok(r) && (body == null || body['success'] != false)) {
+      return const MarketChangeResult(ok: true);
+    }
+    return MarketChangeResult(
+      ok: false,
+      code: growthString(r['code']) ?? growthString(body?['code']),
+      message: growthString(r['errorMessage']) ??
+          growthString(body?['message']),
+    );
+  }
+
+  // ── Phase 3: HudHud Plus ───────────────────────────────────────────────
+
+  /// Never throws. [PlusStatus.disabled] on failure, so Plus stays hidden.
+  /// Customer-only endpoint: callers must skip it for guests.
+  Future<PlusStatus> fetchPlus() async {
+    final r = await dataProvider.getPlus();
+    if (!_ok(r)) return PlusStatus.disabled;
+    return PlusStatus.fromResponseBody(r['data']);
+  }
+
+  Future<PlusActionResult> subscribePlus() =>
+      _plusAction(dataProvider.postPlusSubscribe);
+
+  Future<PlusActionResult> cancelPlus() =>
+      _plusAction(dataProvider.postPlusCancel);
+
+  Future<PlusActionResult> resumePlus() =>
+      _plusAction(dataProvider.postPlusResume);
+
+  Future<PlusActionResult> _plusAction(
+    Future<Map<String, dynamic>> Function() call,
+  ) async {
+    final r = await call();
+    final body = growthMap(r['data']);
+    if (_ok(r) && (body == null || body['success'] != false)) {
+      return const PlusActionResult(ok: true);
+    }
+    final code = growthString(r['code']) ?? growthString(body?['code']);
+    return PlusActionResult(
+      ok: false,
+      code: code,
+      message: growthString(r['errorMessage']) ??
+          growthString(body?['message']),
+      insufficientFunds: code == 'INSUFFICIENT_FUNDS'
+          ? PlusInsufficientFunds.tryParse(body)
+          : null,
+    );
+  }
+
+  // ── Phase 3: sponsored listings ────────────────────────────────────────
+
+  /// Set after a 404 so an older backend is not asked again this session.
+  static bool _adsEndpointMissing = false;
+
+  /// Never throws; empty on failure or when ads are off.
+  Future<List<SponsoredItem>> fetchSponsored({
+    required String placement,
+    String? query,
+    double? lat,
+    double? lng,
+  }) async {
+    if (_adsEndpointMissing) return const [];
+    final r = await dataProvider.getSponsored(
+      placement: placement,
+      query: query,
+      lat: lat,
+      lng: lng,
+    );
+    if (r['statusCode'] == 404) _adsEndpointMissing = true;
+    if (!_ok(r)) return const [];
+    try {
+      return SponsoredItem.listFromResponseBody(
+        r['data'],
+        placement: placement,
+      );
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  /// Fire-and-forget click report. Never throws; callers must not await it
+  /// before navigating.
+  Future<void> trackAdClick(SponsoredItem item) async {
+    if (item.adId <= 0) return;
+    try {
+      await dataProvider.postAdClick(
+        adId: item.adId,
+        impressionToken: item.impressionToken,
+        placement: item.placement,
+      );
+    } catch (_) {}
   }
 }

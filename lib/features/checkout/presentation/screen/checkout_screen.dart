@@ -13,7 +13,12 @@ import '../../../growth/data/models/checkout_quote.dart';
 import '../../../growth/data/models/checkout_quote_request.dart';
 import '../../../growth/data/models/growth_config.dart';
 import '../../../growth/growth_scope.dart';
+import '../../../growth/market_controller.dart';
+import '../../../growth/plus_controller.dart';
+import '../../../growth/presentation/screens/plus_screen.dart';
 import '../../../growth/presentation/widgets/checkout_growth_widgets.dart';
+import '../../../growth/presentation/widgets/plus_widgets.dart';
+import '../../../../core/utils/money_format.dart';
 import '../../../guest/data/branches_repository.dart';
 import '../../../home/presentation/screen/map_location_screen.dart';
 import '../../../payment/bloc/payment_bloc.dart';
@@ -105,6 +110,59 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     _branchId = _cart.selectedBranchId;
     _loadDeliveryAddress();
     WidgetsBinding.instance.addPostFrameCallback((_) => _applyPendingPromo());
+    // Phase 3: Plus status for the upsell (hidden unless the server enables it).
+    PlusController.instance.addListener(_onPlusChanged);
+    unawaited(PlusController.instance.refresh());
+  }
+
+  /// Server quote is used when a Phase 2 feature is on, or (Phase 3) when
+  /// the customer is a Plus member so the Plus free delivery is shown.
+  bool get _quoteEnabled {
+    final growth = _growth;
+    if (growth.checkoutQuoteEnabled) return true;
+    return growth.loaded && PlusController.instance.status.isMember;
+  }
+
+  void _onPlusChanged() {
+    if (!mounted) return;
+    final enabled = _quoteEnabled;
+    if (enabled && !_growthQuoteWasEnabled) {
+      _scheduleGrowthQuote(immediate: true);
+    }
+    _growthQuoteWasEnabled = enabled;
+    setState(() {});
+  }
+
+  /// Phase 3: show "Get free delivery with HudHud Plus" to non-members.
+  bool get _showPlusUpsell {
+    final plus = PlusController.instance.status;
+    if (!plus.available || plus.isMember) return false;
+    final quote = _activeGrowthQuote;
+    return quote == null || !quote.plusApplied;
+  }
+
+  Future<void> _openPlus() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const PlusScreen()),
+    );
+    if (!mounted) return;
+    await PlusController.instance.refresh(force: true);
+    if (!mounted) return;
+    // Membership may have changed the delivery fee: force a fresh quote.
+    _growthQuoteKey = null;
+    _scheduleGrowthQuote(immediate: true);
+  }
+
+  /// Phase 3 display currency: server quote → delivery-fee quote → market.
+  /// Null (= ETB, unchanged output) when nothing says otherwise.
+  String? get _displayCurrency {
+    final growthCurrency = _activeGrowthQuote?.currency.trim();
+    if (growthCurrency != null && growthCurrency.isNotEmpty) {
+      return growthCurrency;
+    }
+    final feeCurrency = _deliveryFeeQuote?.currency.trim();
+    if (feeCurrency != null && feeCurrency.isNotEmpty) return feeCurrency;
+    return MarketController.instance?.selected?.currency;
   }
 
   GrowthConfig get _growth => growthConfigOf(context, listen: false);
@@ -115,7 +173,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     // Listen to config so a late-loading config enables the quote.
-    final enabled = growthConfigOf(context).checkoutQuoteEnabled;
+    growthConfigOf(context);
+    final enabled = _quoteEnabled;
     if (enabled && !_growthQuoteWasEnabled) {
       _scheduleGrowthQuote(immediate: true);
     }
@@ -125,7 +184,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   /// Server quote is shown only when it matches the current inputs.
   CheckoutQuote? get _activeGrowthQuote {
     final quote = _growthQuote;
-    if (quote == null || !_growth.checkoutQuoteEnabled) return null;
+    if (quote == null || !_quoteEnabled) return null;
     if (_growthQuotePending) return quote;
     if (_growthQuoteKey != _currentGrowthRequest()?.cacheKey) return null;
     return quote;
@@ -158,7 +217,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   /// Debounced re-quote whenever cart, address, coupon or points change.
   void _scheduleGrowthQuote({bool immediate = false}) {
     _growthQuoteDebounce?.cancel();
-    if (!mounted || !_growth.checkoutQuoteEnabled) return;
+    if (!mounted || !_quoteEnabled) return;
     _growthQuotePending = true;
     _growthQuoteDebounce = Timer(
       immediate ? Duration.zero : const Duration(milliseconds: 450),
@@ -169,7 +228,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   Future<void> _refreshGrowthQuote() async {
     if (!mounted) return;
     final request =
-        _growth.checkoutQuoteEnabled ? _currentGrowthRequest() : null;
+        _quoteEnabled ? _currentGrowthRequest() : null;
     if (request == null) {
       setState(() => _growthQuotePending = false);
       return;
@@ -330,7 +389,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     if (code != null && code.isNotEmpty) {
       return '$code ${amount.toStringAsFixed(2)}';
     }
-    return 'ETB ${amount.toStringAsFixed(2)}';
+    // ETB / unknown → identical to the previous 'ETB x.xx'.
+    return formatMoneyAmount(amount, currency: _displayCurrency);
   }
 
   void _syncSharedCart(String productId, int quantity) {
@@ -842,6 +902,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       }
     }
 
+    if (_showPlusUpsell) {
+      sections.add(PlusUpsellBanner(onTap: _openPlus));
+    }
+
     if (growth.promoCodesEnabled) {
       sections.add(CheckoutSectionCard(
         icon: Icons.local_offer_outlined,
@@ -939,6 +1003,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     ? 'Calculating…'
                     : (!_hasValidQuote ? 'Waiting for fee' : null),
                 onConfirm: () => _onConfirmOrder(blocContext),
+                currency: _displayCurrency,
               );
             },
           ),
@@ -1017,6 +1082,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   child: CheckoutHeroHeader(
                     itemCount: _itemCount,
                     subtotal: _subtotal,
+                    currency: _displayCurrency,
                   ),
                 ),
                 SliverPadding(
@@ -1041,6 +1107,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               onIncrement: () => _incrementItem(productId),
                               onDecrement: () => _decrementItem(productId),
                               onRemove: () => _removeItem(productId),
+                              currency: _displayCurrency,
                             );
                           }).toList(),
                         ),
@@ -1071,6 +1138,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         accentColor: AppColors.secondaryColor,
                         child: TipSection(
                           currentTip: _tipAmount,
+                          currency: _displayCurrency,
                           onTipChanged: (value) {
                             setState(() => _tipAmount = value);
                           },
@@ -1131,7 +1199,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           couponDiscount: growthQuote?.couponDiscount ?? 0,
                           couponCode: growthQuote?.coupon?.code,
                           pointsDiscount: growthQuote?.pointsDiscount ?? 0,
-                          currencyCode: _deliveryFeeQuote?.currency,
+                          plusFreeDelivery: growthQuote?.plusApplied ?? false,
+                          currencyCode:
+                              _deliveryFeeQuote?.currency.trim().isNotEmpty ==
+                                      true
+                                  ? _deliveryFeeQuote!.currency
+                                  : growthQuote?.currency,
                           currencySymbol: _deliveryFeeQuote?.currencySymbol,
                           deliveryFeeLoading: _quoteLoading,
                           deliveryFeeError: _quoteError,
@@ -1157,6 +1230,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   @override
   void dispose() {
     _growthQuoteDebounce?.cancel();
+    PlusController.instance.removeListener(_onPlusChanged);
     _notesController.dispose();
     super.dispose();
   }

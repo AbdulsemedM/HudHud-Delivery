@@ -52,8 +52,15 @@ class GrowthDataProvider {
 
   String _url(String path) => '${ApiConstants.baseUrl}$path';
 
-  Future<Map<String, dynamic>> getConfig() =>
-      _wrap(() => apiService.get(_url(ApiConstants.growthConfig)));
+  /// [market] (Phase 3) adds `?market=`; omitted when null/empty so the
+  /// request is byte-for-byte the Phase 2 one.
+  Future<Map<String, dynamic>> getConfig({String? market}) => _wrap(
+        () => apiService.get(
+          _url(ApiConstants.growthConfig),
+          queryParameters:
+              market == null || market.isEmpty ? null : {'market': market},
+        ),
+      );
 
   Future<Map<String, dynamic>> getHomeFeed({String? serviceType}) => _wrap(
         () => apiService.get(
@@ -109,6 +116,75 @@ class GrowthDataProvider {
               {'id': orderId},
             ),
           ),
+        ),
+      );
+
+  // ── Phase 3 ────────────────────────────────────────────────────────────
+
+  Future<Map<String, dynamic>> getMarkets() =>
+      _wrap(() => apiService.get(_url(ApiConstants.markets)));
+
+  Future<Map<String, dynamic>> getResolveMarket({
+    required double lat,
+    required double lng,
+  }) =>
+      _wrap(
+        () => apiService.get(
+          _url(ApiConstants.marketsResolve),
+          queryParameters: {'lat': lat, 'lng': lng},
+        ),
+      );
+
+  Future<Map<String, dynamic>> putCustomerMarket(String marketCode) => _wrap(
+        () => apiService.put(
+          _url(ApiConstants.customerMarket),
+          data: {'market_code': marketCode},
+        ),
+      );
+
+  Future<Map<String, dynamic>> getPlus() =>
+      _wrap(() => apiService.get(_url(ApiConstants.customerPlus)));
+
+  Future<Map<String, dynamic>> postPlusSubscribe() =>
+      _wrap(() => apiService.post(_url(ApiConstants.customerPlusSubscribe)));
+
+  Future<Map<String, dynamic>> postPlusCancel() =>
+      _wrap(() => apiService.post(_url(ApiConstants.customerPlusCancel)));
+
+  Future<Map<String, dynamic>> postPlusResume() =>
+      _wrap(() => apiService.post(_url(ApiConstants.customerPlusResume)));
+
+  Future<Map<String, dynamic>> getSponsored({
+    required String placement,
+    String? query,
+    double? lat,
+    double? lng,
+  }) =>
+      _wrap(
+        () => apiService.get(
+          _url(ApiConstants.adsSponsored),
+          queryParameters: {
+            'placement': placement,
+            if (query != null && query.isNotEmpty) 'q': query,
+            if (lat != null && lng != null) 'lat': lat,
+            if (lat != null && lng != null) 'lng': lng,
+          },
+        ),
+      );
+
+  Future<Map<String, dynamic>> postAdClick({
+    required int adId,
+    required String impressionToken,
+    required String placement,
+  }) =>
+      _wrap(
+        () => apiService.post(
+          _url(ApiConstants.adsClick),
+          data: {
+            'ad_id': adId,
+            'impression_token': impressionToken,
+            'placement': placement,
+          },
         ),
       );
 }

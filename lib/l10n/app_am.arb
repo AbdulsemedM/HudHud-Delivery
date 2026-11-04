@@ -1576,5 +1576,84 @@
   "growthSeeAll": "ሁሉንም ይመልከቱ",
   "growthClosed": "ዝግ",
   "growthCollectionFallbackTitle": "ስብስብ",
-  "growthStoreFallbackName": "መደብር"
+  "growthStoreFallbackName": "መደብር",
+  "p3Sponsored": "ስፖንሰር የተደረገ",
+  "p3PlusTitle": "ሁድሁድ ፕላስ",
+  "p3PlusBadge": "ፕላስ",
+  "p3PlusTagline": "በእያንዳንዱ ትዕዛዝ ነፃ ማድረሻ እና ቁጠባ።",
+  "p3PlusPricePerPeriod": "{price} / {days} ቀናት",
+  "@p3PlusPricePerPeriod": {
+    "placeholders": {
+      "price": {"type": "String"},
+      "days": {"type": "int"}
+    }
+  },
+  "p3PlusBenefitsTitle": "የእርስዎ ጥቅሞች",
+  "p3PlusBenefitFreeDelivery": "ከ{amount} በላይ ለሆኑ የምግብና የሸቀጣሸቀጥ ትዕዛዞች ነፃ ማድረሻ",
+  "@p3PlusBenefitFreeDelivery": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p3PlusBenefitFreeDeliveryAll": "ለምግብና ለሸቀጣሸቀጥ ትዕዛዞች ነፃ ማድረሻ",
+  "p3PlusBenefitParcelDiscount": "በጥቅል ማድረሻ ላይ {percent}% ቅናሽ",
+  "@p3PlusBenefitParcelDiscount": {
+    "placeholders": {
+      "percent": {"type": "String"}
+    }
+  },
+  "p3PlusSubscribe": "ሁድሁድ ፕላስን ይቀላቀሉ",
+  "p3PlusCancel": "ፕላስን ሰርዝ",
+  "p3PlusResume": "ፕላሴን ቀጥል",
+  "p3PlusActive": "አባልነትዎ ንቁ ነው",
+  "p3PlusRenewsOn": "በ{date} ይታደሳል",
+  "@p3PlusRenewsOn": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "p3PlusEndsOn": "በ{date} ያበቃል — ማቆየት ይችላሉ",
+  "@p3PlusEndsOn": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "p3PlusPastDue": "የእድሳት ክፍያ አልተሳካም። ፕላስን ለማቆየት ዋሌትዎን ይሙሉ።",
+  "p3PlusSavings": "ባለፉት 30 ቀናት ወደ {amount} ገደማ ቆጥበዋል",
+  "@p3PlusSavings": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p3PlusPaidFromWallet": "ከሁድሁድ ዋሌትዎ ይከፈላል። በማንኛውም ጊዜ መሰረዝ ይችላሉ።",
+  "p3PlusSubscribed": "ወደ ሁድሁድ ፕላስ እንኳን ደህና መጡ!",
+  "p3PlusCancelled": "ፕላስ በዚህ ጊዜ መጨረሻ ያበቃል",
+  "p3PlusResumed": "ፕላስ መታደሱን ይቀጥላል",
+  "p3PlusCancelConfirmTitle": "ሁድሁድ ፕላስ ይሰረዝ?",
+  "p3PlusCancelConfirmMessage": "ጥቅሞችዎ እስከዚህ ጊዜ መጨረሻ ድረስ ይቆያሉ።",
+  "p3PlusInsufficientTitle": "በቂ የዋሌት ቀሪ ሂሳብ የለም",
+  "p3PlusInsufficientMessage": "ፕላስን ለመቀላቀል {amount} ወደ ዋሌትዎ ይጨምሩ።",
+  "@p3PlusInsufficientMessage": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p3PlusTopUp": "ዋሌት ሙላ",
+  "p3PlusActionFailed": "ፕላስን ማዘመን አልተቻለም። እባክዎ እንደገና ይሞክሩ።",
+  "p3PlusLoadError": "ሁድሁድ ፕላስን መጫን አልተቻለም።",
+  "p3PlusUnavailable": "ሁድሁድ ፕላስ አሁን አይገኝም።",
+  "p3PlusUpsell": "በሁድሁድ ፕላስ ነፃ ማድረሻ ያግኙ",
+  "p3PlusMenuJoin": "ሁድሁድ ፕላስ ያግኙ",
+  "p3PlusMenuMember": "የእኔ ሁድሁድ ፕላስ",
+  "p3QuotePlusFreeDelivery": "ፕላስ፦ ነፃ ማድረሻ",
+  "p3MarketSettingTitle": "ከተማ",
+  "p3MarketPickerTitle": "ከተማዎን ይምረጡ",
+  "p3MarketChanged": "ከተማ ወደ {market} ተቀይሯል",
+  "@p3MarketChanged": {
+    "placeholders": {
+      "market": {"type": "String"}
+    }
+  },
+  "p3MarketChangeBlocked": "ዋሌትዎ በሌላ ገንዘብ ቀሪ ሂሳብ እያለው ከተማ መቀየር አይችሉም። መጀመሪያ ይጠቀሙበት ወይም ያውጡት።",
+  "p3MarketChangeFailed": "ከተማ መቀየር አልተቻለም። እባክዎ እንደገና ይሞክሩ።"
 }

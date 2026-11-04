@@ -3526,4 +3526,139 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get growthStoreFallbackName => 'متجر';
+
+  @override
+  String get p3Sponsored => 'إعلان ممول';
+
+  @override
+  String get p3PlusTitle => 'هدهد بلس';
+
+  @override
+  String get p3PlusBadge => 'بلس';
+
+  @override
+  String get p3PlusTagline => 'توصيل مجاني وتوفير مع كل طلب.';
+
+  @override
+  String p3PlusPricePerPeriod(String price, int days) {
+    return '$price / $days يومًا';
+  }
+
+  @override
+  String get p3PlusBenefitsTitle => 'مزاياك';
+
+  @override
+  String p3PlusBenefitFreeDelivery(String amount) {
+    return 'توصيل مجاني لطلبات الطعام والبقالة فوق $amount';
+  }
+
+  @override
+  String get p3PlusBenefitFreeDeliveryAll =>
+      'توصيل مجاني لطلبات الطعام والبقالة';
+
+  @override
+  String p3PlusBenefitParcelDiscount(String percent) {
+    return 'خصم $percent% على توصيل الطرود';
+  }
+
+  @override
+  String get p3PlusSubscribe => 'اشترك في هدهد بلس';
+
+  @override
+  String get p3PlusCancel => 'إلغاء بلس';
+
+  @override
+  String get p3PlusResume => 'الاحتفاظ ببلس';
+
+  @override
+  String get p3PlusActive => 'اشتراكك نشط';
+
+  @override
+  String p3PlusRenewsOn(String date) {
+    return 'يتجدد في $date';
+  }
+
+  @override
+  String p3PlusEndsOn(String date) {
+    return 'ينتهي في $date — يمكنك الاحتفاظ به';
+  }
+
+  @override
+  String get p3PlusPastDue => 'فشل دفع التجديد. اشحن محفظتك للاحتفاظ ببلس.';
+
+  @override
+  String p3PlusSavings(String amount) {
+    return 'وفرت حوالي $amount خلال آخر 30 يومًا';
+  }
+
+  @override
+  String get p3PlusPaidFromWallet =>
+      'يُدفع من محفظة هدهد. يمكنك الإلغاء في أي وقت.';
+
+  @override
+  String get p3PlusSubscribed => 'مرحبًا بك في هدهد بلس!';
+
+  @override
+  String get p3PlusCancelled => 'سينتهي بلس في نهاية هذه الفترة';
+
+  @override
+  String get p3PlusResumed => 'سيستمر تجديد بلس';
+
+  @override
+  String get p3PlusCancelConfirmTitle => 'إلغاء هدهد بلس؟';
+
+  @override
+  String get p3PlusCancelConfirmMessage =>
+      'ستحتفظ بمزاياك حتى نهاية هذه الفترة.';
+
+  @override
+  String get p3PlusInsufficientTitle => 'رصيد المحفظة غير كافٍ';
+
+  @override
+  String p3PlusInsufficientMessage(String amount) {
+    return 'أضف $amount إلى محفظتك للاشتراك في بلس.';
+  }
+
+  @override
+  String get p3PlusTopUp => 'شحن المحفظة';
+
+  @override
+  String get p3PlusActionFailed => 'تعذر تحديث بلس. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get p3PlusLoadError => 'تعذر تحميل هدهد بلس.';
+
+  @override
+  String get p3PlusUnavailable => 'هدهد بلس غير متاح حاليًا.';
+
+  @override
+  String get p3PlusUpsell => 'احصل على توصيل مجاني مع هدهد بلس';
+
+  @override
+  String get p3PlusMenuJoin => 'احصل على هدهد بلس';
+
+  @override
+  String get p3PlusMenuMember => 'هدهد بلس الخاص بي';
+
+  @override
+  String get p3QuotePlusFreeDelivery => 'بلس: توصيل مجاني';
+
+  @override
+  String get p3MarketSettingTitle => 'المدينة';
+
+  @override
+  String get p3MarketPickerTitle => 'اختر مدينتك';
+
+  @override
+  String p3MarketChanged(String market) {
+    return 'تم تغيير المدينة إلى $market';
+  }
+
+  @override
+  String get p3MarketChangeBlocked =>
+      'لا يمكنك تغيير المدينة ومحفظتك تحتوي على رصيد بعملة أخرى. استخدمه أو اسحبه أولًا.';
+
+  @override
+  String get p3MarketChangeFailed =>
+      'تعذر تغيير المدينة. يرجى المحاولة مرة أخرى.';
 }

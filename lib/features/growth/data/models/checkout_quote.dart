@@ -1,4 +1,5 @@
 import 'growth_json.dart';
+import 'plus.dart';
 
 /// Server-side price breakdown from `POST /api/customer/checkout/quote`.
 ///
@@ -13,6 +14,9 @@ class CheckoutQuote {
   final double total;
   final String currency;
 
+  /// Phase 3: `{"member":bool,"applied":bool}`; null when absent.
+  final CheckoutQuotePlus? plus;
+
   const CheckoutQuote({
     required this.subtotal,
     required this.deliveryFee,
@@ -22,7 +26,11 @@ class CheckoutQuote {
     required this.points,
     required this.total,
     required this.currency,
+    this.plus,
   });
+
+  /// HudHud Plus made the delivery free on this quote.
+  bool get plusApplied => plus != null && plus!.applied;
 
   /// Delivery fee was reduced (free delivery, coupon or points).
   bool get deliveryFeeDiscounted =>
@@ -59,6 +67,9 @@ class CheckoutQuote {
       ),
       total: growthDouble(json['total']),
       currency: growthString(json['currency']) ?? 'ETB',
+      plus: growthMap(json['plus']) == null
+          ? null
+          : CheckoutQuotePlus.fromJson(growthMap(json['plus'])!),
     );
   }
 

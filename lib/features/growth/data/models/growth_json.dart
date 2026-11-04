@@ -65,3 +65,26 @@ Map<String, dynamic>? growthEnvelopeData(dynamic body) {
   if (root.containsKey('success') && root['success'] != true) return null;
   return growthMap(root['data']);
 }
+
+/// Unwraps a `{success, data: [...]}` envelope whose `data` is a list.
+/// Also accepts `data: {items|markets: [...]}`. Returns `null` when the
+/// payload is not a successful envelope with list data.
+List<dynamic>? growthEnvelopeList(dynamic body, {String key = 'items'}) {
+  final root = growthMap(body);
+  if (root == null) return null;
+  if (root.containsKey('success') && root['success'] != true) return null;
+  final data = root['data'];
+  if (data is List) return data;
+  final map = growthMap(data);
+  if (map == null) return null;
+  final nested = map[key];
+  if (nested is List) return nested;
+  return null;
+}
+
+/// Reads an ISO-8601 timestamp; `null` when absent or unparseable.
+DateTime? growthDateTime(dynamic value) {
+  final s = growthString(value);
+  if (s == null) return null;
+  return DateTime.tryParse(s);
+}

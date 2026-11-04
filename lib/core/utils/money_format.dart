@@ -31,3 +31,32 @@ String formatEtbPriceString(
   }
   return compactSign ? 'Br $cleaned' : 'ETB $cleaned';
 }
+
+/// Upper-cased ISO currency code, or `null` when blank.
+String? normalizeCurrencyCode(String? currency) {
+  final c = currency?.trim().toUpperCase();
+  if (c == null || c.isEmpty) return null;
+  return c;
+}
+
+/// True for ETB or an unknown (blank) currency — the pre-Phase-3 default.
+bool isEtbCurrency(String? currency) {
+  final c = normalizeCurrencyCode(currency);
+  return c == null || c == 'ETB';
+}
+
+/// Formats [amount] in [currency] (Phase 3 multi-market).
+///
+/// ETB / blank produces exactly [formatEtbAmount]'s output, so existing
+/// Addis Ababa screens render unchanged. Other currencies use the code as a
+/// prefix: `USD 12.50`.
+String formatMoneyAmount(
+  num amount, {
+  String? currency,
+  int fractionDigits = 2,
+}) {
+  if (isEtbCurrency(currency)) {
+    return formatEtbAmount(amount, fractionDigits: fractionDigits);
+  }
+  return '${normalizeCurrencyCode(currency)} ${amount.toStringAsFixed(fractionDigits)}';
+}

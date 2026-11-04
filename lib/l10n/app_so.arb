@@ -1569,5 +1569,84 @@
   "growthSeeAll": "Arag dhammaan",
   "growthClosed": "Xiran",
   "growthCollectionFallbackTitle": "Ururin",
-  "growthStoreFallbackName": "Dukaan"
+  "growthStoreFallbackName": "Dukaan",
+  "p3Sponsored": "La kafaalaqaaday",
+  "p3PlusTitle": "HudHud Plus",
+  "p3PlusBadge": "Plus",
+  "p3PlusTagline": "Gaarsiin bilaash ah iyo dhimis dalab kasta.",
+  "p3PlusPricePerPeriod": "{price} / {days} maalmood",
+  "@p3PlusPricePerPeriod": {
+    "placeholders": {
+      "price": {"type": "String"},
+      "days": {"type": "int"}
+    }
+  },
+  "p3PlusBenefitsTitle": "Faa'iidooyinkaaga",
+  "p3PlusBenefitFreeDelivery": "Gaarsiin bilaash ah dalabyada cuntada iyo raashinka ee ka badan {amount}",
+  "@p3PlusBenefitFreeDelivery": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p3PlusBenefitFreeDeliveryAll": "Gaarsiin bilaash ah dalabyada cuntada iyo raashinka",
+  "p3PlusBenefitParcelDiscount": "{percent}% dhimis gaarsiinta xirmooyinka",
+  "@p3PlusBenefitParcelDiscount": {
+    "placeholders": {
+      "percent": {"type": "String"}
+    }
+  },
+  "p3PlusSubscribe": "Ku biir HudHud Plus",
+  "p3PlusCancel": "Jooji Plus",
+  "p3PlusResume": "Sii hay Plus-kayga",
+  "p3PlusActive": "Xubinnimadaadu waa firfircoon tahay",
+  "p3PlusRenewsOn": "Waxay cusboonaanaysaa {date}",
+  "@p3PlusRenewsOn": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "p3PlusEndsOn": "Wuxuu dhamaanayaa {date} — waad sii hayn kartaa",
+  "@p3PlusEndsOn": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "p3PlusPastDue": "Lacag bixinta cusboonaysiinta way fashilantay. Ku shubo jeebkaaga si aad u sii haysato Plus.",
+  "p3PlusSavings": "Waxaad badbaadisay qiyaastii {amount} 30-kii maalmood ee la soo dhaafay",
+  "@p3PlusSavings": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p3PlusPaidFromWallet": "Waxaa laga bixiyaa jeebkaaga HudHud. Jooji wakhti kasta.",
+  "p3PlusSubscribed": "Ku soo dhowow HudHud Plus!",
+  "p3PlusCancelled": "Plus wuxuu dhamaanayaa dhammaadka muddadan",
+  "p3PlusResumed": "Plus wuu sii cusboonaanayaa",
+  "p3PlusCancelConfirmTitle": "Ma joojinaysaa HudHud Plus?",
+  "p3PlusCancelConfirmMessage": "Faa'iidooyinkaaga waad haysanaysaa ilaa dhammaadka muddadan.",
+  "p3PlusInsufficientTitle": "Haraaga jeebka kuma filna",
+  "p3PlusInsufficientMessage": "Ku dar {amount} jeebkaaga si aad ugu biirto Plus.",
+  "@p3PlusInsufficientMessage": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p3PlusTopUp": "Ku shubo jeebka",
+  "p3PlusActionFailed": "Lama cusboonaysiin karin Plus. Fadlan isku day mar kale.",
+  "p3PlusLoadError": "Lama soo rari karin HudHud Plus.",
+  "p3PlusUnavailable": "HudHud Plus hadda lama heli karo.",
+  "p3PlusUpsell": "Hel gaarsiin bilaash ah adigoo isticmaalaya HudHud Plus",
+  "p3PlusMenuJoin": "Hel HudHud Plus",
+  "p3PlusMenuMember": "HudHud Plus-kayga",
+  "p3QuotePlusFreeDelivery": "Plus: gaarsiin bilaash ah",
+  "p3MarketSettingTitle": "Magaalada",
+  "p3MarketPickerTitle": "Dooro magaaladaada",
+  "p3MarketChanged": "Magaalada waxaa loo beddelay {market}",
+  "@p3MarketChanged": {
+    "placeholders": {
+      "market": {"type": "String"}
+    }
+  },
+  "p3MarketChangeBlocked": "Ma beddeli kartid magaalada inta jeebkaagu haysto haraa lacag kale ah. Marka hore isticmaal ama la bax.",
+  "p3MarketChangeFailed": "Lama beddeli karin magaalada. Fadlan isku day mar kale."
 }

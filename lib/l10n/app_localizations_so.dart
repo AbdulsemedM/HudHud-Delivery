@@ -3577,4 +3577,142 @@ class AppLocalizationsSo extends AppLocalizations {
 
   @override
   String get growthStoreFallbackName => 'Dukaan';
+
+  @override
+  String get p3Sponsored => 'La kafaalaqaaday';
+
+  @override
+  String get p3PlusTitle => 'HudHud Plus';
+
+  @override
+  String get p3PlusBadge => 'Plus';
+
+  @override
+  String get p3PlusTagline => 'Gaarsiin bilaash ah iyo dhimis dalab kasta.';
+
+  @override
+  String p3PlusPricePerPeriod(String price, int days) {
+    return '$price / $days maalmood';
+  }
+
+  @override
+  String get p3PlusBenefitsTitle => 'Faa\'iidooyinkaaga';
+
+  @override
+  String p3PlusBenefitFreeDelivery(String amount) {
+    return 'Gaarsiin bilaash ah dalabyada cuntada iyo raashinka ee ka badan $amount';
+  }
+
+  @override
+  String get p3PlusBenefitFreeDeliveryAll =>
+      'Gaarsiin bilaash ah dalabyada cuntada iyo raashinka';
+
+  @override
+  String p3PlusBenefitParcelDiscount(String percent) {
+    return '$percent% dhimis gaarsiinta xirmooyinka';
+  }
+
+  @override
+  String get p3PlusSubscribe => 'Ku biir HudHud Plus';
+
+  @override
+  String get p3PlusCancel => 'Jooji Plus';
+
+  @override
+  String get p3PlusResume => 'Sii hay Plus-kayga';
+
+  @override
+  String get p3PlusActive => 'Xubinnimadaadu waa firfircoon tahay';
+
+  @override
+  String p3PlusRenewsOn(String date) {
+    return 'Waxay cusboonaanaysaa $date';
+  }
+
+  @override
+  String p3PlusEndsOn(String date) {
+    return 'Wuxuu dhamaanayaa $date — waad sii hayn kartaa';
+  }
+
+  @override
+  String get p3PlusPastDue =>
+      'Lacag bixinta cusboonaysiinta way fashilantay. Ku shubo jeebkaaga si aad u sii haysato Plus.';
+
+  @override
+  String p3PlusSavings(String amount) {
+    return 'Waxaad badbaadisay qiyaastii $amount 30-kii maalmood ee la soo dhaafay';
+  }
+
+  @override
+  String get p3PlusPaidFromWallet =>
+      'Waxaa laga bixiyaa jeebkaaga HudHud. Jooji wakhti kasta.';
+
+  @override
+  String get p3PlusSubscribed => 'Ku soo dhowow HudHud Plus!';
+
+  @override
+  String get p3PlusCancelled => 'Plus wuxuu dhamaanayaa dhammaadka muddadan';
+
+  @override
+  String get p3PlusResumed => 'Plus wuu sii cusboonaanayaa';
+
+  @override
+  String get p3PlusCancelConfirmTitle => 'Ma joojinaysaa HudHud Plus?';
+
+  @override
+  String get p3PlusCancelConfirmMessage =>
+      'Faa\'iidooyinkaaga waad haysanaysaa ilaa dhammaadka muddadan.';
+
+  @override
+  String get p3PlusInsufficientTitle => 'Haraaga jeebka kuma filna';
+
+  @override
+  String p3PlusInsufficientMessage(String amount) {
+    return 'Ku dar $amount jeebkaaga si aad ugu biirto Plus.';
+  }
+
+  @override
+  String get p3PlusTopUp => 'Ku shubo jeebka';
+
+  @override
+  String get p3PlusActionFailed =>
+      'Lama cusboonaysiin karin Plus. Fadlan isku day mar kale.';
+
+  @override
+  String get p3PlusLoadError => 'Lama soo rari karin HudHud Plus.';
+
+  @override
+  String get p3PlusUnavailable => 'HudHud Plus hadda lama heli karo.';
+
+  @override
+  String get p3PlusUpsell =>
+      'Hel gaarsiin bilaash ah adigoo isticmaalaya HudHud Plus';
+
+  @override
+  String get p3PlusMenuJoin => 'Hel HudHud Plus';
+
+  @override
+  String get p3PlusMenuMember => 'HudHud Plus-kayga';
+
+  @override
+  String get p3QuotePlusFreeDelivery => 'Plus: gaarsiin bilaash ah';
+
+  @override
+  String get p3MarketSettingTitle => 'Magaalada';
+
+  @override
+  String get p3MarketPickerTitle => 'Dooro magaaladaada';
+
+  @override
+  String p3MarketChanged(String market) {
+    return 'Magaalada waxaa loo beddelay $market';
+  }
+
+  @override
+  String get p3MarketChangeBlocked =>
+      'Ma beddeli kartid magaalada inta jeebkaagu haysto haraa lacag kale ah. Marka hore isticmaal ama la bax.';
+
+  @override
+  String get p3MarketChangeFailed =>
+      'Lama beddeli karin magaalada. Fadlan isku day mar kale.';
 }

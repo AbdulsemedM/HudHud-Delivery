@@ -28,6 +28,7 @@ import 'core/easy_mode/easy_mode_controller.dart';
 import 'core/easy_mode/voice_hint_service.dart';
 import 'features/growth/deep_link_service.dart';
 import 'features/growth/growth_config_controller.dart';
+import 'features/growth/market_controller.dart';
 
 // Services
 import 'app/services/fcm_service.dart';
@@ -193,6 +194,11 @@ class _MyAppState extends State<MyApp> {
         // Phase 2 growth flags; everything stays hidden until this loads.
         ChangeNotifierProvider(
           create: (_) => GrowthConfigController()..start(),
+          lazy: false,
+        ),
+        // Phase 3 markets; no market (= Addis/ETB, unchanged) until loaded.
+        ChangeNotifierProvider(
+          create: (_) => MarketController()..start(),
           lazy: false,
         ),
         Provider<OrdersRepository>.value(value: widget.ordersRepository),

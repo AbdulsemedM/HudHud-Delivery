@@ -2,16 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/money_format.dart';
 import '../../../payment/presentation/widgets/payment_widgets.dart';
 
 class CheckoutHeroHeader extends StatelessWidget {
   final int itemCount;
   final double subtotal;
 
+  /// Phase 3 market currency; null/ETB keeps the original `ETB x.xx`.
+  final String? currency;
+
   const CheckoutHeroHeader({
     super.key,
     required this.itemCount,
     required this.subtotal,
+    this.currency,
   });
 
   @override
@@ -80,7 +85,7 @@ class CheckoutHeroHeader extends StatelessWidget {
                 ),
                 _HeroStat(
                   icon: Icons.payments_outlined,
-                  label: 'ETB ${subtotal.toStringAsFixed(2)}',
+                  label: formatMoneyAmount(subtotal, currency: currency),
                 ),
               ],
             ),
@@ -225,6 +230,9 @@ class CheckoutProductCard extends StatelessWidget {
   final VoidCallback? onDecrement;
   final VoidCallback? onRemove;
 
+  /// Phase 3 market currency; null/ETB keeps the original output.
+  final String? currency;
+
   const CheckoutProductCard({
     super.key,
     required this.productId,
@@ -235,6 +243,7 @@ class CheckoutProductCard extends StatelessWidget {
     this.onIncrement,
     this.onDecrement,
     this.onRemove,
+    this.currency,
   });
 
   @override
@@ -299,14 +308,14 @@ class CheckoutProductCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'ETB ${price.toStringAsFixed(2)} each',
+                      '${formatMoneyAmount(price, currency: currency)} each',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: scheme.onSurfaceVariant,
                           ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'ETB ${lineTotal.toStringAsFixed(2)}',
+                      formatMoneyAmount(lineTotal, currency: currency),
                       style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
@@ -651,10 +660,14 @@ class TipSection extends StatefulWidget {
   final Function(double) onTipChanged;
   final double currentTip;
 
+  /// Phase 3 market currency; null/ETB keeps the original output.
+  final String? currency;
+
   const TipSection({
     super.key,
     required this.onTipChanged,
     required this.currentTip,
+    this.currency,
   });
 
   @override
@@ -702,7 +715,11 @@ class _TipSectionState extends State<TipSection> {
                 (tip) => Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: _TipChip(
-                    label: 'ETB ${tip.toStringAsFixed(0)}',
+                    label: formatMoneyAmount(
+                      tip,
+                      currency: widget.currency,
+                      fractionDigits: 0,
+                    ),
                     selected: _selectedTip == tip,
                     onTap: () => _selectTip(tip),
                   ),
@@ -723,7 +740,7 @@ class _TipSectionState extends State<TipSection> {
             hintStyle: TextStyle(color: scheme.onSurfaceVariant),
             filled: true,
             fillColor: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
-            prefixText: 'ETB ',
+            prefixText: '${normalizeCurrencyCode(widget.currency) ?? 'ETB'} ',
             suffixIcon: IconButton(
               icon: const Icon(Icons.check_circle_outline),
               color: AppColors.primaryColor,
@@ -814,6 +831,9 @@ class OrderSummarySection extends StatelessWidget {
   final String? couponCode;
   final double pointsDiscount;
 
+  /// Phase 3: the quote's `plus.applied` — label the free delivery as Plus.
+  final bool plusFreeDelivery;
+
   const OrderSummarySection({
     super.key,
     required this.subtotal,
@@ -832,6 +852,7 @@ class OrderSummarySection extends StatelessWidget {
     this.couponDiscount = 0,
     this.couponCode,
     this.pointsDiscount = 0,
+    this.plusFreeDelivery = false,
   });
 
   bool get _deliveryFeeStruck =>
@@ -848,7 +869,7 @@ class OrderSummarySection extends StatelessWidget {
     if (code != null && code.isNotEmpty) {
       return '$code ${amount.toStringAsFixed(2)}';
     }
-    return 'ETB ${amount.toStringAsFixed(2)}';
+    return formatMoneyAmount(amount);
   }
 
   @override
@@ -920,7 +941,9 @@ class OrderSummarySection extends StatelessWidget {
             )
           else if (_deliveryFeeStruck)
             _SummaryRow(
-              label: context.l10n.growthDeliveryFeeLabel,
+              label: plusFreeDelivery
+                  ? context.l10n.p3QuotePlusFreeDelivery
+                  : context.l10n.growthDeliveryFeeLabel,
               amountLabel: deliveryFee! <= 0.009
                   ? context.l10n.growthFree
                   : _formatAmount(deliveryFee!),
@@ -929,7 +952,9 @@ class OrderSummarySection extends StatelessWidget {
             )
           else
             _SummaryRow(
-              label: 'Delivery fee',
+              label: plusFreeDelivery
+                  ? context.l10n.p3QuotePlusFreeDelivery
+                  : 'Delivery fee',
               amountLabel: formattedDeliveryFee?.isNotEmpty == true
                   ? formattedDeliveryFee!
                   : (deliveryFee != null
@@ -1247,6 +1272,9 @@ class CheckoutBottomBar extends StatelessWidget {
   final String? confirmLabel;
   final VoidCallback onConfirm;
 
+  /// Phase 3 market currency for the fallback label; null/ETB unchanged.
+  final String? currency;
+
   const CheckoutBottomBar({
     super.key,
     required this.total,
@@ -1255,6 +1283,7 @@ class CheckoutBottomBar extends StatelessWidget {
     this.enabled = true,
     this.totalLabel,
     this.confirmLabel,
+    this.currency,
   });
 
   @override
@@ -1290,7 +1319,7 @@ class CheckoutBottomBar extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    totalLabel ?? 'ETB ${total.toStringAsFixed(2)}',
+                    totalLabel ?? formatMoneyAmount(total, currency: currency),
                     style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w800,

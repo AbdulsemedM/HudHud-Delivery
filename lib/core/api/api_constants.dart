@@ -129,6 +129,26 @@ class ApiConstants {
   /// POST /api/customer/orders/{id}/reorder
   static const String customerOrderReorder = 'customer/orders/{id}/reorder';
 
+  // Phase 3 endpoints (see phase-3 contract §0, §5, §6).
+  /// GET /api/markets — public list of active markets.
+  static const String markets = 'markets';
+  /// GET /api/markets/resolve?lat=&lng= — nearest active market or null.
+  static const String marketsResolve = 'markets/resolve';
+  /// PUT /api/customer/market {market_code}
+  static const String customerMarket = 'customer/market';
+  /// GET /api/customer/plus — HudHud Plus status.
+  static const String customerPlus = 'customer/plus';
+  /// POST /api/customer/plus/subscribe
+  static const String customerPlusSubscribe = 'customer/plus/subscribe';
+  /// POST /api/customer/plus/cancel
+  static const String customerPlusCancel = 'customer/plus/cancel';
+  /// POST /api/customer/plus/resume
+  static const String customerPlusResume = 'customer/plus/resume';
+  /// GET /api/ads/sponsored?placement=home|search&q=&lat=&lng=
+  static const String adsSponsored = 'ads/sponsored';
+  /// POST /api/ads/click {ad_id, impression_token, placement}
+  static const String adsClick = 'ads/click';
+
   // Delivery endpoints
   static const String delivery = '/delivery';
   static const String trackOrder = '$delivery/track/{orderId}';

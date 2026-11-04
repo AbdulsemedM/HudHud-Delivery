@@ -20,6 +20,7 @@ import 'package:hudhud_delivery/features/growth/data/models/home_feed.dart';
 import 'package:hudhud_delivery/features/growth/data/models/reorder.dart';
 import 'package:hudhud_delivery/features/growth/growth_scope.dart';
 import 'package:hudhud_delivery/features/growth/presentation/widgets/home_feed_widgets.dart';
+import 'package:hudhud_delivery/features/growth/presentation/widgets/sponsored_widgets.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/features/orders/data/models/vendor_model.dart';
 import 'package:hudhud_delivery/features/products/data/products_data_provider.dart';
@@ -121,6 +122,12 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
           banners: _homeFeed.banners,
           collections: _homeFeed.collections,
         ),
+      ));
+    }
+    // Phase 3: sponsored vendors (the feed only sends them when ads are on).
+    if (feedOn && _homeFeed.sponsored.isNotEmpty) {
+      slivers.add(SliverToBoxAdapter(
+        child: SponsoredVendorRow(items: _homeFeed.sponsored),
       ));
     }
     if (reorderOn && _reorderSuggestions.isNotEmpty) {

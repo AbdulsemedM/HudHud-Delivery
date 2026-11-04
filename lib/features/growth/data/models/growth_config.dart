@@ -29,6 +29,16 @@ class GrowthConfig {
   /// `reorder.enabled` key from the server wins if it is ever added.
   final bool reorderEnabled;
 
+  /// Phase 3: `"market":{"code","currency"}` when the server resolved one
+  /// (from `?market=` or the signed-in user). Null otherwise.
+  final String? marketCode;
+  final String? marketCurrency;
+
+  /// Phase 3 sponsored listings. There is no config flag in the contract;
+  /// an explicit `ads.enabled` key wins if the server ever sends one.
+  /// Sponsored items still only appear when the server returns them.
+  final bool adsEnabled;
+
   const GrowthConfig({
     required this.loaded,
     this.currency = 'ETB',
@@ -47,6 +57,9 @@ class GrowthConfig {
     this.onTimeGraceMinutes = 0,
     this.homeFeedEnabled = false,
     this.reorderEnabled = false,
+    this.marketCode,
+    this.marketCurrency,
+    this.adsEnabled = false,
   });
 
   static const GrowthConfig disabled = GrowthConfig(loaded: false);
@@ -64,6 +77,8 @@ class GrowthConfig {
     final onTime = growthMap(json['on_time']) ?? const {};
     final feed = growthMap(json['home_feed']) ?? const {};
     final reorder = growthMap(json['reorder']);
+    final market = growthMap(json['market']);
+    final ads = growthMap(json['ads']);
 
     final redeemPoints = growthInt(rewards['redeem_points'], 100);
     return GrowthConfig(
@@ -85,6 +100,9 @@ class GrowthConfig {
       homeFeedEnabled: growthBool(feed['enabled']),
       reorderEnabled:
           reorder == null ? true : growthBool(reorder['enabled'], true),
+      marketCode: growthString(market?['code'])?.toLowerCase(),
+      marketCurrency: growthString(market?['currency'])?.toUpperCase(),
+      adsEnabled: ads == null ? true : growthBool(ads['enabled'], true),
     );
   }
 

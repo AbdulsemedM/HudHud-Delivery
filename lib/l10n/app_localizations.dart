@@ -6650,6 +6650,234 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Store'**
   String get growthStoreFallbackName;
+
+  /// No description provided for @p3Sponsored.
+  ///
+  /// In en, this message translates to:
+  /// **'Sponsored'**
+  String get p3Sponsored;
+
+  /// No description provided for @p3PlusTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'HudHud Plus'**
+  String get p3PlusTitle;
+
+  /// No description provided for @p3PlusBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Plus'**
+  String get p3PlusBadge;
+
+  /// No description provided for @p3PlusTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Free delivery and savings on every order.'**
+  String get p3PlusTagline;
+
+  /// No description provided for @p3PlusPricePerPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'{price} / {days} days'**
+  String p3PlusPricePerPeriod(String price, int days);
+
+  /// No description provided for @p3PlusBenefitsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your benefits'**
+  String get p3PlusBenefitsTitle;
+
+  /// No description provided for @p3PlusBenefitFreeDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Free delivery on food and grocery orders over {amount}'**
+  String p3PlusBenefitFreeDelivery(String amount);
+
+  /// No description provided for @p3PlusBenefitFreeDeliveryAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Free delivery on food and grocery orders'**
+  String get p3PlusBenefitFreeDeliveryAll;
+
+  /// No description provided for @p3PlusBenefitParcelDiscount.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% off parcel delivery'**
+  String p3PlusBenefitParcelDiscount(String percent);
+
+  /// No description provided for @p3PlusSubscribe.
+  ///
+  /// In en, this message translates to:
+  /// **'Join HudHud Plus'**
+  String get p3PlusSubscribe;
+
+  /// No description provided for @p3PlusCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Plus'**
+  String get p3PlusCancel;
+
+  /// No description provided for @p3PlusResume.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep my Plus'**
+  String get p3PlusResume;
+
+  /// No description provided for @p3PlusActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Your membership is active'**
+  String get p3PlusActive;
+
+  /// No description provided for @p3PlusRenewsOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Renews on {date}'**
+  String p3PlusRenewsOn(String date);
+
+  /// No description provided for @p3PlusEndsOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Ends on {date} — you can keep it'**
+  String p3PlusEndsOn(String date);
+
+  /// No description provided for @p3PlusPastDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Renewal payment failed. Top up your wallet to keep Plus.'**
+  String get p3PlusPastDue;
+
+  /// No description provided for @p3PlusSavings.
+  ///
+  /// In en, this message translates to:
+  /// **'You saved about {amount} in the last 30 days'**
+  String p3PlusSavings(String amount);
+
+  /// No description provided for @p3PlusPaidFromWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid from your HudHud wallet. Cancel anytime.'**
+  String get p3PlusPaidFromWallet;
+
+  /// No description provided for @p3PlusSubscribed.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to HudHud Plus!'**
+  String get p3PlusSubscribed;
+
+  /// No description provided for @p3PlusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Plus will end at the end of this period'**
+  String get p3PlusCancelled;
+
+  /// No description provided for @p3PlusResumed.
+  ///
+  /// In en, this message translates to:
+  /// **'Plus will keep renewing'**
+  String get p3PlusResumed;
+
+  /// No description provided for @p3PlusCancelConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel HudHud Plus?'**
+  String get p3PlusCancelConfirmTitle;
+
+  /// No description provided for @p3PlusCancelConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You keep your benefits until the end of this period.'**
+  String get p3PlusCancelConfirmMessage;
+
+  /// No description provided for @p3PlusInsufficientTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough wallet balance'**
+  String get p3PlusInsufficientTitle;
+
+  /// No description provided for @p3PlusInsufficientMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {amount} to your wallet to join Plus.'**
+  String p3PlusInsufficientMessage(String amount);
+
+  /// No description provided for @p3PlusTopUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Top up wallet'**
+  String get p3PlusTopUp;
+
+  /// No description provided for @p3PlusActionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update Plus. Please try again.'**
+  String get p3PlusActionFailed;
+
+  /// No description provided for @p3PlusLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load HudHud Plus.'**
+  String get p3PlusLoadError;
+
+  /// No description provided for @p3PlusUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'HudHud Plus is not available right now.'**
+  String get p3PlusUnavailable;
+
+  /// No description provided for @p3PlusUpsell.
+  ///
+  /// In en, this message translates to:
+  /// **'Get free delivery with HudHud Plus'**
+  String get p3PlusUpsell;
+
+  /// No description provided for @p3PlusMenuJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Get HudHud Plus'**
+  String get p3PlusMenuJoin;
+
+  /// No description provided for @p3PlusMenuMember.
+  ///
+  /// In en, this message translates to:
+  /// **'My HudHud Plus'**
+  String get p3PlusMenuMember;
+
+  /// No description provided for @p3QuotePlusFreeDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Plus: free delivery'**
+  String get p3QuotePlusFreeDelivery;
+
+  /// No description provided for @p3MarketSettingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get p3MarketSettingTitle;
+
+  /// No description provided for @p3MarketPickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your city'**
+  String get p3MarketPickerTitle;
+
+  /// No description provided for @p3MarketChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'City changed to {market}'**
+  String p3MarketChanged(String market);
+
+  /// No description provided for @p3MarketChangeBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'You can\'t change city while your wallet has a balance in another currency. Use or withdraw it first.'**
+  String get p3MarketChangeBlocked;
+
+  /// No description provided for @p3MarketChangeFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not change city. Please try again.'**
+  String get p3MarketChangeFailed;
 }
 
 class _AppLocalizationsDelegate

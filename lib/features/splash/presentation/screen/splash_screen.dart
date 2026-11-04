@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
@@ -7,6 +9,7 @@ import 'package:hudhud_delivery/app/services/startup_location_service.dart';
 import 'package:hudhud_delivery/features/dashboard/presentation/screen/dashboard_screen.dart';
 import 'package:hudhud_delivery/features/force_update/presentation/screen/force_update_screen.dart';
 import 'package:hudhud_delivery/features/force_update/presentation/widgets/soft_update_dialog.dart';
+import 'package:hudhud_delivery/features/growth/market_controller.dart';
 import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
 import 'package:hudhud_delivery/features/login/presentation/screen/phone_enrollment_screen.dart';
 import 'package:hudhud_delivery/features/login/utils/phone_enrollment_gate.dart';
@@ -77,6 +80,14 @@ class _SplashScreenState extends State<SplashScreen>
       ]);
     } catch (_) {
       // Continue even if auth/location/remote-config init fails.
+    }
+    // Phase 3: pick the market from the startup GPS fix (no-op when the
+    // backend has no markets or the user chose one in Settings).
+    final marketController = MarketController.instance;
+    if (marketController != null) {
+      unawaited(
+        marketController.onStartupLocation(StartupLocationService.cached),
+      );
     }
 
     await Future.delayed(const Duration(seconds: 3));

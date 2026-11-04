@@ -3543,4 +3543,139 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get growthStoreFallbackName => 'Store';
+
+  @override
+  String get p3Sponsored => 'Sponsored';
+
+  @override
+  String get p3PlusTitle => 'HudHud Plus';
+
+  @override
+  String get p3PlusBadge => 'Plus';
+
+  @override
+  String get p3PlusTagline => 'Free delivery and savings on every order.';
+
+  @override
+  String p3PlusPricePerPeriod(String price, int days) {
+    return '$price / $days days';
+  }
+
+  @override
+  String get p3PlusBenefitsTitle => 'Your benefits';
+
+  @override
+  String p3PlusBenefitFreeDelivery(String amount) {
+    return 'Free delivery on food and grocery orders over $amount';
+  }
+
+  @override
+  String get p3PlusBenefitFreeDeliveryAll =>
+      'Free delivery on food and grocery orders';
+
+  @override
+  String p3PlusBenefitParcelDiscount(String percent) {
+    return '$percent% off parcel delivery';
+  }
+
+  @override
+  String get p3PlusSubscribe => 'Join HudHud Plus';
+
+  @override
+  String get p3PlusCancel => 'Cancel Plus';
+
+  @override
+  String get p3PlusResume => 'Keep my Plus';
+
+  @override
+  String get p3PlusActive => 'Your membership is active';
+
+  @override
+  String p3PlusRenewsOn(String date) {
+    return 'Renews on $date';
+  }
+
+  @override
+  String p3PlusEndsOn(String date) {
+    return 'Ends on $date — you can keep it';
+  }
+
+  @override
+  String get p3PlusPastDue =>
+      'Renewal payment failed. Top up your wallet to keep Plus.';
+
+  @override
+  String p3PlusSavings(String amount) {
+    return 'You saved about $amount in the last 30 days';
+  }
+
+  @override
+  String get p3PlusPaidFromWallet =>
+      'Paid from your HudHud wallet. Cancel anytime.';
+
+  @override
+  String get p3PlusSubscribed => 'Welcome to HudHud Plus!';
+
+  @override
+  String get p3PlusCancelled => 'Plus will end at the end of this period';
+
+  @override
+  String get p3PlusResumed => 'Plus will keep renewing';
+
+  @override
+  String get p3PlusCancelConfirmTitle => 'Cancel HudHud Plus?';
+
+  @override
+  String get p3PlusCancelConfirmMessage =>
+      'You keep your benefits until the end of this period.';
+
+  @override
+  String get p3PlusInsufficientTitle => 'Not enough wallet balance';
+
+  @override
+  String p3PlusInsufficientMessage(String amount) {
+    return 'Add $amount to your wallet to join Plus.';
+  }
+
+  @override
+  String get p3PlusTopUp => 'Top up wallet';
+
+  @override
+  String get p3PlusActionFailed => 'Could not update Plus. Please try again.';
+
+  @override
+  String get p3PlusLoadError => 'Could not load HudHud Plus.';
+
+  @override
+  String get p3PlusUnavailable => 'HudHud Plus is not available right now.';
+
+  @override
+  String get p3PlusUpsell => 'Get free delivery with HudHud Plus';
+
+  @override
+  String get p3PlusMenuJoin => 'Get HudHud Plus';
+
+  @override
+  String get p3PlusMenuMember => 'My HudHud Plus';
+
+  @override
+  String get p3QuotePlusFreeDelivery => 'Plus: free delivery';
+
+  @override
+  String get p3MarketSettingTitle => 'City';
+
+  @override
+  String get p3MarketPickerTitle => 'Choose your city';
+
+  @override
+  String p3MarketChanged(String market) {
+    return 'City changed to $market';
+  }
+
+  @override
+  String get p3MarketChangeBlocked =>
+      'You can\'t change city while your wallet has a balance in another currency. Use or withdraw it first.';
+
+  @override
+  String get p3MarketChangeFailed => 'Could not change city. Please try again.';
 }
