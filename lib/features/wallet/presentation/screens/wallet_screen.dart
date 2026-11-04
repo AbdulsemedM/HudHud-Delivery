@@ -12,6 +12,7 @@ import 'package:hudhud_delivery/features/wallet/data/models/wallet_transaction_m
 import 'package:intl/intl.dart';
 import 'package:hudhud_delivery/features/wallet/data/providers/wallet_data_provider.dart';
 import 'package:hudhud_delivery/features/wallet/data/repositories/wallet_repository.dart';
+import 'package:hudhud_delivery/features/wallet/services/wallet_refresh_signal.dart';
 import 'package:hudhud_delivery/features/wallet/services/wallet_topup_recovery_service.dart';
 import 'wallet_topup_page.dart';
 import 'withdraw_funds_screen.dart';
@@ -120,11 +121,13 @@ class _WalletContentState extends State<_WalletContent> {
   void initState() {
     super.initState();
     WalletTopUpRecoveryService.instance.addListener(_onRecoveryChanged);
+    WalletRefreshSignal.changes.addListener(_refreshAfterMutation);
   }
 
   @override
   void dispose() {
     WalletTopUpRecoveryService.instance.removeListener(_onRecoveryChanged);
+    WalletRefreshSignal.changes.removeListener(_refreshAfterMutation);
     super.dispose();
   }
 
@@ -144,6 +147,17 @@ class _WalletContentState extends State<_WalletContent> {
               DateTime.tryParse(t.createdAt!) ?? DateTime.now(),
             )
           : '-';
+      if (t.isRefund) {
+        return TransactionItem(
+          date: date.toUpperCase(),
+          amount: t.amount ?? '0',
+          type: l10n.p5WalletRefundLabel,
+          currency: t.currency ?? defaultCurrency,
+          isCredit: true,
+          isRefund: true,
+          detail: t.description,
+        );
+      }
       return TransactionItem(
         date: date.toUpperCase(),
         amount: t.amount ?? '0',
@@ -151,6 +165,7 @@ class _WalletContentState extends State<_WalletContent> {
             t.description ??
             l10n.walletDefaultTransactionLabel,
         currency: t.currency ?? defaultCurrency,
+        isCredit: t.isCredit ? true : (t.isDebit ? false : null),
       );
     }).toList();
   }

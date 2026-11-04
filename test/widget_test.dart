@@ -12,6 +12,7 @@ import 'package:hudhud_delivery/main.dart';
 import 'package:hudhud_delivery/controllers/theme_controller.dart';
 import 'package:hudhud_delivery/controllers/locale_controller.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
+import 'package:hudhud_delivery/features/orders/data/models/order_cancel_result.dart';
 import 'package:hudhud_delivery/features/orders/data/models/order_model.dart';
 import 'package:hudhud_delivery/features/orders/data/models/order_tracking_model.dart';
 import 'package:hudhud_delivery/features/orders/data/models/orders_response_model.dart';
@@ -19,7 +20,8 @@ import 'package:hudhud_delivery/features/orders/data/repositories/orders_reposit
 
 class _TestOrdersRepository implements OrdersRepository {
   @override
-  Future<bool> cancelOrder(int orderId, {String? reason}) async => true;
+  Future<OrderCancelResult> cancelOrder(int orderId, {String? reason}) async =>
+      const OrderCancelResult(message: 'Order cancelled successfully');
 
   @override
   Future<List<OrderModel>> fetchAvailableOrders() async => <OrderModel>[];

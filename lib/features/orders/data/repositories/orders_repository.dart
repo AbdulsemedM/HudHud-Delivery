@@ -1,3 +1,4 @@
+import '../models/order_cancel_result.dart';
 import '../models/order_model.dart';
 import '../models/order_tracking_model.dart';
 import '../models/orders_response_model.dart';
@@ -20,7 +21,10 @@ abstract class OrdersRepository {
   Future<OrderModel> getOrderById(int orderId);
   Future<OrderTrackingModel> getOrderTracking(int orderId);
   Future<bool> rateOrder(int orderId, {required int rating, String? review});
-  Future<bool> cancelOrder(int orderId, {String? reason});
+
+  /// Throws [OrdersRepositoryException] on failure. The result carries the
+  /// `refund` outcome when the endpoint reports it.
+  Future<OrderCancelResult> cancelOrder(int orderId, {String? reason});
 }
 
 class OrdersRepositoryImpl implements OrdersRepository {
@@ -164,12 +168,14 @@ class OrdersRepositoryImpl implements OrdersRepository {
   }
 
   @override
-  Future<bool> cancelOrder(int orderId, {String? reason}) async {
+  Future<OrderCancelResult> cancelOrder(int orderId, {String? reason}) async {
     try {
       final response = await dataProvider.cancelOrder(orderId, reason: reason);
       
       if (response['statusCode'] == 200) {
-        return response['data'] ?? true;
+        // Body is `{message, refund?}`; the old `data ?? true` returned a Map
+        // where a bool was expected.
+        return OrderCancelResult.fromResponseBody(response['data']);
       } else {
         throw OrdersRepositoryException(response['errorMessage'] ?? 'Failed to cancel order');
       }

@@ -10,6 +10,7 @@ import 'package:hudhud_delivery/core/theme/system_ui_style.dart';
 import 'package:hudhud_delivery/features/growth/growth_scope.dart';
 import 'package:hudhud_delivery/features/growth/presentation/reorder_flow.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
+import 'package:hudhud_delivery/features/wallet/services/wallet_refresh_signal.dart';
 import '../../bloc/orders_bloc.dart';
 import '../../data/models/order_model.dart';
 import '../../data/models/order_tracking_model.dart';
@@ -54,6 +55,18 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       // Silent refresh — keep showing last loaded order while fetching.
       context.read<OrdersBloc>().add(FetchOrderDetailsEvent(widget.orderId));
     });
+  }
+
+  /// "ETB 1,005 refunded to your HudHud wallet" when the server reports a
+  /// wallet refund; the plain cancel message otherwise.
+  String _cancelMessage(BuildContext context, OrderCancelled state) {
+    final refund = state.refund;
+    if (refund == null) return state.message;
+    if (refund.isToWallet) {
+      return context.l10n.p5RefundedToWallet(refund.formattedAmount);
+    }
+    if (refund.isManual) return context.l10n.p5RefundManual;
+    return state.message;
   }
 
   ThemeData _homeTheme(BuildContext context) {
@@ -102,10 +115,15 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
               }
               if (state is OrderCancelled) {
                 _pollTimer?.cancel();
+                // Paid orders are refunded to the HudHud wallet on cancel.
+                WalletRefreshSignal.notify();
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(state.message),
+                    content: Text(_cancelMessage(context, state)),
                     backgroundColor: AppColors.successColor,
+                    duration: state.refund?.isToWallet == true
+                        ? const Duration(seconds: 6)
+                        : const Duration(seconds: 4),
                   ),
                 );
                 Navigator.of(context).pop();

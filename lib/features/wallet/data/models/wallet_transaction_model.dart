@@ -50,6 +50,25 @@ class WalletTransactionModel {
 
   bool get isCredit => type?.toLowerCase() == 'credit';
   bool get isDebit => type?.toLowerCase() == 'debit';
+
+  /// Order refunds credited to the wallet. Backend descriptions:
+  /// "Order cancellation refund #…" (OrderRefundService), "Refund: order #…"
+  /// (payment completed after cancel) and "Finance refund…" (admin refunds).
+  bool get isRefund {
+    if (isDebit) return false;
+    final t = type?.toLowerCase() ?? '';
+    if (t.contains('refund')) return true;
+    return isRefundDescription(description);
+  }
+
+  static bool isRefundDescription(String? description) {
+    final d = description?.trim().toLowerCase() ?? '';
+    if (d.isEmpty) return false;
+    return d.startsWith('order cancellation refund') ||
+        d.startsWith('refund: order') ||
+        d.startsWith('refund for order') ||
+        d.startsWith('finance refund');
+  }
 }
 
 class WalletTransactionsResponse {

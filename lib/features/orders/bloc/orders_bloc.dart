@@ -2,6 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import '../data/repositories/orders_repository.dart';
+import '../data/models/order_cancel_result.dart';
 import '../data/models/order_model.dart';
 import '../data/models/order_tracking_model.dart';
 
@@ -125,18 +126,18 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
     emit(OrderCancelling(event.orderId));
     
     try {
-      final success = await ordersRepository.cancelOrder(
+      final result = await ordersRepository.cancelOrder(
         event.orderId,
         reason: event.reason,
       );
-      
-      if (success) {
-        emit(OrderCancelled(event.orderId, 'Order cancelled successfully'));
-        // Refresh orders list
-        add(const RefreshOrdersEvent());
-      } else {
-        emit(const OrdersError('Failed to cancel order'));
-      }
+
+      emit(OrderCancelled(
+        event.orderId,
+        'Order cancelled successfully',
+        refund: result.refund,
+      ));
+      // Refresh orders list
+      add(const RefreshOrdersEvent());
     } catch (e) {
       emit(OrdersError(e.toString()));
     }

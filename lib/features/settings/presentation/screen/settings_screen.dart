@@ -42,6 +42,7 @@ import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.
 import 'package:hudhud_delivery/features/wallet/data/providers/wallet_data_provider.dart';
 import 'package:hudhud_delivery/features/wallet/data/repositories/wallet_repository.dart';
 import 'package:hudhud_delivery/features/wallet/presentation/screens/wallet_screen.dart';
+import 'package:hudhud_delivery/features/wallet/services/wallet_refresh_signal.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import 'package:hudhud_delivery/models/user_model.dart';
 import 'appearance_screen.dart';
@@ -137,6 +138,11 @@ class _SettingsScreenState extends State<SettingsScreen>
     if (mounted) setState(() {});
   }
 
+  /// e.g. an order was cancelled and refunded to the wallet.
+  void _onWalletChanged() {
+    if (mounted) unawaited(_loadWalletSummary());
+  }
+
   void _openPlus() {
     Navigator.push(
       context,
@@ -222,6 +228,7 @@ class _SettingsScreenState extends State<SettingsScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     PlusController.instance.addListener(_onPlusChanged);
+    WalletRefreshSignal.changes.addListener(_onWalletChanged);
     _loadAll();
     _startChatUnreadPolling();
   }
@@ -229,6 +236,7 @@ class _SettingsScreenState extends State<SettingsScreen>
   @override
   void dispose() {
     PlusController.instance.removeListener(_onPlusChanged);
+    WalletRefreshSignal.changes.removeListener(_onWalletChanged);
     WidgetsBinding.instance.removeObserver(this);
     _chatUnreadTimer?.cancel();
     super.dispose();

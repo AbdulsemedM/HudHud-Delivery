@@ -84,10 +84,20 @@ final class OrderCancelled extends OrdersState {
   final int orderId;
   final String message;
 
-  const OrderCancelled(this.orderId, this.message);
+  /// Refund outcome when the cancel endpoint reports one (Phase 5: paid
+  /// orders are refunded to the HudHud wallet automatically).
+  final OrderRefund? refund;
+
+  const OrderCancelled(this.orderId, this.message, {this.refund});
 
   @override
-  List<Object?> get props => [orderId, message];
+  List<Object?> get props => [
+        orderId,
+        message,
+        refund?.status,
+        refund?.amount,
+        refund?.currency,
+      ];
 }
 
 final class OrderRated extends OrdersState {
