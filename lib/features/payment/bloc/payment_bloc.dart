@@ -6,6 +6,7 @@ import '../../checkout/data/models/create_order_result.dart';
 import '../../checkout/data/repository/checkout_repository.dart';
 import '../data/repository/payment_repository.dart';
 import '../model/payment_initiate_result.dart';
+import '../utils/order_payment_issue.dart';
 import '../presentation/widgets/payment_details_form.dart';
 
 // Events
@@ -90,6 +91,26 @@ class PaymentInitiated extends PaymentState {
         finalDeliveryFee,
         currencySymbol,
       ];
+}
+
+/// The order exists but the server refused this payment attempt for a
+/// reason that needs the order screen (already paid, payment in progress,
+/// totals / currency changed, no longer payable). The cart is spent.
+class PaymentOrderNeedsAttention extends PaymentState {
+  final OrderPaymentIssue issue;
+  final String orderId;
+
+  /// Server text, for logs / fallback only (UI uses localized copy).
+  final String message;
+
+  const PaymentOrderNeedsAttention({
+    required this.issue,
+    required this.orderId,
+    required this.message,
+  });
+
+  @override
+  List<Object?> get props => [issue, orderId, message];
 }
 
 class PaymentFailure extends PaymentState {
@@ -242,6 +263,15 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
           finalDeliveryFee: created.deliveryFee,
         ));
       } catch (e) {
+        final issue = classifyOrderPaymentError(e);
+        if (issue != null) {
+          emit(PaymentOrderNeedsAttention(
+            issue: issue,
+            orderId: created.orderId.toString(),
+            message: userFacingApiError(e),
+          ));
+          return;
+        }
         emit(PaymentFailure(
           error:
               '${userFacingApiError(e)} Order #${created.orderId} was already created — avoid checking out again (duplicate order).',

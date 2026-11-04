@@ -131,7 +131,7 @@ class _PaymentInitiateResultScreenState
     return _isServerPaidStatus(result.status);
   }
 
-  bool get _isCod => result.method == 'cash_on_delivery';
+  bool get _isCod => result.isCashOnDelivery;
 
   static bool _isServerPaidStatus(String? status) {
     final s = status?.toLowerCase();
@@ -607,7 +607,7 @@ class _PaymentInitiateResultScreenState
             : (isCompleted
                 ? 'Your order is paid.'
                 : (isCod
-                    ? 'Pay upon delivery. Your order is confirmed.'
+                    ? context.l10n.p5PayCashOnArrival
                     : 'Your order is processing while payment confirms.'));
         return _StatusContent(
           icon: isCompleted ? Icons.check_circle : Icons.receipt_long,

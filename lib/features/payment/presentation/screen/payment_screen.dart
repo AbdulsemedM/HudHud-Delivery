@@ -10,6 +10,7 @@ import '../../bloc/payment_bloc.dart';
 import '../../data/data_provider/payment_data_provider.dart';
 import '../../data/repository/payment_repository.dart';
 import '../../model/payment_initiate_result.dart';
+import '../order_payment_issue_flow.dart';
 import '../widgets/payment_details_form.dart';
 import '../widgets/payment_widgets.dart';
 import 'payment_initiate_result_screen.dart';
@@ -174,6 +175,13 @@ class _PaymentScreenState extends State<PaymentScreen>
                         orderId: state.orderId,
                       ),
                     ),
+                  );
+                } else if (state is PaymentOrderNeedsAttention) {
+                  Navigator.of(context).pop();
+                  openOrderAfterPaymentIssue(
+                    context,
+                    issue: state.issue,
+                    orderId: state.orderId,
                   );
                 } else if (state is PaymentSuccess) {
                   Navigator.of(context).pop();
