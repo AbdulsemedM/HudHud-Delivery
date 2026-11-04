@@ -1648,5 +1648,21 @@
     }
   },
   "p3MarketChangeBlocked": "Ma beddeli kartid magaalada inta jeebkaagu haysto haraa lacag kale ah. Marka hore isticmaal ama la bax.",
-  "p3MarketChangeFailed": "Lama beddeli karin magaalada. Fadlan isku day mar kale."
+  "p3MarketChangeFailed": "Lama beddeli karin magaalada. Fadlan isku day mar kale.",
+  "p5SetsTitle": "HudHud Set",
+  "p5SetsSubtitle": "Cunto hal qof · gaarsiintu waa ku jirtaa",
+  "p5SetDeliveryIncluded": "Gaarsiintu waa ku jirtaa",
+  "p5SetsMaxPerOrder": "Ilaa {count} dalab kasta",
+  "p5QuoteSetDeliveryIncluded": "HudHud Set: gaarsiintu waa ku jirtaa",
+  "p5SetOverMaxQuantity": "Gaarsiintu waxay ku jirtaa ilaa {count} HudHud Set dalab kasta.",
+  "p5SetMixedCart": "Gaarsiintu waxay ku jirtaa kaliya marka gaadhigaagu HudHud Set oo kaliya leeyahay.",
+  "p5PayCashOnArrival": "Lacag caddaan ah bixi marka dalabkaagu yimaado",
+  "p5PaymentInProgress": "Lacag-bixin dalabkan ah ayaa socota. Ku ansixi ama diid taleefankaaga, kadibna hubi xaaladda dalabka.",
+  "p5PaymentAlreadyPaid": "Dalabkan horay ayaa lacagtiisa loo bixiyay.",
+  "p5PaymentTotalsChanged": "Wadarta dalabkaagu way isbeddeshay. Waan cusbooneysiinay dalabka — fadlan dib u eeg ka hor intaadan bixin.",
+  "p5OrderNotPayable": "Dalabkan lama bixin karo hadda.",
+  "p5CheckOrderStatus": "Hubi xaaladda dalabka",
+  "p5RefundedToWallet": "{amount} ayaa lagu celiyay jeebkaaga HudHud",
+  "p5RefundManual": "Dalabka waa la joojiyay. Kooxdayadu dhowaan ayay lacagtaada kuu celin doontaa.",
+  "p5WalletRefundLabel": "Lacag celin"
 }

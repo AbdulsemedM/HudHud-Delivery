@@ -6878,6 +6878,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not change city. Please try again.'**
   String get p3MarketChangeFailed;
+
+  /// No description provided for @p5SetsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'HudHud Sets'**
+  String get p5SetsTitle;
+
+  /// No description provided for @p5SetsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Meal for one · delivery included'**
+  String get p5SetsSubtitle;
+
+  /// No description provided for @p5SetDeliveryIncluded.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery included'**
+  String get p5SetDeliveryIncluded;
+
+  /// No description provided for @p5SetsMaxPerOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to {count} per order'**
+  String p5SetsMaxPerOrder(int count);
+
+  /// No description provided for @p5QuoteSetDeliveryIncluded.
+  ///
+  /// In en, this message translates to:
+  /// **'HudHud Set: delivery included'**
+  String get p5QuoteSetDeliveryIncluded;
+
+  /// No description provided for @p5SetOverMaxQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery is included for up to {count} HudHud Sets per order.'**
+  String p5SetOverMaxQuantity(int count);
+
+  /// No description provided for @p5SetMixedCart.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery is included only when your cart has HudHud Sets only.'**
+  String get p5SetMixedCart;
+
+  /// No description provided for @p5PayCashOnArrival.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay in cash when your order arrives'**
+  String get p5PayCashOnArrival;
+
+  /// No description provided for @p5PaymentInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'A payment for this order is already in progress. Approve or decline it on your phone, then check the order status.'**
+  String get p5PaymentInProgress;
+
+  /// No description provided for @p5PaymentAlreadyPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'This order is already paid.'**
+  String get p5PaymentAlreadyPaid;
+
+  /// No description provided for @p5PaymentTotalsChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Your order total changed. We refreshed the order — please review it before paying.'**
+  String get p5PaymentTotalsChanged;
+
+  /// No description provided for @p5OrderNotPayable.
+  ///
+  /// In en, this message translates to:
+  /// **'This order can no longer be paid.'**
+  String get p5OrderNotPayable;
+
+  /// No description provided for @p5CheckOrderStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Check order status'**
+  String get p5CheckOrderStatus;
+
+  /// No description provided for @p5RefundedToWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} refunded to your HudHud wallet'**
+  String p5RefundedToWallet(String amount);
+
+  /// No description provided for @p5RefundManual.
+  ///
+  /// In en, this message translates to:
+  /// **'Order cancelled. Our team will process your refund shortly.'**
+  String get p5RefundManual;
+
+  /// No description provided for @p5WalletRefundLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund'**
+  String get p5WalletRefundLabel;
 }
 
 class _AppLocalizationsDelegate

@@ -3661,4 +3661,62 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get p3MarketChangeFailed =>
       'تعذر تغيير المدينة. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get p5SetsTitle => 'وجبات HudHud Set';
+
+  @override
+  String get p5SetsSubtitle => 'وجبة لشخص واحد · التوصيل مشمول';
+
+  @override
+  String get p5SetDeliveryIncluded => 'التوصيل مشمول';
+
+  @override
+  String p5SetsMaxPerOrder(int count) {
+    return 'حتى $count لكل طلب';
+  }
+
+  @override
+  String get p5QuoteSetDeliveryIncluded => 'HudHud Set: التوصيل مشمول';
+
+  @override
+  String p5SetOverMaxQuantity(int count) {
+    return 'التوصيل مشمول لما يصل إلى $count من HudHud Set لكل طلب.';
+  }
+
+  @override
+  String get p5SetMixedCart =>
+      'التوصيل مشمول فقط عندما تحتوي سلتك على HudHud Set فقط.';
+
+  @override
+  String get p5PayCashOnArrival => 'ادفع نقدًا عند وصول طلبك';
+
+  @override
+  String get p5PaymentInProgress =>
+      'هناك عملية دفع جارية لهذا الطلب. وافق عليها أو ارفضها على هاتفك، ثم تحقق من حالة الطلب.';
+
+  @override
+  String get p5PaymentAlreadyPaid => 'تم دفع هذا الطلب بالفعل.';
+
+  @override
+  String get p5PaymentTotalsChanged =>
+      'تغيّر إجمالي طلبك. قمنا بتحديث الطلب — يرجى مراجعته قبل الدفع.';
+
+  @override
+  String get p5OrderNotPayable => 'لم يعد بالإمكان دفع هذا الطلب.';
+
+  @override
+  String get p5CheckOrderStatus => 'تحقق من حالة الطلب';
+
+  @override
+  String p5RefundedToWallet(String amount) {
+    return 'تم استرداد $amount إلى محفظة HudHud الخاصة بك';
+  }
+
+  @override
+  String get p5RefundManual =>
+      'تم إلغاء الطلب. سيقوم فريقنا بمعالجة استرداد أموالك قريبًا.';
+
+  @override
+  String get p5WalletRefundLabel => 'استرداد';
 }

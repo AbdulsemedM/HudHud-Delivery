@@ -3621,4 +3621,60 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get p3MarketChangeFailed => 'ከተማ መቀየር አልተቻለም። እባክዎ እንደገና ይሞክሩ።';
+
+  @override
+  String get p5SetsTitle => 'HudHud ሴት';
+
+  @override
+  String get p5SetsSubtitle => 'ለአንድ ሰው ምግብ · ማድረስ ተካትቷል';
+
+  @override
+  String get p5SetDeliveryIncluded => 'ማድረስ ተካትቷል';
+
+  @override
+  String p5SetsMaxPerOrder(int count) {
+    return 'በአንድ ትዕዛዝ እስከ $count';
+  }
+
+  @override
+  String get p5QuoteSetDeliveryIncluded => 'HudHud ሴት፦ ማድረስ ተካትቷል';
+
+  @override
+  String p5SetOverMaxQuantity(int count) {
+    return 'ማድረስ የሚካተተው በአንድ ትዕዛዝ እስከ $count HudHud ሴቶች ብቻ ነው።';
+  }
+
+  @override
+  String get p5SetMixedCart => 'ማድረስ የሚካተተው ጋሪዎ HudHud ሴቶችን ብቻ ሲይዝ ነው።';
+
+  @override
+  String get p5PayCashOnArrival => 'ትዕዛዝዎ ሲደርስ በጥሬ ገንዘብ ይክፈሉ';
+
+  @override
+  String get p5PaymentInProgress =>
+      'ለዚህ ትዕዛዝ ክፍያ በሂደት ላይ ነው። በስልክዎ ያጽድቁ ወይም ውድቅ ያድርጉ፣ ከዚያ የትዕዛዙን ሁኔታ ይመልከቱ።';
+
+  @override
+  String get p5PaymentAlreadyPaid => 'ይህ ትዕዛዝ አስቀድሞ ተከፍሏል።';
+
+  @override
+  String get p5PaymentTotalsChanged =>
+      'የትዕዛዝዎ ጠቅላላ ዋጋ ተቀይሯል። ትዕዛዙን አድሰናል — ከመክፈልዎ በፊት ይገምግሙት።';
+
+  @override
+  String get p5OrderNotPayable => 'ይህ ትዕዛዝ ከአሁን በኋላ ሊከፈል አይችልም።';
+
+  @override
+  String get p5CheckOrderStatus => 'የትዕዛዝ ሁኔታ ይመልከቱ';
+
+  @override
+  String p5RefundedToWallet(String amount) {
+    return '$amount ወደ HudHud ዋሌትዎ ተመልሷል';
+  }
+
+  @override
+  String get p5RefundManual => 'ትዕዛዙ ተሰርዟል። ቡድናችን ተመላሽ ገንዘብዎን በቅርቡ ያስኬዳል።';
+
+  @override
+  String get p5WalletRefundLabel => 'ተመላሽ';
 }

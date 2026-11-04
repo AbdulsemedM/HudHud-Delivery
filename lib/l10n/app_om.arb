@@ -1648,5 +1648,21 @@
     }
   },
   "p3MarketChangeBlocked": "Yeroo waaletiin kee haftee maallaqa biraa qabutti magaalaa jijjiiruu hin dandeessu. Dura itti fayyadami ykn baasi.",
-  "p3MarketChangeFailed": "Magaalaa jijjiiruun hin danda'amne. Maaloo irra deebi'ii yaali."
+  "p3MarketChangeFailed": "Magaalaa jijjiiruun hin danda'amne. Maaloo irra deebi'ii yaali.",
+  "p5SetsTitle": "HudHud Set",
+  "p5SetsSubtitle": "Nyaata nama tokkoof · geejjibni ni hammatama",
+  "p5SetDeliveryIncluded": "Geejjibni ni hammatama",
+  "p5SetsMaxPerOrder": "Ajaja tokkoon hanga {count}",
+  "p5QuoteSetDeliveryIncluded": "HudHud Set: geejjibni ni hammatama",
+  "p5SetOverMaxQuantity": "Geejjibni ajaja tokkoon hanga HudHud Set {count} qofaaf hammatama.",
+  "p5SetMixedCart": "Geejjibni kan hammatamu yeroo gaariin kee HudHud Set qofa qabu qofa.",
+  "p5PayCashOnArrival": "Yeroo ajajni kee si ga'u maallaqa callaan kaffali",
+  "p5PaymentInProgress": "Kaffaltiin ajaja kanaa adeemsa irra jira. Bilbila kee irratti mirkaneessi ykn didi, achiis haala ajajaa ilaali.",
+  "p5PaymentAlreadyPaid": "Ajajni kun duraan kaffalameera.",
+  "p5PaymentTotalsChanged": "Waliigalli ajaja keetii jijjiirameera. Ajaja haaromsineerra — maaloo osoo hin kaffalin dura ilaali.",
+  "p5OrderNotPayable": "Ajajni kun amma kaffalamuu hin danda'u.",
+  "p5CheckOrderStatus": "Haala ajajaa ilaali",
+  "p5RefundedToWallet": "{amount} waaletii HudHud keetti deebi'eera",
+  "p5RefundManual": "Ajajni haqameera. Gareen keenya dhiyootti maallaqa kee siif deebisa.",
+  "p5WalletRefundLabel": "Deebii"
 }

@@ -17,6 +17,9 @@ class CheckoutQuote {
   /// Phase 3: `{"member":bool,"applied":bool}`; null when absent.
   final CheckoutQuotePlus? plus;
 
+  /// Phase 4 HudHud Set block (`set`); null when absent (older backend).
+  final CheckoutQuoteSet? hudhudSet;
+
   const CheckoutQuote({
     required this.subtotal,
     required this.deliveryFee,
@@ -27,10 +30,14 @@ class CheckoutQuote {
     required this.total,
     required this.currency,
     this.plus,
+    this.hudhudSet,
   });
 
   /// HudHud Plus made the delivery free on this quote.
   bool get plusApplied => plus != null && plus!.applied;
+
+  /// HudHud funds (part of) the delivery fee because the cart is sets only.
+  bool get setDeliveryIncluded => hudhudSet != null && hudhudSet!.applied;
 
   /// Delivery fee was reduced (free delivery, coupon or points).
   bool get deliveryFeeDiscounted =>
@@ -70,6 +77,9 @@ class CheckoutQuote {
       plus: growthMap(json['plus']) == null
           ? null
           : CheckoutQuotePlus.fromJson(growthMap(json['plus'])!),
+      hudhudSet: growthMap(json['set']) == null
+          ? null
+          : CheckoutQuoteSet.fromJson(growthMap(json['set'])!),
     );
   }
 
@@ -85,6 +95,48 @@ class CheckoutQuote {
     } catch (_) {
       return null;
     }
+  }
+}
+
+/// `quote.set` from CheckoutPricingService / HudHudSetService::checkoutStep:
+/// `{enabled, eligible, applied, subsidy, cap, max_per_order, reason}`.
+class CheckoutQuoteSet {
+  final bool enabled;
+  final bool eligible;
+  final bool applied;
+  final double subsidy;
+  final double cap;
+  final int maxPerOrder;
+
+  /// `mixed_cart`, `over_max_quantity`, `not_approved`, `unavailable`,
+  /// `has_item_discount`, `vendor_closed`, `over_max_price`,
+  /// `currency_unavailable` or null.
+  final String? reason;
+
+  const CheckoutQuoteSet({
+    required this.enabled,
+    required this.eligible,
+    required this.applied,
+    required this.subsidy,
+    required this.cap,
+    required this.maxPerOrder,
+    this.reason,
+  });
+
+  bool get isOverMaxQuantity => reason == 'over_max_quantity';
+  bool get isMixedCart => reason == 'mixed_cart';
+
+  factory CheckoutQuoteSet.fromJson(Map<String, dynamic> json) {
+    final max = growthInt(json['max_per_order'], 1);
+    return CheckoutQuoteSet(
+      enabled: growthBool(json['enabled']),
+      eligible: growthBool(json['eligible']),
+      applied: growthBool(json['applied']),
+      subsidy: growthDouble(json['subsidy']),
+      cap: growthDouble(json['cap']),
+      maxPerOrder: max > 0 ? max : 1,
+      reason: growthString(json['reason']),
+    );
   }
 }
 

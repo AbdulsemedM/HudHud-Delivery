@@ -3710,4 +3710,63 @@ class AppLocalizationsOm extends AppLocalizations {
   @override
   String get p3MarketChangeFailed =>
       'Magaalaa jijjiiruun hin danda\'amne. Maaloo irra deebi\'ii yaali.';
+
+  @override
+  String get p5SetsTitle => 'HudHud Set';
+
+  @override
+  String get p5SetsSubtitle => 'Nyaata nama tokkoof · geejjibni ni hammatama';
+
+  @override
+  String get p5SetDeliveryIncluded => 'Geejjibni ni hammatama';
+
+  @override
+  String p5SetsMaxPerOrder(int count) {
+    return 'Ajaja tokkoon hanga $count';
+  }
+
+  @override
+  String get p5QuoteSetDeliveryIncluded => 'HudHud Set: geejjibni ni hammatama';
+
+  @override
+  String p5SetOverMaxQuantity(int count) {
+    return 'Geejjibni ajaja tokkoon hanga HudHud Set $count qofaaf hammatama.';
+  }
+
+  @override
+  String get p5SetMixedCart =>
+      'Geejjibni kan hammatamu yeroo gaariin kee HudHud Set qofa qabu qofa.';
+
+  @override
+  String get p5PayCashOnArrival =>
+      'Yeroo ajajni kee si ga\'u maallaqa callaan kaffali';
+
+  @override
+  String get p5PaymentInProgress =>
+      'Kaffaltiin ajaja kanaa adeemsa irra jira. Bilbila kee irratti mirkaneessi ykn didi, achiis haala ajajaa ilaali.';
+
+  @override
+  String get p5PaymentAlreadyPaid => 'Ajajni kun duraan kaffalameera.';
+
+  @override
+  String get p5PaymentTotalsChanged =>
+      'Waliigalli ajaja keetii jijjiirameera. Ajaja haaromsineerra — maaloo osoo hin kaffalin dura ilaali.';
+
+  @override
+  String get p5OrderNotPayable => 'Ajajni kun amma kaffalamuu hin danda\'u.';
+
+  @override
+  String get p5CheckOrderStatus => 'Haala ajajaa ilaali';
+
+  @override
+  String p5RefundedToWallet(String amount) {
+    return '$amount waaletii HudHud keetti deebi\'eera';
+  }
+
+  @override
+  String get p5RefundManual =>
+      'Ajajni haqameera. Gareen keenya dhiyootti maallaqa kee siif deebisa.';
+
+  @override
+  String get p5WalletRefundLabel => 'Deebii';
 }

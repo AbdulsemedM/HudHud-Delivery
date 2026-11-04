@@ -172,6 +172,18 @@ class GrowthDataProvider {
         ),
       );
 
+  /// Phase 4: [market] is omitted when null/empty (server default market).
+  Future<Map<String, dynamic>> getPublicSets({String? market, int? perPage}) =>
+      _wrap(
+        () => apiService.get(
+          _url(ApiConstants.publicSets),
+          queryParameters: {
+            if (market != null && market.isNotEmpty) 'market': market,
+            if (perPage != null && perPage > 0) 'per_page': perPage,
+          },
+        ),
+      );
+
   Future<Map<String, dynamic>> postAdClick({
     required int adId,
     required String impressionToken,

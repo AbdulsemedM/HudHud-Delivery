@@ -149,6 +149,12 @@ class ApiConstants {
   /// POST /api/ads/click {ad_id, impression_token, placement}
   static const String adsClick = 'ads/click';
 
+  // Phase 4/5 endpoints.
+  /// GET /api/public/sets?market=&per_page=&page= — HudHud Set listing (public).
+  static const String publicSets = 'public/sets';
+  /// POST /api/client-errors — app error reports (single or {reports: [...]}).
+  static const String clientErrors = 'client-errors';
+
   // Delivery endpoints
   static const String delivery = '/delivery';
   static const String trackOrder = '$delivery/track/{orderId}';

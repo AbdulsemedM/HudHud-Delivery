@@ -40,6 +40,10 @@ class OrderModel extends Equatable {
   final CustomerModel? customer;
   final DriverModel? driver;
 
+  /// Phase 4: delivery fee funded by HudHud for a HudHud Set order
+  /// (`orders.set_delivery_subsidy`); 0 when absent.
+  final double setDeliverySubsidy;
+
   const OrderModel({
     required this.id,
     required this.orderNumber,
@@ -73,6 +77,7 @@ class OrderModel extends Equatable {
     required this.vendor,
     this.customer,
     this.driver,
+    this.setDeliverySubsidy = 0,
   });
 
   static int _parseInt(dynamic v) {
@@ -115,6 +120,8 @@ class OrderModel extends Equatable {
       paymentId: json['payment_id'] != null ? _parseInt(json['payment_id']) : null,
       subtotal: json['subtotal']?.toString() ?? '0',
       deliveryFee: json['delivery_fee']?.toString() ?? '0',
+      setDeliverySubsidy:
+          double.tryParse(json['set_delivery_subsidy']?.toString() ?? '') ?? 0,
       taxAmount: json['tax_amount']?.toString() ?? '0',
       discountAmount: json['discount_amount']?.toString() ?? '0',
       totalAmount: json['total_amount']?.toString() ?? '0',
@@ -178,6 +185,7 @@ class OrderModel extends Equatable {
       'payment_id': paymentId,
       'subtotal': subtotal,
       'delivery_fee': deliveryFee,
+      'set_delivery_subsidy': setDeliverySubsidy,
       'tax_amount': taxAmount,
       'discount_amount': discountAmount,
       'total_amount': totalAmount,
@@ -267,6 +275,9 @@ class OrderModel extends Equatable {
     }
   }
   
+  /// HudHud Set order: HudHud paid (part of) the delivery fee.
+  bool get hasSetDeliverySubsidy => setDeliverySubsidy > 0.009;
+
   String get formattedDeliveryFee {
     try {
       final fee = double.parse(deliveryFee);
@@ -407,6 +418,7 @@ class OrderModel extends Equatable {
         paymentId,
         subtotal,
         deliveryFee,
+        setDeliverySubsidy,
         taxAmount,
         discountAmount,
         totalAmount,

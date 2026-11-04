@@ -1648,5 +1648,21 @@
     }
   },
   "p3MarketChangeBlocked": "لا يمكنك تغيير المدينة ومحفظتك تحتوي على رصيد بعملة أخرى. استخدمه أو اسحبه أولًا.",
-  "p3MarketChangeFailed": "تعذر تغيير المدينة. يرجى المحاولة مرة أخرى."
+  "p3MarketChangeFailed": "تعذر تغيير المدينة. يرجى المحاولة مرة أخرى.",
+  "p5SetsTitle": "وجبات HudHud Set",
+  "p5SetsSubtitle": "وجبة لشخص واحد · التوصيل مشمول",
+  "p5SetDeliveryIncluded": "التوصيل مشمول",
+  "p5SetsMaxPerOrder": "حتى {count} لكل طلب",
+  "p5QuoteSetDeliveryIncluded": "HudHud Set: التوصيل مشمول",
+  "p5SetOverMaxQuantity": "التوصيل مشمول لما يصل إلى {count} من HudHud Set لكل طلب.",
+  "p5SetMixedCart": "التوصيل مشمول فقط عندما تحتوي سلتك على HudHud Set فقط.",
+  "p5PayCashOnArrival": "ادفع نقدًا عند وصول طلبك",
+  "p5PaymentInProgress": "هناك عملية دفع جارية لهذا الطلب. وافق عليها أو ارفضها على هاتفك، ثم تحقق من حالة الطلب.",
+  "p5PaymentAlreadyPaid": "تم دفع هذا الطلب بالفعل.",
+  "p5PaymentTotalsChanged": "تغيّر إجمالي طلبك. قمنا بتحديث الطلب — يرجى مراجعته قبل الدفع.",
+  "p5OrderNotPayable": "لم يعد بالإمكان دفع هذا الطلب.",
+  "p5CheckOrderStatus": "تحقق من حالة الطلب",
+  "p5RefundedToWallet": "تم استرداد {amount} إلى محفظة HudHud الخاصة بك",
+  "p5RefundManual": "تم إلغاء الطلب. سيقوم فريقنا بمعالجة استرداد أموالك قريبًا.",
+  "p5WalletRefundLabel": "استرداد"
 }

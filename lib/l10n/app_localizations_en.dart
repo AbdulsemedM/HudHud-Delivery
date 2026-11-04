@@ -3678,4 +3678,62 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get p3MarketChangeFailed => 'Could not change city. Please try again.';
+
+  @override
+  String get p5SetsTitle => 'HudHud Sets';
+
+  @override
+  String get p5SetsSubtitle => 'Meal for one · delivery included';
+
+  @override
+  String get p5SetDeliveryIncluded => 'Delivery included';
+
+  @override
+  String p5SetsMaxPerOrder(int count) {
+    return 'Up to $count per order';
+  }
+
+  @override
+  String get p5QuoteSetDeliveryIncluded => 'HudHud Set: delivery included';
+
+  @override
+  String p5SetOverMaxQuantity(int count) {
+    return 'Delivery is included for up to $count HudHud Sets per order.';
+  }
+
+  @override
+  String get p5SetMixedCart =>
+      'Delivery is included only when your cart has HudHud Sets only.';
+
+  @override
+  String get p5PayCashOnArrival => 'Pay in cash when your order arrives';
+
+  @override
+  String get p5PaymentInProgress =>
+      'A payment for this order is already in progress. Approve or decline it on your phone, then check the order status.';
+
+  @override
+  String get p5PaymentAlreadyPaid => 'This order is already paid.';
+
+  @override
+  String get p5PaymentTotalsChanged =>
+      'Your order total changed. We refreshed the order — please review it before paying.';
+
+  @override
+  String get p5OrderNotPayable => 'This order can no longer be paid.';
+
+  @override
+  String get p5CheckOrderStatus => 'Check order status';
+
+  @override
+  String p5RefundedToWallet(String amount) {
+    return '$amount refunded to your HudHud wallet';
+  }
+
+  @override
+  String get p5RefundManual =>
+      'Order cancelled. Our team will process your refund shortly.';
+
+  @override
+  String get p5WalletRefundLabel => 'Refund';
 }

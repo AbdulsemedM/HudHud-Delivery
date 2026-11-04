@@ -6,6 +6,7 @@ import 'models/checkout_quote_request.dart';
 import 'models/growth_config.dart';
 import 'models/growth_json.dart';
 import 'models/home_feed.dart';
+import 'models/hudhud_set.dart';
 import 'models/market.dart';
 import 'models/plus.dart';
 import 'models/referral_summary.dart';
@@ -308,6 +309,23 @@ class GrowthRepository {
     } catch (_) {
       return const [];
     }
+  }
+
+  // ── Phase 4: HudHud Set ────────────────────────────────────────────────
+
+  /// Set after a 404 so an older backend is not asked again this session.
+  static bool _setsEndpointMissing = false;
+
+  /// Never throws; [HudHudSetsPage.empty] on failure or when sets are off.
+  /// Remembers the returned set product ids for checkout.
+  Future<HudHudSetsPage> fetchSets({String? market, int perPage = 20}) async {
+    if (_setsEndpointMissing) return HudHudSetsPage.empty;
+    final r = await dataProvider.getPublicSets(market: market, perPage: perPage);
+    if (r['statusCode'] == 404) _setsEndpointMissing = true;
+    if (!_ok(r)) return HudHudSetsPage.empty;
+    final page = HudHudSetsPage.fromResponseBody(r['data']);
+    KnownHudHudSets.remember(page.items);
+    return page;
   }
 
   /// Fire-and-forget click report. Never throws; callers must not await it

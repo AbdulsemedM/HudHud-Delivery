@@ -3715,4 +3715,65 @@ class AppLocalizationsSo extends AppLocalizations {
   @override
   String get p3MarketChangeFailed =>
       'Lama beddeli karin magaalada. Fadlan isku day mar kale.';
+
+  @override
+  String get p5SetsTitle => 'HudHud Set';
+
+  @override
+  String get p5SetsSubtitle => 'Cunto hal qof · gaarsiintu waa ku jirtaa';
+
+  @override
+  String get p5SetDeliveryIncluded => 'Gaarsiintu waa ku jirtaa';
+
+  @override
+  String p5SetsMaxPerOrder(int count) {
+    return 'Ilaa $count dalab kasta';
+  }
+
+  @override
+  String get p5QuoteSetDeliveryIncluded =>
+      'HudHud Set: gaarsiintu waa ku jirtaa';
+
+  @override
+  String p5SetOverMaxQuantity(int count) {
+    return 'Gaarsiintu waxay ku jirtaa ilaa $count HudHud Set dalab kasta.';
+  }
+
+  @override
+  String get p5SetMixedCart =>
+      'Gaarsiintu waxay ku jirtaa kaliya marka gaadhigaagu HudHud Set oo kaliya leeyahay.';
+
+  @override
+  String get p5PayCashOnArrival =>
+      'Lacag caddaan ah bixi marka dalabkaagu yimaado';
+
+  @override
+  String get p5PaymentInProgress =>
+      'Lacag-bixin dalabkan ah ayaa socota. Ku ansixi ama diid taleefankaaga, kadibna hubi xaaladda dalabka.';
+
+  @override
+  String get p5PaymentAlreadyPaid =>
+      'Dalabkan horay ayaa lacagtiisa loo bixiyay.';
+
+  @override
+  String get p5PaymentTotalsChanged =>
+      'Wadarta dalabkaagu way isbeddeshay. Waan cusbooneysiinay dalabka — fadlan dib u eeg ka hor intaadan bixin.';
+
+  @override
+  String get p5OrderNotPayable => 'Dalabkan lama bixin karo hadda.';
+
+  @override
+  String get p5CheckOrderStatus => 'Hubi xaaladda dalabka';
+
+  @override
+  String p5RefundedToWallet(String amount) {
+    return '$amount ayaa lagu celiyay jeebkaaga HudHud';
+  }
+
+  @override
+  String get p5RefundManual =>
+      'Dalabka waa la joojiyay. Kooxdayadu dhowaan ayay lacagtaada kuu celin doontaa.';
+
+  @override
+  String get p5WalletRefundLabel => 'Lacag celin';
 }

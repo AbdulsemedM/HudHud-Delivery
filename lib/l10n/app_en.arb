@@ -1600,5 +1600,36 @@
     }
   },
   "p3MarketChangeBlocked": "You can't change city while your wallet has a balance in another currency. Use or withdraw it first.",
-  "p3MarketChangeFailed": "Could not change city. Please try again."
+  "p3MarketChangeFailed": "Could not change city. Please try again.",
+  "p5SetsTitle": "HudHud Sets",
+  "p5SetsSubtitle": "Meal for one · delivery included",
+  "p5SetDeliveryIncluded": "Delivery included",
+  "p5SetsMaxPerOrder": "Up to {count} per order",
+  "@p5SetsMaxPerOrder": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "p5QuoteSetDeliveryIncluded": "HudHud Set: delivery included",
+  "p5SetOverMaxQuantity": "Delivery is included for up to {count} HudHud Sets per order.",
+  "@p5SetOverMaxQuantity": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "p5SetMixedCart": "Delivery is included only when your cart has HudHud Sets only.",
+  "p5PayCashOnArrival": "Pay in cash when your order arrives",
+  "p5PaymentInProgress": "A payment for this order is already in progress. Approve or decline it on your phone, then check the order status.",
+  "p5PaymentAlreadyPaid": "This order is already paid.",
+  "p5PaymentTotalsChanged": "Your order total changed. We refreshed the order — please review it before paying.",
+  "p5OrderNotPayable": "This order can no longer be paid.",
+  "p5CheckOrderStatus": "Check order status",
+  "p5RefundedToWallet": "{amount} refunded to your HudHud wallet",
+  "@p5RefundedToWallet": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p5RefundManual": "Order cancelled. Our team will process your refund shortly.",
+  "p5WalletRefundLabel": "Refund"
 }

@@ -834,6 +834,12 @@ class OrderSummarySection extends StatelessWidget {
   /// Phase 3: the quote's `plus.applied` — label the free delivery as Plus.
   final bool plusFreeDelivery;
 
+  /// Phase 4: the quote's `set.applied` — "HudHud Set: delivery included".
+  final bool setDeliveryIncluded;
+
+  /// Optional hint under the delivery row (e.g. HudHud Set limits).
+  final String? deliveryNote;
+
   const OrderSummarySection({
     super.key,
     required this.subtotal,
@@ -853,6 +859,8 @@ class OrderSummarySection extends StatelessWidget {
     this.couponCode,
     this.pointsDiscount = 0,
     this.plusFreeDelivery = false,
+    this.setDeliveryIncluded = false,
+    this.deliveryNote,
   });
 
   bool get _deliveryFeeStruck =>
@@ -941,9 +949,11 @@ class OrderSummarySection extends StatelessWidget {
             )
           else if (_deliveryFeeStruck)
             _SummaryRow(
-              label: plusFreeDelivery
-                  ? context.l10n.p3QuotePlusFreeDelivery
-                  : context.l10n.growthDeliveryFeeLabel,
+              label: setDeliveryIncluded
+                  ? context.l10n.p5QuoteSetDeliveryIncluded
+                  : plusFreeDelivery
+                      ? context.l10n.p3QuotePlusFreeDelivery
+                      : context.l10n.growthDeliveryFeeLabel,
               amountLabel: deliveryFee! <= 0.009
                   ? context.l10n.growthFree
                   : _formatAmount(deliveryFee!),
@@ -952,9 +962,11 @@ class OrderSummarySection extends StatelessWidget {
             )
           else
             _SummaryRow(
-              label: plusFreeDelivery
-                  ? context.l10n.p3QuotePlusFreeDelivery
-                  : 'Delivery fee',
+              label: setDeliveryIncluded
+                  ? context.l10n.p5QuoteSetDeliveryIncluded
+                  : plusFreeDelivery
+                      ? context.l10n.p3QuotePlusFreeDelivery
+                      : 'Delivery fee',
               amountLabel: formattedDeliveryFee?.isNotEmpty == true
                   ? formattedDeliveryFee!
                   : (deliveryFee != null
@@ -963,6 +975,23 @@ class OrderSummarySection extends StatelessWidget {
                           : _formatAmount(deliveryFee!))
                       : '—'),
               muted: deliveryFee == null || deliveryFee == 0,
+            ),
+          if (!deliveryFeeLoading &&
+              deliveryFeeError == null &&
+              deliveryNote != null &&
+              deliveryNote!.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 2, bottom: 4),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  deliveryNote!,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
             ),
           if (!deliveryFeeLoading &&
               deliveryFeeError == null &&

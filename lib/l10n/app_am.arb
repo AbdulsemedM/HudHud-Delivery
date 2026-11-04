@@ -1655,5 +1655,21 @@
     }
   },
   "p3MarketChangeBlocked": "ዋሌትዎ በሌላ ገንዘብ ቀሪ ሂሳብ እያለው ከተማ መቀየር አይችሉም። መጀመሪያ ይጠቀሙበት ወይም ያውጡት።",
-  "p3MarketChangeFailed": "ከተማ መቀየር አልተቻለም። እባክዎ እንደገና ይሞክሩ።"
+  "p3MarketChangeFailed": "ከተማ መቀየር አልተቻለም። እባክዎ እንደገና ይሞክሩ።",
+  "p5SetsTitle": "HudHud ሴት",
+  "p5SetsSubtitle": "ለአንድ ሰው ምግብ · ማድረስ ተካትቷል",
+  "p5SetDeliveryIncluded": "ማድረስ ተካትቷል",
+  "p5SetsMaxPerOrder": "በአንድ ትዕዛዝ እስከ {count}",
+  "p5QuoteSetDeliveryIncluded": "HudHud ሴት፦ ማድረስ ተካትቷል",
+  "p5SetOverMaxQuantity": "ማድረስ የሚካተተው በአንድ ትዕዛዝ እስከ {count} HudHud ሴቶች ብቻ ነው።",
+  "p5SetMixedCart": "ማድረስ የሚካተተው ጋሪዎ HudHud ሴቶችን ብቻ ሲይዝ ነው።",
+  "p5PayCashOnArrival": "ትዕዛዝዎ ሲደርስ በጥሬ ገንዘብ ይክፈሉ",
+  "p5PaymentInProgress": "ለዚህ ትዕዛዝ ክፍያ በሂደት ላይ ነው። በስልክዎ ያጽድቁ ወይም ውድቅ ያድርጉ፣ ከዚያ የትዕዛዙን ሁኔታ ይመልከቱ።",
+  "p5PaymentAlreadyPaid": "ይህ ትዕዛዝ አስቀድሞ ተከፍሏል።",
+  "p5PaymentTotalsChanged": "የትዕዛዝዎ ጠቅላላ ዋጋ ተቀይሯል። ትዕዛዙን አድሰናል — ከመክፈልዎ በፊት ይገምግሙት።",
+  "p5OrderNotPayable": "ይህ ትዕዛዝ ከአሁን በኋላ ሊከፈል አይችልም።",
+  "p5CheckOrderStatus": "የትዕዛዝ ሁኔታ ይመልከቱ",
+  "p5RefundedToWallet": "{amount} ወደ HudHud ዋሌትዎ ተመልሷል",
+  "p5RefundManual": "ትዕዛዙ ተሰርዟል። ቡድናችን ተመላሽ ገንዘብዎን በቅርቡ ያስኬዳል።",
+  "p5WalletRefundLabel": "ተመላሽ"
 }

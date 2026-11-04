@@ -1167,7 +1167,13 @@ class OrderSummaryCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           _buildSummaryRow(context, 'Subtotal', order.formattedSubtotal),
-          _buildSummaryRow(context, 'Delivery', order.formattedDeliveryFee),
+          _buildSummaryRow(
+            context,
+            order.hasSetDeliverySubsidy
+                ? l10n.p5QuoteSetDeliveryIncluded
+                : 'Delivery',
+            order.formattedDeliveryFee,
+          ),
           _buildSummaryRow(context, 'Tax', order.formattedTax),
           if (order.discount > 0)
             _buildSummaryRow(

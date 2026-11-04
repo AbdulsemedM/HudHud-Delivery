@@ -12,6 +12,7 @@ import '../../../growth/data/growth_repository.dart';
 import '../../../growth/data/models/checkout_quote.dart';
 import '../../../growth/data/models/checkout_quote_request.dart';
 import '../../../growth/data/models/growth_config.dart';
+import '../../../growth/data/models/hudhud_set.dart';
 import '../../../growth/growth_scope.dart';
 import '../../../growth/market_controller.dart';
 import '../../../growth/plus_controller.dart';
@@ -25,6 +26,7 @@ import '../../../payment/bloc/payment_bloc.dart';
 import '../../../payment/data/data_provider/payment_data_provider.dart';
 import '../../../payment/data/repository/payment_repository.dart';
 import '../../../payment/model/payment_initiate_result.dart';
+import '../../../payment/presentation/order_payment_issue_flow.dart';
 import '../../../payment/presentation/screen/payment_initiate_result_screen.dart';
 import '../../../payment/presentation/widgets/payment_details_form.dart';
 import '../../data/data_provider/checkout_data_provider.dart';
@@ -120,7 +122,30 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   bool get _quoteEnabled {
     final growth = _growth;
     if (growth.checkoutQuoteEnabled) return true;
+    // Phase 4: a HudHud Set in the cart needs the server quote, which is
+    // the only source of the set delivery subsidy.
+    if (growth.loaded && _cartHasSet) return true;
     return growth.loaded && PlusController.instance.status.isMember;
+  }
+
+  /// True when a cart line is a HudHud Set seen in this session.
+  bool get _cartHasSet => _cartItems
+      .any((item) => KnownHudHudSets.contains(int.tryParse(_productId(item))));
+
+  /// Explains why a set cart did not get delivery included (server reason).
+  String? _setDeliveryNote(CheckoutQuote? quote) {
+    final setBlock = quote?.hudhudSet;
+    if (setBlock == null ||
+        setBlock.applied ||
+        !setBlock.enabled ||
+        !_cartHasSet) {
+      return null;
+    }
+    if (setBlock.isOverMaxQuantity) {
+      return context.l10n.p5SetOverMaxQuantity(setBlock.maxPerOrder);
+    }
+    if (setBlock.isMixedCart) return context.l10n.p5SetMixedCart;
+    return null;
   }
 
   void _onPlusChanged() {
@@ -1043,6 +1068,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     ),
                   ),
                 );
+              } else if (state is PaymentOrderNeedsAttention) {
+                // Order exists; keep the customer on it (refreshes totals /
+                // status) instead of a generic failure + duplicate risk.
+                openOrderAfterPaymentIssue(
+                  context,
+                  issue: state.issue,
+                  orderId: state.orderId,
+                );
               } else if (state is PaymentSuccess) {
                 CartService().clear();
                 Navigator.of(context).pushReplacement(
@@ -1200,6 +1233,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           couponCode: growthQuote?.coupon?.code,
                           pointsDiscount: growthQuote?.pointsDiscount ?? 0,
                           plusFreeDelivery: growthQuote?.plusApplied ?? false,
+                          setDeliveryIncluded:
+                              growthQuote?.setDeliveryIncluded ?? false,
+                          deliveryNote: _setDeliveryNote(growthQuote),
                           currencyCode:
                               _deliveryFeeQuote?.currency.trim().isNotEmpty ==
                                       true

@@ -17,9 +17,11 @@ import 'package:hudhud_delivery/features/delivery/presentation/screens/product_d
 import 'package:hudhud_delivery/features/delivery/presentation/screens/store_detail_screen.dart';
 import 'package:hudhud_delivery/features/growth/data/growth_repository.dart';
 import 'package:hudhud_delivery/features/growth/data/models/home_feed.dart';
+import 'package:hudhud_delivery/features/growth/data/models/hudhud_set.dart';
 import 'package:hudhud_delivery/features/growth/data/models/reorder.dart';
 import 'package:hudhud_delivery/features/growth/growth_scope.dart';
 import 'package:hudhud_delivery/features/growth/presentation/widgets/home_feed_widgets.dart';
+import 'package:hudhud_delivery/features/growth/presentation/widgets/hudhud_set_widgets.dart';
 import 'package:hudhud_delivery/features/growth/presentation/widgets/sponsored_widgets.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/features/orders/data/models/vendor_model.dart';
@@ -82,6 +84,11 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
   bool _homeFeedWasEnabled = false;
   bool _reorderWasEnabled = false;
 
+  // Phase 4 HudHud Sets: shown only when GET /public/sets returns items.
+  HudHudSetsPage _sets = HudHudSetsPage.empty;
+  bool _setsRequested = false;
+  String? _setsMarket;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -93,6 +100,20 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
     if (reorderEnabled && !_reorderWasEnabled) _loadReorderSuggestions();
     _homeFeedWasEnabled = feedEnabled;
     _reorderWasEnabled = reorderEnabled;
+    // Reload sets once, and again whenever the selected market changes.
+    final market = marketControllerOf(context, listen: true)?.selectedCode;
+    if (!_setsRequested || market != _setsMarket) {
+      _setsRequested = true;
+      _setsMarket = market;
+      _loadSets();
+    }
+  }
+
+  Future<void> _loadSets() async {
+    final market = _setsMarket;
+    final page = await _growthRepository.fetchSets(market: market);
+    if (!mounted || market != _setsMarket) return;
+    setState(() => _sets = page);
   }
 
   Future<void> _loadHomeFeed() async {
@@ -123,6 +144,10 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
           collections: _homeFeed.collections,
         ),
       ));
+    }
+    // Phase 4: HudHud Sets (independent of the feed flag; server decides).
+    if (_sets.hasItems) {
+      slivers.add(SliverToBoxAdapter(child: HudHudSetRow(page: _sets)));
     }
     // Phase 3: sponsored vendors (the feed only sends them when ads are on).
     if (feedOn && _homeFeed.sponsored.isNotEmpty) {
@@ -167,6 +192,7 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
       _loadPopularProducts(),
       if (_homeFeedWasEnabled) _loadHomeFeed(),
       if (_reorderWasEnabled) _loadReorderSuggestions(),
+      if (widget.embedded) _loadSets(),
     ]);
   }
 
