@@ -76,7 +76,7 @@ void main() async {
   // Must exist before FCM tap handlers so they can push routes.
   final navigatorKey = GlobalKey<NavigatorState>();
   AppNavigator.key = navigatorKey;
-  // App links (/r/{code}, /o/{id}); see DeepLinkService TODO.
+  // App links (/r/{code}, /o/{id}, /v/{vendorOwnerId}) via app_links.
   DeepLinkService.instance.start(navigatorKey);
 
   // Initialize FCM (non-blocking: app starts even if Firebase/FCM fails)

@@ -12,6 +12,7 @@ import 'package:hudhud_delivery/main.dart';
 import 'package:hudhud_delivery/controllers/theme_controller.dart';
 import 'package:hudhud_delivery/controllers/locale_controller.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
+import 'package:hudhud_delivery/core/easy_mode/easy_mode_controller.dart';
 import 'package:hudhud_delivery/features/orders/data/models/order_cancel_result.dart';
 import 'package:hudhud_delivery/features/orders/data/models/order_model.dart';
 import 'package:hudhud_delivery/features/orders/data/models/order_tracking_model.dart';
@@ -75,6 +76,7 @@ void main() {
       authService: authService,
       ordersRepository: ordersRepository,
       navigatorKey: navigatorKey,
+      easyModeController: EasyModeController(),
     ));
 
     // Verify that the app loads without errors

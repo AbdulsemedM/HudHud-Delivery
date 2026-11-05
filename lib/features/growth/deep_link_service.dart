@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -19,18 +22,9 @@ export 'data/models/hudhud_deep_link.dart';
 /// come from the server's apple-app-site-association). The `hudhud://`
 /// scheme is parsed but has no native registration yet.
 ///
-/// Native config is in place (Android intent-filter with autoVerify and the
-/// iOS `applinks:hudhuddelivery.com` entitlement), but no Dart deep-link
-/// package is in pubspec.yaml, so incoming URIs are not yet delivered here.
-///
-/// TODO(deep-links): add `app_links` to pubspec.yaml, then in [start]:
-/// ```dart
-/// final appLinks = AppLinks();
-/// final initial = await appLinks.getInitialLink();
-/// if (initial != null) await handleUri(initial);
-/// _sub = appLinks.uriLinkStream.listen(handleUri);
-/// ```
-/// Everything else (parsing, referral storage, order routing) is ready.
+/// Native config: Android intent-filter with autoVerify and the iOS
+/// `applinks:hudhuddelivery.com` entitlement. Incoming URIs arrive through
+/// the `app_links` package (cold-start link + stream while running).
 class DeepLinkService {
   DeepLinkService._();
 
@@ -40,10 +34,37 @@ class DeepLinkService {
 
   GlobalKey<NavigatorState>? _navigatorKey;
 
-  /// Call once after the root navigator key exists.
+  StreamSubscription<Uri>? _sub;
+  bool _started = false;
+
+  /// Call once after the root navigator key exists. Delivers the link that
+  /// launched the app (cold start) and every link received while running.
   void start(GlobalKey<NavigatorState> navigatorKey) {
     _navigatorKey = navigatorKey;
-    // TODO(deep-links): subscribe to the platform link stream here (see class doc).
+    if (_started) return;
+    _started = true;
+    unawaited(_listen());
+  }
+
+  Future<void> _listen() async {
+    try {
+      final appLinks = AppLinks();
+      final initial = await appLinks.getInitialLink();
+      if (initial != null) await handleUri(initial);
+      _sub = appLinks.uriLinkStream.listen(
+        (uri) => unawaited(handleUri(uri)),
+        onError: (Object _) {},
+      );
+    } catch (_) {
+      // Platform without app-link support (tests, desktop): links are optional.
+    }
+  }
+
+  /// Stops listening (tests).
+  Future<void> stop() async {
+    await _sub?.cancel();
+    _sub = null;
+    _started = false;
   }
 
   /// Entry point for a received link. Safe to call with any URI.
