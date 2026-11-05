@@ -25,7 +25,7 @@ void main() {
         'currency': 'USD',
       });
       expect(refund!.isToWallet, isTrue);
-      expect(refund.formattedAmount, 'USD 12.50');
+      expect(refund.formattedAmount, r'$12.50');
     });
 
     test('manual and not required', () {

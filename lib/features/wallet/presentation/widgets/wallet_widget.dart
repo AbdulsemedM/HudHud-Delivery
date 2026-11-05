@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/utils/money_format.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
 
 class WalletHeader extends StatelessWidget {
@@ -504,7 +505,7 @@ class TransactionItem {
 
   String get formattedAmount {
     if (currency != null && currency!.isNotEmpty) {
-      return '$currency $amount';
+      return '${moneyPrefix(currency)}$amount';
     }
     return amount;
   }

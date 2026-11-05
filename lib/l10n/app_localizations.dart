@@ -6974,6 +6974,180 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Refund'**
   String get p5WalletRefundLabel;
+
+  /// No description provided for @p9GiftSendTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a gift'**
+  String get p9GiftSendTitle;
+
+  /// No description provided for @p9GiftBannerSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Order a meal for family in another city. They get an SMS to track it.'**
+  String get p9GiftBannerSubtitle;
+
+  /// No description provided for @p9GiftIntroBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the city where your recipient lives, choose a restaurant and fill your cart as usual. At checkout, add the recipient's name and phone number and pay online.'**
+  String get p9GiftIntroBody;
+
+  /// No description provided for @p9GiftChooseMarket.
+  ///
+  /// In en, this message translates to:
+  /// **'Where does the recipient live?'**
+  String get p9GiftChooseMarket;
+
+  /// No description provided for @p9GiftChooseRestaurant.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a restaurant'**
+  String get p9GiftChooseRestaurant;
+
+  /// No description provided for @p9GiftHowItWorksSms.
+  ///
+  /// In en, this message translates to:
+  /// **'The recipient gets an SMS with a tracking link and a 4-digit delivery code.'**
+  String get p9GiftHowItWorksSms;
+
+  /// No description provided for @p9GiftHowItWorksPay.
+  ///
+  /// In en, this message translates to:
+  /// **'You pay online. Cash on delivery is not available for gifts.'**
+  String get p9GiftHowItWorksPay;
+
+  /// No description provided for @p9GiftSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send as a gift'**
+  String get p9GiftSectionTitle;
+
+  /// No description provided for @p9GiftSectionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We deliver to your recipient and text them a tracking link'**
+  String get p9GiftSectionSubtitle;
+
+  /// No description provided for @p9GiftToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'This order is a gift'**
+  String get p9GiftToggle;
+
+  /// No description provided for @p9GiftRecipientName.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipient's name'**
+  String get p9GiftRecipientName;
+
+  /// No description provided for @p9GiftRecipientPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipient's mobile number'**
+  String get p9GiftRecipientPhone;
+
+  /// No description provided for @p9GiftRecipientPhoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. {example}'**
+  String p9GiftRecipientPhoneHint(String example);
+
+  /// No description provided for @p9GiftMessageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Gift message (optional)'**
+  String get p9GiftMessageLabel;
+
+  /// No description provided for @p9GiftMessageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a short note for the recipient'**
+  String get p9GiftMessageHint;
+
+  /// No description provided for @p9GiftNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the recipient's name'**
+  String get p9GiftNameRequired;
+
+  /// No description provided for @p9GiftPhoneInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid mobile number ({prefix} …)'**
+  String p9GiftPhoneInvalid(String prefix);
+
+  /// No description provided for @p9GiftNoCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash on delivery is not available for gifts. Choose an online payment method.'**
+  String get p9GiftNoCash;
+
+  /// No description provided for @p9GiftAddressHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Set the delivery location to the recipient's address.'**
+  String get p9GiftAddressHint;
+
+  /// No description provided for @p9GiftUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Gift orders are not available yet.'**
+  String get p9GiftUnavailable;
+
+  /// No description provided for @p9GiftPlacedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Gift order placed'**
+  String get p9GiftPlacedTitle;
+
+  /// No description provided for @p9GiftPlacedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'When the payment is confirmed, {name} gets an SMS with a tracking link and a 4-digit delivery code. They give the code to the rider when the order arrives.'**
+  String p9GiftPlacedBody(String name);
+
+  /// No description provided for @p9GiftForName.
+  ///
+  /// In en, this message translates to:
+  /// **'Gift for {name}'**
+  String p9GiftForName(String name);
+
+  /// No description provided for @p9GiftRecipientLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipient'**
+  String get p9GiftRecipientLabel;
+
+  /// No description provided for @p9GiftYourMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your message'**
+  String get p9GiftYourMessage;
+
+  /// No description provided for @p9GiftWalletNote.
+  ///
+  /// In en, this message translates to:
+  /// **'A wallet in another currency is charged the converted amount at today's rate.'**
+  String get p9GiftWalletNote;
+
+  /// No description provided for @p9GiftModeBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending a gift to {market}'**
+  String p9GiftModeBanner(String market);
+
+  /// No description provided for @p9GiftStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop gift'**
+  String get p9GiftStop;
+
+  /// No description provided for @p9GiftOrderLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Gift order'**
+  String get p9GiftOrderLabel;
 }
 
 class _AppLocalizationsDelegate

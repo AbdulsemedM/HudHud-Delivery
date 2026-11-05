@@ -1671,5 +1671,136 @@
   "p5CheckOrderStatus": "የትዕዛዝ ሁኔታ ይመልከቱ",
   "p5RefundedToWallet": "{amount} ወደ HudHud ዋሌትዎ ተመልሷል",
   "p5RefundManual": "ትዕዛዙ ተሰርዟል። ቡድናችን ተመላሽ ገንዘብዎን በቅርቡ ያስኬዳል።",
-  "p5WalletRefundLabel": "ተመላሽ"
+  "p5WalletRefundLabel": "ተመላሽ",
+  "p9GiftSendTitle": "ስጦታ ይላኩ",
+  "@p9GiftSendTitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftBannerSubtitle": "በሌላ ከተማ ለሚኖሩ ቤተሰብዎ ምግብ ያዝዙ። ለመከታተል የኤስኤምኤስ መልዕክት ይደርሳቸዋል።",
+  "@p9GiftBannerSubtitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftIntroBody": "ተቀባዩ የሚኖርበትን ከተማ ይምረጡ፣ ምግብ ቤት ይምረጡና እንደተለመደው ጋሪዎን ይሙሉ። በክፍያ ጊዜ የተቀባዩን ስም እና ስልክ ቁጥር ያስገቡና በኦንላይን ይክፈሉ።",
+  "@p9GiftIntroBody": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftChooseMarket": "ተቀባዩ የሚኖረው የት ነው?",
+  "@p9GiftChooseMarket": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftChooseRestaurant": "ምግብ ቤት ይምረጡ",
+  "@p9GiftChooseRestaurant": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftHowItWorksSms": "ተቀባዩ የመከታተያ ሊንክ እና ባለ 4 አሃዝ የማድረሻ ኮድ ያለው ኤስኤምኤስ ይደርሰዋል።",
+  "@p9GiftHowItWorksSms": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftHowItWorksPay": "በኦንላይን ይከፍላሉ። ለስጦታዎች በማድረሻ ጊዜ በጥሬ ገንዘብ መክፈል አይቻልም።",
+  "@p9GiftHowItWorksPay": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftSectionTitle": "እንደ ስጦታ ይላኩ",
+  "@p9GiftSectionTitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftSectionSubtitle": "ለተቀባዩ እናደርሳለን እና የመከታተያ ሊንክ በመልዕክት እንልካለን",
+  "@p9GiftSectionSubtitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftToggle": "ይህ ትዕዛዝ ስጦታ ነው",
+  "@p9GiftToggle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftRecipientName": "የተቀባዩ ስም",
+  "@p9GiftRecipientName": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftRecipientPhone": "የተቀባዩ ሞባይል ቁጥር",
+  "@p9GiftRecipientPhone": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftRecipientPhoneHint": "ለምሳሌ {example}",
+  "@p9GiftRecipientPhoneHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
+    "placeholders": {
+      "example": {"type": "String"}
+    }
+  },
+  "p9GiftMessageLabel": "የስጦታ መልዕክት (አማራጭ)",
+  "@p9GiftMessageLabel": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftMessageHint": "ለተቀባዩ አጭር መልዕክት ይጻፉ",
+  "@p9GiftMessageHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftNameRequired": "የተቀባዩን ስም ያስገቡ",
+  "@p9GiftNameRequired": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftPhoneInvalid": "ትክክለኛ የሞባይል ቁጥር ያስገቡ ({prefix} …)",
+  "@p9GiftPhoneInvalid": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
+    "placeholders": {
+      "prefix": {"type": "String"}
+    }
+  },
+  "p9GiftNoCash": "ለስጦታዎች በማድረሻ ጊዜ በጥሬ ገንዘብ መክፈል አይቻልም። የኦንላይን የክፍያ መንገድ ይምረጡ።",
+  "@p9GiftNoCash": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftAddressHint": "የማድረሻ ቦታውን የተቀባዩ አድራሻ ያድርጉት።",
+  "@p9GiftAddressHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftUnavailable": "የስጦታ ትዕዛዞች ገና አልተጀመሩም።",
+  "@p9GiftUnavailable": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftPlacedTitle": "የስጦታ ትዕዛዝ ተልኳል",
+  "@p9GiftPlacedTitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftPlacedBody": "ክፍያው ሲረጋገጥ {name} የመከታተያ ሊንክ እና ባለ 4 አሃዝ የማድረሻ ኮድ ያለው ኤስኤምኤስ ይደርሰዋል። ትዕዛዙ ሲደርስ ኮዱን ለአድራሹ ይሰጣል።",
+  "@p9GiftPlacedBody": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "p9GiftForName": "ለ{name} የተላከ ስጦታ",
+  "@p9GiftForName": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "p9GiftRecipientLabel": "ተቀባይ",
+  "@p9GiftRecipientLabel": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftYourMessage": "የእርስዎ መልዕክት",
+  "@p9GiftYourMessage": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftWalletNote": "በሌላ ገንዘብ ያለ ዋሌት በዛሬው የምንዛሪ ተመን የተለወጠው መጠን ይቀነስበታል።",
+  "@p9GiftWalletNote": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftModeBanner": "ወደ {market} ስጦታ እየላኩ ነው",
+  "@p9GiftModeBanner": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
+    "placeholders": {
+      "market": {"type": "String"}
+    }
+  },
+  "p9GiftStop": "ስጦታውን አቁም",
+  "@p9GiftStop": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftOrderLabel": "የስጦታ ትዕዛዝ",
+  "@p9GiftOrderLabel": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  }
 }

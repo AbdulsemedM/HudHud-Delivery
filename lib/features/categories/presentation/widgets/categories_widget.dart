@@ -8,6 +8,7 @@ import '../../../../core/utils/money_format.dart';
 import '../../../home/presentation/theme/home_colors.dart';
 import '../../model/categories_products_model.dart';
 import '../../../wishlist/presentation/widgets/wishlist_toggle_button.dart';
+import '../../../growth/market_controller.dart';
 
 /// Beautiful category detail header: hero image, gradient overlay, frosted back,
 /// category name, product count, and optional description.
@@ -434,7 +435,7 @@ class ProductDetailsModal extends StatelessWidget {
                       if (product.discount_price != null &&
                           product.discount_price!.isNotEmpty) ...[
                         Text(
-                          formatEtbPriceString(product.discount_price),
+                          formatMoneyPriceString(product.discount_price, currency: MarketController.catalogCurrency),
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.w800,
@@ -443,7 +444,7 @@ class ProductDetailsModal extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          formatEtbPriceString(product.price),
+                          formatMoneyPriceString(product.price, currency: MarketController.catalogCurrency),
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
@@ -453,7 +454,7 @@ class ProductDetailsModal extends StatelessWidget {
                         ),
                       ] else ...[
                         Text(
-                          formatEtbPriceString(product.price),
+                          formatMoneyPriceString(product.price, currency: MarketController.catalogCurrency),
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.w800,
@@ -1078,7 +1079,7 @@ class ProductCard extends StatelessWidget {
                               if (product.discount_price != null &&
                                   product.discount_price!.isNotEmpty) ...[
                                 Text(
-                                  formatEtbPriceString(product.discount_price),
+                                  formatMoneyPriceString(product.discount_price, currency: MarketController.catalogCurrency),
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -1086,7 +1087,7 @@ class ProductCard extends StatelessWidget {
                                   ),
                                 ),
                                 Text(
-                                  formatEtbPriceString(product.price),
+                                  formatMoneyPriceString(product.price, currency: MarketController.catalogCurrency),
                                   style: const TextStyle(
                                     fontSize: 12,
                                     decoration: TextDecoration.lineThrough,
@@ -1095,7 +1096,7 @@ class ProductCard extends StatelessWidget {
                                 ),
                               ] else ...[
                                 Text(
-                                  formatEtbPriceString(product.price),
+                                  formatMoneyPriceString(product.price, currency: MarketController.catalogCurrency),
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -1292,8 +1293,9 @@ class ProductItem extends StatelessWidget {
                                   spacing: 6,
                                   children: [
                                     Text(
-                                      formatEtbPriceString(
+                                      formatMoneyPriceString(
                                         discountPrice ?? price,
+                                        currency: MarketController.catalogCurrency,
                                       ),
                                       style: TextStyle(
                                         fontSize: 17,
@@ -1304,7 +1306,7 @@ class ProductItem extends StatelessWidget {
                                     ),
                                     if (discountPrice != null)
                                       Text(
-                                        formatEtbPriceString(price),
+                                        formatMoneyPriceString(price, currency: MarketController.catalogCurrency),
                                         style: TextStyle(
                                           fontSize: 13,
                                           fontWeight: FontWeight.w600,

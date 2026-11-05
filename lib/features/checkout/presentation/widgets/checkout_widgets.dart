@@ -740,7 +740,7 @@ class _TipSectionState extends State<TipSection> {
             hintStyle: TextStyle(color: scheme.onSurfaceVariant),
             filled: true,
             fillColor: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
-            prefixText: '${normalizeCurrencyCode(widget.currency) ?? 'ETB'} ',
+            prefixText: moneyPrefix(widget.currency),
             suffixIcon: IconButton(
               icon: const Icon(Icons.check_circle_outline),
               color: AppColors.primaryColor,
@@ -875,7 +875,7 @@ class OrderSummarySection extends StatelessWidget {
     }
     final code = currencyCode?.trim();
     if (code != null && code.isNotEmpty) {
-      return '$code ${amount.toStringAsFixed(2)}';
+      return formatMoneyAmount(amount, currency: code);
     }
     return formatMoneyAmount(amount);
   }

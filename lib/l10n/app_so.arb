@@ -1664,5 +1664,136 @@
   "p5CheckOrderStatus": "Hubi xaaladda dalabka",
   "p5RefundedToWallet": "{amount} ayaa lagu celiyay jeebkaaga HudHud",
   "p5RefundManual": "Dalabka waa la joojiyay. Kooxdayadu dhowaan ayay lacagtaada kuu celin doontaa.",
-  "p5WalletRefundLabel": "Lacag celin"
+  "p5WalletRefundLabel": "Lacag celin",
+  "p9GiftSendTitle": "Dir hadiyad",
+  "@p9GiftSendTitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftBannerSubtitle": "U dalbo cunto qoyskaaga ku nool magaalo kale. Waxay helayaan SMS ay kula socdaan.",
+  "@p9GiftBannerSubtitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftIntroBody": "Dooro magaalada uu ku nool yahay qofka hadiyadda helaya, dooro makhaayad oo buuxi gaadhigaaga sidii caadiga ahayd. Marka aad bixinayso, ku dar magaca iyo lambarka taleefanka qofka helaya oo online ku bixi.",
+  "@p9GiftIntroBody": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftChooseMarket": "Xaggee buu ku nool yahay qofka helaya?",
+  "@p9GiftChooseMarket": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftChooseRestaurant": "Dooro makhaayad",
+  "@p9GiftChooseRestaurant": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftHowItWorksSms": "Qofka helaya wuxuu helayaa SMS leh xiriiriye la socod iyo koodh gaarsiin oo 4 lambar ah.",
+  "@p9GiftHowItWorksSms": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftHowItWorksPay": "Online ayaad ku bixinaysaa. Lacag caddaan ah marka la keeno looma oggola hadiyadaha.",
+  "@p9GiftHowItWorksPay": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftSectionTitle": "U dir hadiyad ahaan",
+  "@p9GiftSectionTitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftSectionSubtitle": "Waxaan u geynaynaa qofka helaya, waxaana u diraynaa SMS lagula socdo",
+  "@p9GiftSectionSubtitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftToggle": "Dalabkan waa hadiyad",
+  "@p9GiftToggle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftRecipientName": "Magaca qofka helaya",
+  "@p9GiftRecipientName": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftRecipientPhone": "Lambarka taleefanka qofka helaya",
+  "@p9GiftRecipientPhone": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftRecipientPhoneHint": "Tusaale {example}",
+  "@p9GiftRecipientPhoneHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
+    "placeholders": {
+      "example": {"type": "String"}
+    }
+  },
+  "p9GiftMessageLabel": "Fariinta hadiyadda (ikhtiyaari)",
+  "@p9GiftMessageLabel": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftMessageHint": "U qor qofka helaya qoraal gaaban",
+  "@p9GiftMessageHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftNameRequired": "Geli magaca qofka helaya",
+  "@p9GiftNameRequired": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftPhoneInvalid": "Geli lambar taleefan oo sax ah ({prefix} …)",
+  "@p9GiftPhoneInvalid": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
+    "placeholders": {
+      "prefix": {"type": "String"}
+    }
+  },
+  "p9GiftNoCash": "Lacag caddaan ah marka la keeno looma oggola hadiyadaha. Dooro hab lacag-bixin online ah.",
+  "@p9GiftNoCash": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftAddressHint": "Goobta gaarsiinta u dhig cinwaanka qofka helaya.",
+  "@p9GiftAddressHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftUnavailable": "Dalabaadka hadiyadda weli lama heli karo.",
+  "@p9GiftUnavailable": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftPlacedTitle": "Dalabka hadiyadda waa la gudbiyay",
+  "@p9GiftPlacedTitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftPlacedBody": "Marka lacag-bixinta la xaqiijiyo, {name} wuxuu helayaa SMS leh xiriiriye la socod iyo koodh gaarsiin oo 4 lambar ah. Koodhka wuxuu siinayaa darawalka marka dalabku yimaado.",
+  "@p9GiftPlacedBody": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "p9GiftForName": "Hadiyad loogu talagalay {name}",
+  "@p9GiftForName": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "p9GiftRecipientLabel": "Qofka helaya",
+  "@p9GiftRecipientLabel": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftYourMessage": "Fariintaada",
+  "@p9GiftYourMessage": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftWalletNote": "Jeeb lacag kale ku jirta waxaa laga jarayaa qaddarka la beddelay ee sicirka maanta.",
+  "@p9GiftWalletNote": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftModeBanner": "Hadiyad ayaad u diraysaa {market}",
+  "@p9GiftModeBanner": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
+    "placeholders": {
+      "market": {"type": "String"}
+    }
+  },
+  "p9GiftStop": "Jooji hadiyadda",
+  "@p9GiftStop": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftOrderLabel": "Dalab hadiyad",
+  "@p9GiftOrderLabel": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  }
 }

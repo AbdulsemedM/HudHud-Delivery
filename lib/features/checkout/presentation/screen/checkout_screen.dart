@@ -8,11 +8,15 @@ import '../../../../app/services/saved_location_service.dart';
 import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/api/api_service.dart';
+import '../../../gifting/gift_phone.dart';
+import '../../../gifting/gift_session.dart';
+import '../../../gifting/presentation/gift_widgets.dart';
 import '../../../growth/data/growth_repository.dart';
 import '../../../growth/data/models/checkout_quote.dart';
 import '../../../growth/data/models/checkout_quote_request.dart';
 import '../../../growth/data/models/growth_config.dart';
 import '../../../growth/data/models/hudhud_set.dart';
+import '../../../growth/data/models/market.dart';
 import '../../../growth/growth_scope.dart';
 import '../../../growth/market_controller.dart';
 import '../../../growth/plus_controller.dart';
@@ -98,6 +102,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   /// Points requested when the toggle is on (the server's max_redeemable).
   int _redeemPointsAmount = 0;
 
+  // ── Phase 6 diaspora gifting ────────────────────────────────────────────
+  // POST /customer/gift-orders instead of /customer/orders; the recipient
+  // gets the SMS tracking link + delivery code. No cash, no points.
+  final TextEditingController _giftNameController = TextEditingController();
+  final TextEditingController _giftPhoneController = TextEditingController();
+  final TextEditingController _giftMessageController = TextEditingController();
+  bool _giftMode = false;
+  String? _giftNameError;
+  String? _giftPhoneError;
+
   @override
   void initState() {
     super.initState();
@@ -110,6 +124,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         .map((item) => Map<String, dynamic>.from(item))
         .toList();
     _branchId = _cart.selectedBranchId;
+    _giftMode = GiftSession.instance.active;
+    restoreGiftSession();
     _loadDeliveryAddress();
     WidgetsBinding.instance.addPostFrameCallback((_) => _applyPendingPromo());
     // Phase 3: Plus status for the upsell (hidden unless the server enables it).
@@ -215,7 +231,83 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return quote;
   }
 
+  /// Recipient's market: the gift session's, else the customer's own.
+  Market? get _giftMarket =>
+      GiftSession.instance.market ?? MarketController.instance?.selected;
+
+  GiftPhonePlan get _giftPhonePlan => GiftPhonePlan.forMarket(_giftMarket);
+
+  /// The gift section shows when gifting looks available, or when the
+  /// customer already switched it on (e.g. started from "Send a gift").
+  bool get _showGiftSection {
+    if (_giftMode) return true;
+    return giftingAvailable(
+      config: _growth,
+      markets: MarketController.instance?.markets ?? const <Market>[],
+      serverUnavailable: GiftSession.instance.serverUnavailable,
+    );
+  }
+
+  static bool _isCashMethod(Object? id) =>
+      const {'cash_on_delivery', 'cod', 'cash'}.contains(id?.toString());
+
+  /// Gifts are paid electronically only (the API refuses cash on delivery).
+  List<Map<String, dynamic>> get _visiblePaymentMethods => _giftMode
+      ? _paymentMethods.where((m) => !_isCashMethod(m['id'])).toList()
+      : _paymentMethods;
+
+  void _setGiftMode(bool value) {
+    setState(() {
+      _giftMode = value;
+      _giftNameError = null;
+      _giftPhoneError = null;
+      if (value) {
+        if (_isCashMethod(_selectedPaymentMethod)) {
+          _selectedPaymentMethod = null;
+          _paymentDetails = {};
+        }
+        // The API ignores points on gifts (they are valued in ETB).
+        _redeemPoints = false;
+        _redeemPointsAmount = 0;
+      }
+    });
+    if (!value) GiftSession.instance.clear();
+    _scheduleGrowthQuote(immediate: true);
+  }
+
+  void _stopGift() => _setGiftMode(false);
+
+  /// Validates the recipient; returns the `gift` order details or null
+  /// (errors are shown on the fields and in a snackbar).
+  Map<String, dynamic>? _validatedGift() {
+    final l10n = context.l10n;
+    final plan = _giftPhonePlan;
+    final name = _giftNameController.text.trim();
+    final phone = plan.normalize(_giftPhoneController.text);
+    final nameError = name.isEmpty ? l10n.p9GiftNameRequired : null;
+    final phoneError =
+        phone == null ? l10n.p9GiftPhoneInvalid(plan.dialPrefix) : null;
+    setState(() {
+      _giftNameError = nameError;
+      _giftPhoneError = phoneError;
+    });
+    final firstError = nameError ?? phoneError;
+    if (firstError != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(firstError), backgroundColor: Colors.red),
+      );
+      return null;
+    }
+    final message = _giftMessageController.text.trim();
+    return <String, dynamic>{
+      'recipient_name': name,
+      'recipient_phone': phone,
+      if (message.isNotEmpty) 'gift_message': message,
+    };
+  }
+
   int? get _requestedRedeemPoints {
+    if (_giftMode) return null;
     if (!_redeemPoints || !_growth.rewardsEnabled) return null;
     return _redeemPointsAmount > 0 ? _redeemPointsAmount : null;
   }
@@ -412,7 +504,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
     final code = quote?.currency.trim();
     if (code != null && code.isNotEmpty) {
-      return '$code ${amount.toStringAsFixed(2)}';
+      return formatMoneyAmount(amount, currency: code);
     }
     // ETB / unknown → identical to the previous 'ETB x.xx'.
     return formatMoneyAmount(amount, currency: _displayCurrency);
@@ -784,6 +876,21 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       return;
     }
 
+    Map<String, dynamic>? gift;
+    if (_giftMode) {
+      if (_isCashMethod(_selectedPaymentMethod)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.l10n.p9GiftNoCash),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+      gift = _validatedGift();
+      if (gift == null) return;
+    }
+
     if (paymentMethodNeedsDetailsForm(_selectedPaymentMethod)) {
       final phoneError = validatePaymentPhone(
         _paymentDetails['phone']?.toString(),
@@ -869,6 +976,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 if (_requestedRedeemPoints != null &&
                     _activeGrowthQuote != null)
                   'redeem_points': _requestedRedeemPoints,
+                // Phase 6: recipient → POST /customer/gift-orders.
+                if (gift != null) 'gift': gift,
               },
             },
           ),
@@ -951,6 +1060,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     // redeemed (balance ≥ minimum is enforced server-side via max_redeemable).
     final points = _growthQuote?.points;
     if (growth.rewardsEnabled &&
+        !_giftMode &&
         points != null &&
         points.balance >= growth.rewardsMinRedeemPoints &&
         points.maxRedeemable > 0) {
@@ -1060,11 +1170,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   );
                 }
                 CartService().clear();
+                final giftName = state.giftRecipientName;
+                if (state.isGift) GiftSession.instance.clear();
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(
                     builder: (_) => PaymentInitiateResultScreen(
                       result: state.result,
                       orderId: state.orderId,
+                      banner: giftName == null
+                          ? null
+                          : GiftPlacedBanner(recipientName: giftName),
                     ),
                   ),
                 );
@@ -1090,6 +1205,21 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       ),
                       orderId: state.transactionId,
                     ),
+                  ),
+                );
+              } else if (state is PaymentFailure &&
+                  GiftSession.unavailableCodes.contains(state.code)) {
+                // Gifting is off / not migrated: hide it and keep the cart.
+                unawaited(GiftSession.instance.markUnavailable());
+                setState(() {
+                  _giftMode = false;
+                  _giftNameError = null;
+                  _giftPhoneError = null;
+                });
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(context.l10n.p9GiftUnavailable),
+                    backgroundColor: Colors.red,
                   ),
                 );
               } else if (state is PaymentFailure) {
@@ -1122,6 +1252,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
                   sliver: SliverList(
                     delegate: SliverChildListDelegate([
+                      if (_giftMode && GiftSession.instance.market != null)
+                        GiftModeBanner(
+                          marketName: GiftSession.instance.market!.name,
+                          onStop: _stopGift,
+                        ),
                       CheckoutSectionCard(
                         icon: Icons.shopping_basket_outlined,
                         title: 'Your items',
@@ -1156,6 +1291,43 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           onChangeAddress: _onChangeAddress,
                         ),
                       ),
+                      if (_showGiftSection)
+                        CheckoutSectionCard(
+                          icon: Icons.card_giftcard_rounded,
+                          title: context.l10n.p9GiftSectionTitle,
+                          subtitle: context.l10n.p9GiftSectionSubtitle,
+                          accentColor: AppColors.brandOrange,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              SwitchListTile.adaptive(
+                                key: const ValueKey('gift-toggle'),
+                                contentPadding: EdgeInsets.zero,
+                                value: _giftMode,
+                                onChanged: _setGiftMode,
+                                title: Text(context.l10n.p9GiftToggle),
+                              ),
+                              if (_giftMode)
+                                GiftRecipientForm(
+                                  nameController: _giftNameController,
+                                  phoneController: _giftPhoneController,
+                                  messageController: _giftMessageController,
+                                  phonePlan: _giftPhonePlan,
+                                  nameError: _giftNameError,
+                                  phoneError: _giftPhoneError,
+                                  onChanged: () {
+                                    if (_giftNameError != null ||
+                                        _giftPhoneError != null) {
+                                      setState(() {
+                                        _giftNameError = null;
+                                        _giftPhoneError = null;
+                                      });
+                                    }
+                                  },
+                                ),
+                            ],
+                          ),
+                        ),
                       CheckoutSectionCard(
                         icon: Icons.edit_note_outlined,
                         title: 'Order notes',
@@ -1189,7 +1361,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           children: [
                             PaymentMethodGridSection(
                               selectedId: _selectedPaymentMethod,
-                              methods: _paymentMethods,
+                              methods: _visiblePaymentMethods,
                               isLoading: _loadingMethods,
                               onSelected: (id) => setState(() {
                                 _selectedPaymentMethod = id;
@@ -1211,6 +1383,22 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 onChanged: (details) {
                                   _paymentDetails = details;
                                 },
+                              ),
+                            // The API converts a wallet in another currency
+                            // but does not return the converted amount.
+                            if (_giftMode &&
+                                _selectedPaymentMethod == 'wallet')
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8),
+                                child: Text(
+                                  context.l10n.p9GiftWalletNote,
+                                  style: TextStyle(
+                                    fontSize: 12.5,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
+                                ),
                               ),
                           ],
                         ),
@@ -1268,6 +1456,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     _growthQuoteDebounce?.cancel();
     PlusController.instance.removeListener(_onPlusChanged);
     _notesController.dispose();
+    _giftNameController.dispose();
+    _giftPhoneController.dispose();
+    _giftMessageController.dispose();
     super.dispose();
   }
 }

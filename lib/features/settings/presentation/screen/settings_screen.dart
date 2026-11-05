@@ -574,11 +574,11 @@ class _SettingsScreenState extends State<SettingsScreen>
 
     // Phase 3: non-ETB wallets show their own code; ETB is unchanged.
     final walletCurrencyLabel = isEtbCurrency(_walletCurrency)
-        ? l10n.currencyEtb
-        : normalizeCurrencyCode(_walletCurrency)!;
+        ? '${l10n.currencyEtb} '
+        : moneyPrefix(_walletCurrency);
     final walletText = _walletTotal == null
         ? l10n.emDash
-        : '$walletCurrencyLabel ${_walletTotal!.toStringAsFixed(2)}';
+        : '$walletCurrencyLabel${_walletTotal!.toStringAsFixed(2)}';
     final plus = PlusController.instance.status;
     final marketController = marketControllerOf(context, listen: true);
     final showMarketPicker = marketController?.canPick ?? false;

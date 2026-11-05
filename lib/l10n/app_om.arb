@@ -1664,5 +1664,136 @@
   "p5CheckOrderStatus": "Haala ajajaa ilaali",
   "p5RefundedToWallet": "{amount} waaletii HudHud keetti deebi'eera",
   "p5RefundManual": "Ajajni haqameera. Gareen keenya dhiyootti maallaqa kee siif deebisa.",
-  "p5WalletRefundLabel": "Deebii"
+  "p5WalletRefundLabel": "Deebii",
+  "p9GiftSendTitle": "Kennaa ergi",
+  "@p9GiftSendTitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftBannerSubtitle": "Maatii kee magaalaa biraa jiraataniif nyaata ajaji. Hordofuuf SMS ni argatu.",
+  "@p9GiftBannerSubtitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftIntroBody": "Magaalaa namni kennaa fudhatu itti jiraatu filadhu, mana nyaataa filadhuutii akkuma yeroo hundaa gaarii kee guuti. Yeroo kaffaltii, maqaa fi lakkoofsa bilbilaa nama fudhatuu galchiitii toora interneetiitiin kaffali.",
+  "@p9GiftIntroBody": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftChooseMarket": "Namni fudhatu eessa jiraata?",
+  "@p9GiftChooseMarket": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftChooseRestaurant": "Mana nyaataa filadhu",
+  "@p9GiftChooseRestaurant": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftHowItWorksSms": "Namni fudhatu SMS liinkii hordoffii fi koodii geejjibaa lakkoofsa 4 qabu ni argata.",
+  "@p9GiftHowItWorksSms": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftHowItWorksPay": "Toora interneetiitiin kaffalta. Kennaaf kaffaltiin maallaqa harkaa yeroo geejjibaa hin hayyamamu.",
+  "@p9GiftHowItWorksPay": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftSectionTitle": "Akka kennaatti ergi",
+  "@p9GiftSectionTitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftSectionSubtitle": "Nama fudhatuuf ni geessina, liinkii hordoffii SMS-n ni ergina",
+  "@p9GiftSectionSubtitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftToggle": "Ajajni kun kennaa dha",
+  "@p9GiftToggle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftRecipientName": "Maqaa nama fudhatuu",
+  "@p9GiftRecipientName": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftRecipientPhone": "Lakkoofsa bilbila harkaa nama fudhatuu",
+  "@p9GiftRecipientPhone": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftRecipientPhoneHint": "Fakkeenyaaf {example}",
+  "@p9GiftRecipientPhoneHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
+    "placeholders": {
+      "example": {"type": "String"}
+    }
+  },
+  "p9GiftMessageLabel": "Ergaa kennaa (dirqama miti)",
+  "@p9GiftMessageLabel": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftMessageHint": "Nama fudhatuuf ergaa gabaabaa barreessi",
+  "@p9GiftMessageHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftNameRequired": "Maqaa nama fudhatuu galchi",
+  "@p9GiftNameRequired": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftPhoneInvalid": "Lakkoofsa bilbila harkaa sirrii galchi ({prefix} …)",
+  "@p9GiftPhoneInvalid": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
+    "placeholders": {
+      "prefix": {"type": "String"}
+    }
+  },
+  "p9GiftNoCash": "Kennaaf kaffaltiin maallaqa harkaa yeroo geejjibaa hin hayyamamu. Mala kaffaltii toora interneetii filadhu.",
+  "@p9GiftNoCash": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftAddressHint": "Bakka geejjibaa teessoo nama fudhatuu godhi.",
+  "@p9GiftAddressHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftUnavailable": "Ajajni kennaa ammaaf hin jiru.",
+  "@p9GiftUnavailable": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftPlacedTitle": "Ajajni kennaa ergameera",
+  "@p9GiftPlacedTitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftPlacedBody": "Yeroo kaffaltiin mirkanaa'u, {name} SMS liinkii hordoffii fi koodii geejjibaa lakkoofsa 4 qabu ni argata. Yeroo ajajni ga'u koodii sana geessituuf kenna.",
+  "@p9GiftPlacedBody": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "p9GiftForName": "Kennaa {name}f",
+  "@p9GiftForName": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "p9GiftRecipientLabel": "Nama fudhatu",
+  "@p9GiftRecipientLabel": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftYourMessage": "Ergaa kee",
+  "@p9GiftYourMessage": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftWalletNote": "Waalletiin maallaqa biraa qabu gatii jijjiirraa har'aatiin kan jijjiirame irraa hir'ifama.",
+  "@p9GiftWalletNote": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftModeBanner": "Kennaa gara {market} erguu",
+  "@p9GiftModeBanner": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
+    "placeholders": {
+      "market": {"type": "String"}
+    }
+  },
+  "p9GiftStop": "Kennaa dhaabi",
+  "@p9GiftStop": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftOrderLabel": "Ajaja kennaa",
+  "@p9GiftOrderLabel": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  }
 }

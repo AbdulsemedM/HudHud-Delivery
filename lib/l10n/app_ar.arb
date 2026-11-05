@@ -1664,5 +1664,136 @@
   "p5CheckOrderStatus": "تحقق من حالة الطلب",
   "p5RefundedToWallet": "تم استرداد {amount} إلى محفظة HudHud الخاصة بك",
   "p5RefundManual": "تم إلغاء الطلب. سيقوم فريقنا بمعالجة استرداد أموالك قريبًا.",
-  "p5WalletRefundLabel": "استرداد"
+  "p5WalletRefundLabel": "استرداد",
+  "p9GiftSendTitle": "أرسل هدية",
+  "@p9GiftSendTitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftBannerSubtitle": "اطلب وجبة لعائلتك في مدينة أخرى. سيتلقون رسالة نصية لتتبعها.",
+  "@p9GiftBannerSubtitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftIntroBody": "اختر المدينة التي يعيش فيها المستلم، ثم اختر مطعمًا واملأ سلتك كالمعتاد. عند الدفع، أدخل اسم المستلم ورقم هاتفه وادفع إلكترونيًا.",
+  "@p9GiftIntroBody": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftChooseMarket": "أين يعيش المستلم؟",
+  "@p9GiftChooseMarket": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftChooseRestaurant": "اختر مطعمًا",
+  "@p9GiftChooseRestaurant": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftHowItWorksSms": "يتلقى المستلم رسالة نصية تحتوي على رابط للتتبع ورمز توصيل من 4 أرقام.",
+  "@p9GiftHowItWorksSms": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftHowItWorksPay": "تدفع إلكترونيًا. الدفع عند الاستلام غير متاح للهدايا.",
+  "@p9GiftHowItWorksPay": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftSectionTitle": "أرسل كهدية",
+  "@p9GiftSectionTitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftSectionSubtitle": "نوصل الطلب إلى المستلم ونرسل له رابط التتبع برسالة نصية",
+  "@p9GiftSectionSubtitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftToggle": "هذا الطلب هدية",
+  "@p9GiftToggle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftRecipientName": "اسم المستلم",
+  "@p9GiftRecipientName": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftRecipientPhone": "رقم جوال المستلم",
+  "@p9GiftRecipientPhone": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftRecipientPhoneHint": "مثال: {example}",
+  "@p9GiftRecipientPhoneHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
+    "placeholders": {
+      "example": {"type": "String"}
+    }
+  },
+  "p9GiftMessageLabel": "رسالة الهدية (اختياري)",
+  "@p9GiftMessageLabel": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftMessageHint": "اكتب ملاحظة قصيرة للمستلم",
+  "@p9GiftMessageHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftNameRequired": "أدخل اسم المستلم",
+  "@p9GiftNameRequired": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftPhoneInvalid": "أدخل رقم جوال صحيحًا ({prefix} …)",
+  "@p9GiftPhoneInvalid": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
+    "placeholders": {
+      "prefix": {"type": "String"}
+    }
+  },
+  "p9GiftNoCash": "الدفع عند الاستلام غير متاح للهدايا. اختر طريقة دفع إلكترونية.",
+  "@p9GiftNoCash": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftAddressHint": "اجعل موقع التوصيل عنوان المستلم.",
+  "@p9GiftAddressHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftUnavailable": "طلبات الهدايا غير متاحة بعد.",
+  "@p9GiftUnavailable": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftPlacedTitle": "تم تقديم طلب الهدية",
+  "@p9GiftPlacedTitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftPlacedBody": "عند تأكيد الدفع، يتلقى {name} رسالة نصية تحتوي على رابط للتتبع ورمز توصيل من 4 أرقام، ويعطي الرمز للمندوب عند وصول الطلب.",
+  "@p9GiftPlacedBody": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "p9GiftForName": "هدية إلى {name}",
+  "@p9GiftForName": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "p9GiftRecipientLabel": "المستلم",
+  "@p9GiftRecipientLabel": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftYourMessage": "رسالتك",
+  "@p9GiftYourMessage": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftWalletNote": "المحفظة بعملة أخرى تُخصم منها القيمة المحوّلة بسعر اليوم.",
+  "@p9GiftWalletNote": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftModeBanner": "إرسال هدية إلى {market}",
+  "@p9GiftModeBanner": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
+    "placeholders": {
+      "market": {"type": "String"}
+    }
+  },
+  "p9GiftStop": "إيقاف الهدية",
+  "@p9GiftStop": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftOrderLabel": "طلب هدية",
+  "@p9GiftOrderLabel": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  }
 }

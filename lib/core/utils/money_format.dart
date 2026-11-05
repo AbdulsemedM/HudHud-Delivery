@@ -1,4 +1,7 @@
-/// Display helpers for Ethiopian Birr — never use `$`.
+/// Display helpers for Ethiopian Birr — never use `$` for ETB.
+///
+/// US dollar amounts (Hargeisa market) go through [formatMoneyAmount] and
+/// do use `$`.
 ///
 /// - Short code: `ETB 12.50`
 /// - Compact sign: `Br 12.50`
@@ -45,11 +48,19 @@ bool isEtbCurrency(String? currency) {
   return c == null || c == 'ETB';
 }
 
+/// Display prefix for [currency]: `$` for US dollars (Hargeisa), otherwise
+/// the ISO code and a space (`ETB `, `KES `). Blank means ETB.
+String moneyPrefix(String? currency) {
+  final code = normalizeCurrencyCode(currency) ?? 'ETB';
+  if (code == 'USD') return r'$';
+  return '$code ';
+}
+
 /// Formats [amount] in [currency] (Phase 3 multi-market).
 ///
 /// ETB / blank produces exactly [formatEtbAmount]'s output, so existing
-/// Addis Ababa screens render unchanged. Other currencies use the code as a
-/// prefix: `USD 12.50`.
+/// Addis Ababa screens render unchanged. US dollars use the sign (`$12.50`,
+/// `-$3.00`); other currencies use the code as a prefix: `KES 12.50`.
 String formatMoneyAmount(
   num amount, {
   String? currency,
@@ -58,5 +69,31 @@ String formatMoneyAmount(
   if (isEtbCurrency(currency)) {
     return formatEtbAmount(amount, fractionDigits: fractionDigits);
   }
-  return '${normalizeCurrencyCode(currency)} ${amount.toStringAsFixed(fractionDigits)}';
+  final prefix = moneyPrefix(currency);
+  if (amount < 0 && prefix == r'$') {
+    return '-$prefix${(-amount).toStringAsFixed(fractionDigits)}';
+  }
+  return '$prefix${amount.toStringAsFixed(fractionDigits)}';
+}
+
+/// Like [formatEtbPriceString] but in [currency]: ETB / blank output is
+/// unchanged; for other currencies any `$` / code / `Br` the API put in the
+/// string is replaced by [moneyPrefix] (`$12.50`).
+String formatMoneyPriceString(
+  String? raw, {
+  String? currency,
+}) {
+  if (isEtbCurrency(currency)) return formatEtbPriceString(raw);
+  final cleaned = (raw ?? '')
+      .trim()
+      .replaceAll('\$', '')
+      .replaceAll(
+        RegExp(r'^(USD|ETB|Br|Birr)\s*', caseSensitive: false),
+        '',
+      )
+      .trim();
+  if (cleaned.isEmpty) return formatMoneyAmount(0, currency: currency);
+  final parsed = double.tryParse(cleaned.replaceAll(',', ''));
+  if (parsed != null) return formatMoneyAmount(parsed, currency: currency);
+  return '${moneyPrefix(currency)}$cleaned';
 }

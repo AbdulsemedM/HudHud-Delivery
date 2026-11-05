@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/utils/money_format.dart';
 import 'package:hudhud_delivery/features/wallet/bloc/wallet_bloc.dart';
 import 'package:hudhud_delivery/features/wallet/data/providers/wallet_data_provider.dart';
 import 'package:hudhud_delivery/features/wallet/data/repositories/wallet_repository.dart';
@@ -70,7 +71,7 @@ class WalletDetailScreen extends StatelessWidget {
                     const SizedBox(height: 16),
                     _DetailRow(
                       label: l10n.balance,
-                      value: '${b.currency} ${b.balance.toStringAsFixed(2)}',
+                      value: '${moneyPrefix(b.currency)}${b.balance.toStringAsFixed(2)}',
                     ),
                     _DetailRow(
                       label: l10n.walletDetailCurrencyLabel,

@@ -39,6 +39,11 @@ class GrowthConfig {
   /// Sponsored items still only appear when the server returns them.
   final bool adsEnabled;
 
+  /// Phase 6 diaspora gifting. The server keeps `gifting.enabled` in its
+  /// launch settings and does not publish it in this config today, so this
+  /// is null ("not said") unless a `gifting: {enabled}` block is ever sent.
+  final bool? giftingEnabled;
+
   const GrowthConfig({
     required this.loaded,
     this.currency = 'ETB',
@@ -60,6 +65,7 @@ class GrowthConfig {
     this.marketCode,
     this.marketCurrency,
     this.adsEnabled = false,
+    this.giftingEnabled,
   });
 
   static const GrowthConfig disabled = GrowthConfig(loaded: false);
@@ -79,6 +85,7 @@ class GrowthConfig {
     final reorder = growthMap(json['reorder']);
     final market = growthMap(json['market']);
     final ads = growthMap(json['ads']);
+    final gifting = growthMap(json['gifting']);
 
     final redeemPoints = growthInt(rewards['redeem_points'], 100);
     return GrowthConfig(
@@ -103,6 +110,9 @@ class GrowthConfig {
       marketCode: growthString(market?['code'])?.toLowerCase(),
       marketCurrency: growthString(market?['currency'])?.toUpperCase(),
       adsEnabled: ads == null ? true : growthBool(ads['enabled'], true),
+      giftingEnabled: gifting == null || !gifting.containsKey('enabled')
+          ? null
+          : growthBool(gifting['enabled']),
     );
   }
 

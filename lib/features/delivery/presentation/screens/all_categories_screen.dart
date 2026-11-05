@@ -31,12 +31,32 @@ import 'package:hudhud_delivery/features/products/model/popular_product_model.da
 import 'package:hudhud_delivery/features/products/presentation/screens/product_search_results_screen.dart';
 import 'package:hudhud_delivery/features/vendors/data/data_provider/vendors_data_provider.dart';
 import 'package:hudhud_delivery/features/vendors/data/repository/vendors_repository.dart';
+import 'package:hudhud_delivery/features/growth/market_controller.dart';
+import 'package:hudhud_delivery/core/utils/money_format.dart';
+import 'package:hudhud_delivery/features/growth/data/models/market.dart';
+import 'package:hudhud_delivery/features/gifting/gift_session.dart';
+import 'package:hudhud_delivery/features/gifting/presentation/gift_widgets.dart';
+import 'package:hudhud_delivery/features/gifting/presentation/send_gift_screen.dart';
 
 class AllCategoriesScreen extends StatelessWidget {
   /// When true (e.g. home Food & groceries tab), no [Scaffold] app bar — fills parent only.
-  const AllCategoriesScreen({super.key, this.embedded = false});
+  const AllCategoriesScreen({
+    super.key,
+    this.embedded = false,
+    this.discoveryLatitude,
+    this.discoveryLongitude,
+    this.title,
+  });
 
   final bool embedded;
+
+  /// Phase 6 gifting: list stores near these coordinates (the recipient's
+  /// market centre) instead of the device location.
+  final double? discoveryLatitude;
+  final double? discoveryLongitude;
+
+  /// App bar title when not [embedded] (default "All categories").
+  final String? title;
 
   @override
   Widget build(BuildContext context) {
@@ -52,15 +72,28 @@ class AllCategoriesScreen extends StatelessWidget {
     return BlocProvider(
       create: (context) => CategoriesBloc(repository, productsRepository)
         ..add(FetchCategoriesListEvent()),
-      child: _AllCategoriesBody(embedded: embedded),
+      child: _AllCategoriesBody(
+        embedded: embedded,
+        discoveryLatitude: discoveryLatitude,
+        discoveryLongitude: discoveryLongitude,
+        title: title,
+      ),
     );
   }
 }
 
 class _AllCategoriesBody extends StatefulWidget {
-  const _AllCategoriesBody({required this.embedded});
+  const _AllCategoriesBody({
+    required this.embedded,
+    this.discoveryLatitude,
+    this.discoveryLongitude,
+    this.title,
+  });
 
   final bool embedded;
+  final double? discoveryLatitude;
+  final double? discoveryLongitude;
+  final String? title;
 
   @override
   State<_AllCategoriesBody> createState() => _AllCategoriesBodyState();
@@ -130,6 +163,32 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
     setState(() => _reorderSuggestions = list);
   }
 
+  void _onGiftSessionChanged() {
+    if (mounted) setState(() {});
+  }
+
+  /// Phase 6: "Send a gift" entry when a gift market exists and the server
+  /// has not answered FEATURE_DISABLED recently.
+  bool get _showGiftEntry {
+    final markets = marketControllerOf(context, listen: false)?.markets ??
+        const <Market>[];
+    return giftingAvailable(
+      config: growthConfigOf(context, listen: false),
+      markets: markets,
+      serverUnavailable: GiftSession.instance.serverUnavailable,
+    );
+  }
+
+  void _openSendGift() {
+    final markets = marketControllerOf(context, listen: false)?.markets ??
+        const <Market>[];
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => SendGiftScreen(markets: giftMarkets(markets)),
+      ),
+    );
+  }
+
   /// Slivers placed above categories; empty (no layout change) when off.
   List<Widget> _growthSlivers() {
     if (!widget.embedded) return const [];
@@ -137,6 +196,11 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
     final feedOn = controller?.homeFeedEnabled ?? false;
     final reorderOn = controller?.reorderEnabled ?? false;
     final slivers = <Widget>[];
+    if (_showGiftEntry) {
+      slivers.add(SliverToBoxAdapter(
+        child: GiftEntryBanner(onTap: _openSendGift),
+      ));
+    }
     if (feedOn && _homeFeed.banners.isNotEmpty) {
       slivers.add(SliverToBoxAdapter(
         child: HomeFeedBannerCarousel(
@@ -171,8 +235,16 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
   }
 
   @override
+  void dispose() {
+    GiftSession.instance.removeListener(_onGiftSessionChanged);
+    super.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
+    GiftSession.instance.addListener(_onGiftSessionChanged);
+    restoreGiftSession();
     _vendorsRepository = VendorsRepository(
       vendorsDataProvider: VendorsDataProvider(apiService: ApiService.instance),
     );
@@ -203,12 +275,23 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
       _vendorsError = null;
     });
     try {
-      final location = StartupLocationService.cached ??
-          await StartupLocationService.fetchAtStartup();
+      final overrideLat = widget.discoveryLatitude;
+      final overrideLng = widget.discoveryLongitude;
+      double? latitude;
+      double? longitude;
+      if (overrideLat != null && overrideLng != null) {
+        latitude = overrideLat;
+        longitude = overrideLng;
+      } else {
+        final location = StartupLocationService.cached ??
+            await StartupLocationService.fetchAtStartup();
+        latitude = location?.latitude;
+        longitude = location?.longitude;
+      }
       final list = await _vendorsRepository.getVendors(
         page: 1,
-        latitude: location?.latitude,
-        longitude: location?.longitude,
+        latitude: latitude,
+        longitude: longitude,
       );
       if (!mounted) return;
       setState(() {
@@ -373,7 +456,7 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
       appBar: AppBar(
         centerTitle: true,
         title: Text(
-          'All categories',
+          widget.title ?? 'All categories',
           style: TextStyle(
             fontWeight: FontWeight.w800,
             fontSize: 19,
@@ -1435,7 +1518,7 @@ class _PopularProductCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 12),
                         Text(
-                          'ETB ${item.displayPrice}',
+                          '${moneyPrefix(MarketController.catalogCurrency)}${item.displayPrice}',
                           style: TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.w800,
@@ -1507,7 +1590,7 @@ class _PopularProductCard extends StatelessWidget {
                             const SizedBox(width: 4),
                             Expanded(
                               child: Text(
-                                'ETB $deliveryFee delivery',
+                                '${moneyPrefix(MarketController.catalogCurrency)}$deliveryFee delivery',
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,

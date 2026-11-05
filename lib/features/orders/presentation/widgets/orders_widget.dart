@@ -7,6 +7,7 @@ import 'package:hudhud_delivery/core/widgets/status_chip.dart';
 import 'package:hudhud_delivery/core/widgets/user_avatar.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/models/user_model.dart';
+import 'package:hudhud_delivery/features/gifting/presentation/gift_widgets.dart';
 import '../../data/models/order_model.dart';
 import 'package:intl/intl.dart';
 
@@ -420,14 +421,17 @@ class OrderItemCard extends StatelessWidget {
     final statusColor = StatusChip.colorForStatus(order.status);
     final dark = HomeColors.isDark(context);
     final radius = BorderRadius.circular(20);
-    final amount =
-        'ETB ${double.tryParse(order.totalAmount)?.toStringAsFixed(2) ?? order.totalAmount}';
+    // USD (Hargeisa) orders show `$`; ETB output is unchanged.
+    final amount = order.formattedTotal;
+    final giftName = order.giftRecipientDisplayName;
     final ink = HomeColors.textPrimaryOf(context);
     final muted = HomeColors.textMutedOf(context);
 
     return Semantics(
       button: true,
-      label: '${order.vendor.name}. $amount',
+      label: giftName == null
+          ? '${order.vendor.name}. $amount'
+          : '${order.vendor.name}. ${context.l10n.p9GiftForName(giftName)}. $amount',
       child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: radius,
@@ -494,6 +498,10 @@ class OrderItemCard extends StatelessWidget {
                             ),
                           ],
                         ),
+                        if (giftName != null) ...[
+                          const SizedBox(height: 3),
+                          GiftForLabel(name: giftName),
+                        ],
                         const SizedBox(height: 3),
                         Text(
                           _formatDate(order.createdAt),

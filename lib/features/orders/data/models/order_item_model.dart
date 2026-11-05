@@ -94,6 +94,15 @@ class OrderItemModel extends Equatable {
     }
   }
 
+  /// [formattedPrice] in the order's currency (`$4.50` for a USD order).
+  String formattedPriceIn(String? currency) {
+    final priceValue = double.tryParse(price);
+    if (priceValue != null) {
+      return formatMoneyAmount(priceValue, currency: currency);
+    }
+    return formatMoneyPriceString(price, currency: currency);
+  }
+
   @override
   List<Object?> get props => [
         id,

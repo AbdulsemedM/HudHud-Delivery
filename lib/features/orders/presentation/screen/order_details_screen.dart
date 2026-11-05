@@ -265,6 +265,10 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                   trackingEstimatedTime: tracking?.estimatedTime,
                 ),
                 const SizedBox(height: 14),
+                if (order.isGift) ...[
+                  GiftOrderCard(order: order),
+                  const SizedBox(height: 14),
+                ],
                 if (tracking != null) ...[
                   OrderTrackingCard(tracking: tracking),
                   const SizedBox(height: 14),
@@ -279,7 +283,10 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 const SizedBox(height: 14),
                 VendorInfoCard(vendor: order.vendor),
                 const SizedBox(height: 14),
-                OrderItemsCard(items: order.items),
+                OrderItemsCard(
+                  items: order.items,
+                  currency: order.currency,
+                ),
                 const SizedBox(height: 14),
                 OrderSummaryCard(order: order),
                 // Phase 2: rebuild the cart from this past order.

@@ -44,6 +44,17 @@ class OrderModel extends Equatable {
   /// (`orders.set_delivery_subsidy`); 0 when absent.
   final double setDeliverySubsidy;
 
+  /// Order currency (`orders.currency`): `USD` for Hargeisa, else ETB.
+  /// Null on old payloads (= ETB).
+  final String? currency;
+
+  /// Phase 6 diaspora gifting: the payer (this customer) ordered for a
+  /// recipient who gets the SMS tracking link and the delivery code.
+  final bool isGift;
+  final String? recipientName;
+  final String? recipientPhone;
+  final String? giftMessage;
+
   const OrderModel({
     required this.id,
     required this.orderNumber,
@@ -78,7 +89,24 @@ class OrderModel extends Equatable {
     this.customer,
     this.driver,
     this.setDeliverySubsidy = 0,
+    this.currency,
+    this.isGift = false,
+    this.recipientName,
+    this.recipientPhone,
+    this.giftMessage,
   });
+
+  static String? _parseText(dynamic v) {
+    final s = v?.toString().trim();
+    return s == null || s.isEmpty ? null : s;
+  }
+
+  static bool _parseBool(dynamic v) {
+    if (v is bool) return v;
+    if (v is num) return v != 0;
+    final s = v?.toString().trim().toLowerCase();
+    return s == 'true' || s == '1';
+  }
 
   static int _parseInt(dynamic v) {
     if (v == null) return 0;
@@ -172,6 +200,11 @@ class OrderModel extends Equatable {
               Map<String, dynamic>.from(json['driver'] as Map),
             )
           : null,
+      currency: _parseText(json['currency'])?.toUpperCase(),
+      isGift: _parseBool(json['is_gift']),
+      recipientName: _parseText(json['recipient_name']),
+      recipientPhone: _parseText(json['recipient_phone']),
+      giftMessage: _parseText(json['gift_message']),
     );
   }
 
@@ -210,6 +243,11 @@ class OrderModel extends Equatable {
       'vendor': vendor.toJson(),
       'customer': customer?.toJson(),
       'driver': driver?.toJson(),
+      'currency': currency,
+      'is_gift': isGift,
+      'recipient_name': recipientName,
+      'recipient_phone': recipientPhone,
+      'gift_message': giftMessage,
     };
   }
 
@@ -252,9 +290,9 @@ class OrderModel extends Equatable {
   String get formattedTotal {
     try {
       final total = double.parse(totalAmount);
-      return formatEtbAmount(total);
+      return formatMoneyAmount(total, currency: currency);
     } catch (e) {
-      return formatEtbPriceString(totalAmount);
+      return formatMoneyPriceString(totalAmount, currency: currency);
     }
   }
   
@@ -269,39 +307,52 @@ class OrderModel extends Equatable {
   String get formattedDiscount {
     try {
       final discount = double.parse(discountAmount);
-      return formatEtbAmount(discount);
+      return formatMoneyAmount(discount, currency: currency);
     } catch (e) {
-      return formatEtbPriceString(discountAmount);
+      return formatMoneyPriceString(discountAmount, currency: currency);
     }
   }
   
+  /// Recipient's name for a gift order (null when not a gift).
+  String? get giftRecipientDisplayName {
+    if (!isGift) return null;
+    return recipientName ?? recipientPhone;
+  }
+
+  /// `+252634123456` style for display (the API stores digits only).
+  String? get giftRecipientPhoneDisplay {
+    final phone = recipientPhone;
+    if (phone == null) return null;
+    return phone.startsWith('+') ? phone : '+$phone';
+  }
+
   /// HudHud Set order: HudHud paid (part of) the delivery fee.
   bool get hasSetDeliverySubsidy => setDeliverySubsidy > 0.009;
 
   String get formattedDeliveryFee {
     try {
       final fee = double.parse(deliveryFee);
-      return formatEtbAmount(fee);
+      return formatMoneyAmount(fee, currency: currency);
     } catch (e) {
-      return formatEtbPriceString(deliveryFee);
+      return formatMoneyPriceString(deliveryFee, currency: currency);
     }
   }
   
   String get formattedTax {
     try {
       final tax = double.parse(taxAmount);
-      return formatEtbAmount(tax);
+      return formatMoneyAmount(tax, currency: currency);
     } catch (e) {
-      return formatEtbPriceString(taxAmount);
+      return formatMoneyPriceString(taxAmount, currency: currency);
     }
   }
   
   String get formattedSubtotal {
     try {
       final sub = double.parse(subtotal);
-      return formatEtbAmount(sub);
+      return formatMoneyAmount(sub, currency: currency);
     } catch (e) {
-      return formatEtbPriceString(subtotal);
+      return formatMoneyPriceString(subtotal, currency: currency);
     }
   }
   
@@ -443,5 +494,10 @@ class OrderModel extends Equatable {
         vendor,
         customer,
         driver,
+        currency,
+        isGift,
+        recipientName,
+        recipientPhone,
+        giftMessage,
       ];
 }

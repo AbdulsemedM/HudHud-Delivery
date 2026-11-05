@@ -12,6 +12,8 @@ import '../../../checkout/presentation/screen/checkout_screen.dart';
 import '../../../delivery/presentation/screens/product_detail_screen.dart';
 import '../../../products/presentation/widgets/product_price_filter_sheet.dart';
 import '../../../products/presentation/widgets/product_search_field.dart';
+import 'package:hudhud_delivery/features/growth/market_controller.dart';
+import 'package:hudhud_delivery/core/utils/money_format.dart';
 
 class CategoriesScreen extends StatefulWidget {
   final int categoryId;
@@ -627,7 +629,11 @@ class _CategoryCheckoutBar extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'ETB ${totalPrice.toStringAsFixed(1)}',
+                    formatMoneyAmount(
+                      totalPrice,
+                      currency: MarketController.catalogCurrency,
+                      fractionDigits: 1,
+                    ),
                     maxLines: 1,
                     style: TextStyle(
                       color: HomeColors.textPrimaryOf(context),

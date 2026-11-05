@@ -3769,4 +3769,109 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get p5WalletRefundLabel => 'Deebii';
+
+  @override
+  String get p9GiftSendTitle => 'Kennaa ergi';
+
+  @override
+  String get p9GiftBannerSubtitle =>
+      'Maatii kee magaalaa biraa jiraataniif nyaata ajaji. Hordofuuf SMS ni argatu.';
+
+  @override
+  String get p9GiftIntroBody =>
+      'Magaalaa namni kennaa fudhatu itti jiraatu filadhu, mana nyaataa filadhuutii akkuma yeroo hundaa gaarii kee guuti. Yeroo kaffaltii, maqaa fi lakkoofsa bilbilaa nama fudhatuu galchiitii toora interneetiitiin kaffali.';
+
+  @override
+  String get p9GiftChooseMarket => 'Namni fudhatu eessa jiraata?';
+
+  @override
+  String get p9GiftChooseRestaurant => 'Mana nyaataa filadhu';
+
+  @override
+  String get p9GiftHowItWorksSms =>
+      'Namni fudhatu SMS liinkii hordoffii fi koodii geejjibaa lakkoofsa 4 qabu ni argata.';
+
+  @override
+  String get p9GiftHowItWorksPay =>
+      'Toora interneetiitiin kaffalta. Kennaaf kaffaltiin maallaqa harkaa yeroo geejjibaa hin hayyamamu.';
+
+  @override
+  String get p9GiftSectionTitle => 'Akka kennaatti ergi';
+
+  @override
+  String get p9GiftSectionSubtitle =>
+      'Nama fudhatuuf ni geessina, liinkii hordoffii SMS-n ni ergina';
+
+  @override
+  String get p9GiftToggle => 'Ajajni kun kennaa dha';
+
+  @override
+  String get p9GiftRecipientName => 'Maqaa nama fudhatuu';
+
+  @override
+  String get p9GiftRecipientPhone => 'Lakkoofsa bilbila harkaa nama fudhatuu';
+
+  @override
+  String p9GiftRecipientPhoneHint(String example) {
+    return 'Fakkeenyaaf $example';
+  }
+
+  @override
+  String get p9GiftMessageLabel => 'Ergaa kennaa (dirqama miti)';
+
+  @override
+  String get p9GiftMessageHint => 'Nama fudhatuuf ergaa gabaabaa barreessi';
+
+  @override
+  String get p9GiftNameRequired => 'Maqaa nama fudhatuu galchi';
+
+  @override
+  String p9GiftPhoneInvalid(String prefix) {
+    return 'Lakkoofsa bilbila harkaa sirrii galchi ($prefix …)';
+  }
+
+  @override
+  String get p9GiftNoCash =>
+      'Kennaaf kaffaltiin maallaqa harkaa yeroo geejjibaa hin hayyamamu. Mala kaffaltii toora interneetii filadhu.';
+
+  @override
+  String get p9GiftAddressHint =>
+      'Bakka geejjibaa teessoo nama fudhatuu godhi.';
+
+  @override
+  String get p9GiftUnavailable => 'Ajajni kennaa ammaaf hin jiru.';
+
+  @override
+  String get p9GiftPlacedTitle => 'Ajajni kennaa ergameera';
+
+  @override
+  String p9GiftPlacedBody(String name) {
+    return 'Yeroo kaffaltiin mirkanaa\'u, $name SMS liinkii hordoffii fi koodii geejjibaa lakkoofsa 4 qabu ni argata. Yeroo ajajni ga\'u koodii sana geessituuf kenna.';
+  }
+
+  @override
+  String p9GiftForName(String name) {
+    return 'Kennaa ${name}f';
+  }
+
+  @override
+  String get p9GiftRecipientLabel => 'Nama fudhatu';
+
+  @override
+  String get p9GiftYourMessage => 'Ergaa kee';
+
+  @override
+  String get p9GiftWalletNote =>
+      'Waalletiin maallaqa biraa qabu gatii jijjiirraa har\'aatiin kan jijjiirame irraa hir\'ifama.';
+
+  @override
+  String p9GiftModeBanner(String market) {
+    return 'Kennaa gara $market erguu';
+  }
+
+  @override
+  String get p9GiftStop => 'Kennaa dhaabi';
+
+  @override
+  String get p9GiftOrderLabel => 'Ajaja kennaa';
 }

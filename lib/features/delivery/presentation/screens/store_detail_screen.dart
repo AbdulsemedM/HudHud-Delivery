@@ -19,6 +19,8 @@ import 'package:hudhud_delivery/features/products/data/products_repository.dart'
 import 'package:hudhud_delivery/features/products/model/products_query.dart';
 import 'package:hudhud_delivery/features/products/presentation/widgets/product_price_filter_sheet.dart';
 import 'package:hudhud_delivery/features/products/presentation/widgets/product_search_field.dart';
+import 'package:hudhud_delivery/features/growth/market_controller.dart';
+import 'package:hudhud_delivery/core/utils/money_format.dart';
 
 class StoreDetailScreen extends StatefulWidget {
   final String storeName;
@@ -484,7 +486,7 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                'ETB 0 Delivery Fee with selected products',
+                                '${formatMoneyAmount(0, currency: MarketController.catalogCurrency, fractionDigits: 0)} Delivery Fee with selected products',
                                 style: TextStyle(
                                   color: HomeColors.textPrimaryOf(context),
                                   fontSize: 15,
@@ -1065,7 +1067,11 @@ class _StoreCheckoutBar extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'ETB ${totalPrice.toStringAsFixed(1)}',
+                  formatMoneyAmount(
+                    totalPrice,
+                    currency: MarketController.catalogCurrency,
+                    fractionDigits: 1,
+                  ),
                   maxLines: 1,
                   style: TextStyle(
                     color: HomeColors.textPrimaryOf(context),

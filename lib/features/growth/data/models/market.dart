@@ -15,6 +15,12 @@ class Market {
   final String? phonePrefix;
   final List<String> paymentMethods;
 
+  /// Phase 6 phone plan (`settings.phone`): national number length and
+  /// mobile prefixes. `GET /api/markets` does not send it today, so these
+  /// stay empty and `GiftPhonePlan` falls back to known plans.
+  final int? phoneNationalLength;
+  final List<String> phoneMobilePrefixes;
+
   const Market({
     required this.code,
     required this.name,
@@ -25,14 +31,19 @@ class Market {
     this.defaultLng,
     this.phonePrefix,
     this.paymentMethods = const [],
+    this.phoneNationalLength,
+    this.phoneMobilePrefixes = const [],
   });
 
   static const String defaultCode = 'addis_ababa';
+  static const String hargeisaCode = 'hargeisa';
 
   bool get isDefault => code == defaultCode;
 
   factory Market.fromJson(Map<String, dynamic> json) {
     final code = (growthString(json['code']) ?? '').toLowerCase();
+    final settings = growthMap(json['settings']);
+    final phone = growthMap(json['phone']) ?? growthMap(settings?['phone']);
     return Market(
       code: code,
       name: growthString(json['name']) ?? code,
@@ -43,6 +54,11 @@ class Market {
       defaultLng: growthDoubleOrNull(json['default_lng']),
       phonePrefix: growthString(json['phone_prefix']),
       paymentMethods: growthList(json['payment_methods'])
+          .map(growthString)
+          .whereType<String>()
+          .toList(),
+      phoneNationalLength: growthIntOrNull(phone?['national_length']),
+      phoneMobilePrefixes: growthList(phone?['mobile_prefixes'])
           .map(growthString)
           .whereType<String>()
           .toList(),

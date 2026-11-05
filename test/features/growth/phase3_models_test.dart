@@ -369,8 +369,9 @@ void main() {
           'ETB 10');
     });
 
-    test('other currencies use their code', () {
-      expect(formatMoneyAmount(3, currency: 'usd'), 'USD 3.00');
+    test('US dollars use the sign, other currencies their code', () {
+      expect(formatMoneyAmount(3, currency: 'usd'), r'$3.00');
+      expect(formatMoneyAmount(3, currency: 'KES'), 'KES 3.00');
       expect(isEtbCurrency('USD'), isFalse);
       expect(isEtbCurrency(null), isTrue);
       expect(normalizeCurrencyCode('  usd '), 'USD');

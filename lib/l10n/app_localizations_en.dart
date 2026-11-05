@@ -3736,4 +3736,109 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get p5WalletRefundLabel => 'Refund';
+
+  @override
+  String get p9GiftSendTitle => 'Send a gift';
+
+  @override
+  String get p9GiftBannerSubtitle =>
+      'Order a meal for family in another city. They get an SMS to track it.';
+
+  @override
+  String get p9GiftIntroBody =>
+      'Pick the city where your recipient lives, choose a restaurant and fill your cart as usual. At checkout, add the recipient\'s name and phone number and pay online.';
+
+  @override
+  String get p9GiftChooseMarket => 'Where does the recipient live?';
+
+  @override
+  String get p9GiftChooseRestaurant => 'Choose a restaurant';
+
+  @override
+  String get p9GiftHowItWorksSms =>
+      'The recipient gets an SMS with a tracking link and a 4-digit delivery code.';
+
+  @override
+  String get p9GiftHowItWorksPay =>
+      'You pay online. Cash on delivery is not available for gifts.';
+
+  @override
+  String get p9GiftSectionTitle => 'Send as a gift';
+
+  @override
+  String get p9GiftSectionSubtitle =>
+      'We deliver to your recipient and text them a tracking link';
+
+  @override
+  String get p9GiftToggle => 'This order is a gift';
+
+  @override
+  String get p9GiftRecipientName => 'Recipient\'s name';
+
+  @override
+  String get p9GiftRecipientPhone => 'Recipient\'s mobile number';
+
+  @override
+  String p9GiftRecipientPhoneHint(String example) {
+    return 'e.g. $example';
+  }
+
+  @override
+  String get p9GiftMessageLabel => 'Gift message (optional)';
+
+  @override
+  String get p9GiftMessageHint => 'Write a short note for the recipient';
+
+  @override
+  String get p9GiftNameRequired => 'Enter the recipient\'s name';
+
+  @override
+  String p9GiftPhoneInvalid(String prefix) {
+    return 'Enter a valid mobile number ($prefix …)';
+  }
+
+  @override
+  String get p9GiftNoCash =>
+      'Cash on delivery is not available for gifts. Choose an online payment method.';
+
+  @override
+  String get p9GiftAddressHint =>
+      'Set the delivery location to the recipient\'s address.';
+
+  @override
+  String get p9GiftUnavailable => 'Gift orders are not available yet.';
+
+  @override
+  String get p9GiftPlacedTitle => 'Gift order placed';
+
+  @override
+  String p9GiftPlacedBody(String name) {
+    return 'When the payment is confirmed, $name gets an SMS with a tracking link and a 4-digit delivery code. They give the code to the rider when the order arrives.';
+  }
+
+  @override
+  String p9GiftForName(String name) {
+    return 'Gift for $name';
+  }
+
+  @override
+  String get p9GiftRecipientLabel => 'Recipient';
+
+  @override
+  String get p9GiftYourMessage => 'Your message';
+
+  @override
+  String get p9GiftWalletNote =>
+      'A wallet in another currency is charged the converted amount at today\'s rate.';
+
+  @override
+  String p9GiftModeBanner(String market) {
+    return 'Sending a gift to $market';
+  }
+
+  @override
+  String get p9GiftStop => 'Stop gift';
+
+  @override
+  String get p9GiftOrderLabel => 'Gift order';
 }

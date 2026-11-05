@@ -3677,4 +3677,108 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get p5WalletRefundLabel => 'ተመላሽ';
+
+  @override
+  String get p9GiftSendTitle => 'ስጦታ ይላኩ';
+
+  @override
+  String get p9GiftBannerSubtitle =>
+      'በሌላ ከተማ ለሚኖሩ ቤተሰብዎ ምግብ ያዝዙ። ለመከታተል የኤስኤምኤስ መልዕክት ይደርሳቸዋል።';
+
+  @override
+  String get p9GiftIntroBody =>
+      'ተቀባዩ የሚኖርበትን ከተማ ይምረጡ፣ ምግብ ቤት ይምረጡና እንደተለመደው ጋሪዎን ይሙሉ። በክፍያ ጊዜ የተቀባዩን ስም እና ስልክ ቁጥር ያስገቡና በኦንላይን ይክፈሉ።';
+
+  @override
+  String get p9GiftChooseMarket => 'ተቀባዩ የሚኖረው የት ነው?';
+
+  @override
+  String get p9GiftChooseRestaurant => 'ምግብ ቤት ይምረጡ';
+
+  @override
+  String get p9GiftHowItWorksSms =>
+      'ተቀባዩ የመከታተያ ሊንክ እና ባለ 4 አሃዝ የማድረሻ ኮድ ያለው ኤስኤምኤስ ይደርሰዋል።';
+
+  @override
+  String get p9GiftHowItWorksPay =>
+      'በኦንላይን ይከፍላሉ። ለስጦታዎች በማድረሻ ጊዜ በጥሬ ገንዘብ መክፈል አይቻልም።';
+
+  @override
+  String get p9GiftSectionTitle => 'እንደ ስጦታ ይላኩ';
+
+  @override
+  String get p9GiftSectionSubtitle =>
+      'ለተቀባዩ እናደርሳለን እና የመከታተያ ሊንክ በመልዕክት እንልካለን';
+
+  @override
+  String get p9GiftToggle => 'ይህ ትዕዛዝ ስጦታ ነው';
+
+  @override
+  String get p9GiftRecipientName => 'የተቀባዩ ስም';
+
+  @override
+  String get p9GiftRecipientPhone => 'የተቀባዩ ሞባይል ቁጥር';
+
+  @override
+  String p9GiftRecipientPhoneHint(String example) {
+    return 'ለምሳሌ $example';
+  }
+
+  @override
+  String get p9GiftMessageLabel => 'የስጦታ መልዕክት (አማራጭ)';
+
+  @override
+  String get p9GiftMessageHint => 'ለተቀባዩ አጭር መልዕክት ይጻፉ';
+
+  @override
+  String get p9GiftNameRequired => 'የተቀባዩን ስም ያስገቡ';
+
+  @override
+  String p9GiftPhoneInvalid(String prefix) {
+    return 'ትክክለኛ የሞባይል ቁጥር ያስገቡ ($prefix …)';
+  }
+
+  @override
+  String get p9GiftNoCash =>
+      'ለስጦታዎች በማድረሻ ጊዜ በጥሬ ገንዘብ መክፈል አይቻልም። የኦንላይን የክፍያ መንገድ ይምረጡ።';
+
+  @override
+  String get p9GiftAddressHint => 'የማድረሻ ቦታውን የተቀባዩ አድራሻ ያድርጉት።';
+
+  @override
+  String get p9GiftUnavailable => 'የስጦታ ትዕዛዞች ገና አልተጀመሩም።';
+
+  @override
+  String get p9GiftPlacedTitle => 'የስጦታ ትዕዛዝ ተልኳል';
+
+  @override
+  String p9GiftPlacedBody(String name) {
+    return 'ክፍያው ሲረጋገጥ $name የመከታተያ ሊንክ እና ባለ 4 አሃዝ የማድረሻ ኮድ ያለው ኤስኤምኤስ ይደርሰዋል። ትዕዛዙ ሲደርስ ኮዱን ለአድራሹ ይሰጣል።';
+  }
+
+  @override
+  String p9GiftForName(String name) {
+    return 'ለ$name የተላከ ስጦታ';
+  }
+
+  @override
+  String get p9GiftRecipientLabel => 'ተቀባይ';
+
+  @override
+  String get p9GiftYourMessage => 'የእርስዎ መልዕክት';
+
+  @override
+  String get p9GiftWalletNote =>
+      'በሌላ ገንዘብ ያለ ዋሌት በዛሬው የምንዛሪ ተመን የተለወጠው መጠን ይቀነስበታል።';
+
+  @override
+  String p9GiftModeBanner(String market) {
+    return 'ወደ $market ስጦታ እየላኩ ነው';
+  }
+
+  @override
+  String get p9GiftStop => 'ስጦታውን አቁም';
+
+  @override
+  String get p9GiftOrderLabel => 'የስጦታ ትዕዛዝ';
 }

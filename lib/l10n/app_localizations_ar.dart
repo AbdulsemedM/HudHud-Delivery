@@ -3719,4 +3719,108 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get p5WalletRefundLabel => 'استرداد';
+
+  @override
+  String get p9GiftSendTitle => 'أرسل هدية';
+
+  @override
+  String get p9GiftBannerSubtitle =>
+      'اطلب وجبة لعائلتك في مدينة أخرى. سيتلقون رسالة نصية لتتبعها.';
+
+  @override
+  String get p9GiftIntroBody =>
+      'اختر المدينة التي يعيش فيها المستلم، ثم اختر مطعمًا واملأ سلتك كالمعتاد. عند الدفع، أدخل اسم المستلم ورقم هاتفه وادفع إلكترونيًا.';
+
+  @override
+  String get p9GiftChooseMarket => 'أين يعيش المستلم؟';
+
+  @override
+  String get p9GiftChooseRestaurant => 'اختر مطعمًا';
+
+  @override
+  String get p9GiftHowItWorksSms =>
+      'يتلقى المستلم رسالة نصية تحتوي على رابط للتتبع ورمز توصيل من 4 أرقام.';
+
+  @override
+  String get p9GiftHowItWorksPay =>
+      'تدفع إلكترونيًا. الدفع عند الاستلام غير متاح للهدايا.';
+
+  @override
+  String get p9GiftSectionTitle => 'أرسل كهدية';
+
+  @override
+  String get p9GiftSectionSubtitle =>
+      'نوصل الطلب إلى المستلم ونرسل له رابط التتبع برسالة نصية';
+
+  @override
+  String get p9GiftToggle => 'هذا الطلب هدية';
+
+  @override
+  String get p9GiftRecipientName => 'اسم المستلم';
+
+  @override
+  String get p9GiftRecipientPhone => 'رقم جوال المستلم';
+
+  @override
+  String p9GiftRecipientPhoneHint(String example) {
+    return 'مثال: $example';
+  }
+
+  @override
+  String get p9GiftMessageLabel => 'رسالة الهدية (اختياري)';
+
+  @override
+  String get p9GiftMessageHint => 'اكتب ملاحظة قصيرة للمستلم';
+
+  @override
+  String get p9GiftNameRequired => 'أدخل اسم المستلم';
+
+  @override
+  String p9GiftPhoneInvalid(String prefix) {
+    return 'أدخل رقم جوال صحيحًا ($prefix …)';
+  }
+
+  @override
+  String get p9GiftNoCash =>
+      'الدفع عند الاستلام غير متاح للهدايا. اختر طريقة دفع إلكترونية.';
+
+  @override
+  String get p9GiftAddressHint => 'اجعل موقع التوصيل عنوان المستلم.';
+
+  @override
+  String get p9GiftUnavailable => 'طلبات الهدايا غير متاحة بعد.';
+
+  @override
+  String get p9GiftPlacedTitle => 'تم تقديم طلب الهدية';
+
+  @override
+  String p9GiftPlacedBody(String name) {
+    return 'عند تأكيد الدفع، يتلقى $name رسالة نصية تحتوي على رابط للتتبع ورمز توصيل من 4 أرقام، ويعطي الرمز للمندوب عند وصول الطلب.';
+  }
+
+  @override
+  String p9GiftForName(String name) {
+    return 'هدية إلى $name';
+  }
+
+  @override
+  String get p9GiftRecipientLabel => 'المستلم';
+
+  @override
+  String get p9GiftYourMessage => 'رسالتك';
+
+  @override
+  String get p9GiftWalletNote =>
+      'المحفظة بعملة أخرى تُخصم منها القيمة المحوّلة بسعر اليوم.';
+
+  @override
+  String p9GiftModeBanner(String market) {
+    return 'إرسال هدية إلى $market';
+  }
+
+  @override
+  String get p9GiftStop => 'إيقاف الهدية';
+
+  @override
+  String get p9GiftOrderLabel => 'طلب هدية';
 }

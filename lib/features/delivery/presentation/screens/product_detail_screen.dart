@@ -12,6 +12,7 @@ import 'package:hudhud_delivery/features/categories/data/repository/categories_r
 import 'package:hudhud_delivery/features/categories/model/categories_products_model.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/features/wishlist/presentation/widgets/wishlist_toggle_button.dart';
+import 'package:hudhud_delivery/features/growth/market_controller.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final int productId;
@@ -292,9 +293,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                       runSpacing: 4,
                                       children: [
                                         Text(
-                                          formatEtbPriceString(
+                                          formatMoneyPriceString(
                                             product.formatted_price ??
                                                 product.price,
+                                            currency: MarketController.catalogCurrency,
                                           ),
                                           style: TextStyle(
                                             fontSize: 26,
@@ -307,8 +309,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                             product.formatted_original_price !=
                                                 null)
                                           Text(
-                                            formatEtbPriceString(
+                                            formatMoneyPriceString(
                                               product.formatted_original_price,
+                                              currency: MarketController.catalogCurrency,
                                             ),
                                             style: TextStyle(
                                               fontSize: 15,
@@ -702,7 +705,11 @@ class _CartCheckoutBar extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'ETB ${subtotal.toStringAsFixed(1)}',
+                    formatMoneyAmount(
+                      subtotal,
+                      currency: MarketController.catalogCurrency,
+                      fractionDigits: 1,
+                    ),
                     maxLines: 1,
                     style: TextStyle(
                       color: HomeColors.textPrimaryOf(context),

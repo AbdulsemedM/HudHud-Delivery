@@ -3776,4 +3776,109 @@ class AppLocalizationsSo extends AppLocalizations {
 
   @override
   String get p5WalletRefundLabel => 'Lacag celin';
+
+  @override
+  String get p9GiftSendTitle => 'Dir hadiyad';
+
+  @override
+  String get p9GiftBannerSubtitle =>
+      'U dalbo cunto qoyskaaga ku nool magaalo kale. Waxay helayaan SMS ay kula socdaan.';
+
+  @override
+  String get p9GiftIntroBody =>
+      'Dooro magaalada uu ku nool yahay qofka hadiyadda helaya, dooro makhaayad oo buuxi gaadhigaaga sidii caadiga ahayd. Marka aad bixinayso, ku dar magaca iyo lambarka taleefanka qofka helaya oo online ku bixi.';
+
+  @override
+  String get p9GiftChooseMarket => 'Xaggee buu ku nool yahay qofka helaya?';
+
+  @override
+  String get p9GiftChooseRestaurant => 'Dooro makhaayad';
+
+  @override
+  String get p9GiftHowItWorksSms =>
+      'Qofka helaya wuxuu helayaa SMS leh xiriiriye la socod iyo koodh gaarsiin oo 4 lambar ah.';
+
+  @override
+  String get p9GiftHowItWorksPay =>
+      'Online ayaad ku bixinaysaa. Lacag caddaan ah marka la keeno looma oggola hadiyadaha.';
+
+  @override
+  String get p9GiftSectionTitle => 'U dir hadiyad ahaan';
+
+  @override
+  String get p9GiftSectionSubtitle =>
+      'Waxaan u geynaynaa qofka helaya, waxaana u diraynaa SMS lagula socdo';
+
+  @override
+  String get p9GiftToggle => 'Dalabkan waa hadiyad';
+
+  @override
+  String get p9GiftRecipientName => 'Magaca qofka helaya';
+
+  @override
+  String get p9GiftRecipientPhone => 'Lambarka taleefanka qofka helaya';
+
+  @override
+  String p9GiftRecipientPhoneHint(String example) {
+    return 'Tusaale $example';
+  }
+
+  @override
+  String get p9GiftMessageLabel => 'Fariinta hadiyadda (ikhtiyaari)';
+
+  @override
+  String get p9GiftMessageHint => 'U qor qofka helaya qoraal gaaban';
+
+  @override
+  String get p9GiftNameRequired => 'Geli magaca qofka helaya';
+
+  @override
+  String p9GiftPhoneInvalid(String prefix) {
+    return 'Geli lambar taleefan oo sax ah ($prefix …)';
+  }
+
+  @override
+  String get p9GiftNoCash =>
+      'Lacag caddaan ah marka la keeno looma oggola hadiyadaha. Dooro hab lacag-bixin online ah.';
+
+  @override
+  String get p9GiftAddressHint =>
+      'Goobta gaarsiinta u dhig cinwaanka qofka helaya.';
+
+  @override
+  String get p9GiftUnavailable => 'Dalabaadka hadiyadda weli lama heli karo.';
+
+  @override
+  String get p9GiftPlacedTitle => 'Dalabka hadiyadda waa la gudbiyay';
+
+  @override
+  String p9GiftPlacedBody(String name) {
+    return 'Marka lacag-bixinta la xaqiijiyo, $name wuxuu helayaa SMS leh xiriiriye la socod iyo koodh gaarsiin oo 4 lambar ah. Koodhka wuxuu siinayaa darawalka marka dalabku yimaado.';
+  }
+
+  @override
+  String p9GiftForName(String name) {
+    return 'Hadiyad loogu talagalay $name';
+  }
+
+  @override
+  String get p9GiftRecipientLabel => 'Qofka helaya';
+
+  @override
+  String get p9GiftYourMessage => 'Fariintaada';
+
+  @override
+  String get p9GiftWalletNote =>
+      'Jeeb lacag kale ku jirta waxaa laga jarayaa qaddarka la beddelay ee sicirka maanta.';
+
+  @override
+  String p9GiftModeBanner(String market) {
+    return 'Hadiyad ayaad u diraysaa $market';
+  }
+
+  @override
+  String get p9GiftStop => 'Jooji hadiyadda';
+
+  @override
+  String get p9GiftOrderLabel => 'Dalab hadiyad';
 }

@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hudhud_delivery/app/services/custom_location_service.dart';
 import 'package:hudhud_delivery/app/services/startup_location_service.dart';
 
+import '../gifting/gift_session.dart';
 import 'data/growth_repository.dart';
 import 'data/models/market.dart';
 import 'growth_config_controller.dart';
@@ -27,6 +28,12 @@ class MarketController extends ChangeNotifier {
 
   /// Currency of the selected market; ETB when unknown.
   static String get currentCurrency => instance?.currency ?? 'ETB';
+
+  /// Currency for catalog prices (store / product screens). While a gift is
+  /// being prepared the customer browses the recipient's market, so its
+  /// currency wins over the customer's own market.
+  static String get catalogCurrency =>
+      GiftSession.instance.market?.currency ?? currentCurrency;
 
   static const String _prefsCodeKey = 'p3_market_code';
   static const String _prefsManualKey = 'p3_market_manual';

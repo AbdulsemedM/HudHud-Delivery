@@ -34,6 +34,9 @@ class PaymentInitiateResultScreen extends StatefulWidget {
   /// Primary button label on success (default: Done).
   final String? successActionLabel;
 
+  /// Optional card above the result (Phase 6: the gift explanation).
+  final Widget? banner;
+
   const PaymentInitiateResultScreen({
     super.key,
     required this.result,
@@ -42,6 +45,7 @@ class PaymentInitiateResultScreen extends StatefulWidget {
     this.trackingNumber,
     this.onTerminalSuccess,
     this.successActionLabel,
+    this.banner,
   });
 
   @override
@@ -295,6 +299,10 @@ class _PaymentInitiateResultScreenState
                 padding: EdgeInsets.all(AppColors.spaceMD),
                 child: Column(
                   children: [
+                    if (widget.banner != null) ...[
+                      widget.banner!,
+                      const SizedBox(height: AppColors.spaceSM),
+                    ],
                     Expanded(child: _buildBody(context)),
                     if (_isPollingActive) ...[
                       SizedBox(height: AppColors.spaceSM),

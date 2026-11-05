@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/utils/money_format.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
@@ -186,7 +187,7 @@ class _WalletContentState extends State<_WalletContent> {
         children: [
           BalanceCard(
             balance:
-                '$currency ${widget.balance.balance.toStringAsFixed(2)}',
+                '${moneyPrefix(currency)}${widget.balance.balance.toStringAsFixed(2)}',
             bottomActions: WalletActions(
               showPendingTopUp:
                   WalletTopUpRecoveryService.instance.hasPendingTopUp,

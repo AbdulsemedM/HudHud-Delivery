@@ -1,4 +1,5 @@
 import 'package:intl/intl.dart';
+import 'package:hudhud_delivery/core/utils/money_format.dart';
 
 /// `refund` block returned by order cancel endpoints
 /// (OrderRefundService::refundCancelledOrder): `{status, amount?, currency?}`.
@@ -27,7 +28,7 @@ class OrderRefund {
     final whole = (value - value.roundToDouble()).abs() < 0.005;
     final number =
         NumberFormat(whole ? '#,##0' : '#,##0.00', 'en_US').format(value);
-    return '${currency ?? 'ETB'} $number';
+    return '${moneyPrefix(currency)}$number';
   }
 
   /// Finance has to refund by hand (no exchange rate, payer missing, …).

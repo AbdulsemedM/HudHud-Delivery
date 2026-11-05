@@ -75,13 +75,19 @@ class PaymentInitiated extends PaymentState {
   final double? finalDeliveryFee;
   final String? currencySymbol;
 
+  /// Phase 6: set when the order is a gift (recipient's name).
+  final String? giftRecipientName;
+
   const PaymentInitiated({
     required this.result,
     required this.orderId,
     this.deliveryFeeUpdated = false,
     this.finalDeliveryFee,
     this.currencySymbol,
+    this.giftRecipientName,
   });
+
+  bool get isGift => giftRecipientName != null;
 
   @override
   List<Object?> get props => [
@@ -90,6 +96,7 @@ class PaymentInitiated extends PaymentState {
         deliveryFeeUpdated,
         finalDeliveryFee,
         currencySymbol,
+        giftRecipientName,
       ];
 }
 
@@ -116,10 +123,13 @@ class PaymentOrderNeedsAttention extends PaymentState {
 class PaymentFailure extends PaymentState {
   final String error;
 
-  const PaymentFailure({required this.error});
+  /// API error code when known (e.g. FEATURE_DISABLED for gift orders).
+  final String? code;
+
+  const PaymentFailure({required this.error, this.code});
 
   @override
-  List<Object?> get props => [error];
+  List<Object?> get props => [error, code];
 }
 
 class PaymentMethodsLoaded extends PaymentState {
@@ -168,7 +178,40 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
           ? orderDetails['branch_id'] as int
           : int.tryParse(orderDetails['branch_id']?.toString() ?? '');
 
-      final orderResult = await checkoutRepository.createOrder(
+      // Phase 6: a gift goes to POST /customer/gift-orders (no points,
+      // never cash on delivery); payment is then initiated as usual.
+      final gift = orderDetails['gift'] is Map
+          ? Map<String, dynamic>.from(orderDetails['gift'] as Map)
+          : null;
+      final giftRecipientName = gift?['recipient_name']?.toString();
+
+      final orderResult = gift != null
+          ? await checkoutRepository.createGiftOrder(
+              vendorId: orderDetails['vendor_id'] as int,
+              items: List<Map<String, dynamic>>.from(
+                orderDetails['items'] as List,
+              ),
+              deliveryAddress: orderDetails['delivery_address'] as String,
+              deliveryLocation: (orderDetails['delivery_location'] ??
+                  orderDetails['delivery_address']) as String,
+              deliveryLatitude:
+                  (orderDetails['delivery_latitude'] as num?)?.toDouble() ??
+                      0.0,
+              deliveryLongitude:
+                  (orderDetails['delivery_longitude'] as num?)?.toDouble() ??
+                      0.0,
+              paymentMethod: event.paymentMethod,
+              recipientName: giftRecipientName ?? '',
+              recipientPhone: gift['recipient_phone']?.toString() ?? '',
+              giftMessage: gift['gift_message']?.toString(),
+              serviceType:
+                  orderDetails['service_type'] as String? ?? 'restaurant',
+              notes: orderDetails['notes'] as String?,
+              couponCode: orderDetails['coupon_code'] as String?,
+              branchId: branchId,
+              idempotencyKey: _orderIdempotencyKey,
+            )
+          : await checkoutRepository.createOrder(
         vendorId: orderDetails['vendor_id'] as int,
         items: List<Map<String, dynamic>>.from(orderDetails['items'] as List),
         taxAmount: (orderDetails['tax_amount'] ?? 0.0) as double,
@@ -200,7 +243,9 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
 
       if (orderResult['success'] != true) {
         emit(PaymentFailure(
-            error: orderResult['message'] ?? 'Failed to create order'));
+          error: orderResult['message'] ?? 'Failed to create order',
+          code: orderResult['code']?.toString(),
+        ));
         return;
       }
 
@@ -261,6 +306,11 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
           orderId: created.orderId.toString(),
           deliveryFeeUpdated: deliveryFeeUpdated,
           finalDeliveryFee: created.deliveryFee,
+          giftRecipientName: gift == null
+              ? null
+              : (giftRecipientName?.trim().isNotEmpty == true
+                  ? giftRecipientName!.trim()
+                  : gift['recipient_phone']?.toString() ?? ''),
         ));
       } catch (e) {
         final issue = classifyOrderPaymentError(e);

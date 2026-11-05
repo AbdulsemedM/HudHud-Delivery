@@ -13,6 +13,7 @@ import '../home_feed_actions.dart';
 import '../reorder_flow.dart';
 import '../screens/home_collection_screen.dart';
 import 'growth_network_image.dart';
+import '../../market_controller.dart';
 
 class _GrowthSectionHeader extends StatelessWidget {
   const _GrowthSectionHeader({required this.title, this.onSeeAll});
@@ -310,7 +311,12 @@ class HomeFeedItemCard extends StatelessWidget {
       ];
       meta = parts.isEmpty ? null : parts.join(' · ');
     } else {
-      meta = item.price == null ? null : formatEtbAmount(item.price!);
+      meta = item.price == null
+          ? null
+          : formatMoneyAmount(
+              item.price!,
+              currency: MarketController.catalogCurrency,
+            );
     }
     return DecoratedBox(
       decoration: BoxDecoration(

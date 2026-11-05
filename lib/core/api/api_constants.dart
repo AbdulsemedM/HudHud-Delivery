@@ -102,6 +102,9 @@ class ApiConstants {
 
   // Customer order creation - POST /api/customer/orders
   static const String customerOrders = 'customer/orders';
+  /// Phase 6 diaspora gifting: same body as [customerOrders] plus
+  /// recipient_name, recipient_phone and optional gift_message.
+  static const String customerGiftOrders = 'customer/gift-orders';
   static const String customerOrderDetails = 'customer/orders/{id}';
   static const String customerOrdersAvailable = 'customer/orders/available';
   static const String customerOrderRate = 'customer/orders/{id}/rate';

@@ -1631,5 +1631,59 @@
     }
   },
   "p5RefundManual": "Order cancelled. Our team will process your refund shortly.",
-  "p5WalletRefundLabel": "Refund"
+  "p5WalletRefundLabel": "Refund",
+  "p9GiftSendTitle": "Send a gift",
+  "p9GiftBannerSubtitle": "Order a meal for family in another city. They get an SMS to track it.",
+  "p9GiftIntroBody": "Pick the city where your recipient lives, choose a restaurant and fill your cart as usual. At checkout, add the recipient's name and phone number and pay online.",
+  "p9GiftChooseMarket": "Where does the recipient live?",
+  "p9GiftChooseRestaurant": "Choose a restaurant",
+  "p9GiftHowItWorksSms": "The recipient gets an SMS with a tracking link and a 4-digit delivery code.",
+  "p9GiftHowItWorksPay": "You pay online. Cash on delivery is not available for gifts.",
+  "p9GiftSectionTitle": "Send as a gift",
+  "p9GiftSectionSubtitle": "We deliver to your recipient and text them a tracking link",
+  "p9GiftToggle": "This order is a gift",
+  "p9GiftRecipientName": "Recipient's name",
+  "p9GiftRecipientPhone": "Recipient's mobile number",
+  "p9GiftRecipientPhoneHint": "e.g. {example}",
+  "@p9GiftRecipientPhoneHint": {
+    "placeholders": {
+      "example": {"type": "String"}
+    }
+  },
+  "p9GiftMessageLabel": "Gift message (optional)",
+  "p9GiftMessageHint": "Write a short note for the recipient",
+  "p9GiftNameRequired": "Enter the recipient's name",
+  "p9GiftPhoneInvalid": "Enter a valid mobile number ({prefix} …)",
+  "@p9GiftPhoneInvalid": {
+    "placeholders": {
+      "prefix": {"type": "String"}
+    }
+  },
+  "p9GiftNoCash": "Cash on delivery is not available for gifts. Choose an online payment method.",
+  "p9GiftAddressHint": "Set the delivery location to the recipient's address.",
+  "p9GiftUnavailable": "Gift orders are not available yet.",
+  "p9GiftPlacedTitle": "Gift order placed",
+  "p9GiftPlacedBody": "When the payment is confirmed, {name} gets an SMS with a tracking link and a 4-digit delivery code. They give the code to the rider when the order arrives.",
+  "@p9GiftPlacedBody": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "p9GiftForName": "Gift for {name}",
+  "@p9GiftForName": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "p9GiftRecipientLabel": "Recipient",
+  "p9GiftYourMessage": "Your message",
+  "p9GiftWalletNote": "A wallet in another currency is charged the converted amount at today's rate.",
+  "p9GiftModeBanner": "Sending a gift to {market}",
+  "@p9GiftModeBanner": {
+    "placeholders": {
+      "market": {"type": "String"}
+    }
+  },
+  "p9GiftStop": "Stop gift",
+  "p9GiftOrderLabel": "Gift order"
 }
