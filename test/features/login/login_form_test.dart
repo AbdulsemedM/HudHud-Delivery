@@ -32,8 +32,8 @@ void main() {
 
     expect(find.text('Email'), findsOneWidget);
     expect(find.text('Phone'), findsOneWidget);
-    expect(find.byIcon(Icons.phone_outlined), findsOneWidget);
-    expect(find.byIcon(Icons.mail_outline_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.phone_iphone_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.alternate_email_rounded), findsOneWidget);
 
     await tester.tap(find.text('Phone'));
     await tester.pumpAndSettle();
@@ -61,7 +61,7 @@ void main() {
     controller.dispose();
   });
 
-  testWidgets('AuthPhoneNumberField shows ET +251 chip', (tester) async {
+  testWidgets('AuthPhoneNumberField shows Ethiopia flag and +251', (tester) async {
     final controller = TextEditingController();
 
     await tester.pumpWidget(
@@ -78,7 +78,9 @@ void main() {
       ),
     );
 
-    expect(find.text('ET +251'), findsOneWidget);
+    // The chip shows the flag and the dial code as separate texts.
+    expect(find.text('🇪🇹'), findsOneWidget);
+    expect(find.text('+251'), findsOneWidget);
     expect(find.text('912 345 678'), findsOneWidget);
 
     controller.dispose();
