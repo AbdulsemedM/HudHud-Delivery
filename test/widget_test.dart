@@ -81,5 +81,10 @@ void main() {
 
     // Verify that the app loads without errors
     expect(find.byType(MaterialApp), findsOneWidget);
+
+    // The splash screen waits 3s before routing (and checks `mounted`).
+    // Unmount the app, then let that delay elapse so no timer is pending.
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(seconds: 5));
   });
 }
