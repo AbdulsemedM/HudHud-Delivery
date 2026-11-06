@@ -6990,7 +6990,7 @@ abstract class AppLocalizations {
   /// No description provided for @p9GiftIntroBody.
   ///
   /// In en, this message translates to:
-  /// **'Pick the city where your recipient lives, choose a restaurant and fill your cart as usual. At checkout, add the recipient's name and phone number and pay online.'**
+  /// **'Pick the city where your recipient lives, choose a restaurant and fill your cart as usual. At checkout, add the recipient\'s name and phone number and pay online.'**
   String get p9GiftIntroBody;
 
   /// No description provided for @p9GiftChooseMarket.
@@ -7038,13 +7038,13 @@ abstract class AppLocalizations {
   /// No description provided for @p9GiftRecipientName.
   ///
   /// In en, this message translates to:
-  /// **'Recipient's name'**
+  /// **'Recipient\'s name'**
   String get p9GiftRecipientName;
 
   /// No description provided for @p9GiftRecipientPhone.
   ///
   /// In en, this message translates to:
-  /// **'Recipient's mobile number'**
+  /// **'Recipient\'s mobile number'**
   String get p9GiftRecipientPhone;
 
   /// No description provided for @p9GiftRecipientPhoneHint.
@@ -7068,7 +7068,7 @@ abstract class AppLocalizations {
   /// No description provided for @p9GiftNameRequired.
   ///
   /// In en, this message translates to:
-  /// **'Enter the recipient's name'**
+  /// **'Enter the recipient\'s name'**
   String get p9GiftNameRequired;
 
   /// No description provided for @p9GiftPhoneInvalid.
@@ -7086,7 +7086,7 @@ abstract class AppLocalizations {
   /// No description provided for @p9GiftAddressHint.
   ///
   /// In en, this message translates to:
-  /// **'Set the delivery location to the recipient's address.'**
+  /// **'Set the delivery location to the recipient\'s address.'**
   String get p9GiftAddressHint;
 
   /// No description provided for @p9GiftUnavailable.
@@ -7128,7 +7128,7 @@ abstract class AppLocalizations {
   /// No description provided for @p9GiftWalletNote.
   ///
   /// In en, this message translates to:
-  /// **'A wallet in another currency is charged the converted amount at today's rate.'**
+  /// **'A wallet in another currency is charged the converted amount at today\'s rate.'**
   String get p9GiftWalletNote;
 
   /// No description provided for @p9GiftModeBanner.
