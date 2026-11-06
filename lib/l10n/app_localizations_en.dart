@@ -3841,4 +3841,248 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get p9GiftOrderLabel => 'Gift order';
+
+  @override
+  String get p10CityNotServed => 'We don\'t serve this area yet';
+
+  @override
+  String get p10CityCrossCity =>
+      'Pickup and drop-off must be in the same city.';
+
+  @override
+  String get p10CityOtherCity =>
+      'These addresses are in another city. Switch your city in Settings to continue.';
+
+  @override
+  String get p10ParcelTitle => 'Send a parcel';
+
+  @override
+  String get p10ParcelScheduledTitle => 'Schedule a parcel';
+
+  @override
+  String get p10ParcelRoute => 'Route';
+
+  @override
+  String get p10ParcelPickup => 'Pickup';
+
+  @override
+  String get p10ParcelDropoff => 'Drop-off';
+
+  @override
+  String get p10ParcelChooseAddress => 'Choose on the map';
+
+  @override
+  String get p10ParcelBuilding => 'Building / house';
+
+  @override
+  String get p10ParcelFloor => 'Floor';
+
+  @override
+  String get p10ParcelApartment => 'Apartment / office';
+
+  @override
+  String get p10ParcelLandmark => 'Landmark';
+
+  @override
+  String get p10ParcelRecipient => 'Recipient';
+
+  @override
+  String get p10ParcelSendToMyself => 'Send to myself';
+
+  @override
+  String get p10ParcelRecipientName => 'Recipient name';
+
+  @override
+  String get p10ParcelRecipientPhone => 'Recipient phone';
+
+  @override
+  String get p10ParcelWhatSending => 'What are you sending?';
+
+  @override
+  String get p10ParcelCategoryDocument => 'Documents';
+
+  @override
+  String get p10ParcelCategoryParcel => 'Parcel';
+
+  @override
+  String get p10ParcelCategoryFood => 'Food';
+
+  @override
+  String get p10ParcelCategoryGrocery => 'Groceries';
+
+  @override
+  String get p10ParcelCategoryElectronics => 'Electronics';
+
+  @override
+  String get p10ParcelCategoryClothes => 'Clothes';
+
+  @override
+  String get p10ParcelCategoryGift => 'Gift';
+
+  @override
+  String get p10ParcelCategoryFlowers => 'Flowers';
+
+  @override
+  String get p10ParcelCategoryKeys => 'Keys';
+
+  @override
+  String get p10ParcelCategoryOther => 'Other';
+
+  @override
+  String get p10ParcelSizeSmall => 'Small';
+
+  @override
+  String get p10ParcelSizeSmallHint => 'Fits in a backpack';
+
+  @override
+  String get p10ParcelSizeMedium => 'Medium';
+
+  @override
+  String get p10ParcelSizeMediumHint => 'Fits on a car seat';
+
+  @override
+  String get p10ParcelSizeLarge => 'Large';
+
+  @override
+  String get p10ParcelSizeLargeHint => 'Needs a van';
+
+  @override
+  String get p10ParcelSizeUnavailable => 'Not available here yet';
+
+  @override
+  String get p10ParcelDescription => 'Description (optional)';
+
+  @override
+  String get p10ParcelItemValue => 'Item value (optional)';
+
+  @override
+  String get p10ParcelCourierNote => 'Note for the courier';
+
+  @override
+  String get p10ParcelPayment => 'Payment';
+
+  @override
+  String get p10ParcelPayWallet => 'HudHud wallet';
+
+  @override
+  String get p10ParcelPayCash => 'Cash to the courier';
+
+  @override
+  String get p10ParcelPaymentPhone => 'Mobile money number';
+
+  @override
+  String get p10ParcelRecipientPays => 'Recipient pays (cash at drop-off)';
+
+  @override
+  String get p10ParcelSellerCod => 'Collect the item price from the recipient';
+
+  @override
+  String get p10ParcelSellerCodHint =>
+      'The courier collects it in cash and it is paid to your HudHud business wallet.';
+
+  @override
+  String get p10ParcelSellerCodAmount => 'Item price to collect';
+
+  @override
+  String get p10ParcelPickupTime => 'Pickup time';
+
+  @override
+  String get p10ParcelPickupNow => 'As soon as possible';
+
+  @override
+  String get p10ParcelPrice => 'Price';
+
+  @override
+  String p10ParcelPriceHeld(String time) {
+    return 'Price held for $time';
+  }
+
+  @override
+  String get p10ParcelPriceExpired => 'Price lock expired';
+
+  @override
+  String get p10ParcelRefreshPrice => 'Refresh price';
+
+  @override
+  String get p10ParcelGettingPrice => 'Getting the price…';
+
+  @override
+  String get p10ParcelPriceUpdated =>
+      'The price changed. Please check the new price.';
+
+  @override
+  String p10ParcelBook(String price) {
+    return 'Book for $price';
+  }
+
+  @override
+  String get p10ParcelContinue => 'Continue';
+
+  @override
+  String get p10ParcelFillRequired =>
+      'Choose pickup and drop-off, and add the recipient\'s phone.';
+
+  @override
+  String get p10ParcelSizeNotSupported =>
+      'This size is not available in this city yet.';
+
+  @override
+  String get p10ParcelPaymentNotAvailable =>
+      'This payment method is not available in this city.';
+
+  @override
+  String get p10ParcelInsufficientWallet =>
+      'Not enough money in your wallet. Top up or choose another payment method.';
+
+  @override
+  String get p10ParcelSomethingWrong =>
+      'Something went wrong. Please try again.';
+
+  @override
+  String get p10ParcelApprovePayment => 'Approve the payment on your phone.';
+
+  @override
+  String get p10ParcelBooked => 'Parcel booked';
+
+  @override
+  String get p10ParcelHandoverCode => 'Handover code';
+
+  @override
+  String get p10ParcelHandoverHint =>
+      'The recipient gives this code to the courier at delivery.';
+
+  @override
+  String get p10ParcelHandoverSelfHint =>
+      'Give this code to the courier when you receive the parcel.';
+
+  @override
+  String get p10ParcelShareTracking => 'Share tracking link';
+
+  @override
+  String p10ParcelTrackingShareText(String link) {
+    return 'Track my HudHud parcel: $link';
+  }
+
+  @override
+  String p10ParcelEta(String minutes) {
+    return 'Arriving in about $minutes min';
+  }
+
+  @override
+  String get p10ParcelCancel => 'Cancel parcel';
+
+  @override
+  String get p10ParcelCancelFree =>
+      'Cancel this parcel? It\'s free because no courier has been assigned yet.';
+
+  @override
+  String p10ParcelCancelFee(String fee) {
+    return 'A courier is already on the way. Cancelling now costs $fee.';
+  }
+
+  @override
+  String get p10ParcelCancelReason => 'Cancelled by the sender in the app';
+
+  @override
+  String get p10ParcelCancelled => 'Parcel cancelled';
 }

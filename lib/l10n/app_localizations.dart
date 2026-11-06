@@ -7148,6 +7148,450 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Gift order'**
   String get p9GiftOrderLabel;
+
+  /// No description provided for @p10CityNotServed.
+  ///
+  /// In en, this message translates to:
+  /// **'We don\'t serve this area yet'**
+  String get p10CityNotServed;
+
+  /// No description provided for @p10CityCrossCity.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup and drop-off must be in the same city.'**
+  String get p10CityCrossCity;
+
+  /// No description provided for @p10CityOtherCity.
+  ///
+  /// In en, this message translates to:
+  /// **'These addresses are in another city. Switch your city in Settings to continue.'**
+  String get p10CityOtherCity;
+
+  /// No description provided for @p10ParcelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a parcel'**
+  String get p10ParcelTitle;
+
+  /// No description provided for @p10ParcelScheduledTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule a parcel'**
+  String get p10ParcelScheduledTitle;
+
+  /// No description provided for @p10ParcelRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Route'**
+  String get p10ParcelRoute;
+
+  /// No description provided for @p10ParcelPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup'**
+  String get p10ParcelPickup;
+
+  /// No description provided for @p10ParcelDropoff.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop-off'**
+  String get p10ParcelDropoff;
+
+  /// No description provided for @p10ParcelChooseAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose on the map'**
+  String get p10ParcelChooseAddress;
+
+  /// No description provided for @p10ParcelBuilding.
+  ///
+  /// In en, this message translates to:
+  /// **'Building / house'**
+  String get p10ParcelBuilding;
+
+  /// No description provided for @p10ParcelFloor.
+  ///
+  /// In en, this message translates to:
+  /// **'Floor'**
+  String get p10ParcelFloor;
+
+  /// No description provided for @p10ParcelApartment.
+  ///
+  /// In en, this message translates to:
+  /// **'Apartment / office'**
+  String get p10ParcelApartment;
+
+  /// No description provided for @p10ParcelLandmark.
+  ///
+  /// In en, this message translates to:
+  /// **'Landmark'**
+  String get p10ParcelLandmark;
+
+  /// No description provided for @p10ParcelRecipient.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipient'**
+  String get p10ParcelRecipient;
+
+  /// No description provided for @p10ParcelSendToMyself.
+  ///
+  /// In en, this message translates to:
+  /// **'Send to myself'**
+  String get p10ParcelSendToMyself;
+
+  /// No description provided for @p10ParcelRecipientName.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipient name'**
+  String get p10ParcelRecipientName;
+
+  /// No description provided for @p10ParcelRecipientPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipient phone'**
+  String get p10ParcelRecipientPhone;
+
+  /// No description provided for @p10ParcelWhatSending.
+  ///
+  /// In en, this message translates to:
+  /// **'What are you sending?'**
+  String get p10ParcelWhatSending;
+
+  /// No description provided for @p10ParcelCategoryDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents'**
+  String get p10ParcelCategoryDocument;
+
+  /// No description provided for @p10ParcelCategoryParcel.
+  ///
+  /// In en, this message translates to:
+  /// **'Parcel'**
+  String get p10ParcelCategoryParcel;
+
+  /// No description provided for @p10ParcelCategoryFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Food'**
+  String get p10ParcelCategoryFood;
+
+  /// No description provided for @p10ParcelCategoryGrocery.
+  ///
+  /// In en, this message translates to:
+  /// **'Groceries'**
+  String get p10ParcelCategoryGrocery;
+
+  /// No description provided for @p10ParcelCategoryElectronics.
+  ///
+  /// In en, this message translates to:
+  /// **'Electronics'**
+  String get p10ParcelCategoryElectronics;
+
+  /// No description provided for @p10ParcelCategoryClothes.
+  ///
+  /// In en, this message translates to:
+  /// **'Clothes'**
+  String get p10ParcelCategoryClothes;
+
+  /// No description provided for @p10ParcelCategoryGift.
+  ///
+  /// In en, this message translates to:
+  /// **'Gift'**
+  String get p10ParcelCategoryGift;
+
+  /// No description provided for @p10ParcelCategoryFlowers.
+  ///
+  /// In en, this message translates to:
+  /// **'Flowers'**
+  String get p10ParcelCategoryFlowers;
+
+  /// No description provided for @p10ParcelCategoryKeys.
+  ///
+  /// In en, this message translates to:
+  /// **'Keys'**
+  String get p10ParcelCategoryKeys;
+
+  /// No description provided for @p10ParcelCategoryOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get p10ParcelCategoryOther;
+
+  /// No description provided for @p10ParcelSizeSmall.
+  ///
+  /// In en, this message translates to:
+  /// **'Small'**
+  String get p10ParcelSizeSmall;
+
+  /// No description provided for @p10ParcelSizeSmallHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Fits in a backpack'**
+  String get p10ParcelSizeSmallHint;
+
+  /// No description provided for @p10ParcelSizeMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get p10ParcelSizeMedium;
+
+  /// No description provided for @p10ParcelSizeMediumHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Fits on a car seat'**
+  String get p10ParcelSizeMediumHint;
+
+  /// No description provided for @p10ParcelSizeLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Large'**
+  String get p10ParcelSizeLarge;
+
+  /// No description provided for @p10ParcelSizeLargeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs a van'**
+  String get p10ParcelSizeLargeHint;
+
+  /// No description provided for @p10ParcelSizeUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Not available here yet'**
+  String get p10ParcelSizeUnavailable;
+
+  /// No description provided for @p10ParcelDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description (optional)'**
+  String get p10ParcelDescription;
+
+  /// No description provided for @p10ParcelItemValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Item value (optional)'**
+  String get p10ParcelItemValue;
+
+  /// No description provided for @p10ParcelCourierNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note for the courier'**
+  String get p10ParcelCourierNote;
+
+  /// No description provided for @p10ParcelPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment'**
+  String get p10ParcelPayment;
+
+  /// No description provided for @p10ParcelPayWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'HudHud wallet'**
+  String get p10ParcelPayWallet;
+
+  /// No description provided for @p10ParcelPayCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash to the courier'**
+  String get p10ParcelPayCash;
+
+  /// No description provided for @p10ParcelPaymentPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile money number'**
+  String get p10ParcelPaymentPhone;
+
+  /// No description provided for @p10ParcelRecipientPays.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipient pays (cash at drop-off)'**
+  String get p10ParcelRecipientPays;
+
+  /// No description provided for @p10ParcelSellerCod.
+  ///
+  /// In en, this message translates to:
+  /// **'Collect the item price from the recipient'**
+  String get p10ParcelSellerCod;
+
+  /// No description provided for @p10ParcelSellerCodHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The courier collects it in cash and it is paid to your HudHud business wallet.'**
+  String get p10ParcelSellerCodHint;
+
+  /// No description provided for @p10ParcelSellerCodAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Item price to collect'**
+  String get p10ParcelSellerCodAmount;
+
+  /// No description provided for @p10ParcelPickupTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup time'**
+  String get p10ParcelPickupTime;
+
+  /// No description provided for @p10ParcelPickupNow.
+  ///
+  /// In en, this message translates to:
+  /// **'As soon as possible'**
+  String get p10ParcelPickupNow;
+
+  /// No description provided for @p10ParcelPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Price'**
+  String get p10ParcelPrice;
+
+  /// No description provided for @p10ParcelPriceHeld.
+  ///
+  /// In en, this message translates to:
+  /// **'Price held for {time}'**
+  String p10ParcelPriceHeld(String time);
+
+  /// No description provided for @p10ParcelPriceExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Price lock expired'**
+  String get p10ParcelPriceExpired;
+
+  /// No description provided for @p10ParcelRefreshPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh price'**
+  String get p10ParcelRefreshPrice;
+
+  /// No description provided for @p10ParcelGettingPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Getting the price…'**
+  String get p10ParcelGettingPrice;
+
+  /// No description provided for @p10ParcelPriceUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'The price changed. Please check the new price.'**
+  String get p10ParcelPriceUpdated;
+
+  /// No description provided for @p10ParcelBook.
+  ///
+  /// In en, this message translates to:
+  /// **'Book for {price}'**
+  String p10ParcelBook(String price);
+
+  /// No description provided for @p10ParcelContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get p10ParcelContinue;
+
+  /// No description provided for @p10ParcelFillRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose pickup and drop-off, and add the recipient\'s phone.'**
+  String get p10ParcelFillRequired;
+
+  /// No description provided for @p10ParcelSizeNotSupported.
+  ///
+  /// In en, this message translates to:
+  /// **'This size is not available in this city yet.'**
+  String get p10ParcelSizeNotSupported;
+
+  /// No description provided for @p10ParcelPaymentNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This payment method is not available in this city.'**
+  String get p10ParcelPaymentNotAvailable;
+
+  /// No description provided for @p10ParcelInsufficientWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough money in your wallet. Top up or choose another payment method.'**
+  String get p10ParcelInsufficientWallet;
+
+  /// No description provided for @p10ParcelSomethingWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get p10ParcelSomethingWrong;
+
+  /// No description provided for @p10ParcelApprovePayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve the payment on your phone.'**
+  String get p10ParcelApprovePayment;
+
+  /// No description provided for @p10ParcelBooked.
+  ///
+  /// In en, this message translates to:
+  /// **'Parcel booked'**
+  String get p10ParcelBooked;
+
+  /// No description provided for @p10ParcelHandoverCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Handover code'**
+  String get p10ParcelHandoverCode;
+
+  /// No description provided for @p10ParcelHandoverHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The recipient gives this code to the courier at delivery.'**
+  String get p10ParcelHandoverHint;
+
+  /// No description provided for @p10ParcelHandoverSelfHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Give this code to the courier when you receive the parcel.'**
+  String get p10ParcelHandoverSelfHint;
+
+  /// No description provided for @p10ParcelShareTracking.
+  ///
+  /// In en, this message translates to:
+  /// **'Share tracking link'**
+  String get p10ParcelShareTracking;
+
+  /// No description provided for @p10ParcelTrackingShareText.
+  ///
+  /// In en, this message translates to:
+  /// **'Track my HudHud parcel: {link}'**
+  String p10ParcelTrackingShareText(String link);
+
+  /// No description provided for @p10ParcelEta.
+  ///
+  /// In en, this message translates to:
+  /// **'Arriving in about {minutes} min'**
+  String p10ParcelEta(String minutes);
+
+  /// No description provided for @p10ParcelCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel parcel'**
+  String get p10ParcelCancel;
+
+  /// No description provided for @p10ParcelCancelFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel this parcel? It\'s free because no courier has been assigned yet.'**
+  String get p10ParcelCancelFree;
+
+  /// No description provided for @p10ParcelCancelFee.
+  ///
+  /// In en, this message translates to:
+  /// **'A courier is already on the way. Cancelling now costs {fee}.'**
+  String p10ParcelCancelFee(String fee);
+
+  /// No description provided for @p10ParcelCancelReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled by the sender in the app'**
+  String get p10ParcelCancelReason;
+
+  /// No description provided for @p10ParcelCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Parcel cancelled'**
+  String get p10ParcelCancelled;
 }
 
 class _AppLocalizationsDelegate

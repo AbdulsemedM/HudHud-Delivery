@@ -239,6 +239,20 @@ class ApiConstants {
   /// (RideMessengerController@rateDelivery; delivery must be delivered).
   static const String deliveryRate = 'user/deliveries/{id}/rate';
 
+  // Phase 10 parcel booking v2 (server flag parcel.v2_enabled).
+  /// GET /api/parcels/config?market= — sizes, payment methods, flags.
+  static const String parcelsConfig = 'parcels/config';
+  /// POST /api/parcels/quote — upfront price, locked for N minutes.
+  static const String parcelsQuote = 'parcels/quote';
+  /// POST /api/parcels — book with a quote_id.
+  static const String parcels = 'parcels';
+  /// GET /api/parcels/{id} — sender view (status, handover code, link).
+  static const String parcelDetail = 'parcels/{id}';
+  /// GET /api/parcels/{id}/cancellation — fee preview.
+  static const String parcelCancellation = 'parcels/{id}/cancellation';
+  /// POST /api/parcels/{id}/cancel {reason, accept_fee}
+  static const String parcelCancel = 'parcels/{id}/cancel';
+
   // Ride/Taxi endpoints
   static const String rideEstimate = 'services/ride/estimate';
   static const String rideRequest = 'services/ride/request';

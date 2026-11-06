@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:hudhud_delivery/app/services/google_places_service.dart';
 import 'package:hudhud_delivery/app/models/place_result.dart';
 import 'package:hudhud_delivery/app/utils/human_readable_address.dart';
+import 'package:hudhud_delivery/app/services/city_scope.dart';
 import 'package:hudhud_delivery/app/services/custom_location_service.dart';
 import 'package:hudhud_delivery/app/services/startup_location_service.dart';
 import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
@@ -389,6 +390,16 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
   }
 
   void _confirmLocation(PlaceResult place) {
+    // Phase 10: no pins outside the selected city when the rule is enforced.
+    if (!CityScope.allowsPin(
+      place.coordinates.latitude,
+      place.coordinates.longitude,
+    )) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.p10CityNotServed)),
+      );
+      return;
+    }
     Navigator.pop(context);
     Navigator.pop(context, {
       'address': place.shortAddress,

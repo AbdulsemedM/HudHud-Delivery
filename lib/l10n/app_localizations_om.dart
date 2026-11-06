@@ -3874,4 +3874,250 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get p9GiftOrderLabel => 'Ajaja kennaa';
+
+  @override
+  String get p10CityNotServed => 'Naannoo kana ammaaf hin tajaajillu';
+
+  @override
+  String get p10CityCrossCity =>
+      'Bakki fudhatamuu fi bakki geessuu magaalaa tokko keessa ta\'uu qabu.';
+
+  @override
+  String get p10CityOtherCity =>
+      'Teessoon kun magaalaa biraa keessa jira. Itti fufuuf Qindaa\'ina keessatti magaalaa kee jijjiiri.';
+
+  @override
+  String get p10ParcelTitle => 'Paakeejii ergi';
+
+  @override
+  String get p10ParcelScheduledTitle => 'Paakeejii yeroon qabadhu';
+
+  @override
+  String get p10ParcelRoute => 'Karaa';
+
+  @override
+  String get p10ParcelPickup => 'Bakka fudhatamu';
+
+  @override
+  String get p10ParcelDropoff => 'Bakka geessuu';
+
+  @override
+  String get p10ParcelChooseAddress => 'Kaartaa irratti filadhu';
+
+  @override
+  String get p10ParcelBuilding => 'Gamoo / mana';
+
+  @override
+  String get p10ParcelFloor => 'Darbii';
+
+  @override
+  String get p10ParcelApartment => 'Kutaa / waajjira';
+
+  @override
+  String get p10ParcelLandmark => 'Mallattoo naannoo';
+
+  @override
+  String get p10ParcelRecipient => 'Fudhataa';
+
+  @override
+  String get p10ParcelSendToMyself => 'Ofumaaf ergi';
+
+  @override
+  String get p10ParcelRecipientName => 'Maqaa fudhataa';
+
+  @override
+  String get p10ParcelRecipientPhone => 'Bilbila fudhataa';
+
+  @override
+  String get p10ParcelWhatSending => 'Maal ergaa jirta?';
+
+  @override
+  String get p10ParcelCategoryDocument => 'Galmeewwan';
+
+  @override
+  String get p10ParcelCategoryParcel => 'Paakeejii';
+
+  @override
+  String get p10ParcelCategoryFood => 'Nyaata';
+
+  @override
+  String get p10ParcelCategoryGrocery => 'Meeshaalee nyaataa';
+
+  @override
+  String get p10ParcelCategoryElectronics => 'Elektirooniksii';
+
+  @override
+  String get p10ParcelCategoryClothes => 'Uffata';
+
+  @override
+  String get p10ParcelCategoryGift => 'Kennaa';
+
+  @override
+  String get p10ParcelCategoryFlowers => 'Abaaboo';
+
+  @override
+  String get p10ParcelCategoryKeys => 'Furtuu';
+
+  @override
+  String get p10ParcelCategoryOther => 'Kan biraa';
+
+  @override
+  String get p10ParcelSizeSmall => 'Xiqqaa';
+
+  @override
+  String get p10ParcelSizeSmallHint => 'Boorsaa keessa ni seena';
+
+  @override
+  String get p10ParcelSizeMedium => 'Giddugaleessa';
+
+  @override
+  String get p10ParcelSizeMediumHint => 'Teessoo konkolaataa irratti ni ga\'a';
+
+  @override
+  String get p10ParcelSizeLarge => 'Guddaa';
+
+  @override
+  String get p10ParcelSizeLargeHint => 'Konkolaataa fe\'umsaa barbaada';
+
+  @override
+  String get p10ParcelSizeUnavailable => 'Asitti ammaaf hin jiru';
+
+  @override
+  String get p10ParcelDescription => 'Ibsa (dirqama miti)';
+
+  @override
+  String get p10ParcelItemValue => 'Gatii meeshaa (dirqama miti)';
+
+  @override
+  String get p10ParcelCourierNote => 'Yaadannoo geessaaf';
+
+  @override
+  String get p10ParcelPayment => 'Kaffaltii';
+
+  @override
+  String get p10ParcelPayWallet => 'Waaleetii HudHud';
+
+  @override
+  String get p10ParcelPayCash => 'Maallaqa callaa geessaaf';
+
+  @override
+  String get p10ParcelPaymentPhone => 'Lakkoofsa maallaqa moobaayilaa';
+
+  @override
+  String get p10ParcelRecipientPays =>
+      'Fudhataan kaffala (yeroo ga\'u callaan)';
+
+  @override
+  String get p10ParcelSellerCod => 'Gatii meeshaa fudhataa irraa sassaabi';
+
+  @override
+  String get p10ParcelSellerCodHint =>
+      'Geessaan callaan sassaaba; waaleetii daldalaa HudHud keetti ni kaffalama.';
+
+  @override
+  String get p10ParcelSellerCodAmount => 'Gatii meeshaa sassaabamu';
+
+  @override
+  String get p10ParcelPickupTime => 'Yeroo fudhatamu';
+
+  @override
+  String get p10ParcelPickupNow => 'Hamma danda\'ametti dafee';
+
+  @override
+  String get p10ParcelPrice => 'Gatii';
+
+  @override
+  String p10ParcelPriceHeld(String time) {
+    return 'Gatiin ${time}f qabameera';
+  }
+
+  @override
+  String get p10ParcelPriceExpired => 'Yeroon qabannaa gatii darbeera';
+
+  @override
+  String get p10ParcelRefreshPrice => 'Gatii haaromsi';
+
+  @override
+  String get p10ParcelGettingPrice => 'Gatii argachaa jira…';
+
+  @override
+  String get p10ParcelPriceUpdated =>
+      'Gatiin jijjiirameera. Maaloo gatii haaraa ilaali.';
+
+  @override
+  String p10ParcelBook(String price) {
+    return '${price}n ajaji';
+  }
+
+  @override
+  String get p10ParcelContinue => 'Itti fufi';
+
+  @override
+  String get p10ParcelFillRequired =>
+      'Bakka fudhatamuu fi geessuu filadhu, bilbila fudhataas galchi.';
+
+  @override
+  String get p10ParcelSizeNotSupported =>
+      'Hamma kun magaalaa kana keessatti ammaaf hin jiru.';
+
+  @override
+  String get p10ParcelPaymentNotAvailable =>
+      'Malli kaffaltii kun magaalaa kana keessatti hin jiru.';
+
+  @override
+  String get p10ParcelInsufficientWallet =>
+      'Waaleetii kee keessa maallaqni gahaan hin jiru. Guuti ykn mala kaffaltii biraa filadhu.';
+
+  @override
+  String get p10ParcelSomethingWrong =>
+      'Rakkoon uumameera. Maaloo irra deebi\'ii yaali.';
+
+  @override
+  String get p10ParcelApprovePayment =>
+      'Kaffaltii bilbila kee irratti mirkaneessi.';
+
+  @override
+  String get p10ParcelBooked => 'Paakeejiin ajajameera';
+
+  @override
+  String get p10ParcelHandoverCode => 'Koodii kennaa';
+
+  @override
+  String get p10ParcelHandoverHint =>
+      'Fudhataan koodii kana yeroo ga\'u geessaaf kenna.';
+
+  @override
+  String get p10ParcelHandoverSelfHint =>
+      'Yeroo paakeejii fudhattu koodii kana geessaaf kenni.';
+
+  @override
+  String get p10ParcelShareTracking => 'Liinkii hordoffii qoodi';
+
+  @override
+  String p10ParcelTrackingShareText(String link) {
+    return 'Paakeejii HudHud koo hordofi: $link';
+  }
+
+  @override
+  String p10ParcelEta(String minutes) {
+    return 'Gara daqiiqaa $minutes keessatti ga\'a';
+  }
+
+  @override
+  String get p10ParcelCancel => 'Paakeejii haqi';
+
+  @override
+  String get p10ParcelCancelFree =>
+      'Paakeejii kana haqxaa? Geessaan ammaaf waan hin ramadamneef bilisa.';
+
+  @override
+  String p10ParcelCancelFee(String fee) {
+    return 'Geessaan karaa irra jira. Amma haquun $fee baasisa.';
+  }
+
+  @override
+  String get p10ParcelCancelReason => 'Ergaan appii keessatti haqe';
+
+  @override
+  String get p10ParcelCancelled => 'Paakeejiin haqameera';
 }

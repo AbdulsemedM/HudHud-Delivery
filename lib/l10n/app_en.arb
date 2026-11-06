@@ -1685,5 +1685,104 @@
     }
   },
   "p9GiftStop": "Stop gift",
-  "p9GiftOrderLabel": "Gift order"
+  "p9GiftOrderLabel": "Gift order",
+  "p10CityNotServed": "We don't serve this area yet",
+  "p10CityCrossCity": "Pickup and drop-off must be in the same city.",
+  "p10CityOtherCity": "These addresses are in another city. Switch your city in Settings to continue.",
+  "p10ParcelTitle": "Send a parcel",
+  "p10ParcelScheduledTitle": "Schedule a parcel",
+  "p10ParcelRoute": "Route",
+  "p10ParcelPickup": "Pickup",
+  "p10ParcelDropoff": "Drop-off",
+  "p10ParcelChooseAddress": "Choose on the map",
+  "p10ParcelBuilding": "Building / house",
+  "p10ParcelFloor": "Floor",
+  "p10ParcelApartment": "Apartment / office",
+  "p10ParcelLandmark": "Landmark",
+  "p10ParcelRecipient": "Recipient",
+  "p10ParcelSendToMyself": "Send to myself",
+  "p10ParcelRecipientName": "Recipient name",
+  "p10ParcelRecipientPhone": "Recipient phone",
+  "p10ParcelWhatSending": "What are you sending?",
+  "p10ParcelCategoryDocument": "Documents",
+  "p10ParcelCategoryParcel": "Parcel",
+  "p10ParcelCategoryFood": "Food",
+  "p10ParcelCategoryGrocery": "Groceries",
+  "p10ParcelCategoryElectronics": "Electronics",
+  "p10ParcelCategoryClothes": "Clothes",
+  "p10ParcelCategoryGift": "Gift",
+  "p10ParcelCategoryFlowers": "Flowers",
+  "p10ParcelCategoryKeys": "Keys",
+  "p10ParcelCategoryOther": "Other",
+  "p10ParcelSizeSmall": "Small",
+  "p10ParcelSizeSmallHint": "Fits in a backpack",
+  "p10ParcelSizeMedium": "Medium",
+  "p10ParcelSizeMediumHint": "Fits on a car seat",
+  "p10ParcelSizeLarge": "Large",
+  "p10ParcelSizeLargeHint": "Needs a van",
+  "p10ParcelSizeUnavailable": "Not available here yet",
+  "p10ParcelDescription": "Description (optional)",
+  "p10ParcelItemValue": "Item value (optional)",
+  "p10ParcelCourierNote": "Note for the courier",
+  "p10ParcelPayment": "Payment",
+  "p10ParcelPayWallet": "HudHud wallet",
+  "p10ParcelPayCash": "Cash to the courier",
+  "p10ParcelPaymentPhone": "Mobile money number",
+  "p10ParcelRecipientPays": "Recipient pays (cash at drop-off)",
+  "p10ParcelSellerCod": "Collect the item price from the recipient",
+  "p10ParcelSellerCodHint": "The courier collects it in cash and it is paid to your HudHud business wallet.",
+  "p10ParcelSellerCodAmount": "Item price to collect",
+  "p10ParcelPickupTime": "Pickup time",
+  "p10ParcelPickupNow": "As soon as possible",
+  "p10ParcelPrice": "Price",
+  "p10ParcelPriceHeld": "Price held for {time}",
+  "@p10ParcelPriceHeld": {
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "p10ParcelPriceExpired": "Price lock expired",
+  "p10ParcelRefreshPrice": "Refresh price",
+  "p10ParcelGettingPrice": "Getting the price…",
+  "p10ParcelPriceUpdated": "The price changed. Please check the new price.",
+  "p10ParcelBook": "Book for {price}",
+  "@p10ParcelBook": {
+    "placeholders": {
+      "price": {"type": "String"}
+    }
+  },
+  "p10ParcelContinue": "Continue",
+  "p10ParcelFillRequired": "Choose pickup and drop-off, and add the recipient's phone.",
+  "p10ParcelSizeNotSupported": "This size is not available in this city yet.",
+  "p10ParcelPaymentNotAvailable": "This payment method is not available in this city.",
+  "p10ParcelInsufficientWallet": "Not enough money in your wallet. Top up or choose another payment method.",
+  "p10ParcelSomethingWrong": "Something went wrong. Please try again.",
+  "p10ParcelApprovePayment": "Approve the payment on your phone.",
+  "p10ParcelBooked": "Parcel booked",
+  "p10ParcelHandoverCode": "Handover code",
+  "p10ParcelHandoverHint": "The recipient gives this code to the courier at delivery.",
+  "p10ParcelHandoverSelfHint": "Give this code to the courier when you receive the parcel.",
+  "p10ParcelShareTracking": "Share tracking link",
+  "p10ParcelTrackingShareText": "Track my HudHud parcel: {link}",
+  "@p10ParcelTrackingShareText": {
+    "placeholders": {
+      "link": {"type": "String"}
+    }
+  },
+  "p10ParcelEta": "Arriving in about {minutes} min",
+  "@p10ParcelEta": {
+    "placeholders": {
+      "minutes": {"type": "String"}
+    }
+  },
+  "p10ParcelCancel": "Cancel parcel",
+  "p10ParcelCancelFree": "Cancel this parcel? It's free because no courier has been assigned yet.",
+  "p10ParcelCancelFee": "A courier is already on the way. Cancelling now costs {fee}.",
+  "@p10ParcelCancelFee": {
+    "placeholders": {
+      "fee": {"type": "String"}
+    }
+  },
+  "p10ParcelCancelReason": "Cancelled by the sender in the app",
+  "p10ParcelCancelled": "Parcel cancelled"
 }

@@ -1822,5 +1822,316 @@
   "homeTabDelivery": "ማድረስ",
   "@homeTabDelivery": {
     "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
+  },
+  "p10CityNotServed": "ይህን አካባቢ ገና አናገለግልም",
+  "@p10CityNotServed": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10CityCrossCity": "መውሰጃና ማድረሻ በአንድ ከተማ ውስጥ መሆን አለባቸው።",
+  "@p10CityCrossCity": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10CityOtherCity": "እነዚህ አድራሻዎች በሌላ ከተማ ውስጥ ናቸው። ለመቀጠል በቅንብሮች ከተማዎን ይቀይሩ።",
+  "@p10CityOtherCity": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelTitle": "እሽግ ይላኩ",
+  "@p10ParcelTitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelScheduledTitle": "እሽግ ቀጠሮ ያስይዙ",
+  "@p10ParcelScheduledTitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelRoute": "መንገድ",
+  "@p10ParcelRoute": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPickup": "መውሰጃ",
+  "@p10ParcelPickup": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelDropoff": "ማድረሻ",
+  "@p10ParcelDropoff": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelChooseAddress": "በካርታ ላይ ይምረጡ",
+  "@p10ParcelChooseAddress": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelBuilding": "ሕንፃ / ቤት",
+  "@p10ParcelBuilding": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelFloor": "ፎቅ",
+  "@p10ParcelFloor": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelApartment": "አፓርትመንት / ቢሮ",
+  "@p10ParcelApartment": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelLandmark": "መለያ ቦታ",
+  "@p10ParcelLandmark": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelRecipient": "ተቀባይ",
+  "@p10ParcelRecipient": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSendToMyself": "ለራሴ ላክ",
+  "@p10ParcelSendToMyself": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelRecipientName": "የተቀባይ ስም",
+  "@p10ParcelRecipientName": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelRecipientPhone": "የተቀባይ ስልክ",
+  "@p10ParcelRecipientPhone": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelWhatSending": "ምን እየላኩ ነው?",
+  "@p10ParcelWhatSending": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryDocument": "ሰነዶች",
+  "@p10ParcelCategoryDocument": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryParcel": "እሽግ",
+  "@p10ParcelCategoryParcel": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryFood": "ምግብ",
+  "@p10ParcelCategoryFood": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryGrocery": "ሸቀጣሸቀጥ",
+  "@p10ParcelCategoryGrocery": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryElectronics": "ኤሌክትሮኒክስ",
+  "@p10ParcelCategoryElectronics": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryClothes": "ልብስ",
+  "@p10ParcelCategoryClothes": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryGift": "ስጦታ",
+  "@p10ParcelCategoryGift": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryFlowers": "አበቦች",
+  "@p10ParcelCategoryFlowers": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryKeys": "ቁልፎች",
+  "@p10ParcelCategoryKeys": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryOther": "ሌላ",
+  "@p10ParcelCategoryOther": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeSmall": "ትንሽ",
+  "@p10ParcelSizeSmall": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeSmallHint": "በቦርሳ ይገባል",
+  "@p10ParcelSizeSmallHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeMedium": "መካከለኛ",
+  "@p10ParcelSizeMedium": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeMediumHint": "በመኪና ወንበር ላይ ይገባል",
+  "@p10ParcelSizeMediumHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeLarge": "ትልቅ",
+  "@p10ParcelSizeLarge": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeLargeHint": "ቫን ያስፈልገዋል",
+  "@p10ParcelSizeLargeHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeUnavailable": "እዚህ ገና አይገኝም",
+  "@p10ParcelSizeUnavailable": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelDescription": "መግለጫ (አማራጭ)",
+  "@p10ParcelDescription": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelItemValue": "የዕቃው ዋጋ (አማራጭ)",
+  "@p10ParcelItemValue": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCourierNote": "ለአድራሹ ማስታወሻ",
+  "@p10ParcelCourierNote": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPayment": "ክፍያ",
+  "@p10ParcelPayment": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPayWallet": "የHudHud ዋሌት",
+  "@p10ParcelPayWallet": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPayCash": "ለአድራሹ በጥሬ ገንዘብ",
+  "@p10ParcelPayCash": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPaymentPhone": "የሞባይል ገንዘብ ቁጥር",
+  "@p10ParcelPaymentPhone": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelRecipientPays": "ተቀባይ ይከፍላል (ሲደርስ በጥሬ ገንዘብ)",
+  "@p10ParcelRecipientPays": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSellerCod": "የዕቃውን ዋጋ ከተቀባዩ ሰብስብ",
+  "@p10ParcelSellerCod": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSellerCodHint": "አድራሹ በጥሬ ገንዘብ ይሰበስባል፤ ወደ የHudHud የንግድ ዋሌትዎ ይከፈላል።",
+  "@p10ParcelSellerCodHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSellerCodAmount": "የሚሰበሰበው የዕቃ ዋጋ",
+  "@p10ParcelSellerCodAmount": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPickupTime": "የመውሰጃ ሰዓት",
+  "@p10ParcelPickupTime": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPickupNow": "በተቻለ ፍጥነት",
+  "@p10ParcelPickupNow": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPrice": "ዋጋ",
+  "@p10ParcelPrice": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPriceHeld": "ዋጋው ለ{time} ተይዟል",
+  "@p10ParcelPriceHeld": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "p10ParcelPriceExpired": "የዋጋ መያዣው አልፏል",
+  "@p10ParcelPriceExpired": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelRefreshPrice": "ዋጋ አድስ",
+  "@p10ParcelRefreshPrice": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelGettingPrice": "ዋጋ እየተገኘ ነው…",
+  "@p10ParcelGettingPrice": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPriceUpdated": "ዋጋው ተቀይሯል። እባክዎ አዲሱን ዋጋ ይመልከቱ።",
+  "@p10ParcelPriceUpdated": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelBook": "በ{price} ይዘዙ",
+  "@p10ParcelBook": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "price": {"type": "String"}
+    }
+  },
+  "p10ParcelContinue": "ቀጥል",
+  "@p10ParcelContinue": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelFillRequired": "መውሰጃና ማድረሻ ይምረጡ፣ የተቀባዩንም ስልክ ያስገቡ።",
+  "@p10ParcelFillRequired": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeNotSupported": "ይህ መጠን በዚህ ከተማ ገና አይገኝም።",
+  "@p10ParcelSizeNotSupported": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPaymentNotAvailable": "ይህ የክፍያ ዘዴ በዚህ ከተማ አይገኝም።",
+  "@p10ParcelPaymentNotAvailable": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelInsufficientWallet": "በዋሌትዎ በቂ ገንዘብ የለም። ይሙሉ ወይም ሌላ የክፍያ ዘዴ ይምረጡ።",
+  "@p10ParcelInsufficientWallet": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSomethingWrong": "ችግር ተፈጥሯል። እባክዎ እንደገና ይሞክሩ።",
+  "@p10ParcelSomethingWrong": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelApprovePayment": "ክፍያውን በስልክዎ ላይ ያጽድቁ።",
+  "@p10ParcelApprovePayment": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelBooked": "እሽጉ ታዝዟል",
+  "@p10ParcelBooked": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelHandoverCode": "የማስረከቢያ ኮድ",
+  "@p10ParcelHandoverCode": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelHandoverHint": "ተቀባዩ ይህን ኮድ ሲደርስ ለአድራሹ ይሰጣል።",
+  "@p10ParcelHandoverHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelHandoverSelfHint": "እሽጉን ሲቀበሉ ይህን ኮድ ለአድራሹ ይስጡ።",
+  "@p10ParcelHandoverSelfHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelShareTracking": "የመከታተያ ሊንክ አጋራ",
+  "@p10ParcelShareTracking": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelTrackingShareText": "የHudHud እሽጌን ይከታተሉ፦ {link}",
+  "@p10ParcelTrackingShareText": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "link": {"type": "String"}
+    }
+  },
+  "p10ParcelEta": "በግምት በ{minutes} ደቂቃ ይደርሳል",
+  "@p10ParcelEta": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "minutes": {"type": "String"}
+    }
+  },
+  "p10ParcelCancel": "እሽጉን ሰርዝ",
+  "@p10ParcelCancel": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCancelFree": "ይህን እሽግ ይሰርዙ? ገና አድራሽ ስላልተመደበ ነፃ ነው።",
+  "@p10ParcelCancelFree": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCancelFee": "አድራሹ በመንገድ ላይ ነው። አሁን መሰረዝ {fee} ያስከፍላል።",
+  "@p10ParcelCancelFee": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "fee": {"type": "String"}
+    }
+  },
+  "p10ParcelCancelReason": "በላኪው በመተግበሪያው ተሰርዟል",
+  "@p10ParcelCancelReason": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCancelled": "እሽጉ ተሰርዟል",
+  "@p10ParcelCancelled": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
   }
 }

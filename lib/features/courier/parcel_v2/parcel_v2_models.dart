@@ -1,0 +1,513 @@
+/// Phase 10 parcel booking v2 (Yango-style) client models.
+///
+/// All parsing is defensive: a missing or malformed field never throws, so an
+/// older backend simply reports `enabled: false` and the app keeps the
+/// existing courier flow.
+library;
+
+double? _double(dynamic value) {
+  if (value is num) return value.toDouble();
+  if (value is String) return double.tryParse(value.trim());
+  return null;
+}
+
+int? _int(dynamic value) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value.trim());
+  return null;
+}
+
+String? _string(dynamic value) {
+  if (value == null) return null;
+  final text = value.toString().trim();
+  return text.isEmpty ? null : text;
+}
+
+Map<String, dynamic>? _map(dynamic value) =>
+    value is Map ? Map<String, dynamic>.from(value) : null;
+
+Map<String, dynamic>? _data(dynamic body) {
+  final root = _map(body);
+  if (root == null) return null;
+  return _map(root['data']) ?? root;
+}
+
+/// Item sizes and the vehicle the city uses for each.
+class ParcelSizeOption {
+  final String size;
+  final String? vehicleType;
+  final bool available;
+
+  const ParcelSizeOption({
+    required this.size,
+    this.vehicleType,
+    this.available = true,
+  });
+}
+
+/// `GET /api/parcels/config`.
+class ParcelV2Config {
+  final bool enabled;
+  final String? market;
+  final String currency;
+  final int quoteTtlMinutes;
+  final int handoverCodeDigits;
+  final List<ParcelSizeOption> sizes;
+  final List<String> categories;
+  final List<String> paymentMethods;
+  final bool recipientPaysEnabled;
+  final bool sellerCodEnabled;
+  final bool requireDeliveryPhoto;
+  final double cancellationFeeAfterAssign;
+  final bool cityScopeEnforced;
+
+  const ParcelV2Config({
+    this.enabled = false,
+    this.market,
+    this.currency = 'ETB',
+    this.quoteTtlMinutes = 10,
+    this.handoverCodeDigits = 4,
+    this.sizes = const [],
+    this.categories = const [],
+    this.paymentMethods = const [],
+    this.recipientPaysEnabled = false,
+    this.sellerCodEnabled = false,
+    this.requireDeliveryPhoto = false,
+    this.cancellationFeeAfterAssign = 0,
+    this.cityScopeEnforced = false,
+  });
+
+  static const ParcelV2Config disabled = ParcelV2Config();
+
+  factory ParcelV2Config.fromResponseBody(dynamic body) {
+    final data = _data(body);
+    if (data == null) return disabled;
+    final sizes = <ParcelSizeOption>[];
+    final rawSizes = data['sizes'];
+    if (rawSizes is List) {
+      for (final raw in rawSizes) {
+        final m = _map(raw);
+        final size = _string(m?['size']);
+        if (m == null || size == null) continue;
+        sizes.add(ParcelSizeOption(
+          size: size,
+          vehicleType: _string(m['vehicle_type']),
+          available: m['available'] != false,
+        ));
+      }
+    }
+    List<String> strings(dynamic raw) => raw is List
+        ? raw.map(_string).whereType<String>().toList()
+        : const <String>[];
+    return ParcelV2Config(
+      enabled: data['enabled'] == true,
+      market: _string(data['market']),
+      currency: (_string(data['currency']) ?? 'ETB').toUpperCase(),
+      quoteTtlMinutes: _int(data['quote_ttl_minutes']) ?? 10,
+      handoverCodeDigits: _int(data['handover_code_digits']) ?? 4,
+      sizes: sizes,
+      categories: strings(data['categories']),
+      paymentMethods: strings(data['payment_methods']),
+      recipientPaysEnabled: data['recipient_pays_enabled'] == true,
+      sellerCodEnabled: data['seller_cod_enabled'] == true,
+      requireDeliveryPhoto: data['require_delivery_photo'] == true,
+      cancellationFeeAfterAssign:
+          _double(data['cancellation_fee_after_assign']) ?? 0,
+      cityScopeEnforced: data['city_scope_enforced'] == true,
+    );
+  }
+
+  ParcelSizeOption? sizeOption(String size) {
+    for (final option in sizes) {
+      if (option.size == size) return option;
+    }
+    return null;
+  }
+}
+
+/// `POST /api/parcels/quote` — a server price locked until [expiresAt].
+class ParcelQuote {
+  final String quoteId;
+  final double amount;
+  final String currency;
+  final String? vehicleType;
+  final String? itemSize;
+  final double? distanceKm;
+  final int? durationMinutes;
+  final DateTime expiresAt;
+
+  const ParcelQuote({
+    required this.quoteId,
+    required this.amount,
+    required this.currency,
+    required this.expiresAt,
+    this.vehicleType,
+    this.itemSize,
+    this.distanceKm,
+    this.durationMinutes,
+  });
+
+  /// [receivedAt] anchors the countdown to the device clock (server
+  /// `expires_in_seconds`), so a skewed phone clock cannot extend the lock.
+  static ParcelQuote? fromResponseBody(dynamic body, {DateTime? receivedAt}) {
+    final data = _data(body);
+    final id = _string(data?['quote_id']);
+    final amount = _double(data?['amount']);
+    if (data == null || id == null || amount == null) return null;
+    final now = receivedAt ?? DateTime.now();
+    final seconds = _int(data['expires_in_seconds']);
+    final expires = seconds != null
+        ? now.add(Duration(seconds: seconds))
+        : (DateTime.tryParse(data['expires_at']?.toString() ?? '')
+                ?.toLocal() ??
+            now.add(const Duration(minutes: 10)));
+    return ParcelQuote(
+      quoteId: id,
+      amount: amount,
+      currency: (_string(data['currency']) ?? 'ETB').toUpperCase(),
+      vehicleType: _string(data['vehicle_type']),
+      itemSize: _string(data['item_size']),
+      distanceKm: _double(data['distance_km']),
+      durationMinutes: _int(data['duration_minutes']),
+      expiresAt: expires,
+    );
+  }
+
+  Duration remaining([DateTime? now]) {
+    final left = expiresAt.difference(now ?? DateTime.now());
+    return left.isNegative ? Duration.zero : left;
+  }
+
+  bool isExpired([DateTime? now]) => remaining(now) == Duration.zero;
+}
+
+/// "mm:ss" for the price-lock countdown.
+String formatQuoteCountdown(Duration left) {
+  final minutes = left.inMinutes;
+  final seconds = left.inSeconds % 60;
+  return '$minutes:${seconds.toString().padLeft(2, '0')}';
+}
+
+/// Fee preview (`GET /api/parcels/{id}/cancellation`, also in the detail).
+class ParcelCancellationPreview {
+  final bool canCancel;
+  final String? code;
+  final double fee;
+  final String? currency;
+  final double refund;
+
+  const ParcelCancellationPreview({
+    required this.canCancel,
+    this.code,
+    this.fee = 0,
+    this.currency,
+    this.refund = 0,
+  });
+
+  bool get hasFee => fee > 0;
+
+  static ParcelCancellationPreview? fromJson(dynamic raw) {
+    final m = _map(raw);
+    if (m == null) return null;
+    return ParcelCancellationPreview(
+      canCancel: m['can_cancel'] == true,
+      code: _string(m['code']),
+      fee: _double(m['fee']) ?? 0,
+      currency: _string(m['currency']),
+      refund: _double(m['refund']) ?? 0,
+    );
+  }
+}
+
+/// Customer-facing statuses (server ParcelStatus).
+class ParcelV2Status {
+  ParcelV2Status._();
+
+  static const awaitingPayment = 'awaiting_payment';
+  static const scheduled = 'scheduled';
+  static const searching = 'searching';
+  static const courierAssigned = 'courier_assigned';
+  static const atPickup = 'at_pickup';
+  static const pickedUp = 'picked_up';
+  static const atDropoff = 'at_dropoff';
+  static const delivered = 'delivered';
+  static const cancelled = 'cancelled';
+  static const failed = 'failed';
+  static const returned = 'returned';
+
+  static const terminal = {delivered, cancelled, failed, returned};
+}
+
+/// `GET /api/parcels/{id}` — the subset the app shows.
+class ParcelV2Parcel {
+  final int id;
+  final int version;
+  final String status;
+  final int step;
+  final String? trackingNumber;
+  final double amount;
+  final String? currency;
+  final String? handoverCode;
+  final int handoverDigits;
+  final bool handoverVerified;
+  final String? trackingUrl;
+  final int? etaMinutes;
+  final ParcelCancellationPreview? cancellation;
+
+  const ParcelV2Parcel({
+    required this.id,
+    required this.status,
+    this.version = 2,
+    this.step = 0,
+    this.trackingNumber,
+    this.amount = 0,
+    this.currency,
+    this.handoverCode,
+    this.handoverDigits = 4,
+    this.handoverVerified = false,
+    this.trackingUrl,
+    this.etaMinutes,
+    this.cancellation,
+  });
+
+  bool get isV2 => version >= 2;
+  bool get isTerminal => ParcelV2Status.terminal.contains(status);
+
+  static ParcelV2Parcel? fromJson(dynamic raw) {
+    final m = _map(raw);
+    final id = _int(m?['id']);
+    if (m == null || id == null) return null;
+    final price = _map(m['price']);
+    final handover = _map(m['handover']);
+    return ParcelV2Parcel(
+      id: id,
+      version: _int(m['version']) ?? 1,
+      status: _string(m['status']) ?? ParcelV2Status.searching,
+      step: _int(m['step']) ?? 0,
+      trackingNumber: _string(m['tracking_number']),
+      amount: _double(price?['amount']) ?? 0,
+      currency: _string(price?['currency']),
+      handoverCode: _string(handover?['code']),
+      handoverDigits: _int(handover?['digits']) ?? 4,
+      handoverVerified: handover?['verified'] == true,
+      trackingUrl: _string(m['tracking_url']),
+      etaMinutes: _int(m['eta_minutes']),
+      cancellation: ParcelCancellationPreview.fromJson(m['cancellation']),
+    );
+  }
+
+  static ParcelV2Parcel? fromResponseBody(dynamic body) {
+    final root = _map(body);
+    if (root == null) return null;
+    return fromJson(root['parcel'] ?? root['data']);
+  }
+
+  /// The minimal delivery map the existing finding / tracking screens read.
+  Map<String, dynamic> toLegacyDeliveryMap({
+    required double pickupLat,
+    required double pickupLng,
+    required double dropoffLat,
+    required double dropoffLng,
+    required String pickupLocation,
+    required String dropoffLocation,
+    String? vehicleType,
+    String? packageType,
+    String? paymentMethod,
+    String? recipientName,
+    String? recipientPhone,
+  }) {
+    return {
+      'id': id,
+      'status': status == ParcelV2Status.searching ? 'pending' : status,
+      'tracking_number': trackingNumber,
+      'pickup_latitude': pickupLat,
+      'pickup_longitude': pickupLng,
+      'dropoff_latitude': dropoffLat,
+      'dropoff_longitude': dropoffLng,
+      'pickup_location': pickupLocation,
+      'dropoff_location': dropoffLocation,
+      'vehicle_type': vehicleType,
+      'package_type': packageType,
+      'payment_method': paymentMethod,
+      'receiver_name': recipientName,
+      'receiver_phone': recipientPhone,
+    };
+  }
+}
+
+/// Address extras a courier needs (building, floor, …).
+class ParcelAddressDetails {
+  final String building;
+  final String floor;
+  final String apartment;
+  final String landmark;
+
+  const ParcelAddressDetails({
+    this.building = '',
+    this.floor = '',
+    this.apartment = '',
+    this.landmark = '',
+  });
+
+  Map<String, dynamic> toJson(String formattedAddress) {
+    final out = <String, dynamic>{'formatted_address': formattedAddress};
+    void put(String key, String value) {
+      final v = value.trim();
+      if (v.isNotEmpty) out[key] = v;
+    }
+
+    put('building', building);
+    put('floor', floor);
+    put('apartment', apartment);
+    put('landmark', landmark);
+    return out;
+  }
+}
+
+/// Everything the booking form collected; builds the API bodies.
+class ParcelBookingDraft {
+  final String pickupLocation;
+  final double pickupLat;
+  final double pickupLng;
+  final ParcelAddressDetails pickupDetails;
+  final String dropoffLocation;
+  final double dropoffLat;
+  final double dropoffLng;
+  final ParcelAddressDetails dropoffDetails;
+  final bool recipientIsMe;
+  final String recipientName;
+  final String recipientPhone;
+  final String category;
+  final String size;
+  final String description;
+  final double? itemValue;
+  final String courierNote;
+  final String paymentMethod;
+  final String? paymentPhone;
+  final bool recipientPays;
+  final double? sellerCodAmount;
+  final DateTime? scheduledPickup;
+  final String? marketCode;
+
+  const ParcelBookingDraft({
+    required this.pickupLocation,
+    required this.pickupLat,
+    required this.pickupLng,
+    required this.dropoffLocation,
+    required this.dropoffLat,
+    required this.dropoffLng,
+    this.pickupDetails = const ParcelAddressDetails(),
+    this.dropoffDetails = const ParcelAddressDetails(),
+    this.recipientIsMe = false,
+    this.recipientName = '',
+    this.recipientPhone = '',
+    this.category = 'parcel',
+    this.size = 'small',
+    this.description = '',
+    this.itemValue,
+    this.courierNote = '',
+    this.paymentMethod = 'wallet',
+    this.paymentPhone,
+    this.recipientPays = false,
+    this.sellerCodAmount,
+    this.scheduledPickup,
+    this.marketCode,
+  });
+
+  bool get sellerCod => sellerCodAmount != null && sellerCodAmount! > 0;
+
+  Map<String, dynamic> quoteBody() {
+    return {
+      'pickup_location': pickupLocation,
+      'pickup_latitude': pickupLat,
+      'pickup_longitude': pickupLng,
+      'dropoff_latitude': dropoffLat,
+      'dropoff_longitude': dropoffLng,
+      'item_size': size,
+      if (scheduledPickup != null)
+        'scheduled_pickup': scheduledPickup!.toUtc().toIso8601String(),
+      if (marketCode != null) 'market_code': marketCode,
+    };
+  }
+
+  Map<String, dynamic> bookBody(String quoteId) {
+    final note = courierNote.trim();
+    final desc = description.trim();
+    final phone = paymentPhone?.trim();
+    return {
+      'quote_id': quoteId,
+      'pickup_location': pickupLocation,
+      'pickup_latitude': pickupLat,
+      'pickup_longitude': pickupLng,
+      'pickup_address': pickupDetails.toJson(pickupLocation),
+      'dropoff_location': dropoffLocation,
+      'dropoff_latitude': dropoffLat,
+      'dropoff_longitude': dropoffLng,
+      'dropoff_address': dropoffDetails.toJson(dropoffLocation),
+      'recipient_is_me': recipientIsMe,
+      if (!recipientIsMe) 'recipient_name': recipientName.trim(),
+      if (!recipientIsMe) 'recipient_phone': recipientPhone.trim(),
+      'item_category': category,
+      'item_size': size,
+      if (desc.isNotEmpty) 'item_description': desc,
+      if (itemValue != null) 'item_value': itemValue,
+      if (note.isNotEmpty) 'courier_note': note,
+      // "Recipient pays" and seller COD are always cash at drop-off.
+      'payment_method': recipientPays || sellerCod ? 'cash' : paymentMethod,
+      if (phone != null && phone.isNotEmpty) 'payment_phone': phone,
+      'payer': recipientPays || sellerCod ? 'recipient' : 'sender',
+      if (sellerCod)
+        'seller_cod': {'enabled': true, 'amount': sellerCodAmount},
+      if (scheduledPickup != null)
+        'scheduled_pickup': scheduledPickup!.toUtc().toIso8601String(),
+      if (marketCode != null) 'market_code': marketCode,
+    };
+  }
+}
+
+/// Server error codes the booking screen explains in its own words.
+enum ParcelErrorKind {
+  outsideArea,
+  crossCity,
+  otherCity,
+  quoteExpired,
+  quoteChanged,
+  sizeNotSupported,
+  paymentNotAvailable,
+  insufficientWallet,
+  feeConfirmation,
+  pickedUp,
+  other,
+}
+
+ParcelErrorKind parcelErrorKind(String? code, {String? message}) {
+  switch (code) {
+    case 'CITY_OUTSIDE_SERVICE_AREA':
+    case 'PICKUP_SERVICE_AREA_UNAVAILABLE':
+      return ParcelErrorKind.outsideArea;
+    case 'CITY_CROSS_MARKET':
+      return ParcelErrorKind.crossCity;
+    case 'CITY_MARKET_MISMATCH':
+      return ParcelErrorKind.otherCity;
+    case 'PARCEL_QUOTE_EXPIRED':
+    case 'PARCEL_QUOTE_USED':
+    case 'PARCEL_QUOTE_NOT_FOUND':
+      return ParcelErrorKind.quoteExpired;
+    case 'PARCEL_QUOTE_MISMATCH':
+      return ParcelErrorKind.quoteChanged;
+    case 'PARCEL_SIZE_NOT_SUPPORTED':
+    case 'CITY_VEHICLE_NOT_SUPPORTED':
+      return ParcelErrorKind.sizeNotSupported;
+    case 'PAYMENT_METHOD_NOT_AVAILABLE':
+      return ParcelErrorKind.paymentNotAvailable;
+    case 'PARCEL_CANCELLATION_FEE_CONFIRMATION_REQUIRED':
+      return ParcelErrorKind.feeConfirmation;
+    case 'PARCEL_ALREADY_PICKED_UP':
+      return ParcelErrorKind.pickedUp;
+  }
+  if ((message ?? '').toLowerCase().contains('insufficient wallet')) {
+    return ParcelErrorKind.insufficientWallet;
+  }
+  return ParcelErrorKind.other;
+}

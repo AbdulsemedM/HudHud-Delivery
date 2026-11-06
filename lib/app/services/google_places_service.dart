@@ -3,12 +3,19 @@ import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 
 import '../config/google_maps_api_key_provider.dart';
+import '../models/city_service_area.dart';
 import '../models/place_result.dart';
+import '../services/city_scope.dart';
 import '../utils/human_readable_address.dart';
 
 /// Google Places Autocomplete, Place Details, and Geocoding (reverse).
 /// Uses the same API key as the map (from .env via Android BuildConfig).
-/// All results are restricted to Ethiopia.
+///
+/// Phase 10: results follow the selected city ([CityScope.current]): the
+/// market's country, a bias towards the city, and — when the server
+/// enforces one city per request — a hard `locationrestriction` plus a
+/// client-side filter so only places inside the city come back. Without a
+/// known city the search stays restricted to Ethiopia, as before.
 class GooglePlacesService {
   static const _autocompleteUrl =
       'https://maps.googleapis.com/maps/api/place/autocomplete/json';
@@ -19,8 +26,52 @@ class GooglePlacesService {
   static const _geocodeUrl =
       'https://maps.googleapis.com/maps/api/geocode/json';
 
-  /// Restrict suggestions to Ethiopia (ISO 3166-1 alpha-2: et).
+  /// Default restriction without a known city: Ethiopia (ISO 3166-1 alpha-2: et).
   static const String _countryRestriction = 'country:et';
+
+  /// Query parameters for Place Autocomplete in [area] (null = Ethiopia only).
+  static Map<String, String> autocompleteScope(CityServiceArea? area) {
+    final params = <String, String>{
+      'components': area?.countryComponent ?? _countryRestriction,
+    };
+    final rectangle = area?.autocompleteRestriction;
+    if (rectangle != null) {
+      // Hard limit when the city rule is enforced, otherwise a preference.
+      params[area!.enforced ? 'locationrestriction' : 'locationbias'] =
+          rectangle;
+    }
+    return params;
+  }
+
+  /// Query parameters for Text Search in [area] (bias only; filtered after).
+  static Map<String, String> textSearchScope(CityServiceArea? area) {
+    final cc = area?.countryCode?.trim().toLowerCase();
+    final params = <String, String>{
+      'region': cc != null && cc.length == 2 ? cc : 'et',
+    };
+    if (area != null && area.hasCenter) {
+      params['location'] = '${area.centerLat},${area.centerLng}';
+      final radius = (area.radiusKm * 1000).round().clamp(1000, 50000);
+      params['radius'] = radius.toString();
+    }
+    return params;
+  }
+
+  /// Drops places outside an enforced city.
+  static List<PlaceResult> filterToCity(
+    List<PlaceResult> places,
+    CityServiceArea? area,
+  ) {
+    if (area == null || !area.enforced) return places;
+    return places
+        .where(
+          (p) => area.contains(
+            p.coordinates.latitude,
+            p.coordinates.longitude,
+          ),
+        )
+        .toList();
+  }
 
   /// Fetch place suggestions for the given [input]. Only returns places in Ethiopia.
   ///
@@ -33,12 +84,13 @@ class GooglePlacesService {
     final query = input.trim();
     if (query.length < 2) return [];
 
+    final area = CityScope.current;
     try {
       final results = await Future.wait([
-        _searchAutocomplete(key, query),
-        _searchTextSearch(key, query),
+        _searchAutocomplete(key, query, area),
+        _searchTextSearch(key, query, area),
       ]);
-      return _mergePlaces(results[0], results[1]);
+      return filterToCity(_mergePlaces(results[0], results[1]), area);
     } catch (e) {
       return [];
     }
@@ -47,9 +99,14 @@ class GooglePlacesService {
   static Future<List<PlaceResult>> _searchAutocomplete(
     String key,
     String query,
+    CityServiceArea? area,
   ) async {
-    final uri = Uri.parse(
-      '$_autocompleteUrl?input=${Uri.encodeComponent(query)}&key=$key&components=$_countryRestriction',
+    final uri = Uri.parse(_autocompleteUrl).replace(
+      queryParameters: {
+        'input': query,
+        'key': key,
+        ...autocompleteScope(area),
+      },
     );
     final response = await http.get(uri).timeout(const Duration(seconds: 5));
     if (response.statusCode != 200) return [];
@@ -92,9 +149,14 @@ class GooglePlacesService {
   static Future<List<PlaceResult>> _searchTextSearch(
     String key,
     String query,
+    CityServiceArea? area,
   ) async {
-    final uri = Uri.parse(
-      '$_textSearchUrl?query=${Uri.encodeComponent(query)}&key=$key&region=et',
+    final uri = Uri.parse(_textSearchUrl).replace(
+      queryParameters: {
+        'query': query,
+        'key': key,
+        ...textSearchScope(area),
+      },
     );
     final response = await http.get(uri).timeout(const Duration(seconds: 5));
     if (response.statusCode != 200) return [];

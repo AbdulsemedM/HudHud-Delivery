@@ -1815,5 +1815,316 @@
   "homeTabDelivery": "التوصيل",
   "@homeTabDelivery": {
     "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
+  },
+  "p10CityNotServed": "لا نخدم هذه المنطقة بعد",
+  "@p10CityNotServed": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10CityCrossCity": "يجب أن يكون الاستلام والتسليم في المدينة نفسها.",
+  "@p10CityCrossCity": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10CityOtherCity": "هذه العناوين في مدينة أخرى. غيّر مدينتك من الإعدادات للمتابعة.",
+  "@p10CityOtherCity": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelTitle": "إرسال طرد",
+  "@p10ParcelTitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelScheduledTitle": "جدولة طرد",
+  "@p10ParcelScheduledTitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelRoute": "المسار",
+  "@p10ParcelRoute": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPickup": "الاستلام",
+  "@p10ParcelPickup": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelDropoff": "التسليم",
+  "@p10ParcelDropoff": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelChooseAddress": "اختر على الخريطة",
+  "@p10ParcelChooseAddress": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelBuilding": "المبنى / المنزل",
+  "@p10ParcelBuilding": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelFloor": "الطابق",
+  "@p10ParcelFloor": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelApartment": "الشقة / المكتب",
+  "@p10ParcelApartment": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelLandmark": "معلم قريب",
+  "@p10ParcelLandmark": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelRecipient": "المستلم",
+  "@p10ParcelRecipient": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSendToMyself": "إرسال إلى نفسي",
+  "@p10ParcelSendToMyself": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelRecipientName": "اسم المستلم",
+  "@p10ParcelRecipientName": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelRecipientPhone": "هاتف المستلم",
+  "@p10ParcelRecipientPhone": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelWhatSending": "ماذا ترسل؟",
+  "@p10ParcelWhatSending": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryDocument": "مستندات",
+  "@p10ParcelCategoryDocument": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryParcel": "طرد",
+  "@p10ParcelCategoryParcel": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryFood": "طعام",
+  "@p10ParcelCategoryFood": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryGrocery": "بقالة",
+  "@p10ParcelCategoryGrocery": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryElectronics": "إلكترونيات",
+  "@p10ParcelCategoryElectronics": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryClothes": "ملابس",
+  "@p10ParcelCategoryClothes": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryGift": "هدية",
+  "@p10ParcelCategoryGift": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryFlowers": "زهور",
+  "@p10ParcelCategoryFlowers": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryKeys": "مفاتيح",
+  "@p10ParcelCategoryKeys": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryOther": "أخرى",
+  "@p10ParcelCategoryOther": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeSmall": "صغير",
+  "@p10ParcelSizeSmall": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeSmallHint": "يتسع في حقيبة ظهر",
+  "@p10ParcelSizeSmallHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeMedium": "متوسط",
+  "@p10ParcelSizeMedium": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeMediumHint": "يتسع على مقعد سيارة",
+  "@p10ParcelSizeMediumHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeLarge": "كبير",
+  "@p10ParcelSizeLarge": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeLargeHint": "يحتاج إلى شاحنة صغيرة",
+  "@p10ParcelSizeLargeHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeUnavailable": "غير متاح هنا بعد",
+  "@p10ParcelSizeUnavailable": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelDescription": "الوصف (اختياري)",
+  "@p10ParcelDescription": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelItemValue": "قيمة الغرض (اختياري)",
+  "@p10ParcelItemValue": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCourierNote": "ملاحظة للمندوب",
+  "@p10ParcelCourierNote": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPayment": "الدفع",
+  "@p10ParcelPayment": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPayWallet": "محفظة HudHud",
+  "@p10ParcelPayWallet": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPayCash": "نقدًا للمندوب",
+  "@p10ParcelPayCash": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPaymentPhone": "رقم المحفظة المتنقلة",
+  "@p10ParcelPaymentPhone": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelRecipientPays": "المستلم يدفع (نقدًا عند التسليم)",
+  "@p10ParcelRecipientPays": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSellerCod": "تحصيل ثمن الغرض من المستلم",
+  "@p10ParcelSellerCod": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSellerCodHint": "يحصّله المندوب نقدًا ويُدفع إلى محفظة أعمالك في HudHud.",
+  "@p10ParcelSellerCodHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSellerCodAmount": "ثمن الغرض المطلوب تحصيله",
+  "@p10ParcelSellerCodAmount": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPickupTime": "وقت الاستلام",
+  "@p10ParcelPickupTime": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPickupNow": "في أقرب وقت ممكن",
+  "@p10ParcelPickupNow": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPrice": "السعر",
+  "@p10ParcelPrice": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPriceHeld": "السعر محجوز لمدة {time}",
+  "@p10ParcelPriceHeld": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "p10ParcelPriceExpired": "انتهت مدة حجز السعر",
+  "@p10ParcelPriceExpired": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelRefreshPrice": "تحديث السعر",
+  "@p10ParcelRefreshPrice": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelGettingPrice": "جارٍ احتساب السعر…",
+  "@p10ParcelGettingPrice": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPriceUpdated": "تغيّر السعر. يرجى مراجعة السعر الجديد.",
+  "@p10ParcelPriceUpdated": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelBook": "احجز مقابل {price}",
+  "@p10ParcelBook": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "price": {"type": "String"}
+    }
+  },
+  "p10ParcelContinue": "متابعة",
+  "@p10ParcelContinue": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelFillRequired": "اختر مكان الاستلام والتسليم وأضف هاتف المستلم.",
+  "@p10ParcelFillRequired": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeNotSupported": "هذا الحجم غير متاح في هذه المدينة بعد.",
+  "@p10ParcelSizeNotSupported": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPaymentNotAvailable": "طريقة الدفع هذه غير متاحة في هذه المدينة.",
+  "@p10ParcelPaymentNotAvailable": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelInsufficientWallet": "رصيد محفظتك غير كافٍ. اشحنها أو اختر طريقة دفع أخرى.",
+  "@p10ParcelInsufficientWallet": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSomethingWrong": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+  "@p10ParcelSomethingWrong": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelApprovePayment": "وافق على الدفع من هاتفك.",
+  "@p10ParcelApprovePayment": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelBooked": "تم حجز الطرد",
+  "@p10ParcelBooked": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelHandoverCode": "رمز التسليم",
+  "@p10ParcelHandoverCode": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelHandoverHint": "يعطي المستلم هذا الرمز للمندوب عند التسليم.",
+  "@p10ParcelHandoverHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelHandoverSelfHint": "أعطِ هذا الرمز للمندوب عند استلامك الطرد.",
+  "@p10ParcelHandoverSelfHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelShareTracking": "مشاركة رابط التتبع",
+  "@p10ParcelShareTracking": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelTrackingShareText": "تتبّع طردي من HudHud: {link}",
+  "@p10ParcelTrackingShareText": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "link": {"type": "String"}
+    }
+  },
+  "p10ParcelEta": "يصل خلال {minutes} دقيقة تقريبًا",
+  "@p10ParcelEta": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "minutes": {"type": "String"}
+    }
+  },
+  "p10ParcelCancel": "إلغاء الطرد",
+  "@p10ParcelCancel": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCancelFree": "إلغاء هذا الطرد؟ الإلغاء مجاني لأنه لم يُعيَّن مندوب بعد.",
+  "@p10ParcelCancelFree": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCancelFee": "المندوب في الطريق بالفعل. الإلغاء الآن يكلّف {fee}.",
+  "@p10ParcelCancelFee": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "fee": {"type": "String"}
+    }
+  },
+  "p10ParcelCancelReason": "ألغاه المرسل من التطبيق",
+  "@p10ParcelCancelReason": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCancelled": "تم إلغاء الطرد",
+  "@p10ParcelCancelled": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
   }
 }

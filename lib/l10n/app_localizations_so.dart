@@ -3881,4 +3881,250 @@ class AppLocalizationsSo extends AppLocalizations {
 
   @override
   String get p9GiftOrderLabel => 'Dalab hadiyad';
+
+  @override
+  String get p10CityNotServed => 'Weli ma adeegno aaggan';
+
+  @override
+  String get p10CityCrossCity =>
+      'Goobta laga qaado iyo goobta la geeyo waa inay isku magaalo ahaadaan.';
+
+  @override
+  String get p10CityOtherCity =>
+      'Cinwaannadani waxay ku yaalliin magaalo kale. Magaaladaada ka beddel Dejinta si aad u sii wadato.';
+
+  @override
+  String get p10ParcelTitle => 'Dir xirmo';
+
+  @override
+  String get p10ParcelScheduledTitle => 'Ballami xirmo';
+
+  @override
+  String get p10ParcelRoute => 'Waddada';
+
+  @override
+  String get p10ParcelPickup => 'Laga qaado';
+
+  @override
+  String get p10ParcelDropoff => 'Loo geeyo';
+
+  @override
+  String get p10ParcelChooseAddress => 'Ka dooro khariidadda';
+
+  @override
+  String get p10ParcelBuilding => 'Dhismaha / guriga';
+
+  @override
+  String get p10ParcelFloor => 'Dabaqa';
+
+  @override
+  String get p10ParcelApartment => 'Abartamanka / xafiiska';
+
+  @override
+  String get p10ParcelLandmark => 'Calaamad u dhow';
+
+  @override
+  String get p10ParcelRecipient => 'Qaataha';
+
+  @override
+  String get p10ParcelSendToMyself => 'Naftayda u dir';
+
+  @override
+  String get p10ParcelRecipientName => 'Magaca qaataha';
+
+  @override
+  String get p10ParcelRecipientPhone => 'Taleefanka qaataha';
+
+  @override
+  String get p10ParcelWhatSending => 'Maxaad diraysaa?';
+
+  @override
+  String get p10ParcelCategoryDocument => 'Dukumentiyo';
+
+  @override
+  String get p10ParcelCategoryParcel => 'Xirmo';
+
+  @override
+  String get p10ParcelCategoryFood => 'Cunto';
+
+  @override
+  String get p10ParcelCategoryGrocery => 'Raashin';
+
+  @override
+  String get p10ParcelCategoryElectronics => 'Qalab elektaroonig';
+
+  @override
+  String get p10ParcelCategoryClothes => 'Dhar';
+
+  @override
+  String get p10ParcelCategoryGift => 'Hadiyad';
+
+  @override
+  String get p10ParcelCategoryFlowers => 'Ubax';
+
+  @override
+  String get p10ParcelCategoryKeys => 'Furayaal';
+
+  @override
+  String get p10ParcelCategoryOther => 'Kale';
+
+  @override
+  String get p10ParcelSizeSmall => 'Yar';
+
+  @override
+  String get p10ParcelSizeSmallHint => 'Boorso ayuu ku filan yahay';
+
+  @override
+  String get p10ParcelSizeMedium => 'Dhexdhexaad';
+
+  @override
+  String get p10ParcelSizeMediumHint => 'Kursiga gaariga ayuu ku filan yahay';
+
+  @override
+  String get p10ParcelSizeLarge => 'Weyn';
+
+  @override
+  String get p10ParcelSizeLargeHint => 'Wuxuu u baahan yahay baabuur xamuul';
+
+  @override
+  String get p10ParcelSizeUnavailable => 'Halkan weli lagama helo';
+
+  @override
+  String get p10ParcelDescription => 'Faahfaahin (ikhtiyaari)';
+
+  @override
+  String get p10ParcelItemValue => 'Qiimaha alaabta (ikhtiyaari)';
+
+  @override
+  String get p10ParcelCourierNote => 'Fariin loogu talagalay darawalka';
+
+  @override
+  String get p10ParcelPayment => 'Lacag bixinta';
+
+  @override
+  String get p10ParcelPayWallet => 'Boorsada HudHud';
+
+  @override
+  String get p10ParcelPayCash => 'Lacag caddaan ah darawalka';
+
+  @override
+  String get p10ParcelPaymentPhone => 'Lambarka lacagta mobaylka';
+
+  @override
+  String get p10ParcelRecipientPays =>
+      'Qaataha ayaa bixinaya (caddaan marka la geeyo)';
+
+  @override
+  String get p10ParcelSellerCod => 'Ka qaad qiimaha alaabta qaataha';
+
+  @override
+  String get p10ParcelSellerCodHint =>
+      'Darawalku caddaan ayuu ka qaadayaa, waxaana lagu shubayaa boorsadaada ganacsiga ee HudHud.';
+
+  @override
+  String get p10ParcelSellerCodAmount => 'Qiimaha alaabta la qaadayo';
+
+  @override
+  String get p10ParcelPickupTime => 'Waqtiga laga qaado';
+
+  @override
+  String get p10ParcelPickupNow => 'Sida ugu dhakhsaha badan';
+
+  @override
+  String get p10ParcelPrice => 'Qiimaha';
+
+  @override
+  String p10ParcelPriceHeld(String time) {
+    return 'Qiimaha waa la xajiyay $time';
+  }
+
+  @override
+  String get p10ParcelPriceExpired => 'Xajinta qiimaha way dhacday';
+
+  @override
+  String get p10ParcelRefreshPrice => 'Cusboonaysii qiimaha';
+
+  @override
+  String get p10ParcelGettingPrice => 'Qiimaha ayaa la helayaa…';
+
+  @override
+  String get p10ParcelPriceUpdated =>
+      'Qiimaha wuu isbeddelay. Fadlan eeg qiimaha cusub.';
+
+  @override
+  String p10ParcelBook(String price) {
+    return 'Dalbo $price';
+  }
+
+  @override
+  String get p10ParcelContinue => 'Sii wad';
+
+  @override
+  String get p10ParcelFillRequired =>
+      'Dooro goobta laga qaado iyo meesha loo geeyo, kuna dar taleefanka qaataha.';
+
+  @override
+  String get p10ParcelSizeNotSupported =>
+      'Cabbirkan weli lagama helo magaaladan.';
+
+  @override
+  String get p10ParcelPaymentNotAvailable =>
+      'Habkan lacag bixinta lagama helo magaaladan.';
+
+  @override
+  String get p10ParcelInsufficientWallet =>
+      'Boorsadaada lacag ku filan kuma jirto. Ku shub ama dooro hab kale oo lacag bixin ah.';
+
+  @override
+  String get p10ParcelSomethingWrong =>
+      'Wax baa khaldamay. Fadlan isku day mar kale.';
+
+  @override
+  String get p10ParcelApprovePayment =>
+      'Ku oggolow lacag bixinta taleefankaaga.';
+
+  @override
+  String get p10ParcelBooked => 'Xirmada waa la dalbaday';
+
+  @override
+  String get p10ParcelHandoverCode => 'Koodhka gacan-gelinta';
+
+  @override
+  String get p10ParcelHandoverHint =>
+      'Qaatahu koodhkan ayuu siinayaa darawalka marka la keeno.';
+
+  @override
+  String get p10ParcelHandoverSelfHint =>
+      'Sii darawalka koodhkan marka aad xirmada hesho.';
+
+  @override
+  String get p10ParcelShareTracking => 'La wadaag xiriiriyaha la socodka';
+
+  @override
+  String p10ParcelTrackingShareText(String link) {
+    return 'La soco xirmadayda HudHud: $link';
+  }
+
+  @override
+  String p10ParcelEta(String minutes) {
+    return 'Wuxuu imanayaa qiyaastii $minutes daqiiqo';
+  }
+
+  @override
+  String get p10ParcelCancel => 'Jooji xirmada';
+
+  @override
+  String get p10ParcelCancelFree =>
+      'Ma joojinaysaa xirmadan? Waa bilaash maadaama aan weli darawal loo xilsaarin.';
+
+  @override
+  String p10ParcelCancelFee(String fee) {
+    return 'Darawal ayaa soo socda. Hadda joojintu waxay ku kacaysaa $fee.';
+  }
+
+  @override
+  String get p10ParcelCancelReason => 'Diraha ayaa ka joojiyay app-ka';
+
+  @override
+  String get p10ParcelCancelled => 'Xirmada waa la joojiyay';
 }

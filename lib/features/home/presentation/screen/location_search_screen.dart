@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
+import 'package:hudhud_delivery/app/services/city_scope.dart';
 import 'package:hudhud_delivery/app/services/custom_location_service.dart';
 import 'package:hudhud_delivery/app/services/startup_location_service.dart';
 import 'package:hudhud_delivery/app/services/google_places_service.dart';
@@ -13,6 +14,7 @@ import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/widgets/centered_pin_map.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../../../core/widgets/city_outside_area_banner.dart';
 import '../../../../core/widgets/location_search_field.dart';
 
 class LocationSearchScreen extends StatefulWidget {
@@ -30,7 +32,22 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
   /// Fallback only until GPS resolves (Addis Ababa).
   static const LatLng _fallbackPosition = LatLng(9.0222, 38.7468);
 
-  LatLng _currentPosition = _fallbackPosition;
+  /// Phase 10: open on the selected city, not always on Addis Ababa.
+  static LatLng _initialPosition() {
+    final area = CityScope.current;
+    if (area != null && area.hasCenter) {
+      return LatLng(area.centerLat!, area.centerLng!);
+    }
+    return _fallbackPosition;
+  }
+
+  LatLng _currentPosition = _initialPosition();
+
+  /// False when the city rule is enforced and the pin is outside the city.
+  bool get _pinInsideCity => CityScope.allowsPin(
+        _currentPosition.latitude,
+        _currentPosition.longitude,
+      );
   bool _isLoadingCurrentLocation = false;
   bool _hasUserLocation = false;
   /// Bumps [CenteredPinMap] key so it remounts already centered on GPS.
@@ -457,6 +474,12 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
+                    if (!_pinInsideCity) ...[
+                      CityOutsideAreaBanner(
+                        message: l10n.p10CityNotServed,
+                      ),
+                      const SizedBox(height: 12),
+                    ],
                     SizedBox(
                       width: double.infinity,
                       child: FilledButton(
@@ -468,16 +491,18 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        onPressed: () {
-                          // Pin center is authoritative — must match the address.
-                          Navigator.pop(context, {
-                            'address': _selectedPlace!.formattedAddress,
-                            'coordinates': LatLng(
-                              _currentPosition.latitude,
-                              _currentPosition.longitude,
-                            ),
-                          });
-                        },
+                        onPressed: !_pinInsideCity
+                            ? null
+                            : () {
+                                // Pin center is authoritative — must match the address.
+                                Navigator.pop(context, {
+                                  'address': _selectedPlace!.formattedAddress,
+                                  'coordinates': LatLng(
+                                    _currentPosition.latitude,
+                                    _currentPosition.longitude,
+                                  ),
+                                });
+                              },
                         child: Text(
                           l10n.locationConfirmButton,
                           style: const TextStyle(

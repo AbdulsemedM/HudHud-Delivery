@@ -3781,4 +3781,239 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get p9GiftOrderLabel => 'የስጦታ ትዕዛዝ';
+
+  @override
+  String get p10CityNotServed => 'ይህን አካባቢ ገና አናገለግልም';
+
+  @override
+  String get p10CityCrossCity => 'መውሰጃና ማድረሻ በአንድ ከተማ ውስጥ መሆን አለባቸው።';
+
+  @override
+  String get p10CityOtherCity =>
+      'እነዚህ አድራሻዎች በሌላ ከተማ ውስጥ ናቸው። ለመቀጠል በቅንብሮች ከተማዎን ይቀይሩ።';
+
+  @override
+  String get p10ParcelTitle => 'እሽግ ይላኩ';
+
+  @override
+  String get p10ParcelScheduledTitle => 'እሽግ ቀጠሮ ያስይዙ';
+
+  @override
+  String get p10ParcelRoute => 'መንገድ';
+
+  @override
+  String get p10ParcelPickup => 'መውሰጃ';
+
+  @override
+  String get p10ParcelDropoff => 'ማድረሻ';
+
+  @override
+  String get p10ParcelChooseAddress => 'በካርታ ላይ ይምረጡ';
+
+  @override
+  String get p10ParcelBuilding => 'ሕንፃ / ቤት';
+
+  @override
+  String get p10ParcelFloor => 'ፎቅ';
+
+  @override
+  String get p10ParcelApartment => 'አፓርትመንት / ቢሮ';
+
+  @override
+  String get p10ParcelLandmark => 'መለያ ቦታ';
+
+  @override
+  String get p10ParcelRecipient => 'ተቀባይ';
+
+  @override
+  String get p10ParcelSendToMyself => 'ለራሴ ላክ';
+
+  @override
+  String get p10ParcelRecipientName => 'የተቀባይ ስም';
+
+  @override
+  String get p10ParcelRecipientPhone => 'የተቀባይ ስልክ';
+
+  @override
+  String get p10ParcelWhatSending => 'ምን እየላኩ ነው?';
+
+  @override
+  String get p10ParcelCategoryDocument => 'ሰነዶች';
+
+  @override
+  String get p10ParcelCategoryParcel => 'እሽግ';
+
+  @override
+  String get p10ParcelCategoryFood => 'ምግብ';
+
+  @override
+  String get p10ParcelCategoryGrocery => 'ሸቀጣሸቀጥ';
+
+  @override
+  String get p10ParcelCategoryElectronics => 'ኤሌክትሮኒክስ';
+
+  @override
+  String get p10ParcelCategoryClothes => 'ልብስ';
+
+  @override
+  String get p10ParcelCategoryGift => 'ስጦታ';
+
+  @override
+  String get p10ParcelCategoryFlowers => 'አበቦች';
+
+  @override
+  String get p10ParcelCategoryKeys => 'ቁልፎች';
+
+  @override
+  String get p10ParcelCategoryOther => 'ሌላ';
+
+  @override
+  String get p10ParcelSizeSmall => 'ትንሽ';
+
+  @override
+  String get p10ParcelSizeSmallHint => 'በቦርሳ ይገባል';
+
+  @override
+  String get p10ParcelSizeMedium => 'መካከለኛ';
+
+  @override
+  String get p10ParcelSizeMediumHint => 'በመኪና ወንበር ላይ ይገባል';
+
+  @override
+  String get p10ParcelSizeLarge => 'ትልቅ';
+
+  @override
+  String get p10ParcelSizeLargeHint => 'ቫን ያስፈልገዋል';
+
+  @override
+  String get p10ParcelSizeUnavailable => 'እዚህ ገና አይገኝም';
+
+  @override
+  String get p10ParcelDescription => 'መግለጫ (አማራጭ)';
+
+  @override
+  String get p10ParcelItemValue => 'የዕቃው ዋጋ (አማራጭ)';
+
+  @override
+  String get p10ParcelCourierNote => 'ለአድራሹ ማስታወሻ';
+
+  @override
+  String get p10ParcelPayment => 'ክፍያ';
+
+  @override
+  String get p10ParcelPayWallet => 'የHudHud ዋሌት';
+
+  @override
+  String get p10ParcelPayCash => 'ለአድራሹ በጥሬ ገንዘብ';
+
+  @override
+  String get p10ParcelPaymentPhone => 'የሞባይል ገንዘብ ቁጥር';
+
+  @override
+  String get p10ParcelRecipientPays => 'ተቀባይ ይከፍላል (ሲደርስ በጥሬ ገንዘብ)';
+
+  @override
+  String get p10ParcelSellerCod => 'የዕቃውን ዋጋ ከተቀባዩ ሰብስብ';
+
+  @override
+  String get p10ParcelSellerCodHint =>
+      'አድራሹ በጥሬ ገንዘብ ይሰበስባል፤ ወደ የHudHud የንግድ ዋሌትዎ ይከፈላል።';
+
+  @override
+  String get p10ParcelSellerCodAmount => 'የሚሰበሰበው የዕቃ ዋጋ';
+
+  @override
+  String get p10ParcelPickupTime => 'የመውሰጃ ሰዓት';
+
+  @override
+  String get p10ParcelPickupNow => 'በተቻለ ፍጥነት';
+
+  @override
+  String get p10ParcelPrice => 'ዋጋ';
+
+  @override
+  String p10ParcelPriceHeld(String time) {
+    return 'ዋጋው ለ$time ተይዟል';
+  }
+
+  @override
+  String get p10ParcelPriceExpired => 'የዋጋ መያዣው አልፏል';
+
+  @override
+  String get p10ParcelRefreshPrice => 'ዋጋ አድስ';
+
+  @override
+  String get p10ParcelGettingPrice => 'ዋጋ እየተገኘ ነው…';
+
+  @override
+  String get p10ParcelPriceUpdated => 'ዋጋው ተቀይሯል። እባክዎ አዲሱን ዋጋ ይመልከቱ።';
+
+  @override
+  String p10ParcelBook(String price) {
+    return 'በ$price ይዘዙ';
+  }
+
+  @override
+  String get p10ParcelContinue => 'ቀጥል';
+
+  @override
+  String get p10ParcelFillRequired => 'መውሰጃና ማድረሻ ይምረጡ፣ የተቀባዩንም ስልክ ያስገቡ።';
+
+  @override
+  String get p10ParcelSizeNotSupported => 'ይህ መጠን በዚህ ከተማ ገና አይገኝም።';
+
+  @override
+  String get p10ParcelPaymentNotAvailable => 'ይህ የክፍያ ዘዴ በዚህ ከተማ አይገኝም።';
+
+  @override
+  String get p10ParcelInsufficientWallet =>
+      'በዋሌትዎ በቂ ገንዘብ የለም። ይሙሉ ወይም ሌላ የክፍያ ዘዴ ይምረጡ።';
+
+  @override
+  String get p10ParcelSomethingWrong => 'ችግር ተፈጥሯል። እባክዎ እንደገና ይሞክሩ።';
+
+  @override
+  String get p10ParcelApprovePayment => 'ክፍያውን በስልክዎ ላይ ያጽድቁ።';
+
+  @override
+  String get p10ParcelBooked => 'እሽጉ ታዝዟል';
+
+  @override
+  String get p10ParcelHandoverCode => 'የማስረከቢያ ኮድ';
+
+  @override
+  String get p10ParcelHandoverHint => 'ተቀባዩ ይህን ኮድ ሲደርስ ለአድራሹ ይሰጣል።';
+
+  @override
+  String get p10ParcelHandoverSelfHint => 'እሽጉን ሲቀበሉ ይህን ኮድ ለአድራሹ ይስጡ።';
+
+  @override
+  String get p10ParcelShareTracking => 'የመከታተያ ሊንክ አጋራ';
+
+  @override
+  String p10ParcelTrackingShareText(String link) {
+    return 'የHudHud እሽጌን ይከታተሉ፦ $link';
+  }
+
+  @override
+  String p10ParcelEta(String minutes) {
+    return 'በግምት በ$minutes ደቂቃ ይደርሳል';
+  }
+
+  @override
+  String get p10ParcelCancel => 'እሽጉን ሰርዝ';
+
+  @override
+  String get p10ParcelCancelFree => 'ይህን እሽግ ይሰርዙ? ገና አድራሽ ስላልተመደበ ነፃ ነው።';
+
+  @override
+  String p10ParcelCancelFee(String fee) {
+    return 'አድራሹ በመንገድ ላይ ነው። አሁን መሰረዝ $fee ያስከፍላል።';
+  }
+
+  @override
+  String get p10ParcelCancelReason => 'በላኪው በመተግበሪያው ተሰርዟል';
+
+  @override
+  String get p10ParcelCancelled => 'እሽጉ ተሰርዟል';
 }

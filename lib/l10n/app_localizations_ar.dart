@@ -3823,4 +3823,246 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get p9GiftOrderLabel => 'طلب هدية';
+
+  @override
+  String get p10CityNotServed => 'لا نخدم هذه المنطقة بعد';
+
+  @override
+  String get p10CityCrossCity =>
+      'يجب أن يكون الاستلام والتسليم في المدينة نفسها.';
+
+  @override
+  String get p10CityOtherCity =>
+      'هذه العناوين في مدينة أخرى. غيّر مدينتك من الإعدادات للمتابعة.';
+
+  @override
+  String get p10ParcelTitle => 'إرسال طرد';
+
+  @override
+  String get p10ParcelScheduledTitle => 'جدولة طرد';
+
+  @override
+  String get p10ParcelRoute => 'المسار';
+
+  @override
+  String get p10ParcelPickup => 'الاستلام';
+
+  @override
+  String get p10ParcelDropoff => 'التسليم';
+
+  @override
+  String get p10ParcelChooseAddress => 'اختر على الخريطة';
+
+  @override
+  String get p10ParcelBuilding => 'المبنى / المنزل';
+
+  @override
+  String get p10ParcelFloor => 'الطابق';
+
+  @override
+  String get p10ParcelApartment => 'الشقة / المكتب';
+
+  @override
+  String get p10ParcelLandmark => 'معلم قريب';
+
+  @override
+  String get p10ParcelRecipient => 'المستلم';
+
+  @override
+  String get p10ParcelSendToMyself => 'إرسال إلى نفسي';
+
+  @override
+  String get p10ParcelRecipientName => 'اسم المستلم';
+
+  @override
+  String get p10ParcelRecipientPhone => 'هاتف المستلم';
+
+  @override
+  String get p10ParcelWhatSending => 'ماذا ترسل؟';
+
+  @override
+  String get p10ParcelCategoryDocument => 'مستندات';
+
+  @override
+  String get p10ParcelCategoryParcel => 'طرد';
+
+  @override
+  String get p10ParcelCategoryFood => 'طعام';
+
+  @override
+  String get p10ParcelCategoryGrocery => 'بقالة';
+
+  @override
+  String get p10ParcelCategoryElectronics => 'إلكترونيات';
+
+  @override
+  String get p10ParcelCategoryClothes => 'ملابس';
+
+  @override
+  String get p10ParcelCategoryGift => 'هدية';
+
+  @override
+  String get p10ParcelCategoryFlowers => 'زهور';
+
+  @override
+  String get p10ParcelCategoryKeys => 'مفاتيح';
+
+  @override
+  String get p10ParcelCategoryOther => 'أخرى';
+
+  @override
+  String get p10ParcelSizeSmall => 'صغير';
+
+  @override
+  String get p10ParcelSizeSmallHint => 'يتسع في حقيبة ظهر';
+
+  @override
+  String get p10ParcelSizeMedium => 'متوسط';
+
+  @override
+  String get p10ParcelSizeMediumHint => 'يتسع على مقعد سيارة';
+
+  @override
+  String get p10ParcelSizeLarge => 'كبير';
+
+  @override
+  String get p10ParcelSizeLargeHint => 'يحتاج إلى شاحنة صغيرة';
+
+  @override
+  String get p10ParcelSizeUnavailable => 'غير متاح هنا بعد';
+
+  @override
+  String get p10ParcelDescription => 'الوصف (اختياري)';
+
+  @override
+  String get p10ParcelItemValue => 'قيمة الغرض (اختياري)';
+
+  @override
+  String get p10ParcelCourierNote => 'ملاحظة للمندوب';
+
+  @override
+  String get p10ParcelPayment => 'الدفع';
+
+  @override
+  String get p10ParcelPayWallet => 'محفظة HudHud';
+
+  @override
+  String get p10ParcelPayCash => 'نقدًا للمندوب';
+
+  @override
+  String get p10ParcelPaymentPhone => 'رقم المحفظة المتنقلة';
+
+  @override
+  String get p10ParcelRecipientPays => 'المستلم يدفع (نقدًا عند التسليم)';
+
+  @override
+  String get p10ParcelSellerCod => 'تحصيل ثمن الغرض من المستلم';
+
+  @override
+  String get p10ParcelSellerCodHint =>
+      'يحصّله المندوب نقدًا ويُدفع إلى محفظة أعمالك في HudHud.';
+
+  @override
+  String get p10ParcelSellerCodAmount => 'ثمن الغرض المطلوب تحصيله';
+
+  @override
+  String get p10ParcelPickupTime => 'وقت الاستلام';
+
+  @override
+  String get p10ParcelPickupNow => 'في أقرب وقت ممكن';
+
+  @override
+  String get p10ParcelPrice => 'السعر';
+
+  @override
+  String p10ParcelPriceHeld(String time) {
+    return 'السعر محجوز لمدة $time';
+  }
+
+  @override
+  String get p10ParcelPriceExpired => 'انتهت مدة حجز السعر';
+
+  @override
+  String get p10ParcelRefreshPrice => 'تحديث السعر';
+
+  @override
+  String get p10ParcelGettingPrice => 'جارٍ احتساب السعر…';
+
+  @override
+  String get p10ParcelPriceUpdated => 'تغيّر السعر. يرجى مراجعة السعر الجديد.';
+
+  @override
+  String p10ParcelBook(String price) {
+    return 'احجز مقابل $price';
+  }
+
+  @override
+  String get p10ParcelContinue => 'متابعة';
+
+  @override
+  String get p10ParcelFillRequired =>
+      'اختر مكان الاستلام والتسليم وأضف هاتف المستلم.';
+
+  @override
+  String get p10ParcelSizeNotSupported =>
+      'هذا الحجم غير متاح في هذه المدينة بعد.';
+
+  @override
+  String get p10ParcelPaymentNotAvailable =>
+      'طريقة الدفع هذه غير متاحة في هذه المدينة.';
+
+  @override
+  String get p10ParcelInsufficientWallet =>
+      'رصيد محفظتك غير كافٍ. اشحنها أو اختر طريقة دفع أخرى.';
+
+  @override
+  String get p10ParcelSomethingWrong => 'حدث خطأ ما. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get p10ParcelApprovePayment => 'وافق على الدفع من هاتفك.';
+
+  @override
+  String get p10ParcelBooked => 'تم حجز الطرد';
+
+  @override
+  String get p10ParcelHandoverCode => 'رمز التسليم';
+
+  @override
+  String get p10ParcelHandoverHint =>
+      'يعطي المستلم هذا الرمز للمندوب عند التسليم.';
+
+  @override
+  String get p10ParcelHandoverSelfHint =>
+      'أعطِ هذا الرمز للمندوب عند استلامك الطرد.';
+
+  @override
+  String get p10ParcelShareTracking => 'مشاركة رابط التتبع';
+
+  @override
+  String p10ParcelTrackingShareText(String link) {
+    return 'تتبّع طردي من HudHud: $link';
+  }
+
+  @override
+  String p10ParcelEta(String minutes) {
+    return 'يصل خلال $minutes دقيقة تقريبًا';
+  }
+
+  @override
+  String get p10ParcelCancel => 'إلغاء الطرد';
+
+  @override
+  String get p10ParcelCancelFree =>
+      'إلغاء هذا الطرد؟ الإلغاء مجاني لأنه لم يُعيَّن مندوب بعد.';
+
+  @override
+  String p10ParcelCancelFee(String fee) {
+    return 'المندوب في الطريق بالفعل. الإلغاء الآن يكلّف $fee.';
+  }
+
+  @override
+  String get p10ParcelCancelReason => 'ألغاه المرسل من التطبيق';
+
+  @override
+  String get p10ParcelCancelled => 'تم إلغاء الطرد';
 }

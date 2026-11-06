@@ -1815,5 +1815,316 @@
   "homeTabDelivery": "Gaarsiin",
   "@homeTabDelivery": {
     "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
+  },
+  "p10CityNotServed": "Weli ma adeegno aaggan",
+  "@p10CityNotServed": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10CityCrossCity": "Goobta laga qaado iyo goobta la geeyo waa inay isku magaalo ahaadaan.",
+  "@p10CityCrossCity": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10CityOtherCity": "Cinwaannadani waxay ku yaalliin magaalo kale. Magaaladaada ka beddel Dejinta si aad u sii wadato.",
+  "@p10CityOtherCity": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelTitle": "Dir xirmo",
+  "@p10ParcelTitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelScheduledTitle": "Ballami xirmo",
+  "@p10ParcelScheduledTitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelRoute": "Waddada",
+  "@p10ParcelRoute": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPickup": "Laga qaado",
+  "@p10ParcelPickup": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelDropoff": "Loo geeyo",
+  "@p10ParcelDropoff": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelChooseAddress": "Ka dooro khariidadda",
+  "@p10ParcelChooseAddress": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelBuilding": "Dhismaha / guriga",
+  "@p10ParcelBuilding": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelFloor": "Dabaqa",
+  "@p10ParcelFloor": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelApartment": "Abartamanka / xafiiska",
+  "@p10ParcelApartment": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelLandmark": "Calaamad u dhow",
+  "@p10ParcelLandmark": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelRecipient": "Qaataha",
+  "@p10ParcelRecipient": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSendToMyself": "Naftayda u dir",
+  "@p10ParcelSendToMyself": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelRecipientName": "Magaca qaataha",
+  "@p10ParcelRecipientName": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelRecipientPhone": "Taleefanka qaataha",
+  "@p10ParcelRecipientPhone": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelWhatSending": "Maxaad diraysaa?",
+  "@p10ParcelWhatSending": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryDocument": "Dukumentiyo",
+  "@p10ParcelCategoryDocument": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryParcel": "Xirmo",
+  "@p10ParcelCategoryParcel": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryFood": "Cunto",
+  "@p10ParcelCategoryFood": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryGrocery": "Raashin",
+  "@p10ParcelCategoryGrocery": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryElectronics": "Qalab elektaroonig",
+  "@p10ParcelCategoryElectronics": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryClothes": "Dhar",
+  "@p10ParcelCategoryClothes": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryGift": "Hadiyad",
+  "@p10ParcelCategoryGift": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryFlowers": "Ubax",
+  "@p10ParcelCategoryFlowers": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryKeys": "Furayaal",
+  "@p10ParcelCategoryKeys": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryOther": "Kale",
+  "@p10ParcelCategoryOther": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeSmall": "Yar",
+  "@p10ParcelSizeSmall": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeSmallHint": "Boorso ayuu ku filan yahay",
+  "@p10ParcelSizeSmallHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeMedium": "Dhexdhexaad",
+  "@p10ParcelSizeMedium": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeMediumHint": "Kursiga gaariga ayuu ku filan yahay",
+  "@p10ParcelSizeMediumHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeLarge": "Weyn",
+  "@p10ParcelSizeLarge": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeLargeHint": "Wuxuu u baahan yahay baabuur xamuul",
+  "@p10ParcelSizeLargeHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeUnavailable": "Halkan weli lagama helo",
+  "@p10ParcelSizeUnavailable": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelDescription": "Faahfaahin (ikhtiyaari)",
+  "@p10ParcelDescription": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelItemValue": "Qiimaha alaabta (ikhtiyaari)",
+  "@p10ParcelItemValue": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCourierNote": "Fariin loogu talagalay darawalka",
+  "@p10ParcelCourierNote": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPayment": "Lacag bixinta",
+  "@p10ParcelPayment": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPayWallet": "Boorsada HudHud",
+  "@p10ParcelPayWallet": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPayCash": "Lacag caddaan ah darawalka",
+  "@p10ParcelPayCash": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPaymentPhone": "Lambarka lacagta mobaylka",
+  "@p10ParcelPaymentPhone": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelRecipientPays": "Qaataha ayaa bixinaya (caddaan marka la geeyo)",
+  "@p10ParcelRecipientPays": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSellerCod": "Ka qaad qiimaha alaabta qaataha",
+  "@p10ParcelSellerCod": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSellerCodHint": "Darawalku caddaan ayuu ka qaadayaa, waxaana lagu shubayaa boorsadaada ganacsiga ee HudHud.",
+  "@p10ParcelSellerCodHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSellerCodAmount": "Qiimaha alaabta la qaadayo",
+  "@p10ParcelSellerCodAmount": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPickupTime": "Waqtiga laga qaado",
+  "@p10ParcelPickupTime": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPickupNow": "Sida ugu dhakhsaha badan",
+  "@p10ParcelPickupNow": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPrice": "Qiimaha",
+  "@p10ParcelPrice": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPriceHeld": "Qiimaha waa la xajiyay {time}",
+  "@p10ParcelPriceHeld": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "p10ParcelPriceExpired": "Xajinta qiimaha way dhacday",
+  "@p10ParcelPriceExpired": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelRefreshPrice": "Cusboonaysii qiimaha",
+  "@p10ParcelRefreshPrice": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelGettingPrice": "Qiimaha ayaa la helayaa…",
+  "@p10ParcelGettingPrice": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPriceUpdated": "Qiimaha wuu isbeddelay. Fadlan eeg qiimaha cusub.",
+  "@p10ParcelPriceUpdated": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelBook": "Dalbo {price}",
+  "@p10ParcelBook": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "price": {"type": "String"}
+    }
+  },
+  "p10ParcelContinue": "Sii wad",
+  "@p10ParcelContinue": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelFillRequired": "Dooro goobta laga qaado iyo meesha loo geeyo, kuna dar taleefanka qaataha.",
+  "@p10ParcelFillRequired": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeNotSupported": "Cabbirkan weli lagama helo magaaladan.",
+  "@p10ParcelSizeNotSupported": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPaymentNotAvailable": "Habkan lacag bixinta lagama helo magaaladan.",
+  "@p10ParcelPaymentNotAvailable": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelInsufficientWallet": "Boorsadaada lacag ku filan kuma jirto. Ku shub ama dooro hab kale oo lacag bixin ah.",
+  "@p10ParcelInsufficientWallet": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSomethingWrong": "Wax baa khaldamay. Fadlan isku day mar kale.",
+  "@p10ParcelSomethingWrong": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelApprovePayment": "Ku oggolow lacag bixinta taleefankaaga.",
+  "@p10ParcelApprovePayment": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelBooked": "Xirmada waa la dalbaday",
+  "@p10ParcelBooked": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelHandoverCode": "Koodhka gacan-gelinta",
+  "@p10ParcelHandoverCode": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelHandoverHint": "Qaatahu koodhkan ayuu siinayaa darawalka marka la keeno.",
+  "@p10ParcelHandoverHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelHandoverSelfHint": "Sii darawalka koodhkan marka aad xirmada hesho.",
+  "@p10ParcelHandoverSelfHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelShareTracking": "La wadaag xiriiriyaha la socodka",
+  "@p10ParcelShareTracking": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelTrackingShareText": "La soco xirmadayda HudHud: {link}",
+  "@p10ParcelTrackingShareText": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "link": {"type": "String"}
+    }
+  },
+  "p10ParcelEta": "Wuxuu imanayaa qiyaastii {minutes} daqiiqo",
+  "@p10ParcelEta": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "minutes": {"type": "String"}
+    }
+  },
+  "p10ParcelCancel": "Jooji xirmada",
+  "@p10ParcelCancel": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCancelFree": "Ma joojinaysaa xirmadan? Waa bilaash maadaama aan weli darawal loo xilsaarin.",
+  "@p10ParcelCancelFree": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCancelFee": "Darawal ayaa soo socda. Hadda joojintu waxay ku kacaysaa {fee}.",
+  "@p10ParcelCancelFee": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "fee": {"type": "String"}
+    }
+  },
+  "p10ParcelCancelReason": "Diraha ayaa ka joojiyay app-ka",
+  "@p10ParcelCancelReason": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCancelled": "Xirmada waa la joojiyay",
+  "@p10ParcelCancelled": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
   }
 }

@@ -1,3 +1,5 @@
+import 'package:hudhud_delivery/app/models/city_service_area.dart';
+
 import 'growth_json.dart';
 
 /// One city/market from `GET /api/markets` (Phase 3 §0).
@@ -21,6 +23,9 @@ class Market {
   final int? phoneNationalLength;
   final List<String> phoneMobilePrefixes;
 
+  /// Phase 10 service area (`?include=service_area`); null on older backends.
+  final CityServiceArea? serviceArea;
+
   const Market({
     required this.code,
     required this.name,
@@ -33,6 +38,7 @@ class Market {
     this.paymentMethods = const [],
     this.phoneNationalLength,
     this.phoneMobilePrefixes = const [],
+    this.serviceArea,
   });
 
   static const String defaultCode = 'addis_ababa';
@@ -44,9 +50,10 @@ class Market {
     final code = (growthString(json['code']) ?? '').toLowerCase();
     final settings = growthMap(json['settings']);
     final phone = growthMap(json['phone']) ?? growthMap(settings?['phone']);
+    final name = growthString(json['name']) ?? code;
     return Market(
       code: code,
-      name: growthString(json['name']) ?? code,
+      name: name,
       currency: (growthString(json['currency']) ?? 'ETB').toUpperCase(),
       timezone: growthString(json['timezone']),
       isActive: growthBool(json['is_active'], true),
@@ -62,6 +69,11 @@ class Market {
           .map(growthString)
           .whereType<String>()
           .toList(),
+      serviceArea: CityServiceArea.fromJson(
+        json['service_area'],
+        marketCode: code,
+        marketName: name,
+      ),
     );
   }
 

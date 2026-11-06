@@ -1815,5 +1815,316 @@
   "homeTabDelivery": "Geejjiba",
   "@homeTabDelivery": {
     "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
+  },
+  "p10CityNotServed": "Naannoo kana ammaaf hin tajaajillu",
+  "@p10CityNotServed": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10CityCrossCity": "Bakki fudhatamuu fi bakki geessuu magaalaa tokko keessa ta'uu qabu.",
+  "@p10CityCrossCity": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10CityOtherCity": "Teessoon kun magaalaa biraa keessa jira. Itti fufuuf Qindaa'ina keessatti magaalaa kee jijjiiri.",
+  "@p10CityOtherCity": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelTitle": "Paakeejii ergi",
+  "@p10ParcelTitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelScheduledTitle": "Paakeejii yeroon qabadhu",
+  "@p10ParcelScheduledTitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelRoute": "Karaa",
+  "@p10ParcelRoute": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPickup": "Bakka fudhatamu",
+  "@p10ParcelPickup": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelDropoff": "Bakka geessuu",
+  "@p10ParcelDropoff": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelChooseAddress": "Kaartaa irratti filadhu",
+  "@p10ParcelChooseAddress": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelBuilding": "Gamoo / mana",
+  "@p10ParcelBuilding": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelFloor": "Darbii",
+  "@p10ParcelFloor": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelApartment": "Kutaa / waajjira",
+  "@p10ParcelApartment": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelLandmark": "Mallattoo naannoo",
+  "@p10ParcelLandmark": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelRecipient": "Fudhataa",
+  "@p10ParcelRecipient": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSendToMyself": "Ofumaaf ergi",
+  "@p10ParcelSendToMyself": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelRecipientName": "Maqaa fudhataa",
+  "@p10ParcelRecipientName": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelRecipientPhone": "Bilbila fudhataa",
+  "@p10ParcelRecipientPhone": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelWhatSending": "Maal ergaa jirta?",
+  "@p10ParcelWhatSending": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryDocument": "Galmeewwan",
+  "@p10ParcelCategoryDocument": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryParcel": "Paakeejii",
+  "@p10ParcelCategoryParcel": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryFood": "Nyaata",
+  "@p10ParcelCategoryFood": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryGrocery": "Meeshaalee nyaataa",
+  "@p10ParcelCategoryGrocery": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryElectronics": "Elektirooniksii",
+  "@p10ParcelCategoryElectronics": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryClothes": "Uffata",
+  "@p10ParcelCategoryClothes": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryGift": "Kennaa",
+  "@p10ParcelCategoryGift": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryFlowers": "Abaaboo",
+  "@p10ParcelCategoryFlowers": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryKeys": "Furtuu",
+  "@p10ParcelCategoryKeys": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryOther": "Kan biraa",
+  "@p10ParcelCategoryOther": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeSmall": "Xiqqaa",
+  "@p10ParcelSizeSmall": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeSmallHint": "Boorsaa keessa ni seena",
+  "@p10ParcelSizeSmallHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeMedium": "Giddugaleessa",
+  "@p10ParcelSizeMedium": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeMediumHint": "Teessoo konkolaataa irratti ni ga'a",
+  "@p10ParcelSizeMediumHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeLarge": "Guddaa",
+  "@p10ParcelSizeLarge": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeLargeHint": "Konkolaataa fe'umsaa barbaada",
+  "@p10ParcelSizeLargeHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeUnavailable": "Asitti ammaaf hin jiru",
+  "@p10ParcelSizeUnavailable": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelDescription": "Ibsa (dirqama miti)",
+  "@p10ParcelDescription": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelItemValue": "Gatii meeshaa (dirqama miti)",
+  "@p10ParcelItemValue": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCourierNote": "Yaadannoo geessaaf",
+  "@p10ParcelCourierNote": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPayment": "Kaffaltii",
+  "@p10ParcelPayment": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPayWallet": "Waaleetii HudHud",
+  "@p10ParcelPayWallet": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPayCash": "Maallaqa callaa geessaaf",
+  "@p10ParcelPayCash": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPaymentPhone": "Lakkoofsa maallaqa moobaayilaa",
+  "@p10ParcelPaymentPhone": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelRecipientPays": "Fudhataan kaffala (yeroo ga'u callaan)",
+  "@p10ParcelRecipientPays": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSellerCod": "Gatii meeshaa fudhataa irraa sassaabi",
+  "@p10ParcelSellerCod": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSellerCodHint": "Geessaan callaan sassaaba; waaleetii daldalaa HudHud keetti ni kaffalama.",
+  "@p10ParcelSellerCodHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSellerCodAmount": "Gatii meeshaa sassaabamu",
+  "@p10ParcelSellerCodAmount": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPickupTime": "Yeroo fudhatamu",
+  "@p10ParcelPickupTime": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPickupNow": "Hamma danda'ametti dafee",
+  "@p10ParcelPickupNow": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPrice": "Gatii",
+  "@p10ParcelPrice": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPriceHeld": "Gatiin {time}f qabameera",
+  "@p10ParcelPriceHeld": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "p10ParcelPriceExpired": "Yeroon qabannaa gatii darbeera",
+  "@p10ParcelPriceExpired": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelRefreshPrice": "Gatii haaromsi",
+  "@p10ParcelRefreshPrice": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelGettingPrice": "Gatii argachaa jira…",
+  "@p10ParcelGettingPrice": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPriceUpdated": "Gatiin jijjiirameera. Maaloo gatii haaraa ilaali.",
+  "@p10ParcelPriceUpdated": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelBook": "{price}n ajaji",
+  "@p10ParcelBook": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "price": {"type": "String"}
+    }
+  },
+  "p10ParcelContinue": "Itti fufi",
+  "@p10ParcelContinue": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelFillRequired": "Bakka fudhatamuu fi geessuu filadhu, bilbila fudhataas galchi.",
+  "@p10ParcelFillRequired": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeNotSupported": "Hamma kun magaalaa kana keessatti ammaaf hin jiru.",
+  "@p10ParcelSizeNotSupported": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPaymentNotAvailable": "Malli kaffaltii kun magaalaa kana keessatti hin jiru.",
+  "@p10ParcelPaymentNotAvailable": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelInsufficientWallet": "Waaleetii kee keessa maallaqni gahaan hin jiru. Guuti ykn mala kaffaltii biraa filadhu.",
+  "@p10ParcelInsufficientWallet": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSomethingWrong": "Rakkoon uumameera. Maaloo irra deebi'ii yaali.",
+  "@p10ParcelSomethingWrong": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelApprovePayment": "Kaffaltii bilbila kee irratti mirkaneessi.",
+  "@p10ParcelApprovePayment": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelBooked": "Paakeejiin ajajameera",
+  "@p10ParcelBooked": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelHandoverCode": "Koodii kennaa",
+  "@p10ParcelHandoverCode": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelHandoverHint": "Fudhataan koodii kana yeroo ga'u geessaaf kenna.",
+  "@p10ParcelHandoverHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelHandoverSelfHint": "Yeroo paakeejii fudhattu koodii kana geessaaf kenni.",
+  "@p10ParcelHandoverSelfHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelShareTracking": "Liinkii hordoffii qoodi",
+  "@p10ParcelShareTracking": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelTrackingShareText": "Paakeejii HudHud koo hordofi: {link}",
+  "@p10ParcelTrackingShareText": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "link": {"type": "String"}
+    }
+  },
+  "p10ParcelEta": "Gara daqiiqaa {minutes} keessatti ga'a",
+  "@p10ParcelEta": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "minutes": {"type": "String"}
+    }
+  },
+  "p10ParcelCancel": "Paakeejii haqi",
+  "@p10ParcelCancel": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCancelFree": "Paakeejii kana haqxaa? Geessaan ammaaf waan hin ramadamneef bilisa.",
+  "@p10ParcelCancelFree": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCancelFee": "Geessaan karaa irra jira. Amma haquun {fee} baasisa.",
+  "@p10ParcelCancelFee": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "fee": {"type": "String"}
+    }
+  },
+  "p10ParcelCancelReason": "Ergaan appii keessatti haqe",
+  "@p10ParcelCancelReason": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCancelled": "Paakeejiin haqameera",
+  "@p10ParcelCancelled": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
   }
 }

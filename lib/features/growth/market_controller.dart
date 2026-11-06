@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:hudhud_delivery/app/models/city_service_area.dart';
+import 'package:hudhud_delivery/app/services/city_scope.dart';
 import 'package:hudhud_delivery/app/services/custom_location_service.dart';
 import 'package:hudhud_delivery/app/services/startup_location_service.dart';
 
@@ -173,6 +175,23 @@ class MarketController extends ChangeNotifier {
   void _refreshGrowthConfig() {
     final growth = GrowthConfigController.instance;
     if (growth != null) unawaited(growth.refresh(force: true));
+  }
+
+  /// Publishes the city areas for map pickers / place search (Phase 10).
+  void _publishCityScope() {
+    CityScope.update(
+      areas: _markets
+          .map((m) => m.serviceArea)
+          .whereType<CityServiceArea>()
+          .toList(),
+      current: _selected?.serviceArea,
+    );
+  }
+
+  @override
+  void notifyListeners() {
+    _publishCityScope();
+    super.notifyListeners();
   }
 
   @override

@@ -121,8 +121,14 @@ class GrowthDataProvider {
 
   // ── Phase 3 ────────────────────────────────────────────────────────────
 
-  Future<Map<String, dynamic>> getMarkets() =>
-      _wrap(() => apiService.get(_url(ApiConstants.markets)));
+  /// Phase 10: `include=service_area` adds each city's map area; older
+  /// backends ignore the parameter.
+  Future<Map<String, dynamic>> getMarkets() => _wrap(
+        () => apiService.get(
+          _url(ApiConstants.markets),
+          queryParameters: const {'include': 'service_area'},
+        ),
+      );
 
   Future<Map<String, dynamic>> getResolveMarket({
     required double lat,

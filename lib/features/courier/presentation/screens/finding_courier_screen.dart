@@ -18,6 +18,7 @@ import 'package:hudhud_delivery/features/courier/data/models/delivery_live_track
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
 import 'package:hudhud_delivery/features/courier/presentation/widgets/nearby_driver_markers.dart';
 import 'package:hudhud_delivery/features/courier/utils/courier_home_refresh.dart';
+import 'package:hudhud_delivery/features/courier/parcel_v2/parcel_v2_widgets.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_cancel.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_estimate.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_notification.dart';
@@ -681,6 +682,12 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
                                 privacy,
                               ),
                             ],
+                            // Phase 10: handover code + share link (v2 only);
+                            // cancelling here stays on the free legacy button.
+                            ParcelV2Panel(
+                              deliveryId: widget.deliveryId,
+                              allowCancel: false,
+                            ),
                             const SizedBox(height: 24),
                             SizedBox(
                               width: double.infinity,
