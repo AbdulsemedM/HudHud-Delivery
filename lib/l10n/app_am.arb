@@ -1802,5 +1802,25 @@
   "p9GiftOrderLabel": "የስጦታ ትዕዛዝ",
   "@p9GiftOrderLabel": {
     "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "cartDifferentVendorMessage": "ጋሪዎ ከሌላ መደብር የተመረጡ ዕቃዎች አሉት። ከዚህ መደብር ለመጨመር ጋሪውን ያጽዱ።",
+  "@cartDifferentVendorMessage": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
+  },
+  "cartDifferentVendorTitle": "አዲስ ጋሪ ይጀምሩ?",
+  "@cartDifferentVendorTitle": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
+  },
+  "cartKeepCurrentAction": "ጋሪውን አቆይ",
+  "@cartKeepCurrentAction": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
+  },
+  "cartReplaceAction": "አጽዳና ጨምር",
+  "@cartReplaceAction": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
+  },
+  "homeTabDelivery": "ማድረስ",
+  "@homeTabDelivery": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
   }
 }

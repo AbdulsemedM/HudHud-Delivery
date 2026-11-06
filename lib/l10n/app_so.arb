@@ -1795,5 +1795,25 @@
   "p9GiftOrderLabel": "Dalab hadiyad",
   "@p9GiftOrderLabel": {
     "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "cartDifferentVendorMessage": "Gaadhigaagu wuxuu leeyahay alaab dukaan kale ah. Nadiifi si aad alaab uga darto dukaankan.",
+  "@cartDifferentVendorMessage": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
+  },
+  "cartDifferentVendorTitle": "Ma bilowdaa gaadhi cusub?",
+  "@cartDifferentVendorTitle": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
+  },
+  "cartKeepCurrentAction": "Hay gaadhiga",
+  "@cartKeepCurrentAction": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
+  },
+  "cartReplaceAction": "Nadiifi oo ku dar",
+  "@cartReplaceAction": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
+  },
+  "homeTabDelivery": "Gaarsiin",
+  "@homeTabDelivery": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
   }
 }

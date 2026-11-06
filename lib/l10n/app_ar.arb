@@ -1795,5 +1795,25 @@
   "p9GiftOrderLabel": "طلب هدية",
   "@p9GiftOrderLabel": {
     "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "cartDifferentVendorMessage": "تحتوي سلتك على منتجات من متجر آخر. أفرغها لإضافة منتجات من هذا المتجر.",
+  "@cartDifferentVendorMessage": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
+  },
+  "cartDifferentVendorTitle": "بدء سلة جديدة؟",
+  "@cartDifferentVendorTitle": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
+  },
+  "cartKeepCurrentAction": "الاحتفاظ بالسلة",
+  "@cartKeepCurrentAction": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
+  },
+  "cartReplaceAction": "إفراغ وإضافة",
+  "@cartReplaceAction": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
+  },
+  "homeTabDelivery": "التوصيل",
+  "@homeTabDelivery": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
   }
 }

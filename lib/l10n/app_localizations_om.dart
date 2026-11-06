@@ -629,20 +629,20 @@ class AppLocalizationsOm extends AppLocalizations {
   String get homeTabFood => 'Nyaata';
 
   @override
-  String get homeTabDelivery => 'Delivery';
+  String get homeTabDelivery => 'Geejjiba';
 
   @override
-  String get cartDifferentVendorTitle => 'Start a new cart?';
+  String get cartDifferentVendorTitle => 'Gaarii haaraa jalqabduu?';
 
   @override
   String get cartDifferentVendorMessage =>
-      'Your cart has items from another store. Clear it to add items from this store.';
+      'Gaariin kee meeshaalee suuqii biraa qaba. Meeshaalee suuqii kanaa dabaluuf qulqulleessi.';
 
   @override
-  String get cartReplaceAction => 'Clear and add';
+  String get cartReplaceAction => 'Qulqulleessii dabali';
 
   @override
-  String get cartKeepCurrentAction => 'Keep cart';
+  String get cartKeepCurrentAction => 'Gaarii tursi';
 
   @override
   String get homeTabCourier => 'Ergamaa';

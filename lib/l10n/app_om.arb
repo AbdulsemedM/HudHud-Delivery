@@ -1795,5 +1795,25 @@
   "p9GiftOrderLabel": "Ajaja kennaa",
   "@p9GiftOrderLabel": {
     "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "cartDifferentVendorMessage": "Gaariin kee meeshaalee suuqii biraa qaba. Meeshaalee suuqii kanaa dabaluuf qulqulleessi.",
+  "@cartDifferentVendorMessage": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
+  },
+  "cartDifferentVendorTitle": "Gaarii haaraa jalqabduu?",
+  "@cartDifferentVendorTitle": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
+  },
+  "cartKeepCurrentAction": "Gaarii tursi",
+  "@cartKeepCurrentAction": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
+  },
+  "cartReplaceAction": "Qulqulleessii dabali",
+  "@cartReplaceAction": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
+  },
+  "homeTabDelivery": "Geejjiba",
+  "@homeTabDelivery": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
   }
 }

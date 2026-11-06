@@ -618,20 +618,20 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeTabFood => 'طعام';
 
   @override
-  String get homeTabDelivery => 'Delivery';
+  String get homeTabDelivery => 'التوصيل';
 
   @override
-  String get cartDifferentVendorTitle => 'Start a new cart?';
+  String get cartDifferentVendorTitle => 'بدء سلة جديدة؟';
 
   @override
   String get cartDifferentVendorMessage =>
-      'Your cart has items from another store. Clear it to add items from this store.';
+      'تحتوي سلتك على منتجات من متجر آخر. أفرغها لإضافة منتجات من هذا المتجر.';
 
   @override
-  String get cartReplaceAction => 'Clear and add';
+  String get cartReplaceAction => 'إفراغ وإضافة';
 
   @override
-  String get cartKeepCurrentAction => 'Keep cart';
+  String get cartKeepCurrentAction => 'الاحتفاظ بالسلة';
 
   @override
   String get homeTabCourier => 'ساعي';

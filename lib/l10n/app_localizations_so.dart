@@ -626,20 +626,20 @@ class AppLocalizationsSo extends AppLocalizations {
   String get homeTabFood => 'Cunto';
 
   @override
-  String get homeTabDelivery => 'Delivery';
+  String get homeTabDelivery => 'Gaarsiin';
 
   @override
-  String get cartDifferentVendorTitle => 'Start a new cart?';
+  String get cartDifferentVendorTitle => 'Ma bilowdaa gaadhi cusub?';
 
   @override
   String get cartDifferentVendorMessage =>
-      'Your cart has items from another store. Clear it to add items from this store.';
+      'Gaadhigaagu wuxuu leeyahay alaab dukaan kale ah. Nadiifi si aad alaab uga darto dukaankan.';
 
   @override
-  String get cartReplaceAction => 'Clear and add';
+  String get cartReplaceAction => 'Nadiifi oo ku dar';
 
   @override
-  String get cartKeepCurrentAction => 'Keep cart';
+  String get cartKeepCurrentAction => 'Hay gaadhiga';
 
   @override
   String get homeTabCourier => 'Gaadhi-qaade';

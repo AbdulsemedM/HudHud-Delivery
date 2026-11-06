@@ -379,7 +379,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       _growthQuotePending = stillPending;
       if (couponRejected) {
         // Code became invalid (e.g. cart dropped below a minimum).
-        _promoMessage = coupon?.message ?? invalidMessage;
+        _promoMessage = coupon.message ?? invalidMessage;
         _promoMessageIsError = true;
         _appliedPromoCode = null;
       }

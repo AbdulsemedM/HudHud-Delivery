@@ -607,20 +607,20 @@ class AppLocalizationsAm extends AppLocalizations {
   String get homeTabFood => 'ምግብ';
 
   @override
-  String get homeTabDelivery => 'Delivery';
+  String get homeTabDelivery => 'ማድረስ';
 
   @override
-  String get cartDifferentVendorTitle => 'Start a new cart?';
+  String get cartDifferentVendorTitle => 'አዲስ ጋሪ ይጀምሩ?';
 
   @override
   String get cartDifferentVendorMessage =>
-      'Your cart has items from another store. Clear it to add items from this store.';
+      'ጋሪዎ ከሌላ መደብር የተመረጡ ዕቃዎች አሉት። ከዚህ መደብር ለመጨመር ጋሪውን ያጽዱ።';
 
   @override
-  String get cartReplaceAction => 'Clear and add';
+  String get cartReplaceAction => 'አጽዳና ጨምር';
 
   @override
-  String get cartKeepCurrentAction => 'Keep cart';
+  String get cartKeepCurrentAction => 'ጋሪውን አቆይ';
 
   @override
   String get homeTabCourier => 'መልእክተኛ';
