@@ -139,7 +139,7 @@
   "greetingGoodEvening": "مساء الخير",
   "greetingGoodNight": "طاب مساؤك",
   "userDefault": "مستخدم",
-  "emDash": null,
+  "emDash": "—",
   "locationGetting": "جارٍ الحصول على الموقع...",
   "locationAccessDenied": "تم رفض الوصول إلى الموقع",
   "locationDisabledSnackbar": "تم تعطيل الوصول إلى الموقع. قم بتمكينه في الإعدادات لمعرفة موقعك.",
