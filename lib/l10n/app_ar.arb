@@ -2126,5 +2126,120 @@
   "p10ParcelCancelled": "تم إلغاء الطرد",
   "@p10ParcelCancelled": {
     "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelAddStop": "إضافة محطة",
+  "@p11ParcelAddStop": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelStopN": "المحطة {number}",
+  "@p11ParcelStopN": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "number": {"type": "String"}
+    }
+  },
+  "p11ParcelRemoveStop": "إزالة المحطة",
+  "@p11ParcelRemoveStop": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelMoveUp": "نقل للأعلى",
+  "@p11ParcelMoveUp": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelMoveDown": "نقل للأسفل",
+  "@p11ParcelMoveDown": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelStopsLimit": "حتى {max} نقاط تسليم لكل طرد",
+  "@p11ParcelStopsLimit": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "max": {"type": "String"}
+    }
+  },
+  "p11ParcelMultiStopSenderPays": "مع عدة نقاط تسليم تدفع أنت ثمن المسار كاملاً.",
+  "@p11ParcelMultiStopSenderPays": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelMultiStopCashAtPickup": "مع عدة نقاط تسليم يُدفع النقد للمندوب عند الاستلام.",
+  "@p11ParcelMultiStopCashAtPickup": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelPayAtPickup": "الدفع نقداً عند الاستلام",
+  "@p11ParcelPayAtPickup": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelPayAtPickupHint": "سلّم النقد للمندوب عندما يستلم الطرد.",
+  "@p11ParcelPayAtPickupHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelPayAtPickupDue": "ادفع {amount} نقداً للمندوب عند الاستلام",
+  "@p11ParcelPayAtPickupDue": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p11ParcelPaidAtPickup": "تم الدفع للمندوب عند الاستلام",
+  "@p11ParcelPaidAtPickup": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelPayAtPickupUnavailable": "الدفع نقداً عند الاستلام غير متاح حالياً.",
+  "@p11ParcelPayAtPickupUnavailable": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelStopsTitle": "نقاط التسليم",
+  "@p11ParcelStopsTitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelStopCodesHint": "حصل كل مستلم على رمز التسليم الخاص به برسالة SMS. شاركه إن لم يصله.",
+  "@p11ParcelStopCodesHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelShareStopLink": "مشاركة الرابط",
+  "@p11ParcelShareStopLink": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelStopPending": "في الانتظار",
+  "@p11ParcelStopPending": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelStopArrived": "المندوب وصل",
+  "@p11ParcelStopArrived": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelStopDelivered": "تم التسليم",
+  "@p11ParcelStopDelivered": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelStopFailed": "لم يتم التسليم",
+  "@p11ParcelStopFailed": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelStopReturned": "أُعيد إليك",
+  "@p11ParcelStopReturned": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelMultiStopDisabled": "نقاط التسليم المتعددة غير متاحة حالياً.",
+  "@p11ParcelMultiStopDisabled": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelTooManyStops": "عدد كبير جداً من نقاط التسليم لطرد واحد.",
+  "@p11ParcelTooManyStops": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelCancelCashFee": "المندوب في الطريق. الإلغاء الآن يكلف {fee} ويُخصم من محفظتك أو يُضاف إلى رصيدك المستحق.",
+  "@p11ParcelCancelCashFee": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "fee": {"type": "String"}
+    }
+  },
+  "p11ParcelOutstandingBalance": "عليك {amount} من طرد ملغى. سيُخصم من محفظتك عند الشحن أو الطلب التالي.",
+  "@p11ParcelOutstandingBalance": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
   }
 }

@@ -2126,5 +2126,120 @@
   "p10ParcelCancelled": "Paakeejiin haqameera",
   "@p10ParcelCancelled": {
     "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelAddStop": "Dhaabbata dabali",
+  "@p11ParcelAddStop": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelStopN": "Dhaabbata {number}",
+  "@p11ParcelStopN": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "number": {"type": "String"}
+    }
+  },
+  "p11ParcelRemoveStop": "Dhaabbata haqi",
+  "@p11ParcelRemoveStop": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelMoveUp": "Ol kaasi",
+  "@p11ParcelMoveUp": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelMoveDown": "Gadi buusi",
+  "@p11ParcelMoveDown": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelStopsLimit": "Paakeejii tokkoof hanga bakka geessaa {max}",
+  "@p11ParcelStopsLimit": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "max": {"type": "String"}
+    }
+  },
+  "p11ParcelMultiStopSenderPays": "Bakka geessaa hedduu yoo qabaatte, karaa guutuu ati kaffalta.",
+  "@p11ParcelMultiStopSenderPays": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelMultiStopCashAtPickup": "Bakka geessaa hedduu yoo ta'e, maallaqni yeroo fudhatamu ergamaaf kaffalama.",
+  "@p11ParcelMultiStopCashAtPickup": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelPayAtPickup": "Yeroo fudhatamu maallaqaan kaffali",
+  "@p11ParcelPayAtPickup": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelPayAtPickupHint": "Yeroo ergamaan paakeejii fudhatu maallaqa kenniif.",
+  "@p11ParcelPayAtPickupHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelPayAtPickupDue": "Yeroo fudhatamu {amount} maallaqaan ergamaaf kaffali",
+  "@p11ParcelPayAtPickupDue": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p11ParcelPaidAtPickup": "Yeroo fudhatame ergamaaf kaffalameera",
+  "@p11ParcelPaidAtPickup": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelPayAtPickupUnavailable": "Yeroo fudhatamu maallaqaan kaffaluun amma hin jiru.",
+  "@p11ParcelPayAtPickupUnavailable": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelStopsTitle": "Bakkeewwan geessaa",
+  "@p11ParcelStopsTitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelStopCodesHint": "Fudhataan tokkoon tokkoon isaa koodii kennaa isaa SMS-n argateera. Yoo hin arganne qoodi.",
+  "@p11ParcelStopCodesHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelShareStopLink": "Liinkii qoodi",
+  "@p11ParcelShareStopLink": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelStopPending": "Eegaa jira",
+  "@p11ParcelStopPending": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelStopArrived": "Ergamaan achi jira",
+  "@p11ParcelStopArrived": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelStopDelivered": "Geeffameera",
+  "@p11ParcelStopDelivered": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelStopFailed": "Hin geeffamne",
+  "@p11ParcelStopFailed": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelStopReturned": "Siif deebi'eera",
+  "@p11ParcelStopReturned": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelMultiStopDisabled": "Bakka geessaa hedduun amma hin jiran.",
+  "@p11ParcelMultiStopDisabled": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelTooManyStops": "Paakeejii tokkoof bakki geessaa baay'ee heddu.",
+  "@p11ParcelTooManyStops": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelCancelCashFee": "Ergamaan karaa irra jira. Amma haquun {fee} baasa. Waletii keessanii irraa hir'ifama ykn herrega keessan irratti galmaa'a.",
+  "@p11ParcelCancelCashFee": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "fee": {"type": "String"}
+    }
+  },
+  "p11ParcelOutstandingBalance": "Paakeejii haqame irraa {amount} liqii qabda. Yeroo itti aanu yoo guuttu ykn ajajattu waletii irraa hir'ifama.",
+  "@p11ParcelOutstandingBalance": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
   }
 }

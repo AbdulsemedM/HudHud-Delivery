@@ -7592,6 +7592,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Parcel cancelled'**
   String get p10ParcelCancelled;
+
+  /// No description provided for @p11ParcelAddStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a stop'**
+  String get p11ParcelAddStop;
+
+  /// No description provided for @p11ParcelStopN.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop {number}'**
+  String p11ParcelStopN(String number);
+
+  /// No description provided for @p11ParcelRemoveStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove stop'**
+  String get p11ParcelRemoveStop;
+
+  /// No description provided for @p11ParcelMoveUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move up'**
+  String get p11ParcelMoveUp;
+
+  /// No description provided for @p11ParcelMoveDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Move down'**
+  String get p11ParcelMoveDown;
+
+  /// No description provided for @p11ParcelStopsLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to {max} drop-offs per parcel'**
+  String p11ParcelStopsLimit(String max);
+
+  /// No description provided for @p11ParcelMultiStopSenderPays.
+  ///
+  /// In en, this message translates to:
+  /// **'With several drop-offs you pay for the whole route.'**
+  String get p11ParcelMultiStopSenderPays;
+
+  /// No description provided for @p11ParcelMultiStopCashAtPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'With several drop-offs, cash is paid to the courier at pickup.'**
+  String get p11ParcelMultiStopCashAtPickup;
+
+  /// No description provided for @p11ParcelPayAtPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay cash at pickup'**
+  String get p11ParcelPayAtPickup;
+
+  /// No description provided for @p11ParcelPayAtPickupHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Hand the cash to the courier when they collect the parcel.'**
+  String get p11ParcelPayAtPickupHint;
+
+  /// No description provided for @p11ParcelPayAtPickupDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay {amount} cash to the courier at pickup'**
+  String p11ParcelPayAtPickupDue(String amount);
+
+  /// No description provided for @p11ParcelPaidAtPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid to the courier at pickup'**
+  String get p11ParcelPaidAtPickup;
+
+  /// No description provided for @p11ParcelPayAtPickupUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Paying cash at pickup is not available right now.'**
+  String get p11ParcelPayAtPickupUnavailable;
+
+  /// No description provided for @p11ParcelStopsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop-offs'**
+  String get p11ParcelStopsTitle;
+
+  /// No description provided for @p11ParcelStopCodesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Each recipient got their own handover code by SMS. Share it if they did not.'**
+  String get p11ParcelStopCodesHint;
+
+  /// No description provided for @p11ParcelShareStopLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Share link'**
+  String get p11ParcelShareStopLink;
+
+  /// No description provided for @p11ParcelStopPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting'**
+  String get p11ParcelStopPending;
+
+  /// No description provided for @p11ParcelStopArrived.
+  ///
+  /// In en, this message translates to:
+  /// **'Courier is there'**
+  String get p11ParcelStopArrived;
+
+  /// No description provided for @p11ParcelStopDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered'**
+  String get p11ParcelStopDelivered;
+
+  /// No description provided for @p11ParcelStopFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Not delivered'**
+  String get p11ParcelStopFailed;
+
+  /// No description provided for @p11ParcelStopReturned.
+  ///
+  /// In en, this message translates to:
+  /// **'Returned to you'**
+  String get p11ParcelStopReturned;
+
+  /// No description provided for @p11ParcelMultiStopDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Several drop-offs are not available right now.'**
+  String get p11ParcelMultiStopDisabled;
+
+  /// No description provided for @p11ParcelTooManyStops.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many drop-offs for one parcel.'**
+  String get p11ParcelTooManyStops;
+
+  /// No description provided for @p11ParcelCancelCashFee.
+  ///
+  /// In en, this message translates to:
+  /// **'A courier is already on the way. Cancelling now costs {fee}. It is taken from your wallet or added to your balance.'**
+  String p11ParcelCancelCashFee(String fee);
+
+  /// No description provided for @p11ParcelOutstandingBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'You owe {amount} from a cancelled parcel. It is taken from your wallet at your next top-up or order.'**
+  String p11ParcelOutstandingBalance(String amount);
 }
 
 class _AppLocalizationsDelegate

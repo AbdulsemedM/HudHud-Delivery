@@ -4065,4 +4065,96 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get p10ParcelCancelled => 'تم إلغاء الطرد';
+
+  @override
+  String get p11ParcelAddStop => 'إضافة محطة';
+
+  @override
+  String p11ParcelStopN(String number) {
+    return 'المحطة $number';
+  }
+
+  @override
+  String get p11ParcelRemoveStop => 'إزالة المحطة';
+
+  @override
+  String get p11ParcelMoveUp => 'نقل للأعلى';
+
+  @override
+  String get p11ParcelMoveDown => 'نقل للأسفل';
+
+  @override
+  String p11ParcelStopsLimit(String max) {
+    return 'حتى $max نقاط تسليم لكل طرد';
+  }
+
+  @override
+  String get p11ParcelMultiStopSenderPays =>
+      'مع عدة نقاط تسليم تدفع أنت ثمن المسار كاملاً.';
+
+  @override
+  String get p11ParcelMultiStopCashAtPickup =>
+      'مع عدة نقاط تسليم يُدفع النقد للمندوب عند الاستلام.';
+
+  @override
+  String get p11ParcelPayAtPickup => 'الدفع نقداً عند الاستلام';
+
+  @override
+  String get p11ParcelPayAtPickupHint =>
+      'سلّم النقد للمندوب عندما يستلم الطرد.';
+
+  @override
+  String p11ParcelPayAtPickupDue(String amount) {
+    return 'ادفع $amount نقداً للمندوب عند الاستلام';
+  }
+
+  @override
+  String get p11ParcelPaidAtPickup => 'تم الدفع للمندوب عند الاستلام';
+
+  @override
+  String get p11ParcelPayAtPickupUnavailable =>
+      'الدفع نقداً عند الاستلام غير متاح حالياً.';
+
+  @override
+  String get p11ParcelStopsTitle => 'نقاط التسليم';
+
+  @override
+  String get p11ParcelStopCodesHint =>
+      'حصل كل مستلم على رمز التسليم الخاص به برسالة SMS. شاركه إن لم يصله.';
+
+  @override
+  String get p11ParcelShareStopLink => 'مشاركة الرابط';
+
+  @override
+  String get p11ParcelStopPending => 'في الانتظار';
+
+  @override
+  String get p11ParcelStopArrived => 'المندوب وصل';
+
+  @override
+  String get p11ParcelStopDelivered => 'تم التسليم';
+
+  @override
+  String get p11ParcelStopFailed => 'لم يتم التسليم';
+
+  @override
+  String get p11ParcelStopReturned => 'أُعيد إليك';
+
+  @override
+  String get p11ParcelMultiStopDisabled =>
+      'نقاط التسليم المتعددة غير متاحة حالياً.';
+
+  @override
+  String get p11ParcelTooManyStops =>
+      'عدد كبير جداً من نقاط التسليم لطرد واحد.';
+
+  @override
+  String p11ParcelCancelCashFee(String fee) {
+    return 'المندوب في الطريق. الإلغاء الآن يكلف $fee ويُخصم من محفظتك أو يُضاف إلى رصيدك المستحق.';
+  }
+
+  @override
+  String p11ParcelOutstandingBalance(String amount) {
+    return 'عليك $amount من طرد ملغى. سيُخصم من محفظتك عند الشحن أو الطلب التالي.';
+  }
 }

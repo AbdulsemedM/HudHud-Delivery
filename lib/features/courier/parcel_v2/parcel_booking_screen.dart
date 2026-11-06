@@ -58,6 +58,48 @@ class _PickedPlace {
   const _PickedPlace(this.address, this.position);
 }
 
+/// Phase 11: form state of a drop-off after the first one.
+class _ExtraStopForm {
+  _PickedPlace? place;
+  bool recipientIsMe = false;
+  final building = TextEditingController();
+  final floor = TextEditingController();
+  final apartment = TextEditingController();
+  final landmark = TextEditingController();
+  final name = TextEditingController();
+  final phone = TextEditingController();
+  final note = TextEditingController();
+
+  bool get complete =>
+      place != null && (recipientIsMe || phone.text.trim().length >= 7);
+
+  ParcelStopDraft? toDraft() {
+    final p = place;
+    if (p == null) return null;
+    return ParcelStopDraft(
+      location: p.address,
+      lat: p.position.latitude,
+      lng: p.position.longitude,
+      details: ParcelAddressDetails(
+        building: building.text,
+        floor: floor.text,
+        apartment: apartment.text,
+        landmark: landmark.text,
+      ),
+      recipientIsMe: recipientIsMe,
+      recipientName: name.text,
+      recipientPhone: phone.text,
+      note: note.text,
+    );
+  }
+
+  void dispose() {
+    for (final c in [building, floor, apartment, landmark, name, phone, note]) {
+      c.dispose();
+    }
+  }
+}
+
 class _ParcelBookingScreenState extends State<ParcelBookingScreen> {
   late final ParcelV2Repository _repo;
 
@@ -78,6 +120,11 @@ class _ParcelBookingScreenState extends State<ParcelBookingScreen> {
   final _note = TextEditingController();
   final _paymentPhone = TextEditingController();
   final _codAmount = TextEditingController();
+  final _dropoffNote = TextEditingController();
+
+  /// Phase 11: drop-offs 2..N (stop 1 is _dropoff + the recipient section).
+  final List<_ExtraStopForm> _extraStops = [];
+  bool _payAtPickup = false;
 
   bool _recipientIsMe = false;
   String _category = 'parcel';
@@ -133,8 +180,12 @@ class _ParcelBookingScreenState extends State<ParcelBookingScreen> {
       _note,
       _paymentPhone,
       _codAmount,
+      _dropoffNote,
     ]) {
       c.dispose();
+    }
+    for (final stop in _extraStops) {
+      stop.dispose();
     }
     super.dispose();
   }
@@ -148,12 +199,30 @@ class _ParcelBookingScreenState extends State<ParcelBookingScreen> {
     return CityScope.check([
       [p.position.latitude, p.position.longitude],
       [d.position.latitude, d.position.longitude],
+      for (final stop in _extraStops)
+        if (stop.place != null)
+          [stop.place!.position.latitude, stop.place!.position.longitude],
     ]);
   }
 
+  bool get _multiStop => _extraStops.isNotEmpty;
+
+  bool get _canAddStop =>
+      _dropoff != null && 1 + _extraStops.length < widget.config.maxDropoffs;
+
+  /// With several drop-offs the sender always pays (no recipient pays / COD).
+  bool get _recipientPaysActive => !_multiStop && _recipientPays;
+  bool get _sellerCodActive => !_multiStop && _sellerCod;
+
+  bool get _cashAtPickup =>
+      _paymentMethod == 'cash' &&
+      !_recipientPaysActive &&
+      !_sellerCodActive &&
+      (_multiStop || (_payAtPickup && widget.config.payAtPickupEnabled));
+
   bool get _needsPaymentPhone =>
-      !_recipientPays &&
-      !_sellerCod &&
+      !_recipientPaysActive &&
+      !_sellerCodActive &&
       _paymentMethod != 'wallet' &&
       _paymentMethod != 'cash';
 
@@ -195,10 +264,17 @@ class _ParcelBookingScreenState extends State<ParcelBookingScreen> {
       courierNote: _note.text,
       paymentMethod: _paymentMethod,
       paymentPhone: _needsPaymentPhone ? _paymentPhone.text : null,
-      recipientPays: _recipientPays,
-      sellerCodAmount: _sellerCod ? _parseAmount(_codAmount.text) : null,
+      recipientPays: _recipientPaysActive,
+      sellerCodAmount:
+          _sellerCodActive ? _parseAmount(_codAmount.text) : null,
       scheduledPickup: _scheduledPickup,
       marketCode: MarketController.instance?.selectedCode,
+      dropoffNote: _multiStop ? _dropoffNote.text : '',
+      extraStops: _extraStops
+          .map((stop) => stop.toDraft())
+          .whereType<ParcelStopDraft>()
+          .toList(),
+      payAtPickup: _cashAtPickup,
     );
   }
 
@@ -225,6 +301,91 @@ class _ParcelBookingScreenState extends State<ParcelBookingScreen> {
       }
     });
     _scheduleQuote(immediate: true);
+  }
+
+  Future<_PickedPlace?> _searchPlace(String? current) async {
+    final result = await Navigator.push<Map<String, dynamic>>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => LocationSearchScreen(currentLocation: current),
+      ),
+    );
+    if (!mounted || result == null) return null;
+    final coords = result['coordinates'];
+    final address = result['address']?.toString() ?? '';
+    if (coords is! LatLng || address.isEmpty) return null;
+    return _PickedPlace(address, coords);
+  }
+
+  Future<void> _pickStopLocation(_ExtraStopForm stop) async {
+    final picked = await _searchPlace(stop.place?.address);
+    if (!mounted || picked == null) return;
+    setState(() => stop.place = picked);
+    _scheduleQuote(immediate: true);
+  }
+
+  Future<void> _addStop() async {
+    if (!_canAddStop) return;
+    final stop = _ExtraStopForm();
+    setState(() {
+      _extraStops.add(stop);
+      // Several drop-offs: the sender pays (cash only at pickup).
+      _recipientPays = false;
+      _sellerCod = false;
+      final shown = _paymentMethodsShown;
+      if (!shown.contains(_paymentMethod) && shown.isNotEmpty) {
+        _paymentMethod = shown.first;
+      }
+    });
+    await _pickStopLocation(stop);
+  }
+
+  void _removeStop(_ExtraStopForm stop) {
+    setState(() {
+      _extraStops.remove(stop);
+      stop.dispose();
+    });
+    _scheduleQuote(immediate: true);
+  }
+
+  /// Move drop-off [index] (0 = stop 1) one place up or down.
+  void _moveStop(int index, int delta) {
+    final target = index + delta;
+    final total = 1 + _extraStops.length;
+    if (target < 0 || target >= total) return;
+    setState(() {
+      if (index == 0 || target == 0) {
+        _swapWithFirst(_extraStops[(index == 0 ? target : index) - 1]);
+      } else {
+        final a = _extraStops[index - 1];
+        _extraStops[index - 1] = _extraStops[target - 1];
+        _extraStops[target - 1] = a;
+      }
+    });
+    _scheduleQuote(immediate: true);
+  }
+
+  /// Stop 1 lives in the dropoff / recipient fields: swap values with [other].
+  void _swapWithFirst(_ExtraStopForm other) {
+    final place = _dropoff;
+    _dropoff = other.place;
+    other.place = place;
+    final isMe = _recipientIsMe;
+    _recipientIsMe = other.recipientIsMe;
+    other.recipientIsMe = isMe;
+    void swap(TextEditingController a, TextEditingController b) {
+      final text = a.text;
+      a.text = b.text;
+      b.text = text;
+    }
+
+    swap(_dropoffBuilding, other.building);
+    swap(_dropoffFloor, other.floor);
+    swap(_dropoffApartment, other.apartment);
+    swap(_dropoffLandmark, other.landmark);
+    swap(_recipientName, other.name);
+    swap(_recipientPhone, other.phone);
+    swap(_dropoffNote, other.note);
   }
 
   Future<void> _pickTime() async {
@@ -301,6 +462,16 @@ class _ParcelBookingScreenState extends State<ParcelBookingScreen> {
         return l10n.p10ParcelPaymentNotAvailable;
       case ParcelErrorKind.insufficientWallet:
         return l10n.p10ParcelInsufficientWallet;
+      case ParcelErrorKind.multiStopDisabled:
+        return l10n.p11ParcelMultiStopDisabled;
+      case ParcelErrorKind.tooManyStops:
+        return l10n.p11ParcelTooManyStops;
+      case ParcelErrorKind.multiStopSenderPays:
+        return l10n.p11ParcelMultiStopSenderPays;
+      case ParcelErrorKind.multiStopCashAtPickup:
+        return l10n.p11ParcelMultiStopCashAtPickup;
+      case ParcelErrorKind.payAtPickupUnavailable:
+        return l10n.p11ParcelPayAtPickupUnavailable;
       case ParcelErrorKind.feeConfirmation:
       case ParcelErrorKind.pickedUp:
       case ParcelErrorKind.other:
@@ -315,7 +486,10 @@ class _ParcelBookingScreenState extends State<ParcelBookingScreen> {
     if (!_recipientIsMe && _recipientPhone.text.trim().length < 7) {
       return false;
     }
-    if (_sellerCod && _parseAmount(_codAmount.text) == null) return false;
+    if (_extraStops.any((stop) => !stop.complete)) return false;
+    if (_sellerCodActive && _parseAmount(_codAmount.text) == null) {
+      return false;
+    }
     if (_needsPaymentPhone && _paymentPhone.text.trim().length < 7) {
       return false;
     }
@@ -370,21 +544,21 @@ class _ParcelBookingScreenState extends State<ParcelBookingScreen> {
     ParcelBookingDraft draft,
     Map<String, dynamic>? body,
   ) async {
-    final method = draft.recipientPays || draft.sellerCod
-        ? 'cash'
-        : draft.paymentMethod;
+    final method = draft.effectivePaymentMethod;
+    // The live screens follow the route's last drop-off.
+    final last = draft.lastStop;
     final delivery = parcel.toLegacyDeliveryMap(
       pickupLat: draft.pickupLat,
       pickupLng: draft.pickupLng,
-      dropoffLat: draft.dropoffLat,
-      dropoffLng: draft.dropoffLng,
+      dropoffLat: last.lat,
+      dropoffLng: last.lng,
       pickupLocation: draft.pickupLocation,
-      dropoffLocation: draft.dropoffLocation,
+      dropoffLocation: last.location,
       vehicleType: _quote?.vehicleType,
       packageType: draft.category,
       paymentMethod: method,
-      recipientName: draft.recipientIsMe ? null : draft.recipientName,
-      recipientPhone: draft.recipientIsMe ? null : draft.recipientPhone,
+      recipientName: last.recipientIsMe ? null : last.recipientName,
+      recipientPhone: last.recipientIsMe ? null : last.recipientPhone,
     );
 
     await showParcelBookedSheet(context, parcel: parcel, toSelf: _recipientIsMe);
@@ -452,6 +626,86 @@ class _ParcelBookingScreenState extends State<ParcelBookingScreen> {
 
   // ── UI ───────────────────────────────────────────────────────────────
 
+  /// Cash on a multi-stop parcel is only possible as cash at pickup.
+  List<String> get _paymentMethodsShown {
+    final methods = widget.config.paymentMethods.isEmpty
+        ? const ['wallet', 'cash']
+        : widget.config.paymentMethods;
+    if (_multiStop && !widget.config.payAtPickupEnabled) {
+      return methods.where((m) => m != 'cash').toList();
+    }
+    return methods;
+  }
+
+  Widget _buildExtraStop(BuildContext context, int i) {
+    final l10n = context.l10n;
+    final stop = _extraStops[i];
+    final index = i + 1; // 0 = stop 1
+    return Column(
+      key: ObjectKey(stop),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Divider(height: 24),
+        ParcelStopHeader(
+          number: index + 1,
+          onMoveUp: () => _moveStop(index, -1),
+          onMoveDown:
+              i < _extraStops.length - 1 ? () => _moveStop(index, 1) : null,
+          onRemove: () => _removeStop(stop),
+        ),
+        ParcelAddressTile(
+          key: ValueKey('parcel_stop_${index + 1}_address'),
+          icon: Icons.location_on_outlined,
+          label: l10n.p11ParcelStopN((index + 1).toString()),
+          address: stop.place?.address,
+          placeholder: l10n.p10ParcelChooseAddress,
+          onTap: () => _pickStopLocation(stop),
+        ),
+        if (stop.place != null)
+          ParcelAddressDetailsFields(
+            building: stop.building,
+            floor: stop.floor,
+            apartment: stop.apartment,
+            landmark: stop.landmark,
+          ),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          title: Text(l10n.p10ParcelSendToMyself),
+          value: stop.recipientIsMe,
+          onChanged: (v) => setState(() => stop.recipientIsMe = v),
+        ),
+        if (!stop.recipientIsMe) ...[
+          TextField(
+            key: ValueKey('parcel_stop_${index + 1}_name'),
+            controller: stop.name,
+            textCapitalization: TextCapitalization.words,
+            decoration: InputDecoration(
+              labelText: l10n.p10ParcelRecipientName,
+            ),
+          ),
+          TextField(
+            key: ValueKey('parcel_stop_${index + 1}_phone'),
+            controller: stop.phone,
+            keyboardType: TextInputType.phone,
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'[0-9+ ]')),
+            ],
+            decoration: InputDecoration(
+              labelText: l10n.p10ParcelRecipientPhone,
+              hintText: MarketController.instance?.phonePrefix,
+            ),
+            onChanged: (_) => setState(() {}),
+          ),
+        ],
+        TextField(
+          controller: stop.note,
+          maxLength: 300,
+          decoration: InputDecoration(labelText: l10n.p10ParcelCourierNote),
+        ),
+      ],
+    );
+  }
+
   static String _formatPickupTime(BuildContext context, DateTime at) {
     final material = MaterialLocalizations.of(context);
     final date = material.formatMediumDate(at);
@@ -480,6 +734,8 @@ class _ParcelBookingScreenState extends State<ParcelBookingScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           children: [
+            if (widget.config.outstandingDues?.hasDues ?? false)
+              ParcelDuesBanner(dues: widget.config.outstandingDues!),
             ParcelSection(
               title: l10n.p10ParcelRoute,
               children: [
@@ -499,6 +755,11 @@ class _ParcelBookingScreenState extends State<ParcelBookingScreen> {
                     landmark: _pickupLandmark,
                   ),
                 const Divider(height: 24),
+                if (_multiStop)
+                  ParcelStopHeader(
+                    number: 1,
+                    onMoveDown: () => _moveStop(0, 1),
+                  ),
                 ParcelAddressTile(
                   key: const ValueKey('parcel_dropoff'),
                   icon: Icons.location_on,
@@ -513,6 +774,25 @@ class _ParcelBookingScreenState extends State<ParcelBookingScreen> {
                     floor: _dropoffFloor,
                     apartment: _dropoffApartment,
                     landmark: _dropoffLandmark,
+                  ),
+                for (var i = 0; i < _extraStops.length; i++)
+                  _buildExtraStop(context, i),
+                if (_canAddStop)
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: TextButton.icon(
+                      key: const ValueKey('parcel_add_stop'),
+                      icon: const Icon(Icons.add_location_alt_outlined),
+                      label: Text(l10n.p11ParcelAddStop),
+                      onPressed: _addStop,
+                    ),
+                  ),
+                if (widget.config.multiStopEnabled && _multiStop)
+                  Text(
+                    l10n.p11ParcelStopsLimit(
+                      widget.config.maxDropoffs.toString(),
+                    ),
+                    style: Theme.of(context).textTheme.bodySmall,
                   ),
                 if (cityError != null) ...[
                   const SizedBox(height: 12),
@@ -535,7 +815,9 @@ class _ParcelBookingScreenState extends State<ParcelBookingScreen> {
               ],
             ),
             ParcelSection(
-              title: l10n.p10ParcelRecipient,
+              title: _multiStop
+                  ? '${l10n.p10ParcelRecipient} · ${l10n.p11ParcelStopN('1')}'
+                  : l10n.p10ParcelRecipient,
               children: [
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
@@ -568,6 +850,14 @@ class _ParcelBookingScreenState extends State<ParcelBookingScreen> {
                     onChanged: (_) => setState(() {}),
                   ),
                 ],
+                if (_multiStop)
+                  TextField(
+                    controller: _dropoffNote,
+                    maxLength: 300,
+                    decoration: InputDecoration(
+                      labelText: l10n.p10ParcelCourierNote,
+                    ),
+                  ),
               ],
             ),
             ParcelSection(
@@ -619,7 +909,17 @@ class _ParcelBookingScreenState extends State<ParcelBookingScreen> {
             ParcelSection(
               title: l10n.p10ParcelPayment,
               children: [
-                if (widget.config.recipientPaysEnabled && !_recipientIsMe)
+                if (_multiStop)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Text(
+                      l10n.p11ParcelMultiStopSenderPays,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
+                if (widget.config.recipientPaysEnabled &&
+                    !_recipientIsMe &&
+                    !_multiStop)
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
                     title: Text(l10n.p10ParcelRecipientPays),
@@ -628,7 +928,9 @@ class _ParcelBookingScreenState extends State<ParcelBookingScreen> {
                         ? null
                         : (v) => setState(() => _recipientPays = v),
                   ),
-                if (widget.config.sellerCodEnabled && !_recipientIsMe) ...[
+                if (widget.config.sellerCodEnabled &&
+                    !_recipientIsMe &&
+                    !_multiStop) ...[
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
                     title: Text(l10n.p10ParcelSellerCod),
@@ -648,14 +950,31 @@ class _ParcelBookingScreenState extends State<ParcelBookingScreen> {
                       onChanged: (_) => setState(() {}),
                     ),
                 ],
-                if (!_recipientPays && !_sellerCod)
+                if (!_recipientPaysActive && !_sellerCodActive)
                   ParcelPaymentMethodPicker(
-                    methods: widget.config.paymentMethods.isEmpty
-                        ? const ['wallet', 'cash']
-                        : widget.config.paymentMethods,
+                    methods: _paymentMethodsShown,
                     selected: _paymentMethod,
                     onSelected: (m) => setState(() => _paymentMethod = m),
                   ),
+                if (_paymentMethod == 'cash' &&
+                    !_recipientPaysActive &&
+                    !_sellerCodActive &&
+                    widget.config.payAtPickupEnabled) ...[
+                  if (_multiStop)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text(l10n.p11ParcelMultiStopCashAtPickup),
+                    )
+                  else
+                    SwitchListTile(
+                      key: const ValueKey('parcel_pay_at_pickup'),
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(l10n.p11ParcelPayAtPickup),
+                      subtitle: Text(l10n.p11ParcelPayAtPickupHint),
+                      value: _payAtPickup,
+                      onChanged: (v) => setState(() => _payAtPickup = v),
+                    ),
+                ],
                 if (_needsPaymentPhone)
                   TextField(
                     controller: _paymentPhone,
@@ -746,13 +1065,22 @@ Future<void> showParcelBookedSheet(
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
-          if (parcel.handoverCode != null)
+          if (parcel.isMultiStop)
+            ParcelStopsList(stops: parcel.stops)
+          else if (parcel.handoverCode != null)
             ParcelHandoverCodeView(
               code: parcel.handoverCode!,
               hint: toSelf
                   ? l10n.p10ParcelHandoverSelfHint
                   : l10n.p10ParcelHandoverHint,
             ),
+          if (parcel.paysAtPickup) ...[
+            const SizedBox(height: 12),
+            ParcelPayAtPickupNote(
+              amount: parcel.amount,
+              currency: parcel.currency,
+            ),
+          ],
           if (parcel.trackingUrl != null) ...[
             const SizedBox(height: 12),
             OutlinedButton.icon(

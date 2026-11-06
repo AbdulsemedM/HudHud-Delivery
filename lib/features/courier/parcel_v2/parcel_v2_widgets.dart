@@ -623,11 +623,21 @@ class _ParcelV2PanelState extends State<ParcelV2Panel> {
       builder: (dialogContext) => AlertDialog(
         title: Text(l10n.p10ParcelCancel),
         content: Text(
-          fee > 0
-              ? l10n.p10ParcelCancelFee(
-                  formatParcelMoney(fee, preview?.currency ?? parcel.currency),
-                )
-              : l10n.p10ParcelCancelFree,
+          fee <= 0
+              ? l10n.p10ParcelCancelFree
+              : (preview?.chargedToWalletOrBalance ?? false)
+                  ? l10n.p11ParcelCancelCashFee(
+                      formatParcelMoney(
+                        fee,
+                        preview?.currency ?? parcel.currency,
+                      ),
+                    )
+                  : l10n.p10ParcelCancelFee(
+                      formatParcelMoney(
+                        fee,
+                        preview?.currency ?? parcel.currency,
+                      ),
+                    ),
         ),
         actions: [
           TextButton(
@@ -682,7 +692,20 @@ class _ParcelV2PanelState extends State<ParcelV2Panel> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (parcel.handoverCode != null && !parcel.handoverVerified)
+          if (parcel.paysAtPickup) ...[
+            ParcelPayAtPickupNote(
+              amount: parcel.amount,
+              currency: parcel.currency,
+              collected: parcel.collectedAtPickup,
+            ),
+            const SizedBox(height: 8),
+          ],
+          if (parcel.isMultiStop)
+            ParcelStopsList(
+              stops: parcel.stops,
+              currentStop: parcel.currentStop,
+            )
+          else if (parcel.handoverCode != null && !parcel.handoverVerified)
             ParcelHandoverCodeView(
               code: parcel.handoverCode!,
               hint: l10n.p10ParcelHandoverHint,
@@ -717,6 +740,271 @@ class _ParcelV2PanelState extends State<ParcelV2Panel> {
                   ),
                 ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Phase 11 ───────────────────────────────────────────────────────────
+
+String parcelStopStatusLabel(AppLocalizations l10n, String status) {
+  switch (status) {
+    case ParcelStopStatus.arrived:
+      return l10n.p11ParcelStopArrived;
+    case ParcelStopStatus.delivered:
+      return l10n.p11ParcelStopDelivered;
+    case ParcelStopStatus.failed:
+      return l10n.p11ParcelStopFailed;
+    case ParcelStopStatus.returned:
+      return l10n.p11ParcelStopReturned;
+    case ParcelStopStatus.pending:
+    default:
+      return l10n.p11ParcelStopPending;
+  }
+}
+
+/// "Stop 2" header with reorder / remove actions for the booking form.
+class ParcelStopHeader extends StatelessWidget {
+  final int number;
+  final VoidCallback? onMoveUp;
+  final VoidCallback? onMoveDown;
+  final VoidCallback? onRemove;
+
+  const ParcelStopHeader({
+    super.key,
+    required this.number,
+    this.onMoveUp,
+    this.onMoveDown,
+    this.onRemove,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            l10n.p11ParcelStopN(number.toString()),
+            style: Theme.of(context)
+                .textTheme
+                .labelLarge
+                ?.copyWith(fontWeight: FontWeight.w700),
+          ),
+        ),
+        if (onMoveUp != null)
+          IconButton(
+            key: ValueKey('parcel_stop_${number}_up'),
+            tooltip: l10n.p11ParcelMoveUp,
+            icon: const Icon(Icons.arrow_upward),
+            onPressed: onMoveUp,
+          ),
+        if (onMoveDown != null)
+          IconButton(
+            key: ValueKey('parcel_stop_${number}_down'),
+            tooltip: l10n.p11ParcelMoveDown,
+            icon: const Icon(Icons.arrow_downward),
+            onPressed: onMoveDown,
+          ),
+        if (onRemove != null)
+          IconButton(
+            key: ValueKey('parcel_stop_${number}_remove'),
+            tooltip: l10n.p11ParcelRemoveStop,
+            icon: const Icon(Icons.close),
+            onPressed: onRemove,
+          ),
+      ],
+    );
+  }
+}
+
+/// Each drop-off of a multi-stop parcel: status, its own handover code
+/// (while unused) and its own tracking link to share.
+class ParcelStopsList extends StatelessWidget {
+  final List<ParcelV2Stop> stops;
+  final int? currentStop;
+
+  const ParcelStopsList({super.key, required this.stops, this.currentStop});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          l10n.p11ParcelStopsTitle,
+          style: theme.textTheme.titleSmall
+              ?.copyWith(fontWeight: FontWeight.w700),
+        ),
+        const SizedBox(height: 4),
+        Text(l10n.p11ParcelStopCodesHint, style: theme.textTheme.bodySmall),
+        const SizedBox(height: 8),
+        for (final stop in stops)
+          Container(
+            key: ValueKey('parcel_stop_row_${stop.sequence}'),
+            margin: const EdgeInsets.only(bottom: 8),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: stop.sequence == currentStop
+                    ? AppColors.primaryColor
+                    : theme.colorScheme.outlineVariant,
+                width: stop.sequence == currentStop ? 2 : 1,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        l10n.p11ParcelStopN(stop.sequence.toString()),
+                        style: const TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                    Text(
+                      parcelStopStatusLabel(l10n, stop.status),
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: stop.status == ParcelStopStatus.failed
+                            ? theme.colorScheme.error
+                            : theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+                if (stop.address != null)
+                  Text(
+                    stop.address!,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                if (stop.recipientName != null)
+                  Text(
+                    [stop.recipientName, stop.recipientPhone]
+                        .whereType<String>()
+                        .join(' · '),
+                    style: theme.textTheme.bodySmall,
+                  ),
+                if (stop.handoverCode != null && !stop.handoverVerified) ...[
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Text(
+                        '${l10n.p10ParcelHandoverCode}: ',
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                      Text(
+                        stop.handoverCode!,
+                        key: ValueKey('parcel_stop_code_${stop.sequence}'),
+                        style: const TextStyle(
+                          fontSize: 18,
+                          letterSpacing: 4,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+                if (stop.trackingUrl != null && !stop.isDone)
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: TextButton.icon(
+                      icon: const Icon(Icons.share, size: 18),
+                      label: Text(l10n.p11ParcelShareStopLink),
+                      onPressed: () => Share.share(
+                        l10n.p10ParcelTrackingShareText(stop.trackingUrl!),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// "Pay X cash to the courier at pickup" / "Paid at pickup".
+class ParcelPayAtPickupNote extends StatelessWidget {
+  final double amount;
+  final String? currency;
+  final bool collected;
+
+  const ParcelPayAtPickupNote({
+    super.key,
+    required this.amount,
+    required this.currency,
+    this.collected = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.orangeTint,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            collected ? Icons.check_circle : Icons.payments_outlined,
+            color: Colors.black87,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              collected
+                  ? l10n.p11ParcelPaidAtPickup
+                  : l10n.p11ParcelPayAtPickupDue(
+                      formatParcelMoney(amount, currency),
+                    ),
+              style: const TextStyle(color: Colors.black87),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Outstanding balance (e.g. a cash cancellation fee) shown before booking.
+class ParcelDuesBanner extends StatelessWidget {
+  final ParcelDuesSummary dues;
+
+  const ParcelDuesBanner({super.key, required this.dues});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colorScheme = Theme.of(context).colorScheme;
+    final text = dues.amounts.entries
+        .where((e) => e.value > 0)
+        .map((e) => formatParcelMoney(e.value, e.key))
+        .join(' + ');
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: colorScheme.tertiaryContainer,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.info_outline, color: colorScheme.onTertiaryContainer),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              l10n.p11ParcelOutstandingBalance(text),
+              style: TextStyle(color: colorScheme.onTertiaryContainer),
+            ),
           ),
         ],
       ),

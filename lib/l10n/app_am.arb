@@ -2133,5 +2133,120 @@
   "p10ParcelCancelled": "እሽጉ ተሰርዟል",
   "@p10ParcelCancelled": {
     "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelAddStop": "ማቆሚያ ጨምር",
+  "@p11ParcelAddStop": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelStopN": "ማቆሚያ {number}",
+  "@p11ParcelStopN": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "number": {"type": "String"}
+    }
+  },
+  "p11ParcelRemoveStop": "ማቆሚያውን አስወግድ",
+  "@p11ParcelRemoveStop": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelMoveUp": "ወደ ላይ",
+  "@p11ParcelMoveUp": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelMoveDown": "ወደ ታች",
+  "@p11ParcelMoveDown": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelStopsLimit": "በአንድ እሽግ እስከ {max} ማድረሻዎች",
+  "@p11ParcelStopsLimit": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "max": {"type": "String"}
+    }
+  },
+  "p11ParcelMultiStopSenderPays": "ብዙ ማድረሻዎች ሲኖሩ ለሙሉ መንገዱ እርስዎ ይከፍላሉ።",
+  "@p11ParcelMultiStopSenderPays": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelMultiStopCashAtPickup": "ብዙ ማድረሻዎች ሲኖሩ ጥሬ ገንዘብ እሽጉ ሲነሳ ለአድራሹ ይከፈላል።",
+  "@p11ParcelMultiStopCashAtPickup": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelPayAtPickup": "እሽጉ ሲነሳ በጥሬ ገንዘብ ይክፈሉ",
+  "@p11ParcelPayAtPickup": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelPayAtPickupHint": "አድራሹ እሽጉን ሲወስድ ገንዘቡን ይስጡት።",
+  "@p11ParcelPayAtPickupHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelPayAtPickupDue": "እሽጉ ሲነሳ {amount} በጥሬ ገንዘብ ለአድራሹ ይክፈሉ",
+  "@p11ParcelPayAtPickupDue": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p11ParcelPaidAtPickup": "እሽጉ ሲነሳ ለአድራሹ ተከፍሏል",
+  "@p11ParcelPaidAtPickup": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelPayAtPickupUnavailable": "እሽጉ ሲነሳ በጥሬ ገንዘብ መክፈል አሁን አይገኝም።",
+  "@p11ParcelPayAtPickupUnavailable": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelStopsTitle": "ማድረሻዎች",
+  "@p11ParcelStopsTitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelStopCodesHint": "እያንዳንዱ ተቀባይ የራሱን የማስረከቢያ ኮድ በSMS አግኝቷል። ካላገኘ ያጋሩት።",
+  "@p11ParcelStopCodesHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelShareStopLink": "ሊንኩን አጋራ",
+  "@p11ParcelShareStopLink": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelStopPending": "በመጠባበቅ ላይ",
+  "@p11ParcelStopPending": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelStopArrived": "አድራሹ ደርሷል",
+  "@p11ParcelStopArrived": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelStopDelivered": "ደርሷል",
+  "@p11ParcelStopDelivered": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelStopFailed": "አልደረሰም",
+  "@p11ParcelStopFailed": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelStopReturned": "ወደ እርስዎ ተመልሷል",
+  "@p11ParcelStopReturned": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelMultiStopDisabled": "ብዙ ማድረሻዎች አሁን አይገኙም።",
+  "@p11ParcelMultiStopDisabled": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelTooManyStops": "ለአንድ እሽግ በጣም ብዙ ማድረሻዎች።",
+  "@p11ParcelTooManyStops": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelCancelCashFee": "አድራሹ በመንገድ ላይ ነው። አሁን መሰረዝ {fee} ያስከፍላል። ከዋሌትዎ ይቀነሳል ወይም በሂሳብዎ ላይ ይመዘገባል።",
+  "@p11ParcelCancelCashFee": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "fee": {"type": "String"}
+    }
+  },
+  "p11ParcelOutstandingBalance": "ከተሰረዘ እሽግ {amount} ዕዳ አለብዎት። በሚቀጥለው ገንዘብ ሲሞሉ ወይም ሲያዝዙ ከዋሌትዎ ይቀነሳል።",
+  "@p11ParcelOutstandingBalance": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
   }
 }

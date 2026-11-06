@@ -62,6 +62,12 @@ class ParcelV2Config {
   final double cancellationFeeAfterAssign;
   final bool cityScopeEnforced;
 
+  /// Phase 11: drop-offs per parcel (1 while multi-stop is off).
+  final int maxDropoffs;
+  final bool payAtPickupEnabled;
+  final bool cashCancellationFeeEnabled;
+  final ParcelDuesSummary? outstandingDues;
+
   const ParcelV2Config({
     this.enabled = false,
     this.market,
@@ -76,9 +82,15 @@ class ParcelV2Config {
     this.requireDeliveryPhoto = false,
     this.cancellationFeeAfterAssign = 0,
     this.cityScopeEnforced = false,
+    this.maxDropoffs = 1,
+    this.payAtPickupEnabled = false,
+    this.cashCancellationFeeEnabled = false,
+    this.outstandingDues,
   });
 
   static const ParcelV2Config disabled = ParcelV2Config();
+
+  bool get multiStopEnabled => maxDropoffs > 1;
 
   factory ParcelV2Config.fromResponseBody(dynamic body) {
     final data = _data(body);
@@ -115,6 +127,11 @@ class ParcelV2Config {
       cancellationFeeAfterAssign:
           _double(data['cancellation_fee_after_assign']) ?? 0,
       cityScopeEnforced: data['city_scope_enforced'] == true,
+      maxDropoffs: (_int(data['max_dropoffs']) ?? 1).clamp(1, 3),
+      payAtPickupEnabled: data['pay_at_pickup_enabled'] == true,
+      cashCancellationFeeEnabled:
+          data['cash_cancellation_fee_enabled'] == true,
+      outstandingDues: ParcelDuesSummary.fromJson(data['outstanding_dues']),
     );
   }
 
@@ -123,6 +140,36 @@ class ParcelV2Config {
       if (option.size == size) return option;
     }
     return null;
+  }
+}
+
+/// Phase 11: money the customer still owes (e.g. a cash cancellation fee).
+class ParcelDuesSummary {
+  final int count;
+
+  /// currency => amount
+  final Map<String, double> amounts;
+
+  const ParcelDuesSummary({this.count = 0, this.amounts = const {}});
+
+  bool get hasDues => count > 0 && amounts.values.any((a) => a > 0);
+
+  static ParcelDuesSummary? fromJson(dynamic raw) {
+    final m = _map(raw);
+    if (m == null) return null;
+    final amounts = <String, double>{};
+    final list = m['amounts'];
+    if (list is List) {
+      for (final item in list) {
+        final row = _map(item);
+        final currency = _string(row?['currency']);
+        final amount = _double(row?['amount']);
+        if (currency != null && amount != null) {
+          amounts[currency.toUpperCase()] = amount;
+        }
+      }
+    }
+    return ParcelDuesSummary(count: _int(m['count']) ?? 0, amounts: amounts);
   }
 }
 
@@ -137,6 +184,9 @@ class ParcelQuote {
   final int? durationMinutes;
   final DateTime expiresAt;
 
+  /// Phase 11: drop-offs priced in this quote (whole route, in order).
+  final int stopCount;
+
   const ParcelQuote({
     required this.quoteId,
     required this.amount,
@@ -146,6 +196,7 @@ class ParcelQuote {
     this.itemSize,
     this.distanceKm,
     this.durationMinutes,
+    this.stopCount = 1,
   });
 
   /// [receivedAt] anchors the countdown to the device clock (server
@@ -171,6 +222,7 @@ class ParcelQuote {
       distanceKm: _double(data['distance_km']),
       durationMinutes: _int(data['duration_minutes']),
       expiresAt: expires,
+      stopCount: _int(data['stop_count']) ?? 1,
     );
   }
 
@@ -197,15 +249,23 @@ class ParcelCancellationPreview {
   final String? currency;
   final double refund;
 
+  /// Phase 11: `payment` | `wallet_or_outstanding_balance` | `not_collected`.
+  final String? feeChargedTo;
+
   const ParcelCancellationPreview({
     required this.canCancel,
     this.code,
     this.fee = 0,
     this.currency,
     this.refund = 0,
+    this.feeChargedTo,
   });
 
   bool get hasFee => fee > 0;
+
+  /// A cash parcel's fee comes from the wallet or becomes a balance owed.
+  bool get chargedToWalletOrBalance =>
+      feeChargedTo == 'wallet_or_outstanding_balance';
 
   static ParcelCancellationPreview? fromJson(dynamic raw) {
     final m = _map(raw);
@@ -216,6 +276,7 @@ class ParcelCancellationPreview {
       fee: _double(m['fee']) ?? 0,
       currency: _string(m['currency']),
       refund: _double(m['refund']) ?? 0,
+      feeChargedTo: _string(m['fee_charged_to']),
     );
   }
 }
@@ -239,6 +300,65 @@ class ParcelV2Status {
   static const terminal = {delivered, cancelled, failed, returned};
 }
 
+/// Phase 11 per-drop-off states (server package_delivery_stops.status).
+class ParcelStopStatus {
+  ParcelStopStatus._();
+
+  static const pending = 'pending';
+  static const arrived = 'arrived';
+  static const delivered = 'delivered';
+  static const failed = 'failed';
+  static const returned = 'returned';
+}
+
+/// One drop-off of a multi-stop parcel as the sender sees it.
+class ParcelV2Stop {
+  final int sequence;
+  final String status;
+  final String? address;
+  final String? recipientName;
+  final String? recipientPhone;
+  final bool recipientIsMe;
+  final String? handoverCode;
+  final bool handoverVerified;
+  final String? trackingUrl;
+
+  const ParcelV2Stop({
+    required this.sequence,
+    this.status = ParcelStopStatus.pending,
+    this.address,
+    this.recipientName,
+    this.recipientPhone,
+    this.recipientIsMe = false,
+    this.handoverCode,
+    this.handoverVerified = false,
+    this.trackingUrl,
+  });
+
+  bool get isDone =>
+      status == ParcelStopStatus.delivered ||
+      status == ParcelStopStatus.failed ||
+      status == ParcelStopStatus.returned;
+
+  static ParcelV2Stop? fromJson(dynamic raw) {
+    final m = _map(raw);
+    final sequence = _int(m?['sequence']);
+    if (m == null || sequence == null) return null;
+    final handover = _map(m['handover']);
+    return ParcelV2Stop(
+      sequence: sequence,
+      status: _string(m['status']) ?? ParcelStopStatus.pending,
+      address: _string(m['address']),
+      recipientName: _string(m['recipient_name']),
+      recipientPhone: _string(m['recipient_phone']),
+      recipientIsMe: m['recipient_is_me'] == true,
+      handoverCode: _string(handover?['code']),
+      handoverVerified: handover?['verified'] == true,
+      trackingUrl: _string(m['tracking_url']),
+    );
+  }
+}
+
 /// `GET /api/parcels/{id}` — the subset the app shows.
 class ParcelV2Parcel {
   final int id;
@@ -255,6 +375,12 @@ class ParcelV2Parcel {
   final int? etaMinutes;
   final ParcelCancellationPreview? cancellation;
 
+  /// Phase 11.
+  final List<ParcelV2Stop> stops;
+  final int? currentStop;
+  final String? paymentTiming;
+  final bool collectedAtPickup;
+
   const ParcelV2Parcel({
     required this.id,
     required this.status,
@@ -269,9 +395,15 @@ class ParcelV2Parcel {
     this.trackingUrl,
     this.etaMinutes,
     this.cancellation,
+    this.stops = const [],
+    this.currentStop,
+    this.paymentTiming,
+    this.collectedAtPickup = false,
   });
 
   bool get isV2 => version >= 2;
+  bool get isMultiStop => stops.length > 1;
+  bool get paysAtPickup => paymentTiming == 'pickup';
   bool get isTerminal => ParcelV2Status.terminal.contains(status);
 
   static ParcelV2Parcel? fromJson(dynamic raw) {
@@ -280,6 +412,16 @@ class ParcelV2Parcel {
     if (m == null || id == null) return null;
     final price = _map(m['price']);
     final handover = _map(m['handover']);
+    final payment = _map(m['payment']);
+    final stops = <ParcelV2Stop>[];
+    final rawStops = m['stops'];
+    if (rawStops is List) {
+      for (final raw in rawStops) {
+        final stop = ParcelV2Stop.fromJson(raw);
+        if (stop != null) stops.add(stop);
+      }
+      stops.sort((a, b) => a.sequence.compareTo(b.sequence));
+    }
     return ParcelV2Parcel(
       id: id,
       version: _int(m['version']) ?? 1,
@@ -294,6 +436,10 @@ class ParcelV2Parcel {
       trackingUrl: _string(m['tracking_url']),
       etaMinutes: _int(m['eta_minutes']),
       cancellation: ParcelCancellationPreview.fromJson(m['cancellation']),
+      stops: stops,
+      currentStop: _int(m['current_stop']),
+      paymentTiming: _string(payment?['timing']),
+      collectedAtPickup: payment?['collected_at_pickup'] == true,
     );
   }
 
@@ -365,6 +511,43 @@ class ParcelAddressDetails {
   }
 }
 
+/// Phase 11: a drop-off after the first one (each with its own recipient).
+class ParcelStopDraft {
+  final String location;
+  final double lat;
+  final double lng;
+  final ParcelAddressDetails details;
+  final bool recipientIsMe;
+  final String recipientName;
+  final String recipientPhone;
+  final String note;
+
+  const ParcelStopDraft({
+    required this.location,
+    required this.lat,
+    required this.lng,
+    this.details = const ParcelAddressDetails(),
+    this.recipientIsMe = false,
+    this.recipientName = '',
+    this.recipientPhone = '',
+    this.note = '',
+  });
+
+  Map<String, dynamic> toJson() {
+    final n = note.trim();
+    return {
+      'location': location,
+      'latitude': lat,
+      'longitude': lng,
+      'address': details.toJson(location),
+      'recipient_is_me': recipientIsMe,
+      if (!recipientIsMe) 'recipient_name': recipientName.trim(),
+      if (!recipientIsMe) 'recipient_phone': recipientPhone.trim(),
+      if (n.isNotEmpty) 'note': n,
+    };
+  }
+}
+
 /// Everything the booking form collected; builds the API bodies.
 class ParcelBookingDraft {
   final String pickupLocation;
@@ -390,6 +573,15 @@ class ParcelBookingDraft {
   final DateTime? scheduledPickup;
   final String? marketCode;
 
+  /// Phase 11: drop-offs after the first (the dropoff* / recipient* fields).
+  final List<ParcelStopDraft> extraStops;
+
+  /// Phase 11: sender pays the courier in cash at pickup.
+  final bool payAtPickup;
+
+  /// Phase 11: courier note for stop 1 of a multi-stop parcel.
+  final String dropoffNote;
+
   const ParcelBookingDraft({
     required this.pickupLocation,
     required this.pickupLat,
@@ -413,17 +605,57 @@ class ParcelBookingDraft {
     this.sellerCodAmount,
     this.scheduledPickup,
     this.marketCode,
+    this.extraStops = const [],
+    this.payAtPickup = false,
+    this.dropoffNote = '',
   });
 
-  bool get sellerCod => sellerCodAmount != null && sellerCodAmount! > 0;
+  bool get isMultiStop => extraStops.isNotEmpty;
+
+  /// Multi-stop parcels are always paid by the sender.
+  bool get sellerCod =>
+      !isMultiStop && sellerCodAmount != null && sellerCodAmount! > 0;
+  bool get _recipientPaysEffective => !isMultiStop && recipientPays;
+
+  /// Cash at pickup: chosen, and always for a multi-stop cash parcel.
+  bool get paysAtPickup =>
+      !sellerCod &&
+      !_recipientPaysEffective &&
+      paymentMethod == 'cash' &&
+      (payAtPickup || isMultiStop);
+
+  /// The method the server receives.
+  String get effectivePaymentMethod =>
+      _recipientPaysEffective || sellerCod ? 'cash' : paymentMethod;
+
+  ParcelStopDraft get firstStop => ParcelStopDraft(
+        location: dropoffLocation,
+        lat: dropoffLat,
+        lng: dropoffLng,
+        details: dropoffDetails,
+        recipientIsMe: recipientIsMe,
+        recipientName: recipientName,
+        recipientPhone: recipientPhone,
+        note: dropoffNote,
+      );
+
+  List<ParcelStopDraft> get allStops => [firstStop, ...extraStops];
+
+  /// Where the route ends (the legacy screens' drop-off).
+  ParcelStopDraft get lastStop => allStops.last;
 
   Map<String, dynamic> quoteBody() {
     return {
       'pickup_location': pickupLocation,
       'pickup_latitude': pickupLat,
       'pickup_longitude': pickupLng,
-      'dropoff_latitude': dropoffLat,
-      'dropoff_longitude': dropoffLng,
+      if (!isMultiStop) 'dropoff_latitude': dropoffLat,
+      if (!isMultiStop) 'dropoff_longitude': dropoffLng,
+      if (isMultiStop)
+        'stops': [
+          for (final stop in allStops)
+            {'latitude': stop.lat, 'longitude': stop.lng},
+        ],
       'item_size': size,
       if (scheduledPickup != null)
         'scheduled_pickup': scheduledPickup!.toUtc().toIso8601String(),
@@ -435,28 +667,34 @@ class ParcelBookingDraft {
     final note = courierNote.trim();
     final desc = description.trim();
     final phone = paymentPhone?.trim();
+    final recipientSide = _recipientPaysEffective || sellerCod;
     return {
       'quote_id': quoteId,
       'pickup_location': pickupLocation,
       'pickup_latitude': pickupLat,
       'pickup_longitude': pickupLng,
       'pickup_address': pickupDetails.toJson(pickupLocation),
-      'dropoff_location': dropoffLocation,
-      'dropoff_latitude': dropoffLat,
-      'dropoff_longitude': dropoffLng,
-      'dropoff_address': dropoffDetails.toJson(dropoffLocation),
-      'recipient_is_me': recipientIsMe,
-      if (!recipientIsMe) 'recipient_name': recipientName.trim(),
-      if (!recipientIsMe) 'recipient_phone': recipientPhone.trim(),
+      if (!isMultiStop) ...{
+        'dropoff_location': dropoffLocation,
+        'dropoff_latitude': dropoffLat,
+        'dropoff_longitude': dropoffLng,
+        'dropoff_address': dropoffDetails.toJson(dropoffLocation),
+        'recipient_is_me': recipientIsMe,
+        if (!recipientIsMe) 'recipient_name': recipientName.trim(),
+        if (!recipientIsMe) 'recipient_phone': recipientPhone.trim(),
+      },
+      if (isMultiStop)
+        'stops': [for (final stop in allStops) stop.toJson()],
       'item_category': category,
       'item_size': size,
       if (desc.isNotEmpty) 'item_description': desc,
       if (itemValue != null) 'item_value': itemValue,
       if (note.isNotEmpty) 'courier_note': note,
       // "Recipient pays" and seller COD are always cash at drop-off.
-      'payment_method': recipientPays || sellerCod ? 'cash' : paymentMethod,
+      'payment_method': effectivePaymentMethod,
+      if (paysAtPickup) 'payment_timing': 'pickup',
       if (phone != null && phone.isNotEmpty) 'payment_phone': phone,
-      'payer': recipientPays || sellerCod ? 'recipient' : 'sender',
+      'payer': recipientSide ? 'recipient' : 'sender',
       if (sellerCod)
         'seller_cod': {'enabled': true, 'amount': sellerCodAmount},
       if (scheduledPickup != null)
@@ -478,6 +716,11 @@ enum ParcelErrorKind {
   insufficientWallet,
   feeConfirmation,
   pickedUp,
+  multiStopDisabled,
+  tooManyStops,
+  multiStopSenderPays,
+  multiStopCashAtPickup,
+  payAtPickupUnavailable,
   other,
 }
 
@@ -505,6 +748,17 @@ ParcelErrorKind parcelErrorKind(String? code, {String? message}) {
       return ParcelErrorKind.feeConfirmation;
     case 'PARCEL_ALREADY_PICKED_UP':
       return ParcelErrorKind.pickedUp;
+    case 'PARCEL_MULTI_STOP_DISABLED':
+      return ParcelErrorKind.multiStopDisabled;
+    case 'PARCEL_TOO_MANY_STOPS':
+      return ParcelErrorKind.tooManyStops;
+    case 'PARCEL_MULTI_STOP_SENDER_PAYS':
+      return ParcelErrorKind.multiStopSenderPays;
+    case 'PARCEL_MULTI_STOP_CASH_AT_PICKUP':
+      return ParcelErrorKind.multiStopCashAtPickup;
+    case 'PARCEL_PAY_AT_PICKUP_DISABLED':
+    case 'PARCEL_PAY_AT_PICKUP_SENDER_ONLY':
+      return ParcelErrorKind.payAtPickupUnavailable;
   }
   if ((message ?? '').toLowerCase().contains('insufficient wallet')) {
     return ParcelErrorKind.insufficientWallet;

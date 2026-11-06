@@ -4016,4 +4016,93 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get p10ParcelCancelled => 'እሽጉ ተሰርዟል';
+
+  @override
+  String get p11ParcelAddStop => 'ማቆሚያ ጨምር';
+
+  @override
+  String p11ParcelStopN(String number) {
+    return 'ማቆሚያ $number';
+  }
+
+  @override
+  String get p11ParcelRemoveStop => 'ማቆሚያውን አስወግድ';
+
+  @override
+  String get p11ParcelMoveUp => 'ወደ ላይ';
+
+  @override
+  String get p11ParcelMoveDown => 'ወደ ታች';
+
+  @override
+  String p11ParcelStopsLimit(String max) {
+    return 'በአንድ እሽግ እስከ $max ማድረሻዎች';
+  }
+
+  @override
+  String get p11ParcelMultiStopSenderPays =>
+      'ብዙ ማድረሻዎች ሲኖሩ ለሙሉ መንገዱ እርስዎ ይከፍላሉ።';
+
+  @override
+  String get p11ParcelMultiStopCashAtPickup =>
+      'ብዙ ማድረሻዎች ሲኖሩ ጥሬ ገንዘብ እሽጉ ሲነሳ ለአድራሹ ይከፈላል።';
+
+  @override
+  String get p11ParcelPayAtPickup => 'እሽጉ ሲነሳ በጥሬ ገንዘብ ይክፈሉ';
+
+  @override
+  String get p11ParcelPayAtPickupHint => 'አድራሹ እሽጉን ሲወስድ ገንዘቡን ይስጡት።';
+
+  @override
+  String p11ParcelPayAtPickupDue(String amount) {
+    return 'እሽጉ ሲነሳ $amount በጥሬ ገንዘብ ለአድራሹ ይክፈሉ';
+  }
+
+  @override
+  String get p11ParcelPaidAtPickup => 'እሽጉ ሲነሳ ለአድራሹ ተከፍሏል';
+
+  @override
+  String get p11ParcelPayAtPickupUnavailable =>
+      'እሽጉ ሲነሳ በጥሬ ገንዘብ መክፈል አሁን አይገኝም።';
+
+  @override
+  String get p11ParcelStopsTitle => 'ማድረሻዎች';
+
+  @override
+  String get p11ParcelStopCodesHint =>
+      'እያንዳንዱ ተቀባይ የራሱን የማስረከቢያ ኮድ በSMS አግኝቷል። ካላገኘ ያጋሩት።';
+
+  @override
+  String get p11ParcelShareStopLink => 'ሊንኩን አጋራ';
+
+  @override
+  String get p11ParcelStopPending => 'በመጠባበቅ ላይ';
+
+  @override
+  String get p11ParcelStopArrived => 'አድራሹ ደርሷል';
+
+  @override
+  String get p11ParcelStopDelivered => 'ደርሷል';
+
+  @override
+  String get p11ParcelStopFailed => 'አልደረሰም';
+
+  @override
+  String get p11ParcelStopReturned => 'ወደ እርስዎ ተመልሷል';
+
+  @override
+  String get p11ParcelMultiStopDisabled => 'ብዙ ማድረሻዎች አሁን አይገኙም።';
+
+  @override
+  String get p11ParcelTooManyStops => 'ለአንድ እሽግ በጣም ብዙ ማድረሻዎች።';
+
+  @override
+  String p11ParcelCancelCashFee(String fee) {
+    return 'አድራሹ በመንገድ ላይ ነው። አሁን መሰረዝ $fee ያስከፍላል። ከዋሌትዎ ይቀነሳል ወይም በሂሳብዎ ላይ ይመዘገባል።';
+  }
+
+  @override
+  String p11ParcelOutstandingBalance(String amount) {
+    return 'ከተሰረዘ እሽግ $amount ዕዳ አለብዎት። በሚቀጥለው ገንዘብ ሲሞሉ ወይም ሲያዝዙ ከዋሌትዎ ይቀነሳል።';
+  }
 }

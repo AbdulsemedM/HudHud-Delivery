@@ -1784,5 +1784,55 @@
     }
   },
   "p10ParcelCancelReason": "Cancelled by the sender in the app",
-  "p10ParcelCancelled": "Parcel cancelled"
+  "p10ParcelCancelled": "Parcel cancelled",
+  "p11ParcelAddStop": "Add a stop",
+  "p11ParcelStopN": "Stop {number}",
+  "@p11ParcelStopN": {
+    "placeholders": {
+      "number": {"type": "String"}
+    }
+  },
+  "p11ParcelRemoveStop": "Remove stop",
+  "p11ParcelMoveUp": "Move up",
+  "p11ParcelMoveDown": "Move down",
+  "p11ParcelStopsLimit": "Up to {max} drop-offs per parcel",
+  "@p11ParcelStopsLimit": {
+    "placeholders": {
+      "max": {"type": "String"}
+    }
+  },
+  "p11ParcelMultiStopSenderPays": "With several drop-offs you pay for the whole route.",
+  "p11ParcelMultiStopCashAtPickup": "With several drop-offs, cash is paid to the courier at pickup.",
+  "p11ParcelPayAtPickup": "Pay cash at pickup",
+  "p11ParcelPayAtPickupHint": "Hand the cash to the courier when they collect the parcel.",
+  "p11ParcelPayAtPickupDue": "Pay {amount} cash to the courier at pickup",
+  "@p11ParcelPayAtPickupDue": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p11ParcelPaidAtPickup": "Paid to the courier at pickup",
+  "p11ParcelPayAtPickupUnavailable": "Paying cash at pickup is not available right now.",
+  "p11ParcelStopsTitle": "Drop-offs",
+  "p11ParcelStopCodesHint": "Each recipient got their own handover code by SMS. Share it if they did not.",
+  "p11ParcelShareStopLink": "Share link",
+  "p11ParcelStopPending": "Waiting",
+  "p11ParcelStopArrived": "Courier is there",
+  "p11ParcelStopDelivered": "Delivered",
+  "p11ParcelStopFailed": "Not delivered",
+  "p11ParcelStopReturned": "Returned to you",
+  "p11ParcelMultiStopDisabled": "Several drop-offs are not available right now.",
+  "p11ParcelTooManyStops": "Too many drop-offs for one parcel.",
+  "p11ParcelCancelCashFee": "A courier is already on the way. Cancelling now costs {fee}. It is taken from your wallet or added to your balance.",
+  "@p11ParcelCancelCashFee": {
+    "placeholders": {
+      "fee": {"type": "String"}
+    }
+  },
+  "p11ParcelOutstandingBalance": "You owe {amount} from a cancelled parcel. It is taken from your wallet at your next top-up or order.",
+  "@p11ParcelOutstandingBalance": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  }
 }

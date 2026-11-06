@@ -4085,4 +4085,95 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get p10ParcelCancelled => 'Parcel cancelled';
+
+  @override
+  String get p11ParcelAddStop => 'Add a stop';
+
+  @override
+  String p11ParcelStopN(String number) {
+    return 'Stop $number';
+  }
+
+  @override
+  String get p11ParcelRemoveStop => 'Remove stop';
+
+  @override
+  String get p11ParcelMoveUp => 'Move up';
+
+  @override
+  String get p11ParcelMoveDown => 'Move down';
+
+  @override
+  String p11ParcelStopsLimit(String max) {
+    return 'Up to $max drop-offs per parcel';
+  }
+
+  @override
+  String get p11ParcelMultiStopSenderPays =>
+      'With several drop-offs you pay for the whole route.';
+
+  @override
+  String get p11ParcelMultiStopCashAtPickup =>
+      'With several drop-offs, cash is paid to the courier at pickup.';
+
+  @override
+  String get p11ParcelPayAtPickup => 'Pay cash at pickup';
+
+  @override
+  String get p11ParcelPayAtPickupHint =>
+      'Hand the cash to the courier when they collect the parcel.';
+
+  @override
+  String p11ParcelPayAtPickupDue(String amount) {
+    return 'Pay $amount cash to the courier at pickup';
+  }
+
+  @override
+  String get p11ParcelPaidAtPickup => 'Paid to the courier at pickup';
+
+  @override
+  String get p11ParcelPayAtPickupUnavailable =>
+      'Paying cash at pickup is not available right now.';
+
+  @override
+  String get p11ParcelStopsTitle => 'Drop-offs';
+
+  @override
+  String get p11ParcelStopCodesHint =>
+      'Each recipient got their own handover code by SMS. Share it if they did not.';
+
+  @override
+  String get p11ParcelShareStopLink => 'Share link';
+
+  @override
+  String get p11ParcelStopPending => 'Waiting';
+
+  @override
+  String get p11ParcelStopArrived => 'Courier is there';
+
+  @override
+  String get p11ParcelStopDelivered => 'Delivered';
+
+  @override
+  String get p11ParcelStopFailed => 'Not delivered';
+
+  @override
+  String get p11ParcelStopReturned => 'Returned to you';
+
+  @override
+  String get p11ParcelMultiStopDisabled =>
+      'Several drop-offs are not available right now.';
+
+  @override
+  String get p11ParcelTooManyStops => 'Too many drop-offs for one parcel.';
+
+  @override
+  String p11ParcelCancelCashFee(String fee) {
+    return 'A courier is already on the way. Cancelling now costs $fee. It is taken from your wallet or added to your balance.';
+  }
+
+  @override
+  String p11ParcelOutstandingBalance(String amount) {
+    return 'You owe $amount from a cancelled parcel. It is taken from your wallet at your next top-up or order.';
+  }
 }

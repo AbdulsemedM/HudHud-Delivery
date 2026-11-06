@@ -4120,4 +4120,96 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get p10ParcelCancelled => 'Paakeejiin haqameera';
+
+  @override
+  String get p11ParcelAddStop => 'Dhaabbata dabali';
+
+  @override
+  String p11ParcelStopN(String number) {
+    return 'Dhaabbata $number';
+  }
+
+  @override
+  String get p11ParcelRemoveStop => 'Dhaabbata haqi';
+
+  @override
+  String get p11ParcelMoveUp => 'Ol kaasi';
+
+  @override
+  String get p11ParcelMoveDown => 'Gadi buusi';
+
+  @override
+  String p11ParcelStopsLimit(String max) {
+    return 'Paakeejii tokkoof hanga bakka geessaa $max';
+  }
+
+  @override
+  String get p11ParcelMultiStopSenderPays =>
+      'Bakka geessaa hedduu yoo qabaatte, karaa guutuu ati kaffalta.';
+
+  @override
+  String get p11ParcelMultiStopCashAtPickup =>
+      'Bakka geessaa hedduu yoo ta\'e, maallaqni yeroo fudhatamu ergamaaf kaffalama.';
+
+  @override
+  String get p11ParcelPayAtPickup => 'Yeroo fudhatamu maallaqaan kaffali';
+
+  @override
+  String get p11ParcelPayAtPickupHint =>
+      'Yeroo ergamaan paakeejii fudhatu maallaqa kenniif.';
+
+  @override
+  String p11ParcelPayAtPickupDue(String amount) {
+    return 'Yeroo fudhatamu $amount maallaqaan ergamaaf kaffali';
+  }
+
+  @override
+  String get p11ParcelPaidAtPickup => 'Yeroo fudhatame ergamaaf kaffalameera';
+
+  @override
+  String get p11ParcelPayAtPickupUnavailable =>
+      'Yeroo fudhatamu maallaqaan kaffaluun amma hin jiru.';
+
+  @override
+  String get p11ParcelStopsTitle => 'Bakkeewwan geessaa';
+
+  @override
+  String get p11ParcelStopCodesHint =>
+      'Fudhataan tokkoon tokkoon isaa koodii kennaa isaa SMS-n argateera. Yoo hin arganne qoodi.';
+
+  @override
+  String get p11ParcelShareStopLink => 'Liinkii qoodi';
+
+  @override
+  String get p11ParcelStopPending => 'Eegaa jira';
+
+  @override
+  String get p11ParcelStopArrived => 'Ergamaan achi jira';
+
+  @override
+  String get p11ParcelStopDelivered => 'Geeffameera';
+
+  @override
+  String get p11ParcelStopFailed => 'Hin geeffamne';
+
+  @override
+  String get p11ParcelStopReturned => 'Siif deebi\'eera';
+
+  @override
+  String get p11ParcelMultiStopDisabled =>
+      'Bakka geessaa hedduun amma hin jiran.';
+
+  @override
+  String get p11ParcelTooManyStops =>
+      'Paakeejii tokkoof bakki geessaa baay\'ee heddu.';
+
+  @override
+  String p11ParcelCancelCashFee(String fee) {
+    return 'Ergamaan karaa irra jira. Amma haquun $fee baasa. Waletii keessanii irraa hir\'ifama ykn herrega keessan irratti galmaa\'a.';
+  }
+
+  @override
+  String p11ParcelOutstandingBalance(String amount) {
+    return 'Paakeejii haqame irraa $amount liqii qabda. Yeroo itti aanu yoo guuttu ykn ajajattu waletii irraa hir\'ifama.';
+  }
 }

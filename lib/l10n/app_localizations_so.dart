@@ -4127,4 +4127,98 @@ class AppLocalizationsSo extends AppLocalizations {
 
   @override
   String get p10ParcelCancelled => 'Xirmada waa la joojiyay';
+
+  @override
+  String get p11ParcelAddStop => 'Ku dar joogsi';
+
+  @override
+  String p11ParcelStopN(String number) {
+    return 'Joogsiga $number';
+  }
+
+  @override
+  String get p11ParcelRemoveStop => 'Ka saar joogsiga';
+
+  @override
+  String get p11ParcelMoveUp => 'Kor u qaad';
+
+  @override
+  String get p11ParcelMoveDown => 'Hoos u dhig';
+
+  @override
+  String p11ParcelStopsLimit(String max) {
+    return 'Ilaa $max meelood oo la geeyo baakad kasta';
+  }
+
+  @override
+  String get p11ParcelMultiStopSenderPays =>
+      'Marka meelo badan la geynayo, adiga ayaa bixinaya waddada oo dhan.';
+
+  @override
+  String get p11ParcelMultiStopCashAtPickup =>
+      'Marka meelo badan la geynayo, lacagta caddaanka ah waxaa la siinayaa darawalka marka uu qaadanayo.';
+
+  @override
+  String get p11ParcelPayAtPickup =>
+      'Lacag caddaan ah ku bixi marka la qaadanayo';
+
+  @override
+  String get p11ParcelPayAtPickupHint =>
+      'Lacagta sii darawalka marka uu baakadda qaadanayo.';
+
+  @override
+  String p11ParcelPayAtPickupDue(String amount) {
+    return 'Sii darawalka $amount lacag caddaan ah marka uu qaadanayo';
+  }
+
+  @override
+  String get p11ParcelPaidAtPickup =>
+      'Waxaa la siiyay darawalka markii la qaaday';
+
+  @override
+  String get p11ParcelPayAtPickupUnavailable =>
+      'Lacag caddaan ah oo la bixiyo marka la qaadanayo hadda lama heli karo.';
+
+  @override
+  String get p11ParcelStopsTitle => 'Meelaha la geynayo';
+
+  @override
+  String get p11ParcelStopCodesHint =>
+      'Qof kasta oo helaya wuxuu SMS ku helay koodhkiisa wareejinta. La wadaag haddii uusan helin.';
+
+  @override
+  String get p11ParcelShareStopLink => 'La wadaag xiriirka';
+
+  @override
+  String get p11ParcelStopPending => 'Sugitaan';
+
+  @override
+  String get p11ParcelStopArrived => 'Darawalku wuu joogaa';
+
+  @override
+  String get p11ParcelStopDelivered => 'Waa la geeyay';
+
+  @override
+  String get p11ParcelStopFailed => 'Lama gaarsiin';
+
+  @override
+  String get p11ParcelStopReturned => 'Adiga ayaa laguu soo celiyay';
+
+  @override
+  String get p11ParcelMultiStopDisabled =>
+      'Meelo badan oo la geeyo hadda lama heli karo.';
+
+  @override
+  String get p11ParcelTooManyStops =>
+      'Meelo aad u badan oo la geeyo baakad keliya.';
+
+  @override
+  String p11ParcelCancelCashFee(String fee) {
+    return 'Darawal ayaa soo socda. Hadda joojintu waxay ku kacaysaa $fee. Waxaa laga jarayaa boorsadaada ama lagu darayaa haraagaaga.';
+  }
+
+  @override
+  String p11ParcelOutstandingBalance(String amount) {
+    return 'Waxaad ku leedahay $amount baakad la joojiyay. Waxaa laga jarayaa boorsadaada marka xigta ee aad lacag ku shubto ama dalbato.';
+  }
 }
