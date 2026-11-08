@@ -1,23 +1,18 @@
-/// Build-time configuration.
-///
-/// Values come from `--dart-define` / `--dart-define-from-file` at build time
-/// (see ENV_SETUP_NATIVE.md). Nothing is bundled as an asset, and only
-/// non-secret values belong here — native secrets such as
-/// GOOGLE_MAPS_API_KEY are injected through Gradle / Xcode instead.
-///
-/// Example:
-///   flutter run --dart-define=BASE_URL=https://staging.example.com/api/
-///   shorebird release android -- --dart-define-from-file=env/prod.json
+import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-/// Production API (same default as the HudHud driver app).
-const String kDefaultApiBaseUrl = 'https://api.hudhuddelivery.com/api/';
-
-const String _baseUrlDefine =
-    String.fromEnvironment('BASE_URL', defaultValue: kDefaultApiBaseUrl);
-
-/// Kept for call-site compatibility with the old `.env` loader.
-/// Configuration is now compile-time, so there is nothing to load.
-Future<void> loadAppEnv() async {}
+/// Loads root [`.env`] into [dotenv] before Dio / API clients start.
+Future<void> loadAppEnv() async {
+  try {
+    await dotenv.load(fileName: '.env');
+  } catch (e, st) {
+    if (kDebugMode) {
+      debugPrint('Failed to load .env: $e');
+      debugPrint('$st');
+    }
+    rethrow;
+  }
+}
 
 /// Normalizes [BASE_URL] so it ends with `/api/`.
 String normalizeApiBaseUrl(String raw) {
@@ -37,10 +32,15 @@ String normalizeApiBaseUrl(String raw) {
 class ApiEnv {
   ApiEnv._();
 
-  static final String _baseUrl = normalizeApiBaseUrl(
-    _baseUrlDefine.trim().isEmpty ? kDefaultApiBaseUrl : _baseUrlDefine,
-  );
-
-  /// `BASE_URL` dart-define, falling back to [kDefaultApiBaseUrl].
-  static String get baseUrl => _baseUrl;
+  /// Reads `BASE_URL` from `.env` only — no hardcoded fallback.
+  static String get baseUrl {
+    if (!dotenv.isInitialized) {
+      throw StateError('Env not loaded. Call loadAppEnv() before using the API.');
+    }
+    final fromEnv = dotenv.maybeGet('BASE_URL');
+    if (fromEnv == null || fromEnv.trim().isEmpty) {
+      throw StateError('BASE_URL is missing in .env');
+    }
+    return normalizeApiBaseUrl(fromEnv);
+  }
 }
