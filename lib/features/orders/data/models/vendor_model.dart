@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:hudhud_delivery/core/utils/media_url_util.dart';
+import 'package:hudhud_delivery/features/vendors/data/models/store_status.dart';
 
 class VendorModel extends Equatable {
   final int id;
@@ -36,6 +37,13 @@ class VendorModel extends Equatable {
   final String? closingTime;
   final String? bannerPath;
 
+  /// Merchant store controls (closed / busy / opens at); null when the
+  /// backend sent none, which means "open" as before.
+  final StoreStatus? storeStatus;
+
+  /// False only when the server says the store is closed or busy.
+  bool get acceptingOrders => storeStatus?.acceptingOrders ?? true;
+
   // Getter for logo (using avatar as placeholder)
   String? get logo => avatar.isNotEmpty ? avatar : null;
 
@@ -69,6 +77,7 @@ class VendorModel extends Equatable {
     this.openingTime,
     this.closingTime,
     this.bannerPath,
+    this.storeStatus,
   });
 
   static int _parseInt(dynamic v) {
@@ -129,13 +138,44 @@ class VendorModel extends Equatable {
           DateTime.now(),
       updatedAt: DateTime.tryParse(json['updated_at']?.toString() ?? '') ??
           DateTime.now(),
+      storeStatus: StoreStatus.fromVendorJson(json),
     );
+  }
+
+  /// Shop fields that `/api/public/vendors` nests under `vendor_profile`
+  /// (the list returns the owner user). Top-level values win.
+  static const List<String> _profileFields = [
+    'shop_name',
+    'logo_path',
+    'logo_urls',
+    'banner_path',
+    'banner_urls',
+    'description',
+    'cuisine_type',
+    'opening_time',
+    'closing_time',
+    'contact_email',
+    'contact_phone',
+    'store_status',
+  ];
+
+  static Map<String, dynamic> _withProfile(Map<String, dynamic> json) {
+    final profile = json['vendor_profile'] ?? json['vendorProfile'];
+    if (profile is! Map) return json;
+    final merged = Map<String, dynamic>.from(json);
+    for (final key in _profileFields) {
+      final top = merged[key];
+      final missing = top == null || (top is String && top.trim().isEmpty);
+      if (missing && profile[key] != null) merged[key] = profile[key];
+    }
+    return merged;
   }
 
   /// Parses a vendor from the vendors list API (/api/vendors).
   /// Uses shop_name as name and prefers logo_urls.original over logo_path
   /// (logo_path often points at a broken medium conversion URL).
-  factory VendorModel.fromVendorListJson(Map<String, dynamic> json) {
+  factory VendorModel.fromVendorListJson(Map<String, dynamic> raw) {
+    final json = _withProfile(raw);
     final logoUrls = json['logo_urls'] is Map
         ? Map<dynamic, dynamic>.from(json['logo_urls'] as Map)
         : null;
@@ -184,6 +224,7 @@ class VendorModel extends Equatable {
       openingTime: _formatTime(json['opening_time']?.toString()),
       closingTime: _formatTime(json['closing_time']?.toString()),
       bannerPath: banner.isNotEmpty ? banner : null,
+      storeStatus: StoreStatus.fromVendorJson(json),
     );
   }
 
@@ -264,5 +305,6 @@ class VendorModel extends Equatable {
         openingTime,
         closingTime,
         bannerPath,
+        storeStatus,
       ];
 }

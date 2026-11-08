@@ -13,6 +13,8 @@ import 'package:hudhud_delivery/features/categories/model/categories_products_mo
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/features/wishlist/presentation/widgets/wishlist_toggle_button.dart';
 import 'package:hudhud_delivery/features/growth/market_controller.dart';
+import 'package:hudhud_delivery/features/vendors/data/repository/store_status_repository.dart';
+import 'package:hudhud_delivery/features/vendors/presentation/widgets/store_status_widgets.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final int productId;
@@ -111,11 +113,31 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     if (!product.canOrder) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(context.l10n.productUnavailable),
+          content: Text(
+            !product.isSoldOut
+                ? context.l10n.productUnavailable
+                : (product.name?.trim().isNotEmpty ?? false)
+                    ? context.l10n.p12ErrItemSoldOutNamed(product.name!.trim())
+                    : context.l10n.p12ErrItemSoldOut,
+          ),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
       return;
+    }
+    // Store closed / busy: nothing can be ordered now (cached lookup).
+    final vendorId = product.vendor_id;
+    if (vendorId != null && vendorId > 0) {
+      final status = await StoreStatusRepository.instance.statusFor(vendorId);
+      if (!mounted) return;
+      if (status != null && !status.acceptingOrders) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(storeUnavailableMessage(context.l10n, status)),
+          ),
+        );
+        return;
+      }
     }
     if (_variants.isNotEmpty && _selectedVariantId == null) {
       ScaffoldMessenger.of(context).showSnackBar(

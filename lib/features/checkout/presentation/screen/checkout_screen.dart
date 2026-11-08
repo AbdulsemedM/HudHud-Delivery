@@ -5,9 +5,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../app/services/cart_service.dart';
 import '../../../../app/services/location_service.dart';
 import '../../../../app/services/saved_location_service.dart';
+import '../../../../core/l10n/api_error_l10n.dart';
+import '../../../../core/utils/api_error_result.dart' show kCityMarketMismatchCode;
 import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/api/api_service.dart';
+import '../../../courier/parcel_v2/parcel_v2_models.dart'
+    show ParcelDuesSummary;
+import '../../../courier/parcel_v2/parcel_v2_widgets.dart'
+    show ParcelDuesBanner;
 import '../../../gifting/gift_phone.dart';
 import '../../../gifting/gift_session.dart';
 import '../../../gifting/presentation/gift_widgets.dart';
@@ -19,6 +25,7 @@ import '../../../growth/data/models/hudhud_set.dart';
 import '../../../growth/data/models/market.dart';
 import '../../../growth/growth_scope.dart';
 import '../../../growth/market_controller.dart';
+import '../../../growth/market_switch.dart';
 import '../../../growth/plus_controller.dart';
 import '../../../growth/presentation/screens/plus_screen.dart';
 import '../../../growth/presentation/widgets/checkout_growth_widgets.dart';
@@ -33,10 +40,16 @@ import '../../../payment/model/payment_initiate_result.dart';
 import '../../../payment/presentation/order_payment_issue_flow.dart';
 import '../../../payment/presentation/screen/payment_initiate_result_screen.dart';
 import '../../../payment/presentation/widgets/payment_details_form.dart';
+import '../../../vendors/data/models/store_status.dart';
+import '../../../vendors/data/repository/store_status_repository.dart';
+import '../../../vendors/presentation/widgets/store_status_widgets.dart';
+import '../../../wallet/data/customer_dues_repository.dart';
+import '../../../wallet/presentation/screens/wallet_topup_page.dart';
 import '../../data/data_provider/checkout_data_provider.dart';
 import '../../data/models/delivery_fee_quote.dart';
 import '../../data/repository/checkout_repository.dart';
 import '../../utils/nearest_branch.dart';
+import '../widgets/checkout_issue_card.dart';
 import '../widgets/checkout_widgets.dart';
 
 class CheckoutScreen extends StatefulWidget {
@@ -112,6 +125,19 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   String? _giftNameError;
   String? _giftPhoneError;
 
+  // ── Store controls, unpaid balance and one-city refusals ───────────────
+  /// Set from a STORE_CLOSED / STORE_PAUSED refusal (the branch-aware
+  /// delivery-fee quote, the checkout quote or the order call); cleared by
+  /// the next successful quote.
+  StoreStatus? _storeStatus;
+
+  /// `GET /customer/dues`; cash is refused while any are open.
+  ParcelDuesSummary? _dues;
+
+  /// Refusal that blocks "Place order" until fixed (store closed / busy,
+  /// sold-out item, address outside the city …).
+  ApiErrorResult? _issue;
+
   @override
   void initState() {
     super.initState();
@@ -127,6 +153,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     _giftMode = GiftSession.instance.active;
     restoreGiftSession();
     _loadDeliveryAddress();
+    unawaited(_loadDues());
     WidgetsBinding.instance.addPostFrameCallback((_) => _applyPendingPromo());
     // Phase 3: Plus status for the upsell (hidden unless the server enables it).
     PlusController.instance.addListener(_onPlusChanged);
@@ -277,6 +304,212 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   void _stopGift() => _setGiftMode(false);
 
+  Future<void> _loadDues() async {
+    final dues = await CustomerDuesRepository().fetchSummary();
+    if (!mounted || dues == null) return;
+    setState(() => _dues = dues);
+  }
+
+  bool get _hasDues => _dues?.hasDues ?? false;
+
+  bool get _storeBlocked => !(_storeStatus?.acceptingOrders ?? true);
+
+  /// "Place order" stays disabled while a refusal needs fixing first.
+  bool get _orderBlocked =>
+      _storeBlocked || (_issue != null && !_issue!.isOutstandingDues);
+
+  /// Records a refusal (call inside setState).
+  void _setIssue(ApiErrorResult issue) {
+    _issue = issue;
+    if (issue.isStoreUnavailable) {
+      final status = StoreStatus.tryParse(issue.storeStatus) ??
+          StoreStatus(
+            state: issue.isStorePaused ? StoreState.busy : StoreState.closed,
+          );
+      _storeStatus = status;
+      final vendorId = _vendorId;
+      if (vendorId != null) {
+        StoreStatusRepository.instance.remember(vendorId, status);
+      }
+    }
+  }
+
+  /// A quote went through: store / city refusals no longer apply
+  /// (call inside setState).
+  void _clearResolvedIssue({bool soldOutToo = false}) {
+    _storeStatus = null;
+    final issue = _issue;
+    if (issue == null) return;
+    if (issue.isStoreUnavailable ||
+        issue.isCityScopeError ||
+        (soldOutToo && issue.isItemSoldOut)) {
+      _issue = null;
+    }
+  }
+
+  String? _cartItemName(int? productId) {
+    if (productId == null) return null;
+    for (final item in _cartItems) {
+      if (_productId(item) == productId.toString()) {
+        return item['name']?.toString();
+      }
+    }
+    return null;
+  }
+
+  String _issueMessage(ApiErrorResult issue) =>
+      localizedKnownApiError(
+        context.l10n,
+        issue,
+        itemName: _cartItemName(issue.productId),
+      ) ??
+      issue.message;
+
+  /// Wallet top-up; an open balance is collected from it automatically.
+  Future<void> _openTopUpForDues({double? amount, String? currency}) async {
+    MapEntry<String, double>? entry;
+    for (final e in _dues?.amounts.entries ?? <MapEntry<String, double>>[]) {
+      if (e.value > 0) {
+        entry = e;
+        break;
+      }
+    }
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => WalletTopUpPage(
+          defaultCurrency: currency ?? entry?.key ?? _displayCurrency ?? 'ETB',
+          initialAmount: amount ?? entry?.value,
+        ),
+      ),
+    );
+    if (!mounted) return;
+    await _loadDues();
+    if (!mounted) return;
+    if (!_hasDues && (_issue?.isOutstandingDues ?? false)) {
+      setState(() => _issue = null);
+    }
+  }
+
+  Future<void> _showDuesDialog({double? amount, String? currency}) async {
+    final l10n = context.l10n;
+    final owed = amount ?? _firstDue?.value;
+    final owedCurrency = currency ?? _firstDue?.key;
+    final text = owed == null || owed <= 0
+        ? l10n.p12CashBlockedByDues
+        : l10n.p12ErrOutstandingDues(
+            formatMoneyAmount(owed, currency: owedCurrency),
+          );
+    final payNow = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.p12DuesTitle),
+        content: Text(text),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.p12ChooseOtherPayment),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.p12PayNow),
+          ),
+        ],
+      ),
+    );
+    if (!mounted) return;
+    if (payNow == true) {
+      await _openTopUpForDues(amount: owed, currency: owedCurrency);
+    } else if (_isCashMethod(_selectedPaymentMethod)) {
+      setState(() {
+        _selectedPaymentMethod = null;
+        _paymentDetails = {};
+      });
+    }
+  }
+
+  MapEntry<String, double>? get _firstDue {
+    for (final e in _dues?.amounts.entries ?? <MapEntry<String, double>>[]) {
+      if (e.value > 0) return e;
+    }
+    return null;
+  }
+
+  /// Fix-it action for the current refusal.
+  Widget _issueCard(ApiErrorResult issue) {
+    final l10n = context.l10n;
+    String? label;
+    VoidCallback? action;
+    IconData icon = Icons.error_outline_rounded;
+    if (issue.isStoreUnavailable) {
+      icon = issue.isStorePaused
+          ? Icons.hourglass_top_rounded
+          : Icons.storefront_outlined;
+      label = l10n.actionRetry;
+      action = () {
+        setState(() => _issue = null);
+        _refreshDeliveryFeeQuote(force: true);
+        _growthQuoteKey = null;
+        _scheduleGrowthQuote(immediate: true);
+      };
+    } else if (issue.isItemSoldOut) {
+      icon = Icons.remove_shopping_cart_outlined;
+      final productId = issue.productId?.toString();
+      if (productId != null &&
+          _cartItems.any((item) => _productId(item) == productId)) {
+        label = l10n.p12RemoveItem;
+        action = () => _removeItem(productId);
+      }
+    } else if (issue.code == kCityMarketMismatchCode &&
+        cityNameForMarket(issue.marketCode) != null) {
+      icon = Icons.location_city_outlined;
+      label = l10n.p12ChangeCity;
+      action = () async {
+        final changed = await switchCustomerMarket(context, issue.marketCode!);
+        if (!mounted || !changed) return;
+        setState(() => _issue = null);
+        _growthQuoteKey = null;
+        _scheduleGrowthQuote(immediate: true);
+      };
+    } else if (issue.isCityScopeError) {
+      icon = Icons.location_off_outlined;
+      label = l10n.addressFormEditTitle;
+      action = _onChangeAddress;
+    }
+    return CheckoutIssueCard(
+      icon: icon,
+      message: _issueMessage(issue),
+      actionLabel: label,
+      onAction: action,
+    );
+  }
+
+  /// Refusals checkout explains itself; false for anything else.
+  bool _handleKnownOrderFailure(PaymentFailure state) {
+    final details = state.details ?? <String, dynamic>{};
+    final parsed = parseApiErrorResult(
+      {...details, if (state.code != null) 'code': state.code},
+      statusCode: state.statusCode,
+    );
+    if (parsed.isOutstandingDues) {
+      unawaited(_loadDues());
+      _showDuesDialog(amount: parsed.amount, currency: parsed.currency);
+      return true;
+    }
+    if (parsed.isStoreUnavailable ||
+        parsed.isItemSoldOut ||
+        parsed.isCityScopeError) {
+      setState(() => _setIssue(parsed));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_issueMessage(parsed)),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return true;
+    }
+    return false;
+  }
+
   /// Validates the recipient; returns the `gift` order details or null
   /// (errors are shown on the fields and in a snackbar).
   Map<String, dynamic>? _validatedGift() {
@@ -356,16 +589,25 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       return;
     }
     final requestId = ++_growthQuoteRequestId;
-    final quote = await _growthRepository.fetchCheckoutQuote(request);
+    final outcome = await _growthRepository.fetchCheckoutQuoteOutcome(request);
+    final quote = outcome.quote;
     if (!mounted || requestId != _growthQuoteRequestId) return;
     // A newer change may have been scheduled while this was in flight.
     final stillPending = _growthQuoteDebounce?.isActive ?? false;
     if (quote == null) {
-      // Fall back to the client-side display.
+      // Fall back to the client-side display; explain refusals checkout
+      // can fix (store closed / busy, sold-out item, wrong city).
+      final error = outcome.error;
       setState(() {
         _growthQuote = null;
         _growthQuoteKey = null;
         _growthQuotePending = stillPending;
+        if (error != null &&
+            (error.isStoreUnavailable ||
+                error.isItemSoldOut ||
+                error.isCityScopeError)) {
+          _setIssue(error);
+        }
       });
       return;
     }
@@ -377,6 +619,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       _growthQuote = quote;
       _growthQuoteKey = key;
       _growthQuotePending = stillPending;
+      _clearResolvedIssue(soldOutToo: true);
       if (couponRejected) {
         // Code became invalid (e.g. cart dropped below a minimum).
         _promoMessage = coupon.message ?? invalidMessage;
@@ -547,6 +790,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     setState(() {
       _cartItems.removeWhere((item) => _productId(item) == productId);
       _syncSharedCart(productId, 0);
+      if ((_issue?.isItemSoldOut ?? false) &&
+          _issue!.productId?.toString() == productId) {
+        _issue = null;
+      }
     });
     if (_cartItems.isEmpty && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -709,17 +956,28 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         _quoteError = null;
         _quoteRetryable = false;
         _branchName = quote.restaurant?.name ?? _branchName;
+        _clearResolvedIssue();
       });
       _scheduleGrowthQuote(immediate: true);
     } on DeliveryFeeQuoteException catch (e) {
       if (!mounted || requestId != _quoteRequestId) return;
+      final l10n = context.l10n;
+      final refusal = parseApiErrorResult(
+        {...?e.details, if (e.code != null) 'code': e.code},
+        statusCode: e.statusCode,
+      );
       setState(() {
         _deliveryFeeQuote = null;
         _quoteCacheKey = null;
         _quoteLoading = false;
         _quoteRetryable = e.isRetryableNetwork || e.isBranchUnavailable;
         if (e.isUnauthenticated) {
-          _quoteError = 'Your session expired. Please log in again.';
+          _quoteError = l10n.p12ErrSessionExpired;
+        } else if (refusal.isStoreUnavailable || refusal.isCityScopeError) {
+          // Store closed / busy, or the address is outside the city.
+          _setIssue(refusal);
+          _quoteError = _issueMessage(refusal);
+          _quoteRetryable = refusal.isStoreUnavailable;
         } else if (e.isBranchUnavailable) {
           _quoteError =
               'This restaurant branch is not available for delivery. Please choose another branch or store.';
@@ -733,9 +991,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           _quoteError =
               'Please select a valid delivery location with coordinates.';
         } else {
-          _quoteError = e.message.isNotEmpty
-              ? e.message
-              : 'Unable to calculate delivery fee. Tap Retry.';
+          _quoteError = localizedApiErrorMessage(
+            l10n,
+            statusCode: e.statusCode,
+            message: e.message,
+            fallback: 'Unable to calculate delivery fee. Tap Retry.',
+          );
           _quoteRetryable = true;
         }
       });
@@ -746,8 +1007,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         _quoteCacheKey = null;
         _quoteLoading = false;
         _quoteRetryable = true;
-        _quoteError =
-            'Unable to calculate delivery fee. Check your connection and retry.';
+        _quoteError = context.l10n.p12ErrNetwork;
       });
     }
   }
@@ -796,6 +1056,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           _deliveryLatitude = latitude;
           _deliveryLongitude = longitude;
           _invalidateQuote();
+          if (_issue?.isCityScopeError ?? false) _issue = null;
         });
         await _refreshDeliveryFeeQuote(force: true);
         if (!mounted) return;
@@ -811,6 +1072,24 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   void _onConfirmOrder(BuildContext blocContext) {
+    final issue = _issue;
+    if (_orderBlocked) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            issue != null && !issue.isOutstandingDues
+                ? _issueMessage(issue)
+                : storeUnavailableMessage(context.l10n, _storeStatus),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    if (_hasDues && _isCashMethod(_selectedPaymentMethod) && !_giftMode) {
+      _showDuesDialog();
+      return;
+    }
     if (_quoteLoading) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -1133,10 +1412,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 total: _total,
                 totalLabel: _formatMoney(_total),
                 isLoading: state is PaymentLoading,
-                enabled: _hasValidQuote && state is! PaymentLoading,
-                confirmLabel: _quoteLoading
-                    ? 'Calculating…'
-                    : (!_hasValidQuote ? 'Waiting for fee' : null),
+                enabled: _hasValidQuote &&
+                    !_orderBlocked &&
+                    state is! PaymentLoading,
+                confirmLabel: _storeBlocked
+                    ? context.l10n.p12StoreOrderingPaused
+                    : _quoteLoading
+                        ? 'Calculating…'
+                        : (!_hasValidQuote ? 'Waiting for fee' : null),
                 onConfirm: () => _onConfirmOrder(blocContext),
                 currency: _displayCurrency,
               );
@@ -1222,6 +1505,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     backgroundColor: Colors.red,
                   ),
                 );
+              } else if (state is PaymentFailure &&
+                  !_loadingMethods &&
+                  _handleKnownOrderFailure(state)) {
+                // Explained above (store, sold out, dues, city).
               } else if (state is PaymentFailure) {
                 if (_loadingMethods) {
                   setState(() {
@@ -1230,9 +1517,18 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         List.from(kDefaultAllowedPaymentMethods);
                   });
                 } else {
+                  // Network / server failures in the app language; messages
+                  // that mention an order number stay as written.
+                  final text = state.error.contains('#')
+                      ? state.error
+                      : localizedApiErrorMessage(
+                          context.l10n,
+                          statusCode: state.statusCode,
+                          message: state.error,
+                        );
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(state.error),
+                      content: Text(text),
                       backgroundColor: Colors.red,
                     ),
                   );
@@ -1252,6 +1548,21 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
                   sliver: SliverList(
                     delegate: SliverChildListDelegate([
+                      if (_storeBlocked && _storeStatus != null)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: StoreStatusBanner(status: _storeStatus!),
+                        ),
+                      if (_issue != null &&
+                          !_issue!.isStoreUnavailable &&
+                          !_issue!.isOutstandingDues)
+                        _issueCard(_issue!),
+                      if (_hasDues && !_giftMode)
+                        ParcelDuesBanner(
+                          dues: _dues!,
+                          message: context.l10n.p12DuesCheckoutBody,
+                          onPayNow: _openTopUpForDues,
+                        ),
                       if (_giftMode && GiftSession.instance.market != null)
                         GiftModeBanner(
                           marketName: GiftSession.instance.market!.name,

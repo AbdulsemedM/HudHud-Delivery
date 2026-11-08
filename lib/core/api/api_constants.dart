@@ -167,7 +167,6 @@ class ApiConstants {
   static const String payments = '/payments';
   static const String paymentMethods = 'payment-methods';
   static const String paymentsMethods = 'payments/methods';
-  static const String processPayment = '$payments/process';
   static const String paymentsInitiate = 'payments/initiate';
   /// GET /api/payments/{id}/status
   static const String paymentsStatus = 'payments/{id}/status';
@@ -252,6 +251,10 @@ class ApiConstants {
   static const String parcelCancellation = 'parcels/{id}/cancellation';
   /// POST /api/parcels/{id}/cancel {reason, accept_fee}
   static const String parcelCancel = 'parcels/{id}/cancel';
+  /// GET /api/customer/dues — open dues (unpaid cash-parcel cancellation
+  /// fees). While any are open the API refuses cash orders and cash
+  /// parcels with OUTSTANDING_DUES; a wallet top-up collects them.
+  static const String customerDues = 'customer/dues';
 
   // Ride/Taxi endpoints
   static const String rideEstimate = 'services/ride/estimate';

@@ -35,7 +35,7 @@ class CheckoutDataProvider {
         'statusCode': apiException.statusCode,
         'data': apiException.data,
         'errorMessage': _extractApiErrorMessage(apiException),
-        'code': apiException.code ?? _extractErrorCode(apiException.data),
+        'code': _extractErrorCode(apiException.data) ?? apiException.code,
       };
     } on Exception catch (e) {
       return {
@@ -235,9 +235,19 @@ class CheckoutDataProvider {
         'statusCode': apiException.statusCode,
         'data': null,
         'errorMessage': message,
+        // Error body (store_status, amount/currency, product_id, market)
+        // so checkout can explain STORE_* / ITEM_SOLD_OUT /
+        // OUTSTANDING_DUES / CITY_* refusals.
+        'errorData': apiException.data,
+        'code': _extractErrorCode(apiException.data) ?? apiException.code,
       };
     } on Exception catch (e) {
-      return {'statusCode': 500, 'data': null, 'errorMessage': e.toString()};
+      return {
+        'statusCode': 500,
+        'data': null,
+        'errorMessage': e.toString(),
+        'code': null,
+      };
     }
   }
 
@@ -271,7 +281,7 @@ class CheckoutDataProvider {
         'statusCode': apiException.statusCode,
         'data': apiException.data,
         'errorMessage': _extractGiftErrorMessage(apiException),
-        'code': apiException.code ?? _extractErrorCode(apiException.data),
+        'code': _extractErrorCode(apiException.data) ?? apiException.code,
       };
     } on Exception catch (e) {
       return {

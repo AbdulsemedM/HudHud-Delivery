@@ -156,15 +156,20 @@ class DeliveryFeeQuoteException implements Exception {
   final String? code;
   final Map<String, dynamic>? errors;
 
+  /// Error body (e.g. `store_status` on STORE_CLOSED / STORE_PAUSED).
+  final Map<String, dynamic>? details;
+
   const DeliveryFeeQuoteException({
     required this.message,
     this.statusCode,
     this.code,
     this.errors,
+    this.details,
   });
 
   bool get isUnauthenticated => statusCode == 401;
-  bool get isValidation => statusCode == 422 && code == null;
+  bool get isValidation =>
+      statusCode == 422 && (code == null || code == 'validation_error');
   bool get isBranchUnavailable => code == branchUnavailable;
   bool get isBranchLocationUnavailable => code == branchLocationUnavailable;
   bool get isRetryableNetwork {

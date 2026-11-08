@@ -68,10 +68,11 @@ class HudHudSetItem {
       vendorName: growthString(vendor['name']) ?? '',
       vendorLogoUrls: growthMap(vendor['logo_urls']),
       vendorLogoPath: growthString(vendor['logo_path']),
-      vendorIsOpen: growthBool(
-        vendor['is_currently_open'] ?? vendor['is_open'],
-        true,
-      ),
+      vendorIsOpen: storeOpenFlag(vendor, legacy: false) ??
+          growthBool(
+            vendor['is_currently_open'] ?? vendor['is_open'],
+            true,
+          ),
     );
   }
 }

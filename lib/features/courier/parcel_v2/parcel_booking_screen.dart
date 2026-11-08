@@ -7,8 +7,10 @@ import 'package:share_plus/share_plus.dart';
 
 import 'package:hudhud_delivery/app/services/city_scope.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
+import 'package:hudhud_delivery/core/l10n/api_error_l10n.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/utils/money_format.dart';
 import 'package:hudhud_delivery/core/utils/payment_idempotency.dart';
 import 'package:hudhud_delivery/core/widgets/city_outside_area_banner.dart';
 import 'package:hudhud_delivery/features/courier/utils/courier_home_refresh.dart';
@@ -19,6 +21,8 @@ import 'package:hudhud_delivery/features/home/presentation/screen/location_searc
 import 'package:hudhud_delivery/features/payment/data/data_provider/payment_data_provider.dart';
 import 'package:hudhud_delivery/features/payment/data/repository/payment_repository.dart';
 import 'package:hudhud_delivery/features/payment/presentation/screen/payment_initiate_result_screen.dart';
+import 'package:hudhud_delivery/features/wallet/data/customer_dues_repository.dart';
+import 'package:hudhud_delivery/features/wallet/presentation/screens/wallet_topup_page.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
 
 import 'parcel_v2_models.dart';
@@ -472,13 +476,65 @@ class _ParcelBookingScreenState extends State<ParcelBookingScreen> {
         return l10n.p11ParcelMultiStopCashAtPickup;
       case ParcelErrorKind.payAtPickupUnavailable:
         return l10n.p11ParcelPayAtPickupUnavailable;
+      case ParcelErrorKind.outstandingDues:
+        final parsed = parseApiErrorResult(
+          result.body ?? const <String, dynamic>{},
+          statusCode: result.statusCode,
+        );
+        final amount = parsed.amount;
+        return amount != null && amount > 0
+            ? l10n.p12ErrOutstandingDues(
+                formatMoneyAmount(amount, currency: parsed.currency),
+              )
+            : l10n.p12CashBlockedByDues;
       case ParcelErrorKind.feeConfirmation:
       case ParcelErrorKind.pickedUp:
       case ParcelErrorKind.other:
+        switch (classifyApiFailure(
+          statusCode: result.statusCode,
+          message: result.message,
+        )) {
+          case ApiFailureKind.network:
+            return l10n.p12ErrNetwork;
+          case ApiFailureKind.timeout:
+            return l10n.p12ErrTimeout;
+          case ApiFailureKind.sessionExpired:
+            return l10n.p12ErrSessionExpired;
+          case ApiFailureKind.server:
+            return l10n.p12ErrServer;
+          case ApiFailureKind.other:
+            break;
+        }
         return result.message?.isNotEmpty == true
             ? result.message!
             : l10n.p10ParcelSomethingWrong;
     }
+  }
+
+  /// Open dues shown above the form; refreshed after a top-up.
+  late ParcelDuesSummary? _dues = widget.config.outstandingDues;
+
+  /// Wallet top-up, which collects an open balance automatically.
+  Future<void> _payDues({double? amount, String? currency}) async {
+    MapEntry<String, double>? entry;
+    for (final e in _dues?.amounts.entries ?? <MapEntry<String, double>>[]) {
+      if (e.value > 0) {
+        entry = e;
+        break;
+      }
+    }
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => WalletTopUpPage(
+          defaultCurrency: currency ?? entry?.key ?? 'ETB',
+          initialAmount: amount ?? entry?.value,
+        ),
+      ),
+    );
+    if (!mounted) return;
+    final fresh = await CustomerDuesRepository().fetchSummary();
+    if (!mounted || fresh == null) return;
+    setState(() => _dues = fresh);
   }
 
   bool _formComplete() {
@@ -525,10 +581,26 @@ class _ParcelBookingScreenState extends State<ParcelBookingScreen> {
         await _fetchQuote();
       }
       if (!mounted) return;
+      final dues = kind == ParcelErrorKind.outstandingDues
+          ? parseApiErrorResult(
+              result.body ?? const <String, dynamic>{},
+              statusCode: result.statusCode,
+            )
+          : null;
       messenger.showSnackBar(
         SnackBar(
           content: Text(_errorText(result)),
           backgroundColor: AppColors.errorColor,
+          action: dues == null
+              ? null
+              : SnackBarAction(
+                  label: l10n.p12PayNow,
+                  textColor: Colors.white,
+                  onPressed: () => _payDues(
+                    amount: dues.amount,
+                    currency: dues.currency,
+                  ),
+                ),
         ),
       );
       return;
@@ -734,8 +806,8 @@ class _ParcelBookingScreenState extends State<ParcelBookingScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           children: [
-            if (widget.config.outstandingDues?.hasDues ?? false)
-              ParcelDuesBanner(dues: widget.config.outstandingDues!),
+            if (_dues?.hasDues ?? false)
+              ParcelDuesBanner(dues: _dues!, onPayNow: _payDues),
             ParcelSection(
               title: l10n.p10ParcelRoute,
               children: [

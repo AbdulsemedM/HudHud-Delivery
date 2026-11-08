@@ -2241,5 +2241,158 @@
     "placeholders": {
       "amount": {"type": "String"}
     }
+  },
+  "p12StoreOpen": "مفتوح",
+  "@p12StoreOpen": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12StoreClosed": "مغلق",
+  "@p12StoreClosed": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12StoreBusy": "مشغول",
+  "@p12StoreBusy": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12StoreOpensAt": "يفتح {time}",
+  "@p12StoreOpensAt": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "p12StoreOpensTomorrowAt": "يفتح غدًا {time}",
+  "@p12StoreOpensTomorrowAt": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "p12StoreBackAt": "يعود {time}",
+  "@p12StoreBackAt": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "p12StoreClosedToday": "مغلق اليوم",
+  "@p12StoreClosedToday": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12StoreClosedBanner": "هذا المتجر مغلق الآن. يمكنك تصفح القائمة، لكن الطلب متوقف حتى يفتح.",
+  "@p12StoreClosedBanner": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12StoreBusyBanner": "هذا المتجر مشغول جدًا وأوقف الطلبات الجديدة مؤقتًا. يرجى المحاولة بعد قليل.",
+  "@p12StoreBusyBanner": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12StoreOrderingPaused": "الطلب متوقف",
+  "@p12StoreOrderingPaused": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12SoldOut": "نفدت الكمية",
+  "@p12SoldOut": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12Unavailable": "غير متوفر",
+  "@p12Unavailable": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12GoToCheckout": "إلى الدفع",
+  "@p12GoToCheckout": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrStoreClosed": "هذا المتجر مغلق الآن.",
+  "@p12ErrStoreClosed": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrStoreBusy": "هذا المتجر مشغول ولا يستقبل طلبات الآن.",
+  "@p12ErrStoreBusy": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrItemSoldOut": "أحد المنتجات في سلتك نفد اليوم. أزله للمتابعة.",
+  "@p12ErrItemSoldOut": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrItemSoldOutNamed": "{item} نفد اليوم. أزله للمتابعة.",
+  "@p12ErrItemSoldOutNamed": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
+    "placeholders": {
+      "item": {"type": "String"}
+    }
+  },
+  "p12RemoveItem": "إزالة المنتج",
+  "@p12RemoveItem": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrOutstandingDues": "لديك رصيد غير مدفوع بقيمة {amount}. الدفع النقدي غير متاح حتى يتم سداده. اشحن محفظتك أو اختر طريقة دفع أخرى.",
+  "@p12ErrOutstandingDues": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p12DuesTitle": "رصيد غير مدفوع",
+  "@p12DuesTitle": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12DuesCheckoutBody": "عليك {amount} من طرد ملغى. الدفع عند الاستلام متوقف حتى يتم السداد. شحن محفظتك يسدده تلقائيًا.",
+  "@p12DuesCheckoutBody": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p12PayNow": "ادفع الآن",
+  "@p12PayNow": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12CashBlockedByDues": "الدفع النقدي متوقف حتى سداد رصيدك غير المدفوع.",
+  "@p12CashBlockedByDues": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ChooseOtherPayment": "اختر طريقة دفع أخرى",
+  "@p12ChooseOtherPayment": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrCityOutside": "لا نوصّل إلى هذا العنوان بعد. اختر عنوانًا داخل مدينتك.",
+  "@p12ErrCityOutside": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrCityCross": "يجب أن تكون جميع العناوين في الطلب الواحد داخل المدينة نفسها.",
+  "@p12ErrCityCross": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrCityMismatch": "هذا العنوان في {city}. غيّر مدينتك إلى {city} للمتابعة.",
+  "@p12ErrCityMismatch": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
+    "placeholders": {
+      "city": {"type": "String"}
+    }
+  },
+  "p12ErrCityMismatchGeneric": "هذا العنوان في مدينة أخرى. غيّر مدينتك للمتابعة.",
+  "@p12ErrCityMismatchGeneric": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ChangeCity": "تغيير المدينة",
+  "@p12ChangeCity": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrNetwork": "لا يوجد اتصال بالإنترنت. تحقق من اتصالك وحاول مرة أخرى.",
+  "@p12ErrNetwork": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrTimeout": "الاتصال بطيء. يرجى المحاولة مرة أخرى.",
+  "@p12ErrTimeout": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrServer": "حدث خطأ من جهتنا. يرجى المحاولة بعد قليل.",
+  "@p12ErrServer": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrSessionExpired": "انتهت جلستك. يرجى تسجيل الدخول مرة أخرى.",
+  "@p12ErrSessionExpired": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
   }
 }

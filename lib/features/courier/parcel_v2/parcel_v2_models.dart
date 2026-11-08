@@ -721,6 +721,9 @@ enum ParcelErrorKind {
   multiStopSenderPays,
   multiStopCashAtPickup,
   payAtPickupUnavailable,
+
+  /// Cash refused while the customer owes a balance (OUTSTANDING_DUES).
+  outstandingDues,
   other,
 }
 
@@ -759,6 +762,8 @@ ParcelErrorKind parcelErrorKind(String? code, {String? message}) {
     case 'PARCEL_PAY_AT_PICKUP_DISABLED':
     case 'PARCEL_PAY_AT_PICKUP_SENDER_ONLY':
       return ParcelErrorKind.payAtPickupUnavailable;
+    case 'OUTSTANDING_DUES':
+      return ParcelErrorKind.outstandingDues;
   }
   if ((message ?? '').toLowerCase().contains('insufficient wallet')) {
     return ParcelErrorKind.insufficientWallet;

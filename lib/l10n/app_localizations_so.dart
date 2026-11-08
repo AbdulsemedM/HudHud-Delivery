@@ -4221,4 +4221,127 @@ class AppLocalizationsSo extends AppLocalizations {
   String p11ParcelOutstandingBalance(String amount) {
     return 'Waxaad ku leedahay $amount baakad la joojiyay. Waxaa laga jarayaa boorsadaada marka xigta ee aad lacag ku shubto ama dalbato.';
   }
+
+  @override
+  String get p12StoreOpen => 'Furan';
+
+  @override
+  String get p12StoreClosed => 'Xiran';
+
+  @override
+  String get p12StoreBusy => 'Mashquul';
+
+  @override
+  String p12StoreOpensAt(String time) {
+    return 'Wuxuu furmayaa $time';
+  }
+
+  @override
+  String p12StoreOpensTomorrowAt(String time) {
+    return 'Berri ayuu furmayaa $time';
+  }
+
+  @override
+  String p12StoreBackAt(String time) {
+    return 'Wuu soo laabanayaa $time';
+  }
+
+  @override
+  String get p12StoreClosedToday => 'Maanta waa xiran yahay';
+
+  @override
+  String get p12StoreClosedBanner =>
+      'Dukaankan hadda waa xiran yahay. Waad eegi kartaa liiska, laakiin dalbashadu way xiran tahay ilaa uu furmo.';
+
+  @override
+  String get p12StoreBusyBanner =>
+      'Dukaankan aad ayuu u mashquul yahay, dalabyada cusubna wuu hakiyay. Fadlan dib u eeg dhowaan.';
+
+  @override
+  String get p12StoreOrderingPaused => 'Dalbashadu way hakad tahay';
+
+  @override
+  String get p12SoldOut => 'Waa dhammaaday';
+
+  @override
+  String get p12Unavailable => 'Lama heli karo';
+
+  @override
+  String get p12GoToCheckout => 'U gudub lacag bixinta';
+
+  @override
+  String get p12ErrStoreClosed => 'Dukaankan hadda waa xiran yahay.';
+
+  @override
+  String get p12ErrStoreBusy => 'Dukaankan waa mashquul, hadda dalab ma qaato.';
+
+  @override
+  String get p12ErrItemSoldOut =>
+      'Shay ku jira gaadhigaaga ayaa maanta dhammaaday. Ka saar si aad u sii wadato.';
+
+  @override
+  String p12ErrItemSoldOutNamed(String item) {
+    return '$item maanta wuu dhammaaday. Ka saar si aad u sii wadato.';
+  }
+
+  @override
+  String get p12RemoveItem => 'Ka saar shayga';
+
+  @override
+  String p12ErrOutstandingDues(String amount) {
+    return 'Waxaa kugu maqan lacag aan la bixin oo ah $amount. Lacag caddaan ah lama heli karo ilaa la bixiyo. Ku shub boorsadaada ama dooro hab kale oo lacag bixin.';
+  }
+
+  @override
+  String get p12DuesTitle => 'Lacag aan la bixin';
+
+  @override
+  String p12DuesCheckoutBody(String amount) {
+    return 'Waxaa lagugu leeyahay $amount xirmo la joojiyay dartiis. Lacag bixinta marka la keeno way xiran tahay ilaa la bixiyo. Markaad boorsadaada ku shubto si toos ah ayaa loo bixiyaa.';
+  }
+
+  @override
+  String get p12PayNow => 'Hadda bixi';
+
+  @override
+  String get p12CashBlockedByDues =>
+      'Lacag caddaan ah way xiran tahay ilaa lacagta lagugu leeyahay la bixiyo.';
+
+  @override
+  String get p12ChooseOtherPayment => 'Dooro lacag bixin kale';
+
+  @override
+  String get p12ErrCityOutside =>
+      'Weli kuma keenno cinwaankan. Dooro cinwaan ku yaal magaaladaada.';
+
+  @override
+  String get p12ErrCityCross =>
+      'Dhammaan cinwaannada hal dalab waa inay ku jiraan isla magaalo.';
+
+  @override
+  String p12ErrCityMismatch(String city) {
+    return 'Cinwaankani wuxuu ku yaal $city. U beddel magaaladaada $city si aad u sii wadato.';
+  }
+
+  @override
+  String get p12ErrCityMismatchGeneric =>
+      'Cinwaankani wuxuu ku yaal magaalo kale. Beddel magaaladaada si aad u sii wadato.';
+
+  @override
+  String get p12ChangeCity => 'Beddel magaalada';
+
+  @override
+  String get p12ErrNetwork =>
+      'Ma jiro xiriir internet. Hubi xiriirkaaga oo isku day mar kale.';
+
+  @override
+  String get p12ErrTimeout => 'Xiriirku waa gaabis. Fadlan isku day mar kale.';
+
+  @override
+  String get p12ErrServer =>
+      'Cillad ayaa dhinaceena ka dhacday. Fadlan isku day mar kale wax yar kadib.';
+
+  @override
+  String get p12ErrSessionExpired =>
+      'Fadhigaagu wuu dhacay. Fadlan mar kale gal.';
 }

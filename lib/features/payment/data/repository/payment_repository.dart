@@ -11,34 +11,6 @@ class PaymentRepository {
 
   PaymentRepository({required this.paymentDataProvider});
 
-  Future<Map<String, dynamic>> processPayment({
-    required String paymentMethod,
-    required double amount,
-    required String orderId,
-    Map<String, dynamic>? paymentDetails,
-  }) async {
-    try {
-      if (paymentMethod.isEmpty) {
-        throw Exception('Payment method is required');
-      }
-
-      if (amount <= 0) {
-        throw Exception('Invalid payment amount: $amount');
-      }
-
-      final result = await paymentDataProvider.processPayment(
-        paymentMethod: paymentMethod,
-        amount: amount,
-        orderId: orderId,
-        paymentDetails: paymentDetails,
-      );
-
-      return result;
-    } catch (e) {
-      throw Exception('Payment processing failed: $e');
-    }
-  }
-
   Future<List<Map<String, dynamic>>> getPaymentMethods({String? type}) async {
     try {
       final methods = await paymentDataProvider.getPaymentMethods(type: type);
@@ -177,20 +149,6 @@ class PaymentRepository {
       return PaymentStatusResult.fromJson(raw);
     } catch (e) {
       throw Exception('Payment status fetch failed: $e');
-    }
-  }
-
-  Future<Map<String, dynamic>> validatePayment({
-    required String transactionId,
-    required String paymentMethod,
-  }) async {
-    try {
-      return await paymentDataProvider.validatePayment(
-        transactionId: transactionId,
-        paymentMethod: paymentMethod,
-      );
-    } catch (e) {
-      throw Exception('Payment validation failed: $e');
     }
   }
 }

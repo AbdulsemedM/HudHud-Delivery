@@ -88,3 +88,22 @@ DateTime? growthDateTime(dynamic value) {
   if (s == null) return null;
   return DateTime.tryParse(s);
 }
+
+/// Whether a store on a feed / sponsored / Set card takes orders.
+///
+/// Prefers the merchant store-controls block (`store_status.state` or
+/// `accepting_orders`); falls back to the legacy `is_open` flag only when
+/// that block is absent (and [legacy] is true). Null when neither is
+/// present (no badge).
+bool? storeOpenFlag(Map<String, dynamic> json, {bool legacy = true}) {
+  final status = growthMap(json['store_status']);
+  if (status != null) {
+    final accepting = status['accepting_orders'];
+    if (accepting is bool) return accepting;
+    final state = growthString(status['state'])?.toLowerCase();
+    if (state != null) return state == 'open';
+  }
+  final isOpen = json['is_open'];
+  if (!legacy || isOpen == null) return null;
+  return growthBool(isOpen);
+}

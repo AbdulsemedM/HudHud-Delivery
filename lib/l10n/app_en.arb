@@ -1834,5 +1834,73 @@
     "placeholders": {
       "amount": {"type": "String"}
     }
-  }
+  },
+  "p12StoreOpen": "Open",
+  "p12StoreClosed": "Closed",
+  "p12StoreBusy": "Busy",
+  "p12StoreOpensAt": "Opens {time}",
+  "@p12StoreOpensAt": {
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "p12StoreOpensTomorrowAt": "Opens tomorrow {time}",
+  "@p12StoreOpensTomorrowAt": {
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "p12StoreBackAt": "Back at {time}",
+  "@p12StoreBackAt": {
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "p12StoreClosedToday": "Closed today",
+  "p12StoreClosedBanner": "This store is closed right now. You can look at the menu, but ordering is off until it opens.",
+  "p12StoreBusyBanner": "This store is very busy and has paused new orders. Please check back soon.",
+  "p12StoreOrderingPaused": "Ordering paused",
+  "p12SoldOut": "Sold out",
+  "p12Unavailable": "Unavailable",
+  "p12GoToCheckout": "Go to Checkout",
+  "p12ErrStoreClosed": "This store is closed right now.",
+  "p12ErrStoreBusy": "This store is busy and not taking orders right now.",
+  "p12ErrItemSoldOut": "An item in your cart is sold out today. Remove it to continue.",
+  "p12ErrItemSoldOutNamed": "{item} is sold out today. Remove it to continue.",
+  "@p12ErrItemSoldOutNamed": {
+    "placeholders": {
+      "item": {"type": "String"}
+    }
+  },
+  "p12RemoveItem": "Remove item",
+  "p12ErrOutstandingDues": "You have an unpaid balance of {amount}. Cash is not available until it is paid. Top up your wallet or choose another way to pay.",
+  "@p12ErrOutstandingDues": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p12DuesTitle": "Unpaid balance",
+  "p12DuesCheckoutBody": "You owe {amount} from a cancelled parcel. Cash on delivery is off until it is paid. Topping up your wallet pays it automatically.",
+  "@p12DuesCheckoutBody": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p12PayNow": "Pay now",
+  "p12CashBlockedByDues": "Cash is off until your unpaid balance is paid.",
+  "p12ChooseOtherPayment": "Choose another payment",
+  "p12ErrCityOutside": "We don't deliver to this address yet. Choose an address inside your city.",
+  "p12ErrCityCross": "All addresses in one order must be in the same city.",
+  "p12ErrCityMismatch": "This address is in {city}. Switch your city to {city} to continue.",
+  "@p12ErrCityMismatch": {
+    "placeholders": {
+      "city": {"type": "String"}
+    }
+  },
+  "p12ErrCityMismatchGeneric": "This address is in another city. Switch your city to continue.",
+  "p12ChangeCity": "Change city",
+  "p12ErrNetwork": "No internet connection. Check your connection and try again.",
+  "p12ErrTimeout": "The connection is slow. Please try again.",
+  "p12ErrServer": "Something went wrong on our side. Please try again in a moment.",
+  "p12ErrSessionExpired": "Your session has expired. Please log in again."
 }

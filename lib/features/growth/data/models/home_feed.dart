@@ -178,7 +178,7 @@ class HomeFeedItem {
       name: growthString(json['name']) ?? '',
       imageUrl: growthString(json['image_url']),
       rating: growthDoubleOrNull(json['rating']),
-      isOpen: json['is_open'] == null ? null : growthBool(json['is_open']),
+      isOpen: storeOpenFlag(json),
       price: growthDoubleOrNull(json['price']),
       vendorId: growthIntOrNull(json['vendor_id']),
     );

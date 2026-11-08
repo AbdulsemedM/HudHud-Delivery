@@ -2248,5 +2248,158 @@
     "placeholders": {
       "amount": {"type": "String"}
     }
+  },
+  "p12StoreOpen": "ክፍት ነው",
+  "@p12StoreOpen": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12StoreClosed": "ዝግ ነው",
+  "@p12StoreClosed": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12StoreBusy": "ተጨናንቋል",
+  "@p12StoreBusy": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12StoreOpensAt": "{time} ይከፈታል",
+  "@p12StoreOpensAt": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "p12StoreOpensTomorrowAt": "ነገ {time} ይከፈታል",
+  "@p12StoreOpensTomorrowAt": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "p12StoreBackAt": "{time} ይመለሳል",
+  "@p12StoreBackAt": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "p12StoreClosedToday": "ዛሬ ዝግ ነው",
+  "@p12StoreClosedToday": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12StoreClosedBanner": "ይህ መደብር አሁን ዝግ ነው። ምናሌውን ማየት ይችላሉ፣ ግን እስኪከፈት ድረስ ማዘዝ አይቻልም።",
+  "@p12StoreClosedBanner": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12StoreBusyBanner": "ይህ መደብር በጣም ስራ በዝቶበታል፣ አዳዲስ ትዕዛዞችን ለጊዜው አቁሟል። እባክዎ ትንሽ ቆይተው ይመለሱ።",
+  "@p12StoreBusyBanner": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12StoreOrderingPaused": "ማዘዝ ተቋርጧል",
+  "@p12StoreOrderingPaused": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12SoldOut": "አልቋል",
+  "@p12SoldOut": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12Unavailable": "አይገኝም",
+  "@p12Unavailable": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12GoToCheckout": "ወደ ክፍያ ይሂዱ",
+  "@p12GoToCheckout": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrStoreClosed": "ይህ መደብር አሁን ዝግ ነው።",
+  "@p12ErrStoreClosed": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrStoreBusy": "ይህ መደብር ስራ በዝቶበታል፣ አሁን ትዕዛዝ አይቀበልም።",
+  "@p12ErrStoreBusy": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrItemSoldOut": "በጋሪዎ ውስጥ ያለ አንድ ዕቃ ዛሬ አልቋል። ለመቀጠል ያስወግዱት።",
+  "@p12ErrItemSoldOut": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrItemSoldOutNamed": "{item} ዛሬ አልቋል። ለመቀጠል ያስወግዱት።",
+  "@p12ErrItemSoldOutNamed": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
+    "placeholders": {
+      "item": {"type": "String"}
+    }
+  },
+  "p12RemoveItem": "ዕቃውን አስወግድ",
+  "@p12RemoveItem": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrOutstandingDues": "ያልተከፈለ {amount} ሂሳብ አለብዎት። እስኪከፈል ድረስ በጥሬ ገንዘብ መክፈል አይቻልም። ዋሌትዎን ይሙሉ ወይም ሌላ የክፍያ መንገድ ይምረጡ።",
+  "@p12ErrOutstandingDues": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p12DuesTitle": "ያልተከፈለ ሂሳብ",
+  "@p12DuesTitle": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12DuesCheckoutBody": "ከተሰረዘ እሽግ {amount} ዕዳ አለብዎት። እስኪከፈል ድረስ ሲደርስ በጥሬ ገንዘብ መክፈል አይቻልም። ዋሌትዎን ሲሞሉ በራስ-ሰር ይከፈላል።",
+  "@p12DuesCheckoutBody": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p12PayNow": "አሁን ይክፈሉ",
+  "@p12PayNow": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12CashBlockedByDues": "ያልተከፈለው ሂሳብ እስኪከፈል ድረስ ጥሬ ገንዘብ አይቻልም።",
+  "@p12CashBlockedByDues": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ChooseOtherPayment": "ሌላ የክፍያ መንገድ ይምረጡ",
+  "@p12ChooseOtherPayment": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrCityOutside": "ወደዚህ አድራሻ ገና አናደርስም። በከተማዎ ውስጥ ያለ አድራሻ ይምረጡ።",
+  "@p12ErrCityOutside": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrCityCross": "በአንድ ትዕዛዝ ውስጥ ያሉ ሁሉም አድራሻዎች በአንድ ከተማ ውስጥ መሆን አለባቸው።",
+  "@p12ErrCityCross": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrCityMismatch": "ይህ አድራሻ በ{city} ነው። ለመቀጠል ከተማዎን ወደ {city} ይቀይሩ።",
+  "@p12ErrCityMismatch": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
+    "placeholders": {
+      "city": {"type": "String"}
+    }
+  },
+  "p12ErrCityMismatchGeneric": "ይህ አድራሻ በሌላ ከተማ ነው። ለመቀጠል ከተማዎን ይቀይሩ።",
+  "@p12ErrCityMismatchGeneric": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ChangeCity": "ከተማ ቀይር",
+  "@p12ChangeCity": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrNetwork": "የኢንተርኔት ግንኙነት የለም። ግንኙነትዎን አረጋግጠው እንደገና ይሞክሩ።",
+  "@p12ErrNetwork": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrTimeout": "ግንኙነቱ ቀርፋፋ ነው። እባክዎ እንደገና ይሞክሩ።",
+  "@p12ErrTimeout": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrServer": "በእኛ በኩል ችግር ተፈጥሯል። እባክዎ ትንሽ ቆይተው እንደገና ይሞክሩ።",
+  "@p12ErrServer": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrSessionExpired": "ክፍለ ጊዜዎ አብቅቷል። እባክዎ እንደገና ይግቡ።",
+  "@p12ErrSessionExpired": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
   }
 }

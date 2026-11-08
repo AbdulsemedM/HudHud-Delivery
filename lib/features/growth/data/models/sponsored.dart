@@ -51,7 +51,7 @@ class SponsoredItem {
       vendorName: growthString(vendor['name']) ?? '',
       imageUrl: growthString(vendor['image_url']),
       rating: growthDoubleOrNull(vendor['rating']),
-      isOpen: vendor['is_open'] == null ? null : growthBool(vendor['is_open']),
+      isOpen: storeOpenFlag(vendor),
       label: growthString(json['label']),
       placement: growthString(json['placement']) ?? placement,
     );

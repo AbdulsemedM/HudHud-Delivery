@@ -4176,4 +4176,128 @@ class AppLocalizationsEn extends AppLocalizations {
   String p11ParcelOutstandingBalance(String amount) {
     return 'You owe $amount from a cancelled parcel. It is taken from your wallet at your next top-up or order.';
   }
+
+  @override
+  String get p12StoreOpen => 'Open';
+
+  @override
+  String get p12StoreClosed => 'Closed';
+
+  @override
+  String get p12StoreBusy => 'Busy';
+
+  @override
+  String p12StoreOpensAt(String time) {
+    return 'Opens $time';
+  }
+
+  @override
+  String p12StoreOpensTomorrowAt(String time) {
+    return 'Opens tomorrow $time';
+  }
+
+  @override
+  String p12StoreBackAt(String time) {
+    return 'Back at $time';
+  }
+
+  @override
+  String get p12StoreClosedToday => 'Closed today';
+
+  @override
+  String get p12StoreClosedBanner =>
+      'This store is closed right now. You can look at the menu, but ordering is off until it opens.';
+
+  @override
+  String get p12StoreBusyBanner =>
+      'This store is very busy and has paused new orders. Please check back soon.';
+
+  @override
+  String get p12StoreOrderingPaused => 'Ordering paused';
+
+  @override
+  String get p12SoldOut => 'Sold out';
+
+  @override
+  String get p12Unavailable => 'Unavailable';
+
+  @override
+  String get p12GoToCheckout => 'Go to Checkout';
+
+  @override
+  String get p12ErrStoreClosed => 'This store is closed right now.';
+
+  @override
+  String get p12ErrStoreBusy =>
+      'This store is busy and not taking orders right now.';
+
+  @override
+  String get p12ErrItemSoldOut =>
+      'An item in your cart is sold out today. Remove it to continue.';
+
+  @override
+  String p12ErrItemSoldOutNamed(String item) {
+    return '$item is sold out today. Remove it to continue.';
+  }
+
+  @override
+  String get p12RemoveItem => 'Remove item';
+
+  @override
+  String p12ErrOutstandingDues(String amount) {
+    return 'You have an unpaid balance of $amount. Cash is not available until it is paid. Top up your wallet or choose another way to pay.';
+  }
+
+  @override
+  String get p12DuesTitle => 'Unpaid balance';
+
+  @override
+  String p12DuesCheckoutBody(String amount) {
+    return 'You owe $amount from a cancelled parcel. Cash on delivery is off until it is paid. Topping up your wallet pays it automatically.';
+  }
+
+  @override
+  String get p12PayNow => 'Pay now';
+
+  @override
+  String get p12CashBlockedByDues =>
+      'Cash is off until your unpaid balance is paid.';
+
+  @override
+  String get p12ChooseOtherPayment => 'Choose another payment';
+
+  @override
+  String get p12ErrCityOutside =>
+      'We don\'t deliver to this address yet. Choose an address inside your city.';
+
+  @override
+  String get p12ErrCityCross =>
+      'All addresses in one order must be in the same city.';
+
+  @override
+  String p12ErrCityMismatch(String city) {
+    return 'This address is in $city. Switch your city to $city to continue.';
+  }
+
+  @override
+  String get p12ErrCityMismatchGeneric =>
+      'This address is in another city. Switch your city to continue.';
+
+  @override
+  String get p12ChangeCity => 'Change city';
+
+  @override
+  String get p12ErrNetwork =>
+      'No internet connection. Check your connection and try again.';
+
+  @override
+  String get p12ErrTimeout => 'The connection is slow. Please try again.';
+
+  @override
+  String get p12ErrServer =>
+      'Something went wrong on our side. Please try again in a moment.';
+
+  @override
+  String get p12ErrSessionExpired =>
+      'Your session has expired. Please log in again.';
 }

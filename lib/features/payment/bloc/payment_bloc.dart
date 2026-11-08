@@ -123,13 +123,26 @@ class PaymentOrderNeedsAttention extends PaymentState {
 class PaymentFailure extends PaymentState {
   final String error;
 
-  /// API error code when known (e.g. FEATURE_DISABLED for gift orders).
+  /// API error code when known (e.g. FEATURE_DISABLED for gift orders,
+  /// STORE_CLOSED, ITEM_SOLD_OUT, OUTSTANDING_DUES, CITY_*).
   final String? code;
 
-  const PaymentFailure({required this.error, this.code});
+  /// HTTP status of the refused order call (null for transport errors).
+  final int? statusCode;
+
+  /// Error body of the refused order call (store_status, amount, currency,
+  /// product_id, market, …) for checkout to explain the refusal.
+  final Map<String, dynamic>? details;
+
+  const PaymentFailure({
+    required this.error,
+    this.code,
+    this.statusCode,
+    this.details,
+  });
 
   @override
-  List<Object?> get props => [error, code];
+  List<Object?> get props => [error, code, statusCode, details];
 }
 
 class PaymentMethodsLoaded extends PaymentState {
@@ -242,9 +255,14 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
       );
 
       if (orderResult['success'] != true) {
+        final details = orderResult['errorData'];
+        final status = orderResult['statusCode'];
         emit(PaymentFailure(
           error: orderResult['message'] ?? 'Failed to create order',
           code: orderResult['code']?.toString(),
+          statusCode: status is int ? status : null,
+          details:
+              details is Map ? Map<String, dynamic>.from(details) : null,
         ));
         return;
       }

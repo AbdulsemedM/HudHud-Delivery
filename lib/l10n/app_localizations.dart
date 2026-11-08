@@ -7742,6 +7742,204 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You owe {amount} from a cancelled parcel. It is taken from your wallet at your next top-up or order.'**
   String p11ParcelOutstandingBalance(String amount);
+
+  /// No description provided for @p12StoreOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get p12StoreOpen;
+
+  /// No description provided for @p12StoreClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get p12StoreClosed;
+
+  /// No description provided for @p12StoreBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'Busy'**
+  String get p12StoreBusy;
+
+  /// No description provided for @p12StoreOpensAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Opens {time}'**
+  String p12StoreOpensAt(String time);
+
+  /// No description provided for @p12StoreOpensTomorrowAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Opens tomorrow {time}'**
+  String p12StoreOpensTomorrowAt(String time);
+
+  /// No description provided for @p12StoreBackAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Back at {time}'**
+  String p12StoreBackAt(String time);
+
+  /// No description provided for @p12StoreClosedToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed today'**
+  String get p12StoreClosedToday;
+
+  /// No description provided for @p12StoreClosedBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'This store is closed right now. You can look at the menu, but ordering is off until it opens.'**
+  String get p12StoreClosedBanner;
+
+  /// No description provided for @p12StoreBusyBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'This store is very busy and has paused new orders. Please check back soon.'**
+  String get p12StoreBusyBanner;
+
+  /// No description provided for @p12StoreOrderingPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Ordering paused'**
+  String get p12StoreOrderingPaused;
+
+  /// No description provided for @p12SoldOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sold out'**
+  String get p12SoldOut;
+
+  /// No description provided for @p12Unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable'**
+  String get p12Unavailable;
+
+  /// No description provided for @p12GoToCheckout.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Checkout'**
+  String get p12GoToCheckout;
+
+  /// No description provided for @p12ErrStoreClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'This store is closed right now.'**
+  String get p12ErrStoreClosed;
+
+  /// No description provided for @p12ErrStoreBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'This store is busy and not taking orders right now.'**
+  String get p12ErrStoreBusy;
+
+  /// No description provided for @p12ErrItemSoldOut.
+  ///
+  /// In en, this message translates to:
+  /// **'An item in your cart is sold out today. Remove it to continue.'**
+  String get p12ErrItemSoldOut;
+
+  /// No description provided for @p12ErrItemSoldOutNamed.
+  ///
+  /// In en, this message translates to:
+  /// **'{item} is sold out today. Remove it to continue.'**
+  String p12ErrItemSoldOutNamed(String item);
+
+  /// No description provided for @p12RemoveItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove item'**
+  String get p12RemoveItem;
+
+  /// No description provided for @p12ErrOutstandingDues.
+  ///
+  /// In en, this message translates to:
+  /// **'You have an unpaid balance of {amount}. Cash is not available until it is paid. Top up your wallet or choose another way to pay.'**
+  String p12ErrOutstandingDues(String amount);
+
+  /// No description provided for @p12DuesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpaid balance'**
+  String get p12DuesTitle;
+
+  /// No description provided for @p12DuesCheckoutBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You owe {amount} from a cancelled parcel. Cash on delivery is off until it is paid. Topping up your wallet pays it automatically.'**
+  String p12DuesCheckoutBody(String amount);
+
+  /// No description provided for @p12PayNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay now'**
+  String get p12PayNow;
+
+  /// No description provided for @p12CashBlockedByDues.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash is off until your unpaid balance is paid.'**
+  String get p12CashBlockedByDues;
+
+  /// No description provided for @p12ChooseOtherPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose another payment'**
+  String get p12ChooseOtherPayment;
+
+  /// No description provided for @p12ErrCityOutside.
+  ///
+  /// In en, this message translates to:
+  /// **'We don\'t deliver to this address yet. Choose an address inside your city.'**
+  String get p12ErrCityOutside;
+
+  /// No description provided for @p12ErrCityCross.
+  ///
+  /// In en, this message translates to:
+  /// **'All addresses in one order must be in the same city.'**
+  String get p12ErrCityCross;
+
+  /// No description provided for @p12ErrCityMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'This address is in {city}. Switch your city to {city} to continue.'**
+  String p12ErrCityMismatch(String city);
+
+  /// No description provided for @p12ErrCityMismatchGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'This address is in another city. Switch your city to continue.'**
+  String get p12ErrCityMismatchGeneric;
+
+  /// No description provided for @p12ChangeCity.
+  ///
+  /// In en, this message translates to:
+  /// **'Change city'**
+  String get p12ChangeCity;
+
+  /// No description provided for @p12ErrNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'No internet connection. Check your connection and try again.'**
+  String get p12ErrNetwork;
+
+  /// No description provided for @p12ErrTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'The connection is slow. Please try again.'**
+  String get p12ErrTimeout;
+
+  /// No description provided for @p12ErrServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong on our side. Please try again in a moment.'**
+  String get p12ErrServer;
+
+  /// No description provided for @p12ErrSessionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session has expired. Please log in again.'**
+  String get p12ErrSessionExpired;
 }
 
 class _AppLocalizationsDelegate

@@ -30,7 +30,9 @@ import 'package:hudhud_delivery/features/products/data/products_repository.dart'
 import 'package:hudhud_delivery/features/products/model/popular_product_model.dart';
 import 'package:hudhud_delivery/features/products/presentation/screens/product_search_results_screen.dart';
 import 'package:hudhud_delivery/features/vendors/data/data_provider/vendors_data_provider.dart';
+import 'package:hudhud_delivery/features/vendors/data/models/store_status.dart';
 import 'package:hudhud_delivery/features/vendors/data/repository/vendors_repository.dart';
+import 'package:hudhud_delivery/features/vendors/presentation/widgets/store_status_widgets.dart';
 import 'package:hudhud_delivery/features/growth/market_controller.dart';
 import 'package:hudhud_delivery/core/utils/money_format.dart';
 import 'package:hudhud_delivery/features/growth/data/models/market.dart';
@@ -1127,6 +1129,7 @@ class _CategoriesGrid extends StatelessWidget {
                   return _VendorSliderCard(
                     name: vendor.name,
                     avatarUrl: vendor.avatar,
+                    storeStatus: vendor.storeStatus,
                     index: index,
                     embedded: embedded,
                     onTap: () {
@@ -1312,21 +1315,29 @@ class _VendorSliderCard extends StatelessWidget {
   final VoidCallback onTap;
   final bool embedded;
 
+  /// Closed / busy badge on the logo (hidden while open or unknown).
+  final StoreStatus? storeStatus;
+
   const _VendorSliderCard({
     required this.name,
     required this.avatarUrl,
     required this.onTap,
     this.index = 0,
     this.embedded = false,
+    this.storeStatus,
   });
 
   @override
   Widget build(BuildContext context) {
     final dark = HomeColors.isDark(context);
     final radius = BorderRadius.circular(24);
+    final status = storeStatus;
+    final unavailable = status != null && !status.acceptingOrders;
     return Semantics(
       button: true,
-      label: name,
+      label: status != null && !status.acceptingOrders
+          ? '$name, ${storeStatusLine(context.l10n, status)}'
+          : name,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(20),
@@ -1335,38 +1346,54 @@ class _VendorSliderCard extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  color: HomeColors.surfaceOf(context),
-                  borderRadius: radius,
-                  border: dark
-                      ? Border.all(color: HomeColors.borderOf(context))
-                      : null,
-                  boxShadow: AppColors.softShadow(context),
-                ),
-                child: ClipRRect(
-                  borderRadius: radius,
-                  child: avatarUrl.isNotEmpty &&
-                          (avatarUrl.startsWith('http') ||
-                              avatarUrl.contains('/storage/'))
-                      ? FallbackNetworkImage(
-                          url: avatarUrl,
-                          width: 80,
-                          height: 80,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_) => _avatarPlaceholder(context),
-                        )
-                      : (avatarUrl.isNotEmpty
-                          ? Image.asset(
-                              avatarUrl,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) =>
-                                  _avatarPlaceholder(context),
-                            )
-                          : _avatarPlaceholder(context)),
-                ),
+              Stack(
+                children: [
+                  Opacity(
+                    opacity: unavailable ? 0.55 : 1,
+                    child: Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: HomeColors.surfaceOf(context),
+                        borderRadius: radius,
+                        border: dark
+                            ? Border.all(color: HomeColors.borderOf(context))
+                            : null,
+                        boxShadow: AppColors.softShadow(context),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: radius,
+                        child: avatarUrl.isNotEmpty &&
+                                (avatarUrl.startsWith('http') ||
+                                    avatarUrl.contains('/storage/'))
+                            ? FallbackNetworkImage(
+                                url: avatarUrl,
+                                width: 80,
+                                height: 80,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_) => _avatarPlaceholder(context),
+                              )
+                            : (avatarUrl.isNotEmpty
+                                ? Image.asset(
+                                    avatarUrl,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) =>
+                                        _avatarPlaceholder(context),
+                                  )
+                                : _avatarPlaceholder(context)),
+                      ),
+                    ),
+                  ),
+                  if (status != null && !status.acceptingOrders)
+                    PositionedDirectional(
+                      start: 2,
+                      end: 2,
+                      bottom: 4,
+                      child: Center(
+                        child: StoreStatusPill(status: status, compact: true),
+                      ),
+                    ),
+                ],
               ),
               const SizedBox(height: 8),
               Text(

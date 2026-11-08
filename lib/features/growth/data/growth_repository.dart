@@ -45,6 +45,14 @@ class PromoPreviewResult {
   });
 }
 
+/// `POST /api/customer/checkout/quote`: the quote, or the refusal.
+class CheckoutQuoteOutcome {
+  final CheckoutQuote? quote;
+  final ApiErrorResult? error;
+
+  const CheckoutQuoteOutcome({this.quote, this.error});
+}
+
 /// Outcome of `PUT /api/customer/market`.
 class MarketChangeResult {
   final bool ok;
@@ -112,9 +120,43 @@ class GrowthRepository {
   /// Returns `null` on any failure so checkout can fall back to the
   /// client-side display.
   Future<CheckoutQuote?> fetchCheckoutQuote(CheckoutQuoteRequest request) async {
+    return (await fetchCheckoutQuoteOutcome(request)).quote;
+  }
+
+  /// Like [fetchCheckoutQuote] but also returns why the server refused the
+  /// quote (STORE_CLOSED / STORE_PAUSED, ITEM_SOLD_OUT, CITY_* …), so
+  /// checkout can explain it before the customer taps "Place order".
+  /// Never throws.
+  Future<CheckoutQuoteOutcome> fetchCheckoutQuoteOutcome(
+    CheckoutQuoteRequest request,
+  ) async {
     final r = await dataProvider.postCheckoutQuote(request.toJson());
-    if (!_ok(r)) return null;
-    return CheckoutQuote.tryParseResponseBody(r['data']);
+    if (_ok(r)) {
+      return CheckoutQuoteOutcome(
+        quote: CheckoutQuote.tryParseResponseBody(r['data']),
+      );
+    }
+    final status = r['statusCode'];
+    final data = r['data'];
+    final parsed = parseApiErrorResult(
+      data is Map ? data : (r['errorMessage']?.toString() ?? ''),
+      statusCode: status is int ? status : null,
+    );
+    final code = r['code']?.toString();
+    return CheckoutQuoteOutcome(
+      error: code != null && code.isNotEmpty && parsed.code != code
+          ? ApiErrorResult(
+              message: parsed.message,
+              code: code,
+              statusCode: parsed.statusCode,
+              amount: parsed.amount,
+              currency: parsed.currency,
+              productId: parsed.productId,
+              marketCode: parsed.marketCode,
+              storeStatus: parsed.storeStatus,
+            )
+          : parsed,
+    );
   }
 
   /// Never throws; invalid codes return `valid: false` with the server reason.

@@ -4212,4 +4212,129 @@ class AppLocalizationsOm extends AppLocalizations {
   String p11ParcelOutstandingBalance(String amount) {
     return 'Paakeejii haqame irraa $amount liqii qabda. Yeroo itti aanu yoo guuttu ykn ajajattu waletii irraa hir\'ifama.';
   }
+
+  @override
+  String get p12StoreOpen => 'Banaa dha';
+
+  @override
+  String get p12StoreClosed => 'Cufaa dha';
+
+  @override
+  String get p12StoreBusy => 'Qabamaa dha';
+
+  @override
+  String p12StoreOpensAt(String time) {
+    return 'Sa\'aatii $time banama';
+  }
+
+  @override
+  String p12StoreOpensTomorrowAt(String time) {
+    return 'Boru $time banama';
+  }
+
+  @override
+  String p12StoreBackAt(String time) {
+    return 'Sa\'aatii $time deebi\'a';
+  }
+
+  @override
+  String get p12StoreClosedToday => 'Har\'a cufaa dha';
+
+  @override
+  String get p12StoreClosedBanner =>
+      'Suuqiin kun amma cufaa dha. Menyuu ilaaluu dandeessa, garuu hanga banamutti ajajuun hin danda\'amu.';
+
+  @override
+  String get p12StoreBusyBanner =>
+      'Suuqiin kun baay\'ee qabamaa dha, ajaja haaraa yeroof dhaabeera. Maaloo yeroo muraasa booda deebi\'i.';
+
+  @override
+  String get p12StoreOrderingPaused => 'Ajajuun dhaabbateera';
+
+  @override
+  String get p12SoldOut => 'Dhumeera';
+
+  @override
+  String get p12Unavailable => 'Hin argamu';
+
+  @override
+  String get p12GoToCheckout => 'Gara kaffaltiitti deemi';
+
+  @override
+  String get p12ErrStoreClosed => 'Suuqiin kun amma cufaa dha.';
+
+  @override
+  String get p12ErrStoreBusy =>
+      'Suuqiin kun qabamaa dha, amma ajaja hin fudhatu.';
+
+  @override
+  String get p12ErrItemSoldOut =>
+      'Meeshaan gaarii kee keessa jiru tokko har\'a dhumeera. Itti fufuuf haqi.';
+
+  @override
+  String p12ErrItemSoldOutNamed(String item) {
+    return '$item har\'a dhumeera. Itti fufuuf haqi.';
+  }
+
+  @override
+  String get p12RemoveItem => 'Meeshaa haqi';
+
+  @override
+  String p12ErrOutstandingDues(String amount) {
+    return 'Kaffaltii hin kaffalamne $amount qabda. Hanga kaffalamutti callaan kaffaluun hin danda\'amu. Waaleetii kee guuti ykn mala kaffaltii biraa filadhu.';
+  }
+
+  @override
+  String get p12DuesTitle => 'Kaffaltii hin kaffalamne';
+
+  @override
+  String p12DuesCheckoutBody(String amount) {
+    return 'Paarselii haqame irraa $amount kaffaluu qabda. Hanga kaffalamutti yeroo geessituu callaan kaffaluun hin jiru. Waaleetii kee yoo guutte ofumaan kaffalama.';
+  }
+
+  @override
+  String get p12PayNow => 'Amma kaffali';
+
+  @override
+  String get p12CashBlockedByDues =>
+      'Hanga kaffaltiin hin kaffalamne kaffalamutti callaan hin danda\'amu.';
+
+  @override
+  String get p12ChooseOtherPayment => 'Kaffaltii biraa filadhu';
+
+  @override
+  String get p12ErrCityOutside =>
+      'Teessoo kanatti ammaaf hin geessinu. Teessoo magaalaa kee keessa jiru filadhu.';
+
+  @override
+  String get p12ErrCityCross =>
+      'Teessoon ajaja tokko keessa jiran hundi magaalaa tokko keessa ta\'uu qabu.';
+
+  @override
+  String p12ErrCityMismatch(String city) {
+    return 'Teessoon kun $city keessa jira. Itti fufuuf magaalaa kee gara ${city}tti jijjiiri.';
+  }
+
+  @override
+  String get p12ErrCityMismatchGeneric =>
+      'Teessoon kun magaalaa biraa keessa jira. Itti fufuuf magaalaa kee jijjiiri.';
+
+  @override
+  String get p12ChangeCity => 'Magaalaa jijjiiri';
+
+  @override
+  String get p12ErrNetwork =>
+      'Walqunnamtiin interneetii hin jiru. Walqunnamtii kee mirkaneessiitii irra deebi\'ii yaali.';
+
+  @override
+  String get p12ErrTimeout =>
+      'Walqunnamtiin suuta dha. Maaloo irra deebi\'ii yaali.';
+
+  @override
+  String get p12ErrServer =>
+      'Gama keenyaan rakkoon uumame. Maaloo yeroo muraasa booda irra deebi\'ii yaali.';
+
+  @override
+  String get p12ErrSessionExpired =>
+      'Yeroon seenumsa keetii dhumeera. Maaloo irra deebi\'ii seeni.';
 }

@@ -51,7 +51,11 @@ class ParcelV2Repository {
     } on ApiException catch (e) {
       final raw = e.data;
       final data = raw is Map ? Map<String, dynamic>.from(raw) : null;
-      final code = e.code ?? data?['code']?.toString();
+      // The body's own code first: ApiException.code is only a fallback
+      // (older builds folded unknown 422 codes into validation_error).
+      final bodyCode = data?['code']?.toString();
+      final code =
+          bodyCode != null && bodyCode.isNotEmpty ? bodyCode : e.code;
       final message = (data?['message'] is String &&
               (data!['message'] as String).trim().isNotEmpty)
           ? (data['message'] as String).trim()

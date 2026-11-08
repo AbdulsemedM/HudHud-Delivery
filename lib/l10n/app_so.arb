@@ -2241,5 +2241,158 @@
     "placeholders": {
       "amount": {"type": "String"}
     }
+  },
+  "p12StoreOpen": "Furan",
+  "@p12StoreOpen": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12StoreClosed": "Xiran",
+  "@p12StoreClosed": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12StoreBusy": "Mashquul",
+  "@p12StoreBusy": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12StoreOpensAt": "Wuxuu furmayaa {time}",
+  "@p12StoreOpensAt": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "p12StoreOpensTomorrowAt": "Berri ayuu furmayaa {time}",
+  "@p12StoreOpensTomorrowAt": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "p12StoreBackAt": "Wuu soo laabanayaa {time}",
+  "@p12StoreBackAt": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "p12StoreClosedToday": "Maanta waa xiran yahay",
+  "@p12StoreClosedToday": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12StoreClosedBanner": "Dukaankan hadda waa xiran yahay. Waad eegi kartaa liiska, laakiin dalbashadu way xiran tahay ilaa uu furmo.",
+  "@p12StoreClosedBanner": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12StoreBusyBanner": "Dukaankan aad ayuu u mashquul yahay, dalabyada cusubna wuu hakiyay. Fadlan dib u eeg dhowaan.",
+  "@p12StoreBusyBanner": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12StoreOrderingPaused": "Dalbashadu way hakad tahay",
+  "@p12StoreOrderingPaused": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12SoldOut": "Waa dhammaaday",
+  "@p12SoldOut": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12Unavailable": "Lama heli karo",
+  "@p12Unavailable": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12GoToCheckout": "U gudub lacag bixinta",
+  "@p12GoToCheckout": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrStoreClosed": "Dukaankan hadda waa xiran yahay.",
+  "@p12ErrStoreClosed": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrStoreBusy": "Dukaankan waa mashquul, hadda dalab ma qaato.",
+  "@p12ErrStoreBusy": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrItemSoldOut": "Shay ku jira gaadhigaaga ayaa maanta dhammaaday. Ka saar si aad u sii wadato.",
+  "@p12ErrItemSoldOut": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrItemSoldOutNamed": "{item} maanta wuu dhammaaday. Ka saar si aad u sii wadato.",
+  "@p12ErrItemSoldOutNamed": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
+    "placeholders": {
+      "item": {"type": "String"}
+    }
+  },
+  "p12RemoveItem": "Ka saar shayga",
+  "@p12RemoveItem": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrOutstandingDues": "Waxaa kugu maqan lacag aan la bixin oo ah {amount}. Lacag caddaan ah lama heli karo ilaa la bixiyo. Ku shub boorsadaada ama dooro hab kale oo lacag bixin.",
+  "@p12ErrOutstandingDues": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p12DuesTitle": "Lacag aan la bixin",
+  "@p12DuesTitle": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12DuesCheckoutBody": "Waxaa lagugu leeyahay {amount} xirmo la joojiyay dartiis. Lacag bixinta marka la keeno way xiran tahay ilaa la bixiyo. Markaad boorsadaada ku shubto si toos ah ayaa loo bixiyaa.",
+  "@p12DuesCheckoutBody": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p12PayNow": "Hadda bixi",
+  "@p12PayNow": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12CashBlockedByDues": "Lacag caddaan ah way xiran tahay ilaa lacagta lagugu leeyahay la bixiyo.",
+  "@p12CashBlockedByDues": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ChooseOtherPayment": "Dooro lacag bixin kale",
+  "@p12ChooseOtherPayment": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrCityOutside": "Weli kuma keenno cinwaankan. Dooro cinwaan ku yaal magaaladaada.",
+  "@p12ErrCityOutside": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrCityCross": "Dhammaan cinwaannada hal dalab waa inay ku jiraan isla magaalo.",
+  "@p12ErrCityCross": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrCityMismatch": "Cinwaankani wuxuu ku yaal {city}. U beddel magaaladaada {city} si aad u sii wadato.",
+  "@p12ErrCityMismatch": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
+    "placeholders": {
+      "city": {"type": "String"}
+    }
+  },
+  "p12ErrCityMismatchGeneric": "Cinwaankani wuxuu ku yaal magaalo kale. Beddel magaaladaada si aad u sii wadato.",
+  "@p12ErrCityMismatchGeneric": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ChangeCity": "Beddel magaalada",
+  "@p12ChangeCity": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrNetwork": "Ma jiro xiriir internet. Hubi xiriirkaaga oo isku day mar kale.",
+  "@p12ErrNetwork": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrTimeout": "Xiriirku waa gaabis. Fadlan isku day mar kale.",
+  "@p12ErrTimeout": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrServer": "Cillad ayaa dhinaceena ka dhacday. Fadlan isku day mar kale wax yar kadib.",
+  "@p12ErrServer": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrSessionExpired": "Fadhigaagu wuu dhacay. Fadlan mar kale gal.",
+  "@p12ErrSessionExpired": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
   }
 }

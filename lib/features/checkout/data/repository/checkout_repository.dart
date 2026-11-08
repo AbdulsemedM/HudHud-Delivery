@@ -64,6 +64,7 @@ class CheckoutRepository {
       statusCode: statusCode,
       code: code ?? (body is Map ? body['code']?.toString() : null),
       errors: errors,
+      details: body is Map ? Map<String, dynamic>.from(body) : null,
     );
   }
 
@@ -119,7 +120,14 @@ class CheckoutRepository {
         String errorMessage =
             response['errorMessage'] ?? 'Error creating order';
         errorMessage = _cleanErrorMessage(errorMessage);
-        return {'success': false, 'data': null, 'message': errorMessage};
+        return {
+          'success': false,
+          'data': null,
+          'message': errorMessage,
+          'code': response['code']?.toString(),
+          'statusCode': response['statusCode'],
+          'errorData': response['errorData'],
+        };
       }
     } catch (e) {
       String errorMessage = e.toString();
@@ -199,6 +207,8 @@ class CheckoutRepository {
           response['errorMessage']?.toString() ?? 'Error creating gift order',
         ),
         'code': response['code']?.toString(),
+        'statusCode': statusCode,
+        'errorData': response['data'],
       };
     } catch (e) {
       return {

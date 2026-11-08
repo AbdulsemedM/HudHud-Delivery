@@ -4105,4 +4105,122 @@ class AppLocalizationsAm extends AppLocalizations {
   String p11ParcelOutstandingBalance(String amount) {
     return 'ከተሰረዘ እሽግ $amount ዕዳ አለብዎት። በሚቀጥለው ገንዘብ ሲሞሉ ወይም ሲያዝዙ ከዋሌትዎ ይቀነሳል።';
   }
+
+  @override
+  String get p12StoreOpen => 'ክፍት ነው';
+
+  @override
+  String get p12StoreClosed => 'ዝግ ነው';
+
+  @override
+  String get p12StoreBusy => 'ተጨናንቋል';
+
+  @override
+  String p12StoreOpensAt(String time) {
+    return '$time ይከፈታል';
+  }
+
+  @override
+  String p12StoreOpensTomorrowAt(String time) {
+    return 'ነገ $time ይከፈታል';
+  }
+
+  @override
+  String p12StoreBackAt(String time) {
+    return '$time ይመለሳል';
+  }
+
+  @override
+  String get p12StoreClosedToday => 'ዛሬ ዝግ ነው';
+
+  @override
+  String get p12StoreClosedBanner =>
+      'ይህ መደብር አሁን ዝግ ነው። ምናሌውን ማየት ይችላሉ፣ ግን እስኪከፈት ድረስ ማዘዝ አይቻልም።';
+
+  @override
+  String get p12StoreBusyBanner =>
+      'ይህ መደብር በጣም ስራ በዝቶበታል፣ አዳዲስ ትዕዛዞችን ለጊዜው አቁሟል። እባክዎ ትንሽ ቆይተው ይመለሱ።';
+
+  @override
+  String get p12StoreOrderingPaused => 'ማዘዝ ተቋርጧል';
+
+  @override
+  String get p12SoldOut => 'አልቋል';
+
+  @override
+  String get p12Unavailable => 'አይገኝም';
+
+  @override
+  String get p12GoToCheckout => 'ወደ ክፍያ ይሂዱ';
+
+  @override
+  String get p12ErrStoreClosed => 'ይህ መደብር አሁን ዝግ ነው።';
+
+  @override
+  String get p12ErrStoreBusy => 'ይህ መደብር ስራ በዝቶበታል፣ አሁን ትዕዛዝ አይቀበልም።';
+
+  @override
+  String get p12ErrItemSoldOut => 'በጋሪዎ ውስጥ ያለ አንድ ዕቃ ዛሬ አልቋል። ለመቀጠል ያስወግዱት።';
+
+  @override
+  String p12ErrItemSoldOutNamed(String item) {
+    return '$item ዛሬ አልቋል። ለመቀጠል ያስወግዱት።';
+  }
+
+  @override
+  String get p12RemoveItem => 'ዕቃውን አስወግድ';
+
+  @override
+  String p12ErrOutstandingDues(String amount) {
+    return 'ያልተከፈለ $amount ሂሳብ አለብዎት። እስኪከፈል ድረስ በጥሬ ገንዘብ መክፈል አይቻልም። ዋሌትዎን ይሙሉ ወይም ሌላ የክፍያ መንገድ ይምረጡ።';
+  }
+
+  @override
+  String get p12DuesTitle => 'ያልተከፈለ ሂሳብ';
+
+  @override
+  String p12DuesCheckoutBody(String amount) {
+    return 'ከተሰረዘ እሽግ $amount ዕዳ አለብዎት። እስኪከፈል ድረስ ሲደርስ በጥሬ ገንዘብ መክፈል አይቻልም። ዋሌትዎን ሲሞሉ በራስ-ሰር ይከፈላል።';
+  }
+
+  @override
+  String get p12PayNow => 'አሁን ይክፈሉ';
+
+  @override
+  String get p12CashBlockedByDues => 'ያልተከፈለው ሂሳብ እስኪከፈል ድረስ ጥሬ ገንዘብ አይቻልም።';
+
+  @override
+  String get p12ChooseOtherPayment => 'ሌላ የክፍያ መንገድ ይምረጡ';
+
+  @override
+  String get p12ErrCityOutside =>
+      'ወደዚህ አድራሻ ገና አናደርስም። በከተማዎ ውስጥ ያለ አድራሻ ይምረጡ።';
+
+  @override
+  String get p12ErrCityCross =>
+      'በአንድ ትዕዛዝ ውስጥ ያሉ ሁሉም አድራሻዎች በአንድ ከተማ ውስጥ መሆን አለባቸው።';
+
+  @override
+  String p12ErrCityMismatch(String city) {
+    return 'ይህ አድራሻ በ$city ነው። ለመቀጠል ከተማዎን ወደ $city ይቀይሩ።';
+  }
+
+  @override
+  String get p12ErrCityMismatchGeneric =>
+      'ይህ አድራሻ በሌላ ከተማ ነው። ለመቀጠል ከተማዎን ይቀይሩ።';
+
+  @override
+  String get p12ChangeCity => 'ከተማ ቀይር';
+
+  @override
+  String get p12ErrNetwork => 'የኢንተርኔት ግንኙነት የለም። ግንኙነትዎን አረጋግጠው እንደገና ይሞክሩ።';
+
+  @override
+  String get p12ErrTimeout => 'ግንኙነቱ ቀርፋፋ ነው። እባክዎ እንደገና ይሞክሩ።';
+
+  @override
+  String get p12ErrServer => 'በእኛ በኩል ችግር ተፈጥሯል። እባክዎ ትንሽ ቆይተው እንደገና ይሞክሩ።';
+
+  @override
+  String get p12ErrSessionExpired => 'ክፍለ ጊዜዎ አብቅቷል። እባክዎ እንደገና ይግቡ።';
 }

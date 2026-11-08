@@ -4157,4 +4157,125 @@ class AppLocalizationsAr extends AppLocalizations {
   String p11ParcelOutstandingBalance(String amount) {
     return 'عليك $amount من طرد ملغى. سيُخصم من محفظتك عند الشحن أو الطلب التالي.';
   }
+
+  @override
+  String get p12StoreOpen => 'مفتوح';
+
+  @override
+  String get p12StoreClosed => 'مغلق';
+
+  @override
+  String get p12StoreBusy => 'مشغول';
+
+  @override
+  String p12StoreOpensAt(String time) {
+    return 'يفتح $time';
+  }
+
+  @override
+  String p12StoreOpensTomorrowAt(String time) {
+    return 'يفتح غدًا $time';
+  }
+
+  @override
+  String p12StoreBackAt(String time) {
+    return 'يعود $time';
+  }
+
+  @override
+  String get p12StoreClosedToday => 'مغلق اليوم';
+
+  @override
+  String get p12StoreClosedBanner =>
+      'هذا المتجر مغلق الآن. يمكنك تصفح القائمة، لكن الطلب متوقف حتى يفتح.';
+
+  @override
+  String get p12StoreBusyBanner =>
+      'هذا المتجر مشغول جدًا وأوقف الطلبات الجديدة مؤقتًا. يرجى المحاولة بعد قليل.';
+
+  @override
+  String get p12StoreOrderingPaused => 'الطلب متوقف';
+
+  @override
+  String get p12SoldOut => 'نفدت الكمية';
+
+  @override
+  String get p12Unavailable => 'غير متوفر';
+
+  @override
+  String get p12GoToCheckout => 'إلى الدفع';
+
+  @override
+  String get p12ErrStoreClosed => 'هذا المتجر مغلق الآن.';
+
+  @override
+  String get p12ErrStoreBusy => 'هذا المتجر مشغول ولا يستقبل طلبات الآن.';
+
+  @override
+  String get p12ErrItemSoldOut =>
+      'أحد المنتجات في سلتك نفد اليوم. أزله للمتابعة.';
+
+  @override
+  String p12ErrItemSoldOutNamed(String item) {
+    return '$item نفد اليوم. أزله للمتابعة.';
+  }
+
+  @override
+  String get p12RemoveItem => 'إزالة المنتج';
+
+  @override
+  String p12ErrOutstandingDues(String amount) {
+    return 'لديك رصيد غير مدفوع بقيمة $amount. الدفع النقدي غير متاح حتى يتم سداده. اشحن محفظتك أو اختر طريقة دفع أخرى.';
+  }
+
+  @override
+  String get p12DuesTitle => 'رصيد غير مدفوع';
+
+  @override
+  String p12DuesCheckoutBody(String amount) {
+    return 'عليك $amount من طرد ملغى. الدفع عند الاستلام متوقف حتى يتم السداد. شحن محفظتك يسدده تلقائيًا.';
+  }
+
+  @override
+  String get p12PayNow => 'ادفع الآن';
+
+  @override
+  String get p12CashBlockedByDues =>
+      'الدفع النقدي متوقف حتى سداد رصيدك غير المدفوع.';
+
+  @override
+  String get p12ChooseOtherPayment => 'اختر طريقة دفع أخرى';
+
+  @override
+  String get p12ErrCityOutside =>
+      'لا نوصّل إلى هذا العنوان بعد. اختر عنوانًا داخل مدينتك.';
+
+  @override
+  String get p12ErrCityCross =>
+      'يجب أن تكون جميع العناوين في الطلب الواحد داخل المدينة نفسها.';
+
+  @override
+  String p12ErrCityMismatch(String city) {
+    return 'هذا العنوان في $city. غيّر مدينتك إلى $city للمتابعة.';
+  }
+
+  @override
+  String get p12ErrCityMismatchGeneric =>
+      'هذا العنوان في مدينة أخرى. غيّر مدينتك للمتابعة.';
+
+  @override
+  String get p12ChangeCity => 'تغيير المدينة';
+
+  @override
+  String get p12ErrNetwork =>
+      'لا يوجد اتصال بالإنترنت. تحقق من اتصالك وحاول مرة أخرى.';
+
+  @override
+  String get p12ErrTimeout => 'الاتصال بطيء. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get p12ErrServer => 'حدث خطأ من جهتنا. يرجى المحاولة بعد قليل.';
+
+  @override
+  String get p12ErrSessionExpired => 'انتهت جلستك. يرجى تسجيل الدخول مرة أخرى.';
 }

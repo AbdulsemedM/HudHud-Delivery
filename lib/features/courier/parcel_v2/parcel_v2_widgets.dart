@@ -5,6 +5,7 @@ import 'package:share_plus/share_plus.dart';
 
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/utils/money_format.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_payment_helper.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
 
@@ -976,36 +977,72 @@ class ParcelPayAtPickupNote extends StatelessWidget {
 }
 
 /// Outstanding balance (e.g. a cash cancellation fee) shown before booking.
+///
+/// With [onPayNow] it offers a "Pay now" button (wallet top-up, which
+/// collects the balance automatically). [message] replaces the parcel text
+/// (food checkout uses its own wording).
 class ParcelDuesBanner extends StatelessWidget {
   final ParcelDuesSummary dues;
+  final String Function(String amount)? message;
+  final VoidCallback? onPayNow;
 
-  const ParcelDuesBanner({super.key, required this.dues});
+  const ParcelDuesBanner({
+    super.key,
+    required this.dues,
+    this.message,
+    this.onPayNow,
+  });
+
+  /// `ETB 30.00 + $2.00` for every currency with a positive balance.
+  static String amountText(ParcelDuesSummary dues) => dues.amounts.entries
+      .where((e) => e.value > 0)
+      .map((e) => formatMoneyAmount(e.value, currency: e.key))
+      .join(' + ');
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final colorScheme = Theme.of(context).colorScheme;
-    final text = dues.amounts.entries
-        .where((e) => e.value > 0)
-        .map((e) => formatParcelMoney(e.value, e.key))
-        .join(' + ');
+    final text = amountText(dues);
+    final body = message?.call(text) ?? l10n.p11ParcelOutstandingBalance(text);
     return Container(
+      key: const ValueKey('dues_banner'),
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: colorScheme.tertiaryContainer,
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Icon(Icons.info_outline, color: colorScheme.onTertiaryContainer),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              l10n.p11ParcelOutstandingBalance(text),
-              style: TextStyle(color: colorScheme.onTertiaryContainer),
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.info_outline, color: colorScheme.onTertiaryContainer),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  body,
+                  style: TextStyle(color: colorScheme.onTertiaryContainer),
+                ),
+              ),
+            ],
           ),
+          if (onPayNow != null)
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: TextButton.icon(
+                key: const ValueKey('dues_pay_now'),
+                onPressed: onPayNow,
+                style: TextButton.styleFrom(
+                  foregroundColor: colorScheme.onTertiaryContainer,
+                  minimumSize: const Size(48, 44),
+                ),
+                icon: const Icon(Icons.account_balance_wallet_outlined),
+                label: Text(l10n.p12PayNow),
+              ),
+            ),
         ],
       ),
     );
