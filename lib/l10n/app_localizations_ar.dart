@@ -618,20 +618,20 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeTabFood => 'طعام';
 
   @override
-  String get homeTabDelivery => 'Delivery';
+  String get homeTabDelivery => 'التوصيل';
 
   @override
-  String get cartDifferentVendorTitle => 'Start a new cart?';
+  String get cartDifferentVendorTitle => 'بدء سلة جديدة؟';
 
   @override
   String get cartDifferentVendorMessage =>
-      'Your cart has items from another store. Clear it to add items from this store.';
+      'تحتوي سلتك على منتجات من متجر آخر. أفرغها لإضافة منتجات من هذا المتجر.';
 
   @override
-  String get cartReplaceAction => 'Clear and add';
+  String get cartReplaceAction => 'إفراغ وإضافة';
 
   @override
-  String get cartKeepCurrentAction => 'Keep cart';
+  String get cartKeepCurrentAction => 'الاحتفاظ بالسلة';
 
   @override
   String get homeTabCourier => 'ساعي';
@@ -3325,4 +3325,957 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get paymentCard => 'Card';
+
+  @override
+  String get growthPromoTitle => 'رمز الخصم';
+
+  @override
+  String get growthPromoSubtitle => 'لديك رمز؟ أدخله هنا';
+
+  @override
+  String get growthPromoHint => 'أدخل رمز الخصم';
+
+  @override
+  String get growthPromoApply => 'تطبيق';
+
+  @override
+  String get growthPromoRemove => 'إزالة';
+
+  @override
+  String get growthPromoApplied => 'تم تطبيق رمز الخصم';
+
+  @override
+  String get growthPromoInvalid => 'لا يمكن استخدام رمز الخصم هذا';
+
+  @override
+  String growthPromoSavedForCheckout(String code) {
+    return 'سيتم تطبيق الرمز $code عند الدفع';
+  }
+
+  @override
+  String growthPointsToggle(int points, String amount) {
+    return 'استخدم $points نقطة (−$amount من رسوم التوصيل)';
+  }
+
+  @override
+  String get growthPointsSubtitle => 'النقاط تخفض رسوم التوصيل فقط';
+
+  @override
+  String growthPointsCount(int points) {
+    return '$points نقطة';
+  }
+
+  @override
+  String get growthPointsDiscount => 'خصم النقاط';
+
+  @override
+  String get growthCouponDiscount => 'خصم الرمز';
+
+  @override
+  String growthCouponDiscountWithCode(String code) {
+    return 'خصم ($code)';
+  }
+
+  @override
+  String get growthDeliveryFeeLabel => 'رسوم التوصيل';
+
+  @override
+  String get growthFree => 'مجاني';
+
+  @override
+  String growthFreeDeliveryHint(String amount) {
+    return 'أضف $amount للحصول على توصيل مجاني';
+  }
+
+  @override
+  String get growthFreeDeliveryUnlocked => 'لقد حصلت على توصيل مجاني!';
+
+  @override
+  String get growthRewardsTitle => 'المكافآت';
+
+  @override
+  String growthRewardsWorth(String amount) {
+    return 'بقيمة $amount';
+  }
+
+  @override
+  String get growthRewardsHowItWorks => 'كيف تعمل';
+
+  @override
+  String get growthRewardsEarnLine => 'اكسب نقاطًا مع كل طلب مكتمل.';
+
+  @override
+  String growthRewardsRateLine(int points, String amount) {
+    return '$points نقطة = خصم $amount من رسوم التوصيل.';
+  }
+
+  @override
+  String growthRewardsUseLine(int points) {
+    return 'استخدمها عند الدفع عندما يكون لديك $points نقطة.';
+  }
+
+  @override
+  String get growthRewardsHistory => 'السجل';
+
+  @override
+  String get growthRewardsHistoryEmpty => 'لا يوجد نشاط نقاط بعد.';
+
+  @override
+  String get growthRewardsLoadError => 'تعذر تحميل مكافآتك.';
+
+  @override
+  String get growthRewardsTypeEarned => 'نقاط مكتسبة';
+
+  @override
+  String get growthRewardsTypeRedeemed => 'نقاط مستخدمة';
+
+  @override
+  String get growthRewardsTypeRestored => 'نقاط مستردة';
+
+  @override
+  String get growthRewardsTypeExpired => 'نقاط منتهية الصلاحية';
+
+  @override
+  String growthReferralTitle(String amount) {
+    return 'ادعُ أصدقاءك واحصل على $amount';
+  }
+
+  @override
+  String growthReferralSubtitle(String amount) {
+    return 'تحصل أنت وصديقك على $amount لكل منكما بعد طلبه الأول.';
+  }
+
+  @override
+  String get growthReferralCopy => 'نسخ';
+
+  @override
+  String get growthReferralCopied => 'تم نسخ رمز الإحالة';
+
+  @override
+  String get growthReferralShare => 'مشاركة الدعوة';
+
+  @override
+  String get growthReferralShareSubject => 'انضم إليّ في هدهد للتوصيل';
+
+  @override
+  String growthReferralShareFallback(String amount, String code, String link) {
+    return 'احصل على $amount في هدهد للتوصيل باستخدام رمزي $code: $link';
+  }
+
+  @override
+  String get growthReferralInvited => 'المدعوون';
+
+  @override
+  String get growthReferralRewarded => 'تمت مكافأتهم';
+
+  @override
+  String get growthReferralPending => 'قيد الانتظار';
+
+  @override
+  String get growthReferralEarned => 'المكتسب';
+
+  @override
+  String get growthReorderButton => 'إعادة الطلب';
+
+  @override
+  String get growthReorderFailed =>
+      'تعذرت إعادة الطلب. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get growthReorderReplaceMessage =>
+      'تحتوي سلتك على منتجات من متجر آخر. هل تريد استبدالها بهذا الطلب؟';
+
+  @override
+  String get growthReorderUnavailableTitle => 'بعض المنتجات غير متوفرة';
+
+  @override
+  String get growthReorderNothingAvailable =>
+      'لا يتوفر أي من هذه المنتجات الآن';
+
+  @override
+  String get growthReorderContinue => 'المتابعة بالمنتجات المتوفرة';
+
+  @override
+  String get growthReorderReasonOutOfStock => 'نفد من المخزون';
+
+  @override
+  String get growthReorderReasonRemoved => 'لم يعد متاحًا للبيع';
+
+  @override
+  String get growthReorderReasonVendorClosed => 'المتجر مغلق';
+
+  @override
+  String get growthReorderReasonUnavailable => 'غير متوفر';
+
+  @override
+  String get growthOrderAgainTitle => 'اطلب مرة أخرى';
+
+  @override
+  String growthOrderAgainOrderLabel(String order) {
+    return 'الطلب #$order';
+  }
+
+  @override
+  String get growthSeeAll => 'عرض الكل';
+
+  @override
+  String get growthClosed => 'مغلق';
+
+  @override
+  String get growthCollectionFallbackTitle => 'مجموعة';
+
+  @override
+  String get growthStoreFallbackName => 'متجر';
+
+  @override
+  String get p3Sponsored => 'إعلان ممول';
+
+  @override
+  String get p3PlusTitle => 'هدهد بلس';
+
+  @override
+  String get p3PlusBadge => 'بلس';
+
+  @override
+  String get p3PlusTagline => 'توصيل مجاني وتوفير مع كل طلب.';
+
+  @override
+  String p3PlusPricePerPeriod(String price, int days) {
+    return '$price / $days يومًا';
+  }
+
+  @override
+  String get p3PlusBenefitsTitle => 'مزاياك';
+
+  @override
+  String p3PlusBenefitFreeDelivery(String amount) {
+    return 'توصيل مجاني لطلبات الطعام والبقالة فوق $amount';
+  }
+
+  @override
+  String get p3PlusBenefitFreeDeliveryAll =>
+      'توصيل مجاني لطلبات الطعام والبقالة';
+
+  @override
+  String p3PlusBenefitParcelDiscount(String percent) {
+    return 'خصم $percent% على توصيل الطرود';
+  }
+
+  @override
+  String get p3PlusSubscribe => 'اشترك في هدهد بلس';
+
+  @override
+  String get p3PlusCancel => 'إلغاء بلس';
+
+  @override
+  String get p3PlusResume => 'الاحتفاظ ببلس';
+
+  @override
+  String get p3PlusActive => 'اشتراكك نشط';
+
+  @override
+  String p3PlusRenewsOn(String date) {
+    return 'يتجدد في $date';
+  }
+
+  @override
+  String p3PlusEndsOn(String date) {
+    return 'ينتهي في $date — يمكنك الاحتفاظ به';
+  }
+
+  @override
+  String get p3PlusPastDue => 'فشل دفع التجديد. اشحن محفظتك للاحتفاظ ببلس.';
+
+  @override
+  String p3PlusSavings(String amount) {
+    return 'وفرت حوالي $amount خلال آخر 30 يومًا';
+  }
+
+  @override
+  String get p3PlusPaidFromWallet =>
+      'يُدفع من محفظة هدهد. يمكنك الإلغاء في أي وقت.';
+
+  @override
+  String get p3PlusSubscribed => 'مرحبًا بك في هدهد بلس!';
+
+  @override
+  String get p3PlusCancelled => 'سينتهي بلس في نهاية هذه الفترة';
+
+  @override
+  String get p3PlusResumed => 'سيستمر تجديد بلس';
+
+  @override
+  String get p3PlusCancelConfirmTitle => 'إلغاء هدهد بلس؟';
+
+  @override
+  String get p3PlusCancelConfirmMessage =>
+      'ستحتفظ بمزاياك حتى نهاية هذه الفترة.';
+
+  @override
+  String get p3PlusInsufficientTitle => 'رصيد المحفظة غير كافٍ';
+
+  @override
+  String p3PlusInsufficientMessage(String amount) {
+    return 'أضف $amount إلى محفظتك للاشتراك في بلس.';
+  }
+
+  @override
+  String get p3PlusTopUp => 'شحن المحفظة';
+
+  @override
+  String get p3PlusActionFailed => 'تعذر تحديث بلس. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get p3PlusLoadError => 'تعذر تحميل هدهد بلس.';
+
+  @override
+  String get p3PlusUnavailable => 'هدهد بلس غير متاح حاليًا.';
+
+  @override
+  String get p3PlusUpsell => 'احصل على توصيل مجاني مع هدهد بلس';
+
+  @override
+  String get p3PlusMenuJoin => 'احصل على هدهد بلس';
+
+  @override
+  String get p3PlusMenuMember => 'هدهد بلس الخاص بي';
+
+  @override
+  String get p3QuotePlusFreeDelivery => 'بلس: توصيل مجاني';
+
+  @override
+  String get p3MarketSettingTitle => 'المدينة';
+
+  @override
+  String get p3MarketPickerTitle => 'اختر مدينتك';
+
+  @override
+  String p3MarketChanged(String market) {
+    return 'تم تغيير المدينة إلى $market';
+  }
+
+  @override
+  String get p3MarketChangeBlocked =>
+      'لا يمكنك تغيير المدينة ومحفظتك تحتوي على رصيد بعملة أخرى. استخدمه أو اسحبه أولًا.';
+
+  @override
+  String get p3MarketChangeFailed =>
+      'تعذر تغيير المدينة. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get p5SetsTitle => 'وجبات HudHud Set';
+
+  @override
+  String get p5SetsSubtitle => 'وجبة لشخص واحد · التوصيل مشمول';
+
+  @override
+  String get p5SetDeliveryIncluded => 'التوصيل مشمول';
+
+  @override
+  String p5SetsMaxPerOrder(int count) {
+    return 'حتى $count لكل طلب';
+  }
+
+  @override
+  String get p5QuoteSetDeliveryIncluded => 'HudHud Set: التوصيل مشمول';
+
+  @override
+  String p5SetOverMaxQuantity(int count) {
+    return 'التوصيل مشمول لما يصل إلى $count من HudHud Set لكل طلب.';
+  }
+
+  @override
+  String get p5SetMixedCart =>
+      'التوصيل مشمول فقط عندما تحتوي سلتك على HudHud Set فقط.';
+
+  @override
+  String get p5PayCashOnArrival => 'ادفع نقدًا عند وصول طلبك';
+
+  @override
+  String get p5PaymentInProgress =>
+      'هناك عملية دفع جارية لهذا الطلب. وافق عليها أو ارفضها على هاتفك، ثم تحقق من حالة الطلب.';
+
+  @override
+  String get p5PaymentAlreadyPaid => 'تم دفع هذا الطلب بالفعل.';
+
+  @override
+  String get p5PaymentTotalsChanged =>
+      'تغيّر إجمالي طلبك. قمنا بتحديث الطلب — يرجى مراجعته قبل الدفع.';
+
+  @override
+  String get p5OrderNotPayable => 'لم يعد بالإمكان دفع هذا الطلب.';
+
+  @override
+  String get p5CheckOrderStatus => 'تحقق من حالة الطلب';
+
+  @override
+  String p5RefundedToWallet(String amount) {
+    return 'تم استرداد $amount إلى محفظة HudHud الخاصة بك';
+  }
+
+  @override
+  String get p5RefundManual =>
+      'تم إلغاء الطلب. سيقوم فريقنا بمعالجة استرداد أموالك قريبًا.';
+
+  @override
+  String get p5WalletRefundLabel => 'استرداد';
+
+  @override
+  String get p9GiftSendTitle => 'أرسل هدية';
+
+  @override
+  String get p9GiftBannerSubtitle =>
+      'اطلب وجبة لعائلتك في مدينة أخرى. سيتلقون رسالة نصية لتتبعها.';
+
+  @override
+  String get p9GiftIntroBody =>
+      'اختر المدينة التي يعيش فيها المستلم، ثم اختر مطعمًا واملأ سلتك كالمعتاد. عند الدفع، أدخل اسم المستلم ورقم هاتفه وادفع إلكترونيًا.';
+
+  @override
+  String get p9GiftChooseMarket => 'أين يعيش المستلم؟';
+
+  @override
+  String get p9GiftChooseRestaurant => 'اختر مطعمًا';
+
+  @override
+  String get p9GiftHowItWorksSms =>
+      'يتلقى المستلم رسالة نصية تحتوي على رابط للتتبع ورمز توصيل من 4 أرقام.';
+
+  @override
+  String get p9GiftHowItWorksPay =>
+      'تدفع إلكترونيًا. الدفع عند الاستلام غير متاح للهدايا.';
+
+  @override
+  String get p9GiftSectionTitle => 'أرسل كهدية';
+
+  @override
+  String get p9GiftSectionSubtitle =>
+      'نوصل الطلب إلى المستلم ونرسل له رابط التتبع برسالة نصية';
+
+  @override
+  String get p9GiftToggle => 'هذا الطلب هدية';
+
+  @override
+  String get p9GiftRecipientName => 'اسم المستلم';
+
+  @override
+  String get p9GiftRecipientPhone => 'رقم جوال المستلم';
+
+  @override
+  String p9GiftRecipientPhoneHint(String example) {
+    return 'مثال: $example';
+  }
+
+  @override
+  String get p9GiftMessageLabel => 'رسالة الهدية (اختياري)';
+
+  @override
+  String get p9GiftMessageHint => 'اكتب ملاحظة قصيرة للمستلم';
+
+  @override
+  String get p9GiftNameRequired => 'أدخل اسم المستلم';
+
+  @override
+  String p9GiftPhoneInvalid(String prefix) {
+    return 'أدخل رقم جوال صحيحًا ($prefix …)';
+  }
+
+  @override
+  String get p9GiftNoCash =>
+      'الدفع عند الاستلام غير متاح للهدايا. اختر طريقة دفع إلكترونية.';
+
+  @override
+  String get p9GiftAddressHint => 'اجعل موقع التوصيل عنوان المستلم.';
+
+  @override
+  String get p9GiftUnavailable => 'طلبات الهدايا غير متاحة بعد.';
+
+  @override
+  String get p9GiftPlacedTitle => 'تم تقديم طلب الهدية';
+
+  @override
+  String p9GiftPlacedBody(String name) {
+    return 'عند تأكيد الدفع، يتلقى $name رسالة نصية تحتوي على رابط للتتبع ورمز توصيل من 4 أرقام، ويعطي الرمز للمندوب عند وصول الطلب.';
+  }
+
+  @override
+  String p9GiftForName(String name) {
+    return 'هدية إلى $name';
+  }
+
+  @override
+  String get p9GiftRecipientLabel => 'المستلم';
+
+  @override
+  String get p9GiftYourMessage => 'رسالتك';
+
+  @override
+  String get p9GiftWalletNote =>
+      'المحفظة بعملة أخرى تُخصم منها القيمة المحوّلة بسعر اليوم.';
+
+  @override
+  String p9GiftModeBanner(String market) {
+    return 'إرسال هدية إلى $market';
+  }
+
+  @override
+  String get p9GiftStop => 'إيقاف الهدية';
+
+  @override
+  String get p9GiftOrderLabel => 'طلب هدية';
+
+  @override
+  String get p10CityNotServed => 'لا نخدم هذه المنطقة بعد';
+
+  @override
+  String get p10CityCrossCity =>
+      'يجب أن يكون الاستلام والتسليم في المدينة نفسها.';
+
+  @override
+  String get p10CityOtherCity =>
+      'هذه العناوين في مدينة أخرى. غيّر مدينتك من الإعدادات للمتابعة.';
+
+  @override
+  String get p10ParcelTitle => 'إرسال طرد';
+
+  @override
+  String get p10ParcelScheduledTitle => 'جدولة طرد';
+
+  @override
+  String get p10ParcelRoute => 'المسار';
+
+  @override
+  String get p10ParcelPickup => 'الاستلام';
+
+  @override
+  String get p10ParcelDropoff => 'التسليم';
+
+  @override
+  String get p10ParcelChooseAddress => 'اختر على الخريطة';
+
+  @override
+  String get p10ParcelBuilding => 'المبنى / المنزل';
+
+  @override
+  String get p10ParcelFloor => 'الطابق';
+
+  @override
+  String get p10ParcelApartment => 'الشقة / المكتب';
+
+  @override
+  String get p10ParcelLandmark => 'معلم قريب';
+
+  @override
+  String get p10ParcelRecipient => 'المستلم';
+
+  @override
+  String get p10ParcelSendToMyself => 'إرسال إلى نفسي';
+
+  @override
+  String get p10ParcelRecipientName => 'اسم المستلم';
+
+  @override
+  String get p10ParcelRecipientPhone => 'هاتف المستلم';
+
+  @override
+  String get p10ParcelWhatSending => 'ماذا ترسل؟';
+
+  @override
+  String get p10ParcelCategoryDocument => 'مستندات';
+
+  @override
+  String get p10ParcelCategoryParcel => 'طرد';
+
+  @override
+  String get p10ParcelCategoryFood => 'طعام';
+
+  @override
+  String get p10ParcelCategoryGrocery => 'بقالة';
+
+  @override
+  String get p10ParcelCategoryElectronics => 'إلكترونيات';
+
+  @override
+  String get p10ParcelCategoryClothes => 'ملابس';
+
+  @override
+  String get p10ParcelCategoryGift => 'هدية';
+
+  @override
+  String get p10ParcelCategoryFlowers => 'زهور';
+
+  @override
+  String get p10ParcelCategoryKeys => 'مفاتيح';
+
+  @override
+  String get p10ParcelCategoryOther => 'أخرى';
+
+  @override
+  String get p10ParcelSizeSmall => 'صغير';
+
+  @override
+  String get p10ParcelSizeSmallHint => 'يتسع في حقيبة ظهر';
+
+  @override
+  String get p10ParcelSizeMedium => 'متوسط';
+
+  @override
+  String get p10ParcelSizeMediumHint => 'يتسع على مقعد سيارة';
+
+  @override
+  String get p10ParcelSizeLarge => 'كبير';
+
+  @override
+  String get p10ParcelSizeLargeHint => 'يحتاج إلى شاحنة صغيرة';
+
+  @override
+  String get p10ParcelSizeUnavailable => 'غير متاح هنا بعد';
+
+  @override
+  String get p10ParcelDescription => 'الوصف (اختياري)';
+
+  @override
+  String get p10ParcelItemValue => 'قيمة الغرض (اختياري)';
+
+  @override
+  String get p10ParcelCourierNote => 'ملاحظة للمندوب';
+
+  @override
+  String get p10ParcelPayment => 'الدفع';
+
+  @override
+  String get p10ParcelPayWallet => 'محفظة HudHud';
+
+  @override
+  String get p10ParcelPayCash => 'نقدًا للمندوب';
+
+  @override
+  String get p10ParcelPaymentPhone => 'رقم المحفظة المتنقلة';
+
+  @override
+  String get p10ParcelRecipientPays => 'المستلم يدفع (نقدًا عند التسليم)';
+
+  @override
+  String get p10ParcelSellerCod => 'تحصيل ثمن الغرض من المستلم';
+
+  @override
+  String get p10ParcelSellerCodHint =>
+      'يحصّله المندوب نقدًا ويُدفع إلى محفظة أعمالك في HudHud.';
+
+  @override
+  String get p10ParcelSellerCodAmount => 'ثمن الغرض المطلوب تحصيله';
+
+  @override
+  String get p10ParcelPickupTime => 'وقت الاستلام';
+
+  @override
+  String get p10ParcelPickupNow => 'في أقرب وقت ممكن';
+
+  @override
+  String get p10ParcelPrice => 'السعر';
+
+  @override
+  String p10ParcelPriceHeld(String time) {
+    return 'السعر محجوز لمدة $time';
+  }
+
+  @override
+  String get p10ParcelPriceExpired => 'انتهت مدة حجز السعر';
+
+  @override
+  String get p10ParcelRefreshPrice => 'تحديث السعر';
+
+  @override
+  String get p10ParcelGettingPrice => 'جارٍ احتساب السعر…';
+
+  @override
+  String get p10ParcelPriceUpdated => 'تغيّر السعر. يرجى مراجعة السعر الجديد.';
+
+  @override
+  String p10ParcelBook(String price) {
+    return 'احجز مقابل $price';
+  }
+
+  @override
+  String get p10ParcelContinue => 'متابعة';
+
+  @override
+  String get p10ParcelFillRequired =>
+      'اختر مكان الاستلام والتسليم وأضف هاتف المستلم.';
+
+  @override
+  String get p10ParcelSizeNotSupported =>
+      'هذا الحجم غير متاح في هذه المدينة بعد.';
+
+  @override
+  String get p10ParcelPaymentNotAvailable =>
+      'طريقة الدفع هذه غير متاحة في هذه المدينة.';
+
+  @override
+  String get p10ParcelInsufficientWallet =>
+      'رصيد محفظتك غير كافٍ. اشحنها أو اختر طريقة دفع أخرى.';
+
+  @override
+  String get p10ParcelSomethingWrong => 'حدث خطأ ما. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get p10ParcelApprovePayment => 'وافق على الدفع من هاتفك.';
+
+  @override
+  String get p10ParcelBooked => 'تم حجز الطرد';
+
+  @override
+  String get p10ParcelHandoverCode => 'رمز التسليم';
+
+  @override
+  String get p10ParcelHandoverHint =>
+      'يعطي المستلم هذا الرمز للمندوب عند التسليم.';
+
+  @override
+  String get p10ParcelHandoverSelfHint =>
+      'أعطِ هذا الرمز للمندوب عند استلامك الطرد.';
+
+  @override
+  String get p10ParcelShareTracking => 'مشاركة رابط التتبع';
+
+  @override
+  String p10ParcelTrackingShareText(String link) {
+    return 'تتبّع طردي من HudHud: $link';
+  }
+
+  @override
+  String p10ParcelEta(String minutes) {
+    return 'يصل خلال $minutes دقيقة تقريبًا';
+  }
+
+  @override
+  String get p10ParcelCancel => 'إلغاء الطرد';
+
+  @override
+  String get p10ParcelCancelFree =>
+      'إلغاء هذا الطرد؟ الإلغاء مجاني لأنه لم يُعيَّن مندوب بعد.';
+
+  @override
+  String p10ParcelCancelFee(String fee) {
+    return 'المندوب في الطريق بالفعل. الإلغاء الآن يكلّف $fee.';
+  }
+
+  @override
+  String get p10ParcelCancelReason => 'ألغاه المرسل من التطبيق';
+
+  @override
+  String get p10ParcelCancelled => 'تم إلغاء الطرد';
+
+  @override
+  String get p11ParcelAddStop => 'إضافة محطة';
+
+  @override
+  String p11ParcelStopN(String number) {
+    return 'المحطة $number';
+  }
+
+  @override
+  String get p11ParcelRemoveStop => 'إزالة المحطة';
+
+  @override
+  String get p11ParcelMoveUp => 'نقل للأعلى';
+
+  @override
+  String get p11ParcelMoveDown => 'نقل للأسفل';
+
+  @override
+  String p11ParcelStopsLimit(String max) {
+    return 'حتى $max نقاط تسليم لكل طرد';
+  }
+
+  @override
+  String get p11ParcelMultiStopSenderPays =>
+      'مع عدة نقاط تسليم تدفع أنت ثمن المسار كاملاً.';
+
+  @override
+  String get p11ParcelMultiStopCashAtPickup =>
+      'مع عدة نقاط تسليم يُدفع النقد للمندوب عند الاستلام.';
+
+  @override
+  String get p11ParcelPayAtPickup => 'الدفع نقداً عند الاستلام';
+
+  @override
+  String get p11ParcelPayAtPickupHint =>
+      'سلّم النقد للمندوب عندما يستلم الطرد.';
+
+  @override
+  String p11ParcelPayAtPickupDue(String amount) {
+    return 'ادفع $amount نقداً للمندوب عند الاستلام';
+  }
+
+  @override
+  String get p11ParcelPaidAtPickup => 'تم الدفع للمندوب عند الاستلام';
+
+  @override
+  String get p11ParcelPayAtPickupUnavailable =>
+      'الدفع نقداً عند الاستلام غير متاح حالياً.';
+
+  @override
+  String get p11ParcelStopsTitle => 'نقاط التسليم';
+
+  @override
+  String get p11ParcelStopCodesHint =>
+      'حصل كل مستلم على رمز التسليم الخاص به برسالة SMS. شاركه إن لم يصله.';
+
+  @override
+  String get p11ParcelShareStopLink => 'مشاركة الرابط';
+
+  @override
+  String get p11ParcelStopPending => 'في الانتظار';
+
+  @override
+  String get p11ParcelStopArrived => 'المندوب وصل';
+
+  @override
+  String get p11ParcelStopDelivered => 'تم التسليم';
+
+  @override
+  String get p11ParcelStopFailed => 'لم يتم التسليم';
+
+  @override
+  String get p11ParcelStopReturned => 'أُعيد إليك';
+
+  @override
+  String get p11ParcelMultiStopDisabled =>
+      'نقاط التسليم المتعددة غير متاحة حالياً.';
+
+  @override
+  String get p11ParcelTooManyStops =>
+      'عدد كبير جداً من نقاط التسليم لطرد واحد.';
+
+  @override
+  String p11ParcelCancelCashFee(String fee) {
+    return 'المندوب في الطريق. الإلغاء الآن يكلف $fee ويُخصم من محفظتك أو يُضاف إلى رصيدك المستحق.';
+  }
+
+  @override
+  String p11ParcelOutstandingBalance(String amount) {
+    return 'عليك $amount من طرد ملغى. سيُخصم من محفظتك عند الشحن أو الطلب التالي.';
+  }
+
+  @override
+  String get p12StoreOpen => 'مفتوح';
+
+  @override
+  String get p12StoreClosed => 'مغلق';
+
+  @override
+  String get p12StoreBusy => 'مشغول';
+
+  @override
+  String p12StoreOpensAt(String time) {
+    return 'يفتح $time';
+  }
+
+  @override
+  String p12StoreOpensTomorrowAt(String time) {
+    return 'يفتح غدًا $time';
+  }
+
+  @override
+  String p12StoreBackAt(String time) {
+    return 'يعود $time';
+  }
+
+  @override
+  String get p12StoreClosedToday => 'مغلق اليوم';
+
+  @override
+  String get p12StoreClosedBanner =>
+      'هذا المتجر مغلق الآن. يمكنك تصفح القائمة، لكن الطلب متوقف حتى يفتح.';
+
+  @override
+  String get p12StoreBusyBanner =>
+      'هذا المتجر مشغول جدًا وأوقف الطلبات الجديدة مؤقتًا. يرجى المحاولة بعد قليل.';
+
+  @override
+  String get p12StoreOrderingPaused => 'الطلب متوقف';
+
+  @override
+  String get p12SoldOut => 'نفدت الكمية';
+
+  @override
+  String get p12Unavailable => 'غير متوفر';
+
+  @override
+  String get p12GoToCheckout => 'إلى الدفع';
+
+  @override
+  String get p12ErrStoreClosed => 'هذا المتجر مغلق الآن.';
+
+  @override
+  String get p12ErrStoreBusy => 'هذا المتجر مشغول ولا يستقبل طلبات الآن.';
+
+  @override
+  String get p12ErrItemSoldOut =>
+      'أحد المنتجات في سلتك نفد اليوم. أزله للمتابعة.';
+
+  @override
+  String p12ErrItemSoldOutNamed(String item) {
+    return '$item نفد اليوم. أزله للمتابعة.';
+  }
+
+  @override
+  String get p12RemoveItem => 'إزالة المنتج';
+
+  @override
+  String p12ErrOutstandingDues(String amount) {
+    return 'لديك رصيد غير مدفوع بقيمة $amount. الدفع النقدي غير متاح حتى يتم سداده. اشحن محفظتك أو اختر طريقة دفع أخرى.';
+  }
+
+  @override
+  String get p12DuesTitle => 'رصيد غير مدفوع';
+
+  @override
+  String p12DuesCheckoutBody(String amount) {
+    return 'عليك $amount من طرد ملغى. الدفع عند الاستلام متوقف حتى يتم السداد. شحن محفظتك يسدده تلقائيًا.';
+  }
+
+  @override
+  String get p12PayNow => 'ادفع الآن';
+
+  @override
+  String get p12CashBlockedByDues =>
+      'الدفع النقدي متوقف حتى سداد رصيدك غير المدفوع.';
+
+  @override
+  String get p12ChooseOtherPayment => 'اختر طريقة دفع أخرى';
+
+  @override
+  String get p12ErrCityOutside =>
+      'لا نوصّل إلى هذا العنوان بعد. اختر عنوانًا داخل مدينتك.';
+
+  @override
+  String get p12ErrCityCross =>
+      'يجب أن تكون جميع العناوين في الطلب الواحد داخل المدينة نفسها.';
+
+  @override
+  String p12ErrCityMismatch(String city) {
+    return 'هذا العنوان في $city. غيّر مدينتك إلى $city للمتابعة.';
+  }
+
+  @override
+  String get p12ErrCityMismatchGeneric =>
+      'هذا العنوان في مدينة أخرى. غيّر مدينتك للمتابعة.';
+
+  @override
+  String get p12ChangeCity => 'تغيير المدينة';
+
+  @override
+  String get p12ErrNetwork =>
+      'لا يوجد اتصال بالإنترنت. تحقق من اتصالك وحاول مرة أخرى.';
+
+  @override
+  String get p12ErrTimeout => 'الاتصال بطيء. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get p12ErrServer => 'حدث خطأ من جهتنا. يرجى المحاولة بعد قليل.';
+
+  @override
+  String get p12ErrSessionExpired => 'انتهت جلستك. يرجى تسجيل الدخول مرة أخرى.';
 }

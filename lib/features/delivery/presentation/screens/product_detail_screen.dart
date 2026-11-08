@@ -12,6 +12,9 @@ import 'package:hudhud_delivery/features/categories/data/repository/categories_r
 import 'package:hudhud_delivery/features/categories/model/categories_products_model.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/features/wishlist/presentation/widgets/wishlist_toggle_button.dart';
+import 'package:hudhud_delivery/features/growth/market_controller.dart';
+import 'package:hudhud_delivery/features/vendors/data/repository/store_status_repository.dart';
+import 'package:hudhud_delivery/features/vendors/presentation/widgets/store_status_widgets.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final int productId;
@@ -110,11 +113,31 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     if (!product.canOrder) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(context.l10n.productUnavailable),
+          content: Text(
+            !product.isSoldOut
+                ? context.l10n.productUnavailable
+                : (product.name?.trim().isNotEmpty ?? false)
+                    ? context.l10n.p12ErrItemSoldOutNamed(product.name!.trim())
+                    : context.l10n.p12ErrItemSoldOut,
+          ),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
       return;
+    }
+    // Store closed / busy: nothing can be ordered now (cached lookup).
+    final vendorId = product.vendor_id;
+    if (vendorId != null && vendorId > 0) {
+      final status = await StoreStatusRepository.instance.statusFor(vendorId);
+      if (!mounted) return;
+      if (status != null && !status.acceptingOrders) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(storeUnavailableMessage(context.l10n, status)),
+          ),
+        );
+        return;
+      }
     }
     if (_variants.isNotEmpty && _selectedVariantId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -292,9 +315,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                       runSpacing: 4,
                                       children: [
                                         Text(
-                                          formatEtbPriceString(
+                                          formatMoneyPriceString(
                                             product.formatted_price ??
                                                 product.price,
+                                            currency: MarketController.catalogCurrency,
                                           ),
                                           style: TextStyle(
                                             fontSize: 26,
@@ -307,8 +331,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                             product.formatted_original_price !=
                                                 null)
                                           Text(
-                                            formatEtbPriceString(
+                                            formatMoneyPriceString(
                                               product.formatted_original_price,
+                                              currency: MarketController.catalogCurrency,
                                             ),
                                             style: TextStyle(
                                               fontSize: 15,
@@ -702,7 +727,11 @@ class _CartCheckoutBar extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'ETB ${subtotal.toStringAsFixed(1)}',
+                    formatMoneyAmount(
+                      subtotal,
+                      currency: MarketController.catalogCurrency,
+                      fractionDigits: 1,
+                    ),
                     maxLines: 1,
                     style: TextStyle(
                       color: HomeColors.textPrimaryOf(context),

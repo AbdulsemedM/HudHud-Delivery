@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/utils/money_format.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -35,7 +36,7 @@ class DeliveryEstimateBanner extends StatelessWidget {
 
     String costText = '—';
     if (!isLoading && error == null && estimatedCost != null) {
-      costText = '$currency ${estimatedCost!.toStringAsFixed(2)}';
+      costText = formatMoneyAmount(estimatedCost!, currency: currency);
     }
 
     final showMeta = !isLoading && error == null;

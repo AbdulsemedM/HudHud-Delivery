@@ -7,7 +7,10 @@ import 'package:shimmer/shimmer.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/theme/system_ui_style.dart';
+import 'package:hudhud_delivery/features/growth/growth_scope.dart';
+import 'package:hudhud_delivery/features/growth/presentation/reorder_flow.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
+import 'package:hudhud_delivery/features/wallet/services/wallet_refresh_signal.dart';
 import '../../bloc/orders_bloc.dart';
 import '../../data/models/order_model.dart';
 import '../../data/models/order_tracking_model.dart';
@@ -52,6 +55,18 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       // Silent refresh — keep showing last loaded order while fetching.
       context.read<OrdersBloc>().add(FetchOrderDetailsEvent(widget.orderId));
     });
+  }
+
+  /// "ETB 1,005 refunded to your HudHud wallet" when the server reports a
+  /// wallet refund; the plain cancel message otherwise.
+  String _cancelMessage(BuildContext context, OrderCancelled state) {
+    final refund = state.refund;
+    if (refund == null) return state.message;
+    if (refund.isToWallet) {
+      return context.l10n.p5RefundedToWallet(refund.formattedAmount);
+    }
+    if (refund.isManual) return context.l10n.p5RefundManual;
+    return state.message;
   }
 
   ThemeData _homeTheme(BuildContext context) {
@@ -100,10 +115,15 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
               }
               if (state is OrderCancelled) {
                 _pollTimer?.cancel();
+                // Paid orders are refunded to the HudHud wallet on cancel.
+                WalletRefreshSignal.notify();
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(state.message),
+                    content: Text(_cancelMessage(context, state)),
                     backgroundColor: AppColors.successColor,
+                    duration: state.refund?.isToWallet == true
+                        ? const Duration(seconds: 6)
+                        : const Duration(seconds: 4),
                   ),
                 );
                 Navigator.of(context).pop();
@@ -245,6 +265,10 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                   trackingEstimatedTime: tracking?.estimatedTime,
                 ),
                 const SizedBox(height: 14),
+                if (order.isGift) ...[
+                  GiftOrderCard(order: order),
+                  const SizedBox(height: 14),
+                ],
                 if (tracking != null) ...[
                   OrderTrackingCard(tracking: tracking),
                   const SizedBox(height: 14),
@@ -259,9 +283,40 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 const SizedBox(height: 14),
                 VendorInfoCard(vendor: order.vendor),
                 const SizedBox(height: 14),
-                OrderItemsCard(items: order.items),
+                OrderItemsCard(
+                  items: order.items,
+                  currency: order.currency,
+                ),
                 const SizedBox(height: 14),
                 OrderSummaryCard(order: order),
+                // Phase 2: rebuild the cart from this past order.
+                if (order.isDelivered &&
+                    (growthControllerOf(context, listen: true)
+                            ?.reorderEnabled ??
+                        false)) ...[
+                  const SizedBox(height: 14),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppColors.brandOrange,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        textStyle: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      onPressed: () =>
+                          runReorderFlow(context, orderId: order.id),
+                      icon: const Icon(Icons.replay_rounded),
+                      label: Text(context.l10n.growthReorderButton),
+                    ),
+                  ),
+                ],
                 if (order.isDelivered) ...[
                   const SizedBox(height: 14),
                   RateOrderCard(

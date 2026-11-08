@@ -12,6 +12,7 @@ import 'package:hudhud_delivery/features/settings/presentation/widgets/profile_d
 import 'package:hudhud_delivery/features/wishlist/bloc/wishlist_bloc.dart';
 import 'package:hudhud_delivery/features/wishlist/model/wishlist_item_model.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
+import 'package:hudhud_delivery/features/growth/market_controller.dart';
 
 class WishlistScreen extends StatefulWidget {
   const WishlistScreen({super.key});
@@ -57,7 +58,10 @@ class _WishlistScreenState extends State<WishlistScreen> {
     if (p == null) return '—';
     final formatted = p.formatted_price ?? p.current_price ?? p.price;
     if (formatted != null && formatted.isNotEmpty) {
-      return formatEtbPriceString(formatted);
+      return formatMoneyPriceString(
+        formatted,
+        currency: MarketController.catalogCurrency,
+      );
     }
     return '—';
   }

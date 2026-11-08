@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:hudhud_delivery/app/models/place_result.dart';
+import 'package:hudhud_delivery/app/services/city_scope.dart';
 import 'package:hudhud_delivery/app/services/custom_location_service.dart';
 import 'package:hudhud_delivery/app/services/google_places_service.dart';
-import 'package:hudhud_delivery/app/utils/human_readable_address.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/widgets/centered_pin_map.dart';
@@ -22,7 +22,16 @@ class AddressMapPickerScreen extends StatefulWidget {
 
 class _AddressMapPickerScreenState extends State<AddressMapPickerScreen> {
   gmaps.GoogleMapController? _mapController;
-  LatLng _currentPosition = const LatLng(9.0222, 38.7468);
+  LatLng _currentPosition = _cityCenter();
+
+  /// Phase 10: start on the selected city (Addis Ababa when unknown).
+  static LatLng _cityCenter() {
+    final area = CityScope.current;
+    if (area != null && area.hasCenter) {
+      return LatLng(area.centerLat!, area.centerLng!);
+    }
+    return const LatLng(9.0222, 38.7468);
+  }
   bool _isLoadingCurrentLocation = false;
   PlaceResult? _selectedPlace;
   bool _skipNextIdleGeocode = false;
@@ -37,12 +46,11 @@ class _AddressMapPickerScreenState extends State<AddressMapPickerScreen> {
 
   Future<void> _reverseGeocodeCenter(gmaps.LatLng point) async {
     try {
-      final places = await GooglePlacesService.reverseGeocode(
+      final best = await GooglePlacesService.placeAtPoint(
         point.latitude,
         point.longitude,
       );
       if (!mounted) return;
-      final best = HumanReadableAddress.pickBestPlace(places);
       if (best != null) {
         setState(() => _selectedPlace = best);
       }
@@ -89,6 +97,15 @@ class _AddressMapPickerScreenState extends State<AddressMapPickerScreen> {
 
   void _confirm() {
     if (_selectedPlace == null) return;
+    if (!CityScope.allowsPin(
+      _selectedPlace!.coordinates.latitude,
+      _selectedPlace!.coordinates.longitude,
+    )) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.p10CityNotServed)),
+      );
+      return;
+    }
     final mapped = AddressFieldsMapper.fromPlaceResult(_selectedPlace!);
     Navigator.pop(context, {
       ...mapped,

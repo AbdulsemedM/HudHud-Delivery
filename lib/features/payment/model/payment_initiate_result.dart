@@ -107,6 +107,12 @@ class PaymentInitiateResult {
 
   final Map<String, dynamic>? raw;
 
+  /// Cash on delivery: the server answers success with
+  /// `next_action: pay_cash_on_delivery` and the payment stays pending until
+  /// the cash is collected — never show it as "payment completed".
+  bool get isCashOnDelivery =>
+      method == 'cash_on_delivery' || nextAction == 'pay_cash_on_delivery';
+
   /// Prefer USSD / approve-on-phone copy instead of “payment completed”.
   bool get showUssdSuccessCopy =>
       ussdDispatched ||

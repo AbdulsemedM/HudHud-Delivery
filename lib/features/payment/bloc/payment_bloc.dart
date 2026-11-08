@@ -6,6 +6,7 @@ import '../../checkout/data/models/create_order_result.dart';
 import '../../checkout/data/repository/checkout_repository.dart';
 import '../data/repository/payment_repository.dart';
 import '../model/payment_initiate_result.dart';
+import '../utils/order_payment_issue.dart';
 import '../presentation/widgets/payment_details_form.dart';
 
 // Events
@@ -74,13 +75,19 @@ class PaymentInitiated extends PaymentState {
   final double? finalDeliveryFee;
   final String? currencySymbol;
 
+  /// Phase 6: set when the order is a gift (recipient's name).
+  final String? giftRecipientName;
+
   const PaymentInitiated({
     required this.result,
     required this.orderId,
     this.deliveryFeeUpdated = false,
     this.finalDeliveryFee,
     this.currencySymbol,
+    this.giftRecipientName,
   });
+
+  bool get isGift => giftRecipientName != null;
 
   @override
   List<Object?> get props => [
@@ -89,16 +96,53 @@ class PaymentInitiated extends PaymentState {
         deliveryFeeUpdated,
         finalDeliveryFee,
         currencySymbol,
+        giftRecipientName,
       ];
+}
+
+/// The order exists but the server refused this payment attempt for a
+/// reason that needs the order screen (already paid, payment in progress,
+/// totals / currency changed, no longer payable). The cart is spent.
+class PaymentOrderNeedsAttention extends PaymentState {
+  final OrderPaymentIssue issue;
+  final String orderId;
+
+  /// Server text, for logs / fallback only (UI uses localized copy).
+  final String message;
+
+  const PaymentOrderNeedsAttention({
+    required this.issue,
+    required this.orderId,
+    required this.message,
+  });
+
+  @override
+  List<Object?> get props => [issue, orderId, message];
 }
 
 class PaymentFailure extends PaymentState {
   final String error;
 
-  const PaymentFailure({required this.error});
+  /// API error code when known (e.g. FEATURE_DISABLED for gift orders,
+  /// STORE_CLOSED, ITEM_SOLD_OUT, OUTSTANDING_DUES, CITY_*).
+  final String? code;
+
+  /// HTTP status of the refused order call (null for transport errors).
+  final int? statusCode;
+
+  /// Error body of the refused order call (store_status, amount, currency,
+  /// product_id, market, …) for checkout to explain the refusal.
+  final Map<String, dynamic>? details;
+
+  const PaymentFailure({
+    required this.error,
+    this.code,
+    this.statusCode,
+    this.details,
+  });
 
   @override
-  List<Object?> get props => [error];
+  List<Object?> get props => [error, code, statusCode, details];
 }
 
 class PaymentMethodsLoaded extends PaymentState {
@@ -147,7 +191,40 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
           ? orderDetails['branch_id'] as int
           : int.tryParse(orderDetails['branch_id']?.toString() ?? '');
 
-      final orderResult = await checkoutRepository.createOrder(
+      // Phase 6: a gift goes to POST /customer/gift-orders (no points,
+      // never cash on delivery); payment is then initiated as usual.
+      final gift = orderDetails['gift'] is Map
+          ? Map<String, dynamic>.from(orderDetails['gift'] as Map)
+          : null;
+      final giftRecipientName = gift?['recipient_name']?.toString();
+
+      final orderResult = gift != null
+          ? await checkoutRepository.createGiftOrder(
+              vendorId: orderDetails['vendor_id'] as int,
+              items: List<Map<String, dynamic>>.from(
+                orderDetails['items'] as List,
+              ),
+              deliveryAddress: orderDetails['delivery_address'] as String,
+              deliveryLocation: (orderDetails['delivery_location'] ??
+                  orderDetails['delivery_address']) as String,
+              deliveryLatitude:
+                  (orderDetails['delivery_latitude'] as num?)?.toDouble() ??
+                      0.0,
+              deliveryLongitude:
+                  (orderDetails['delivery_longitude'] as num?)?.toDouble() ??
+                      0.0,
+              paymentMethod: event.paymentMethod,
+              recipientName: giftRecipientName ?? '',
+              recipientPhone: gift['recipient_phone']?.toString() ?? '',
+              giftMessage: gift['gift_message']?.toString(),
+              serviceType:
+                  orderDetails['service_type'] as String? ?? 'restaurant',
+              notes: orderDetails['notes'] as String?,
+              couponCode: orderDetails['coupon_code'] as String?,
+              branchId: branchId,
+              idempotencyKey: _orderIdempotencyKey,
+            )
+          : await checkoutRepository.createOrder(
         vendorId: orderDetails['vendor_id'] as int,
         items: List<Map<String, dynamic>>.from(orderDetails['items'] as List),
         taxAmount: (orderDetails['tax_amount'] ?? 0.0) as double,
@@ -174,11 +251,19 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
             (orderDetails['pickup_longitude'] as num?)?.toDouble(),
         branchId: branchId,
         idempotencyKey: _orderIdempotencyKey,
+        redeemPoints: _parseRedeemPoints(orderDetails['redeem_points']),
       );
 
       if (orderResult['success'] != true) {
+        final details = orderResult['errorData'];
+        final status = orderResult['statusCode'];
         emit(PaymentFailure(
-            error: orderResult['message'] ?? 'Failed to create order'));
+          error: orderResult['message'] ?? 'Failed to create order',
+          code: orderResult['code']?.toString(),
+          statusCode: status is int ? status : null,
+          details:
+              details is Map ? Map<String, dynamic>.from(details) : null,
+        ));
         return;
       }
 
@@ -239,8 +324,22 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
           orderId: created.orderId.toString(),
           deliveryFeeUpdated: deliveryFeeUpdated,
           finalDeliveryFee: created.deliveryFee,
+          giftRecipientName: gift == null
+              ? null
+              : (giftRecipientName?.trim().isNotEmpty == true
+                  ? giftRecipientName!.trim()
+                  : gift['recipient_phone']?.toString() ?? ''),
         ));
       } catch (e) {
+        final issue = classifyOrderPaymentError(e);
+        if (issue != null) {
+          emit(PaymentOrderNeedsAttention(
+            issue: issue,
+            orderId: created.orderId.toString(),
+            message: userFacingApiError(e),
+          ));
+          return;
+        }
         emit(PaymentFailure(
           error:
               '${userFacingApiError(e)} Order #${created.orderId} was already created — avoid checking out again (duplicate order).',
@@ -249,6 +348,13 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
     } catch (e) {
       emit(PaymentFailure(error: userFacingApiError(e)));
     }
+  }
+
+  static int? _parseRedeemPoints(dynamic raw) {
+    if (raw == null) return null;
+    final parsed = raw is int ? raw : int.tryParse(raw.toString());
+    if (parsed == null || parsed <= 0) return null;
+    return parsed;
   }
 
   Future<void> _onGetPaymentMethods(

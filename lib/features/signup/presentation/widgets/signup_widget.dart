@@ -10,6 +10,7 @@ import 'package:hudhud_delivery/features/login/presentation/widgets/auth_field_d
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_gradient_button.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_phone_number_field.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_ui.dart';
+import 'package:hudhud_delivery/features/growth/deep_link_service.dart';
 import 'package:hudhud_delivery/features/settings/presentation/screen/terms_conditions_screen.dart';
 import 'package:hudhud_delivery/features/signup/bloc/signup_bloc.dart';
 import 'package:hudhud_delivery/features/signup/presentation/screen/verify_contact_screen.dart';
@@ -84,6 +85,15 @@ class SignupFormState extends State<SignupForm> {
     super.initState();
     _termsTap = TapGestureRecognizer()..onTap = _openTerms;
     _privacyTap = TapGestureRecognizer()..onTap = _openTerms;
+    _prefillReferralCode();
+  }
+
+  /// Prefills a referral code captured from a `/r/{code}` link.
+  Future<void> _prefillReferralCode() async {
+    final code = await DeepLinkService.getPendingReferralCode();
+    if (!mounted || code == null) return;
+    if (_referralController.text.trim().isNotEmpty) return;
+    _referralController.text = code;
   }
 
   SignupFormData getFormData() {
@@ -554,6 +564,7 @@ class SignupButton extends StatelessWidget {
     return BlocListener<SignupBloc, SignupState>(
       listener: (context, state) {
         if (state is SignupSuccess) {
+          DeepLinkService.clearPendingReferralCode();
           if (resumeAfterAuth) {
             Navigator.push<bool>(
               context,

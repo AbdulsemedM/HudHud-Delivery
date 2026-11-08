@@ -34,6 +34,9 @@ class CategoriesProductsModel {
   final bool? is_available;
   final String? status;
   final bool? is_featured;
+
+  /// Merchant "sold out today" (`products.sold_out_until`, ISO-8601).
+  final String? sold_out_until;
   CategoriesProductsModel({
     this.id,
     this.vendor_id,
@@ -65,11 +68,25 @@ class CategoriesProductsModel {
     this.is_available,
     this.status,
     this.is_featured,
+    this.sold_out_until,
   });
 
-  /// Whether the product can be added to cart (API: is_available + active status).
+  /// Whether the product can be added to cart (API: is_available + active
+  /// status, and not sold out today).
   bool get canOrder =>
-      is_available != false && (status == null || status == 'active');
+      is_available != false &&
+      (status == null || status == 'active') &&
+      !isSoldOut;
+
+  /// Sold out until [sold_out_until] (shown as a "Sold out" badge).
+  bool get isSoldOut => isSoldOutAt(DateTime.now());
+
+  bool isSoldOutAt(DateTime now) {
+    final raw = sold_out_until?.trim();
+    if (raw == null || raw.isEmpty) return false;
+    final until = DateTime.tryParse(raw);
+    return until != null && until.isAfter(now);
+  }
 
   static bool _parseBool(dynamic value, {required bool fallback}) {
     if (value == null) return fallback;
@@ -112,6 +129,7 @@ class CategoriesProductsModel {
     bool? is_available,
     String? status,
     bool? is_featured,
+    String? sold_out_until,
   }) {
     return CategoriesProductsModel(
       id: id ?? this.id,
@@ -144,6 +162,7 @@ class CategoriesProductsModel {
       is_available: is_available ?? this.is_available,
       status: status ?? this.status,
       is_featured: is_featured ?? this.is_featured,
+      sold_out_until: sold_out_until ?? this.sold_out_until,
     );
   }
 
@@ -179,6 +198,7 @@ class CategoriesProductsModel {
       'is_available': is_available,
       'status': status,
       'is_featured': is_featured,
+      'sold_out_until': sold_out_until,
     };
   }
 
@@ -244,6 +264,7 @@ class CategoriesProductsModel {
       is_available: _parseBool(map['is_available'], fallback: true),
       status: map['status']?.toString(),
       is_featured: _parseBool(map['is_featured'], fallback: false),
+      sold_out_until: map['sold_out_until']?.toString(),
     );
   }
 
@@ -290,7 +311,8 @@ class CategoriesProductsModel {
       other.discount_percentage == discount_percentage &&
       other.is_available == is_available &&
       other.status == status &&
-      other.is_featured == is_featured;
+      other.is_featured == is_featured &&
+      other.sold_out_until == sold_out_until;
   }
 
   @override
@@ -324,6 +346,7 @@ class CategoriesProductsModel {
       discount_percentage.hashCode ^
       is_available.hashCode ^
       status.hashCode ^
-      is_featured.hashCode;
+      is_featured.hashCode ^
+      sold_out_until.hashCode;
   }
 }

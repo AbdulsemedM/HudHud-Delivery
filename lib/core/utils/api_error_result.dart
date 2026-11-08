@@ -17,7 +17,26 @@ const Set<String> kKnownApiErrorCodes = {
   'DELIVERY_PAYMENT_RETRY_FAILED',
   'CITY_VEHICLE_NOT_SUPPORTED',
   'PICKUP_SERVICE_AREA_UNAVAILABLE',
+  // Merchant store controls (StoreAvailabilityService / checkout pricing).
+  'STORE_CLOSED',
+  'STORE_PAUSED',
+  'ITEM_SOLD_OUT',
+  // Customer dues (CustomerDuesService::cashBlock).
+  'OUTSTANDING_DUES',
+  // One-city rule (CityScopeService).
+  'CITY_OUTSIDE_SERVICE_AREA',
+  'CITY_CROSS_MARKET',
+  'CITY_MARKET_MISMATCH',
 };
+
+/// Server error codes the customer app explains in its own words.
+const String kStoreClosedCode = 'STORE_CLOSED';
+const String kStorePausedCode = 'STORE_PAUSED';
+const String kItemSoldOutCode = 'ITEM_SOLD_OUT';
+const String kOutstandingDuesCode = 'OUTSTANDING_DUES';
+const String kCityOutsideCode = 'CITY_OUTSIDE_SERVICE_AREA';
+const String kCityCrossMarketCode = 'CITY_CROSS_MARKET';
+const String kCityMarketMismatchCode = 'CITY_MARKET_MISMATCH';
 
 /// Structured parse of Laravel-style / payment API error envelopes.
 class ApiErrorResult {
@@ -33,6 +52,11 @@ class ApiErrorResult {
     this.gatewayErrorCode,
     this.expectedAmount,
     this.providedAmount,
+    this.amount,
+    this.currency,
+    this.productId,
+    this.marketCode,
+    this.storeStatus,
   });
 
   final String message;
@@ -48,6 +72,33 @@ class ApiErrorResult {
   final double? expectedAmount;
   /// From payment amount-mismatch 422 (`provided_amount`).
   final double? providedAmount;
+
+  /// `OUTSTANDING_DUES`: the amount owed and its currency.
+  final double? amount;
+  final String? currency;
+
+  /// `ITEM_SOLD_OUT`: the product to remove from the cart.
+  final int? productId;
+
+  /// `CITY_MARKET_MISMATCH`: the city (market code) the points are in.
+  final String? marketCode;
+
+  /// `STORE_CLOSED` / `STORE_PAUSED`: the raw `store_status` block.
+  final Map<String, dynamic>? storeStatus;
+
+  bool get isStoreClosed => code == kStoreClosedCode;
+  bool get isStorePaused => code == kStorePausedCode;
+
+  /// The store cannot take an order right now (closed or busy).
+  bool get isStoreUnavailable => isStoreClosed || isStorePaused;
+  bool get isItemSoldOut => code == kItemSoldOutCode;
+  bool get isOutstandingDues => code == kOutstandingDuesCode;
+
+  /// One of the three one-city (`CITY_*`) refusals.
+  bool get isCityScopeError =>
+      code == kCityOutsideCode ||
+      code == kCityCrossMarketCode ||
+      code == kCityMarketMismatchCode;
 
   bool get isInsufficientBalance =>
       code == 'insufficient_balance' ||
@@ -211,13 +262,34 @@ ApiErrorResult parseApiErrorResult(
     nestedData['error_code'],
     root['error_code'],
   ]);
+  final amount = _parseDouble(root['amount'] ?? nestedData['amount']);
+  final currency = _firstNonEmptyString([
+    root['currency'],
+    nestedData['currency'],
+  ])?.toUpperCase();
+  final productIdRaw = _parseDouble(
+    root['product_id'] ?? nestedData['product_id'],
+  );
+  final market = root['market'] ?? nestedData['market'];
+  final marketCode = market is String && market.trim().isNotEmpty
+      ? market.trim().toLowerCase()
+      : null;
+  final storeStatusRaw = _asMap(root['store_status']);
 
-  var code = _firstNonEmptyString([
+  // First candidate that is a usable code: a free-text `error` (debug
+  // message) no longer hides a real `code` next to it.
+  String? code;
+  for (final candidate in [
     root['error'],
     root['code'],
     nestedData['error'],
     nestedData['code'],
-  ]);
+  ]) {
+    final text = candidate?.toString().trim();
+    if (text == null || text.isEmpty) continue;
+    code = _normalizeCode(text);
+    if (code != null) break;
+  }
 
   // Provider `error_code` (e.g. DECLINED) is not the app error code unless known.
   final providerErrorCode = _firstNonEmptyString([
@@ -228,15 +300,6 @@ ApiErrorResult parseApiErrorResult(
       providerErrorCode != null &&
       kKnownApiErrorCodes.contains(providerErrorCode)) {
     code = providerErrorCode;
-  }
-
-  if (code != null && !kKnownApiErrorCodes.contains(code)) {
-    // Keep SCREAMING_SNAKE route-distance codes and lowercase snake_case ids.
-    if (_isRouteDistanceCode(code)) {
-      // preserve as-is
-    } else if (!RegExp(r'^[a-z][a-z0-9_]*$').hasMatch(code)) {
-      code = null;
-    }
   }
 
   code ??= _inferCode(
@@ -263,6 +326,11 @@ ApiErrorResult parseApiErrorResult(
     gatewayErrorCode: gatewayErrorCode,
     expectedAmount: expectedAmount,
     providedAmount: providedAmount,
+    amount: amount,
+    currency: currency,
+    productId: productIdRaw?.toInt(),
+    marketCode: marketCode,
+    storeStatus: storeStatusRaw.isEmpty ? null : storeStatusRaw,
   );
 }
 
@@ -318,6 +386,22 @@ String? _inferCode({
     if (lower.contains('order')) return 'order_not_found';
   }
   return _inferCodeFromStatus(statusCode);
+}
+
+/// Keeps known ids, stable SCREAMING_SNAKE API codes (STORE_CLOSED,
+/// FEATURE_DISABLED, PARCEL_QUOTE_EXPIRED, …) and lowercase snake_case ids;
+/// folds an upper-case alias of a known id onto it; drops anything else
+/// (free text, provider strings) so it is never shown or matched.
+String? _normalizeCode(String code) {
+  if (kKnownApiErrorCodes.contains(code)) return code;
+  final lower = code.toLowerCase();
+  if (kKnownApiErrorCodes.contains(lower)) return lower;
+  if (_isRouteDistanceCode(code) ||
+      RegExp(r'^[A-Z][A-Z0-9]*(_[A-Z0-9]+)+$').hasMatch(code)) {
+    return code;
+  }
+  if (RegExp(r'^[a-z][a-z0-9_]*$').hasMatch(code)) return code;
+  return null;
 }
 
 bool _isRouteDistanceCode(String? code) {

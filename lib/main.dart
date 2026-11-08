@@ -26,8 +26,12 @@ import 'controllers/locale_controller.dart';
 import 'controllers/service_accent_controller.dart';
 import 'core/easy_mode/easy_mode_controller.dart';
 import 'core/easy_mode/voice_hint_service.dart';
+import 'features/growth/deep_link_service.dart';
+import 'features/growth/growth_config_controller.dart';
+import 'features/growth/market_controller.dart';
 
 // Services
+import 'app/services/client_error_reporter.dart';
 import 'app/services/fcm_service.dart';
 import 'app/services/auth_service.dart';
 import 'app/services/remote_config_service.dart';
@@ -45,6 +49,10 @@ import 'package:hudhud_delivery/features/wallet/services/wallet_topup_recovery_s
 import 'package:image_picker_android/image_picker_android.dart';
 import 'package:image_picker_platform_interface/image_picker_platform_interface.dart';
 
+/// One instance for the app's lifetime (MaterialApp rebuilds keep it).
+final ClientErrorRouteObserver _clientErrorRouteObserver =
+    ClientErrorRouteObserver();
+
 void _configureAndroidPhotoPicker() {
   if (!Platform.isAndroid) return;
   final impl = ImagePickerPlatform.instance;
@@ -55,14 +63,21 @@ void _configureAndroidPhotoPicker() {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Error/crash reports to POST /api/client-errors (release builds; debug
+  // only with --dart-define=REPORT_ERRORS_IN_DEBUG=true). runZonedGuarded is
+  // not used: main() awaits plugin init before runApp, and
+  // PlatformDispatcher.onError already covers uncaught async errors.
+  ClientErrorReporter.instance.install();
   _configureAndroidPhotoPicker();
 
-  // Env (BASE_URL, etc.) before any Dio / ApiService access.
+  // Config is compile-time (--dart-define); kept as a no-op hook.
   await loadAppEnv();
 
   // Must exist before FCM tap handlers so they can push routes.
   final navigatorKey = GlobalKey<NavigatorState>();
   AppNavigator.key = navigatorKey;
+  // App links (/r/{code}, /o/{id}, /v/{vendorOwnerId}) via app_links.
+  DeepLinkService.instance.start(navigatorKey);
 
   // Initialize FCM (non-blocking: app starts even if Firebase/FCM fails)
   FcmService? fcmService;
@@ -117,6 +132,8 @@ void main() async {
 
   final localeController = LocaleController();
   await localeController.init();
+  ClientErrorReporter.instance.localeProvider =
+      () => localeController.locale.languageCode;
 
   final easyModeController = EasyModeController();
   await easyModeController.init();
@@ -186,6 +203,16 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(
           create: (_) => AuthController(),
         ),
+        // Phase 2 growth flags; everything stays hidden until this loads.
+        ChangeNotifierProvider(
+          create: (_) => GrowthConfigController()..start(),
+          lazy: false,
+        ),
+        // Phase 3 markets; no market (= Addis/ETB, unchanged) until loaded.
+        ChangeNotifierProvider(
+          create: (_) => MarketController()..start(),
+          lazy: false,
+        ),
         Provider<OrdersRepository>.value(value: widget.ordersRepository),
       ],
       child: MultiBlocProvider(
@@ -211,6 +238,7 @@ class _MyAppState extends State<MyApp> {
                 : AppTheme.darkTheme;
             return MaterialApp(
               navigatorKey: widget.navigatorKey,
+              navigatorObservers: [_clientErrorRouteObserver],
               onGenerateTitle: (context) =>
                   AppLocalizations.of(context)!.appTitle,
               debugShowCheckedModeBanner: false,

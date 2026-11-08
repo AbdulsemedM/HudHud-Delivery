@@ -5,6 +5,7 @@ import 'package:hudhud_delivery/app/navigation/fcm_notification_router.dart';
 import 'package:hudhud_delivery/app/navigation/fcm_order_navigation.dart';
 import 'package:hudhud_delivery/app/services/fcm_service.dart';
 import 'package:hudhud_delivery/controllers/service_accent_controller.dart';
+import 'package:hudhud_delivery/features/growth/deep_link_service.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
@@ -72,6 +73,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
       _openPendingFcmChatIfAny();
     }
     _applyPendingDashboardTab();
+    _openPendingVendorLinkIfAny();
+  }
+
+  /// Vendor QR / app link received during splash (see DeepLinkService).
+  void _openPendingVendorLinkIfAny() {
+    final id = DeepLinkService.instance.takePendingVendorId();
+    if (id == null || !mounted) return;
+    DeepLinkService.openVendorStore(context, id);
   }
 
   void _applyPendingDashboardTab() {

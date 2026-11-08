@@ -1,7 +1,7 @@
 import 'package:hudhud_delivery/app/config/app_env.dart';
 
 class ApiConstants {
-  /// Resolved from root `.env` (`BASE_URL`) only.
+  /// `BASE_URL` dart-define, defaulting to production (see app_env.dart).
   static String get baseUrl => ApiEnv.baseUrl;
 
   // Timeout values (in milliseconds)
@@ -102,12 +102,61 @@ class ApiConstants {
 
   // Customer order creation - POST /api/customer/orders
   static const String customerOrders = 'customer/orders';
+  /// Phase 6 diaspora gifting: same body as [customerOrders] plus
+  /// recipient_name, recipient_phone and optional gift_message.
+  static const String customerGiftOrders = 'customer/gift-orders';
   static const String customerOrderDetails = 'customer/orders/{id}';
   static const String customerOrdersAvailable = 'customer/orders/available';
   static const String customerOrderRate = 'customer/orders/{id}/rate';
   static const String customerOrderCancel = 'customer/orders/{id}/cancel';
   /// POST /api/customer/delivery-fee/quote — checkout delivery-fee preview.
   static const String customerDeliveryFeeQuote = 'customer/delivery-fee/quote';
+
+  // Phase 2 growth endpoints (see phase-2 contract).
+  /// GET /api/growth/config — public feature flags (optional auth).
+  static const String growthConfig = 'growth/config';
+  /// GET /api/home/feed?service_type= — public banners + collections.
+  static const String homeFeed = 'home/feed';
+  /// POST /api/customer/checkout/quote — server-side price breakdown.
+  static const String customerCheckoutQuote = 'customer/checkout/quote';
+  /// POST /api/customer/growth/promo-preview {code, subtotal, vendor_id?, service_type?}
+  static const String customerPromoPreview = 'customer/growth/promo-preview';
+  /// GET /api/customer/growth/referral-summary
+  static const String customerReferralSummary =
+      'customer/growth/referral-summary';
+  /// GET /api/customer/rewards/summary
+  static const String customerRewardsSummary = 'customer/rewards/summary';
+  /// GET /api/customer/retention/reorder-suggestions
+  static const String customerReorderSuggestions =
+      'customer/retention/reorder-suggestions';
+  /// POST /api/customer/orders/{id}/reorder
+  static const String customerOrderReorder = 'customer/orders/{id}/reorder';
+
+  // Phase 3 endpoints (see phase-3 contract §0, §5, §6).
+  /// GET /api/markets — public list of active markets.
+  static const String markets = 'markets';
+  /// GET /api/markets/resolve?lat=&lng= — nearest active market or null.
+  static const String marketsResolve = 'markets/resolve';
+  /// PUT /api/customer/market {market_code}
+  static const String customerMarket = 'customer/market';
+  /// GET /api/customer/plus — HudHud Plus status.
+  static const String customerPlus = 'customer/plus';
+  /// POST /api/customer/plus/subscribe
+  static const String customerPlusSubscribe = 'customer/plus/subscribe';
+  /// POST /api/customer/plus/cancel
+  static const String customerPlusCancel = 'customer/plus/cancel';
+  /// POST /api/customer/plus/resume
+  static const String customerPlusResume = 'customer/plus/resume';
+  /// GET /api/ads/sponsored?placement=home|search&q=&lat=&lng=
+  static const String adsSponsored = 'ads/sponsored';
+  /// POST /api/ads/click {ad_id, impression_token, placement}
+  static const String adsClick = 'ads/click';
+
+  // Phase 4/5 endpoints.
+  /// GET /api/public/sets?market=&per_page=&page= — HudHud Set listing (public).
+  static const String publicSets = 'public/sets';
+  /// POST /api/client-errors — app error reports (single or {reports: [...]}).
+  static const String clientErrors = 'client-errors';
 
   // Delivery endpoints
   static const String delivery = '/delivery';
@@ -118,7 +167,6 @@ class ApiConstants {
   static const String payments = '/payments';
   static const String paymentMethods = 'payment-methods';
   static const String paymentsMethods = 'payments/methods';
-  static const String processPayment = '$payments/process';
   static const String paymentsInitiate = 'payments/initiate';
   /// GET /api/payments/{id}/status
   static const String paymentsStatus = 'payments/{id}/status';
@@ -165,8 +213,10 @@ class ApiConstants {
   // Notifications endpoints (GET /api/notifications, GET /api/notifications/{id})
   static const String notificationsList = 'notifications';
   static const String notificationDetails = 'notifications/{id}';
-  static const String notificationsRead = 'notifications/read';
-  static const String notificationsReadAll = 'notifications/read-all';
+  /// POST {notification_id} — backend canonical route (routes/api_shared.php).
+  static const String notificationsRead = 'notifications/mark-read';
+  /// POST (no body) — backend canonical route.
+  static const String notificationsReadAll = 'notifications/mark-all-read';
 
   // Service types endpoints
   static const String serviceTypes = 'service-types';
@@ -184,7 +234,27 @@ class ApiConstants {
       'services/delivery/{id}/retry-payment';
   static const String deliveryConfirmReceipt =
       'services/delivery/{id}/confirm-receipt';
-  static const String deliveryRate = 'services/delivery/{id}/rate';
+  /// POST {rating: 1-5, comment?} — backend canonical route
+  /// (RideMessengerController@rateDelivery; delivery must be delivered).
+  static const String deliveryRate = 'user/deliveries/{id}/rate';
+
+  // Phase 10 parcel booking v2 (server flag parcel.v2_enabled).
+  /// GET /api/parcels/config?market= — sizes, payment methods, flags.
+  static const String parcelsConfig = 'parcels/config';
+  /// POST /api/parcels/quote — upfront price, locked for N minutes.
+  static const String parcelsQuote = 'parcels/quote';
+  /// POST /api/parcels — book with a quote_id.
+  static const String parcels = 'parcels';
+  /// GET /api/parcels/{id} — sender view (status, handover code, link).
+  static const String parcelDetail = 'parcels/{id}';
+  /// GET /api/parcels/{id}/cancellation — fee preview.
+  static const String parcelCancellation = 'parcels/{id}/cancellation';
+  /// POST /api/parcels/{id}/cancel {reason, accept_fee}
+  static const String parcelCancel = 'parcels/{id}/cancel';
+  /// GET /api/customer/dues — open dues (unpaid cash-parcel cancellation
+  /// fees). While any are open the API refuses cash orders and cash
+  /// parcels with OUTSTANDING_DUES; a wallet top-up collects them.
+  static const String customerDues = 'customer/dues';
 
   // Ride/Taxi endpoints
   static const String rideEstimate = 'services/ride/estimate';

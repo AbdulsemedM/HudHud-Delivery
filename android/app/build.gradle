@@ -85,8 +85,30 @@ android {
 
     buildTypes {
         release {
-            signingConfig keystorePropertiesFile.exists() ? signingConfigs.release : signingConfigs.debug
+            // Never fall back to the debug keystore for release artifacts: a
+            // debug-signed AAB/APK cannot be uploaded to Play and a Shorebird
+            // release built that way would not match the store build.
+            if (keystorePropertiesFile.exists()) {
+                signingConfig signingConfigs.release
+            }
         }
+    }
+}
+
+// Fail fast (release only) when android/key.properties is missing. Debug and
+// profile builds are unaffected.
+gradle.taskGraph.whenReady { graph ->
+    if (keystorePropertiesFile.exists()) return
+    def releaseTasks = graph.allTasks.findAll { t ->
+        t.project == project && t.name.toLowerCase().contains('release')
+    }
+    if (!releaseTasks.isEmpty()) {
+        throw new GradleException(
+            "Release signing is not configured: ${keystorePropertiesFile} not found. " +
+            "Create android/key.properties (keyAlias, keyPassword, storeFile, storePassword) " +
+            "or, in CI, write it from secrets before running 'flutter build' / 'shorebird release'. " +
+            "Release builds are no longer signed with the debug key."
+        )
     }
 }
 

@@ -96,6 +96,19 @@ class NotificationTypes {
   NotificationTypes._();
 
   static const otpRequired = 'otp_required';
+
+  // Phase 2 growth wallet credits (tap → wallet screen).
+  static const onTimeCredit = 'on_time_credit';
+  static const referralReward = 'referral_reward';
+
+  static const walletCreditTypes = {onTimeCredit, referralReward};
+
+  // Phase 3 HudHud Plus lifecycle (tap → Plus screen).
+  static const plusRenewed = 'plus_renewed';
+  static const plusPaymentFailed = 'plus_payment_failed';
+  static const plusExpired = 'plus_expired';
+
+  static const plusTypes = {plusRenewed, plusPaymentFailed, plusExpired};
 }
 
 class NotificationScreens {
@@ -154,6 +167,23 @@ String? parseDeliveryStatusFromPayload(Map<String, String> data) {
   final raw = data['new_status'] ?? data['status'] ?? data['event'];
   final normalized = normalizeDeliveryStatus(raw);
   return normalized.isEmpty ? null : normalized;
+}
+
+/// Phase 2 wallet-credit pushes (`on_time_credit`, `referral_reward`),
+/// matched on `type` or `event`.
+bool isWalletCreditPayload(Map<String, String> data) {
+  final type = normalizeEvent(data['type']);
+  if (NotificationTypes.walletCreditTypes.contains(type)) return true;
+  return NotificationTypes.walletCreditTypes
+      .contains(normalizeEvent(data['event']));
+}
+
+/// Phase 3 Plus pushes (`plus_renewed`, `plus_payment_failed`,
+/// `plus_expired`), matched on `type` or `event`.
+bool isPlusPayload(Map<String, String> data) {
+  final type = normalizeEvent(data['type']);
+  if (NotificationTypes.plusTypes.contains(type)) return true;
+  return NotificationTypes.plusTypes.contains(normalizeEvent(data['event']));
 }
 
 bool isOtpRequiredPayload(Map<String, String> data) {

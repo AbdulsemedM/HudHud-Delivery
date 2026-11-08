@@ -18,8 +18,8 @@ void main() {
       ),
     );
 
-    expect(find.byIcon(Icons.chat_bubble_outline), findsOneWidget);
-    expect(find.byIcon(Icons.phone), findsNothing);
+    expect(find.byIcon(Icons.chat_bubble_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.call_rounded), findsNothing);
     expect(find.text('Ahmed'), findsOneWidget);
   });
 }

@@ -3343,4 +3343,961 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get paymentCard => 'Card';
+
+  @override
+  String get growthPromoTitle => 'Promo code';
+
+  @override
+  String get growthPromoSubtitle => 'Have a code? Apply it here';
+
+  @override
+  String get growthPromoHint => 'Enter promo code';
+
+  @override
+  String get growthPromoApply => 'Apply';
+
+  @override
+  String get growthPromoRemove => 'Remove';
+
+  @override
+  String get growthPromoApplied => 'Promo code applied';
+
+  @override
+  String get growthPromoInvalid => 'This promo code cannot be used';
+
+  @override
+  String growthPromoSavedForCheckout(String code) {
+    return 'Code $code will be applied at checkout';
+  }
+
+  @override
+  String growthPointsToggle(int points, String amount) {
+    return 'Use $points points (−$amount on delivery)';
+  }
+
+  @override
+  String get growthPointsSubtitle => 'Points reduce the delivery fee only';
+
+  @override
+  String growthPointsCount(int points) {
+    return '$points points';
+  }
+
+  @override
+  String get growthPointsDiscount => 'Points discount';
+
+  @override
+  String get growthCouponDiscount => 'Promo discount';
+
+  @override
+  String growthCouponDiscountWithCode(String code) {
+    return 'Promo ($code)';
+  }
+
+  @override
+  String get growthDeliveryFeeLabel => 'Delivery fee';
+
+  @override
+  String get growthFree => 'Free';
+
+  @override
+  String growthFreeDeliveryHint(String amount) {
+    return 'Add $amount more for free delivery';
+  }
+
+  @override
+  String get growthFreeDeliveryUnlocked => 'You unlocked free delivery!';
+
+  @override
+  String get growthRewardsTitle => 'Rewards';
+
+  @override
+  String growthRewardsWorth(String amount) {
+    return 'Worth $amount';
+  }
+
+  @override
+  String get growthRewardsHowItWorks => 'How it works';
+
+  @override
+  String get growthRewardsEarnLine => 'Earn points on every completed order.';
+
+  @override
+  String growthRewardsRateLine(int points, String amount) {
+    return '$points points = $amount off your delivery fee.';
+  }
+
+  @override
+  String growthRewardsUseLine(int points) {
+    return 'Use them at checkout once you have $points points.';
+  }
+
+  @override
+  String get growthRewardsHistory => 'History';
+
+  @override
+  String get growthRewardsHistoryEmpty => 'No points activity yet.';
+
+  @override
+  String get growthRewardsLoadError => 'Could not load your rewards.';
+
+  @override
+  String get growthRewardsTypeEarned => 'Points earned';
+
+  @override
+  String get growthRewardsTypeRedeemed => 'Points used';
+
+  @override
+  String get growthRewardsTypeRestored => 'Points returned';
+
+  @override
+  String get growthRewardsTypeExpired => 'Points expired';
+
+  @override
+  String growthReferralTitle(String amount) {
+    return 'Invite friends, get $amount';
+  }
+
+  @override
+  String growthReferralSubtitle(String amount) {
+    return 'You and your friend each get $amount after their first order.';
+  }
+
+  @override
+  String get growthReferralCopy => 'Copy';
+
+  @override
+  String get growthReferralCopied => 'Referral code copied';
+
+  @override
+  String get growthReferralShare => 'Share invite';
+
+  @override
+  String get growthReferralShareSubject => 'Join me on HudHud Delivery';
+
+  @override
+  String growthReferralShareFallback(String amount, String code, String link) {
+    return 'Get $amount on HudHud Delivery with my code $code: $link';
+  }
+
+  @override
+  String get growthReferralInvited => 'Invited';
+
+  @override
+  String get growthReferralRewarded => 'Rewarded';
+
+  @override
+  String get growthReferralPending => 'Pending';
+
+  @override
+  String get growthReferralEarned => 'Earned';
+
+  @override
+  String get growthReorderButton => 'Reorder';
+
+  @override
+  String get growthReorderFailed => 'Could not reorder. Please try again.';
+
+  @override
+  String get growthReorderReplaceMessage =>
+      'Your cart has items from another store. Replace them with this order?';
+
+  @override
+  String get growthReorderUnavailableTitle => 'Some items are unavailable';
+
+  @override
+  String get growthReorderNothingAvailable =>
+      'None of these items are available now';
+
+  @override
+  String get growthReorderContinue => 'Continue with available items';
+
+  @override
+  String get growthReorderReasonOutOfStock => 'Out of stock';
+
+  @override
+  String get growthReorderReasonRemoved => 'No longer sold';
+
+  @override
+  String get growthReorderReasonVendorClosed => 'Store is closed';
+
+  @override
+  String get growthReorderReasonUnavailable => 'Unavailable';
+
+  @override
+  String get growthOrderAgainTitle => 'Order again';
+
+  @override
+  String growthOrderAgainOrderLabel(String order) {
+    return 'Order #$order';
+  }
+
+  @override
+  String get growthSeeAll => 'See all';
+
+  @override
+  String get growthClosed => 'Closed';
+
+  @override
+  String get growthCollectionFallbackTitle => 'Collection';
+
+  @override
+  String get growthStoreFallbackName => 'Store';
+
+  @override
+  String get p3Sponsored => 'Sponsored';
+
+  @override
+  String get p3PlusTitle => 'HudHud Plus';
+
+  @override
+  String get p3PlusBadge => 'Plus';
+
+  @override
+  String get p3PlusTagline => 'Free delivery and savings on every order.';
+
+  @override
+  String p3PlusPricePerPeriod(String price, int days) {
+    return '$price / $days days';
+  }
+
+  @override
+  String get p3PlusBenefitsTitle => 'Your benefits';
+
+  @override
+  String p3PlusBenefitFreeDelivery(String amount) {
+    return 'Free delivery on food and grocery orders over $amount';
+  }
+
+  @override
+  String get p3PlusBenefitFreeDeliveryAll =>
+      'Free delivery on food and grocery orders';
+
+  @override
+  String p3PlusBenefitParcelDiscount(String percent) {
+    return '$percent% off parcel delivery';
+  }
+
+  @override
+  String get p3PlusSubscribe => 'Join HudHud Plus';
+
+  @override
+  String get p3PlusCancel => 'Cancel Plus';
+
+  @override
+  String get p3PlusResume => 'Keep my Plus';
+
+  @override
+  String get p3PlusActive => 'Your membership is active';
+
+  @override
+  String p3PlusRenewsOn(String date) {
+    return 'Renews on $date';
+  }
+
+  @override
+  String p3PlusEndsOn(String date) {
+    return 'Ends on $date — you can keep it';
+  }
+
+  @override
+  String get p3PlusPastDue =>
+      'Renewal payment failed. Top up your wallet to keep Plus.';
+
+  @override
+  String p3PlusSavings(String amount) {
+    return 'You saved about $amount in the last 30 days';
+  }
+
+  @override
+  String get p3PlusPaidFromWallet =>
+      'Paid from your HudHud wallet. Cancel anytime.';
+
+  @override
+  String get p3PlusSubscribed => 'Welcome to HudHud Plus!';
+
+  @override
+  String get p3PlusCancelled => 'Plus will end at the end of this period';
+
+  @override
+  String get p3PlusResumed => 'Plus will keep renewing';
+
+  @override
+  String get p3PlusCancelConfirmTitle => 'Cancel HudHud Plus?';
+
+  @override
+  String get p3PlusCancelConfirmMessage =>
+      'You keep your benefits until the end of this period.';
+
+  @override
+  String get p3PlusInsufficientTitle => 'Not enough wallet balance';
+
+  @override
+  String p3PlusInsufficientMessage(String amount) {
+    return 'Add $amount to your wallet to join Plus.';
+  }
+
+  @override
+  String get p3PlusTopUp => 'Top up wallet';
+
+  @override
+  String get p3PlusActionFailed => 'Could not update Plus. Please try again.';
+
+  @override
+  String get p3PlusLoadError => 'Could not load HudHud Plus.';
+
+  @override
+  String get p3PlusUnavailable => 'HudHud Plus is not available right now.';
+
+  @override
+  String get p3PlusUpsell => 'Get free delivery with HudHud Plus';
+
+  @override
+  String get p3PlusMenuJoin => 'Get HudHud Plus';
+
+  @override
+  String get p3PlusMenuMember => 'My HudHud Plus';
+
+  @override
+  String get p3QuotePlusFreeDelivery => 'Plus: free delivery';
+
+  @override
+  String get p3MarketSettingTitle => 'City';
+
+  @override
+  String get p3MarketPickerTitle => 'Choose your city';
+
+  @override
+  String p3MarketChanged(String market) {
+    return 'City changed to $market';
+  }
+
+  @override
+  String get p3MarketChangeBlocked =>
+      'You can\'t change city while your wallet has a balance in another currency. Use or withdraw it first.';
+
+  @override
+  String get p3MarketChangeFailed => 'Could not change city. Please try again.';
+
+  @override
+  String get p5SetsTitle => 'HudHud Sets';
+
+  @override
+  String get p5SetsSubtitle => 'Meal for one · delivery included';
+
+  @override
+  String get p5SetDeliveryIncluded => 'Delivery included';
+
+  @override
+  String p5SetsMaxPerOrder(int count) {
+    return 'Up to $count per order';
+  }
+
+  @override
+  String get p5QuoteSetDeliveryIncluded => 'HudHud Set: delivery included';
+
+  @override
+  String p5SetOverMaxQuantity(int count) {
+    return 'Delivery is included for up to $count HudHud Sets per order.';
+  }
+
+  @override
+  String get p5SetMixedCart =>
+      'Delivery is included only when your cart has HudHud Sets only.';
+
+  @override
+  String get p5PayCashOnArrival => 'Pay in cash when your order arrives';
+
+  @override
+  String get p5PaymentInProgress =>
+      'A payment for this order is already in progress. Approve or decline it on your phone, then check the order status.';
+
+  @override
+  String get p5PaymentAlreadyPaid => 'This order is already paid.';
+
+  @override
+  String get p5PaymentTotalsChanged =>
+      'Your order total changed. We refreshed the order — please review it before paying.';
+
+  @override
+  String get p5OrderNotPayable => 'This order can no longer be paid.';
+
+  @override
+  String get p5CheckOrderStatus => 'Check order status';
+
+  @override
+  String p5RefundedToWallet(String amount) {
+    return '$amount refunded to your HudHud wallet';
+  }
+
+  @override
+  String get p5RefundManual =>
+      'Order cancelled. Our team will process your refund shortly.';
+
+  @override
+  String get p5WalletRefundLabel => 'Refund';
+
+  @override
+  String get p9GiftSendTitle => 'Send a gift';
+
+  @override
+  String get p9GiftBannerSubtitle =>
+      'Order a meal for family in another city. They get an SMS to track it.';
+
+  @override
+  String get p9GiftIntroBody =>
+      'Pick the city where your recipient lives, choose a restaurant and fill your cart as usual. At checkout, add the recipient\'s name and phone number and pay online.';
+
+  @override
+  String get p9GiftChooseMarket => 'Where does the recipient live?';
+
+  @override
+  String get p9GiftChooseRestaurant => 'Choose a restaurant';
+
+  @override
+  String get p9GiftHowItWorksSms =>
+      'The recipient gets an SMS with a tracking link and a 4-digit delivery code.';
+
+  @override
+  String get p9GiftHowItWorksPay =>
+      'You pay online. Cash on delivery is not available for gifts.';
+
+  @override
+  String get p9GiftSectionTitle => 'Send as a gift';
+
+  @override
+  String get p9GiftSectionSubtitle =>
+      'We deliver to your recipient and text them a tracking link';
+
+  @override
+  String get p9GiftToggle => 'This order is a gift';
+
+  @override
+  String get p9GiftRecipientName => 'Recipient\'s name';
+
+  @override
+  String get p9GiftRecipientPhone => 'Recipient\'s mobile number';
+
+  @override
+  String p9GiftRecipientPhoneHint(String example) {
+    return 'e.g. $example';
+  }
+
+  @override
+  String get p9GiftMessageLabel => 'Gift message (optional)';
+
+  @override
+  String get p9GiftMessageHint => 'Write a short note for the recipient';
+
+  @override
+  String get p9GiftNameRequired => 'Enter the recipient\'s name';
+
+  @override
+  String p9GiftPhoneInvalid(String prefix) {
+    return 'Enter a valid mobile number ($prefix …)';
+  }
+
+  @override
+  String get p9GiftNoCash =>
+      'Cash on delivery is not available for gifts. Choose an online payment method.';
+
+  @override
+  String get p9GiftAddressHint =>
+      'Set the delivery location to the recipient\'s address.';
+
+  @override
+  String get p9GiftUnavailable => 'Gift orders are not available yet.';
+
+  @override
+  String get p9GiftPlacedTitle => 'Gift order placed';
+
+  @override
+  String p9GiftPlacedBody(String name) {
+    return 'When the payment is confirmed, $name gets an SMS with a tracking link and a 4-digit delivery code. They give the code to the rider when the order arrives.';
+  }
+
+  @override
+  String p9GiftForName(String name) {
+    return 'Gift for $name';
+  }
+
+  @override
+  String get p9GiftRecipientLabel => 'Recipient';
+
+  @override
+  String get p9GiftYourMessage => 'Your message';
+
+  @override
+  String get p9GiftWalletNote =>
+      'A wallet in another currency is charged the converted amount at today\'s rate.';
+
+  @override
+  String p9GiftModeBanner(String market) {
+    return 'Sending a gift to $market';
+  }
+
+  @override
+  String get p9GiftStop => 'Stop gift';
+
+  @override
+  String get p9GiftOrderLabel => 'Gift order';
+
+  @override
+  String get p10CityNotServed => 'We don\'t serve this area yet';
+
+  @override
+  String get p10CityCrossCity =>
+      'Pickup and drop-off must be in the same city.';
+
+  @override
+  String get p10CityOtherCity =>
+      'These addresses are in another city. Switch your city in Settings to continue.';
+
+  @override
+  String get p10ParcelTitle => 'Send a parcel';
+
+  @override
+  String get p10ParcelScheduledTitle => 'Schedule a parcel';
+
+  @override
+  String get p10ParcelRoute => 'Route';
+
+  @override
+  String get p10ParcelPickup => 'Pickup';
+
+  @override
+  String get p10ParcelDropoff => 'Drop-off';
+
+  @override
+  String get p10ParcelChooseAddress => 'Choose on the map';
+
+  @override
+  String get p10ParcelBuilding => 'Building / house';
+
+  @override
+  String get p10ParcelFloor => 'Floor';
+
+  @override
+  String get p10ParcelApartment => 'Apartment / office';
+
+  @override
+  String get p10ParcelLandmark => 'Landmark';
+
+  @override
+  String get p10ParcelRecipient => 'Recipient';
+
+  @override
+  String get p10ParcelSendToMyself => 'Send to myself';
+
+  @override
+  String get p10ParcelRecipientName => 'Recipient name';
+
+  @override
+  String get p10ParcelRecipientPhone => 'Recipient phone';
+
+  @override
+  String get p10ParcelWhatSending => 'What are you sending?';
+
+  @override
+  String get p10ParcelCategoryDocument => 'Documents';
+
+  @override
+  String get p10ParcelCategoryParcel => 'Parcel';
+
+  @override
+  String get p10ParcelCategoryFood => 'Food';
+
+  @override
+  String get p10ParcelCategoryGrocery => 'Groceries';
+
+  @override
+  String get p10ParcelCategoryElectronics => 'Electronics';
+
+  @override
+  String get p10ParcelCategoryClothes => 'Clothes';
+
+  @override
+  String get p10ParcelCategoryGift => 'Gift';
+
+  @override
+  String get p10ParcelCategoryFlowers => 'Flowers';
+
+  @override
+  String get p10ParcelCategoryKeys => 'Keys';
+
+  @override
+  String get p10ParcelCategoryOther => 'Other';
+
+  @override
+  String get p10ParcelSizeSmall => 'Small';
+
+  @override
+  String get p10ParcelSizeSmallHint => 'Fits in a backpack';
+
+  @override
+  String get p10ParcelSizeMedium => 'Medium';
+
+  @override
+  String get p10ParcelSizeMediumHint => 'Fits on a car seat';
+
+  @override
+  String get p10ParcelSizeLarge => 'Large';
+
+  @override
+  String get p10ParcelSizeLargeHint => 'Needs a van';
+
+  @override
+  String get p10ParcelSizeUnavailable => 'Not available here yet';
+
+  @override
+  String get p10ParcelDescription => 'Description (optional)';
+
+  @override
+  String get p10ParcelItemValue => 'Item value (optional)';
+
+  @override
+  String get p10ParcelCourierNote => 'Note for the courier';
+
+  @override
+  String get p10ParcelPayment => 'Payment';
+
+  @override
+  String get p10ParcelPayWallet => 'HudHud wallet';
+
+  @override
+  String get p10ParcelPayCash => 'Cash to the courier';
+
+  @override
+  String get p10ParcelPaymentPhone => 'Mobile money number';
+
+  @override
+  String get p10ParcelRecipientPays => 'Recipient pays (cash at drop-off)';
+
+  @override
+  String get p10ParcelSellerCod => 'Collect the item price from the recipient';
+
+  @override
+  String get p10ParcelSellerCodHint =>
+      'The courier collects it in cash and it is paid to your HudHud business wallet.';
+
+  @override
+  String get p10ParcelSellerCodAmount => 'Item price to collect';
+
+  @override
+  String get p10ParcelPickupTime => 'Pickup time';
+
+  @override
+  String get p10ParcelPickupNow => 'As soon as possible';
+
+  @override
+  String get p10ParcelPrice => 'Price';
+
+  @override
+  String p10ParcelPriceHeld(String time) {
+    return 'Price held for $time';
+  }
+
+  @override
+  String get p10ParcelPriceExpired => 'Price lock expired';
+
+  @override
+  String get p10ParcelRefreshPrice => 'Refresh price';
+
+  @override
+  String get p10ParcelGettingPrice => 'Getting the price…';
+
+  @override
+  String get p10ParcelPriceUpdated =>
+      'The price changed. Please check the new price.';
+
+  @override
+  String p10ParcelBook(String price) {
+    return 'Book for $price';
+  }
+
+  @override
+  String get p10ParcelContinue => 'Continue';
+
+  @override
+  String get p10ParcelFillRequired =>
+      'Choose pickup and drop-off, and add the recipient\'s phone.';
+
+  @override
+  String get p10ParcelSizeNotSupported =>
+      'This size is not available in this city yet.';
+
+  @override
+  String get p10ParcelPaymentNotAvailable =>
+      'This payment method is not available in this city.';
+
+  @override
+  String get p10ParcelInsufficientWallet =>
+      'Not enough money in your wallet. Top up or choose another payment method.';
+
+  @override
+  String get p10ParcelSomethingWrong =>
+      'Something went wrong. Please try again.';
+
+  @override
+  String get p10ParcelApprovePayment => 'Approve the payment on your phone.';
+
+  @override
+  String get p10ParcelBooked => 'Parcel booked';
+
+  @override
+  String get p10ParcelHandoverCode => 'Handover code';
+
+  @override
+  String get p10ParcelHandoverHint =>
+      'The recipient gives this code to the courier at delivery.';
+
+  @override
+  String get p10ParcelHandoverSelfHint =>
+      'Give this code to the courier when you receive the parcel.';
+
+  @override
+  String get p10ParcelShareTracking => 'Share tracking link';
+
+  @override
+  String p10ParcelTrackingShareText(String link) {
+    return 'Track my HudHud parcel: $link';
+  }
+
+  @override
+  String p10ParcelEta(String minutes) {
+    return 'Arriving in about $minutes min';
+  }
+
+  @override
+  String get p10ParcelCancel => 'Cancel parcel';
+
+  @override
+  String get p10ParcelCancelFree =>
+      'Cancel this parcel? It\'s free because no courier has been assigned yet.';
+
+  @override
+  String p10ParcelCancelFee(String fee) {
+    return 'A courier is already on the way. Cancelling now costs $fee.';
+  }
+
+  @override
+  String get p10ParcelCancelReason => 'Cancelled by the sender in the app';
+
+  @override
+  String get p10ParcelCancelled => 'Parcel cancelled';
+
+  @override
+  String get p11ParcelAddStop => 'Add a stop';
+
+  @override
+  String p11ParcelStopN(String number) {
+    return 'Stop $number';
+  }
+
+  @override
+  String get p11ParcelRemoveStop => 'Remove stop';
+
+  @override
+  String get p11ParcelMoveUp => 'Move up';
+
+  @override
+  String get p11ParcelMoveDown => 'Move down';
+
+  @override
+  String p11ParcelStopsLimit(String max) {
+    return 'Up to $max drop-offs per parcel';
+  }
+
+  @override
+  String get p11ParcelMultiStopSenderPays =>
+      'With several drop-offs you pay for the whole route.';
+
+  @override
+  String get p11ParcelMultiStopCashAtPickup =>
+      'With several drop-offs, cash is paid to the courier at pickup.';
+
+  @override
+  String get p11ParcelPayAtPickup => 'Pay cash at pickup';
+
+  @override
+  String get p11ParcelPayAtPickupHint =>
+      'Hand the cash to the courier when they collect the parcel.';
+
+  @override
+  String p11ParcelPayAtPickupDue(String amount) {
+    return 'Pay $amount cash to the courier at pickup';
+  }
+
+  @override
+  String get p11ParcelPaidAtPickup => 'Paid to the courier at pickup';
+
+  @override
+  String get p11ParcelPayAtPickupUnavailable =>
+      'Paying cash at pickup is not available right now.';
+
+  @override
+  String get p11ParcelStopsTitle => 'Drop-offs';
+
+  @override
+  String get p11ParcelStopCodesHint =>
+      'Each recipient got their own handover code by SMS. Share it if they did not.';
+
+  @override
+  String get p11ParcelShareStopLink => 'Share link';
+
+  @override
+  String get p11ParcelStopPending => 'Waiting';
+
+  @override
+  String get p11ParcelStopArrived => 'Courier is there';
+
+  @override
+  String get p11ParcelStopDelivered => 'Delivered';
+
+  @override
+  String get p11ParcelStopFailed => 'Not delivered';
+
+  @override
+  String get p11ParcelStopReturned => 'Returned to you';
+
+  @override
+  String get p11ParcelMultiStopDisabled =>
+      'Several drop-offs are not available right now.';
+
+  @override
+  String get p11ParcelTooManyStops => 'Too many drop-offs for one parcel.';
+
+  @override
+  String p11ParcelCancelCashFee(String fee) {
+    return 'A courier is already on the way. Cancelling now costs $fee. It is taken from your wallet or added to your balance.';
+  }
+
+  @override
+  String p11ParcelOutstandingBalance(String amount) {
+    return 'You owe $amount from a cancelled parcel. It is taken from your wallet at your next top-up or order.';
+  }
+
+  @override
+  String get p12StoreOpen => 'Open';
+
+  @override
+  String get p12StoreClosed => 'Closed';
+
+  @override
+  String get p12StoreBusy => 'Busy';
+
+  @override
+  String p12StoreOpensAt(String time) {
+    return 'Opens $time';
+  }
+
+  @override
+  String p12StoreOpensTomorrowAt(String time) {
+    return 'Opens tomorrow $time';
+  }
+
+  @override
+  String p12StoreBackAt(String time) {
+    return 'Back at $time';
+  }
+
+  @override
+  String get p12StoreClosedToday => 'Closed today';
+
+  @override
+  String get p12StoreClosedBanner =>
+      'This store is closed right now. You can look at the menu, but ordering is off until it opens.';
+
+  @override
+  String get p12StoreBusyBanner =>
+      'This store is very busy and has paused new orders. Please check back soon.';
+
+  @override
+  String get p12StoreOrderingPaused => 'Ordering paused';
+
+  @override
+  String get p12SoldOut => 'Sold out';
+
+  @override
+  String get p12Unavailable => 'Unavailable';
+
+  @override
+  String get p12GoToCheckout => 'Go to Checkout';
+
+  @override
+  String get p12ErrStoreClosed => 'This store is closed right now.';
+
+  @override
+  String get p12ErrStoreBusy =>
+      'This store is busy and not taking orders right now.';
+
+  @override
+  String get p12ErrItemSoldOut =>
+      'An item in your cart is sold out today. Remove it to continue.';
+
+  @override
+  String p12ErrItemSoldOutNamed(String item) {
+    return '$item is sold out today. Remove it to continue.';
+  }
+
+  @override
+  String get p12RemoveItem => 'Remove item';
+
+  @override
+  String p12ErrOutstandingDues(String amount) {
+    return 'You have an unpaid balance of $amount. Cash is not available until it is paid. Top up your wallet or choose another way to pay.';
+  }
+
+  @override
+  String get p12DuesTitle => 'Unpaid balance';
+
+  @override
+  String p12DuesCheckoutBody(String amount) {
+    return 'You owe $amount from a cancelled parcel. Cash on delivery is off until it is paid. Topping up your wallet pays it automatically.';
+  }
+
+  @override
+  String get p12PayNow => 'Pay now';
+
+  @override
+  String get p12CashBlockedByDues =>
+      'Cash is off until your unpaid balance is paid.';
+
+  @override
+  String get p12ChooseOtherPayment => 'Choose another payment';
+
+  @override
+  String get p12ErrCityOutside =>
+      'We don\'t deliver to this address yet. Choose an address inside your city.';
+
+  @override
+  String get p12ErrCityCross =>
+      'All addresses in one order must be in the same city.';
+
+  @override
+  String p12ErrCityMismatch(String city) {
+    return 'This address is in $city. Switch your city to $city to continue.';
+  }
+
+  @override
+  String get p12ErrCityMismatchGeneric =>
+      'This address is in another city. Switch your city to continue.';
+
+  @override
+  String get p12ChangeCity => 'Change city';
+
+  @override
+  String get p12ErrNetwork =>
+      'No internet connection. Check your connection and try again.';
+
+  @override
+  String get p12ErrTimeout => 'The connection is slow. Please try again.';
+
+  @override
+  String get p12ErrServer =>
+      'Something went wrong on our side. Please try again in a moment.';
+
+  @override
+  String get p12ErrSessionExpired =>
+      'Your session has expired. Please log in again.';
 }

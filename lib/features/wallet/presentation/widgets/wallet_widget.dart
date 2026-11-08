@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/utils/money_format.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
 
 class WalletHeader extends StatelessWidget {
@@ -388,11 +389,19 @@ class TransactionListItem extends StatelessWidget {
   });
 
   bool get _isCredit {
+    if (transaction.isRefund) return true;
+    final explicit = transaction.isCredit;
+    if (explicit != null) return explicit;
     final type = transaction.type.toLowerCase();
     return type.contains('credit') ||
         type.contains('deposit') ||
         type.contains('add') ||
         type.contains('refund');
+  }
+
+  IconData get _icon {
+    if (transaction.isRefund) return Icons.replay_rounded;
+    return _isCredit ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded;
   }
 
   @override
@@ -420,7 +429,7 @@ class TransactionListItem extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
-              _isCredit ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded,
+              _icon,
               color: amountColor,
               size: 20,
             ),
@@ -436,6 +445,16 @@ class TransactionListItem extends StatelessWidget {
                         fontWeight: FontWeight.w500,
                       ),
                 ),
+                if (transaction.detail != null &&
+                    transaction.detail!.isNotEmpty)
+                  Text(
+                    transaction.detail!,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                  ),
                 Text(
                   transaction.date,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -465,16 +484,28 @@ class TransactionItem {
   final String type;
   final String? currency;
 
+  /// Server credit/debit when known; null keeps the label heuristic.
+  final bool? isCredit;
+
+  /// Order refund credited to the wallet (refund icon + label).
+  final bool isRefund;
+
+  /// Secondary line (e.g. "Order cancellation refund #1234").
+  final String? detail;
+
   const TransactionItem({
     required this.date,
     required this.amount,
     required this.type,
     this.currency,
+    this.isCredit,
+    this.isRefund = false,
+    this.detail,
   });
 
   String get formattedAmount {
     if (currency != null && currency!.isNotEmpty) {
-      return '$currency $amount';
+      return '${moneyPrefix(currency)}$amount';
     }
     return amount;
   }

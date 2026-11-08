@@ -4,6 +4,11 @@ import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/features/categories/model/categories_products_model.dart';
 import 'package:hudhud_delivery/features/categories/presentation/widgets/categories_widget.dart';
 import 'package:hudhud_delivery/features/delivery/presentation/screens/product_detail_screen.dart';
+import 'package:hudhud_delivery/app/services/startup_location_service.dart';
+import 'package:hudhud_delivery/features/growth/data/growth_repository.dart';
+import 'package:hudhud_delivery/features/growth/data/models/sponsored.dart';
+import 'package:hudhud_delivery/features/growth/growth_scope.dart';
+import 'package:hudhud_delivery/features/growth/presentation/widgets/sponsored_widgets.dart';
 import 'package:hudhud_delivery/features/products/data/products_data_provider.dart';
 import 'package:hudhud_delivery/features/products/data/products_repository.dart';
 import 'package:hudhud_delivery/features/products/model/products_query.dart';
@@ -35,6 +40,12 @@ class _ProductSearchResultsScreenState extends State<ProductSearchResultsScreen>
   int _currentPage = 1;
   bool _hasMore = false;
 
+  // Phase 3: sponsored vendors above results (empty unless ads are on and
+  // the server returns some — layout is unchanged otherwise).
+  final GrowthRepository _growthRepository = GrowthRepository.create();
+  List<SponsoredItem> _sponsored = const [];
+  int _sponsoredRequestId = 0;
+
   @override
   void initState() {
     super.initState();
@@ -43,6 +54,29 @@ class _ProductSearchResultsScreenState extends State<ProductSearchResultsScreen>
     );
     _search = widget.initialSearch.trim();
     _fetch(page: 1);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadSponsored());
+  }
+
+  Future<void> _loadSponsored() async {
+    final requestId = ++_sponsoredRequestId;
+    final query = _search.trim();
+    final adsOn = mounted &&
+        (growthControllerOf(context)?.adsEnabled ?? false);
+    if (!adsOn || query.isEmpty) {
+      if (mounted && _sponsored.isNotEmpty) {
+        setState(() => _sponsored = const []);
+      }
+      return;
+    }
+    final location = StartupLocationService.cached;
+    final items = await _growthRepository.fetchSponsored(
+      placement: SponsoredPlacement.search,
+      query: query,
+      lat: location?.latitude,
+      lng: location?.longitude,
+    );
+    if (!mounted || requestId != _sponsoredRequestId) return;
+    setState(() => _sponsored = items);
   }
 
   Future<void> _fetch({required int page, bool loadMore = false}) async {
@@ -88,6 +122,7 @@ class _ProductSearchResultsScreenState extends State<ProductSearchResultsScreen>
   void _onSearchChanged(String value) {
     _search = value;
     _fetch(page: 1);
+    _loadSponsored();
   }
 
   Future<void> _openPriceFilter() async {
@@ -180,9 +215,22 @@ class _ProductSearchResultsScreenState extends State<ProductSearchResultsScreen>
                             onRefresh: () => _fetch(page: 1),
                             child: ListView.builder(
                               padding: const EdgeInsets.only(bottom: 24),
-                              itemCount:
-                                  _products.length + (_hasMore ? 1 : 0),
-                              itemBuilder: (context, index) {
+                              itemCount: _products.length +
+                                  (_hasMore ? 1 : 0) +
+                                  (_sponsored.isNotEmpty ? 1 : 0),
+                              itemBuilder: (context, rawIndex) {
+                                if (_sponsored.isNotEmpty && rawIndex == 0) {
+                                  return SponsoredVendorRow(
+                                    items: _sponsored,
+                                    padding: const EdgeInsets.only(
+                                      top: 8,
+                                      bottom: 8,
+                                    ),
+                                  );
+                                }
+                                final index = _sponsored.isNotEmpty
+                                    ? rawIndex - 1
+                                    : rawIndex;
                                 if (index == _products.length) {
                                   if (_loadingMore) {
                                     return const Padding(

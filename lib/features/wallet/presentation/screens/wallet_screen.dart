@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/utils/money_format.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
@@ -12,6 +13,7 @@ import 'package:hudhud_delivery/features/wallet/data/models/wallet_transaction_m
 import 'package:intl/intl.dart';
 import 'package:hudhud_delivery/features/wallet/data/providers/wallet_data_provider.dart';
 import 'package:hudhud_delivery/features/wallet/data/repositories/wallet_repository.dart';
+import 'package:hudhud_delivery/features/wallet/services/wallet_refresh_signal.dart';
 import 'package:hudhud_delivery/features/wallet/services/wallet_topup_recovery_service.dart';
 import 'wallet_topup_page.dart';
 import 'withdraw_funds_screen.dart';
@@ -120,11 +122,13 @@ class _WalletContentState extends State<_WalletContent> {
   void initState() {
     super.initState();
     WalletTopUpRecoveryService.instance.addListener(_onRecoveryChanged);
+    WalletRefreshSignal.changes.addListener(_refreshAfterMutation);
   }
 
   @override
   void dispose() {
     WalletTopUpRecoveryService.instance.removeListener(_onRecoveryChanged);
+    WalletRefreshSignal.changes.removeListener(_refreshAfterMutation);
     super.dispose();
   }
 
@@ -144,6 +148,17 @@ class _WalletContentState extends State<_WalletContent> {
               DateTime.tryParse(t.createdAt!) ?? DateTime.now(),
             )
           : '-';
+      if (t.isRefund) {
+        return TransactionItem(
+          date: date.toUpperCase(),
+          amount: t.amount ?? '0',
+          type: l10n.p5WalletRefundLabel,
+          currency: t.currency ?? defaultCurrency,
+          isCredit: true,
+          isRefund: true,
+          detail: t.description,
+        );
+      }
       return TransactionItem(
         date: date.toUpperCase(),
         amount: t.amount ?? '0',
@@ -151,6 +166,7 @@ class _WalletContentState extends State<_WalletContent> {
             t.description ??
             l10n.walletDefaultTransactionLabel,
         currency: t.currency ?? defaultCurrency,
+        isCredit: t.isCredit ? true : (t.isDebit ? false : null),
       );
     }).toList();
   }
@@ -171,7 +187,7 @@ class _WalletContentState extends State<_WalletContent> {
         children: [
           BalanceCard(
             balance:
-                '$currency ${widget.balance.balance.toStringAsFixed(2)}',
+                '${moneyPrefix(currency)}${widget.balance.balance.toStringAsFixed(2)}',
             bottomActions: WalletActions(
               showPendingTopUp:
                   WalletTopUpRecoveryService.instance.hasPendingTopUp,

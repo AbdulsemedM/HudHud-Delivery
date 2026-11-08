@@ -226,6 +226,8 @@ bool shouldPollPaymentStatus({
 }) {
   if (!isSuccess) return false;
   if (method == 'cash_on_delivery') return false;
+  // COD stays pending until the cash is collected; nothing to poll.
+  if (nextAction == 'pay_cash_on_delivery') return false;
   if (status == 'completed') return false;
   if (isTerminalPaymentStatus(status) && status != 'completed') {
     // Failed initiate already shown; no poll needed.

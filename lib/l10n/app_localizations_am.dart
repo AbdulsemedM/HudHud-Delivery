@@ -607,20 +607,20 @@ class AppLocalizationsAm extends AppLocalizations {
   String get homeTabFood => 'ምግብ';
 
   @override
-  String get homeTabDelivery => 'Delivery';
+  String get homeTabDelivery => 'ማድረስ';
 
   @override
-  String get cartDifferentVendorTitle => 'Start a new cart?';
+  String get cartDifferentVendorTitle => 'አዲስ ጋሪ ይጀምሩ?';
 
   @override
   String get cartDifferentVendorMessage =>
-      'Your cart has items from another store. Clear it to add items from this store.';
+      'ጋሪዎ ከሌላ መደብር የተመረጡ ዕቃዎች አሉት። ከዚህ መደብር ለመጨመር ጋሪውን ያጽዱ።';
 
   @override
-  String get cartReplaceAction => 'Clear and add';
+  String get cartReplaceAction => 'አጽዳና ጨምር';
 
   @override
-  String get cartKeepCurrentAction => 'Keep cart';
+  String get cartKeepCurrentAction => 'ጋሪውን አቆይ';
 
   @override
   String get homeTabCourier => 'መልእክተኛ';
@@ -3291,4 +3291,936 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get paymentCard => 'Card';
+
+  @override
+  String get growthPromoTitle => 'የማስተዋወቂያ ኮድ';
+
+  @override
+  String get growthPromoSubtitle => 'ኮድ አለዎት? እዚህ ያስገቡ';
+
+  @override
+  String get growthPromoHint => 'የማስተዋወቂያ ኮድ ያስገቡ';
+
+  @override
+  String get growthPromoApply => 'ተግብር';
+
+  @override
+  String get growthPromoRemove => 'አስወግድ';
+
+  @override
+  String get growthPromoApplied => 'የማስተዋወቂያ ኮዱ ተተግብሯል';
+
+  @override
+  String get growthPromoInvalid => 'ይህ ኮድ ጥቅም ላይ ሊውል አይችልም';
+
+  @override
+  String growthPromoSavedForCheckout(String code) {
+    return 'ኮድ $code በክፍያ ጊዜ ይተገበራል';
+  }
+
+  @override
+  String growthPointsToggle(int points, String amount) {
+    return '$points ነጥቦችን ተጠቀም (በማድረሻ ላይ −$amount)';
+  }
+
+  @override
+  String get growthPointsSubtitle => 'ነጥቦች የማድረሻ ክፍያን ብቻ ይቀንሳሉ';
+
+  @override
+  String growthPointsCount(int points) {
+    return '$points ነጥቦች';
+  }
+
+  @override
+  String get growthPointsDiscount => 'የነጥብ ቅናሽ';
+
+  @override
+  String get growthCouponDiscount => 'የማስተዋወቂያ ቅናሽ';
+
+  @override
+  String growthCouponDiscountWithCode(String code) {
+    return 'ማስተዋወቂያ ($code)';
+  }
+
+  @override
+  String get growthDeliveryFeeLabel => 'የማድረሻ ክፍያ';
+
+  @override
+  String get growthFree => 'ነፃ';
+
+  @override
+  String growthFreeDeliveryHint(String amount) {
+    return 'ለነፃ ማድረሻ $amount ተጨማሪ ይጨምሩ';
+  }
+
+  @override
+  String get growthFreeDeliveryUnlocked => 'ነፃ ማድረሻ አግኝተዋል!';
+
+  @override
+  String get growthRewardsTitle => 'ሽልማቶች';
+
+  @override
+  String growthRewardsWorth(String amount) {
+    return 'ዋጋው $amount';
+  }
+
+  @override
+  String get growthRewardsHowItWorks => 'እንዴት እንደሚሰራ';
+
+  @override
+  String get growthRewardsEarnLine => 'በእያንዳንዱ የተጠናቀቀ ትዕዛዝ ነጥብ ያግኙ።';
+
+  @override
+  String growthRewardsRateLine(int points, String amount) {
+    return '$points ነጥቦች = ከማድረሻ ክፍያዎ $amount ቅናሽ።';
+  }
+
+  @override
+  String growthRewardsUseLine(int points) {
+    return '$points ነጥቦች ሲኖርዎት በክፍያ ጊዜ ይጠቀሙባቸው።';
+  }
+
+  @override
+  String get growthRewardsHistory => 'ታሪክ';
+
+  @override
+  String get growthRewardsHistoryEmpty => 'እስካሁን የነጥብ እንቅስቃሴ የለም።';
+
+  @override
+  String get growthRewardsLoadError => 'ሽልማቶችዎን መጫን አልተቻለም።';
+
+  @override
+  String get growthRewardsTypeEarned => 'የተገኙ ነጥቦች';
+
+  @override
+  String get growthRewardsTypeRedeemed => 'ጥቅም ላይ የዋሉ ነጥቦች';
+
+  @override
+  String get growthRewardsTypeRestored => 'የተመለሱ ነጥቦች';
+
+  @override
+  String get growthRewardsTypeExpired => 'ጊዜያቸው ያለፈ ነጥቦች';
+
+  @override
+  String growthReferralTitle(String amount) {
+    return 'ጓደኞችን ይጋብዙ፣ $amount ያግኙ';
+  }
+
+  @override
+  String growthReferralSubtitle(String amount) {
+    return 'ከመጀመሪያ ትዕዛዛቸው በኋላ እርስዎና ጓደኛዎ እያንዳንዳችሁ $amount ታገኛላችሁ።';
+  }
+
+  @override
+  String get growthReferralCopy => 'ቅዳ';
+
+  @override
+  String get growthReferralCopied => 'የግብዣ ኮድ ተቀድቷል';
+
+  @override
+  String get growthReferralShare => 'ግብዣ አጋራ';
+
+  @override
+  String get growthReferralShareSubject => 'በሁድሁድ መላኪያ ይቀላቀሉኝ';
+
+  @override
+  String growthReferralShareFallback(String amount, String code, String link) {
+    return 'በኮዴ $code በሁድሁድ መላኪያ $amount ያግኙ፦ $link';
+  }
+
+  @override
+  String get growthReferralInvited => 'የተጋበዙ';
+
+  @override
+  String get growthReferralRewarded => 'የተሸለሙ';
+
+  @override
+  String get growthReferralPending => 'በመጠባበቅ ላይ';
+
+  @override
+  String get growthReferralEarned => 'የተገኘ';
+
+  @override
+  String get growthReorderButton => 'እንደገና እዘዝ';
+
+  @override
+  String get growthReorderFailed => 'እንደገና ማዘዝ አልተቻለም። እባክዎ እንደገና ይሞክሩ።';
+
+  @override
+  String get growthReorderReplaceMessage =>
+      'ጋሪዎ ከሌላ መደብር እቃዎች አሉት። በዚህ ትዕዛዝ ይተኩ?';
+
+  @override
+  String get growthReorderUnavailableTitle => 'አንዳንድ እቃዎች አይገኙም';
+
+  @override
+  String get growthReorderNothingAvailable => 'ከእነዚህ እቃዎች አንዳቸውም አሁን አይገኙም';
+
+  @override
+  String get growthReorderContinue => 'ባሉት እቃዎች ቀጥል';
+
+  @override
+  String get growthReorderReasonOutOfStock => 'ከክምችት ውጭ';
+
+  @override
+  String get growthReorderReasonRemoved => 'ከእንግዲህ አይሸጥም';
+
+  @override
+  String get growthReorderReasonVendorClosed => 'መደብሩ ተዘግቷል';
+
+  @override
+  String get growthReorderReasonUnavailable => 'አይገኝም';
+
+  @override
+  String get growthOrderAgainTitle => 'እንደገና ይዘዙ';
+
+  @override
+  String growthOrderAgainOrderLabel(String order) {
+    return 'ትዕዛዝ #$order';
+  }
+
+  @override
+  String get growthSeeAll => 'ሁሉንም ይመልከቱ';
+
+  @override
+  String get growthClosed => 'ዝግ';
+
+  @override
+  String get growthCollectionFallbackTitle => 'ስብስብ';
+
+  @override
+  String get growthStoreFallbackName => 'መደብር';
+
+  @override
+  String get p3Sponsored => 'ስፖንሰር የተደረገ';
+
+  @override
+  String get p3PlusTitle => 'ሁድሁድ ፕላስ';
+
+  @override
+  String get p3PlusBadge => 'ፕላስ';
+
+  @override
+  String get p3PlusTagline => 'በእያንዳንዱ ትዕዛዝ ነፃ ማድረሻ እና ቁጠባ።';
+
+  @override
+  String p3PlusPricePerPeriod(String price, int days) {
+    return '$price / $days ቀናት';
+  }
+
+  @override
+  String get p3PlusBenefitsTitle => 'የእርስዎ ጥቅሞች';
+
+  @override
+  String p3PlusBenefitFreeDelivery(String amount) {
+    return 'ከ$amount በላይ ለሆኑ የምግብና የሸቀጣሸቀጥ ትዕዛዞች ነፃ ማድረሻ';
+  }
+
+  @override
+  String get p3PlusBenefitFreeDeliveryAll => 'ለምግብና ለሸቀጣሸቀጥ ትዕዛዞች ነፃ ማድረሻ';
+
+  @override
+  String p3PlusBenefitParcelDiscount(String percent) {
+    return 'በጥቅል ማድረሻ ላይ $percent% ቅናሽ';
+  }
+
+  @override
+  String get p3PlusSubscribe => 'ሁድሁድ ፕላስን ይቀላቀሉ';
+
+  @override
+  String get p3PlusCancel => 'ፕላስን ሰርዝ';
+
+  @override
+  String get p3PlusResume => 'ፕላሴን ቀጥል';
+
+  @override
+  String get p3PlusActive => 'አባልነትዎ ንቁ ነው';
+
+  @override
+  String p3PlusRenewsOn(String date) {
+    return 'በ$date ይታደሳል';
+  }
+
+  @override
+  String p3PlusEndsOn(String date) {
+    return 'በ$date ያበቃል — ማቆየት ይችላሉ';
+  }
+
+  @override
+  String get p3PlusPastDue => 'የእድሳት ክፍያ አልተሳካም። ፕላስን ለማቆየት ዋሌትዎን ይሙሉ።';
+
+  @override
+  String p3PlusSavings(String amount) {
+    return 'ባለፉት 30 ቀናት ወደ $amount ገደማ ቆጥበዋል';
+  }
+
+  @override
+  String get p3PlusPaidFromWallet => 'ከሁድሁድ ዋሌትዎ ይከፈላል። በማንኛውም ጊዜ መሰረዝ ይችላሉ።';
+
+  @override
+  String get p3PlusSubscribed => 'ወደ ሁድሁድ ፕላስ እንኳን ደህና መጡ!';
+
+  @override
+  String get p3PlusCancelled => 'ፕላስ በዚህ ጊዜ መጨረሻ ያበቃል';
+
+  @override
+  String get p3PlusResumed => 'ፕላስ መታደሱን ይቀጥላል';
+
+  @override
+  String get p3PlusCancelConfirmTitle => 'ሁድሁድ ፕላስ ይሰረዝ?';
+
+  @override
+  String get p3PlusCancelConfirmMessage => 'ጥቅሞችዎ እስከዚህ ጊዜ መጨረሻ ድረስ ይቆያሉ።';
+
+  @override
+  String get p3PlusInsufficientTitle => 'በቂ የዋሌት ቀሪ ሂሳብ የለም';
+
+  @override
+  String p3PlusInsufficientMessage(String amount) {
+    return 'ፕላስን ለመቀላቀል $amount ወደ ዋሌትዎ ይጨምሩ።';
+  }
+
+  @override
+  String get p3PlusTopUp => 'ዋሌት ሙላ';
+
+  @override
+  String get p3PlusActionFailed => 'ፕላስን ማዘመን አልተቻለም። እባክዎ እንደገና ይሞክሩ።';
+
+  @override
+  String get p3PlusLoadError => 'ሁድሁድ ፕላስን መጫን አልተቻለም።';
+
+  @override
+  String get p3PlusUnavailable => 'ሁድሁድ ፕላስ አሁን አይገኝም።';
+
+  @override
+  String get p3PlusUpsell => 'በሁድሁድ ፕላስ ነፃ ማድረሻ ያግኙ';
+
+  @override
+  String get p3PlusMenuJoin => 'ሁድሁድ ፕላስ ያግኙ';
+
+  @override
+  String get p3PlusMenuMember => 'የእኔ ሁድሁድ ፕላስ';
+
+  @override
+  String get p3QuotePlusFreeDelivery => 'ፕላስ፦ ነፃ ማድረሻ';
+
+  @override
+  String get p3MarketSettingTitle => 'ከተማ';
+
+  @override
+  String get p3MarketPickerTitle => 'ከተማዎን ይምረጡ';
+
+  @override
+  String p3MarketChanged(String market) {
+    return 'ከተማ ወደ $market ተቀይሯል';
+  }
+
+  @override
+  String get p3MarketChangeBlocked =>
+      'ዋሌትዎ በሌላ ገንዘብ ቀሪ ሂሳብ እያለው ከተማ መቀየር አይችሉም። መጀመሪያ ይጠቀሙበት ወይም ያውጡት።';
+
+  @override
+  String get p3MarketChangeFailed => 'ከተማ መቀየር አልተቻለም። እባክዎ እንደገና ይሞክሩ።';
+
+  @override
+  String get p5SetsTitle => 'HudHud ሴት';
+
+  @override
+  String get p5SetsSubtitle => 'ለአንድ ሰው ምግብ · ማድረስ ተካትቷል';
+
+  @override
+  String get p5SetDeliveryIncluded => 'ማድረስ ተካትቷል';
+
+  @override
+  String p5SetsMaxPerOrder(int count) {
+    return 'በአንድ ትዕዛዝ እስከ $count';
+  }
+
+  @override
+  String get p5QuoteSetDeliveryIncluded => 'HudHud ሴት፦ ማድረስ ተካትቷል';
+
+  @override
+  String p5SetOverMaxQuantity(int count) {
+    return 'ማድረስ የሚካተተው በአንድ ትዕዛዝ እስከ $count HudHud ሴቶች ብቻ ነው።';
+  }
+
+  @override
+  String get p5SetMixedCart => 'ማድረስ የሚካተተው ጋሪዎ HudHud ሴቶችን ብቻ ሲይዝ ነው።';
+
+  @override
+  String get p5PayCashOnArrival => 'ትዕዛዝዎ ሲደርስ በጥሬ ገንዘብ ይክፈሉ';
+
+  @override
+  String get p5PaymentInProgress =>
+      'ለዚህ ትዕዛዝ ክፍያ በሂደት ላይ ነው። በስልክዎ ያጽድቁ ወይም ውድቅ ያድርጉ፣ ከዚያ የትዕዛዙን ሁኔታ ይመልከቱ።';
+
+  @override
+  String get p5PaymentAlreadyPaid => 'ይህ ትዕዛዝ አስቀድሞ ተከፍሏል።';
+
+  @override
+  String get p5PaymentTotalsChanged =>
+      'የትዕዛዝዎ ጠቅላላ ዋጋ ተቀይሯል። ትዕዛዙን አድሰናል — ከመክፈልዎ በፊት ይገምግሙት።';
+
+  @override
+  String get p5OrderNotPayable => 'ይህ ትዕዛዝ ከአሁን በኋላ ሊከፈል አይችልም።';
+
+  @override
+  String get p5CheckOrderStatus => 'የትዕዛዝ ሁኔታ ይመልከቱ';
+
+  @override
+  String p5RefundedToWallet(String amount) {
+    return '$amount ወደ HudHud ዋሌትዎ ተመልሷል';
+  }
+
+  @override
+  String get p5RefundManual => 'ትዕዛዙ ተሰርዟል። ቡድናችን ተመላሽ ገንዘብዎን በቅርቡ ያስኬዳል።';
+
+  @override
+  String get p5WalletRefundLabel => 'ተመላሽ';
+
+  @override
+  String get p9GiftSendTitle => 'ስጦታ ይላኩ';
+
+  @override
+  String get p9GiftBannerSubtitle =>
+      'በሌላ ከተማ ለሚኖሩ ቤተሰብዎ ምግብ ያዝዙ። ለመከታተል የኤስኤምኤስ መልዕክት ይደርሳቸዋል።';
+
+  @override
+  String get p9GiftIntroBody =>
+      'ተቀባዩ የሚኖርበትን ከተማ ይምረጡ፣ ምግብ ቤት ይምረጡና እንደተለመደው ጋሪዎን ይሙሉ። በክፍያ ጊዜ የተቀባዩን ስም እና ስልክ ቁጥር ያስገቡና በኦንላይን ይክፈሉ።';
+
+  @override
+  String get p9GiftChooseMarket => 'ተቀባዩ የሚኖረው የት ነው?';
+
+  @override
+  String get p9GiftChooseRestaurant => 'ምግብ ቤት ይምረጡ';
+
+  @override
+  String get p9GiftHowItWorksSms =>
+      'ተቀባዩ የመከታተያ ሊንክ እና ባለ 4 አሃዝ የማድረሻ ኮድ ያለው ኤስኤምኤስ ይደርሰዋል።';
+
+  @override
+  String get p9GiftHowItWorksPay =>
+      'በኦንላይን ይከፍላሉ። ለስጦታዎች በማድረሻ ጊዜ በጥሬ ገንዘብ መክፈል አይቻልም።';
+
+  @override
+  String get p9GiftSectionTitle => 'እንደ ስጦታ ይላኩ';
+
+  @override
+  String get p9GiftSectionSubtitle =>
+      'ለተቀባዩ እናደርሳለን እና የመከታተያ ሊንክ በመልዕክት እንልካለን';
+
+  @override
+  String get p9GiftToggle => 'ይህ ትዕዛዝ ስጦታ ነው';
+
+  @override
+  String get p9GiftRecipientName => 'የተቀባዩ ስም';
+
+  @override
+  String get p9GiftRecipientPhone => 'የተቀባዩ ሞባይል ቁጥር';
+
+  @override
+  String p9GiftRecipientPhoneHint(String example) {
+    return 'ለምሳሌ $example';
+  }
+
+  @override
+  String get p9GiftMessageLabel => 'የስጦታ መልዕክት (አማራጭ)';
+
+  @override
+  String get p9GiftMessageHint => 'ለተቀባዩ አጭር መልዕክት ይጻፉ';
+
+  @override
+  String get p9GiftNameRequired => 'የተቀባዩን ስም ያስገቡ';
+
+  @override
+  String p9GiftPhoneInvalid(String prefix) {
+    return 'ትክክለኛ የሞባይል ቁጥር ያስገቡ ($prefix …)';
+  }
+
+  @override
+  String get p9GiftNoCash =>
+      'ለስጦታዎች በማድረሻ ጊዜ በጥሬ ገንዘብ መክፈል አይቻልም። የኦንላይን የክፍያ መንገድ ይምረጡ።';
+
+  @override
+  String get p9GiftAddressHint => 'የማድረሻ ቦታውን የተቀባዩ አድራሻ ያድርጉት።';
+
+  @override
+  String get p9GiftUnavailable => 'የስጦታ ትዕዛዞች ገና አልተጀመሩም።';
+
+  @override
+  String get p9GiftPlacedTitle => 'የስጦታ ትዕዛዝ ተልኳል';
+
+  @override
+  String p9GiftPlacedBody(String name) {
+    return 'ክፍያው ሲረጋገጥ $name የመከታተያ ሊንክ እና ባለ 4 አሃዝ የማድረሻ ኮድ ያለው ኤስኤምኤስ ይደርሰዋል። ትዕዛዙ ሲደርስ ኮዱን ለአድራሹ ይሰጣል።';
+  }
+
+  @override
+  String p9GiftForName(String name) {
+    return 'ለ$name የተላከ ስጦታ';
+  }
+
+  @override
+  String get p9GiftRecipientLabel => 'ተቀባይ';
+
+  @override
+  String get p9GiftYourMessage => 'የእርስዎ መልዕክት';
+
+  @override
+  String get p9GiftWalletNote =>
+      'በሌላ ገንዘብ ያለ ዋሌት በዛሬው የምንዛሪ ተመን የተለወጠው መጠን ይቀነስበታል።';
+
+  @override
+  String p9GiftModeBanner(String market) {
+    return 'ወደ $market ስጦታ እየላኩ ነው';
+  }
+
+  @override
+  String get p9GiftStop => 'ስጦታውን አቁም';
+
+  @override
+  String get p9GiftOrderLabel => 'የስጦታ ትዕዛዝ';
+
+  @override
+  String get p10CityNotServed => 'ይህን አካባቢ ገና አናገለግልም';
+
+  @override
+  String get p10CityCrossCity => 'መውሰጃና ማድረሻ በአንድ ከተማ ውስጥ መሆን አለባቸው።';
+
+  @override
+  String get p10CityOtherCity =>
+      'እነዚህ አድራሻዎች በሌላ ከተማ ውስጥ ናቸው። ለመቀጠል በቅንብሮች ከተማዎን ይቀይሩ።';
+
+  @override
+  String get p10ParcelTitle => 'እሽግ ይላኩ';
+
+  @override
+  String get p10ParcelScheduledTitle => 'እሽግ ቀጠሮ ያስይዙ';
+
+  @override
+  String get p10ParcelRoute => 'መንገድ';
+
+  @override
+  String get p10ParcelPickup => 'መውሰጃ';
+
+  @override
+  String get p10ParcelDropoff => 'ማድረሻ';
+
+  @override
+  String get p10ParcelChooseAddress => 'በካርታ ላይ ይምረጡ';
+
+  @override
+  String get p10ParcelBuilding => 'ሕንፃ / ቤት';
+
+  @override
+  String get p10ParcelFloor => 'ፎቅ';
+
+  @override
+  String get p10ParcelApartment => 'አፓርትመንት / ቢሮ';
+
+  @override
+  String get p10ParcelLandmark => 'መለያ ቦታ';
+
+  @override
+  String get p10ParcelRecipient => 'ተቀባይ';
+
+  @override
+  String get p10ParcelSendToMyself => 'ለራሴ ላክ';
+
+  @override
+  String get p10ParcelRecipientName => 'የተቀባይ ስም';
+
+  @override
+  String get p10ParcelRecipientPhone => 'የተቀባይ ስልክ';
+
+  @override
+  String get p10ParcelWhatSending => 'ምን እየላኩ ነው?';
+
+  @override
+  String get p10ParcelCategoryDocument => 'ሰነዶች';
+
+  @override
+  String get p10ParcelCategoryParcel => 'እሽግ';
+
+  @override
+  String get p10ParcelCategoryFood => 'ምግብ';
+
+  @override
+  String get p10ParcelCategoryGrocery => 'ሸቀጣሸቀጥ';
+
+  @override
+  String get p10ParcelCategoryElectronics => 'ኤሌክትሮኒክስ';
+
+  @override
+  String get p10ParcelCategoryClothes => 'ልብስ';
+
+  @override
+  String get p10ParcelCategoryGift => 'ስጦታ';
+
+  @override
+  String get p10ParcelCategoryFlowers => 'አበቦች';
+
+  @override
+  String get p10ParcelCategoryKeys => 'ቁልፎች';
+
+  @override
+  String get p10ParcelCategoryOther => 'ሌላ';
+
+  @override
+  String get p10ParcelSizeSmall => 'ትንሽ';
+
+  @override
+  String get p10ParcelSizeSmallHint => 'በቦርሳ ይገባል';
+
+  @override
+  String get p10ParcelSizeMedium => 'መካከለኛ';
+
+  @override
+  String get p10ParcelSizeMediumHint => 'በመኪና ወንበር ላይ ይገባል';
+
+  @override
+  String get p10ParcelSizeLarge => 'ትልቅ';
+
+  @override
+  String get p10ParcelSizeLargeHint => 'ቫን ያስፈልገዋል';
+
+  @override
+  String get p10ParcelSizeUnavailable => 'እዚህ ገና አይገኝም';
+
+  @override
+  String get p10ParcelDescription => 'መግለጫ (አማራጭ)';
+
+  @override
+  String get p10ParcelItemValue => 'የዕቃው ዋጋ (አማራጭ)';
+
+  @override
+  String get p10ParcelCourierNote => 'ለአድራሹ ማስታወሻ';
+
+  @override
+  String get p10ParcelPayment => 'ክፍያ';
+
+  @override
+  String get p10ParcelPayWallet => 'የHudHud ዋሌት';
+
+  @override
+  String get p10ParcelPayCash => 'ለአድራሹ በጥሬ ገንዘብ';
+
+  @override
+  String get p10ParcelPaymentPhone => 'የሞባይል ገንዘብ ቁጥር';
+
+  @override
+  String get p10ParcelRecipientPays => 'ተቀባይ ይከፍላል (ሲደርስ በጥሬ ገንዘብ)';
+
+  @override
+  String get p10ParcelSellerCod => 'የዕቃውን ዋጋ ከተቀባዩ ሰብስብ';
+
+  @override
+  String get p10ParcelSellerCodHint =>
+      'አድራሹ በጥሬ ገንዘብ ይሰበስባል፤ ወደ የHudHud የንግድ ዋሌትዎ ይከፈላል።';
+
+  @override
+  String get p10ParcelSellerCodAmount => 'የሚሰበሰበው የዕቃ ዋጋ';
+
+  @override
+  String get p10ParcelPickupTime => 'የመውሰጃ ሰዓት';
+
+  @override
+  String get p10ParcelPickupNow => 'በተቻለ ፍጥነት';
+
+  @override
+  String get p10ParcelPrice => 'ዋጋ';
+
+  @override
+  String p10ParcelPriceHeld(String time) {
+    return 'ዋጋው ለ$time ተይዟል';
+  }
+
+  @override
+  String get p10ParcelPriceExpired => 'የዋጋ መያዣው አልፏል';
+
+  @override
+  String get p10ParcelRefreshPrice => 'ዋጋ አድስ';
+
+  @override
+  String get p10ParcelGettingPrice => 'ዋጋ እየተገኘ ነው…';
+
+  @override
+  String get p10ParcelPriceUpdated => 'ዋጋው ተቀይሯል። እባክዎ አዲሱን ዋጋ ይመልከቱ።';
+
+  @override
+  String p10ParcelBook(String price) {
+    return 'በ$price ይዘዙ';
+  }
+
+  @override
+  String get p10ParcelContinue => 'ቀጥል';
+
+  @override
+  String get p10ParcelFillRequired => 'መውሰጃና ማድረሻ ይምረጡ፣ የተቀባዩንም ስልክ ያስገቡ።';
+
+  @override
+  String get p10ParcelSizeNotSupported => 'ይህ መጠን በዚህ ከተማ ገና አይገኝም።';
+
+  @override
+  String get p10ParcelPaymentNotAvailable => 'ይህ የክፍያ ዘዴ በዚህ ከተማ አይገኝም።';
+
+  @override
+  String get p10ParcelInsufficientWallet =>
+      'በዋሌትዎ በቂ ገንዘብ የለም። ይሙሉ ወይም ሌላ የክፍያ ዘዴ ይምረጡ።';
+
+  @override
+  String get p10ParcelSomethingWrong => 'ችግር ተፈጥሯል። እባክዎ እንደገና ይሞክሩ።';
+
+  @override
+  String get p10ParcelApprovePayment => 'ክፍያውን በስልክዎ ላይ ያጽድቁ።';
+
+  @override
+  String get p10ParcelBooked => 'እሽጉ ታዝዟል';
+
+  @override
+  String get p10ParcelHandoverCode => 'የማስረከቢያ ኮድ';
+
+  @override
+  String get p10ParcelHandoverHint => 'ተቀባዩ ይህን ኮድ ሲደርስ ለአድራሹ ይሰጣል።';
+
+  @override
+  String get p10ParcelHandoverSelfHint => 'እሽጉን ሲቀበሉ ይህን ኮድ ለአድራሹ ይስጡ።';
+
+  @override
+  String get p10ParcelShareTracking => 'የመከታተያ ሊንክ አጋራ';
+
+  @override
+  String p10ParcelTrackingShareText(String link) {
+    return 'የHudHud እሽጌን ይከታተሉ፦ $link';
+  }
+
+  @override
+  String p10ParcelEta(String minutes) {
+    return 'በግምት በ$minutes ደቂቃ ይደርሳል';
+  }
+
+  @override
+  String get p10ParcelCancel => 'እሽጉን ሰርዝ';
+
+  @override
+  String get p10ParcelCancelFree => 'ይህን እሽግ ይሰርዙ? ገና አድራሽ ስላልተመደበ ነፃ ነው።';
+
+  @override
+  String p10ParcelCancelFee(String fee) {
+    return 'አድራሹ በመንገድ ላይ ነው። አሁን መሰረዝ $fee ያስከፍላል።';
+  }
+
+  @override
+  String get p10ParcelCancelReason => 'በላኪው በመተግበሪያው ተሰርዟል';
+
+  @override
+  String get p10ParcelCancelled => 'እሽጉ ተሰርዟል';
+
+  @override
+  String get p11ParcelAddStop => 'ማቆሚያ ጨምር';
+
+  @override
+  String p11ParcelStopN(String number) {
+    return 'ማቆሚያ $number';
+  }
+
+  @override
+  String get p11ParcelRemoveStop => 'ማቆሚያውን አስወግድ';
+
+  @override
+  String get p11ParcelMoveUp => 'ወደ ላይ';
+
+  @override
+  String get p11ParcelMoveDown => 'ወደ ታች';
+
+  @override
+  String p11ParcelStopsLimit(String max) {
+    return 'በአንድ እሽግ እስከ $max ማድረሻዎች';
+  }
+
+  @override
+  String get p11ParcelMultiStopSenderPays =>
+      'ብዙ ማድረሻዎች ሲኖሩ ለሙሉ መንገዱ እርስዎ ይከፍላሉ።';
+
+  @override
+  String get p11ParcelMultiStopCashAtPickup =>
+      'ብዙ ማድረሻዎች ሲኖሩ ጥሬ ገንዘብ እሽጉ ሲነሳ ለአድራሹ ይከፈላል።';
+
+  @override
+  String get p11ParcelPayAtPickup => 'እሽጉ ሲነሳ በጥሬ ገንዘብ ይክፈሉ';
+
+  @override
+  String get p11ParcelPayAtPickupHint => 'አድራሹ እሽጉን ሲወስድ ገንዘቡን ይስጡት።';
+
+  @override
+  String p11ParcelPayAtPickupDue(String amount) {
+    return 'እሽጉ ሲነሳ $amount በጥሬ ገንዘብ ለአድራሹ ይክፈሉ';
+  }
+
+  @override
+  String get p11ParcelPaidAtPickup => 'እሽጉ ሲነሳ ለአድራሹ ተከፍሏል';
+
+  @override
+  String get p11ParcelPayAtPickupUnavailable =>
+      'እሽጉ ሲነሳ በጥሬ ገንዘብ መክፈል አሁን አይገኝም።';
+
+  @override
+  String get p11ParcelStopsTitle => 'ማድረሻዎች';
+
+  @override
+  String get p11ParcelStopCodesHint =>
+      'እያንዳንዱ ተቀባይ የራሱን የማስረከቢያ ኮድ በSMS አግኝቷል። ካላገኘ ያጋሩት።';
+
+  @override
+  String get p11ParcelShareStopLink => 'ሊንኩን አጋራ';
+
+  @override
+  String get p11ParcelStopPending => 'በመጠባበቅ ላይ';
+
+  @override
+  String get p11ParcelStopArrived => 'አድራሹ ደርሷል';
+
+  @override
+  String get p11ParcelStopDelivered => 'ደርሷል';
+
+  @override
+  String get p11ParcelStopFailed => 'አልደረሰም';
+
+  @override
+  String get p11ParcelStopReturned => 'ወደ እርስዎ ተመልሷል';
+
+  @override
+  String get p11ParcelMultiStopDisabled => 'ብዙ ማድረሻዎች አሁን አይገኙም።';
+
+  @override
+  String get p11ParcelTooManyStops => 'ለአንድ እሽግ በጣም ብዙ ማድረሻዎች።';
+
+  @override
+  String p11ParcelCancelCashFee(String fee) {
+    return 'አድራሹ በመንገድ ላይ ነው። አሁን መሰረዝ $fee ያስከፍላል። ከዋሌትዎ ይቀነሳል ወይም በሂሳብዎ ላይ ይመዘገባል።';
+  }
+
+  @override
+  String p11ParcelOutstandingBalance(String amount) {
+    return 'ከተሰረዘ እሽግ $amount ዕዳ አለብዎት። በሚቀጥለው ገንዘብ ሲሞሉ ወይም ሲያዝዙ ከዋሌትዎ ይቀነሳል።';
+  }
+
+  @override
+  String get p12StoreOpen => 'ክፍት ነው';
+
+  @override
+  String get p12StoreClosed => 'ዝግ ነው';
+
+  @override
+  String get p12StoreBusy => 'ተጨናንቋል';
+
+  @override
+  String p12StoreOpensAt(String time) {
+    return '$time ይከፈታል';
+  }
+
+  @override
+  String p12StoreOpensTomorrowAt(String time) {
+    return 'ነገ $time ይከፈታል';
+  }
+
+  @override
+  String p12StoreBackAt(String time) {
+    return '$time ይመለሳል';
+  }
+
+  @override
+  String get p12StoreClosedToday => 'ዛሬ ዝግ ነው';
+
+  @override
+  String get p12StoreClosedBanner =>
+      'ይህ መደብር አሁን ዝግ ነው። ምናሌውን ማየት ይችላሉ፣ ግን እስኪከፈት ድረስ ማዘዝ አይቻልም።';
+
+  @override
+  String get p12StoreBusyBanner =>
+      'ይህ መደብር በጣም ስራ በዝቶበታል፣ አዳዲስ ትዕዛዞችን ለጊዜው አቁሟል። እባክዎ ትንሽ ቆይተው ይመለሱ።';
+
+  @override
+  String get p12StoreOrderingPaused => 'ማዘዝ ተቋርጧል';
+
+  @override
+  String get p12SoldOut => 'አልቋል';
+
+  @override
+  String get p12Unavailable => 'አይገኝም';
+
+  @override
+  String get p12GoToCheckout => 'ወደ ክፍያ ይሂዱ';
+
+  @override
+  String get p12ErrStoreClosed => 'ይህ መደብር አሁን ዝግ ነው።';
+
+  @override
+  String get p12ErrStoreBusy => 'ይህ መደብር ስራ በዝቶበታል፣ አሁን ትዕዛዝ አይቀበልም።';
+
+  @override
+  String get p12ErrItemSoldOut => 'በጋሪዎ ውስጥ ያለ አንድ ዕቃ ዛሬ አልቋል። ለመቀጠል ያስወግዱት።';
+
+  @override
+  String p12ErrItemSoldOutNamed(String item) {
+    return '$item ዛሬ አልቋል። ለመቀጠል ያስወግዱት።';
+  }
+
+  @override
+  String get p12RemoveItem => 'ዕቃውን አስወግድ';
+
+  @override
+  String p12ErrOutstandingDues(String amount) {
+    return 'ያልተከፈለ $amount ሂሳብ አለብዎት። እስኪከፈል ድረስ በጥሬ ገንዘብ መክፈል አይቻልም። ዋሌትዎን ይሙሉ ወይም ሌላ የክፍያ መንገድ ይምረጡ።';
+  }
+
+  @override
+  String get p12DuesTitle => 'ያልተከፈለ ሂሳብ';
+
+  @override
+  String p12DuesCheckoutBody(String amount) {
+    return 'ከተሰረዘ እሽግ $amount ዕዳ አለብዎት። እስኪከፈል ድረስ ሲደርስ በጥሬ ገንዘብ መክፈል አይቻልም። ዋሌትዎን ሲሞሉ በራስ-ሰር ይከፈላል።';
+  }
+
+  @override
+  String get p12PayNow => 'አሁን ይክፈሉ';
+
+  @override
+  String get p12CashBlockedByDues => 'ያልተከፈለው ሂሳብ እስኪከፈል ድረስ ጥሬ ገንዘብ አይቻልም።';
+
+  @override
+  String get p12ChooseOtherPayment => 'ሌላ የክፍያ መንገድ ይምረጡ';
+
+  @override
+  String get p12ErrCityOutside =>
+      'ወደዚህ አድራሻ ገና አናደርስም። በከተማዎ ውስጥ ያለ አድራሻ ይምረጡ።';
+
+  @override
+  String get p12ErrCityCross =>
+      'በአንድ ትዕዛዝ ውስጥ ያሉ ሁሉም አድራሻዎች በአንድ ከተማ ውስጥ መሆን አለባቸው።';
+
+  @override
+  String p12ErrCityMismatch(String city) {
+    return 'ይህ አድራሻ በ$city ነው። ለመቀጠል ከተማዎን ወደ $city ይቀይሩ።';
+  }
+
+  @override
+  String get p12ErrCityMismatchGeneric =>
+      'ይህ አድራሻ በሌላ ከተማ ነው። ለመቀጠል ከተማዎን ይቀይሩ።';
+
+  @override
+  String get p12ChangeCity => 'ከተማ ቀይር';
+
+  @override
+  String get p12ErrNetwork => 'የኢንተርኔት ግንኙነት የለም። ግንኙነትዎን አረጋግጠው እንደገና ይሞክሩ።';
+
+  @override
+  String get p12ErrTimeout => 'ግንኙነቱ ቀርፋፋ ነው። እባክዎ እንደገና ይሞክሩ።';
+
+  @override
+  String get p12ErrServer => 'በእኛ በኩል ችግር ተፈጥሯል። እባክዎ ትንሽ ቆይተው እንደገና ይሞክሩ።';
+
+  @override
+  String get p12ErrSessionExpired => 'ክፍለ ጊዜዎ አብቅቷል። እባክዎ እንደገና ይግቡ።';
 }

@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/app/services/startup_location_service.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
@@ -14,6 +15,14 @@ import 'package:hudhud_delivery/features/categories/model/category_tree_model.da
 import 'package:hudhud_delivery/features/categories/presentation/screens/categories_screen.dart';
 import 'package:hudhud_delivery/features/delivery/presentation/screens/product_detail_screen.dart';
 import 'package:hudhud_delivery/features/delivery/presentation/screens/store_detail_screen.dart';
+import 'package:hudhud_delivery/features/growth/data/growth_repository.dart';
+import 'package:hudhud_delivery/features/growth/data/models/home_feed.dart';
+import 'package:hudhud_delivery/features/growth/data/models/hudhud_set.dart';
+import 'package:hudhud_delivery/features/growth/data/models/reorder.dart';
+import 'package:hudhud_delivery/features/growth/growth_scope.dart';
+import 'package:hudhud_delivery/features/growth/presentation/widgets/home_feed_widgets.dart';
+import 'package:hudhud_delivery/features/growth/presentation/widgets/hudhud_set_widgets.dart';
+import 'package:hudhud_delivery/features/growth/presentation/widgets/sponsored_widgets.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/features/orders/data/models/vendor_model.dart';
 import 'package:hudhud_delivery/features/products/data/products_data_provider.dart';
@@ -21,13 +30,35 @@ import 'package:hudhud_delivery/features/products/data/products_repository.dart'
 import 'package:hudhud_delivery/features/products/model/popular_product_model.dart';
 import 'package:hudhud_delivery/features/products/presentation/screens/product_search_results_screen.dart';
 import 'package:hudhud_delivery/features/vendors/data/data_provider/vendors_data_provider.dart';
+import 'package:hudhud_delivery/features/vendors/data/models/store_status.dart';
 import 'package:hudhud_delivery/features/vendors/data/repository/vendors_repository.dart';
+import 'package:hudhud_delivery/features/vendors/presentation/widgets/store_status_widgets.dart';
+import 'package:hudhud_delivery/features/growth/market_controller.dart';
+import 'package:hudhud_delivery/core/utils/money_format.dart';
+import 'package:hudhud_delivery/features/growth/data/models/market.dart';
+import 'package:hudhud_delivery/features/gifting/gift_session.dart';
+import 'package:hudhud_delivery/features/gifting/presentation/gift_widgets.dart';
+import 'package:hudhud_delivery/features/gifting/presentation/send_gift_screen.dart';
 
 class AllCategoriesScreen extends StatelessWidget {
   /// When true (e.g. home Food & groceries tab), no [Scaffold] app bar — fills parent only.
-  const AllCategoriesScreen({super.key, this.embedded = false});
+  const AllCategoriesScreen({
+    super.key,
+    this.embedded = false,
+    this.discoveryLatitude,
+    this.discoveryLongitude,
+    this.title,
+  });
 
   final bool embedded;
+
+  /// Phase 6 gifting: list stores near these coordinates (the recipient's
+  /// market centre) instead of the device location.
+  final double? discoveryLatitude;
+  final double? discoveryLongitude;
+
+  /// App bar title when not [embedded] (default "All categories").
+  final String? title;
 
   @override
   Widget build(BuildContext context) {
@@ -43,15 +74,28 @@ class AllCategoriesScreen extends StatelessWidget {
     return BlocProvider(
       create: (context) => CategoriesBloc(repository, productsRepository)
         ..add(FetchCategoriesListEvent()),
-      child: _AllCategoriesBody(embedded: embedded),
+      child: _AllCategoriesBody(
+        embedded: embedded,
+        discoveryLatitude: discoveryLatitude,
+        discoveryLongitude: discoveryLongitude,
+        title: title,
+      ),
     );
   }
 }
 
 class _AllCategoriesBody extends StatefulWidget {
-  const _AllCategoriesBody({required this.embedded});
+  const _AllCategoriesBody({
+    required this.embedded,
+    this.discoveryLatitude,
+    this.discoveryLongitude,
+    this.title,
+  });
 
   final bool embedded;
+  final double? discoveryLatitude;
+  final double? discoveryLongitude;
+  final String? title;
 
   @override
   State<_AllCategoriesBody> createState() => _AllCategoriesBodyState();
@@ -68,9 +112,141 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
   late final VendorsRepository _vendorsRepository;
   late final ProductsRepository _productsRepository;
 
+  // Phase 2 growth (Food tab only; hidden unless enabled by /growth/config).
+  final GrowthRepository _growthRepository = GrowthRepository.create();
+  HomeFeed _homeFeed = HomeFeed.empty;
+  List<ReorderSuggestion> _reorderSuggestions = const [];
+  bool _homeFeedWasEnabled = false;
+  bool _reorderWasEnabled = false;
+
+  // Phase 4 HudHud Sets: shown only when GET /public/sets returns items.
+  HudHudSetsPage _sets = HudHudSetsPage.empty;
+  bool _setsRequested = false;
+  String? _setsMarket;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!widget.embedded) return;
+    final controller = growthControllerOf(context, listen: true);
+    final feedEnabled = controller?.homeFeedEnabled ?? false;
+    final reorderEnabled = controller?.reorderEnabled ?? false;
+    if (feedEnabled && !_homeFeedWasEnabled) _loadHomeFeed();
+    if (reorderEnabled && !_reorderWasEnabled) _loadReorderSuggestions();
+    _homeFeedWasEnabled = feedEnabled;
+    _reorderWasEnabled = reorderEnabled;
+    // Reload sets once, and again whenever the selected market changes.
+    final market = marketControllerOf(context, listen: true)?.selectedCode;
+    if (!_setsRequested || market != _setsMarket) {
+      _setsRequested = true;
+      _setsMarket = market;
+      _loadSets();
+    }
+  }
+
+  Future<void> _loadSets() async {
+    final market = _setsMarket;
+    final page = await _growthRepository.fetchSets(market: market);
+    if (!mounted || market != _setsMarket) return;
+    setState(() => _sets = page);
+  }
+
+  Future<void> _loadHomeFeed() async {
+    final feed = await _growthRepository.fetchHomeFeed(serviceType: 'food');
+    if (!mounted) return;
+    setState(() => _homeFeed = feed);
+  }
+
+  Future<void> _loadReorderSuggestions() async {
+    // Customer-only endpoint: skip for guests so a 401 never logs anyone out.
+    if (!await AuthService().isAuthenticated()) return;
+    final list = await _growthRepository.fetchReorderSuggestions();
+    if (!mounted) return;
+    setState(() => _reorderSuggestions = list);
+  }
+
+  void _onGiftSessionChanged() {
+    if (mounted) setState(() {});
+  }
+
+  /// Phase 6: "Send a gift" entry when a gift market exists and the server
+  /// has not answered FEATURE_DISABLED recently.
+  bool get _showGiftEntry {
+    final markets = marketControllerOf(context, listen: false)?.markets ??
+        const <Market>[];
+    return giftingAvailable(
+      config: growthConfigOf(context, listen: false),
+      markets: markets,
+      serverUnavailable: GiftSession.instance.serverUnavailable,
+    );
+  }
+
+  void _openSendGift() {
+    final markets = marketControllerOf(context, listen: false)?.markets ??
+        const <Market>[];
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => SendGiftScreen(markets: giftMarkets(markets)),
+      ),
+    );
+  }
+
+  /// Slivers placed above categories; empty (no layout change) when off.
+  List<Widget> _growthSlivers() {
+    if (!widget.embedded) return const [];
+    final controller = growthControllerOf(context, listen: false);
+    final feedOn = controller?.homeFeedEnabled ?? false;
+    final reorderOn = controller?.reorderEnabled ?? false;
+    final slivers = <Widget>[];
+    if (_showGiftEntry) {
+      slivers.add(SliverToBoxAdapter(
+        child: GiftEntryBanner(onTap: _openSendGift),
+      ));
+    }
+    if (feedOn && _homeFeed.banners.isNotEmpty) {
+      slivers.add(SliverToBoxAdapter(
+        child: HomeFeedBannerCarousel(
+          banners: _homeFeed.banners,
+          collections: _homeFeed.collections,
+        ),
+      ));
+    }
+    // Phase 4: HudHud Sets (independent of the feed flag; server decides).
+    if (_sets.hasItems) {
+      slivers.add(SliverToBoxAdapter(child: HudHudSetRow(page: _sets)));
+    }
+    // Phase 3: sponsored vendors (the feed only sends them when ads are on).
+    if (feedOn && _homeFeed.sponsored.isNotEmpty) {
+      slivers.add(SliverToBoxAdapter(
+        child: SponsoredVendorRow(items: _homeFeed.sponsored),
+      ));
+    }
+    if (reorderOn && _reorderSuggestions.isNotEmpty) {
+      slivers.add(SliverToBoxAdapter(
+        child: OrderAgainRow(suggestions: _reorderSuggestions),
+      ));
+    }
+    if (feedOn) {
+      for (final collection in _homeFeed.collections) {
+        slivers.add(SliverToBoxAdapter(
+          child: HomeFeedCollectionRow(collection: collection),
+        ));
+      }
+    }
+    return slivers;
+  }
+
+  @override
+  void dispose() {
+    GiftSession.instance.removeListener(_onGiftSessionChanged);
+    super.dispose();
+  }
+
   @override
   void initState() {
     super.initState();
+    GiftSession.instance.addListener(_onGiftSessionChanged);
+    restoreGiftSession();
     _vendorsRepository = VendorsRepository(
       vendorsDataProvider: VendorsDataProvider(apiService: ApiService.instance),
     );
@@ -88,6 +264,9 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
     await Future.wait([
       _loadVendors(),
       _loadPopularProducts(),
+      if (_homeFeedWasEnabled) _loadHomeFeed(),
+      if (_reorderWasEnabled) _loadReorderSuggestions(),
+      if (widget.embedded) _loadSets(),
     ]);
   }
 
@@ -98,12 +277,23 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
       _vendorsError = null;
     });
     try {
-      final location = StartupLocationService.cached ??
-          await StartupLocationService.fetchAtStartup();
+      final overrideLat = widget.discoveryLatitude;
+      final overrideLng = widget.discoveryLongitude;
+      double? latitude;
+      double? longitude;
+      if (overrideLat != null && overrideLng != null) {
+        latitude = overrideLat;
+        longitude = overrideLng;
+      } else {
+        final location = StartupLocationService.cached ??
+            await StartupLocationService.fetchAtStartup();
+        latitude = location?.latitude;
+        longitude = location?.longitude;
+      }
       final list = await _vendorsRepository.getVendors(
         page: 1,
-        latitude: location?.latitude,
-        longitude: location?.longitude,
+        latitude: latitude,
+        longitude: longitude,
       );
       if (!mounted) return;
       setState(() {
@@ -147,6 +337,7 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
   @override
   Widget build(BuildContext context) {
     final embedded = widget.embedded;
+    final growthSlivers = _growthSlivers();
     final searchHint =
         embedded ? context.l10n.homeSearchHint : 'Search products everywhere';
 
@@ -175,6 +366,7 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
               usePullToRefresh: true,
               onPullToRefresh: _onPullToRefresh,
               embedded: embedded,
+              leadingSlivers: growthSlivers,
               categoriesError: state.errorMessage,
               onCategoriesRetry: () => context
                   .read<CategoriesBloc>()
@@ -207,6 +399,7 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
             usePullToRefresh: true,
             onPullToRefresh: _onPullToRefresh,
             embedded: embedded,
+            leadingSlivers: growthSlivers,
           );
         }
         // Initial / other states: still surface popular if already loaded.
@@ -224,6 +417,7 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
             usePullToRefresh: true,
             onPullToRefresh: _onPullToRefresh,
             embedded: embedded,
+            leadingSlivers: growthSlivers,
           );
         }
         return const SizedBox.shrink();
@@ -264,7 +458,7 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
       appBar: AppBar(
         centerTitle: true,
         title: Text(
-          'All categories',
+          widget.title ?? 'All categories',
           style: TextStyle(
             fontWeight: FontWeight.w800,
             fontSize: 19,
@@ -768,6 +962,9 @@ class _CategoriesGrid extends StatelessWidget {
   final String? categoriesError;
   final VoidCallback? onCategoriesRetry;
 
+  /// Phase 2 growth slivers (banners, order again, collections).
+  final List<Widget> leadingSlivers;
+
   const _CategoriesGrid({
     required this.categories,
     required this.showAll,
@@ -783,6 +980,7 @@ class _CategoriesGrid extends StatelessWidget {
     this.embedded = false,
     this.categoriesError,
     this.onCategoriesRetry,
+    this.leadingSlivers = const [],
   });
 
   @override
@@ -862,6 +1060,7 @@ class _CategoriesGrid extends StatelessWidget {
     final view = CustomScrollView(
       physics: usePullToRefresh ? const AlwaysScrollableScrollPhysics() : null,
       slivers: [
+        ...leadingSlivers,
         if (categoriesError != null) ...[
           SliverToBoxAdapter(
             child: Padding(
@@ -930,6 +1129,7 @@ class _CategoriesGrid extends StatelessWidget {
                   return _VendorSliderCard(
                     name: vendor.name,
                     avatarUrl: vendor.avatar,
+                    storeStatus: vendor.storeStatus,
                     index: index,
                     embedded: embedded,
                     onTap: () {
@@ -1115,21 +1315,29 @@ class _VendorSliderCard extends StatelessWidget {
   final VoidCallback onTap;
   final bool embedded;
 
+  /// Closed / busy badge on the logo (hidden while open or unknown).
+  final StoreStatus? storeStatus;
+
   const _VendorSliderCard({
     required this.name,
     required this.avatarUrl,
     required this.onTap,
     this.index = 0,
     this.embedded = false,
+    this.storeStatus,
   });
 
   @override
   Widget build(BuildContext context) {
     final dark = HomeColors.isDark(context);
     final radius = BorderRadius.circular(24);
+    final status = storeStatus;
+    final unavailable = status != null && !status.acceptingOrders;
     return Semantics(
       button: true,
-      label: name,
+      label: status != null && !status.acceptingOrders
+          ? '$name, ${storeStatusLine(context.l10n, status)}'
+          : name,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(20),
@@ -1138,38 +1346,54 @@ class _VendorSliderCard extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  color: HomeColors.surfaceOf(context),
-                  borderRadius: radius,
-                  border: dark
-                      ? Border.all(color: HomeColors.borderOf(context))
-                      : null,
-                  boxShadow: AppColors.softShadow(context),
-                ),
-                child: ClipRRect(
-                  borderRadius: radius,
-                  child: avatarUrl.isNotEmpty &&
-                          (avatarUrl.startsWith('http') ||
-                              avatarUrl.contains('/storage/'))
-                      ? FallbackNetworkImage(
-                          url: avatarUrl,
-                          width: 80,
-                          height: 80,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_) => _avatarPlaceholder(context),
-                        )
-                      : (avatarUrl.isNotEmpty
-                          ? Image.asset(
-                              avatarUrl,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) =>
-                                  _avatarPlaceholder(context),
-                            )
-                          : _avatarPlaceholder(context)),
-                ),
+              Stack(
+                children: [
+                  Opacity(
+                    opacity: unavailable ? 0.55 : 1,
+                    child: Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: HomeColors.surfaceOf(context),
+                        borderRadius: radius,
+                        border: dark
+                            ? Border.all(color: HomeColors.borderOf(context))
+                            : null,
+                        boxShadow: AppColors.softShadow(context),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: radius,
+                        child: avatarUrl.isNotEmpty &&
+                                (avatarUrl.startsWith('http') ||
+                                    avatarUrl.contains('/storage/'))
+                            ? FallbackNetworkImage(
+                                url: avatarUrl,
+                                width: 80,
+                                height: 80,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_) => _avatarPlaceholder(context),
+                              )
+                            : (avatarUrl.isNotEmpty
+                                ? Image.asset(
+                                    avatarUrl,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) =>
+                                        _avatarPlaceholder(context),
+                                  )
+                                : _avatarPlaceholder(context)),
+                      ),
+                    ),
+                  ),
+                  if (status != null && !status.acceptingOrders)
+                    PositionedDirectional(
+                      start: 2,
+                      end: 2,
+                      bottom: 4,
+                      child: Center(
+                        child: StoreStatusPill(status: status, compact: true),
+                      ),
+                    ),
+                ],
               ),
               const SizedBox(height: 8),
               Text(
@@ -1321,7 +1545,7 @@ class _PopularProductCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 12),
                         Text(
-                          'ETB ${item.displayPrice}',
+                          '${moneyPrefix(MarketController.catalogCurrency)}${item.displayPrice}',
                           style: TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.w800,
@@ -1393,7 +1617,7 @@ class _PopularProductCard extends StatelessWidget {
                             const SizedBox(width: 4),
                             Expanded(
                               child: Text(
-                                'ETB $deliveryFee delivery',
+                                '${moneyPrefix(MarketController.catalogCurrency)}$deliveryFee delivery',
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,

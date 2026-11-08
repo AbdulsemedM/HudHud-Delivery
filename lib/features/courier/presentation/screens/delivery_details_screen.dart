@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
+import 'package:hudhud_delivery/core/utils/money_format.dart';
 import 'package:hudhud_delivery/core/utils/phone_util.dart';
 import 'package:hudhud_delivery/core/widgets/status_chip.dart';
 import '../../../home/presentation/widgets/home_widget.dart';
@@ -131,7 +132,7 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
     final amount = cost is num ? cost.toDouble() : double.tryParse('$cost');
     if (amount == null) return cost.toString();
     final currency = d['currency']?.toString() ?? 'ETB';
-    return '$currency ${amount.toStringAsFixed(2)}';
+    return formatMoneyAmount(amount, currency: currency);
   }
 
   Future<void> _cancelOrder() async {

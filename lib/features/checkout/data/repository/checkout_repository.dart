@@ -64,6 +64,7 @@ class CheckoutRepository {
       statusCode: statusCode,
       code: code ?? (body is Map ? body['code']?.toString() : null),
       errors: errors,
+      details: body is Map ? Map<String, dynamic>.from(body) : null,
     );
   }
 
@@ -85,6 +86,7 @@ class CheckoutRepository {
     double? pickupLongitude,
     int? branchId,
     String? idempotencyKey,
+    int? redeemPoints,
   }) async {
     try {
       final response = await checkoutDataProvider.createOrder(
@@ -105,6 +107,7 @@ class CheckoutRepository {
         pickupLongitude: pickupLongitude,
         branchId: branchId,
         idempotencyKey: idempotencyKey,
+        redeemPoints: redeemPoints,
       );
 
       if (response['statusCode'] == 200 || response['statusCode'] == 201) {
@@ -117,12 +120,103 @@ class CheckoutRepository {
         String errorMessage =
             response['errorMessage'] ?? 'Error creating order';
         errorMessage = _cleanErrorMessage(errorMessage);
-        return {'success': false, 'data': null, 'message': errorMessage};
+        return {
+          'success': false,
+          'data': null,
+          'message': errorMessage,
+          'code': response['code']?.toString(),
+          'statusCode': response['statusCode'],
+          'errorData': response['errorData'],
+        };
       }
     } catch (e) {
       String errorMessage = e.toString();
       errorMessage = _cleanErrorMessage(errorMessage);
       return {'success': false, 'data': null, 'message': errorMessage};
+    }
+  }
+
+  /// POST /api/customer/gift-orders. Same order fields as [createOrder] plus
+  /// the recipient; returns `{success, data, message, code}` where `code`
+  /// is the API error code (FEATURE_DISABLED, GIFTING_NOT_READY, …).
+  Future<Map<String, dynamic>> createGiftOrder({
+    required int vendorId,
+    required List<Map<String, dynamic>> items,
+    required String deliveryAddress,
+    required String deliveryLocation,
+    required double deliveryLatitude,
+    required double deliveryLongitude,
+    required String paymentMethod,
+    required String recipientName,
+    required String recipientPhone,
+    String? giftMessage,
+    String serviceType = 'restaurant',
+    String? notes,
+    String? couponCode,
+    int? branchId,
+    String? idempotencyKey,
+  }) async {
+    try {
+      final body = CheckoutDataProvider.buildGiftOrderBody(
+        orderBody: CheckoutDataProvider.buildOrderBody(
+          vendorId: vendorId,
+          items: items,
+          deliveryAddress: deliveryAddress,
+          deliveryLocation: deliveryLocation,
+          deliveryLatitude: deliveryLatitude,
+          deliveryLongitude: deliveryLongitude,
+          paymentMethod: paymentMethod,
+          serviceType: serviceType,
+          notes: notes,
+          couponCode: couponCode,
+          branchId: branchId,
+        ),
+        recipientName: recipientName,
+        recipientPhone: recipientPhone,
+        giftMessage: giftMessage,
+      );
+      final response = await checkoutDataProvider.createGiftOrder(
+        body: body,
+        idempotencyKey: idempotencyKey,
+      );
+      final statusCode = response['statusCode'];
+      if (statusCode == 200 || statusCode == 201) {
+        final data = response['data'];
+        final root = data is Map ? data : null;
+        if (root != null && root['success'] == false) {
+          return {
+            'success': false,
+            'data': null,
+            'message': _cleanErrorMessage(
+              root['message']?.toString() ?? 'Error creating gift order',
+            ),
+            'code': root['code']?.toString(),
+          };
+        }
+        return {
+          'success': true,
+          'data': data,
+          'message': root?['message']?.toString() ?? 'Gift order created',
+          'code': null,
+        };
+      }
+      return {
+        'success': false,
+        'data': null,
+        'message': _cleanErrorMessage(
+          response['errorMessage']?.toString() ?? 'Error creating gift order',
+        ),
+        'code': response['code']?.toString(),
+        'statusCode': statusCode,
+        'errorData': response['data'],
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'data': null,
+        'message': _cleanErrorMessage(e.toString()),
+        'code': null,
+      };
     }
   }
 

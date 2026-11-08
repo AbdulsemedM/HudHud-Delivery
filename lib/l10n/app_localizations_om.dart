@@ -629,20 +629,20 @@ class AppLocalizationsOm extends AppLocalizations {
   String get homeTabFood => 'Nyaata';
 
   @override
-  String get homeTabDelivery => 'Delivery';
+  String get homeTabDelivery => 'Geejjiba';
 
   @override
-  String get cartDifferentVendorTitle => 'Start a new cart?';
+  String get cartDifferentVendorTitle => 'Gaarii haaraa jalqabduu?';
 
   @override
   String get cartDifferentVendorMessage =>
-      'Your cart has items from another store. Clear it to add items from this store.';
+      'Gaariin kee meeshaalee suuqii biraa qaba. Meeshaalee suuqii kanaa dabaluuf qulqulleessi.';
 
   @override
-  String get cartReplaceAction => 'Clear and add';
+  String get cartReplaceAction => 'Qulqulleessii dabali';
 
   @override
-  String get cartKeepCurrentAction => 'Keep cart';
+  String get cartKeepCurrentAction => 'Gaarii tursi';
 
   @override
   String get homeTabCourier => 'Ergamaa';
@@ -3368,4 +3368,973 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get paymentCard => 'Card';
+
+  @override
+  String get growthPromoTitle => 'Koodii hir\'isaa';
+
+  @override
+  String get growthPromoSubtitle => 'Koodii qabdaa? Asitti galchi';
+
+  @override
+  String get growthPromoHint => 'Koodii hir\'isaa galchi';
+
+  @override
+  String get growthPromoApply => 'Fayyadami';
+
+  @override
+  String get growthPromoRemove => 'Haqi';
+
+  @override
+  String get growthPromoApplied => 'Koodiin hir\'isaa hojiirra oole';
+
+  @override
+  String get growthPromoInvalid => 'Koodii kana fayyadamuun hin danda\'amu';
+
+  @override
+  String growthPromoSavedForCheckout(String code) {
+    return 'Koodiin $code yeroo kaffaltii ni hojiirra oola';
+  }
+
+  @override
+  String growthPointsToggle(int points, String amount) {
+    return 'Qabxii $points fayyadami (geejjiba irratti −$amount)';
+  }
+
+  @override
+  String get growthPointsSubtitle =>
+      'Qabxiin kaffaltii geejjibaa qofa hir\'isa';
+
+  @override
+  String growthPointsCount(int points) {
+    return 'Qabxii $points';
+  }
+
+  @override
+  String get growthPointsDiscount => 'Hir\'isa qabxii';
+
+  @override
+  String get growthCouponDiscount => 'Hir\'isa koodii';
+
+  @override
+  String growthCouponDiscountWithCode(String code) {
+    return 'Hir\'isa ($code)';
+  }
+
+  @override
+  String get growthDeliveryFeeLabel => 'Kaffaltii geejjibaa';
+
+  @override
+  String get growthFree => 'Bilisa';
+
+  @override
+  String growthFreeDeliveryHint(String amount) {
+    return 'Geejjiba bilisaaf $amount dabalataa ida\'i';
+  }
+
+  @override
+  String get growthFreeDeliveryUnlocked => 'Geejjiba bilisaa argattee!';
+
+  @override
+  String get growthRewardsTitle => 'Badhaasa';
+
+  @override
+  String growthRewardsWorth(String amount) {
+    return 'Gatiin isaa $amount';
+  }
+
+  @override
+  String get growthRewardsHowItWorks => 'Akkamitti akka hojjetu';
+
+  @override
+  String get growthRewardsEarnLine => 'Ajaja xumurame hundaan qabxii argadhu.';
+
+  @override
+  String growthRewardsRateLine(int points, String amount) {
+    return 'Qabxii $points = kaffaltii geejjibaa irraa $amount hir\'isa.';
+  }
+
+  @override
+  String growthRewardsUseLine(int points) {
+    return 'Yeroo qabxii $points qabaattu kaffaltii irratti fayyadami.';
+  }
+
+  @override
+  String get growthRewardsHistory => 'Seenaa';
+
+  @override
+  String get growthRewardsHistoryEmpty => 'Ammaaf sochiin qabxii hin jiru.';
+
+  @override
+  String get growthRewardsLoadError => 'Badhaasa kee fe\'uu hin dandeenye.';
+
+  @override
+  String get growthRewardsTypeEarned => 'Qabxii argame';
+
+  @override
+  String get growthRewardsTypeRedeemed => 'Qabxii itti fayyadame';
+
+  @override
+  String get growthRewardsTypeRestored => 'Qabxii deebi\'e';
+
+  @override
+  String get growthRewardsTypeExpired => 'Qabxii yeroon isaa darbe';
+
+  @override
+  String growthReferralTitle(String amount) {
+    return 'Hiriyoota affeeri, $amount argadhu';
+  }
+
+  @override
+  String growthReferralSubtitle(String amount) {
+    return 'Ajaja isaanii jalqabaa booda atii fi hiriyaan kee tokkoon tokkoon $amount argattu.';
+  }
+
+  @override
+  String get growthReferralCopy => 'Garagalchi';
+
+  @override
+  String get growthReferralCopied => 'Koodiin affeerraa garagalfame';
+
+  @override
+  String get growthReferralShare => 'Affeerraa qoodi';
+
+  @override
+  String get growthReferralShareSubject =>
+      'HudHud Delivery irratti na bira dhufi';
+
+  @override
+  String growthReferralShareFallback(String amount, String code, String link) {
+    return 'Koodii koo $code fayyadamuun HudHud Delivery irratti $amount argadhu: $link';
+  }
+
+  @override
+  String get growthReferralInvited => 'Kan affeeraman';
+
+  @override
+  String get growthReferralRewarded => 'Kan badhaafaman';
+
+  @override
+  String get growthReferralPending => 'Eegaa jiru';
+
+  @override
+  String get growthReferralEarned => 'Kan argame';
+
+  @override
+  String get growthReorderButton => 'Irra deebi\'ii ajaji';
+
+  @override
+  String get growthReorderFailed =>
+      'Irra deebi\'anii ajajuun hin danda\'amne. Maaloo irra deebi\'ii yaali.';
+
+  @override
+  String get growthReorderReplaceMessage =>
+      'Gaariin kee meeshaalee suuqa biraa qaba. Ajaja kanaan bakka buusi?';
+
+  @override
+  String get growthReorderUnavailableTitle =>
+      'Meeshaaleen tokko tokko hin argaman';
+
+  @override
+  String get growthReorderNothingAvailable =>
+      'Meeshaalee kana keessaa tokkollee amma hin argamu';
+
+  @override
+  String get growthReorderContinue => 'Meeshaalee jiraniin itti fufi';
+
+  @override
+  String get growthReorderReasonOutOfStock => 'Kuusaa keessaa dhumeera';
+
+  @override
+  String get growthReorderReasonRemoved => 'Kana booda hin gurguramu';
+
+  @override
+  String get growthReorderReasonVendorClosed => 'Suuqni cufameera';
+
+  @override
+  String get growthReorderReasonUnavailable => 'Hin argamu';
+
+  @override
+  String get growthOrderAgainTitle => 'Ammas ajaji';
+
+  @override
+  String growthOrderAgainOrderLabel(String order) {
+    return 'Ajaja #$order';
+  }
+
+  @override
+  String get growthSeeAll => 'Hunda ilaali';
+
+  @override
+  String get growthClosed => 'Cufaa';
+
+  @override
+  String get growthCollectionFallbackTitle => 'Walitti qabama';
+
+  @override
+  String get growthStoreFallbackName => 'Suuqa';
+
+  @override
+  String get p3Sponsored => 'Deeggarame';
+
+  @override
+  String get p3PlusTitle => 'HudHud Plus';
+
+  @override
+  String get p3PlusBadge => 'Plus';
+
+  @override
+  String get p3PlusTagline =>
+      'Ajaja hunda irratti geejjiba bilisaa fi qusannaa.';
+
+  @override
+  String p3PlusPricePerPeriod(String price, int days) {
+    return '$price / guyyaa $days';
+  }
+
+  @override
+  String get p3PlusBenefitsTitle => 'Faayidaa kee';
+
+  @override
+  String p3PlusBenefitFreeDelivery(String amount) {
+    return 'Ajajoota nyaataa fi meeshaalee $amount ol ta\'aniif geejjiba bilisaa';
+  }
+
+  @override
+  String get p3PlusBenefitFreeDeliveryAll =>
+      'Ajajoota nyaataa fi meeshaaleetiif geejjiba bilisaa';
+
+  @override
+  String p3PlusBenefitParcelDiscount(String percent) {
+    return 'Geejjiba paakeejii irratti $percent% hir\'isa';
+  }
+
+  @override
+  String get p3PlusSubscribe => 'HudHud Plus makamaa';
+
+  @override
+  String get p3PlusCancel => 'Plus haqi';
+
+  @override
+  String get p3PlusResume => 'Plus koo itti fufi';
+
+  @override
+  String get p3PlusActive => 'Miseensummaan kee hojii irra jira';
+
+  @override
+  String p3PlusRenewsOn(String date) {
+    return 'Guyyaa $date haaromfama';
+  }
+
+  @override
+  String p3PlusEndsOn(String date) {
+    return 'Guyyaa $date xumurama — itti fufsiisuu dandeessa';
+  }
+
+  @override
+  String get p3PlusPastDue =>
+      'Kaffaltiin haaromsaa hin milkoofne. Plus itti fufsiisuuf waaletii kee guuti.';
+
+  @override
+  String p3PlusSavings(String amount) {
+    return 'Guyyoota 30 darban keessatti gara $amount qusatteetta';
+  }
+
+  @override
+  String get p3PlusPaidFromWallet =>
+      'Waaletii HudHud kee irraa kaffalama. Yeroo barbaadde haquu dandeessa.';
+
+  @override
+  String get p3PlusSubscribed => 'Baga gara HudHud Plus dhuftan!';
+
+  @override
+  String get p3PlusCancelled => 'Plus xumura yeroo kanaa irratti dhaabbata';
+
+  @override
+  String get p3PlusResumed => 'Plus haaromfamuu itti fufa';
+
+  @override
+  String get p3PlusCancelConfirmTitle => 'HudHud Plus haqamuu?';
+
+  @override
+  String get p3PlusCancelConfirmMessage =>
+      'Hanga xumura yeroo kanaatti faayidaa kee ni qabaatta.';
+
+  @override
+  String get p3PlusInsufficientTitle => 'Haftee waaletii gahaa hin jiru';
+
+  @override
+  String p3PlusInsufficientMessage(String amount) {
+    return 'Plus makamuuf waaletii keetti $amount dabali.';
+  }
+
+  @override
+  String get p3PlusTopUp => 'Waaletii guuti';
+
+  @override
+  String get p3PlusActionFailed =>
+      'Plus haaromsuun hin danda\'amne. Maaloo irra deebi\'ii yaali.';
+
+  @override
+  String get p3PlusLoadError => 'HudHud Plus fe\'uu hin dandeenye.';
+
+  @override
+  String get p3PlusUnavailable => 'HudHud Plus amma hin argamu.';
+
+  @override
+  String get p3PlusUpsell => 'HudHud Plus waliin geejjiba bilisaa argadhu';
+
+  @override
+  String get p3PlusMenuJoin => 'HudHud Plus argadhu';
+
+  @override
+  String get p3PlusMenuMember => 'HudHud Plus koo';
+
+  @override
+  String get p3QuotePlusFreeDelivery => 'Plus: geejjiba bilisaa';
+
+  @override
+  String get p3MarketSettingTitle => 'Magaalaa';
+
+  @override
+  String get p3MarketPickerTitle => 'Magaalaa kee filadhu';
+
+  @override
+  String p3MarketChanged(String market) {
+    return 'Magaalaan gara $market jijjiirameera';
+  }
+
+  @override
+  String get p3MarketChangeBlocked =>
+      'Yeroo waaletiin kee haftee maallaqa biraa qabutti magaalaa jijjiiruu hin dandeessu. Dura itti fayyadami ykn baasi.';
+
+  @override
+  String get p3MarketChangeFailed =>
+      'Magaalaa jijjiiruun hin danda\'amne. Maaloo irra deebi\'ii yaali.';
+
+  @override
+  String get p5SetsTitle => 'HudHud Set';
+
+  @override
+  String get p5SetsSubtitle => 'Nyaata nama tokkoof · geejjibni ni hammatama';
+
+  @override
+  String get p5SetDeliveryIncluded => 'Geejjibni ni hammatama';
+
+  @override
+  String p5SetsMaxPerOrder(int count) {
+    return 'Ajaja tokkoon hanga $count';
+  }
+
+  @override
+  String get p5QuoteSetDeliveryIncluded => 'HudHud Set: geejjibni ni hammatama';
+
+  @override
+  String p5SetOverMaxQuantity(int count) {
+    return 'Geejjibni ajaja tokkoon hanga HudHud Set $count qofaaf hammatama.';
+  }
+
+  @override
+  String get p5SetMixedCart =>
+      'Geejjibni kan hammatamu yeroo gaariin kee HudHud Set qofa qabu qofa.';
+
+  @override
+  String get p5PayCashOnArrival =>
+      'Yeroo ajajni kee si ga\'u maallaqa callaan kaffali';
+
+  @override
+  String get p5PaymentInProgress =>
+      'Kaffaltiin ajaja kanaa adeemsa irra jira. Bilbila kee irratti mirkaneessi ykn didi, achiis haala ajajaa ilaali.';
+
+  @override
+  String get p5PaymentAlreadyPaid => 'Ajajni kun duraan kaffalameera.';
+
+  @override
+  String get p5PaymentTotalsChanged =>
+      'Waliigalli ajaja keetii jijjiirameera. Ajaja haaromsineerra — maaloo osoo hin kaffalin dura ilaali.';
+
+  @override
+  String get p5OrderNotPayable => 'Ajajni kun amma kaffalamuu hin danda\'u.';
+
+  @override
+  String get p5CheckOrderStatus => 'Haala ajajaa ilaali';
+
+  @override
+  String p5RefundedToWallet(String amount) {
+    return '$amount waaletii HudHud keetti deebi\'eera';
+  }
+
+  @override
+  String get p5RefundManual =>
+      'Ajajni haqameera. Gareen keenya dhiyootti maallaqa kee siif deebisa.';
+
+  @override
+  String get p5WalletRefundLabel => 'Deebii';
+
+  @override
+  String get p9GiftSendTitle => 'Kennaa ergi';
+
+  @override
+  String get p9GiftBannerSubtitle =>
+      'Maatii kee magaalaa biraa jiraataniif nyaata ajaji. Hordofuuf SMS ni argatu.';
+
+  @override
+  String get p9GiftIntroBody =>
+      'Magaalaa namni kennaa fudhatu itti jiraatu filadhu, mana nyaataa filadhuutii akkuma yeroo hundaa gaarii kee guuti. Yeroo kaffaltii, maqaa fi lakkoofsa bilbilaa nama fudhatuu galchiitii toora interneetiitiin kaffali.';
+
+  @override
+  String get p9GiftChooseMarket => 'Namni fudhatu eessa jiraata?';
+
+  @override
+  String get p9GiftChooseRestaurant => 'Mana nyaataa filadhu';
+
+  @override
+  String get p9GiftHowItWorksSms =>
+      'Namni fudhatu SMS liinkii hordoffii fi koodii geejjibaa lakkoofsa 4 qabu ni argata.';
+
+  @override
+  String get p9GiftHowItWorksPay =>
+      'Toora interneetiitiin kaffalta. Kennaaf kaffaltiin maallaqa harkaa yeroo geejjibaa hin hayyamamu.';
+
+  @override
+  String get p9GiftSectionTitle => 'Akka kennaatti ergi';
+
+  @override
+  String get p9GiftSectionSubtitle =>
+      'Nama fudhatuuf ni geessina, liinkii hordoffii SMS-n ni ergina';
+
+  @override
+  String get p9GiftToggle => 'Ajajni kun kennaa dha';
+
+  @override
+  String get p9GiftRecipientName => 'Maqaa nama fudhatuu';
+
+  @override
+  String get p9GiftRecipientPhone => 'Lakkoofsa bilbila harkaa nama fudhatuu';
+
+  @override
+  String p9GiftRecipientPhoneHint(String example) {
+    return 'Fakkeenyaaf $example';
+  }
+
+  @override
+  String get p9GiftMessageLabel => 'Ergaa kennaa (dirqama miti)';
+
+  @override
+  String get p9GiftMessageHint => 'Nama fudhatuuf ergaa gabaabaa barreessi';
+
+  @override
+  String get p9GiftNameRequired => 'Maqaa nama fudhatuu galchi';
+
+  @override
+  String p9GiftPhoneInvalid(String prefix) {
+    return 'Lakkoofsa bilbila harkaa sirrii galchi ($prefix …)';
+  }
+
+  @override
+  String get p9GiftNoCash =>
+      'Kennaaf kaffaltiin maallaqa harkaa yeroo geejjibaa hin hayyamamu. Mala kaffaltii toora interneetii filadhu.';
+
+  @override
+  String get p9GiftAddressHint =>
+      'Bakka geejjibaa teessoo nama fudhatuu godhi.';
+
+  @override
+  String get p9GiftUnavailable => 'Ajajni kennaa ammaaf hin jiru.';
+
+  @override
+  String get p9GiftPlacedTitle => 'Ajajni kennaa ergameera';
+
+  @override
+  String p9GiftPlacedBody(String name) {
+    return 'Yeroo kaffaltiin mirkanaa\'u, $name SMS liinkii hordoffii fi koodii geejjibaa lakkoofsa 4 qabu ni argata. Yeroo ajajni ga\'u koodii sana geessituuf kenna.';
+  }
+
+  @override
+  String p9GiftForName(String name) {
+    return 'Kennaa ${name}f';
+  }
+
+  @override
+  String get p9GiftRecipientLabel => 'Nama fudhatu';
+
+  @override
+  String get p9GiftYourMessage => 'Ergaa kee';
+
+  @override
+  String get p9GiftWalletNote =>
+      'Waalletiin maallaqa biraa qabu gatii jijjiirraa har\'aatiin kan jijjiirame irraa hir\'ifama.';
+
+  @override
+  String p9GiftModeBanner(String market) {
+    return 'Kennaa gara $market erguu';
+  }
+
+  @override
+  String get p9GiftStop => 'Kennaa dhaabi';
+
+  @override
+  String get p9GiftOrderLabel => 'Ajaja kennaa';
+
+  @override
+  String get p10CityNotServed => 'Naannoo kana ammaaf hin tajaajillu';
+
+  @override
+  String get p10CityCrossCity =>
+      'Bakki fudhatamuu fi bakki geessuu magaalaa tokko keessa ta\'uu qabu.';
+
+  @override
+  String get p10CityOtherCity =>
+      'Teessoon kun magaalaa biraa keessa jira. Itti fufuuf Qindaa\'ina keessatti magaalaa kee jijjiiri.';
+
+  @override
+  String get p10ParcelTitle => 'Paakeejii ergi';
+
+  @override
+  String get p10ParcelScheduledTitle => 'Paakeejii yeroon qabadhu';
+
+  @override
+  String get p10ParcelRoute => 'Karaa';
+
+  @override
+  String get p10ParcelPickup => 'Bakka fudhatamu';
+
+  @override
+  String get p10ParcelDropoff => 'Bakka geessuu';
+
+  @override
+  String get p10ParcelChooseAddress => 'Kaartaa irratti filadhu';
+
+  @override
+  String get p10ParcelBuilding => 'Gamoo / mana';
+
+  @override
+  String get p10ParcelFloor => 'Darbii';
+
+  @override
+  String get p10ParcelApartment => 'Kutaa / waajjira';
+
+  @override
+  String get p10ParcelLandmark => 'Mallattoo naannoo';
+
+  @override
+  String get p10ParcelRecipient => 'Fudhataa';
+
+  @override
+  String get p10ParcelSendToMyself => 'Ofumaaf ergi';
+
+  @override
+  String get p10ParcelRecipientName => 'Maqaa fudhataa';
+
+  @override
+  String get p10ParcelRecipientPhone => 'Bilbila fudhataa';
+
+  @override
+  String get p10ParcelWhatSending => 'Maal ergaa jirta?';
+
+  @override
+  String get p10ParcelCategoryDocument => 'Galmeewwan';
+
+  @override
+  String get p10ParcelCategoryParcel => 'Paakeejii';
+
+  @override
+  String get p10ParcelCategoryFood => 'Nyaata';
+
+  @override
+  String get p10ParcelCategoryGrocery => 'Meeshaalee nyaataa';
+
+  @override
+  String get p10ParcelCategoryElectronics => 'Elektirooniksii';
+
+  @override
+  String get p10ParcelCategoryClothes => 'Uffata';
+
+  @override
+  String get p10ParcelCategoryGift => 'Kennaa';
+
+  @override
+  String get p10ParcelCategoryFlowers => 'Abaaboo';
+
+  @override
+  String get p10ParcelCategoryKeys => 'Furtuu';
+
+  @override
+  String get p10ParcelCategoryOther => 'Kan biraa';
+
+  @override
+  String get p10ParcelSizeSmall => 'Xiqqaa';
+
+  @override
+  String get p10ParcelSizeSmallHint => 'Boorsaa keessa ni seena';
+
+  @override
+  String get p10ParcelSizeMedium => 'Giddugaleessa';
+
+  @override
+  String get p10ParcelSizeMediumHint => 'Teessoo konkolaataa irratti ni ga\'a';
+
+  @override
+  String get p10ParcelSizeLarge => 'Guddaa';
+
+  @override
+  String get p10ParcelSizeLargeHint => 'Konkolaataa fe\'umsaa barbaada';
+
+  @override
+  String get p10ParcelSizeUnavailable => 'Asitti ammaaf hin jiru';
+
+  @override
+  String get p10ParcelDescription => 'Ibsa (dirqama miti)';
+
+  @override
+  String get p10ParcelItemValue => 'Gatii meeshaa (dirqama miti)';
+
+  @override
+  String get p10ParcelCourierNote => 'Yaadannoo geessaaf';
+
+  @override
+  String get p10ParcelPayment => 'Kaffaltii';
+
+  @override
+  String get p10ParcelPayWallet => 'Waaleetii HudHud';
+
+  @override
+  String get p10ParcelPayCash => 'Maallaqa callaa geessaaf';
+
+  @override
+  String get p10ParcelPaymentPhone => 'Lakkoofsa maallaqa moobaayilaa';
+
+  @override
+  String get p10ParcelRecipientPays =>
+      'Fudhataan kaffala (yeroo ga\'u callaan)';
+
+  @override
+  String get p10ParcelSellerCod => 'Gatii meeshaa fudhataa irraa sassaabi';
+
+  @override
+  String get p10ParcelSellerCodHint =>
+      'Geessaan callaan sassaaba; waaleetii daldalaa HudHud keetti ni kaffalama.';
+
+  @override
+  String get p10ParcelSellerCodAmount => 'Gatii meeshaa sassaabamu';
+
+  @override
+  String get p10ParcelPickupTime => 'Yeroo fudhatamu';
+
+  @override
+  String get p10ParcelPickupNow => 'Hamma danda\'ametti dafee';
+
+  @override
+  String get p10ParcelPrice => 'Gatii';
+
+  @override
+  String p10ParcelPriceHeld(String time) {
+    return 'Gatiin ${time}f qabameera';
+  }
+
+  @override
+  String get p10ParcelPriceExpired => 'Yeroon qabannaa gatii darbeera';
+
+  @override
+  String get p10ParcelRefreshPrice => 'Gatii haaromsi';
+
+  @override
+  String get p10ParcelGettingPrice => 'Gatii argachaa jira…';
+
+  @override
+  String get p10ParcelPriceUpdated =>
+      'Gatiin jijjiirameera. Maaloo gatii haaraa ilaali.';
+
+  @override
+  String p10ParcelBook(String price) {
+    return '${price}n ajaji';
+  }
+
+  @override
+  String get p10ParcelContinue => 'Itti fufi';
+
+  @override
+  String get p10ParcelFillRequired =>
+      'Bakka fudhatamuu fi geessuu filadhu, bilbila fudhataas galchi.';
+
+  @override
+  String get p10ParcelSizeNotSupported =>
+      'Hamma kun magaalaa kana keessatti ammaaf hin jiru.';
+
+  @override
+  String get p10ParcelPaymentNotAvailable =>
+      'Malli kaffaltii kun magaalaa kana keessatti hin jiru.';
+
+  @override
+  String get p10ParcelInsufficientWallet =>
+      'Waaleetii kee keessa maallaqni gahaan hin jiru. Guuti ykn mala kaffaltii biraa filadhu.';
+
+  @override
+  String get p10ParcelSomethingWrong =>
+      'Rakkoon uumameera. Maaloo irra deebi\'ii yaali.';
+
+  @override
+  String get p10ParcelApprovePayment =>
+      'Kaffaltii bilbila kee irratti mirkaneessi.';
+
+  @override
+  String get p10ParcelBooked => 'Paakeejiin ajajameera';
+
+  @override
+  String get p10ParcelHandoverCode => 'Koodii kennaa';
+
+  @override
+  String get p10ParcelHandoverHint =>
+      'Fudhataan koodii kana yeroo ga\'u geessaaf kenna.';
+
+  @override
+  String get p10ParcelHandoverSelfHint =>
+      'Yeroo paakeejii fudhattu koodii kana geessaaf kenni.';
+
+  @override
+  String get p10ParcelShareTracking => 'Liinkii hordoffii qoodi';
+
+  @override
+  String p10ParcelTrackingShareText(String link) {
+    return 'Paakeejii HudHud koo hordofi: $link';
+  }
+
+  @override
+  String p10ParcelEta(String minutes) {
+    return 'Gara daqiiqaa $minutes keessatti ga\'a';
+  }
+
+  @override
+  String get p10ParcelCancel => 'Paakeejii haqi';
+
+  @override
+  String get p10ParcelCancelFree =>
+      'Paakeejii kana haqxaa? Geessaan ammaaf waan hin ramadamneef bilisa.';
+
+  @override
+  String p10ParcelCancelFee(String fee) {
+    return 'Geessaan karaa irra jira. Amma haquun $fee baasisa.';
+  }
+
+  @override
+  String get p10ParcelCancelReason => 'Ergaan appii keessatti haqe';
+
+  @override
+  String get p10ParcelCancelled => 'Paakeejiin haqameera';
+
+  @override
+  String get p11ParcelAddStop => 'Dhaabbata dabali';
+
+  @override
+  String p11ParcelStopN(String number) {
+    return 'Dhaabbata $number';
+  }
+
+  @override
+  String get p11ParcelRemoveStop => 'Dhaabbata haqi';
+
+  @override
+  String get p11ParcelMoveUp => 'Ol kaasi';
+
+  @override
+  String get p11ParcelMoveDown => 'Gadi buusi';
+
+  @override
+  String p11ParcelStopsLimit(String max) {
+    return 'Paakeejii tokkoof hanga bakka geessaa $max';
+  }
+
+  @override
+  String get p11ParcelMultiStopSenderPays =>
+      'Bakka geessaa hedduu yoo qabaatte, karaa guutuu ati kaffalta.';
+
+  @override
+  String get p11ParcelMultiStopCashAtPickup =>
+      'Bakka geessaa hedduu yoo ta\'e, maallaqni yeroo fudhatamu ergamaaf kaffalama.';
+
+  @override
+  String get p11ParcelPayAtPickup => 'Yeroo fudhatamu maallaqaan kaffali';
+
+  @override
+  String get p11ParcelPayAtPickupHint =>
+      'Yeroo ergamaan paakeejii fudhatu maallaqa kenniif.';
+
+  @override
+  String p11ParcelPayAtPickupDue(String amount) {
+    return 'Yeroo fudhatamu $amount maallaqaan ergamaaf kaffali';
+  }
+
+  @override
+  String get p11ParcelPaidAtPickup => 'Yeroo fudhatame ergamaaf kaffalameera';
+
+  @override
+  String get p11ParcelPayAtPickupUnavailable =>
+      'Yeroo fudhatamu maallaqaan kaffaluun amma hin jiru.';
+
+  @override
+  String get p11ParcelStopsTitle => 'Bakkeewwan geessaa';
+
+  @override
+  String get p11ParcelStopCodesHint =>
+      'Fudhataan tokkoon tokkoon isaa koodii kennaa isaa SMS-n argateera. Yoo hin arganne qoodi.';
+
+  @override
+  String get p11ParcelShareStopLink => 'Liinkii qoodi';
+
+  @override
+  String get p11ParcelStopPending => 'Eegaa jira';
+
+  @override
+  String get p11ParcelStopArrived => 'Ergamaan achi jira';
+
+  @override
+  String get p11ParcelStopDelivered => 'Geeffameera';
+
+  @override
+  String get p11ParcelStopFailed => 'Hin geeffamne';
+
+  @override
+  String get p11ParcelStopReturned => 'Siif deebi\'eera';
+
+  @override
+  String get p11ParcelMultiStopDisabled =>
+      'Bakka geessaa hedduun amma hin jiran.';
+
+  @override
+  String get p11ParcelTooManyStops =>
+      'Paakeejii tokkoof bakki geessaa baay\'ee heddu.';
+
+  @override
+  String p11ParcelCancelCashFee(String fee) {
+    return 'Ergamaan karaa irra jira. Amma haquun $fee baasa. Waletii keessanii irraa hir\'ifama ykn herrega keessan irratti galmaa\'a.';
+  }
+
+  @override
+  String p11ParcelOutstandingBalance(String amount) {
+    return 'Paakeejii haqame irraa $amount liqii qabda. Yeroo itti aanu yoo guuttu ykn ajajattu waletii irraa hir\'ifama.';
+  }
+
+  @override
+  String get p12StoreOpen => 'Banaa dha';
+
+  @override
+  String get p12StoreClosed => 'Cufaa dha';
+
+  @override
+  String get p12StoreBusy => 'Qabamaa dha';
+
+  @override
+  String p12StoreOpensAt(String time) {
+    return 'Sa\'aatii $time banama';
+  }
+
+  @override
+  String p12StoreOpensTomorrowAt(String time) {
+    return 'Boru $time banama';
+  }
+
+  @override
+  String p12StoreBackAt(String time) {
+    return 'Sa\'aatii $time deebi\'a';
+  }
+
+  @override
+  String get p12StoreClosedToday => 'Har\'a cufaa dha';
+
+  @override
+  String get p12StoreClosedBanner =>
+      'Suuqiin kun amma cufaa dha. Menyuu ilaaluu dandeessa, garuu hanga banamutti ajajuun hin danda\'amu.';
+
+  @override
+  String get p12StoreBusyBanner =>
+      'Suuqiin kun baay\'ee qabamaa dha, ajaja haaraa yeroof dhaabeera. Maaloo yeroo muraasa booda deebi\'i.';
+
+  @override
+  String get p12StoreOrderingPaused => 'Ajajuun dhaabbateera';
+
+  @override
+  String get p12SoldOut => 'Dhumeera';
+
+  @override
+  String get p12Unavailable => 'Hin argamu';
+
+  @override
+  String get p12GoToCheckout => 'Gara kaffaltiitti deemi';
+
+  @override
+  String get p12ErrStoreClosed => 'Suuqiin kun amma cufaa dha.';
+
+  @override
+  String get p12ErrStoreBusy =>
+      'Suuqiin kun qabamaa dha, amma ajaja hin fudhatu.';
+
+  @override
+  String get p12ErrItemSoldOut =>
+      'Meeshaan gaarii kee keessa jiru tokko har\'a dhumeera. Itti fufuuf haqi.';
+
+  @override
+  String p12ErrItemSoldOutNamed(String item) {
+    return '$item har\'a dhumeera. Itti fufuuf haqi.';
+  }
+
+  @override
+  String get p12RemoveItem => 'Meeshaa haqi';
+
+  @override
+  String p12ErrOutstandingDues(String amount) {
+    return 'Kaffaltii hin kaffalamne $amount qabda. Hanga kaffalamutti callaan kaffaluun hin danda\'amu. Waaleetii kee guuti ykn mala kaffaltii biraa filadhu.';
+  }
+
+  @override
+  String get p12DuesTitle => 'Kaffaltii hin kaffalamne';
+
+  @override
+  String p12DuesCheckoutBody(String amount) {
+    return 'Paarselii haqame irraa $amount kaffaluu qabda. Hanga kaffalamutti yeroo geessituu callaan kaffaluun hin jiru. Waaleetii kee yoo guutte ofumaan kaffalama.';
+  }
+
+  @override
+  String get p12PayNow => 'Amma kaffali';
+
+  @override
+  String get p12CashBlockedByDues =>
+      'Hanga kaffaltiin hin kaffalamne kaffalamutti callaan hin danda\'amu.';
+
+  @override
+  String get p12ChooseOtherPayment => 'Kaffaltii biraa filadhu';
+
+  @override
+  String get p12ErrCityOutside =>
+      'Teessoo kanatti ammaaf hin geessinu. Teessoo magaalaa kee keessa jiru filadhu.';
+
+  @override
+  String get p12ErrCityCross =>
+      'Teessoon ajaja tokko keessa jiran hundi magaalaa tokko keessa ta\'uu qabu.';
+
+  @override
+  String p12ErrCityMismatch(String city) {
+    return 'Teessoon kun $city keessa jira. Itti fufuuf magaalaa kee gara ${city}tti jijjiiri.';
+  }
+
+  @override
+  String get p12ErrCityMismatchGeneric =>
+      'Teessoon kun magaalaa biraa keessa jira. Itti fufuuf magaalaa kee jijjiiri.';
+
+  @override
+  String get p12ChangeCity => 'Magaalaa jijjiiri';
+
+  @override
+  String get p12ErrNetwork =>
+      'Walqunnamtiin interneetii hin jiru. Walqunnamtii kee mirkaneessiitii irra deebi\'ii yaali.';
+
+  @override
+  String get p12ErrTimeout =>
+      'Walqunnamtiin suuta dha. Maaloo irra deebi\'ii yaali.';
+
+  @override
+  String get p12ErrServer =>
+      'Gama keenyaan rakkoon uumame. Maaloo yeroo muraasa booda irra deebi\'ii yaali.';
+
+  @override
+  String get p12ErrSessionExpired =>
+      'Yeroon seenumsa keetii dhumeera. Maaloo irra deebi\'ii seeni.';
 }

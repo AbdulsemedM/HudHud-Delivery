@@ -16,23 +16,46 @@ class HumanReadableAddress {
     return _plusCode.hasMatch(normalized);
   }
 
-  /// First comma-separated segment that is not a plus code.
+  /// Google's placeholder for roads without a name, in the languages it
+  /// returns for our markets (English, Amharic script and romanized, Arabic).
+  static const List<String> _unnamedRoadLabels = [
+    'unnamed road',
+    'ያልተሰየመ መንገድ',
+    'yaliteseyeme menigedi',
+    'طريق بدون اسم',
+    'طريق غير مسمى',
+  ];
+
+  /// True for Google's "Unnamed Road" placeholder (it carries no real detail).
+  static bool isUnnamedRoad(String? value) {
+    if (value == null) return false;
+    final normalized =
+        value.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
+    if (normalized.isEmpty) return false;
+    return _unnamedRoadLabels.contains(normalized);
+  }
+
+  /// Segments never shown to users: plus codes and unnamed-road placeholders.
+  static bool isNoiseSegment(String? value) =>
+      isPlusCode(value) || isUnnamedRoad(value);
+
+  /// First comma-separated segment that is not a plus code or unnamed road.
   static String? firstReadableSegment(String text) {
     for (final part in text.split(',')) {
       final trimmed = part.trim();
-      if (trimmed.isNotEmpty && !isPlusCode(trimmed)) {
+      if (trimmed.isNotEmpty && !isNoiseSegment(trimmed)) {
         return trimmed;
       }
     }
     return null;
   }
 
-  /// Removes plus-code segments from a comma-separated address string.
+  /// Removes plus-code and unnamed-road segments from an address string.
   static String stripPlusCodesFromAddress(String text) {
     final parts = text
         .split(',')
         .map((s) => s.trim())
-        .where((s) => s.isNotEmpty && !isPlusCode(s))
+        .where((s) => s.isNotEmpty && !isNoiseSegment(s))
         .toList();
     if (parts.isEmpty) {
       return firstReadableSegment(text) ?? text.trim();

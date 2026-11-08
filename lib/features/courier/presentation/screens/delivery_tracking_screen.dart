@@ -23,6 +23,7 @@ import 'package:hudhud_delivery/features/courier/presentation/widgets/nearby_dri
 import 'package:hudhud_delivery/features/courier/utils/delivery_notification.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_status.dart';
 import 'package:hudhud_delivery/features/chat/utils/chat_navigation.dart';
+import 'package:hudhud_delivery/features/courier/parcel_v2/parcel_v2_widgets.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import '../../../home/presentation/widgets/home_widget.dart';
 
@@ -871,6 +872,12 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                                                 ),
                                                 const SizedBox(height: 14),
                                               ],
+                                              // Phase 10: handover code, share
+                                              // link, cancel with fee (v2 only).
+                                              ParcelV2Panel(
+                                                deliveryId: widget.deliveryId,
+                                              ),
+                                              const SizedBox(height: 14),
                                               _ReviewOrderCard(
                                                 courierNumber: _trackData?[
                                                             'tracking_number']

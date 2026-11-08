@@ -140,11 +140,12 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
 
   Future<PlaceResult?> _reverseGeocodePlace(LatLng point) async {
     try {
-      final places = await GooglePlacesService.reverseGeocode(
+      // Nearest named place + area; far-away (stale) geocode hits are
+      // dropped inside placeAtPoint.
+      return await GooglePlacesService.placeAtPoint(
         point.latitude,
         point.longitude,
       );
-      return HumanReadableAddress.pickBestPlace(places);
     } catch (_) {}
     return null;
   }
@@ -154,43 +155,54 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
     final segments = address
         .split(',')
         .map((s) => s.trim())
-        .where((s) => s.isNotEmpty && !HumanReadableAddress.isPlusCode(s))
+        .where((s) => s.isNotEmpty && !HumanReadableAddress.isNoiseSegment(s))
         .toList();
     return segments.length > 1;
   }
 
+  // Reverse-geocode responses can arrive out of order (e.g. a slow lookup for
+  // the simulator's default GPS fix in San Francisco finishing after the user
+  // already moved the pin in Addis). Only the latest request may update the
+  // address label.
+  int _pickupGeocodeSeq = 0;
+  int _dropoffGeocodeSeq = 0;
+
+  /// Whether a fresh geocode result should replace the current label.
+  ///
+  /// When Google finds no specific road or area (nothing, or city level only,
+  /// e.g. after dropping an "Unnamed Road" placeholder) we keep the more
+  /// detailed label we already had instead of downgrading it. The pin's
+  /// coordinates are stored separately and always follow the map.
+  bool _shouldReplaceAddress(PlaceResult? next, PlaceResult? current) {
+    if (next != null && next.hasLocalDetail) return true;
+    return current == null || !current.hasLocalDetail;
+  }
+
+  String _coordinatesLabel(LatLng p) =>
+      '${p.latitude.toStringAsFixed(5)}, ${p.longitude.toStringAsFixed(5)}';
+
   Future<void> _reverseGeocodePickup() async {
+    final seq = ++_pickupGeocodeSeq;
     final place = await _reverseGeocodePlace(_pickupPosition);
-    if (!mounted) return;
-    if (place != null) {
-      setState(() {
-        _pickupPlace = place;
-        _pickupAddress = place.formattedAddress;
-      });
-    } else {
-      setState(() {
-        _pickupPlace = null;
-        _pickupAddress =
-            '${_pickupPosition.latitude.toStringAsFixed(5)}, ${_pickupPosition.longitude.toStringAsFixed(5)}';
-      });
-    }
+    if (!mounted || seq != _pickupGeocodeSeq) return;
+    if (!_shouldReplaceAddress(place, _pickupPlace)) return;
+    setState(() {
+      _pickupPlace = place;
+      _pickupAddress =
+          place?.formattedAddress ?? _coordinatesLabel(_pickupPosition);
+    });
   }
 
   Future<void> _reverseGeocodeDropoff() async {
+    final seq = ++_dropoffGeocodeSeq;
     final place = await _reverseGeocodePlace(_dropoffPosition);
-    if (!mounted) return;
-    if (place != null) {
-      setState(() {
-        _dropoffPlace = place;
-        _dropoffAddress = place.formattedAddress;
-      });
-    } else {
-      setState(() {
-        _dropoffPlace = null;
-        _dropoffAddress =
-            '${_dropoffPosition.latitude.toStringAsFixed(5)}, ${_dropoffPosition.longitude.toStringAsFixed(5)}';
-      });
-    }
+    if (!mounted || seq != _dropoffGeocodeSeq) return;
+    if (!_shouldReplaceAddress(place, _dropoffPlace)) return;
+    setState(() {
+      _dropoffPlace = place;
+      _dropoffAddress =
+          place?.formattedAddress ?? _coordinatesLabel(_dropoffPosition);
+    });
   }
 
   void _snack(String message) {
@@ -481,6 +493,8 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
             unawaited(_reverseGeocodePickup());
           },
           onPlaceSelected: (place) {
+            // Invalidate any in-flight reverse geocode for the old pin.
+            _pickupGeocodeSeq++;
             setState(() {
               _pickupPosition = place.coordinates;
               _pickupAddress = place.formattedAddress;
@@ -509,6 +523,8 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
             unawaited(_reverseGeocodeDropoff());
           },
           onPlaceSelected: (place) {
+            // Invalidate any in-flight reverse geocode for the old pin.
+            _dropoffGeocodeSeq++;
             setState(() {
               _dropoffPosition = place.coordinates;
               _dropoffAddress = place.formattedAddress;

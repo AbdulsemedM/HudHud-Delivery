@@ -626,20 +626,20 @@ class AppLocalizationsSo extends AppLocalizations {
   String get homeTabFood => 'Cunto';
 
   @override
-  String get homeTabDelivery => 'Delivery';
+  String get homeTabDelivery => 'Gaarsiin';
 
   @override
-  String get cartDifferentVendorTitle => 'Start a new cart?';
+  String get cartDifferentVendorTitle => 'Ma bilowdaa gaadhi cusub?';
 
   @override
   String get cartDifferentVendorMessage =>
-      'Your cart has items from another store. Clear it to add items from this store.';
+      'Gaadhigaagu wuxuu leeyahay alaab dukaan kale ah. Nadiifi si aad alaab uga darto dukaankan.';
 
   @override
-  String get cartReplaceAction => 'Clear and add';
+  String get cartReplaceAction => 'Nadiifi oo ku dar';
 
   @override
-  String get cartKeepCurrentAction => 'Keep cart';
+  String get cartKeepCurrentAction => 'Hay gaadhiga';
 
   @override
   String get homeTabCourier => 'Gaadhi-qaade';
@@ -3374,4 +3374,974 @@ class AppLocalizationsSo extends AppLocalizations {
 
   @override
   String get paymentCard => 'Card';
+
+  @override
+  String get growthPromoTitle => 'Koodhka dhimista';
+
+  @override
+  String get growthPromoSubtitle => 'Kood ma haysaa? Halkan ku dar';
+
+  @override
+  String get growthPromoHint => 'Geli koodhka dhimista';
+
+  @override
+  String get growthPromoApply => 'Codso';
+
+  @override
+  String get growthPromoRemove => 'Ka saar';
+
+  @override
+  String get growthPromoApplied => 'Koodhka dhimista waa la dabaqay';
+
+  @override
+  String get growthPromoInvalid => 'Koodhkan lama isticmaali karo';
+
+  @override
+  String growthPromoSavedForCheckout(String code) {
+    return 'Koodhka $code waxaa lagu dabaqi doonaa marka aad bixinayso';
+  }
+
+  @override
+  String growthPointsToggle(int points, String amount) {
+    return 'Isticmaal $points dhibcood (−$amount gaarsiinta)';
+  }
+
+  @override
+  String get growthPointsSubtitle =>
+      'Dhibcuhu waxay dhimaan kharashka gaarsiinta oo keliya';
+
+  @override
+  String growthPointsCount(int points) {
+    return '$points dhibcood';
+  }
+
+  @override
+  String get growthPointsDiscount => 'Dhimista dhibcaha';
+
+  @override
+  String get growthCouponDiscount => 'Dhimista koodhka';
+
+  @override
+  String growthCouponDiscountWithCode(String code) {
+    return 'Dhimis ($code)';
+  }
+
+  @override
+  String get growthDeliveryFeeLabel => 'Kharashka gaarsiinta';
+
+  @override
+  String get growthFree => 'Bilaash';
+
+  @override
+  String growthFreeDeliveryHint(String amount) {
+    return 'Ku dar $amount kale si aad u hesho gaarsiin bilaash ah';
+  }
+
+  @override
+  String get growthFreeDeliveryUnlocked => 'Waxaad heshay gaarsiin bilaash ah!';
+
+  @override
+  String get growthRewardsTitle => 'Abaalmarinno';
+
+  @override
+  String growthRewardsWorth(String amount) {
+    return 'Qiimihiisu waa $amount';
+  }
+
+  @override
+  String get growthRewardsHowItWorks => 'Sida ay u shaqeyso';
+
+  @override
+  String get growthRewardsEarnLine =>
+      'Ku hel dhibco dalab kasta oo dhammaystiran.';
+
+  @override
+  String growthRewardsRateLine(int points, String amount) {
+    return '$points dhibcood = $amount dhimis kharashka gaarsiinta.';
+  }
+
+  @override
+  String growthRewardsUseLine(int points) {
+    return 'Isticmaal marka aad bixinayso markaad haysato $points dhibcood.';
+  }
+
+  @override
+  String get growthRewardsHistory => 'Taariikhda';
+
+  @override
+  String get growthRewardsHistoryEmpty => 'Wali ma jiro dhaqdhaqaaq dhibco.';
+
+  @override
+  String get growthRewardsLoadError => 'Lama soo rari karin abaalmarinnadaada.';
+
+  @override
+  String get growthRewardsTypeEarned => 'Dhibco la helay';
+
+  @override
+  String get growthRewardsTypeRedeemed => 'Dhibco la isticmaalay';
+
+  @override
+  String get growthRewardsTypeRestored => 'Dhibco la soo celiyay';
+
+  @override
+  String get growthRewardsTypeExpired => 'Dhibco dhacay';
+
+  @override
+  String growthReferralTitle(String amount) {
+    return 'Casuun saaxiibbada, hel $amount';
+  }
+
+  @override
+  String growthReferralSubtitle(String amount) {
+    return 'Adiga iyo saaxiibkaa mid walba wuxuu helayaa $amount kadib dalabkooda ugu horreeya.';
+  }
+
+  @override
+  String get growthReferralCopy => 'Koobiyee';
+
+  @override
+  String get growthReferralCopied => 'Koodhka casuumaadda waa la koobiyeeyay';
+
+  @override
+  String get growthReferralShare => 'Wadaag casuumaadda';
+
+  @override
+  String get growthReferralShareSubject => 'Igu soo biir HudHud Delivery';
+
+  @override
+  String growthReferralShareFallback(String amount, String code, String link) {
+    return 'Hel $amount HudHud Delivery adigoo isticmaalaya koodhkayga $code: $link';
+  }
+
+  @override
+  String get growthReferralInvited => 'La casuumay';
+
+  @override
+  String get growthReferralRewarded => 'La abaalmariyay';
+
+  @override
+  String get growthReferralPending => 'Sugaya';
+
+  @override
+  String get growthReferralEarned => 'La helay';
+
+  @override
+  String get growthReorderButton => 'Dib u dalbo';
+
+  @override
+  String get growthReorderFailed =>
+      'Dib u dalbashadu way fashilantay. Fadlan isku day mar kale.';
+
+  @override
+  String get growthReorderReplaceMessage =>
+      'Gaadhigaagu wuxuu leeyahay alaab dukaan kale. Ku beddel dalabkan?';
+
+  @override
+  String get growthReorderUnavailableTitle => 'Alaabo qaar lama heli karo';
+
+  @override
+  String get growthReorderNothingAvailable =>
+      'Alaabtan midkoodna hadda lama heli karo';
+
+  @override
+  String get growthReorderContinue => 'Ku sii wad alaabta la heli karo';
+
+  @override
+  String get growthReorderReasonOutOfStock => 'Wuu dhammaaday';
+
+  @override
+  String get growthReorderReasonRemoved => 'Lama iibiyo mar dambe';
+
+  @override
+  String get growthReorderReasonVendorClosed => 'Dukaanku wuu xiran yahay';
+
+  @override
+  String get growthReorderReasonUnavailable => 'Lama heli karo';
+
+  @override
+  String get growthOrderAgainTitle => 'Mar kale dalbo';
+
+  @override
+  String growthOrderAgainOrderLabel(String order) {
+    return 'Dalab #$order';
+  }
+
+  @override
+  String get growthSeeAll => 'Arag dhammaan';
+
+  @override
+  String get growthClosed => 'Xiran';
+
+  @override
+  String get growthCollectionFallbackTitle => 'Ururin';
+
+  @override
+  String get growthStoreFallbackName => 'Dukaan';
+
+  @override
+  String get p3Sponsored => 'La kafaalaqaaday';
+
+  @override
+  String get p3PlusTitle => 'HudHud Plus';
+
+  @override
+  String get p3PlusBadge => 'Plus';
+
+  @override
+  String get p3PlusTagline => 'Gaarsiin bilaash ah iyo dhimis dalab kasta.';
+
+  @override
+  String p3PlusPricePerPeriod(String price, int days) {
+    return '$price / $days maalmood';
+  }
+
+  @override
+  String get p3PlusBenefitsTitle => 'Faa\'iidooyinkaaga';
+
+  @override
+  String p3PlusBenefitFreeDelivery(String amount) {
+    return 'Gaarsiin bilaash ah dalabyada cuntada iyo raashinka ee ka badan $amount';
+  }
+
+  @override
+  String get p3PlusBenefitFreeDeliveryAll =>
+      'Gaarsiin bilaash ah dalabyada cuntada iyo raashinka';
+
+  @override
+  String p3PlusBenefitParcelDiscount(String percent) {
+    return '$percent% dhimis gaarsiinta xirmooyinka';
+  }
+
+  @override
+  String get p3PlusSubscribe => 'Ku biir HudHud Plus';
+
+  @override
+  String get p3PlusCancel => 'Jooji Plus';
+
+  @override
+  String get p3PlusResume => 'Sii hay Plus-kayga';
+
+  @override
+  String get p3PlusActive => 'Xubinnimadaadu waa firfircoon tahay';
+
+  @override
+  String p3PlusRenewsOn(String date) {
+    return 'Waxay cusboonaanaysaa $date';
+  }
+
+  @override
+  String p3PlusEndsOn(String date) {
+    return 'Wuxuu dhamaanayaa $date — waad sii hayn kartaa';
+  }
+
+  @override
+  String get p3PlusPastDue =>
+      'Lacag bixinta cusboonaysiinta way fashilantay. Ku shubo jeebkaaga si aad u sii haysato Plus.';
+
+  @override
+  String p3PlusSavings(String amount) {
+    return 'Waxaad badbaadisay qiyaastii $amount 30-kii maalmood ee la soo dhaafay';
+  }
+
+  @override
+  String get p3PlusPaidFromWallet =>
+      'Waxaa laga bixiyaa jeebkaaga HudHud. Jooji wakhti kasta.';
+
+  @override
+  String get p3PlusSubscribed => 'Ku soo dhowow HudHud Plus!';
+
+  @override
+  String get p3PlusCancelled => 'Plus wuxuu dhamaanayaa dhammaadka muddadan';
+
+  @override
+  String get p3PlusResumed => 'Plus wuu sii cusboonaanayaa';
+
+  @override
+  String get p3PlusCancelConfirmTitle => 'Ma joojinaysaa HudHud Plus?';
+
+  @override
+  String get p3PlusCancelConfirmMessage =>
+      'Faa\'iidooyinkaaga waad haysanaysaa ilaa dhammaadka muddadan.';
+
+  @override
+  String get p3PlusInsufficientTitle => 'Haraaga jeebka kuma filna';
+
+  @override
+  String p3PlusInsufficientMessage(String amount) {
+    return 'Ku dar $amount jeebkaaga si aad ugu biirto Plus.';
+  }
+
+  @override
+  String get p3PlusTopUp => 'Ku shubo jeebka';
+
+  @override
+  String get p3PlusActionFailed =>
+      'Lama cusboonaysiin karin Plus. Fadlan isku day mar kale.';
+
+  @override
+  String get p3PlusLoadError => 'Lama soo rari karin HudHud Plus.';
+
+  @override
+  String get p3PlusUnavailable => 'HudHud Plus hadda lama heli karo.';
+
+  @override
+  String get p3PlusUpsell =>
+      'Hel gaarsiin bilaash ah adigoo isticmaalaya HudHud Plus';
+
+  @override
+  String get p3PlusMenuJoin => 'Hel HudHud Plus';
+
+  @override
+  String get p3PlusMenuMember => 'HudHud Plus-kayga';
+
+  @override
+  String get p3QuotePlusFreeDelivery => 'Plus: gaarsiin bilaash ah';
+
+  @override
+  String get p3MarketSettingTitle => 'Magaalada';
+
+  @override
+  String get p3MarketPickerTitle => 'Dooro magaaladaada';
+
+  @override
+  String p3MarketChanged(String market) {
+    return 'Magaalada waxaa loo beddelay $market';
+  }
+
+  @override
+  String get p3MarketChangeBlocked =>
+      'Ma beddeli kartid magaalada inta jeebkaagu haysto haraa lacag kale ah. Marka hore isticmaal ama la bax.';
+
+  @override
+  String get p3MarketChangeFailed =>
+      'Lama beddeli karin magaalada. Fadlan isku day mar kale.';
+
+  @override
+  String get p5SetsTitle => 'HudHud Set';
+
+  @override
+  String get p5SetsSubtitle => 'Cunto hal qof · gaarsiintu waa ku jirtaa';
+
+  @override
+  String get p5SetDeliveryIncluded => 'Gaarsiintu waa ku jirtaa';
+
+  @override
+  String p5SetsMaxPerOrder(int count) {
+    return 'Ilaa $count dalab kasta';
+  }
+
+  @override
+  String get p5QuoteSetDeliveryIncluded =>
+      'HudHud Set: gaarsiintu waa ku jirtaa';
+
+  @override
+  String p5SetOverMaxQuantity(int count) {
+    return 'Gaarsiintu waxay ku jirtaa ilaa $count HudHud Set dalab kasta.';
+  }
+
+  @override
+  String get p5SetMixedCart =>
+      'Gaarsiintu waxay ku jirtaa kaliya marka gaadhigaagu HudHud Set oo kaliya leeyahay.';
+
+  @override
+  String get p5PayCashOnArrival =>
+      'Lacag caddaan ah bixi marka dalabkaagu yimaado';
+
+  @override
+  String get p5PaymentInProgress =>
+      'Lacag-bixin dalabkan ah ayaa socota. Ku ansixi ama diid taleefankaaga, kadibna hubi xaaladda dalabka.';
+
+  @override
+  String get p5PaymentAlreadyPaid =>
+      'Dalabkan horay ayaa lacagtiisa loo bixiyay.';
+
+  @override
+  String get p5PaymentTotalsChanged =>
+      'Wadarta dalabkaagu way isbeddeshay. Waan cusbooneysiinay dalabka — fadlan dib u eeg ka hor intaadan bixin.';
+
+  @override
+  String get p5OrderNotPayable => 'Dalabkan lama bixin karo hadda.';
+
+  @override
+  String get p5CheckOrderStatus => 'Hubi xaaladda dalabka';
+
+  @override
+  String p5RefundedToWallet(String amount) {
+    return '$amount ayaa lagu celiyay jeebkaaga HudHud';
+  }
+
+  @override
+  String get p5RefundManual =>
+      'Dalabka waa la joojiyay. Kooxdayadu dhowaan ayay lacagtaada kuu celin doontaa.';
+
+  @override
+  String get p5WalletRefundLabel => 'Lacag celin';
+
+  @override
+  String get p9GiftSendTitle => 'Dir hadiyad';
+
+  @override
+  String get p9GiftBannerSubtitle =>
+      'U dalbo cunto qoyskaaga ku nool magaalo kale. Waxay helayaan SMS ay kula socdaan.';
+
+  @override
+  String get p9GiftIntroBody =>
+      'Dooro magaalada uu ku nool yahay qofka hadiyadda helaya, dooro makhaayad oo buuxi gaadhigaaga sidii caadiga ahayd. Marka aad bixinayso, ku dar magaca iyo lambarka taleefanka qofka helaya oo online ku bixi.';
+
+  @override
+  String get p9GiftChooseMarket => 'Xaggee buu ku nool yahay qofka helaya?';
+
+  @override
+  String get p9GiftChooseRestaurant => 'Dooro makhaayad';
+
+  @override
+  String get p9GiftHowItWorksSms =>
+      'Qofka helaya wuxuu helayaa SMS leh xiriiriye la socod iyo koodh gaarsiin oo 4 lambar ah.';
+
+  @override
+  String get p9GiftHowItWorksPay =>
+      'Online ayaad ku bixinaysaa. Lacag caddaan ah marka la keeno looma oggola hadiyadaha.';
+
+  @override
+  String get p9GiftSectionTitle => 'U dir hadiyad ahaan';
+
+  @override
+  String get p9GiftSectionSubtitle =>
+      'Waxaan u geynaynaa qofka helaya, waxaana u diraynaa SMS lagula socdo';
+
+  @override
+  String get p9GiftToggle => 'Dalabkan waa hadiyad';
+
+  @override
+  String get p9GiftRecipientName => 'Magaca qofka helaya';
+
+  @override
+  String get p9GiftRecipientPhone => 'Lambarka taleefanka qofka helaya';
+
+  @override
+  String p9GiftRecipientPhoneHint(String example) {
+    return 'Tusaale $example';
+  }
+
+  @override
+  String get p9GiftMessageLabel => 'Fariinta hadiyadda (ikhtiyaari)';
+
+  @override
+  String get p9GiftMessageHint => 'U qor qofka helaya qoraal gaaban';
+
+  @override
+  String get p9GiftNameRequired => 'Geli magaca qofka helaya';
+
+  @override
+  String p9GiftPhoneInvalid(String prefix) {
+    return 'Geli lambar taleefan oo sax ah ($prefix …)';
+  }
+
+  @override
+  String get p9GiftNoCash =>
+      'Lacag caddaan ah marka la keeno looma oggola hadiyadaha. Dooro hab lacag-bixin online ah.';
+
+  @override
+  String get p9GiftAddressHint =>
+      'Goobta gaarsiinta u dhig cinwaanka qofka helaya.';
+
+  @override
+  String get p9GiftUnavailable => 'Dalabaadka hadiyadda weli lama heli karo.';
+
+  @override
+  String get p9GiftPlacedTitle => 'Dalabka hadiyadda waa la gudbiyay';
+
+  @override
+  String p9GiftPlacedBody(String name) {
+    return 'Marka lacag-bixinta la xaqiijiyo, $name wuxuu helayaa SMS leh xiriiriye la socod iyo koodh gaarsiin oo 4 lambar ah. Koodhka wuxuu siinayaa darawalka marka dalabku yimaado.';
+  }
+
+  @override
+  String p9GiftForName(String name) {
+    return 'Hadiyad loogu talagalay $name';
+  }
+
+  @override
+  String get p9GiftRecipientLabel => 'Qofka helaya';
+
+  @override
+  String get p9GiftYourMessage => 'Fariintaada';
+
+  @override
+  String get p9GiftWalletNote =>
+      'Jeeb lacag kale ku jirta waxaa laga jarayaa qaddarka la beddelay ee sicirka maanta.';
+
+  @override
+  String p9GiftModeBanner(String market) {
+    return 'Hadiyad ayaad u diraysaa $market';
+  }
+
+  @override
+  String get p9GiftStop => 'Jooji hadiyadda';
+
+  @override
+  String get p9GiftOrderLabel => 'Dalab hadiyad';
+
+  @override
+  String get p10CityNotServed => 'Weli ma adeegno aaggan';
+
+  @override
+  String get p10CityCrossCity =>
+      'Goobta laga qaado iyo goobta la geeyo waa inay isku magaalo ahaadaan.';
+
+  @override
+  String get p10CityOtherCity =>
+      'Cinwaannadani waxay ku yaalliin magaalo kale. Magaaladaada ka beddel Dejinta si aad u sii wadato.';
+
+  @override
+  String get p10ParcelTitle => 'Dir xirmo';
+
+  @override
+  String get p10ParcelScheduledTitle => 'Ballami xirmo';
+
+  @override
+  String get p10ParcelRoute => 'Waddada';
+
+  @override
+  String get p10ParcelPickup => 'Laga qaado';
+
+  @override
+  String get p10ParcelDropoff => 'Loo geeyo';
+
+  @override
+  String get p10ParcelChooseAddress => 'Ka dooro khariidadda';
+
+  @override
+  String get p10ParcelBuilding => 'Dhismaha / guriga';
+
+  @override
+  String get p10ParcelFloor => 'Dabaqa';
+
+  @override
+  String get p10ParcelApartment => 'Abartamanka / xafiiska';
+
+  @override
+  String get p10ParcelLandmark => 'Calaamad u dhow';
+
+  @override
+  String get p10ParcelRecipient => 'Qaataha';
+
+  @override
+  String get p10ParcelSendToMyself => 'Naftayda u dir';
+
+  @override
+  String get p10ParcelRecipientName => 'Magaca qaataha';
+
+  @override
+  String get p10ParcelRecipientPhone => 'Taleefanka qaataha';
+
+  @override
+  String get p10ParcelWhatSending => 'Maxaad diraysaa?';
+
+  @override
+  String get p10ParcelCategoryDocument => 'Dukumentiyo';
+
+  @override
+  String get p10ParcelCategoryParcel => 'Xirmo';
+
+  @override
+  String get p10ParcelCategoryFood => 'Cunto';
+
+  @override
+  String get p10ParcelCategoryGrocery => 'Raashin';
+
+  @override
+  String get p10ParcelCategoryElectronics => 'Qalab elektaroonig';
+
+  @override
+  String get p10ParcelCategoryClothes => 'Dhar';
+
+  @override
+  String get p10ParcelCategoryGift => 'Hadiyad';
+
+  @override
+  String get p10ParcelCategoryFlowers => 'Ubax';
+
+  @override
+  String get p10ParcelCategoryKeys => 'Furayaal';
+
+  @override
+  String get p10ParcelCategoryOther => 'Kale';
+
+  @override
+  String get p10ParcelSizeSmall => 'Yar';
+
+  @override
+  String get p10ParcelSizeSmallHint => 'Boorso ayuu ku filan yahay';
+
+  @override
+  String get p10ParcelSizeMedium => 'Dhexdhexaad';
+
+  @override
+  String get p10ParcelSizeMediumHint => 'Kursiga gaariga ayuu ku filan yahay';
+
+  @override
+  String get p10ParcelSizeLarge => 'Weyn';
+
+  @override
+  String get p10ParcelSizeLargeHint => 'Wuxuu u baahan yahay baabuur xamuul';
+
+  @override
+  String get p10ParcelSizeUnavailable => 'Halkan weli lagama helo';
+
+  @override
+  String get p10ParcelDescription => 'Faahfaahin (ikhtiyaari)';
+
+  @override
+  String get p10ParcelItemValue => 'Qiimaha alaabta (ikhtiyaari)';
+
+  @override
+  String get p10ParcelCourierNote => 'Fariin loogu talagalay darawalka';
+
+  @override
+  String get p10ParcelPayment => 'Lacag bixinta';
+
+  @override
+  String get p10ParcelPayWallet => 'Boorsada HudHud';
+
+  @override
+  String get p10ParcelPayCash => 'Lacag caddaan ah darawalka';
+
+  @override
+  String get p10ParcelPaymentPhone => 'Lambarka lacagta mobaylka';
+
+  @override
+  String get p10ParcelRecipientPays =>
+      'Qaataha ayaa bixinaya (caddaan marka la geeyo)';
+
+  @override
+  String get p10ParcelSellerCod => 'Ka qaad qiimaha alaabta qaataha';
+
+  @override
+  String get p10ParcelSellerCodHint =>
+      'Darawalku caddaan ayuu ka qaadayaa, waxaana lagu shubayaa boorsadaada ganacsiga ee HudHud.';
+
+  @override
+  String get p10ParcelSellerCodAmount => 'Qiimaha alaabta la qaadayo';
+
+  @override
+  String get p10ParcelPickupTime => 'Waqtiga laga qaado';
+
+  @override
+  String get p10ParcelPickupNow => 'Sida ugu dhakhsaha badan';
+
+  @override
+  String get p10ParcelPrice => 'Qiimaha';
+
+  @override
+  String p10ParcelPriceHeld(String time) {
+    return 'Qiimaha waa la xajiyay $time';
+  }
+
+  @override
+  String get p10ParcelPriceExpired => 'Xajinta qiimaha way dhacday';
+
+  @override
+  String get p10ParcelRefreshPrice => 'Cusboonaysii qiimaha';
+
+  @override
+  String get p10ParcelGettingPrice => 'Qiimaha ayaa la helayaa…';
+
+  @override
+  String get p10ParcelPriceUpdated =>
+      'Qiimaha wuu isbeddelay. Fadlan eeg qiimaha cusub.';
+
+  @override
+  String p10ParcelBook(String price) {
+    return 'Dalbo $price';
+  }
+
+  @override
+  String get p10ParcelContinue => 'Sii wad';
+
+  @override
+  String get p10ParcelFillRequired =>
+      'Dooro goobta laga qaado iyo meesha loo geeyo, kuna dar taleefanka qaataha.';
+
+  @override
+  String get p10ParcelSizeNotSupported =>
+      'Cabbirkan weli lagama helo magaaladan.';
+
+  @override
+  String get p10ParcelPaymentNotAvailable =>
+      'Habkan lacag bixinta lagama helo magaaladan.';
+
+  @override
+  String get p10ParcelInsufficientWallet =>
+      'Boorsadaada lacag ku filan kuma jirto. Ku shub ama dooro hab kale oo lacag bixin ah.';
+
+  @override
+  String get p10ParcelSomethingWrong =>
+      'Wax baa khaldamay. Fadlan isku day mar kale.';
+
+  @override
+  String get p10ParcelApprovePayment =>
+      'Ku oggolow lacag bixinta taleefankaaga.';
+
+  @override
+  String get p10ParcelBooked => 'Xirmada waa la dalbaday';
+
+  @override
+  String get p10ParcelHandoverCode => 'Koodhka gacan-gelinta';
+
+  @override
+  String get p10ParcelHandoverHint =>
+      'Qaatahu koodhkan ayuu siinayaa darawalka marka la keeno.';
+
+  @override
+  String get p10ParcelHandoverSelfHint =>
+      'Sii darawalka koodhkan marka aad xirmada hesho.';
+
+  @override
+  String get p10ParcelShareTracking => 'La wadaag xiriiriyaha la socodka';
+
+  @override
+  String p10ParcelTrackingShareText(String link) {
+    return 'La soco xirmadayda HudHud: $link';
+  }
+
+  @override
+  String p10ParcelEta(String minutes) {
+    return 'Wuxuu imanayaa qiyaastii $minutes daqiiqo';
+  }
+
+  @override
+  String get p10ParcelCancel => 'Jooji xirmada';
+
+  @override
+  String get p10ParcelCancelFree =>
+      'Ma joojinaysaa xirmadan? Waa bilaash maadaama aan weli darawal loo xilsaarin.';
+
+  @override
+  String p10ParcelCancelFee(String fee) {
+    return 'Darawal ayaa soo socda. Hadda joojintu waxay ku kacaysaa $fee.';
+  }
+
+  @override
+  String get p10ParcelCancelReason => 'Diraha ayaa ka joojiyay app-ka';
+
+  @override
+  String get p10ParcelCancelled => 'Xirmada waa la joojiyay';
+
+  @override
+  String get p11ParcelAddStop => 'Ku dar joogsi';
+
+  @override
+  String p11ParcelStopN(String number) {
+    return 'Joogsiga $number';
+  }
+
+  @override
+  String get p11ParcelRemoveStop => 'Ka saar joogsiga';
+
+  @override
+  String get p11ParcelMoveUp => 'Kor u qaad';
+
+  @override
+  String get p11ParcelMoveDown => 'Hoos u dhig';
+
+  @override
+  String p11ParcelStopsLimit(String max) {
+    return 'Ilaa $max meelood oo la geeyo baakad kasta';
+  }
+
+  @override
+  String get p11ParcelMultiStopSenderPays =>
+      'Marka meelo badan la geynayo, adiga ayaa bixinaya waddada oo dhan.';
+
+  @override
+  String get p11ParcelMultiStopCashAtPickup =>
+      'Marka meelo badan la geynayo, lacagta caddaanka ah waxaa la siinayaa darawalka marka uu qaadanayo.';
+
+  @override
+  String get p11ParcelPayAtPickup =>
+      'Lacag caddaan ah ku bixi marka la qaadanayo';
+
+  @override
+  String get p11ParcelPayAtPickupHint =>
+      'Lacagta sii darawalka marka uu baakadda qaadanayo.';
+
+  @override
+  String p11ParcelPayAtPickupDue(String amount) {
+    return 'Sii darawalka $amount lacag caddaan ah marka uu qaadanayo';
+  }
+
+  @override
+  String get p11ParcelPaidAtPickup =>
+      'Waxaa la siiyay darawalka markii la qaaday';
+
+  @override
+  String get p11ParcelPayAtPickupUnavailable =>
+      'Lacag caddaan ah oo la bixiyo marka la qaadanayo hadda lama heli karo.';
+
+  @override
+  String get p11ParcelStopsTitle => 'Meelaha la geynayo';
+
+  @override
+  String get p11ParcelStopCodesHint =>
+      'Qof kasta oo helaya wuxuu SMS ku helay koodhkiisa wareejinta. La wadaag haddii uusan helin.';
+
+  @override
+  String get p11ParcelShareStopLink => 'La wadaag xiriirka';
+
+  @override
+  String get p11ParcelStopPending => 'Sugitaan';
+
+  @override
+  String get p11ParcelStopArrived => 'Darawalku wuu joogaa';
+
+  @override
+  String get p11ParcelStopDelivered => 'Waa la geeyay';
+
+  @override
+  String get p11ParcelStopFailed => 'Lama gaarsiin';
+
+  @override
+  String get p11ParcelStopReturned => 'Adiga ayaa laguu soo celiyay';
+
+  @override
+  String get p11ParcelMultiStopDisabled =>
+      'Meelo badan oo la geeyo hadda lama heli karo.';
+
+  @override
+  String get p11ParcelTooManyStops =>
+      'Meelo aad u badan oo la geeyo baakad keliya.';
+
+  @override
+  String p11ParcelCancelCashFee(String fee) {
+    return 'Darawal ayaa soo socda. Hadda joojintu waxay ku kacaysaa $fee. Waxaa laga jarayaa boorsadaada ama lagu darayaa haraagaaga.';
+  }
+
+  @override
+  String p11ParcelOutstandingBalance(String amount) {
+    return 'Waxaad ku leedahay $amount baakad la joojiyay. Waxaa laga jarayaa boorsadaada marka xigta ee aad lacag ku shubto ama dalbato.';
+  }
+
+  @override
+  String get p12StoreOpen => 'Furan';
+
+  @override
+  String get p12StoreClosed => 'Xiran';
+
+  @override
+  String get p12StoreBusy => 'Mashquul';
+
+  @override
+  String p12StoreOpensAt(String time) {
+    return 'Wuxuu furmayaa $time';
+  }
+
+  @override
+  String p12StoreOpensTomorrowAt(String time) {
+    return 'Berri ayuu furmayaa $time';
+  }
+
+  @override
+  String p12StoreBackAt(String time) {
+    return 'Wuu soo laabanayaa $time';
+  }
+
+  @override
+  String get p12StoreClosedToday => 'Maanta waa xiran yahay';
+
+  @override
+  String get p12StoreClosedBanner =>
+      'Dukaankan hadda waa xiran yahay. Waad eegi kartaa liiska, laakiin dalbashadu way xiran tahay ilaa uu furmo.';
+
+  @override
+  String get p12StoreBusyBanner =>
+      'Dukaankan aad ayuu u mashquul yahay, dalabyada cusubna wuu hakiyay. Fadlan dib u eeg dhowaan.';
+
+  @override
+  String get p12StoreOrderingPaused => 'Dalbashadu way hakad tahay';
+
+  @override
+  String get p12SoldOut => 'Waa dhammaaday';
+
+  @override
+  String get p12Unavailable => 'Lama heli karo';
+
+  @override
+  String get p12GoToCheckout => 'U gudub lacag bixinta';
+
+  @override
+  String get p12ErrStoreClosed => 'Dukaankan hadda waa xiran yahay.';
+
+  @override
+  String get p12ErrStoreBusy => 'Dukaankan waa mashquul, hadda dalab ma qaato.';
+
+  @override
+  String get p12ErrItemSoldOut =>
+      'Shay ku jira gaadhigaaga ayaa maanta dhammaaday. Ka saar si aad u sii wadato.';
+
+  @override
+  String p12ErrItemSoldOutNamed(String item) {
+    return '$item maanta wuu dhammaaday. Ka saar si aad u sii wadato.';
+  }
+
+  @override
+  String get p12RemoveItem => 'Ka saar shayga';
+
+  @override
+  String p12ErrOutstandingDues(String amount) {
+    return 'Waxaa kugu maqan lacag aan la bixin oo ah $amount. Lacag caddaan ah lama heli karo ilaa la bixiyo. Ku shub boorsadaada ama dooro hab kale oo lacag bixin.';
+  }
+
+  @override
+  String get p12DuesTitle => 'Lacag aan la bixin';
+
+  @override
+  String p12DuesCheckoutBody(String amount) {
+    return 'Waxaa lagugu leeyahay $amount xirmo la joojiyay dartiis. Lacag bixinta marka la keeno way xiran tahay ilaa la bixiyo. Markaad boorsadaada ku shubto si toos ah ayaa loo bixiyaa.';
+  }
+
+  @override
+  String get p12PayNow => 'Hadda bixi';
+
+  @override
+  String get p12CashBlockedByDues =>
+      'Lacag caddaan ah way xiran tahay ilaa lacagta lagugu leeyahay la bixiyo.';
+
+  @override
+  String get p12ChooseOtherPayment => 'Dooro lacag bixin kale';
+
+  @override
+  String get p12ErrCityOutside =>
+      'Weli kuma keenno cinwaankan. Dooro cinwaan ku yaal magaaladaada.';
+
+  @override
+  String get p12ErrCityCross =>
+      'Dhammaan cinwaannada hal dalab waa inay ku jiraan isla magaalo.';
+
+  @override
+  String p12ErrCityMismatch(String city) {
+    return 'Cinwaankani wuxuu ku yaal $city. U beddel magaaladaada $city si aad u sii wadato.';
+  }
+
+  @override
+  String get p12ErrCityMismatchGeneric =>
+      'Cinwaankani wuxuu ku yaal magaalo kale. Beddel magaaladaada si aad u sii wadato.';
+
+  @override
+  String get p12ChangeCity => 'Beddel magaalada';
+
+  @override
+  String get p12ErrNetwork =>
+      'Ma jiro xiriir internet. Hubi xiriirkaaga oo isku day mar kale.';
+
+  @override
+  String get p12ErrTimeout => 'Xiriirku waa gaabis. Fadlan isku day mar kale.';
+
+  @override
+  String get p12ErrServer =>
+      'Cillad ayaa dhinaceena ka dhacday. Fadlan isku day mar kale wax yar kadib.';
+
+  @override
+  String get p12ErrSessionExpired =>
+      'Fadhigaagu wuu dhacay. Fadlan mar kale gal.';
 }

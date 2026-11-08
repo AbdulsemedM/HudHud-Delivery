@@ -1447,5 +1447,952 @@
   },
   "paymentCash": "Cash",
   "paymentWallet": "Wallet",
-  "paymentCard": "Card"
+  "paymentCard": "Card",
+  "growthPromoTitle": "Koodii hir'isaa",
+  "growthPromoSubtitle": "Koodii qabdaa? Asitti galchi",
+  "growthPromoHint": "Koodii hir'isaa galchi",
+  "growthPromoApply": "Fayyadami",
+  "growthPromoRemove": "Haqi",
+  "growthPromoApplied": "Koodiin hir'isaa hojiirra oole",
+  "growthPromoInvalid": "Koodii kana fayyadamuun hin danda'amu",
+  "growthPromoSavedForCheckout": "Koodiin {code} yeroo kaffaltii ni hojiirra oola",
+  "@growthPromoSavedForCheckout": {
+    "placeholders": {
+      "code": {"type": "String"}
+    }
+  },
+  "growthPointsToggle": "Qabxii {points} fayyadami (geejjiba irratti −{amount})",
+  "@growthPointsToggle": {
+    "placeholders": {
+      "points": {"type": "int"},
+      "amount": {"type": "String"}
+    }
+  },
+  "growthPointsSubtitle": "Qabxiin kaffaltii geejjibaa qofa hir'isa",
+  "growthPointsCount": "Qabxii {points}",
+  "@growthPointsCount": {
+    "placeholders": {
+      "points": {"type": "int"}
+    }
+  },
+  "growthPointsDiscount": "Hir'isa qabxii",
+  "growthCouponDiscount": "Hir'isa koodii",
+  "growthCouponDiscountWithCode": "Hir'isa ({code})",
+  "@growthCouponDiscountWithCode": {
+    "placeholders": {
+      "code": {"type": "String"}
+    }
+  },
+  "growthDeliveryFeeLabel": "Kaffaltii geejjibaa",
+  "growthFree": "Bilisa",
+  "growthFreeDeliveryHint": "Geejjiba bilisaaf {amount} dabalataa ida'i",
+  "@growthFreeDeliveryHint": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "growthFreeDeliveryUnlocked": "Geejjiba bilisaa argattee!",
+  "growthRewardsTitle": "Badhaasa",
+  "growthRewardsWorth": "Gatiin isaa {amount}",
+  "@growthRewardsWorth": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "growthRewardsHowItWorks": "Akkamitti akka hojjetu",
+  "growthRewardsEarnLine": "Ajaja xumurame hundaan qabxii argadhu.",
+  "growthRewardsRateLine": "Qabxii {points} = kaffaltii geejjibaa irraa {amount} hir'isa.",
+  "@growthRewardsRateLine": {
+    "placeholders": {
+      "points": {"type": "int"},
+      "amount": {"type": "String"}
+    }
+  },
+  "growthRewardsUseLine": "Yeroo qabxii {points} qabaattu kaffaltii irratti fayyadami.",
+  "@growthRewardsUseLine": {
+    "placeholders": {
+      "points": {"type": "int"}
+    }
+  },
+  "growthRewardsHistory": "Seenaa",
+  "growthRewardsHistoryEmpty": "Ammaaf sochiin qabxii hin jiru.",
+  "growthRewardsLoadError": "Badhaasa kee fe'uu hin dandeenye.",
+  "growthRewardsTypeEarned": "Qabxii argame",
+  "growthRewardsTypeRedeemed": "Qabxii itti fayyadame",
+  "growthRewardsTypeRestored": "Qabxii deebi'e",
+  "growthRewardsTypeExpired": "Qabxii yeroon isaa darbe",
+  "growthReferralTitle": "Hiriyoota affeeri, {amount} argadhu",
+  "@growthReferralTitle": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "growthReferralSubtitle": "Ajaja isaanii jalqabaa booda atii fi hiriyaan kee tokkoon tokkoon {amount} argattu.",
+  "@growthReferralSubtitle": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "growthReferralCopy": "Garagalchi",
+  "growthReferralCopied": "Koodiin affeerraa garagalfame",
+  "growthReferralShare": "Affeerraa qoodi",
+  "growthReferralShareSubject": "HudHud Delivery irratti na bira dhufi",
+  "growthReferralShareFallback": "Koodii koo {code} fayyadamuun HudHud Delivery irratti {amount} argadhu: {link}",
+  "@growthReferralShareFallback": {
+    "placeholders": {
+      "amount": {"type": "String"},
+      "code": {"type": "String"},
+      "link": {"type": "String"}
+    }
+  },
+  "growthReferralInvited": "Kan affeeraman",
+  "growthReferralRewarded": "Kan badhaafaman",
+  "growthReferralPending": "Eegaa jiru",
+  "growthReferralEarned": "Kan argame",
+  "growthReorderButton": "Irra deebi'ii ajaji",
+  "growthReorderFailed": "Irra deebi'anii ajajuun hin danda'amne. Maaloo irra deebi'ii yaali.",
+  "growthReorderReplaceMessage": "Gaariin kee meeshaalee suuqa biraa qaba. Ajaja kanaan bakka buusi?",
+  "growthReorderUnavailableTitle": "Meeshaaleen tokko tokko hin argaman",
+  "growthReorderNothingAvailable": "Meeshaalee kana keessaa tokkollee amma hin argamu",
+  "growthReorderContinue": "Meeshaalee jiraniin itti fufi",
+  "growthReorderReasonOutOfStock": "Kuusaa keessaa dhumeera",
+  "growthReorderReasonRemoved": "Kana booda hin gurguramu",
+  "growthReorderReasonVendorClosed": "Suuqni cufameera",
+  "growthReorderReasonUnavailable": "Hin argamu",
+  "growthOrderAgainTitle": "Ammas ajaji",
+  "growthOrderAgainOrderLabel": "Ajaja #{order}",
+  "@growthOrderAgainOrderLabel": {
+    "placeholders": {
+      "order": {"type": "String"}
+    }
+  },
+  "growthSeeAll": "Hunda ilaali",
+  "growthClosed": "Cufaa",
+  "growthCollectionFallbackTitle": "Walitti qabama",
+  "growthStoreFallbackName": "Suuqa",
+  "p3Sponsored": "Deeggarame",
+  "p3PlusTitle": "HudHud Plus",
+  "p3PlusBadge": "Plus",
+  "p3PlusTagline": "Ajaja hunda irratti geejjiba bilisaa fi qusannaa.",
+  "p3PlusPricePerPeriod": "{price} / guyyaa {days}",
+  "@p3PlusPricePerPeriod": {
+    "placeholders": {
+      "price": {"type": "String"},
+      "days": {"type": "int"}
+    }
+  },
+  "p3PlusBenefitsTitle": "Faayidaa kee",
+  "p3PlusBenefitFreeDelivery": "Ajajoota nyaataa fi meeshaalee {amount} ol ta'aniif geejjiba bilisaa",
+  "@p3PlusBenefitFreeDelivery": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p3PlusBenefitFreeDeliveryAll": "Ajajoota nyaataa fi meeshaaleetiif geejjiba bilisaa",
+  "p3PlusBenefitParcelDiscount": "Geejjiba paakeejii irratti {percent}% hir'isa",
+  "@p3PlusBenefitParcelDiscount": {
+    "placeholders": {
+      "percent": {"type": "String"}
+    }
+  },
+  "p3PlusSubscribe": "HudHud Plus makamaa",
+  "p3PlusCancel": "Plus haqi",
+  "p3PlusResume": "Plus koo itti fufi",
+  "p3PlusActive": "Miseensummaan kee hojii irra jira",
+  "p3PlusRenewsOn": "Guyyaa {date} haaromfama",
+  "@p3PlusRenewsOn": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "p3PlusEndsOn": "Guyyaa {date} xumurama — itti fufsiisuu dandeessa",
+  "@p3PlusEndsOn": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "p3PlusPastDue": "Kaffaltiin haaromsaa hin milkoofne. Plus itti fufsiisuuf waaletii kee guuti.",
+  "p3PlusSavings": "Guyyoota 30 darban keessatti gara {amount} qusatteetta",
+  "@p3PlusSavings": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p3PlusPaidFromWallet": "Waaletii HudHud kee irraa kaffalama. Yeroo barbaadde haquu dandeessa.",
+  "p3PlusSubscribed": "Baga gara HudHud Plus dhuftan!",
+  "p3PlusCancelled": "Plus xumura yeroo kanaa irratti dhaabbata",
+  "p3PlusResumed": "Plus haaromfamuu itti fufa",
+  "p3PlusCancelConfirmTitle": "HudHud Plus haqamuu?",
+  "p3PlusCancelConfirmMessage": "Hanga xumura yeroo kanaatti faayidaa kee ni qabaatta.",
+  "p3PlusInsufficientTitle": "Haftee waaletii gahaa hin jiru",
+  "p3PlusInsufficientMessage": "Plus makamuuf waaletii keetti {amount} dabali.",
+  "@p3PlusInsufficientMessage": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p3PlusTopUp": "Waaletii guuti",
+  "p3PlusActionFailed": "Plus haaromsuun hin danda'amne. Maaloo irra deebi'ii yaali.",
+  "p3PlusLoadError": "HudHud Plus fe'uu hin dandeenye.",
+  "p3PlusUnavailable": "HudHud Plus amma hin argamu.",
+  "p3PlusUpsell": "HudHud Plus waliin geejjiba bilisaa argadhu",
+  "p3PlusMenuJoin": "HudHud Plus argadhu",
+  "p3PlusMenuMember": "HudHud Plus koo",
+  "p3QuotePlusFreeDelivery": "Plus: geejjiba bilisaa",
+  "p3MarketSettingTitle": "Magaalaa",
+  "p3MarketPickerTitle": "Magaalaa kee filadhu",
+  "p3MarketChanged": "Magaalaan gara {market} jijjiirameera",
+  "@p3MarketChanged": {
+    "placeholders": {
+      "market": {"type": "String"}
+    }
+  },
+  "p3MarketChangeBlocked": "Yeroo waaletiin kee haftee maallaqa biraa qabutti magaalaa jijjiiruu hin dandeessu. Dura itti fayyadami ykn baasi.",
+  "p3MarketChangeFailed": "Magaalaa jijjiiruun hin danda'amne. Maaloo irra deebi'ii yaali.",
+  "p5SetsTitle": "HudHud Set",
+  "p5SetsSubtitle": "Nyaata nama tokkoof · geejjibni ni hammatama",
+  "p5SetDeliveryIncluded": "Geejjibni ni hammatama",
+  "p5SetsMaxPerOrder": "Ajaja tokkoon hanga {count}",
+  "p5QuoteSetDeliveryIncluded": "HudHud Set: geejjibni ni hammatama",
+  "p5SetOverMaxQuantity": "Geejjibni ajaja tokkoon hanga HudHud Set {count} qofaaf hammatama.",
+  "p5SetMixedCart": "Geejjibni kan hammatamu yeroo gaariin kee HudHud Set qofa qabu qofa.",
+  "p5PayCashOnArrival": "Yeroo ajajni kee si ga'u maallaqa callaan kaffali",
+  "p5PaymentInProgress": "Kaffaltiin ajaja kanaa adeemsa irra jira. Bilbila kee irratti mirkaneessi ykn didi, achiis haala ajajaa ilaali.",
+  "p5PaymentAlreadyPaid": "Ajajni kun duraan kaffalameera.",
+  "p5PaymentTotalsChanged": "Waliigalli ajaja keetii jijjiirameera. Ajaja haaromsineerra — maaloo osoo hin kaffalin dura ilaali.",
+  "p5OrderNotPayable": "Ajajni kun amma kaffalamuu hin danda'u.",
+  "p5CheckOrderStatus": "Haala ajajaa ilaali",
+  "p5RefundedToWallet": "{amount} waaletii HudHud keetti deebi'eera",
+  "p5RefundManual": "Ajajni haqameera. Gareen keenya dhiyootti maallaqa kee siif deebisa.",
+  "p5WalletRefundLabel": "Deebii",
+  "p9GiftSendTitle": "Kennaa ergi",
+  "@p9GiftSendTitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftBannerSubtitle": "Maatii kee magaalaa biraa jiraataniif nyaata ajaji. Hordofuuf SMS ni argatu.",
+  "@p9GiftBannerSubtitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftIntroBody": "Magaalaa namni kennaa fudhatu itti jiraatu filadhu, mana nyaataa filadhuutii akkuma yeroo hundaa gaarii kee guuti. Yeroo kaffaltii, maqaa fi lakkoofsa bilbilaa nama fudhatuu galchiitii toora interneetiitiin kaffali.",
+  "@p9GiftIntroBody": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftChooseMarket": "Namni fudhatu eessa jiraata?",
+  "@p9GiftChooseMarket": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftChooseRestaurant": "Mana nyaataa filadhu",
+  "@p9GiftChooseRestaurant": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftHowItWorksSms": "Namni fudhatu SMS liinkii hordoffii fi koodii geejjibaa lakkoofsa 4 qabu ni argata.",
+  "@p9GiftHowItWorksSms": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftHowItWorksPay": "Toora interneetiitiin kaffalta. Kennaaf kaffaltiin maallaqa harkaa yeroo geejjibaa hin hayyamamu.",
+  "@p9GiftHowItWorksPay": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftSectionTitle": "Akka kennaatti ergi",
+  "@p9GiftSectionTitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftSectionSubtitle": "Nama fudhatuuf ni geessina, liinkii hordoffii SMS-n ni ergina",
+  "@p9GiftSectionSubtitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftToggle": "Ajajni kun kennaa dha",
+  "@p9GiftToggle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftRecipientName": "Maqaa nama fudhatuu",
+  "@p9GiftRecipientName": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftRecipientPhone": "Lakkoofsa bilbila harkaa nama fudhatuu",
+  "@p9GiftRecipientPhone": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftRecipientPhoneHint": "Fakkeenyaaf {example}",
+  "@p9GiftRecipientPhoneHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
+    "placeholders": {
+      "example": {"type": "String"}
+    }
+  },
+  "p9GiftMessageLabel": "Ergaa kennaa (dirqama miti)",
+  "@p9GiftMessageLabel": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftMessageHint": "Nama fudhatuuf ergaa gabaabaa barreessi",
+  "@p9GiftMessageHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftNameRequired": "Maqaa nama fudhatuu galchi",
+  "@p9GiftNameRequired": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftPhoneInvalid": "Lakkoofsa bilbila harkaa sirrii galchi ({prefix} …)",
+  "@p9GiftPhoneInvalid": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
+    "placeholders": {
+      "prefix": {"type": "String"}
+    }
+  },
+  "p9GiftNoCash": "Kennaaf kaffaltiin maallaqa harkaa yeroo geejjibaa hin hayyamamu. Mala kaffaltii toora interneetii filadhu.",
+  "@p9GiftNoCash": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftAddressHint": "Bakka geejjibaa teessoo nama fudhatuu godhi.",
+  "@p9GiftAddressHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftUnavailable": "Ajajni kennaa ammaaf hin jiru.",
+  "@p9GiftUnavailable": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftPlacedTitle": "Ajajni kennaa ergameera",
+  "@p9GiftPlacedTitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftPlacedBody": "Yeroo kaffaltiin mirkanaa'u, {name} SMS liinkii hordoffii fi koodii geejjibaa lakkoofsa 4 qabu ni argata. Yeroo ajajni ga'u koodii sana geessituuf kenna.",
+  "@p9GiftPlacedBody": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "p9GiftForName": "Kennaa {name}f",
+  "@p9GiftForName": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "p9GiftRecipientLabel": "Nama fudhatu",
+  "@p9GiftRecipientLabel": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftYourMessage": "Ergaa kee",
+  "@p9GiftYourMessage": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftWalletNote": "Waalletiin maallaqa biraa qabu gatii jijjiirraa har'aatiin kan jijjiirame irraa hir'ifama.",
+  "@p9GiftWalletNote": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftModeBanner": "Kennaa gara {market} erguu",
+  "@p9GiftModeBanner": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
+    "placeholders": {
+      "market": {"type": "String"}
+    }
+  },
+  "p9GiftStop": "Kennaa dhaabi",
+  "@p9GiftStop": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "p9GiftOrderLabel": "Ajaja kennaa",
+  "@p9GiftOrderLabel": {
+    "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker."
+  },
+  "cartDifferentVendorMessage": "Gaariin kee meeshaalee suuqii biraa qaba. Meeshaalee suuqii kanaa dabaluuf qulqulleessi.",
+  "@cartDifferentVendorMessage": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
+  },
+  "cartDifferentVendorTitle": "Gaarii haaraa jalqabduu?",
+  "@cartDifferentVendorTitle": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
+  },
+  "cartKeepCurrentAction": "Gaarii tursi",
+  "@cartKeepCurrentAction": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
+  },
+  "cartReplaceAction": "Qulqulleessii dabali",
+  "@cartReplaceAction": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
+  },
+  "homeTabDelivery": "Geejjiba",
+  "@homeTabDelivery": {
+    "description": "NEEDS NATIVE REVIEW: machine draft, not checked by a native speaker."
+  },
+  "p10CityNotServed": "Naannoo kana ammaaf hin tajaajillu",
+  "@p10CityNotServed": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10CityCrossCity": "Bakki fudhatamuu fi bakki geessuu magaalaa tokko keessa ta'uu qabu.",
+  "@p10CityCrossCity": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10CityOtherCity": "Teessoon kun magaalaa biraa keessa jira. Itti fufuuf Qindaa'ina keessatti magaalaa kee jijjiiri.",
+  "@p10CityOtherCity": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelTitle": "Paakeejii ergi",
+  "@p10ParcelTitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelScheduledTitle": "Paakeejii yeroon qabadhu",
+  "@p10ParcelScheduledTitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelRoute": "Karaa",
+  "@p10ParcelRoute": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPickup": "Bakka fudhatamu",
+  "@p10ParcelPickup": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelDropoff": "Bakka geessuu",
+  "@p10ParcelDropoff": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelChooseAddress": "Kaartaa irratti filadhu",
+  "@p10ParcelChooseAddress": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelBuilding": "Gamoo / mana",
+  "@p10ParcelBuilding": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelFloor": "Darbii",
+  "@p10ParcelFloor": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelApartment": "Kutaa / waajjira",
+  "@p10ParcelApartment": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelLandmark": "Mallattoo naannoo",
+  "@p10ParcelLandmark": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelRecipient": "Fudhataa",
+  "@p10ParcelRecipient": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSendToMyself": "Ofumaaf ergi",
+  "@p10ParcelSendToMyself": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelRecipientName": "Maqaa fudhataa",
+  "@p10ParcelRecipientName": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelRecipientPhone": "Bilbila fudhataa",
+  "@p10ParcelRecipientPhone": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelWhatSending": "Maal ergaa jirta?",
+  "@p10ParcelWhatSending": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryDocument": "Galmeewwan",
+  "@p10ParcelCategoryDocument": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryParcel": "Paakeejii",
+  "@p10ParcelCategoryParcel": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryFood": "Nyaata",
+  "@p10ParcelCategoryFood": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryGrocery": "Meeshaalee nyaataa",
+  "@p10ParcelCategoryGrocery": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryElectronics": "Elektirooniksii",
+  "@p10ParcelCategoryElectronics": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryClothes": "Uffata",
+  "@p10ParcelCategoryClothes": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryGift": "Kennaa",
+  "@p10ParcelCategoryGift": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryFlowers": "Abaaboo",
+  "@p10ParcelCategoryFlowers": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryKeys": "Furtuu",
+  "@p10ParcelCategoryKeys": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCategoryOther": "Kan biraa",
+  "@p10ParcelCategoryOther": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeSmall": "Xiqqaa",
+  "@p10ParcelSizeSmall": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeSmallHint": "Boorsaa keessa ni seena",
+  "@p10ParcelSizeSmallHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeMedium": "Giddugaleessa",
+  "@p10ParcelSizeMedium": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeMediumHint": "Teessoo konkolaataa irratti ni ga'a",
+  "@p10ParcelSizeMediumHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeLarge": "Guddaa",
+  "@p10ParcelSizeLarge": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeLargeHint": "Konkolaataa fe'umsaa barbaada",
+  "@p10ParcelSizeLargeHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeUnavailable": "Asitti ammaaf hin jiru",
+  "@p10ParcelSizeUnavailable": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelDescription": "Ibsa (dirqama miti)",
+  "@p10ParcelDescription": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelItemValue": "Gatii meeshaa (dirqama miti)",
+  "@p10ParcelItemValue": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCourierNote": "Yaadannoo geessaaf",
+  "@p10ParcelCourierNote": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPayment": "Kaffaltii",
+  "@p10ParcelPayment": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPayWallet": "Waaleetii HudHud",
+  "@p10ParcelPayWallet": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPayCash": "Maallaqa callaa geessaaf",
+  "@p10ParcelPayCash": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPaymentPhone": "Lakkoofsa maallaqa moobaayilaa",
+  "@p10ParcelPaymentPhone": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelRecipientPays": "Fudhataan kaffala (yeroo ga'u callaan)",
+  "@p10ParcelRecipientPays": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSellerCod": "Gatii meeshaa fudhataa irraa sassaabi",
+  "@p10ParcelSellerCod": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSellerCodHint": "Geessaan callaan sassaaba; waaleetii daldalaa HudHud keetti ni kaffalama.",
+  "@p10ParcelSellerCodHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSellerCodAmount": "Gatii meeshaa sassaabamu",
+  "@p10ParcelSellerCodAmount": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPickupTime": "Yeroo fudhatamu",
+  "@p10ParcelPickupTime": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPickupNow": "Hamma danda'ametti dafee",
+  "@p10ParcelPickupNow": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPrice": "Gatii",
+  "@p10ParcelPrice": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPriceHeld": "Gatiin {time}f qabameera",
+  "@p10ParcelPriceHeld": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "p10ParcelPriceExpired": "Yeroon qabannaa gatii darbeera",
+  "@p10ParcelPriceExpired": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelRefreshPrice": "Gatii haaromsi",
+  "@p10ParcelRefreshPrice": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelGettingPrice": "Gatii argachaa jira…",
+  "@p10ParcelGettingPrice": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPriceUpdated": "Gatiin jijjiirameera. Maaloo gatii haaraa ilaali.",
+  "@p10ParcelPriceUpdated": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelBook": "{price}n ajaji",
+  "@p10ParcelBook": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "price": {"type": "String"}
+    }
+  },
+  "p10ParcelContinue": "Itti fufi",
+  "@p10ParcelContinue": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelFillRequired": "Bakka fudhatamuu fi geessuu filadhu, bilbila fudhataas galchi.",
+  "@p10ParcelFillRequired": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSizeNotSupported": "Hamma kun magaalaa kana keessatti ammaaf hin jiru.",
+  "@p10ParcelSizeNotSupported": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelPaymentNotAvailable": "Malli kaffaltii kun magaalaa kana keessatti hin jiru.",
+  "@p10ParcelPaymentNotAvailable": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelInsufficientWallet": "Waaleetii kee keessa maallaqni gahaan hin jiru. Guuti ykn mala kaffaltii biraa filadhu.",
+  "@p10ParcelInsufficientWallet": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelSomethingWrong": "Rakkoon uumameera. Maaloo irra deebi'ii yaali.",
+  "@p10ParcelSomethingWrong": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelApprovePayment": "Kaffaltii bilbila kee irratti mirkaneessi.",
+  "@p10ParcelApprovePayment": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelBooked": "Paakeejiin ajajameera",
+  "@p10ParcelBooked": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelHandoverCode": "Koodii kennaa",
+  "@p10ParcelHandoverCode": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelHandoverHint": "Fudhataan koodii kana yeroo ga'u geessaaf kenna.",
+  "@p10ParcelHandoverHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelHandoverSelfHint": "Yeroo paakeejii fudhattu koodii kana geessaaf kenni.",
+  "@p10ParcelHandoverSelfHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelShareTracking": "Liinkii hordoffii qoodi",
+  "@p10ParcelShareTracking": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelTrackingShareText": "Paakeejii HudHud koo hordofi: {link}",
+  "@p10ParcelTrackingShareText": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "link": {"type": "String"}
+    }
+  },
+  "p10ParcelEta": "Gara daqiiqaa {minutes} keessatti ga'a",
+  "@p10ParcelEta": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "minutes": {"type": "String"}
+    }
+  },
+  "p10ParcelCancel": "Paakeejii haqi",
+  "@p10ParcelCancel": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCancelFree": "Paakeejii kana haqxaa? Geessaan ammaaf waan hin ramadamneef bilisa.",
+  "@p10ParcelCancelFree": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCancelFee": "Geessaan karaa irra jira. Amma haquun {fee} baasisa.",
+  "@p10ParcelCancelFee": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "fee": {"type": "String"}
+    }
+  },
+  "p10ParcelCancelReason": "Ergaan appii keessatti haqe",
+  "@p10ParcelCancelReason": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p10ParcelCancelled": "Paakeejiin haqameera",
+  "@p10ParcelCancelled": {
+    "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelAddStop": "Dhaabbata dabali",
+  "@p11ParcelAddStop": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelStopN": "Dhaabbata {number}",
+  "@p11ParcelStopN": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "number": {"type": "String"}
+    }
+  },
+  "p11ParcelRemoveStop": "Dhaabbata haqi",
+  "@p11ParcelRemoveStop": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelMoveUp": "Ol kaasi",
+  "@p11ParcelMoveUp": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelMoveDown": "Gadi buusi",
+  "@p11ParcelMoveDown": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelStopsLimit": "Paakeejii tokkoof hanga bakka geessaa {max}",
+  "@p11ParcelStopsLimit": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "max": {"type": "String"}
+    }
+  },
+  "p11ParcelMultiStopSenderPays": "Bakka geessaa hedduu yoo qabaatte, karaa guutuu ati kaffalta.",
+  "@p11ParcelMultiStopSenderPays": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelMultiStopCashAtPickup": "Bakka geessaa hedduu yoo ta'e, maallaqni yeroo fudhatamu ergamaaf kaffalama.",
+  "@p11ParcelMultiStopCashAtPickup": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelPayAtPickup": "Yeroo fudhatamu maallaqaan kaffali",
+  "@p11ParcelPayAtPickup": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelPayAtPickupHint": "Yeroo ergamaan paakeejii fudhatu maallaqa kenniif.",
+  "@p11ParcelPayAtPickupHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelPayAtPickupDue": "Yeroo fudhatamu {amount} maallaqaan ergamaaf kaffali",
+  "@p11ParcelPayAtPickupDue": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p11ParcelPaidAtPickup": "Yeroo fudhatame ergamaaf kaffalameera",
+  "@p11ParcelPaidAtPickup": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelPayAtPickupUnavailable": "Yeroo fudhatamu maallaqaan kaffaluun amma hin jiru.",
+  "@p11ParcelPayAtPickupUnavailable": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelStopsTitle": "Bakkeewwan geessaa",
+  "@p11ParcelStopsTitle": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelStopCodesHint": "Fudhataan tokkoon tokkoon isaa koodii kennaa isaa SMS-n argateera. Yoo hin arganne qoodi.",
+  "@p11ParcelStopCodesHint": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelShareStopLink": "Liinkii qoodi",
+  "@p11ParcelShareStopLink": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelStopPending": "Eegaa jira",
+  "@p11ParcelStopPending": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelStopArrived": "Ergamaan achi jira",
+  "@p11ParcelStopArrived": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelStopDelivered": "Geeffameera",
+  "@p11ParcelStopDelivered": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelStopFailed": "Hin geeffamne",
+  "@p11ParcelStopFailed": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelStopReturned": "Siif deebi'eera",
+  "@p11ParcelStopReturned": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelMultiStopDisabled": "Bakka geessaa hedduun amma hin jiran.",
+  "@p11ParcelMultiStopDisabled": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelTooManyStops": "Paakeejii tokkoof bakki geessaa baay'ee heddu.",
+  "@p11ParcelTooManyStops": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker."
+  },
+  "p11ParcelCancelCashFee": "Ergamaan karaa irra jira. Amma haquun {fee} baasa. Waletii keessanii irraa hir'ifama ykn herrega keessan irratti galmaa'a.",
+  "@p11ParcelCancelCashFee": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "fee": {"type": "String"}
+    }
+  },
+  "p11ParcelOutstandingBalance": "Paakeejii haqame irraa {amount} liqii qabda. Yeroo itti aanu yoo guuttu ykn ajajattu waletii irraa hir'ifama.",
+  "@p11ParcelOutstandingBalance": {
+    "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker.",
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p12StoreOpen": "Banaa dha",
+  "@p12StoreOpen": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12StoreClosed": "Cufaa dha",
+  "@p12StoreClosed": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12StoreBusy": "Qabamaa dha",
+  "@p12StoreBusy": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12StoreOpensAt": "Sa'aatii {time} banama",
+  "@p12StoreOpensAt": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "p12StoreOpensTomorrowAt": "Boru {time} banama",
+  "@p12StoreOpensTomorrowAt": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "p12StoreBackAt": "Sa'aatii {time} deebi'a",
+  "@p12StoreBackAt": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "p12StoreClosedToday": "Har'a cufaa dha",
+  "@p12StoreClosedToday": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12StoreClosedBanner": "Suuqiin kun amma cufaa dha. Menyuu ilaaluu dandeessa, garuu hanga banamutti ajajuun hin danda'amu.",
+  "@p12StoreClosedBanner": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12StoreBusyBanner": "Suuqiin kun baay'ee qabamaa dha, ajaja haaraa yeroof dhaabeera. Maaloo yeroo muraasa booda deebi'i.",
+  "@p12StoreBusyBanner": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12StoreOrderingPaused": "Ajajuun dhaabbateera",
+  "@p12StoreOrderingPaused": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12SoldOut": "Dhumeera",
+  "@p12SoldOut": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12Unavailable": "Hin argamu",
+  "@p12Unavailable": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12GoToCheckout": "Gara kaffaltiitti deemi",
+  "@p12GoToCheckout": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrStoreClosed": "Suuqiin kun amma cufaa dha.",
+  "@p12ErrStoreClosed": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrStoreBusy": "Suuqiin kun qabamaa dha, amma ajaja hin fudhatu.",
+  "@p12ErrStoreBusy": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrItemSoldOut": "Meeshaan gaarii kee keessa jiru tokko har'a dhumeera. Itti fufuuf haqi.",
+  "@p12ErrItemSoldOut": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrItemSoldOutNamed": "{item} har'a dhumeera. Itti fufuuf haqi.",
+  "@p12ErrItemSoldOutNamed": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
+    "placeholders": {
+      "item": {"type": "String"}
+    }
+  },
+  "p12RemoveItem": "Meeshaa haqi",
+  "@p12RemoveItem": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrOutstandingDues": "Kaffaltii hin kaffalamne {amount} qabda. Hanga kaffalamutti callaan kaffaluun hin danda'amu. Waaleetii kee guuti ykn mala kaffaltii biraa filadhu.",
+  "@p12ErrOutstandingDues": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p12DuesTitle": "Kaffaltii hin kaffalamne",
+  "@p12DuesTitle": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12DuesCheckoutBody": "Paarselii haqame irraa {amount} kaffaluu qabda. Hanga kaffalamutti yeroo geessituu callaan kaffaluun hin jiru. Waaleetii kee yoo guutte ofumaan kaffalama.",
+  "@p12DuesCheckoutBody": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p12PayNow": "Amma kaffali",
+  "@p12PayNow": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12CashBlockedByDues": "Hanga kaffaltiin hin kaffalamne kaffalamutti callaan hin danda'amu.",
+  "@p12CashBlockedByDues": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ChooseOtherPayment": "Kaffaltii biraa filadhu",
+  "@p12ChooseOtherPayment": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrCityOutside": "Teessoo kanatti ammaaf hin geessinu. Teessoo magaalaa kee keessa jiru filadhu.",
+  "@p12ErrCityOutside": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrCityCross": "Teessoon ajaja tokko keessa jiran hundi magaalaa tokko keessa ta'uu qabu.",
+  "@p12ErrCityCross": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrCityMismatch": "Teessoon kun {city} keessa jira. Itti fufuuf magaalaa kee gara {city}tti jijjiiri.",
+  "@p12ErrCityMismatch": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
+    "placeholders": {
+      "city": {"type": "String"}
+    }
+  },
+  "p12ErrCityMismatchGeneric": "Teessoon kun magaalaa biraa keessa jira. Itti fufuuf magaalaa kee jijjiiri.",
+  "@p12ErrCityMismatchGeneric": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ChangeCity": "Magaalaa jijjiiri",
+  "@p12ChangeCity": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrNetwork": "Walqunnamtiin interneetii hin jiru. Walqunnamtii kee mirkaneessiitii irra deebi'ii yaali.",
+  "@p12ErrNetwork": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrTimeout": "Walqunnamtiin suuta dha. Maaloo irra deebi'ii yaali.",
+  "@p12ErrTimeout": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrServer": "Gama keenyaan rakkoon uumame. Maaloo yeroo muraasa booda irra deebi'ii yaali.",
+  "@p12ErrServer": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  },
+  "p12ErrSessionExpired": "Yeroon seenumsa keetii dhumeera. Maaloo irra deebi'ii seeni.",
+  "@p12ErrSessionExpired": {
+    "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker."
+  }
 }

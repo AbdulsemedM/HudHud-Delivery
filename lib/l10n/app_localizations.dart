@@ -6302,6 +6302,1644 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Card'**
   String get paymentCard;
+
+  /// No description provided for @growthPromoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Promo code'**
+  String get growthPromoTitle;
+
+  /// No description provided for @growthPromoSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Have a code? Apply it here'**
+  String get growthPromoSubtitle;
+
+  /// No description provided for @growthPromoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter promo code'**
+  String get growthPromoHint;
+
+  /// No description provided for @growthPromoApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get growthPromoApply;
+
+  /// No description provided for @growthPromoRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get growthPromoRemove;
+
+  /// No description provided for @growthPromoApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'Promo code applied'**
+  String get growthPromoApplied;
+
+  /// No description provided for @growthPromoInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'This promo code cannot be used'**
+  String get growthPromoInvalid;
+
+  /// No description provided for @growthPromoSavedForCheckout.
+  ///
+  /// In en, this message translates to:
+  /// **'Code {code} will be applied at checkout'**
+  String growthPromoSavedForCheckout(String code);
+
+  /// No description provided for @growthPointsToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use {points} points (−{amount} on delivery)'**
+  String growthPointsToggle(int points, String amount);
+
+  /// No description provided for @growthPointsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Points reduce the delivery fee only'**
+  String get growthPointsSubtitle;
+
+  /// No description provided for @growthPointsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{points} points'**
+  String growthPointsCount(int points);
+
+  /// No description provided for @growthPointsDiscount.
+  ///
+  /// In en, this message translates to:
+  /// **'Points discount'**
+  String get growthPointsDiscount;
+
+  /// No description provided for @growthCouponDiscount.
+  ///
+  /// In en, this message translates to:
+  /// **'Promo discount'**
+  String get growthCouponDiscount;
+
+  /// No description provided for @growthCouponDiscountWithCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Promo ({code})'**
+  String growthCouponDiscountWithCode(String code);
+
+  /// No description provided for @growthDeliveryFeeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery fee'**
+  String get growthDeliveryFeeLabel;
+
+  /// No description provided for @growthFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get growthFree;
+
+  /// No description provided for @growthFreeDeliveryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {amount} more for free delivery'**
+  String growthFreeDeliveryHint(String amount);
+
+  /// No description provided for @growthFreeDeliveryUnlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'You unlocked free delivery!'**
+  String get growthFreeDeliveryUnlocked;
+
+  /// No description provided for @growthRewardsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rewards'**
+  String get growthRewardsTitle;
+
+  /// No description provided for @growthRewardsWorth.
+  ///
+  /// In en, this message translates to:
+  /// **'Worth {amount}'**
+  String growthRewardsWorth(String amount);
+
+  /// No description provided for @growthRewardsHowItWorks.
+  ///
+  /// In en, this message translates to:
+  /// **'How it works'**
+  String get growthRewardsHowItWorks;
+
+  /// No description provided for @growthRewardsEarnLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Earn points on every completed order.'**
+  String get growthRewardsEarnLine;
+
+  /// No description provided for @growthRewardsRateLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{points} points = {amount} off your delivery fee.'**
+  String growthRewardsRateLine(int points, String amount);
+
+  /// No description provided for @growthRewardsUseLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Use them at checkout once you have {points} points.'**
+  String growthRewardsUseLine(int points);
+
+  /// No description provided for @growthRewardsHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get growthRewardsHistory;
+
+  /// No description provided for @growthRewardsHistoryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No points activity yet.'**
+  String get growthRewardsHistoryEmpty;
+
+  /// No description provided for @growthRewardsLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load your rewards.'**
+  String get growthRewardsLoadError;
+
+  /// No description provided for @growthRewardsTypeEarned.
+  ///
+  /// In en, this message translates to:
+  /// **'Points earned'**
+  String get growthRewardsTypeEarned;
+
+  /// No description provided for @growthRewardsTypeRedeemed.
+  ///
+  /// In en, this message translates to:
+  /// **'Points used'**
+  String get growthRewardsTypeRedeemed;
+
+  /// No description provided for @growthRewardsTypeRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Points returned'**
+  String get growthRewardsTypeRestored;
+
+  /// No description provided for @growthRewardsTypeExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Points expired'**
+  String get growthRewardsTypeExpired;
+
+  /// No description provided for @growthReferralTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite friends, get {amount}'**
+  String growthReferralTitle(String amount);
+
+  /// No description provided for @growthReferralSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You and your friend each get {amount} after their first order.'**
+  String growthReferralSubtitle(String amount);
+
+  /// No description provided for @growthReferralCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get growthReferralCopy;
+
+  /// No description provided for @growthReferralCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Referral code copied'**
+  String get growthReferralCopied;
+
+  /// No description provided for @growthReferralShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share invite'**
+  String get growthReferralShare;
+
+  /// No description provided for @growthReferralShareSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Join me on HudHud Delivery'**
+  String get growthReferralShareSubject;
+
+  /// No description provided for @growthReferralShareFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Get {amount} on HudHud Delivery with my code {code}: {link}'**
+  String growthReferralShareFallback(String amount, String code, String link);
+
+  /// No description provided for @growthReferralInvited.
+  ///
+  /// In en, this message translates to:
+  /// **'Invited'**
+  String get growthReferralInvited;
+
+  /// No description provided for @growthReferralRewarded.
+  ///
+  /// In en, this message translates to:
+  /// **'Rewarded'**
+  String get growthReferralRewarded;
+
+  /// No description provided for @growthReferralPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get growthReferralPending;
+
+  /// No description provided for @growthReferralEarned.
+  ///
+  /// In en, this message translates to:
+  /// **'Earned'**
+  String get growthReferralEarned;
+
+  /// No description provided for @growthReorderButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Reorder'**
+  String get growthReorderButton;
+
+  /// No description provided for @growthReorderFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not reorder. Please try again.'**
+  String get growthReorderFailed;
+
+  /// No description provided for @growthReorderReplaceMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your cart has items from another store. Replace them with this order?'**
+  String get growthReorderReplaceMessage;
+
+  /// No description provided for @growthReorderUnavailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Some items are unavailable'**
+  String get growthReorderUnavailableTitle;
+
+  /// No description provided for @growthReorderNothingAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'None of these items are available now'**
+  String get growthReorderNothingAvailable;
+
+  /// No description provided for @growthReorderContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with available items'**
+  String get growthReorderContinue;
+
+  /// No description provided for @growthReorderReasonOutOfStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of stock'**
+  String get growthReorderReasonOutOfStock;
+
+  /// No description provided for @growthReorderReasonRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'No longer sold'**
+  String get growthReorderReasonRemoved;
+
+  /// No description provided for @growthReorderReasonVendorClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Store is closed'**
+  String get growthReorderReasonVendorClosed;
+
+  /// No description provided for @growthReorderReasonUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable'**
+  String get growthReorderReasonUnavailable;
+
+  /// No description provided for @growthOrderAgainTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Order again'**
+  String get growthOrderAgainTitle;
+
+  /// No description provided for @growthOrderAgainOrderLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Order #{order}'**
+  String growthOrderAgainOrderLabel(String order);
+
+  /// No description provided for @growthSeeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See all'**
+  String get growthSeeAll;
+
+  /// No description provided for @growthClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get growthClosed;
+
+  /// No description provided for @growthCollectionFallbackTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection'**
+  String get growthCollectionFallbackTitle;
+
+  /// No description provided for @growthStoreFallbackName.
+  ///
+  /// In en, this message translates to:
+  /// **'Store'**
+  String get growthStoreFallbackName;
+
+  /// No description provided for @p3Sponsored.
+  ///
+  /// In en, this message translates to:
+  /// **'Sponsored'**
+  String get p3Sponsored;
+
+  /// No description provided for @p3PlusTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'HudHud Plus'**
+  String get p3PlusTitle;
+
+  /// No description provided for @p3PlusBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Plus'**
+  String get p3PlusBadge;
+
+  /// No description provided for @p3PlusTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Free delivery and savings on every order.'**
+  String get p3PlusTagline;
+
+  /// No description provided for @p3PlusPricePerPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'{price} / {days} days'**
+  String p3PlusPricePerPeriod(String price, int days);
+
+  /// No description provided for @p3PlusBenefitsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your benefits'**
+  String get p3PlusBenefitsTitle;
+
+  /// No description provided for @p3PlusBenefitFreeDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Free delivery on food and grocery orders over {amount}'**
+  String p3PlusBenefitFreeDelivery(String amount);
+
+  /// No description provided for @p3PlusBenefitFreeDeliveryAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Free delivery on food and grocery orders'**
+  String get p3PlusBenefitFreeDeliveryAll;
+
+  /// No description provided for @p3PlusBenefitParcelDiscount.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% off parcel delivery'**
+  String p3PlusBenefitParcelDiscount(String percent);
+
+  /// No description provided for @p3PlusSubscribe.
+  ///
+  /// In en, this message translates to:
+  /// **'Join HudHud Plus'**
+  String get p3PlusSubscribe;
+
+  /// No description provided for @p3PlusCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Plus'**
+  String get p3PlusCancel;
+
+  /// No description provided for @p3PlusResume.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep my Plus'**
+  String get p3PlusResume;
+
+  /// No description provided for @p3PlusActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Your membership is active'**
+  String get p3PlusActive;
+
+  /// No description provided for @p3PlusRenewsOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Renews on {date}'**
+  String p3PlusRenewsOn(String date);
+
+  /// No description provided for @p3PlusEndsOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Ends on {date} — you can keep it'**
+  String p3PlusEndsOn(String date);
+
+  /// No description provided for @p3PlusPastDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Renewal payment failed. Top up your wallet to keep Plus.'**
+  String get p3PlusPastDue;
+
+  /// No description provided for @p3PlusSavings.
+  ///
+  /// In en, this message translates to:
+  /// **'You saved about {amount} in the last 30 days'**
+  String p3PlusSavings(String amount);
+
+  /// No description provided for @p3PlusPaidFromWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid from your HudHud wallet. Cancel anytime.'**
+  String get p3PlusPaidFromWallet;
+
+  /// No description provided for @p3PlusSubscribed.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to HudHud Plus!'**
+  String get p3PlusSubscribed;
+
+  /// No description provided for @p3PlusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Plus will end at the end of this period'**
+  String get p3PlusCancelled;
+
+  /// No description provided for @p3PlusResumed.
+  ///
+  /// In en, this message translates to:
+  /// **'Plus will keep renewing'**
+  String get p3PlusResumed;
+
+  /// No description provided for @p3PlusCancelConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel HudHud Plus?'**
+  String get p3PlusCancelConfirmTitle;
+
+  /// No description provided for @p3PlusCancelConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You keep your benefits until the end of this period.'**
+  String get p3PlusCancelConfirmMessage;
+
+  /// No description provided for @p3PlusInsufficientTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough wallet balance'**
+  String get p3PlusInsufficientTitle;
+
+  /// No description provided for @p3PlusInsufficientMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {amount} to your wallet to join Plus.'**
+  String p3PlusInsufficientMessage(String amount);
+
+  /// No description provided for @p3PlusTopUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Top up wallet'**
+  String get p3PlusTopUp;
+
+  /// No description provided for @p3PlusActionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update Plus. Please try again.'**
+  String get p3PlusActionFailed;
+
+  /// No description provided for @p3PlusLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load HudHud Plus.'**
+  String get p3PlusLoadError;
+
+  /// No description provided for @p3PlusUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'HudHud Plus is not available right now.'**
+  String get p3PlusUnavailable;
+
+  /// No description provided for @p3PlusUpsell.
+  ///
+  /// In en, this message translates to:
+  /// **'Get free delivery with HudHud Plus'**
+  String get p3PlusUpsell;
+
+  /// No description provided for @p3PlusMenuJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Get HudHud Plus'**
+  String get p3PlusMenuJoin;
+
+  /// No description provided for @p3PlusMenuMember.
+  ///
+  /// In en, this message translates to:
+  /// **'My HudHud Plus'**
+  String get p3PlusMenuMember;
+
+  /// No description provided for @p3QuotePlusFreeDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Plus: free delivery'**
+  String get p3QuotePlusFreeDelivery;
+
+  /// No description provided for @p3MarketSettingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get p3MarketSettingTitle;
+
+  /// No description provided for @p3MarketPickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your city'**
+  String get p3MarketPickerTitle;
+
+  /// No description provided for @p3MarketChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'City changed to {market}'**
+  String p3MarketChanged(String market);
+
+  /// No description provided for @p3MarketChangeBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'You can\'t change city while your wallet has a balance in another currency. Use or withdraw it first.'**
+  String get p3MarketChangeBlocked;
+
+  /// No description provided for @p3MarketChangeFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not change city. Please try again.'**
+  String get p3MarketChangeFailed;
+
+  /// No description provided for @p5SetsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'HudHud Sets'**
+  String get p5SetsTitle;
+
+  /// No description provided for @p5SetsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Meal for one · delivery included'**
+  String get p5SetsSubtitle;
+
+  /// No description provided for @p5SetDeliveryIncluded.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery included'**
+  String get p5SetDeliveryIncluded;
+
+  /// No description provided for @p5SetsMaxPerOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to {count} per order'**
+  String p5SetsMaxPerOrder(int count);
+
+  /// No description provided for @p5QuoteSetDeliveryIncluded.
+  ///
+  /// In en, this message translates to:
+  /// **'HudHud Set: delivery included'**
+  String get p5QuoteSetDeliveryIncluded;
+
+  /// No description provided for @p5SetOverMaxQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery is included for up to {count} HudHud Sets per order.'**
+  String p5SetOverMaxQuantity(int count);
+
+  /// No description provided for @p5SetMixedCart.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery is included only when your cart has HudHud Sets only.'**
+  String get p5SetMixedCart;
+
+  /// No description provided for @p5PayCashOnArrival.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay in cash when your order arrives'**
+  String get p5PayCashOnArrival;
+
+  /// No description provided for @p5PaymentInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'A payment for this order is already in progress. Approve or decline it on your phone, then check the order status.'**
+  String get p5PaymentInProgress;
+
+  /// No description provided for @p5PaymentAlreadyPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'This order is already paid.'**
+  String get p5PaymentAlreadyPaid;
+
+  /// No description provided for @p5PaymentTotalsChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Your order total changed. We refreshed the order — please review it before paying.'**
+  String get p5PaymentTotalsChanged;
+
+  /// No description provided for @p5OrderNotPayable.
+  ///
+  /// In en, this message translates to:
+  /// **'This order can no longer be paid.'**
+  String get p5OrderNotPayable;
+
+  /// No description provided for @p5CheckOrderStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Check order status'**
+  String get p5CheckOrderStatus;
+
+  /// No description provided for @p5RefundedToWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} refunded to your HudHud wallet'**
+  String p5RefundedToWallet(String amount);
+
+  /// No description provided for @p5RefundManual.
+  ///
+  /// In en, this message translates to:
+  /// **'Order cancelled. Our team will process your refund shortly.'**
+  String get p5RefundManual;
+
+  /// No description provided for @p5WalletRefundLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund'**
+  String get p5WalletRefundLabel;
+
+  /// No description provided for @p9GiftSendTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a gift'**
+  String get p9GiftSendTitle;
+
+  /// No description provided for @p9GiftBannerSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Order a meal for family in another city. They get an SMS to track it.'**
+  String get p9GiftBannerSubtitle;
+
+  /// No description provided for @p9GiftIntroBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the city where your recipient lives, choose a restaurant and fill your cart as usual. At checkout, add the recipient\'s name and phone number and pay online.'**
+  String get p9GiftIntroBody;
+
+  /// No description provided for @p9GiftChooseMarket.
+  ///
+  /// In en, this message translates to:
+  /// **'Where does the recipient live?'**
+  String get p9GiftChooseMarket;
+
+  /// No description provided for @p9GiftChooseRestaurant.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a restaurant'**
+  String get p9GiftChooseRestaurant;
+
+  /// No description provided for @p9GiftHowItWorksSms.
+  ///
+  /// In en, this message translates to:
+  /// **'The recipient gets an SMS with a tracking link and a 4-digit delivery code.'**
+  String get p9GiftHowItWorksSms;
+
+  /// No description provided for @p9GiftHowItWorksPay.
+  ///
+  /// In en, this message translates to:
+  /// **'You pay online. Cash on delivery is not available for gifts.'**
+  String get p9GiftHowItWorksPay;
+
+  /// No description provided for @p9GiftSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send as a gift'**
+  String get p9GiftSectionTitle;
+
+  /// No description provided for @p9GiftSectionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We deliver to your recipient and text them a tracking link'**
+  String get p9GiftSectionSubtitle;
+
+  /// No description provided for @p9GiftToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'This order is a gift'**
+  String get p9GiftToggle;
+
+  /// No description provided for @p9GiftRecipientName.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipient\'s name'**
+  String get p9GiftRecipientName;
+
+  /// No description provided for @p9GiftRecipientPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipient\'s mobile number'**
+  String get p9GiftRecipientPhone;
+
+  /// No description provided for @p9GiftRecipientPhoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. {example}'**
+  String p9GiftRecipientPhoneHint(String example);
+
+  /// No description provided for @p9GiftMessageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Gift message (optional)'**
+  String get p9GiftMessageLabel;
+
+  /// No description provided for @p9GiftMessageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a short note for the recipient'**
+  String get p9GiftMessageHint;
+
+  /// No description provided for @p9GiftNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the recipient\'s name'**
+  String get p9GiftNameRequired;
+
+  /// No description provided for @p9GiftPhoneInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid mobile number ({prefix} …)'**
+  String p9GiftPhoneInvalid(String prefix);
+
+  /// No description provided for @p9GiftNoCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash on delivery is not available for gifts. Choose an online payment method.'**
+  String get p9GiftNoCash;
+
+  /// No description provided for @p9GiftAddressHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Set the delivery location to the recipient\'s address.'**
+  String get p9GiftAddressHint;
+
+  /// No description provided for @p9GiftUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Gift orders are not available yet.'**
+  String get p9GiftUnavailable;
+
+  /// No description provided for @p9GiftPlacedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Gift order placed'**
+  String get p9GiftPlacedTitle;
+
+  /// No description provided for @p9GiftPlacedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'When the payment is confirmed, {name} gets an SMS with a tracking link and a 4-digit delivery code. They give the code to the rider when the order arrives.'**
+  String p9GiftPlacedBody(String name);
+
+  /// No description provided for @p9GiftForName.
+  ///
+  /// In en, this message translates to:
+  /// **'Gift for {name}'**
+  String p9GiftForName(String name);
+
+  /// No description provided for @p9GiftRecipientLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipient'**
+  String get p9GiftRecipientLabel;
+
+  /// No description provided for @p9GiftYourMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your message'**
+  String get p9GiftYourMessage;
+
+  /// No description provided for @p9GiftWalletNote.
+  ///
+  /// In en, this message translates to:
+  /// **'A wallet in another currency is charged the converted amount at today\'s rate.'**
+  String get p9GiftWalletNote;
+
+  /// No description provided for @p9GiftModeBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending a gift to {market}'**
+  String p9GiftModeBanner(String market);
+
+  /// No description provided for @p9GiftStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop gift'**
+  String get p9GiftStop;
+
+  /// No description provided for @p9GiftOrderLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Gift order'**
+  String get p9GiftOrderLabel;
+
+  /// No description provided for @p10CityNotServed.
+  ///
+  /// In en, this message translates to:
+  /// **'We don\'t serve this area yet'**
+  String get p10CityNotServed;
+
+  /// No description provided for @p10CityCrossCity.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup and drop-off must be in the same city.'**
+  String get p10CityCrossCity;
+
+  /// No description provided for @p10CityOtherCity.
+  ///
+  /// In en, this message translates to:
+  /// **'These addresses are in another city. Switch your city in Settings to continue.'**
+  String get p10CityOtherCity;
+
+  /// No description provided for @p10ParcelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a parcel'**
+  String get p10ParcelTitle;
+
+  /// No description provided for @p10ParcelScheduledTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule a parcel'**
+  String get p10ParcelScheduledTitle;
+
+  /// No description provided for @p10ParcelRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Route'**
+  String get p10ParcelRoute;
+
+  /// No description provided for @p10ParcelPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup'**
+  String get p10ParcelPickup;
+
+  /// No description provided for @p10ParcelDropoff.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop-off'**
+  String get p10ParcelDropoff;
+
+  /// No description provided for @p10ParcelChooseAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose on the map'**
+  String get p10ParcelChooseAddress;
+
+  /// No description provided for @p10ParcelBuilding.
+  ///
+  /// In en, this message translates to:
+  /// **'Building / house'**
+  String get p10ParcelBuilding;
+
+  /// No description provided for @p10ParcelFloor.
+  ///
+  /// In en, this message translates to:
+  /// **'Floor'**
+  String get p10ParcelFloor;
+
+  /// No description provided for @p10ParcelApartment.
+  ///
+  /// In en, this message translates to:
+  /// **'Apartment / office'**
+  String get p10ParcelApartment;
+
+  /// No description provided for @p10ParcelLandmark.
+  ///
+  /// In en, this message translates to:
+  /// **'Landmark'**
+  String get p10ParcelLandmark;
+
+  /// No description provided for @p10ParcelRecipient.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipient'**
+  String get p10ParcelRecipient;
+
+  /// No description provided for @p10ParcelSendToMyself.
+  ///
+  /// In en, this message translates to:
+  /// **'Send to myself'**
+  String get p10ParcelSendToMyself;
+
+  /// No description provided for @p10ParcelRecipientName.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipient name'**
+  String get p10ParcelRecipientName;
+
+  /// No description provided for @p10ParcelRecipientPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipient phone'**
+  String get p10ParcelRecipientPhone;
+
+  /// No description provided for @p10ParcelWhatSending.
+  ///
+  /// In en, this message translates to:
+  /// **'What are you sending?'**
+  String get p10ParcelWhatSending;
+
+  /// No description provided for @p10ParcelCategoryDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents'**
+  String get p10ParcelCategoryDocument;
+
+  /// No description provided for @p10ParcelCategoryParcel.
+  ///
+  /// In en, this message translates to:
+  /// **'Parcel'**
+  String get p10ParcelCategoryParcel;
+
+  /// No description provided for @p10ParcelCategoryFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Food'**
+  String get p10ParcelCategoryFood;
+
+  /// No description provided for @p10ParcelCategoryGrocery.
+  ///
+  /// In en, this message translates to:
+  /// **'Groceries'**
+  String get p10ParcelCategoryGrocery;
+
+  /// No description provided for @p10ParcelCategoryElectronics.
+  ///
+  /// In en, this message translates to:
+  /// **'Electronics'**
+  String get p10ParcelCategoryElectronics;
+
+  /// No description provided for @p10ParcelCategoryClothes.
+  ///
+  /// In en, this message translates to:
+  /// **'Clothes'**
+  String get p10ParcelCategoryClothes;
+
+  /// No description provided for @p10ParcelCategoryGift.
+  ///
+  /// In en, this message translates to:
+  /// **'Gift'**
+  String get p10ParcelCategoryGift;
+
+  /// No description provided for @p10ParcelCategoryFlowers.
+  ///
+  /// In en, this message translates to:
+  /// **'Flowers'**
+  String get p10ParcelCategoryFlowers;
+
+  /// No description provided for @p10ParcelCategoryKeys.
+  ///
+  /// In en, this message translates to:
+  /// **'Keys'**
+  String get p10ParcelCategoryKeys;
+
+  /// No description provided for @p10ParcelCategoryOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get p10ParcelCategoryOther;
+
+  /// No description provided for @p10ParcelSizeSmall.
+  ///
+  /// In en, this message translates to:
+  /// **'Small'**
+  String get p10ParcelSizeSmall;
+
+  /// No description provided for @p10ParcelSizeSmallHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Fits in a backpack'**
+  String get p10ParcelSizeSmallHint;
+
+  /// No description provided for @p10ParcelSizeMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get p10ParcelSizeMedium;
+
+  /// No description provided for @p10ParcelSizeMediumHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Fits on a car seat'**
+  String get p10ParcelSizeMediumHint;
+
+  /// No description provided for @p10ParcelSizeLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Large'**
+  String get p10ParcelSizeLarge;
+
+  /// No description provided for @p10ParcelSizeLargeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs a van'**
+  String get p10ParcelSizeLargeHint;
+
+  /// No description provided for @p10ParcelSizeUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Not available here yet'**
+  String get p10ParcelSizeUnavailable;
+
+  /// No description provided for @p10ParcelDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description (optional)'**
+  String get p10ParcelDescription;
+
+  /// No description provided for @p10ParcelItemValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Item value (optional)'**
+  String get p10ParcelItemValue;
+
+  /// No description provided for @p10ParcelCourierNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note for the courier'**
+  String get p10ParcelCourierNote;
+
+  /// No description provided for @p10ParcelPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment'**
+  String get p10ParcelPayment;
+
+  /// No description provided for @p10ParcelPayWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'HudHud wallet'**
+  String get p10ParcelPayWallet;
+
+  /// No description provided for @p10ParcelPayCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash to the courier'**
+  String get p10ParcelPayCash;
+
+  /// No description provided for @p10ParcelPaymentPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile money number'**
+  String get p10ParcelPaymentPhone;
+
+  /// No description provided for @p10ParcelRecipientPays.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipient pays (cash at drop-off)'**
+  String get p10ParcelRecipientPays;
+
+  /// No description provided for @p10ParcelSellerCod.
+  ///
+  /// In en, this message translates to:
+  /// **'Collect the item price from the recipient'**
+  String get p10ParcelSellerCod;
+
+  /// No description provided for @p10ParcelSellerCodHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The courier collects it in cash and it is paid to your HudHud business wallet.'**
+  String get p10ParcelSellerCodHint;
+
+  /// No description provided for @p10ParcelSellerCodAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Item price to collect'**
+  String get p10ParcelSellerCodAmount;
+
+  /// No description provided for @p10ParcelPickupTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup time'**
+  String get p10ParcelPickupTime;
+
+  /// No description provided for @p10ParcelPickupNow.
+  ///
+  /// In en, this message translates to:
+  /// **'As soon as possible'**
+  String get p10ParcelPickupNow;
+
+  /// No description provided for @p10ParcelPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Price'**
+  String get p10ParcelPrice;
+
+  /// No description provided for @p10ParcelPriceHeld.
+  ///
+  /// In en, this message translates to:
+  /// **'Price held for {time}'**
+  String p10ParcelPriceHeld(String time);
+
+  /// No description provided for @p10ParcelPriceExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Price lock expired'**
+  String get p10ParcelPriceExpired;
+
+  /// No description provided for @p10ParcelRefreshPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh price'**
+  String get p10ParcelRefreshPrice;
+
+  /// No description provided for @p10ParcelGettingPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Getting the price…'**
+  String get p10ParcelGettingPrice;
+
+  /// No description provided for @p10ParcelPriceUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'The price changed. Please check the new price.'**
+  String get p10ParcelPriceUpdated;
+
+  /// No description provided for @p10ParcelBook.
+  ///
+  /// In en, this message translates to:
+  /// **'Book for {price}'**
+  String p10ParcelBook(String price);
+
+  /// No description provided for @p10ParcelContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get p10ParcelContinue;
+
+  /// No description provided for @p10ParcelFillRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose pickup and drop-off, and add the recipient\'s phone.'**
+  String get p10ParcelFillRequired;
+
+  /// No description provided for @p10ParcelSizeNotSupported.
+  ///
+  /// In en, this message translates to:
+  /// **'This size is not available in this city yet.'**
+  String get p10ParcelSizeNotSupported;
+
+  /// No description provided for @p10ParcelPaymentNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This payment method is not available in this city.'**
+  String get p10ParcelPaymentNotAvailable;
+
+  /// No description provided for @p10ParcelInsufficientWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough money in your wallet. Top up or choose another payment method.'**
+  String get p10ParcelInsufficientWallet;
+
+  /// No description provided for @p10ParcelSomethingWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get p10ParcelSomethingWrong;
+
+  /// No description provided for @p10ParcelApprovePayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve the payment on your phone.'**
+  String get p10ParcelApprovePayment;
+
+  /// No description provided for @p10ParcelBooked.
+  ///
+  /// In en, this message translates to:
+  /// **'Parcel booked'**
+  String get p10ParcelBooked;
+
+  /// No description provided for @p10ParcelHandoverCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Handover code'**
+  String get p10ParcelHandoverCode;
+
+  /// No description provided for @p10ParcelHandoverHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The recipient gives this code to the courier at delivery.'**
+  String get p10ParcelHandoverHint;
+
+  /// No description provided for @p10ParcelHandoverSelfHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Give this code to the courier when you receive the parcel.'**
+  String get p10ParcelHandoverSelfHint;
+
+  /// No description provided for @p10ParcelShareTracking.
+  ///
+  /// In en, this message translates to:
+  /// **'Share tracking link'**
+  String get p10ParcelShareTracking;
+
+  /// No description provided for @p10ParcelTrackingShareText.
+  ///
+  /// In en, this message translates to:
+  /// **'Track my HudHud parcel: {link}'**
+  String p10ParcelTrackingShareText(String link);
+
+  /// No description provided for @p10ParcelEta.
+  ///
+  /// In en, this message translates to:
+  /// **'Arriving in about {minutes} min'**
+  String p10ParcelEta(String minutes);
+
+  /// No description provided for @p10ParcelCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel parcel'**
+  String get p10ParcelCancel;
+
+  /// No description provided for @p10ParcelCancelFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel this parcel? It\'s free because no courier has been assigned yet.'**
+  String get p10ParcelCancelFree;
+
+  /// No description provided for @p10ParcelCancelFee.
+  ///
+  /// In en, this message translates to:
+  /// **'A courier is already on the way. Cancelling now costs {fee}.'**
+  String p10ParcelCancelFee(String fee);
+
+  /// No description provided for @p10ParcelCancelReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled by the sender in the app'**
+  String get p10ParcelCancelReason;
+
+  /// No description provided for @p10ParcelCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Parcel cancelled'**
+  String get p10ParcelCancelled;
+
+  /// No description provided for @p11ParcelAddStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a stop'**
+  String get p11ParcelAddStop;
+
+  /// No description provided for @p11ParcelStopN.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop {number}'**
+  String p11ParcelStopN(String number);
+
+  /// No description provided for @p11ParcelRemoveStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove stop'**
+  String get p11ParcelRemoveStop;
+
+  /// No description provided for @p11ParcelMoveUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move up'**
+  String get p11ParcelMoveUp;
+
+  /// No description provided for @p11ParcelMoveDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Move down'**
+  String get p11ParcelMoveDown;
+
+  /// No description provided for @p11ParcelStopsLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to {max} drop-offs per parcel'**
+  String p11ParcelStopsLimit(String max);
+
+  /// No description provided for @p11ParcelMultiStopSenderPays.
+  ///
+  /// In en, this message translates to:
+  /// **'With several drop-offs you pay for the whole route.'**
+  String get p11ParcelMultiStopSenderPays;
+
+  /// No description provided for @p11ParcelMultiStopCashAtPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'With several drop-offs, cash is paid to the courier at pickup.'**
+  String get p11ParcelMultiStopCashAtPickup;
+
+  /// No description provided for @p11ParcelPayAtPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay cash at pickup'**
+  String get p11ParcelPayAtPickup;
+
+  /// No description provided for @p11ParcelPayAtPickupHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Hand the cash to the courier when they collect the parcel.'**
+  String get p11ParcelPayAtPickupHint;
+
+  /// No description provided for @p11ParcelPayAtPickupDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay {amount} cash to the courier at pickup'**
+  String p11ParcelPayAtPickupDue(String amount);
+
+  /// No description provided for @p11ParcelPaidAtPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid to the courier at pickup'**
+  String get p11ParcelPaidAtPickup;
+
+  /// No description provided for @p11ParcelPayAtPickupUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Paying cash at pickup is not available right now.'**
+  String get p11ParcelPayAtPickupUnavailable;
+
+  /// No description provided for @p11ParcelStopsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop-offs'**
+  String get p11ParcelStopsTitle;
+
+  /// No description provided for @p11ParcelStopCodesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Each recipient got their own handover code by SMS. Share it if they did not.'**
+  String get p11ParcelStopCodesHint;
+
+  /// No description provided for @p11ParcelShareStopLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Share link'**
+  String get p11ParcelShareStopLink;
+
+  /// No description provided for @p11ParcelStopPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting'**
+  String get p11ParcelStopPending;
+
+  /// No description provided for @p11ParcelStopArrived.
+  ///
+  /// In en, this message translates to:
+  /// **'Courier is there'**
+  String get p11ParcelStopArrived;
+
+  /// No description provided for @p11ParcelStopDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered'**
+  String get p11ParcelStopDelivered;
+
+  /// No description provided for @p11ParcelStopFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Not delivered'**
+  String get p11ParcelStopFailed;
+
+  /// No description provided for @p11ParcelStopReturned.
+  ///
+  /// In en, this message translates to:
+  /// **'Returned to you'**
+  String get p11ParcelStopReturned;
+
+  /// No description provided for @p11ParcelMultiStopDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Several drop-offs are not available right now.'**
+  String get p11ParcelMultiStopDisabled;
+
+  /// No description provided for @p11ParcelTooManyStops.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many drop-offs for one parcel.'**
+  String get p11ParcelTooManyStops;
+
+  /// No description provided for @p11ParcelCancelCashFee.
+  ///
+  /// In en, this message translates to:
+  /// **'A courier is already on the way. Cancelling now costs {fee}. It is taken from your wallet or added to your balance.'**
+  String p11ParcelCancelCashFee(String fee);
+
+  /// No description provided for @p11ParcelOutstandingBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'You owe {amount} from a cancelled parcel. It is taken from your wallet at your next top-up or order.'**
+  String p11ParcelOutstandingBalance(String amount);
+
+  /// No description provided for @p12StoreOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get p12StoreOpen;
+
+  /// No description provided for @p12StoreClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get p12StoreClosed;
+
+  /// No description provided for @p12StoreBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'Busy'**
+  String get p12StoreBusy;
+
+  /// No description provided for @p12StoreOpensAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Opens {time}'**
+  String p12StoreOpensAt(String time);
+
+  /// No description provided for @p12StoreOpensTomorrowAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Opens tomorrow {time}'**
+  String p12StoreOpensTomorrowAt(String time);
+
+  /// No description provided for @p12StoreBackAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Back at {time}'**
+  String p12StoreBackAt(String time);
+
+  /// No description provided for @p12StoreClosedToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed today'**
+  String get p12StoreClosedToday;
+
+  /// No description provided for @p12StoreClosedBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'This store is closed right now. You can look at the menu, but ordering is off until it opens.'**
+  String get p12StoreClosedBanner;
+
+  /// No description provided for @p12StoreBusyBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'This store is very busy and has paused new orders. Please check back soon.'**
+  String get p12StoreBusyBanner;
+
+  /// No description provided for @p12StoreOrderingPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Ordering paused'**
+  String get p12StoreOrderingPaused;
+
+  /// No description provided for @p12SoldOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sold out'**
+  String get p12SoldOut;
+
+  /// No description provided for @p12Unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable'**
+  String get p12Unavailable;
+
+  /// No description provided for @p12GoToCheckout.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Checkout'**
+  String get p12GoToCheckout;
+
+  /// No description provided for @p12ErrStoreClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'This store is closed right now.'**
+  String get p12ErrStoreClosed;
+
+  /// No description provided for @p12ErrStoreBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'This store is busy and not taking orders right now.'**
+  String get p12ErrStoreBusy;
+
+  /// No description provided for @p12ErrItemSoldOut.
+  ///
+  /// In en, this message translates to:
+  /// **'An item in your cart is sold out today. Remove it to continue.'**
+  String get p12ErrItemSoldOut;
+
+  /// No description provided for @p12ErrItemSoldOutNamed.
+  ///
+  /// In en, this message translates to:
+  /// **'{item} is sold out today. Remove it to continue.'**
+  String p12ErrItemSoldOutNamed(String item);
+
+  /// No description provided for @p12RemoveItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove item'**
+  String get p12RemoveItem;
+
+  /// No description provided for @p12ErrOutstandingDues.
+  ///
+  /// In en, this message translates to:
+  /// **'You have an unpaid balance of {amount}. Cash is not available until it is paid. Top up your wallet or choose another way to pay.'**
+  String p12ErrOutstandingDues(String amount);
+
+  /// No description provided for @p12DuesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpaid balance'**
+  String get p12DuesTitle;
+
+  /// No description provided for @p12DuesCheckoutBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You owe {amount} from a cancelled parcel. Cash on delivery is off until it is paid. Topping up your wallet pays it automatically.'**
+  String p12DuesCheckoutBody(String amount);
+
+  /// No description provided for @p12PayNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay now'**
+  String get p12PayNow;
+
+  /// No description provided for @p12CashBlockedByDues.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash is off until your unpaid balance is paid.'**
+  String get p12CashBlockedByDues;
+
+  /// No description provided for @p12ChooseOtherPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose another payment'**
+  String get p12ChooseOtherPayment;
+
+  /// No description provided for @p12ErrCityOutside.
+  ///
+  /// In en, this message translates to:
+  /// **'We don\'t deliver to this address yet. Choose an address inside your city.'**
+  String get p12ErrCityOutside;
+
+  /// No description provided for @p12ErrCityCross.
+  ///
+  /// In en, this message translates to:
+  /// **'All addresses in one order must be in the same city.'**
+  String get p12ErrCityCross;
+
+  /// No description provided for @p12ErrCityMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'This address is in {city}. Switch your city to {city} to continue.'**
+  String p12ErrCityMismatch(String city);
+
+  /// No description provided for @p12ErrCityMismatchGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'This address is in another city. Switch your city to continue.'**
+  String get p12ErrCityMismatchGeneric;
+
+  /// No description provided for @p12ChangeCity.
+  ///
+  /// In en, this message translates to:
+  /// **'Change city'**
+  String get p12ChangeCity;
+
+  /// No description provided for @p12ErrNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'No internet connection. Check your connection and try again.'**
+  String get p12ErrNetwork;
+
+  /// No description provided for @p12ErrTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'The connection is slow. Please try again.'**
+  String get p12ErrTimeout;
+
+  /// No description provided for @p12ErrServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong on our side. Please try again in a moment.'**
+  String get p12ErrServer;
+
+  /// No description provided for @p12ErrSessionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session has expired. Please log in again.'**
+  String get p12ErrSessionExpired;
 }
 
 class _AppLocalizationsDelegate

@@ -1399,5 +1399,508 @@
   },
   "paymentCash": "Cash",
   "paymentWallet": "Wallet",
-  "paymentCard": "Card"
+  "paymentCard": "Card",
+  "growthPromoTitle": "Promo code",
+  "growthPromoSubtitle": "Have a code? Apply it here",
+  "growthPromoHint": "Enter promo code",
+  "growthPromoApply": "Apply",
+  "growthPromoRemove": "Remove",
+  "growthPromoApplied": "Promo code applied",
+  "growthPromoInvalid": "This promo code cannot be used",
+  "growthPromoSavedForCheckout": "Code {code} will be applied at checkout",
+  "@growthPromoSavedForCheckout": {
+    "placeholders": {
+      "code": {"type": "String"}
+    }
+  },
+  "growthPointsToggle": "Use {points} points (−{amount} on delivery)",
+  "@growthPointsToggle": {
+    "placeholders": {
+      "points": {"type": "int"},
+      "amount": {"type": "String"}
+    }
+  },
+  "growthPointsSubtitle": "Points reduce the delivery fee only",
+  "growthPointsCount": "{points} points",
+  "@growthPointsCount": {
+    "placeholders": {
+      "points": {"type": "int"}
+    }
+  },
+  "growthPointsDiscount": "Points discount",
+  "growthCouponDiscount": "Promo discount",
+  "growthCouponDiscountWithCode": "Promo ({code})",
+  "@growthCouponDiscountWithCode": {
+    "placeholders": {
+      "code": {"type": "String"}
+    }
+  },
+  "growthDeliveryFeeLabel": "Delivery fee",
+  "growthFree": "Free",
+  "growthFreeDeliveryHint": "Add {amount} more for free delivery",
+  "@growthFreeDeliveryHint": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "growthFreeDeliveryUnlocked": "You unlocked free delivery!",
+  "growthRewardsTitle": "Rewards",
+  "growthRewardsWorth": "Worth {amount}",
+  "@growthRewardsWorth": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "growthRewardsHowItWorks": "How it works",
+  "growthRewardsEarnLine": "Earn points on every completed order.",
+  "growthRewardsRateLine": "{points} points = {amount} off your delivery fee.",
+  "@growthRewardsRateLine": {
+    "placeholders": {
+      "points": {"type": "int"},
+      "amount": {"type": "String"}
+    }
+  },
+  "growthRewardsUseLine": "Use them at checkout once you have {points} points.",
+  "@growthRewardsUseLine": {
+    "placeholders": {
+      "points": {"type": "int"}
+    }
+  },
+  "growthRewardsHistory": "History",
+  "growthRewardsHistoryEmpty": "No points activity yet.",
+  "growthRewardsLoadError": "Could not load your rewards.",
+  "growthRewardsTypeEarned": "Points earned",
+  "growthRewardsTypeRedeemed": "Points used",
+  "growthRewardsTypeRestored": "Points returned",
+  "growthRewardsTypeExpired": "Points expired",
+  "growthReferralTitle": "Invite friends, get {amount}",
+  "@growthReferralTitle": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "growthReferralSubtitle": "You and your friend each get {amount} after their first order.",
+  "@growthReferralSubtitle": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "growthReferralCopy": "Copy",
+  "growthReferralCopied": "Referral code copied",
+  "growthReferralShare": "Share invite",
+  "growthReferralShareSubject": "Join me on HudHud Delivery",
+  "growthReferralShareFallback": "Get {amount} on HudHud Delivery with my code {code}: {link}",
+  "@growthReferralShareFallback": {
+    "placeholders": {
+      "amount": {"type": "String"},
+      "code": {"type": "String"},
+      "link": {"type": "String"}
+    }
+  },
+  "growthReferralInvited": "Invited",
+  "growthReferralRewarded": "Rewarded",
+  "growthReferralPending": "Pending",
+  "growthReferralEarned": "Earned",
+  "growthReorderButton": "Reorder",
+  "growthReorderFailed": "Could not reorder. Please try again.",
+  "growthReorderReplaceMessage": "Your cart has items from another store. Replace them with this order?",
+  "growthReorderUnavailableTitle": "Some items are unavailable",
+  "growthReorderNothingAvailable": "None of these items are available now",
+  "growthReorderContinue": "Continue with available items",
+  "growthReorderReasonOutOfStock": "Out of stock",
+  "growthReorderReasonRemoved": "No longer sold",
+  "growthReorderReasonVendorClosed": "Store is closed",
+  "growthReorderReasonUnavailable": "Unavailable",
+  "growthOrderAgainTitle": "Order again",
+  "growthOrderAgainOrderLabel": "Order #{order}",
+  "@growthOrderAgainOrderLabel": {
+    "placeholders": {
+      "order": {"type": "String"}
+    }
+  },
+  "growthSeeAll": "See all",
+  "growthClosed": "Closed",
+  "growthCollectionFallbackTitle": "Collection",
+  "growthStoreFallbackName": "Store",
+  "p3Sponsored": "Sponsored",
+  "p3PlusTitle": "HudHud Plus",
+  "p3PlusBadge": "Plus",
+  "p3PlusTagline": "Free delivery and savings on every order.",
+  "p3PlusPricePerPeriod": "{price} / {days} days",
+  "@p3PlusPricePerPeriod": {
+    "placeholders": {
+      "price": {"type": "String"},
+      "days": {"type": "int"}
+    }
+  },
+  "p3PlusBenefitsTitle": "Your benefits",
+  "p3PlusBenefitFreeDelivery": "Free delivery on food and grocery orders over {amount}",
+  "@p3PlusBenefitFreeDelivery": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p3PlusBenefitFreeDeliveryAll": "Free delivery on food and grocery orders",
+  "p3PlusBenefitParcelDiscount": "{percent}% off parcel delivery",
+  "@p3PlusBenefitParcelDiscount": {
+    "placeholders": {
+      "percent": {"type": "String"}
+    }
+  },
+  "p3PlusSubscribe": "Join HudHud Plus",
+  "p3PlusCancel": "Cancel Plus",
+  "p3PlusResume": "Keep my Plus",
+  "p3PlusActive": "Your membership is active",
+  "p3PlusRenewsOn": "Renews on {date}",
+  "@p3PlusRenewsOn": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "p3PlusEndsOn": "Ends on {date} — you can keep it",
+  "@p3PlusEndsOn": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "p3PlusPastDue": "Renewal payment failed. Top up your wallet to keep Plus.",
+  "p3PlusSavings": "You saved about {amount} in the last 30 days",
+  "@p3PlusSavings": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p3PlusPaidFromWallet": "Paid from your HudHud wallet. Cancel anytime.",
+  "p3PlusSubscribed": "Welcome to HudHud Plus!",
+  "p3PlusCancelled": "Plus will end at the end of this period",
+  "p3PlusResumed": "Plus will keep renewing",
+  "p3PlusCancelConfirmTitle": "Cancel HudHud Plus?",
+  "p3PlusCancelConfirmMessage": "You keep your benefits until the end of this period.",
+  "p3PlusInsufficientTitle": "Not enough wallet balance",
+  "p3PlusInsufficientMessage": "Add {amount} to your wallet to join Plus.",
+  "@p3PlusInsufficientMessage": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p3PlusTopUp": "Top up wallet",
+  "p3PlusActionFailed": "Could not update Plus. Please try again.",
+  "p3PlusLoadError": "Could not load HudHud Plus.",
+  "p3PlusUnavailable": "HudHud Plus is not available right now.",
+  "p3PlusUpsell": "Get free delivery with HudHud Plus",
+  "p3PlusMenuJoin": "Get HudHud Plus",
+  "p3PlusMenuMember": "My HudHud Plus",
+  "p3QuotePlusFreeDelivery": "Plus: free delivery",
+  "p3MarketSettingTitle": "City",
+  "p3MarketPickerTitle": "Choose your city",
+  "p3MarketChanged": "City changed to {market}",
+  "@p3MarketChanged": {
+    "placeholders": {
+      "market": {"type": "String"}
+    }
+  },
+  "p3MarketChangeBlocked": "You can't change city while your wallet has a balance in another currency. Use or withdraw it first.",
+  "p3MarketChangeFailed": "Could not change city. Please try again.",
+  "p5SetsTitle": "HudHud Sets",
+  "p5SetsSubtitle": "Meal for one · delivery included",
+  "p5SetDeliveryIncluded": "Delivery included",
+  "p5SetsMaxPerOrder": "Up to {count} per order",
+  "@p5SetsMaxPerOrder": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "p5QuoteSetDeliveryIncluded": "HudHud Set: delivery included",
+  "p5SetOverMaxQuantity": "Delivery is included for up to {count} HudHud Sets per order.",
+  "@p5SetOverMaxQuantity": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "p5SetMixedCart": "Delivery is included only when your cart has HudHud Sets only.",
+  "p5PayCashOnArrival": "Pay in cash when your order arrives",
+  "p5PaymentInProgress": "A payment for this order is already in progress. Approve or decline it on your phone, then check the order status.",
+  "p5PaymentAlreadyPaid": "This order is already paid.",
+  "p5PaymentTotalsChanged": "Your order total changed. We refreshed the order — please review it before paying.",
+  "p5OrderNotPayable": "This order can no longer be paid.",
+  "p5CheckOrderStatus": "Check order status",
+  "p5RefundedToWallet": "{amount} refunded to your HudHud wallet",
+  "@p5RefundedToWallet": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p5RefundManual": "Order cancelled. Our team will process your refund shortly.",
+  "p5WalletRefundLabel": "Refund",
+  "p9GiftSendTitle": "Send a gift",
+  "p9GiftBannerSubtitle": "Order a meal for family in another city. They get an SMS to track it.",
+  "p9GiftIntroBody": "Pick the city where your recipient lives, choose a restaurant and fill your cart as usual. At checkout, add the recipient's name and phone number and pay online.",
+  "p9GiftChooseMarket": "Where does the recipient live?",
+  "p9GiftChooseRestaurant": "Choose a restaurant",
+  "p9GiftHowItWorksSms": "The recipient gets an SMS with a tracking link and a 4-digit delivery code.",
+  "p9GiftHowItWorksPay": "You pay online. Cash on delivery is not available for gifts.",
+  "p9GiftSectionTitle": "Send as a gift",
+  "p9GiftSectionSubtitle": "We deliver to your recipient and text them a tracking link",
+  "p9GiftToggle": "This order is a gift",
+  "p9GiftRecipientName": "Recipient's name",
+  "p9GiftRecipientPhone": "Recipient's mobile number",
+  "p9GiftRecipientPhoneHint": "e.g. {example}",
+  "@p9GiftRecipientPhoneHint": {
+    "placeholders": {
+      "example": {"type": "String"}
+    }
+  },
+  "p9GiftMessageLabel": "Gift message (optional)",
+  "p9GiftMessageHint": "Write a short note for the recipient",
+  "p9GiftNameRequired": "Enter the recipient's name",
+  "p9GiftPhoneInvalid": "Enter a valid mobile number ({prefix} …)",
+  "@p9GiftPhoneInvalid": {
+    "placeholders": {
+      "prefix": {"type": "String"}
+    }
+  },
+  "p9GiftNoCash": "Cash on delivery is not available for gifts. Choose an online payment method.",
+  "p9GiftAddressHint": "Set the delivery location to the recipient's address.",
+  "p9GiftUnavailable": "Gift orders are not available yet.",
+  "p9GiftPlacedTitle": "Gift order placed",
+  "p9GiftPlacedBody": "When the payment is confirmed, {name} gets an SMS with a tracking link and a 4-digit delivery code. They give the code to the rider when the order arrives.",
+  "@p9GiftPlacedBody": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "p9GiftForName": "Gift for {name}",
+  "@p9GiftForName": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "p9GiftRecipientLabel": "Recipient",
+  "p9GiftYourMessage": "Your message",
+  "p9GiftWalletNote": "A wallet in another currency is charged the converted amount at today's rate.",
+  "p9GiftModeBanner": "Sending a gift to {market}",
+  "@p9GiftModeBanner": {
+    "placeholders": {
+      "market": {"type": "String"}
+    }
+  },
+  "p9GiftStop": "Stop gift",
+  "p9GiftOrderLabel": "Gift order",
+  "p10CityNotServed": "We don't serve this area yet",
+  "p10CityCrossCity": "Pickup and drop-off must be in the same city.",
+  "p10CityOtherCity": "These addresses are in another city. Switch your city in Settings to continue.",
+  "p10ParcelTitle": "Send a parcel",
+  "p10ParcelScheduledTitle": "Schedule a parcel",
+  "p10ParcelRoute": "Route",
+  "p10ParcelPickup": "Pickup",
+  "p10ParcelDropoff": "Drop-off",
+  "p10ParcelChooseAddress": "Choose on the map",
+  "p10ParcelBuilding": "Building / house",
+  "p10ParcelFloor": "Floor",
+  "p10ParcelApartment": "Apartment / office",
+  "p10ParcelLandmark": "Landmark",
+  "p10ParcelRecipient": "Recipient",
+  "p10ParcelSendToMyself": "Send to myself",
+  "p10ParcelRecipientName": "Recipient name",
+  "p10ParcelRecipientPhone": "Recipient phone",
+  "p10ParcelWhatSending": "What are you sending?",
+  "p10ParcelCategoryDocument": "Documents",
+  "p10ParcelCategoryParcel": "Parcel",
+  "p10ParcelCategoryFood": "Food",
+  "p10ParcelCategoryGrocery": "Groceries",
+  "p10ParcelCategoryElectronics": "Electronics",
+  "p10ParcelCategoryClothes": "Clothes",
+  "p10ParcelCategoryGift": "Gift",
+  "p10ParcelCategoryFlowers": "Flowers",
+  "p10ParcelCategoryKeys": "Keys",
+  "p10ParcelCategoryOther": "Other",
+  "p10ParcelSizeSmall": "Small",
+  "p10ParcelSizeSmallHint": "Fits in a backpack",
+  "p10ParcelSizeMedium": "Medium",
+  "p10ParcelSizeMediumHint": "Fits on a car seat",
+  "p10ParcelSizeLarge": "Large",
+  "p10ParcelSizeLargeHint": "Needs a van",
+  "p10ParcelSizeUnavailable": "Not available here yet",
+  "p10ParcelDescription": "Description (optional)",
+  "p10ParcelItemValue": "Item value (optional)",
+  "p10ParcelCourierNote": "Note for the courier",
+  "p10ParcelPayment": "Payment",
+  "p10ParcelPayWallet": "HudHud wallet",
+  "p10ParcelPayCash": "Cash to the courier",
+  "p10ParcelPaymentPhone": "Mobile money number",
+  "p10ParcelRecipientPays": "Recipient pays (cash at drop-off)",
+  "p10ParcelSellerCod": "Collect the item price from the recipient",
+  "p10ParcelSellerCodHint": "The courier collects it in cash and it is paid to your HudHud business wallet.",
+  "p10ParcelSellerCodAmount": "Item price to collect",
+  "p10ParcelPickupTime": "Pickup time",
+  "p10ParcelPickupNow": "As soon as possible",
+  "p10ParcelPrice": "Price",
+  "p10ParcelPriceHeld": "Price held for {time}",
+  "@p10ParcelPriceHeld": {
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "p10ParcelPriceExpired": "Price lock expired",
+  "p10ParcelRefreshPrice": "Refresh price",
+  "p10ParcelGettingPrice": "Getting the price…",
+  "p10ParcelPriceUpdated": "The price changed. Please check the new price.",
+  "p10ParcelBook": "Book for {price}",
+  "@p10ParcelBook": {
+    "placeholders": {
+      "price": {"type": "String"}
+    }
+  },
+  "p10ParcelContinue": "Continue",
+  "p10ParcelFillRequired": "Choose pickup and drop-off, and add the recipient's phone.",
+  "p10ParcelSizeNotSupported": "This size is not available in this city yet.",
+  "p10ParcelPaymentNotAvailable": "This payment method is not available in this city.",
+  "p10ParcelInsufficientWallet": "Not enough money in your wallet. Top up or choose another payment method.",
+  "p10ParcelSomethingWrong": "Something went wrong. Please try again.",
+  "p10ParcelApprovePayment": "Approve the payment on your phone.",
+  "p10ParcelBooked": "Parcel booked",
+  "p10ParcelHandoverCode": "Handover code",
+  "p10ParcelHandoverHint": "The recipient gives this code to the courier at delivery.",
+  "p10ParcelHandoverSelfHint": "Give this code to the courier when you receive the parcel.",
+  "p10ParcelShareTracking": "Share tracking link",
+  "p10ParcelTrackingShareText": "Track my HudHud parcel: {link}",
+  "@p10ParcelTrackingShareText": {
+    "placeholders": {
+      "link": {"type": "String"}
+    }
+  },
+  "p10ParcelEta": "Arriving in about {minutes} min",
+  "@p10ParcelEta": {
+    "placeholders": {
+      "minutes": {"type": "String"}
+    }
+  },
+  "p10ParcelCancel": "Cancel parcel",
+  "p10ParcelCancelFree": "Cancel this parcel? It's free because no courier has been assigned yet.",
+  "p10ParcelCancelFee": "A courier is already on the way. Cancelling now costs {fee}.",
+  "@p10ParcelCancelFee": {
+    "placeholders": {
+      "fee": {"type": "String"}
+    }
+  },
+  "p10ParcelCancelReason": "Cancelled by the sender in the app",
+  "p10ParcelCancelled": "Parcel cancelled",
+  "p11ParcelAddStop": "Add a stop",
+  "p11ParcelStopN": "Stop {number}",
+  "@p11ParcelStopN": {
+    "placeholders": {
+      "number": {"type": "String"}
+    }
+  },
+  "p11ParcelRemoveStop": "Remove stop",
+  "p11ParcelMoveUp": "Move up",
+  "p11ParcelMoveDown": "Move down",
+  "p11ParcelStopsLimit": "Up to {max} drop-offs per parcel",
+  "@p11ParcelStopsLimit": {
+    "placeholders": {
+      "max": {"type": "String"}
+    }
+  },
+  "p11ParcelMultiStopSenderPays": "With several drop-offs you pay for the whole route.",
+  "p11ParcelMultiStopCashAtPickup": "With several drop-offs, cash is paid to the courier at pickup.",
+  "p11ParcelPayAtPickup": "Pay cash at pickup",
+  "p11ParcelPayAtPickupHint": "Hand the cash to the courier when they collect the parcel.",
+  "p11ParcelPayAtPickupDue": "Pay {amount} cash to the courier at pickup",
+  "@p11ParcelPayAtPickupDue": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p11ParcelPaidAtPickup": "Paid to the courier at pickup",
+  "p11ParcelPayAtPickupUnavailable": "Paying cash at pickup is not available right now.",
+  "p11ParcelStopsTitle": "Drop-offs",
+  "p11ParcelStopCodesHint": "Each recipient got their own handover code by SMS. Share it if they did not.",
+  "p11ParcelShareStopLink": "Share link",
+  "p11ParcelStopPending": "Waiting",
+  "p11ParcelStopArrived": "Courier is there",
+  "p11ParcelStopDelivered": "Delivered",
+  "p11ParcelStopFailed": "Not delivered",
+  "p11ParcelStopReturned": "Returned to you",
+  "p11ParcelMultiStopDisabled": "Several drop-offs are not available right now.",
+  "p11ParcelTooManyStops": "Too many drop-offs for one parcel.",
+  "p11ParcelCancelCashFee": "A courier is already on the way. Cancelling now costs {fee}. It is taken from your wallet or added to your balance.",
+  "@p11ParcelCancelCashFee": {
+    "placeholders": {
+      "fee": {"type": "String"}
+    }
+  },
+  "p11ParcelOutstandingBalance": "You owe {amount} from a cancelled parcel. It is taken from your wallet at your next top-up or order.",
+  "@p11ParcelOutstandingBalance": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p12StoreOpen": "Open",
+  "p12StoreClosed": "Closed",
+  "p12StoreBusy": "Busy",
+  "p12StoreOpensAt": "Opens {time}",
+  "@p12StoreOpensAt": {
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "p12StoreOpensTomorrowAt": "Opens tomorrow {time}",
+  "@p12StoreOpensTomorrowAt": {
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "p12StoreBackAt": "Back at {time}",
+  "@p12StoreBackAt": {
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "p12StoreClosedToday": "Closed today",
+  "p12StoreClosedBanner": "This store is closed right now. You can look at the menu, but ordering is off until it opens.",
+  "p12StoreBusyBanner": "This store is very busy and has paused new orders. Please check back soon.",
+  "p12StoreOrderingPaused": "Ordering paused",
+  "p12SoldOut": "Sold out",
+  "p12Unavailable": "Unavailable",
+  "p12GoToCheckout": "Go to Checkout",
+  "p12ErrStoreClosed": "This store is closed right now.",
+  "p12ErrStoreBusy": "This store is busy and not taking orders right now.",
+  "p12ErrItemSoldOut": "An item in your cart is sold out today. Remove it to continue.",
+  "p12ErrItemSoldOutNamed": "{item} is sold out today. Remove it to continue.",
+  "@p12ErrItemSoldOutNamed": {
+    "placeholders": {
+      "item": {"type": "String"}
+    }
+  },
+  "p12RemoveItem": "Remove item",
+  "p12ErrOutstandingDues": "You have an unpaid balance of {amount}. Cash is not available until it is paid. Top up your wallet or choose another way to pay.",
+  "@p12ErrOutstandingDues": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p12DuesTitle": "Unpaid balance",
+  "p12DuesCheckoutBody": "You owe {amount} from a cancelled parcel. Cash on delivery is off until it is paid. Topping up your wallet pays it automatically.",
+  "@p12DuesCheckoutBody": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "p12PayNow": "Pay now",
+  "p12CashBlockedByDues": "Cash is off until your unpaid balance is paid.",
+  "p12ChooseOtherPayment": "Choose another payment",
+  "p12ErrCityOutside": "We don't deliver to this address yet. Choose an address inside your city.",
+  "p12ErrCityCross": "All addresses in one order must be in the same city.",
+  "p12ErrCityMismatch": "This address is in {city}. Switch your city to {city} to continue.",
+  "@p12ErrCityMismatch": {
+    "placeholders": {
+      "city": {"type": "String"}
+    }
+  },
+  "p12ErrCityMismatchGeneric": "This address is in another city. Switch your city to continue.",
+  "p12ChangeCity": "Change city",
+  "p12ErrNetwork": "No internet connection. Check your connection and try again.",
+  "p12ErrTimeout": "The connection is slow. Please try again.",
+  "p12ErrServer": "Something went wrong on our side. Please try again in a moment.",
+  "p12ErrSessionExpired": "Your session has expired. Please log in again."
 }

@@ -15,6 +15,7 @@ import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/theme/system_ui_style.dart';
 import 'package:provider/provider.dart';
 import 'package:hudhud_delivery/core/utils/avatar_util.dart';
+import 'package:hudhud_delivery/core/utils/money_format.dart';
 import 'package:hudhud_delivery/core/utils/phone_util.dart';
 import 'package:hudhud_delivery/core/widgets/user_avatar.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
@@ -27,11 +28,21 @@ import 'package:hudhud_delivery/features/chat/presentation/screens/support_chat_
 import 'package:hudhud_delivery/features/chat/chat_bloc_provider.dart';
 import 'package:hudhud_delivery/features/chat/presentation/widgets/chat_unread_badge.dart';
 import 'package:hudhud_delivery/features/chat/utils/chat_polling_config.dart';
+import 'package:hudhud_delivery/features/growth/data/growth_repository.dart';
+import 'package:hudhud_delivery/features/growth/data/models/market.dart';
+import 'package:hudhud_delivery/features/growth/growth_scope.dart';
+import 'package:hudhud_delivery/features/growth/market_controller.dart';
+import 'package:hudhud_delivery/features/growth/plus_controller.dart';
+import 'package:hudhud_delivery/features/growth/presentation/screens/plus_screen.dart';
+import 'package:hudhud_delivery/features/growth/presentation/screens/rewards_screen.dart';
+import 'package:hudhud_delivery/features/growth/presentation/widgets/plus_widgets.dart';
+import 'package:hudhud_delivery/features/growth/presentation/widgets/referral_card.dart';
 import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
 // import 'package:hudhud_delivery/features/onboarding_tour/presentation/onboarding_tour_controller.dart';
 import 'package:hudhud_delivery/features/wallet/data/providers/wallet_data_provider.dart';
 import 'package:hudhud_delivery/features/wallet/data/repositories/wallet_repository.dart';
 import 'package:hudhud_delivery/features/wallet/presentation/screens/wallet_screen.dart';
+import 'package:hudhud_delivery/features/wallet/services/wallet_refresh_signal.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import 'package:hudhud_delivery/models/user_model.dart';
 import 'appearance_screen.dart';
@@ -82,16 +93,150 @@ class _SettingsScreenState extends State<SettingsScreen>
   final BiometricCredentialService _biometricService =
       BiometricCredentialService();
 
+  // Phase 2: rewards points (only fetched when rewards are enabled).
+  int? _rewardPoints;
+  bool _rewardsWasEnabled = false;
+  bool _referralWasEnabled = false;
+  final GlobalKey<ReferralCardState> _referralCardKey =
+      GlobalKey<ReferralCardState>();
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final growth = growthConfigOf(context);
+    if (growth.rewardsEnabled && !_rewardsWasEnabled) {
+      unawaited(_loadRewardPoints());
+    }
+    if (!growth.rewardsEnabled) _rewardPoints = null;
+    _rewardsWasEnabled = growth.rewardsEnabled;
+    _referralWasEnabled = growth.referralEnabled;
+  }
+
+  Future<void> _loadRewardPoints() async {
+    if (!mounted) return;
+    if (!growthConfigOf(context, listen: false).rewardsEnabled) return;
+    try {
+      final summary = await GrowthRepository.create().fetchRewardsSummary();
+      if (mounted) setState(() => _rewardPoints = summary.points);
+    } catch (_) {
+      if (mounted) setState(() => _rewardPoints = null);
+    }
+  }
+
+  void _openRewards() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const RewardsScreen()),
+    ).then((_) => _loadRewardPoints());
+  }
+
+  // ── Phase 3: HudHud Plus + markets ─────────────────────────────────────
+  String? _walletCurrency;
+  bool _marketChanging = false;
+
+  void _onPlusChanged() {
+    if (mounted) setState(() {});
+  }
+
+  /// e.g. an order was cancelled and refunded to the wallet.
+  void _onWalletChanged() {
+    if (mounted) unawaited(_loadWalletSummary());
+  }
+
+  void _openPlus() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const PlusScreen()),
+    ).then((_) {
+      PlusController.instance.refresh(force: true);
+      _loadWalletSummary();
+    });
+  }
+
+  Future<void> _openMarketPicker(MarketController controller) async {
+    if (_marketChanging) return;
+    final l10n = context.l10n;
+    final current = controller.selectedCode ?? Market.defaultCode;
+    final picked = await AuthModal.sheet<Market>(
+      context: context,
+      builder: (sheetContext) => SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+              child: Text(
+                l10n.p3MarketPickerTitle,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: AuthScreenColors.textPrimaryOf(sheetContext),
+                ),
+              ),
+            ),
+            for (final market in controller.markets)
+              ListTile(
+                minVerticalPadding: 12,
+                title: Text(
+                  market.name,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+                subtitle: Text(market.currency),
+                trailing: market.code == current
+                    ? const Icon(
+                        Icons.check_circle_rounded,
+                        color: AuthScreenColors.orange,
+                      )
+                    : null,
+                onTap: () => Navigator.of(sheetContext).pop(market),
+              ),
+            const SizedBox(height: 12),
+          ],
+        ),
+      ),
+    );
+    if (picked == null || !mounted || picked.code == current) return;
+    if (!await AuthService().isAuthenticated()) {
+      await controller.select(picked);
+      return;
+    }
+    setState(() => _marketChanging = true);
+    final result =
+        await GrowthRepository.create().updateCustomerMarket(picked.code);
+    if (!mounted) return;
+    setState(() => _marketChanging = false);
+    if (result.ok) {
+      await controller.select(picked);
+      if (!mounted) return;
+      AuthSnackBar.success(context, l10n.p3MarketChanged(picked.name));
+      unawaited(_loadWalletSummary());
+      unawaited(PlusController.instance.refresh(force: true));
+      return;
+    }
+    AuthSnackBar.error(
+      context,
+      result.isBlocked
+          ? l10n.p3MarketChangeBlocked
+          : (result.message ?? l10n.p3MarketChangeFailed),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    PlusController.instance.addListener(_onPlusChanged);
+    WalletRefreshSignal.changes.addListener(_onWalletChanged);
     _loadAll();
     _startChatUnreadPolling();
   }
 
   @override
   void dispose() {
+    PlusController.instance.removeListener(_onPlusChanged);
+    WalletRefreshSignal.changes.removeListener(_onWalletChanged);
     WidgetsBinding.instance.removeObserver(this);
     _chatUnreadTimer?.cancel();
     super.dispose();
@@ -138,6 +283,10 @@ class _SettingsScreenState extends State<SettingsScreen>
       _loadWalletSummary(),
       _loadPackageInfo(),
       _loadBiometricState(),
+      if (_rewardsWasEnabled) _loadRewardPoints(),
+      if (_referralWasEnabled && _referralCardKey.currentState != null)
+        _referralCardKey.currentState!.reload(),
+      PlusController.instance.refresh(force: true),
     ]);
   }
 
@@ -359,7 +508,10 @@ class _SettingsScreenState extends State<SettingsScreen>
       );
       final balance = await repo.getBalance();
       if (mounted) {
-        setState(() => _walletTotal = balance.balance);
+        setState(() {
+          _walletTotal = balance.balance;
+          _walletCurrency = balance.currency;
+        });
       }
     } catch (_) {
       if (mounted) {
@@ -392,6 +544,7 @@ class _SettingsScreenState extends State<SettingsScreen>
       if (shouldLogout == true) {
         final authService = AuthService();
         await authService.logout();
+        PlusController.instance.reset();
 
         if (context.mounted) {
           Navigator.of(context).pushAndRemoveUntil(
@@ -419,11 +572,23 @@ class _SettingsScreenState extends State<SettingsScreen>
         ? _user!.phone!.trim()
         : l10n.emDash;
 
+    // Phase 3: non-ETB wallets show their own code; ETB is unchanged.
+    final walletCurrencyLabel = isEtbCurrency(_walletCurrency)
+        ? '${l10n.currencyEtb} '
+        : moneyPrefix(_walletCurrency);
     final walletText = _walletTotal == null
         ? l10n.emDash
-        : '${l10n.currencyEtb} ${_walletTotal!.toStringAsFixed(2)}';
+        : '$walletCurrencyLabel${_walletTotal!.toStringAsFixed(2)}';
+    final plus = PlusController.instance.status;
+    final marketController = marketControllerOf(context, listen: true);
+    final showMarketPicker = marketController?.canPick ?? false;
 
     final indigo = _accentIndigo(context);
+    final growth = growthConfigOf(context);
+    final showRewards = growth.rewardsEnabled;
+    final rewardsValue = _rewardPoints == null
+        ? l10n.emDash
+        : l10n.growthPointsCount(_rewardPoints!);
 
     return Theme(
       data: authTheme,
@@ -444,6 +609,11 @@ class _SettingsScreenState extends State<SettingsScreen>
                     displayName: displayName,
                     phone: phone,
                     user: _user,
+                    rewardsLabel:
+                        showRewards && _rewardPoints != null ? rewardsValue : null,
+                    onRewardsTap: showRewards ? _openRewards : null,
+                    plusMember: plus.isMember,
+                    onPlusTap: plus.available ? _openPlus : null,
                     onEdit: () {
                       Navigator.push(
                         context,
@@ -476,22 +646,51 @@ class _SettingsScreenState extends State<SettingsScreen>
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: _ProfileStatCard(
-                            icon: Icons.local_activity_rounded,
-                            iconColor: AuthScreenColors.orange,
-                            title: l10n.profileCoupons,
-                            value: '0',
-                            onTap: () {
-                              AuthSnackBar.comingSoon(
-                                context,
-                                l10n.profileCouponsComingSoon,
-                              );
-                            },
-                          ),
+                          child: showRewards
+                              ? _ProfileStatCard(
+                                  icon: Icons.stars_rounded,
+                                  iconColor: AuthScreenColors.orange,
+                                  title: l10n.growthRewardsTitle,
+                                  value: rewardsValue,
+                                  onTap: _openRewards,
+                                )
+                              : _ProfileStatCard(
+                                  icon: Icons.local_activity_rounded,
+                                  iconColor: AuthScreenColors.orange,
+                                  title: l10n.profileCoupons,
+                                  value: '0',
+                                  onTap: () {
+                                    AuthSnackBar.comingSoon(
+                                      context,
+                                      l10n.profileCouponsComingSoon,
+                                    );
+                                  },
+                                ),
                         ),
                       ],
                     ),
                   ),
+                  if (growth.referralEnabled)
+                    ReferralCard(
+                      key: _referralCardKey,
+                      padding: const EdgeInsets.only(top: 14),
+                    ),
+                  if (plus.available) ...[
+                    const SizedBox(height: 14),
+                    _ProfileGroupCard(
+                      children: [
+                        _ProfileMenuTile(
+                          icon: Icons.workspace_premium_rounded,
+                          color: AppColors.brandIndigo,
+                          title: plus.isMember
+                              ? l10n.p3PlusMenuMember
+                              : l10n.p3PlusMenuJoin,
+                          trailing: plus.isMember ? const PlusBadge() : null,
+                          onTap: _openPlus,
+                        ),
+                      ],
+                    ),
+                  ],
                   const SizedBox(height: 26),
                   _ProfileSectionLabel(title: l10n.settingsAccount),
                   _ProfileGroupCard(
@@ -658,6 +857,37 @@ class _SettingsScreenState extends State<SettingsScreen>
                           );
                         },
                       ),
+                      if (showMarketPicker && marketController != null) ...[
+                        const _ProfileTileDivider(),
+                        _ProfileMenuTile(
+                          icon: Icons.location_city_rounded,
+                          color: AuthScreenColors.orange,
+                          title: l10n.p3MarketSettingTitle,
+                          trailing: _marketChanging
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.2,
+                                    color: AuthScreenColors.orange,
+                                  ),
+                                )
+                              : Text(
+                                  marketController.selected?.name ??
+                                      marketController
+                                          .marketFor(Market.defaultCode)
+                                          ?.name ??
+                                      l10n.emDash,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color:
+                                        AuthScreenColors.textMutedOf(context),
+                                  ),
+                                ),
+                          onTap: () => _openMarketPicker(marketController),
+                        ),
+                      ],
                       const _ProfileTileDivider(),
                       _ProfileMenuTile(
                         icon: Icons.translate_rounded,
@@ -1249,11 +1479,23 @@ class _ProfileHeaderCard extends StatelessWidget {
   final UserModel? user;
   final VoidCallback onEdit;
 
+  /// Phase 2 rewards badge text (e.g. "340 points"); hidden when null.
+  final String? rewardsLabel;
+  final VoidCallback? onRewardsTap;
+
+  /// Phase 3: "Plus" badge for active members.
+  final bool plusMember;
+  final VoidCallback? onPlusTap;
+
   const _ProfileHeaderCard({
     required this.displayName,
     required this.phone,
     required this.user,
     required this.onEdit,
+    this.rewardsLabel,
+    this.onRewardsTap,
+    this.plusMember = false,
+    this.onPlusTap,
   });
 
   String get _initial {
@@ -1361,6 +1603,46 @@ class _ProfileHeaderCard extends StatelessWidget {
                             ),
                           ],
                         ),
+                        if (plusMember) ...[
+                          const SizedBox(height: 8),
+                          PlusBadge(onTap: onPlusTap, onDark: true),
+                        ],
+                        if (rewardsLabel != null) ...[
+                          const SizedBox(height: 8),
+                          Material(
+                            color: AppColors.brandOrange,
+                            shape: const StadiumBorder(),
+                            clipBehavior: Clip.antiAlias,
+                            child: InkWell(
+                              onTap: onRewardsTap,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 5,
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.stars_rounded,
+                                      size: 16,
+                                      color: Colors.white,
+                                    ),
+                                    const SizedBox(width: 5),
+                                    Text(
+                                      rewardsLabel!,
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w800,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                         const SizedBox(height: 12),
                         Material(
                           color: Colors.white.withValues(alpha: 0.18),

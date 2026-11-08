@@ -838,7 +838,11 @@ class VendorInfoCard extends StatelessWidget {
 class OrderItemsCard extends StatelessWidget {
   final List<OrderItemModel> items;
 
-  const OrderItemsCard({Key? key, required this.items}) : super(key: key);
+  /// Order currency; null / ETB keeps the original `ETB x.xx` output.
+  final String? currency;
+
+  const OrderItemsCard({Key? key, required this.items, this.currency})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -941,7 +945,7 @@ class OrderItemsCard extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Text(
-            item.formattedPrice,
+            item.formattedPriceIn(currency),
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w800,
@@ -963,6 +967,49 @@ class OrderItemsCard extends StatelessWidget {
         Icons.fastfood_rounded,
         color: AppColors.brandOrange,
         size: 26,
+      ),
+    );
+  }
+}
+
+/// Phase 6 diaspora gifting: who receives this order and the payer's note.
+class GiftOrderCard extends StatelessWidget {
+  final OrderModel order;
+
+  const GiftOrderCard({Key? key, required this.order}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final name = order.recipientName;
+    final phone = order.giftRecipientPhoneDisplay;
+    final message = order.giftMessage;
+    return _DetailCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _CardHeader(
+            icon: Icons.card_giftcard_rounded,
+            title: l10n.p9GiftOrderLabel,
+            color: AppColors.brandOrange,
+          ),
+          const SizedBox(height: 8),
+          if (name != null)
+            _InfoRow(label: l10n.p9GiftRecipientLabel, value: name),
+          if (phone != null)
+            _InfoRow(label: l10n.p9GiftRecipientPhone, value: phone),
+          if (message != null)
+            _InfoRow(label: l10n.p9GiftYourMessage, value: message),
+          const SizedBox(height: 6),
+          Text(
+            l10n.p9GiftHowItWorksSms,
+            style: TextStyle(
+              fontSize: 13,
+              height: 1.4,
+              color: HomeColors.textSecondaryOf(context),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1167,7 +1214,13 @@ class OrderSummaryCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           _buildSummaryRow(context, 'Subtotal', order.formattedSubtotal),
-          _buildSummaryRow(context, 'Delivery', order.formattedDeliveryFee),
+          _buildSummaryRow(
+            context,
+            order.hasSetDeliverySubsidy
+                ? l10n.p5QuoteSetDeliveryIncluded
+                : 'Delivery',
+            order.formattedDeliveryFee,
+          ),
           _buildSummaryRow(context, 'Tax', order.formattedTax),
           if (order.discount > 0)
             _buildSummaryRow(

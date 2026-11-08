@@ -8,6 +8,7 @@ import '../../../../core/utils/money_format.dart';
 import '../../../home/presentation/theme/home_colors.dart';
 import '../../model/categories_products_model.dart';
 import '../../../wishlist/presentation/widgets/wishlist_toggle_button.dart';
+import '../../../growth/market_controller.dart';
 
 /// Beautiful category detail header: hero image, gradient overlay, frosted back,
 /// category name, product count, and optional description.
@@ -403,7 +404,7 @@ class ProductDetailsModal extends StatelessWidget {
                           Icon(Icons.block_rounded, size: 20, color: muted),
                           const SizedBox(width: 8),
                           Text(
-                            'Currently unavailable',
+                            productAvailabilityLabel(context, product),
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
@@ -434,7 +435,7 @@ class ProductDetailsModal extends StatelessWidget {
                       if (product.discount_price != null &&
                           product.discount_price!.isNotEmpty) ...[
                         Text(
-                          formatEtbPriceString(product.discount_price),
+                          formatMoneyPriceString(product.discount_price, currency: MarketController.catalogCurrency),
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.w800,
@@ -443,7 +444,7 @@ class ProductDetailsModal extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          formatEtbPriceString(product.price),
+                          formatMoneyPriceString(product.price, currency: MarketController.catalogCurrency),
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
@@ -453,7 +454,7 @@ class ProductDetailsModal extends StatelessWidget {
                         ),
                       ] else ...[
                         Text(
-                          formatEtbPriceString(product.price),
+                          formatMoneyPriceString(product.price, currency: MarketController.catalogCurrency),
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.w800,
@@ -1017,9 +1018,9 @@ class ProductCard extends StatelessWidget {
                         : null,
                   ),
                   if (!canOrder)
-                    Positioned(
+                    PositionedDirectional(
                       top: 8,
-                      left: 8,
+                      start: 8,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 4),
@@ -1027,9 +1028,9 @@ class ProductCard extends StatelessWidget {
                           color: Colors.black.withValues(alpha: 0.65),
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        child: const Text(
-                          'Unavailable',
-                          style: TextStyle(
+                        child: Text(
+                          productAvailabilityLabel(context, product),
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
@@ -1078,7 +1079,7 @@ class ProductCard extends StatelessWidget {
                               if (product.discount_price != null &&
                                   product.discount_price!.isNotEmpty) ...[
                                 Text(
-                                  formatEtbPriceString(product.discount_price),
+                                  formatMoneyPriceString(product.discount_price, currency: MarketController.catalogCurrency),
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -1086,7 +1087,7 @@ class ProductCard extends StatelessWidget {
                                   ),
                                 ),
                                 Text(
-                                  formatEtbPriceString(product.price),
+                                  formatMoneyPriceString(product.price, currency: MarketController.catalogCurrency),
                                   style: const TextStyle(
                                     fontSize: 12,
                                     decoration: TextDecoration.lineThrough,
@@ -1095,7 +1096,7 @@ class ProductCard extends StatelessWidget {
                                 ),
                               ] else ...[
                                 Text(
-                                  formatEtbPriceString(product.price),
+                                  formatMoneyPriceString(product.price, currency: MarketController.catalogCurrency),
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -1166,11 +1167,17 @@ class ProductItem extends StatelessWidget {
     required this.quantity,
     this.onTap,
     this.margin = const EdgeInsets.fromLTRB(16, 0, 16, 12),
+    this.orderBlockedLabel,
   });
+
+  /// Set while the store is closed / busy: the add button is disabled and
+  /// shows this label (the item itself is still available).
+  final String? orderBlockedLabel;
 
   @override
   Widget build(BuildContext context) {
-    final canOrder = product?.canOrder ?? true;
+    final productAvailable = product?.canOrder ?? true;
+    final canOrder = productAvailable && orderBlockedLabel == null;
     final dark = HomeColors.isDark(context);
     final ink = HomeColors.textPrimaryOf(context);
     final muted = HomeColors.textMutedOf(context);
@@ -1206,7 +1213,7 @@ class ProductItem extends StatelessWidget {
           child: InkWell(
             onTap: onTap,
             child: Opacity(
-              opacity: canOrder ? 1 : 0.6,
+              opacity: productAvailable ? 1 : 0.6,
               child: Padding(
                 padding: const EdgeInsets.all(12),
                 child: Row(
@@ -1221,9 +1228,10 @@ class ProductItem extends StatelessWidget {
                               width: 92,
                               height: 92,
                               fit: BoxFit.cover,
-                              color: canOrder ? null : Colors.grey,
-                              colorBlendMode:
-                                  canOrder ? null : BlendMode.saturation,
+                              color: productAvailable ? null : Colors.grey,
+                              colorBlendMode: productAvailable
+                                  ? null
+                                  : BlendMode.saturation,
                               errorBuilder: (context, error, stackTrace) =>
                                   imageFallback(),
                             ),
@@ -1271,10 +1279,10 @@ class ProductItem extends StatelessWidget {
                               ),
                             ),
                           ],
-                          if (!canOrder) ...[
+                          if (!productAvailable && product != null) ...[
                             const SizedBox(height: 6),
                             Text(
-                              'Unavailable',
+                              productAvailabilityLabel(context, product!),
                               style: TextStyle(
                                 fontSize: 12.5,
                                 fontWeight: FontWeight.w800,
@@ -1292,8 +1300,9 @@ class ProductItem extends StatelessWidget {
                                   spacing: 6,
                                   children: [
                                     Text(
-                                      formatEtbPriceString(
+                                      formatMoneyPriceString(
                                         discountPrice ?? price,
+                                        currency: MarketController.catalogCurrency,
                                       ),
                                       style: TextStyle(
                                         fontSize: 17,
@@ -1304,7 +1313,7 @@ class ProductItem extends StatelessWidget {
                                     ),
                                     if (discountPrice != null)
                                       Text(
-                                        formatEtbPriceString(price),
+                                        formatMoneyPriceString(price, currency: MarketController.catalogCurrency),
                                         style: TextStyle(
                                           fontSize: 13,
                                           fontWeight: FontWeight.w600,
@@ -1321,6 +1330,13 @@ class ProductItem extends StatelessWidget {
                                 _AddPill(
                                   canOrder: canOrder,
                                   onPressed: canOrder ? onAddPressed : null,
+                                  disabledLabel: orderBlockedLabel ??
+                                      (product == null
+                                          ? null
+                                          : productAvailabilityLabel(
+                                              context,
+                                              product!,
+                                            )),
                                 )
                               else
                                 _QuantityStepper(
@@ -1371,12 +1387,28 @@ class ProductItem extends StatelessWidget {
   }
 }
 
+/// "Sold out" for a merchant sold-out-today item, else "Unavailable".
+String productAvailabilityLabel(
+  BuildContext context,
+  CategoriesProductsModel product,
+) {
+  final l10n = context.l10n;
+  return product.isSoldOut ? l10n.p12SoldOut : l10n.p12Unavailable;
+}
+
 /// White-on-orange "ADD" pill (grey when the product can't be ordered).
 class _AddPill extends StatelessWidget {
-  const _AddPill({required this.canOrder, required this.onPressed});
+  const _AddPill({
+    required this.canOrder,
+    required this.onPressed,
+    this.disabledLabel,
+  });
 
   final bool canOrder;
   final VoidCallback? onPressed;
+
+  /// Text when disabled (sold out, unavailable, store closed …).
+  final String? disabledLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -1397,7 +1429,9 @@ class _AddPill extends StatelessWidget {
           size: 20,
         ),
         label: Text(
-          canOrder ? 'ADD' : 'UNAVAILABLE',
+          canOrder
+              ? 'ADD'
+              : (disabledLabel ?? context.l10n.p12Unavailable).toUpperCase(),
           style: TextStyle(
             fontWeight: FontWeight.w800,
             fontSize: canOrder ? 14 : 12,

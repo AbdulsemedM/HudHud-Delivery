@@ -19,6 +19,11 @@ import 'package:hudhud_delivery/features/products/data/products_repository.dart'
 import 'package:hudhud_delivery/features/products/model/products_query.dart';
 import 'package:hudhud_delivery/features/products/presentation/widgets/product_price_filter_sheet.dart';
 import 'package:hudhud_delivery/features/products/presentation/widgets/product_search_field.dart';
+import 'package:hudhud_delivery/features/vendors/data/models/store_status.dart';
+import 'package:hudhud_delivery/features/vendors/data/repository/store_status_repository.dart';
+import 'package:hudhud_delivery/features/vendors/presentation/widgets/store_status_widgets.dart';
+import 'package:hudhud_delivery/features/growth/market_controller.dart';
+import 'package:hudhud_delivery/core/utils/money_format.dart';
 
 class StoreDetailScreen extends StatefulWidget {
   final String storeName;
@@ -61,9 +66,29 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
   /// Shared cart used by store lists and product detail screen.
   final CartService _cart = CartService();
 
+  /// Live closed / busy state (vendor list payload, then
+  /// `GET /public/vendors/{id}`). Null = unknown, treated as open.
+  StoreStatus? _storeStatus;
+
+  bool get _acceptingOrders => _storeStatus?.acceptingOrders ?? true;
+
+  /// Add-button label while the store cannot take orders.
+  String? get _orderBlockedLabel {
+    final status = _storeStatus;
+    if (status == null || status.acceptingOrders) return null;
+    return storeStateLabel(context.l10n, status);
+  }
+
   @override
   void initState() {
     super.initState();
+    _storeStatus = widget.vendor?.storeStatus;
+    final vendorId = widget.vendorId;
+    if (vendorId != null) {
+      StoreStatusRepository.instance.remember(vendorId, _storeStatus);
+      _storeStatus ??= StoreStatusRepository.instance.peek(vendorId);
+      _loadStoreStatus(vendorId);
+    }
     _cart.addListener(_onCartChanged);
     _productsRepository = ProductsRepository(
       productsDataProvider:
@@ -84,6 +109,26 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
 
   void _onCartChanged() {
     if (mounted) setState(() {});
+  }
+
+  Future<void> _loadStoreStatus(int vendorId, {bool force = false}) async {
+    final status =
+        await StoreStatusRepository.instance.statusFor(vendorId, force: force);
+    if (!mounted || status == null) return;
+    setState(() => _storeStatus = status);
+  }
+
+  /// Explains why nothing can be added while the store is closed / busy.
+  bool _blockIfStoreUnavailable() {
+    if (_acceptingOrders) return false;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(storeUnavailableMessage(context.l10n, _storeStatus)),
+        ),
+      );
+    return true;
   }
 
   void _syncFeaturedFromVendorProducts() {
@@ -199,6 +244,7 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
   Future<void> _addToCart(String productId) async {
     final product = _productById(productId);
     if (product == null || !product.canOrder) return;
+    if (_blockIfStoreUnavailable()) return;
     var result = _cart.addProduct(product);
     if (result == CartAddResult.differentVendor) {
       final replace = await _confirmReplaceCart();
@@ -235,6 +281,7 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
   Future<void> _incrementQuantity(String productId) async {
     final product = _productById(productId);
     if (product != null && !product.canOrder) return;
+    if (_blockIfStoreUnavailable()) return;
     if (_cart.quantityFor(int.tryParse(productId)) == 0 && product != null) {
       await _addToCart(productId);
       return;
@@ -282,6 +329,7 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
             if (widget.vendor != null)
               _VendorDetailHeader(
                 vendor: widget.vendor!,
+                storeStatus: _storeStatus,
                 branches: _branches,
                 onBack: () => Navigator.pop(context),
               )
@@ -311,6 +359,11 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                     ),
                   ],
                 ),
+              ),
+            if (!_acceptingOrders && _storeStatus != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                child: StoreStatusBanner(status: _storeStatus!),
               ),
             if (widget.vendorId != null) ...[
               const SizedBox(height: 12),
@@ -484,7 +537,7 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                'ETB 0 Delivery Fee with selected products',
+                                '${formatMoneyAmount(0, currency: MarketController.catalogCurrency, fractionDigits: 0)} Delivery Fee with selected products',
                                 style: TextStyle(
                                   color: HomeColors.textPrimaryOf(context),
                                   fontSize: 15,
@@ -512,6 +565,7 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                     onIncrementQuantity: _incrementQuantity,
                     onDecrementQuantity: _decrementQuantity,
                     onShowProductDetails: _showProductDetails,
+                    orderBlockedLabel: _orderBlockedLabel,
                   ),
                 );
               }),
@@ -553,7 +607,7 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
             child: _StoreCheckoutBar(
               totalItems: _totalItems,
               totalPrice: _totalPrice,
-              onCheckout: _goToCart,
+              onCheckout: _acceptingOrders ? _goToCart : null,
             ),
           ),
       ],
@@ -569,11 +623,13 @@ class _VendorDetailHeader extends StatelessWidget {
   static const double _heroHeight = 280;
 
   final VendorModel vendor;
+  final StoreStatus? storeStatus;
   final List<BranchModel> branches;
   final VoidCallback onBack;
 
   const _VendorDetailHeader({
     required this.vendor,
+    this.storeStatus,
     this.branches = const [],
     required this.onBack,
   });
@@ -629,9 +685,9 @@ class _VendorDetailHeader extends StatelessWidget {
             ),
           ),
           // Back button
-          Positioned(
+          PositionedDirectional(
             top: 8,
-            left: 8,
+            start: 8,
             child: ClipOval(
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
@@ -684,10 +740,12 @@ class _VendorDetailHeader extends StatelessWidget {
                         label: tag,
                         accent: AppColors.primaryLightColor,
                       ),
-                    if (vendor.status == 'active')
-                      const _VendorInfoChip(
+                    if (storeStatus != null && !storeStatus!.acceptingOrders)
+                      StoreStatusPill(status: storeStatus!)
+                    else if (vendor.status == 'active')
+                      _VendorInfoChip(
                         icon: Icons.check_circle_outline,
-                        label: 'Open for orders',
+                        label: context.l10n.p12StoreOpen,
                         accent: AppColors.successLightColor,
                       ),
                   ],
@@ -1008,7 +1066,9 @@ class _StoreCheckoutBar extends StatelessWidget {
 
   final int totalItems;
   final double totalPrice;
-  final VoidCallback onCheckout;
+
+  /// Null while the store is closed / busy (button disabled).
+  final VoidCallback? onCheckout;
 
   @override
   Widget build(BuildContext context) {
@@ -1065,7 +1125,11 @@ class _StoreCheckoutBar extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'ETB ${totalPrice.toStringAsFixed(1)}',
+                  formatMoneyAmount(
+                    totalPrice,
+                    currency: MarketController.catalogCurrency,
+                    fractionDigits: 1,
+                  ),
                   maxLines: 1,
                   style: TextStyle(
                     color: HomeColors.textPrimaryOf(context),
@@ -1081,29 +1145,39 @@ class _StoreCheckoutBar extends StatelessWidget {
           SizedBox(
             height: 52,
             child: FilledButton(
+              key: const ValueKey('store_checkout_button'),
               onPressed: onCheckout,
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.brandOrange,
                 foregroundColor: Colors.white,
+                disabledBackgroundColor: HomeColors.surfaceElevatedOf(context),
+                disabledForegroundColor: HomeColors.textMutedOf(context),
                 padding: const EdgeInsets.symmetric(horizontal: 18),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
               ),
-              child: const FittedBox(
+              child: FittedBox(
                 fit: BoxFit.scaleDown,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Go to Checkout',
-                      style: TextStyle(
+                      onCheckout == null
+                          ? context.l10n.p12StoreOrderingPaused
+                          : context.l10n.p12GoToCheckout,
+                      style: const TextStyle(
                         fontWeight: FontWeight.w800,
                         fontSize: 15,
                       ),
                     ),
-                    SizedBox(width: 6),
-                    Icon(Icons.arrow_forward_rounded, size: 20),
+                    const SizedBox(width: 6),
+                    Icon(
+                      onCheckout == null
+                          ? Icons.schedule_rounded
+                          : Icons.arrow_forward_rounded,
+                      size: 20,
+                    ),
                   ],
                 ),
               ),
@@ -1124,6 +1198,7 @@ class _ProductSectionFromModel extends StatelessWidget {
   final void Function(String productId) onIncrementQuantity;
   final void Function(String productId) onDecrementQuantity;
   final void Function(CategoriesProductsModel product) onShowProductDetails;
+  final String? orderBlockedLabel;
 
   const _ProductSectionFromModel({
     required this.title,
@@ -1134,6 +1209,7 @@ class _ProductSectionFromModel extends StatelessWidget {
     required this.onIncrementQuantity,
     required this.onDecrementQuantity,
     required this.onShowProductDetails,
+    this.orderBlockedLabel,
   });
 
   @override
@@ -1179,6 +1255,7 @@ class _ProductSectionFromModel extends StatelessWidget {
               onIncrementPressed: () => onIncrementQuantity(productId),
               onDecrementPressed: () => onDecrementQuantity(productId),
               onTap: () => onShowProductDetails(product),
+              orderBlockedLabel: orderBlockedLabel,
             );
           },
         ),

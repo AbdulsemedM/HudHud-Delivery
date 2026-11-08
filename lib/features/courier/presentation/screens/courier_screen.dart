@@ -9,6 +9,10 @@ import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/courier/easy_mode/easy_booking_wizard_screen.dart';
+import 'package:hudhud_delivery/features/courier/parcel_v2/parcel_booking_screen.dart';
+import 'package:hudhud_delivery/features/courier/parcel_v2/parcel_v2_models.dart';
+import 'package:hudhud_delivery/features/courier/parcel_v2/parcel_v2_repository.dart';
+import 'package:hudhud_delivery/features/growth/market_controller.dart';
 import 'package:hudhud_delivery/features/courier/presentation/widgets/active_delivery_card.dart';
 import 'package:hudhud_delivery/features/courier/presentation/widgets/courier_history_empty_state.dart';
 import 'package:hudhud_delivery/features/courier/presentation/widgets/delivery_history_card.dart';
@@ -47,6 +51,9 @@ class _CourierScreenState extends State<CourierScreen> {
   bool _fabExtended = true;
   late final void Function() _homeRefreshListener;
 
+  /// Phase 10: parcel booking v2 when the server enables it.
+  ParcelV2Config _parcelConfig = ParcelV2Config.disabled;
+
   @override
   void initState() {
     super.initState();
@@ -59,6 +66,21 @@ class _CourierScreenState extends State<CourierScreen> {
     CourierHomeRefresh.instance.addListener(_homeRefreshListener);
     _fetchDeliveries();
     _fetchActiveDelivery();
+    _loadParcelConfig();
+  }
+
+  Future<void> _loadParcelConfig() async {
+    final config = await ParcelV2Repository().fetchConfig(
+      market: MarketController.instance?.selectedCode,
+    );
+    if (mounted) setState(() => _parcelConfig = config);
+  }
+
+  /// v2 booking screen, or null to keep the legacy flow.
+  Widget? _parcelV2Screen({required bool scheduled}) {
+    if (!_parcelConfig.enabled) return null;
+    if (context.read<EasyModeController>().enabled) return null;
+    return ParcelBookingScreen(config: _parcelConfig, scheduled: scheduled);
   }
 
   @override
@@ -164,12 +186,15 @@ class _CourierScreenState extends State<CourierScreen> {
     if (!await requireCourierSendAccess(context)) return;
     if (!mounted) return;
     final easyMode = context.read<EasyModeController>().enabled;
+    final v2 = _parcelV2Screen(scheduled: false);
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => easyMode
-            ? const EasyBookingWizardScreen()
-            : const InstantDeliveryScreen(),
+        builder: (context) =>
+            v2 ??
+            (easyMode
+                ? const EasyBookingWizardScreen()
+                : const InstantDeliveryScreen()),
       ),
     );
   }
@@ -177,10 +202,11 @@ class _CourierScreenState extends State<CourierScreen> {
   Future<void> _openScheduleDelivery() async {
     if (!await requireCourierSendAccess(context)) return;
     if (!mounted) return;
+    final v2 = _parcelV2Screen(scheduled: true);
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const ScheduleDeliveryScreen(),
+        builder: (context) => v2 ?? const ScheduleDeliveryScreen(),
       ),
     );
   }
@@ -263,7 +289,10 @@ class _CourierScreenState extends State<CourierScreen> {
             onRefresh: _refreshData,
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
+              // Reserve room under the content for the floating call / add
+              // buttons so they never cover the last card's primary action
+              // (e.g. "Track delivery") once the user scrolls to the end.
+              padding: EdgeInsets.fromLTRB(16, 20, 16, hasActive ? 160 : 96),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
