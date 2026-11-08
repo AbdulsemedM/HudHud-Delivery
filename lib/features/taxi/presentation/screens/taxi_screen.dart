@@ -616,14 +616,13 @@ class _TaxiScreenState extends State<TaxiScreen> {
     });
 
     try {
-      // Reverse geocode the tapped location
-      final places = await GooglePlacesService.reverseGeocode(
+      // Name the tapped location (nearest named place + area).
+      final place = await GooglePlacesService.placeAtPoint(
         point.latitude,
         point.longitude,
       );
 
-      if (mounted && places.isNotEmpty) {
-        final place = places.first;
+      if (mounted && place != null) {
         setState(() {
           _destinationPosition = latLng;
           _destinationController.text = place.shortAddress;

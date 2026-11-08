@@ -4,6 +4,9 @@ import 'custom_location_service.dart';
 class StartupLocationService {
   StartupLocationService._();
 
+  /// A cached fix older than this is refreshed before a map uses it.
+  static const Duration _maxCachedFixAge = Duration(minutes: 2);
+
   static LocationData? _cached;
   static Future<LocationData?>? _fetchFuture;
 
@@ -39,7 +42,10 @@ class StartupLocationService {
   static Future<LocationFetchResult> resolveFix({bool forceFresh = false}) async {
     if (!forceFresh) {
       final cached = await fetchAtStartup();
-      if (cached != null) {
+      // The startup fix can be from long ago if the app stayed open; only
+      // reuse it while it still reflects where the user is.
+      if (cached != null &&
+          DateTime.now().difference(cached.timestamp) <= _maxCachedFixAge) {
         return LocationFetchResult.success(cached);
       }
     }

@@ -25,6 +25,34 @@ class GooglePlacesService {
       'https://maps.googleapis.com/maps/api/place/details/json';
   static const _geocodeUrl =
       'https://maps.googleapis.com/maps/api/geocode/json';
+  static const _nearbySearchUrl =
+      'https://maps.googleapis.com/maps/api/place/nearbysearch/json';
+
+  /// A named place (shop, building, office…) within this distance of the pin
+  /// gives the address its name.
+  static const double namedPlaceRadiusMeters = 50;
+
+  /// Geocode hits further than this from the pin are ignored (stale fixes).
+  static const double _maxGeocodeDistanceKm = 50;
+
+  /// Nearby-search types that are areas, not places with their own name.
+  static const Set<String> _areaTypes = {
+    'route',
+    'street_address',
+    'intersection',
+    'locality',
+    'sublocality',
+    'sublocality_level_1',
+    'sublocality_level_2',
+    'neighborhood',
+    'political',
+    'administrative_area_level_1',
+    'administrative_area_level_2',
+    'administrative_area_level_3',
+    'country',
+    'postal_code',
+    'plus_code',
+  };
 
   /// Default restriction without a known city: Ethiopia (ISO 3166-1 alpha-2: et).
   static const String _countryRestriction = 'country:et';
@@ -256,6 +284,134 @@ class GooglePlacesService {
     return formatted;
   }
 
+  /// Describes the exact point a user picked on the map.
+  ///
+  /// Combines the nearest named place (Places Nearby Search, within
+  /// [namedPlaceRadiusMeters]) with the area details from reverse geocoding,
+  /// e.g. "Edna Mall, Bole, Addis Ababa". Without a named place nearby it
+  /// falls back to the best geocode result. The returned coordinates are
+  /// always the queried point, not Google's nearest address point.
+  static Future<PlaceResult?> placeAtPoint(
+    double latitude,
+    double longitude,
+  ) async {
+    final point = LatLng(latitude, longitude);
+    final (geocoded, venue) = await (
+      reverseGeocode(latitude, longitude),
+      _nearestNamedPlace(point),
+    ).wait;
+
+    const distance = Distance();
+    final nearby = geocoded
+        .where((r) =>
+            distance.as(LengthUnit.Kilometer, point, r.coordinates) <=
+            _maxGeocodeDistanceKm)
+        .toList();
+    final area = HumanReadableAddress.pickBestPlace(nearby);
+
+    if (area == null && venue == null) return null;
+    if (venue == null) return _withCoordinates(area!, point);
+
+    final areaText = area?.displayName ?? venue.vicinity ?? '';
+    return PlaceResult(
+      placeId: venue.placeId,
+      displayName:
+          areaText.isEmpty ? venue.name : '${venue.name}, $areaText',
+      coordinates: point,
+      establishment: venue.name,
+      street: area?.street,
+      neighborhood: area?.neighborhood,
+      sublocality: area?.sublocality,
+      city: area?.city,
+      state: area?.state,
+      country: area?.country,
+      postcode: area?.postcode,
+    );
+  }
+
+  static PlaceResult _withCoordinates(PlaceResult place, LatLng point) {
+    return PlaceResult(
+      placeId: place.placeId,
+      displayName: place.displayName,
+      coordinates: point,
+      street: place.street,
+      neighborhood: place.neighborhood,
+      sublocality: place.sublocality,
+      establishment: place.establishment,
+      city: place.city,
+      state: place.state,
+      country: place.country,
+      postcode: place.postcode,
+      isPlusCodeOnly: place.isPlusCodeOnly,
+    );
+  }
+
+  /// Closest place with its own name (not a road or area) near [point].
+  static Future<NamedPlaceHit?> _nearestNamedPlace(LatLng point) async {
+    final key = await GoogleMapsApiKeyProvider.getKey();
+    if (key.isEmpty) return null;
+
+    try {
+      final uri = Uri.parse(_nearbySearchUrl).replace(queryParameters: {
+        'location': '${point.latitude},${point.longitude}',
+        'radius': namedPlaceRadiusMeters.toStringAsFixed(0),
+        'key': key,
+      });
+      final response = await http.get(uri).timeout(const Duration(seconds: 5));
+      if (response.statusCode != 200) return null;
+
+      final json = jsonDecode(response.body) as Map<String, dynamic>;
+      if (json['status'] != 'OK') return null;
+
+      return nearestNamedPlaceFrom(
+        (json['results'] as List<dynamic>? ?? const [])
+            .cast<Map<String, dynamic>>(),
+        point,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Picks the closest named place in a Nearby Search [results] list.
+  /// Visible for tests.
+  static NamedPlaceHit? nearestNamedPlaceFrom(
+    List<Map<String, dynamic>> results,
+    LatLng point,
+  ) {
+    const distance = Distance();
+    NamedPlaceHit? best;
+    double? bestMeters;
+    for (final r in results) {
+      final name = (r['name'] as String?)?.trim() ?? '';
+      if (name.isEmpty || HumanReadableAddress.isNoiseSegment(name)) continue;
+      if (r['business_status'] == 'CLOSED_PERMANENTLY') continue;
+
+      final types = (r['types'] as List<dynamic>?)?.cast<String>() ?? const [];
+      if (types.isEmpty || types.every(_areaTypes.contains)) continue;
+      if (types.contains('route') || types.contains('locality')) continue;
+
+      final loc = (r['geometry'] as Map<String, dynamic>?)?['location']
+          as Map<String, dynamic>?;
+      final lat = (loc?['lat'] as num?)?.toDouble();
+      final lng = (loc?['lng'] as num?)?.toDouble();
+      if (lat == null || lng == null) continue;
+
+      final meters = distance.as(LengthUnit.Meter, point, LatLng(lat, lng));
+      if (meters > namedPlaceRadiusMeters) continue;
+      if (bestMeters == null || meters < bestMeters) {
+        bestMeters = meters;
+        best = NamedPlaceHit(
+          name: name,
+          placeId: r['place_id'] as String?,
+          vicinity: (r['vicinity'] as String?)?.trim(),
+          meters: meters,
+        );
+      }
+    }
+    return best;
+  }
+
   /// Reverse geocode: get address(es) for the given coordinates. Uses Google Geocoding API.
   static Future<List<PlaceResult>> reverseGeocode(
       double latitude, double longitude) async {
@@ -429,6 +585,11 @@ class GooglePlacesService {
       final long = comp['long_name'] as String? ?? '';
       if (long.isEmpty) continue;
 
+      if (types.contains('route') && HumanReadableAddress.isUnnamedRoad(long)) {
+        // Google's "Unnamed Road" placeholder is not a street; the area,
+        // neighborhood and city components describe the place instead.
+        continue;
+      }
       if (types.contains('street_number') || types.contains('route')) {
         street = (street ?? '') + (street != null ? ' ' : '') + long;
       } else if (types.contains('neighborhood')) {
@@ -488,4 +649,21 @@ class _ParsedAddressComponents {
     this.country,
     this.postcode,
   });
+}
+
+/// Closest named place found by Nearby Search.
+class NamedPlaceHit {
+  const NamedPlaceHit({
+    required this.name,
+    required this.meters,
+    this.placeId,
+    this.vicinity,
+  });
+
+  final String name;
+  final String? placeId;
+  final String? vicinity;
+
+  /// Distance from the pin, in meters.
+  final double meters;
 }

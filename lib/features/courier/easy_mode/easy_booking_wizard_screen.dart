@@ -140,19 +140,12 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
 
   Future<PlaceResult?> _reverseGeocodePlace(LatLng point) async {
     try {
-      final places = await GooglePlacesService.reverseGeocode(
+      // Nearest named place + area; far-away (stale) geocode hits are
+      // dropped inside placeAtPoint.
+      return await GooglePlacesService.placeAtPoint(
         point.latitude,
         point.longitude,
       );
-      // Sanity check: a reverse-geocode result must describe the pin itself.
-      // Drop anything far from the queried point (e.g. a stale simulator
-      // default in San Francisco) so it can never label a pin in Addis.
-      const distance = Distance();
-      final nearby = places
-          .where((r) =>
-              distance.as(LengthUnit.Kilometer, point, r.coordinates) <= 50)
-          .toList();
-      return HumanReadableAddress.pickBestPlace(nearby);
     } catch (_) {}
     return null;
   }
@@ -162,7 +155,7 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
     final segments = address
         .split(',')
         .map((s) => s.trim())
-        .where((s) => s.isNotEmpty && !HumanReadableAddress.isPlusCode(s))
+        .where((s) => s.isNotEmpty && !HumanReadableAddress.isNoiseSegment(s))
         .toList();
     return segments.length > 1;
   }
@@ -174,40 +167,42 @@ class _EasyBookingWizardScreenState extends State<EasyBookingWizardScreen> {
   int _pickupGeocodeSeq = 0;
   int _dropoffGeocodeSeq = 0;
 
+  /// Whether a fresh geocode result should replace the current label.
+  ///
+  /// When Google finds no specific road or area (nothing, or city level only,
+  /// e.g. after dropping an "Unnamed Road" placeholder) we keep the more
+  /// detailed label we already had instead of downgrading it. The pin's
+  /// coordinates are stored separately and always follow the map.
+  bool _shouldReplaceAddress(PlaceResult? next, PlaceResult? current) {
+    if (next != null && next.hasLocalDetail) return true;
+    return current == null || !current.hasLocalDetail;
+  }
+
+  String _coordinatesLabel(LatLng p) =>
+      '${p.latitude.toStringAsFixed(5)}, ${p.longitude.toStringAsFixed(5)}';
+
   Future<void> _reverseGeocodePickup() async {
     final seq = ++_pickupGeocodeSeq;
     final place = await _reverseGeocodePlace(_pickupPosition);
     if (!mounted || seq != _pickupGeocodeSeq) return;
-    if (place != null) {
-      setState(() {
-        _pickupPlace = place;
-        _pickupAddress = place.formattedAddress;
-      });
-    } else {
-      setState(() {
-        _pickupPlace = null;
-        _pickupAddress =
-            '${_pickupPosition.latitude.toStringAsFixed(5)}, ${_pickupPosition.longitude.toStringAsFixed(5)}';
-      });
-    }
+    if (!_shouldReplaceAddress(place, _pickupPlace)) return;
+    setState(() {
+      _pickupPlace = place;
+      _pickupAddress =
+          place?.formattedAddress ?? _coordinatesLabel(_pickupPosition);
+    });
   }
 
   Future<void> _reverseGeocodeDropoff() async {
     final seq = ++_dropoffGeocodeSeq;
     final place = await _reverseGeocodePlace(_dropoffPosition);
     if (!mounted || seq != _dropoffGeocodeSeq) return;
-    if (place != null) {
-      setState(() {
-        _dropoffPlace = place;
-        _dropoffAddress = place.formattedAddress;
-      });
-    } else {
-      setState(() {
-        _dropoffPlace = null;
-        _dropoffAddress =
-            '${_dropoffPosition.latitude.toStringAsFixed(5)}, ${_dropoffPosition.longitude.toStringAsFixed(5)}';
-      });
-    }
+    if (!_shouldReplaceAddress(place, _dropoffPlace)) return;
+    setState(() {
+      _dropoffPlace = place;
+      _dropoffAddress =
+          place?.formattedAddress ?? _coordinatesLabel(_dropoffPosition);
+    });
   }
 
   void _snack(String message) {

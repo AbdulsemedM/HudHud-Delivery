@@ -112,6 +112,20 @@ class PlaceResult {
     return HumanReadableAddress.stripPlusCodesFromAddress(displayName.trim());
   }
 
+  /// True when there is something more local than the city: a venue, street,
+  /// neighborhood or sub-city.
+  bool get hasLocalDetail {
+    for (final candidate in [establishment, street, neighborhood, sublocality]) {
+      if (candidate != null &&
+          candidate.trim().isNotEmpty &&
+          !HumanReadableAddress.isNoiseSegment(candidate)) {
+        return true;
+      }
+    }
+    return autocompleteMainText != null &&
+        autocompleteMainText!.trim().isNotEmpty;
+  }
+
   /// True when the place looks city-level only (no venue, street, or neighborhood).
   bool get isCityLevelOnly {
     if (establishment != null && establishment!.trim().isNotEmpty) return false;
@@ -126,22 +140,28 @@ class PlaceResult {
     final segments = formattedAddress
         .split(',')
         .map((s) => s.trim())
-        .where((s) => s.isNotEmpty && !HumanReadableAddress.isPlusCode(s))
+        .where((s) => s.isNotEmpty && !HumanReadableAddress.isNoiseSegment(s))
         .toList();
     return segments.length <= 1;
   }
 
+  /// Short label: the place's own name first when known (e.g. "Edna Mall,
+  /// Bole, Addis Ababa"), otherwise area and city ("Bole, Addis Ababa").
   String get shortAddress {
-    final area = areaLabel;
-    if (area != null) {
-      final parts = <String>[area];
-      if (city != null &&
-          city!.trim().isNotEmpty &&
-          city!.trim().toLowerCase() != area.toLowerCase()) {
-        parts.add(city!.trim());
+    final parts = <String>[];
+    void add(String? value) {
+      final v = value?.trim();
+      if (v == null || v.isEmpty || HumanReadableAddress.isNoiseSegment(v)) {
+        return;
       }
-      return parts.join(', ');
+      if (parts.any((p) => p.toLowerCase() == v.toLowerCase())) return;
+      parts.add(v);
     }
+
+    add(establishment);
+    add(areaLabel);
+    add(city);
+    if (parts.isNotEmpty) return parts.join(', ');
     return HumanReadableAddress.firstReadableSegment(displayName) ?? displayName;
   }
 

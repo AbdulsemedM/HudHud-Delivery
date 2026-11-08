@@ -6,7 +6,6 @@ import 'package:hudhud_delivery/app/models/place_result.dart';
 import 'package:hudhud_delivery/app/services/city_scope.dart';
 import 'package:hudhud_delivery/app/services/custom_location_service.dart';
 import 'package:hudhud_delivery/app/services/google_places_service.dart';
-import 'package:hudhud_delivery/app/utils/human_readable_address.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/widgets/centered_pin_map.dart';
@@ -47,12 +46,11 @@ class _AddressMapPickerScreenState extends State<AddressMapPickerScreen> {
 
   Future<void> _reverseGeocodeCenter(gmaps.LatLng point) async {
     try {
-      final places = await GooglePlacesService.reverseGeocode(
+      final best = await GooglePlacesService.placeAtPoint(
         point.latitude,
         point.longitude,
       );
       if (!mounted) return;
-      final best = HumanReadableAddress.pickBestPlace(places);
       if (best != null) {
         setState(() => _selectedPlace = best);
       }

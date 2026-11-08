@@ -3,7 +3,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
 import 'package:hudhud_delivery/app/services/google_places_service.dart';
 import 'package:hudhud_delivery/app/models/place_result.dart';
-import 'package:hudhud_delivery/app/utils/human_readable_address.dart';
 import 'package:hudhud_delivery/app/services/city_scope.dart';
 import 'package:hudhud_delivery/app/services/custom_location_service.dart';
 import 'package:hudhud_delivery/app/services/startup_location_service.dart';
@@ -245,13 +244,11 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
       return;
     }
     try {
-      final places = await GooglePlacesService.reverseGeocode(
+      final best = await GooglePlacesService.placeAtPoint(
         g.latitude,
         g.longitude,
       );
-      if (!mounted || places.isEmpty) return;
-      final best = HumanReadableAddress.pickBestPlace(places);
-      if (best == null) return;
+      if (!mounted || best == null) return;
       setState(() => _centerPickPlace = best);
     } catch (_) {
       // Non-fatal: user can still pick from search markers.
@@ -265,13 +262,11 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
       gmaps.CameraUpdate.newLatLngZoom(g, 16.0),
     );
     try {
-      final places = await GooglePlacesService.reverseGeocode(
+      final best = await GooglePlacesService.placeAtPoint(
         g.latitude,
         g.longitude,
       );
-      if (!mounted || places.isEmpty) return;
-      final best = HumanReadableAddress.pickBestPlace(places);
-      if (best == null) return;
+      if (!mounted || best == null) return;
       setState(() => _centerPickPlace = best);
       _showPlaceDetails(best);
     } catch (_) {}
