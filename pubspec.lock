@@ -1141,6 +1141,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.0.1"
+  pin_input_text_field:
+    dependency: transitive
+    description:
+      name: pin_input_text_field
+      sha256: c2a32d26f0447da0c4bd246625363d91c00d2d51e8148dd3053c448488057c31
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.5.3"
   platform:
     dependency: transitive
     description:
@@ -1354,6 +1362,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  sms_autofill:
+    dependency: "direct main"
+    description:
+      name: sms_autofill
+      sha256: "5c6c5569a310fce12117eaefab5be6e29cc676b635e43be8b70b1946ec21ae91"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.5.0"
   source_span:
     dependency: transitive
     description:
