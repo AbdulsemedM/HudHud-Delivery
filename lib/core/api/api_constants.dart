@@ -22,6 +22,14 @@ class ApiConstants {
   static const String phoneEnrollmentStatus = '$auth/phone-enrollment/status';
   static const String phoneEnrollmentRequest = '$auth/phone-enrollment/request';
   static const String phoneEnrollmentVerify = '$auth/phone-enrollment/verify';
+  /// Passwordless phone sign-in (unauthenticated): POST `/api/auth/phone/...`
+  ///
+  /// These are how a caller with no account and no token gets one, so they
+  /// MUST stay in [unauthenticatedAuthPaths] — otherwise the client attaches a
+  /// stale Bearer and clears the session on a 401 that only means "wrong code".
+  static const String phoneSignInRequest = '$auth/phone/request';
+  static const String phoneSignInVerify = '$auth/phone/verify';
+
   /// Password reset OTP flow (unauthenticated): POST `/api/password/...`
   static const String passwordResetOtp = 'password/reset-otp';
   static const String passwordVerifyOtp = 'password/verify-otp';
@@ -33,6 +41,8 @@ class ApiConstants {
     login,
     register,
     googleLogin,
+    phoneSignInRequest,
+    phoneSignInVerify,
     passwordResetOtp,
     passwordVerifyOtp,
     passwordResendOtp,

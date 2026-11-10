@@ -10,7 +10,14 @@
 ///   shorebird release android -- --dart-define-from-file=env/prod.json
 
 /// Production API (same default as the HudHud driver app).
-const String kDefaultApiBaseUrl = 'https://api.hudhuddelivery.com/api/';
+///
+/// NOTE: `api.hudhuddelivery.com` is DOWN — the hudhuddelivery.com domain is
+/// suspended at the registrar (clientHold + redemptionPeriod), so it no longer
+/// resolves. Any build that does not pass `--dart-define=BASE_URL=...` was
+/// talking to a dead host. The live API is served from the host below.
+///
+/// Change this back only once the domain is recovered AND confirmed resolving.
+const String kDefaultApiBaseUrl = 'https://deliveryapi.hudhudexpress.com/api/';
 
 const String _baseUrlDefine =
     String.fromEnvironment('BASE_URL', defaultValue: kDefaultApiBaseUrl);

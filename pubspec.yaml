@@ -27,6 +27,15 @@ dependencies:
   # HTTP Client
   dio: ^5.4.0
 
+  # Android SMS Retriever auto-read for passwordless sign-in codes.
+  # Android only; on iOS the code is offered by the keyboard instead, via
+  # autofillHints: [AutofillHints.oneTimeCode] on the field — no package needed.
+  # Also exposes SmsAutoFill().getAppSignature, which prints the 11-char app
+  # hash the backend must put on the last line of the SMS. That hash is per
+  # signing key: if the app is re-signed, auto-read silently stops working
+  # while the SMS still arrives, and the backend env must be updated.
+  sms_autofill: ^2.3.1
+
   # QPay QR rendering
   qr_flutter: ^4.1.0
 
