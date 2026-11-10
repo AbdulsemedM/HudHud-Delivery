@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,6 +11,7 @@ import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_co
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_brand_header.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_dark_scaffold.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_ui.dart';
+import 'package:hudhud_delivery/features/login/presentation/screen/phone_sign_in_test_screen.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/login_widget.dart';
 import 'package:hudhud_delivery/features/login/utils/phone_enrollment_navigation.dart';
 import 'package:hudhud_delivery/features/signup/presentation/screen/signup_screen.dart';
@@ -113,6 +115,19 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
+  /// Debug-only entry to the passwordless sign-in harness. The service has
+  /// already stored the session when this returns true, and a verified phone
+  /// means phone enrollment is not needed.
+  Future<void> _openPhoneSignInTest(BuildContext context) async {
+    final signedIn = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute<bool>(builder: (_) => const PhoneSignInTestScreen()),
+    );
+    if (signedIn == true) {
+      await _navigateAfterSuccess(phoneEnrollmentRequired: false);
+    }
+  }
+
   Future<void> _navigateAfterSuccess({
     required bool phoneEnrollmentRequired,
   }) async {
@@ -169,6 +184,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     const LoginForm(),
                     const SizedBox(height: 28),
                     _SignUpPrompt(onPressed: () => _openSignup(context)),
+                    if (kDebugMode) ...[
+                      const SizedBox(height: 16),
+                      OutlinedButton.icon(
+                        onPressed: () => _openPhoneSignInTest(context),
+                        icon: const Icon(Icons.sms_outlined),
+                        label: const Text('Sign in with SMS code (test)'),
+                      ),
+                    ],
                   ],
                 );
               },
