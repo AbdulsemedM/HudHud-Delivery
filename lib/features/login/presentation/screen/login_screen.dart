@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -184,14 +183,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     const LoginForm(),
                     const SizedBox(height: 28),
                     _SignUpPrompt(onPressed: () => _openSignup(context)),
-                    if (kDebugMode) ...[
-                      const SizedBox(height: 16),
-                      OutlinedButton.icon(
-                        onPressed: () => _openPhoneSignInTest(context),
-                        icon: const Icon(Icons.sms_outlined),
-                        label: const Text('Sign in with SMS code (test)'),
-                      ),
-                    ],
+                    const SizedBox(height: 16),
+                    OutlinedButton.icon(
+                      onPressed: () => _openPhoneSignInTest(context),
+                      icon: const Icon(Icons.sms_outlined),
+                      label: const Text('Sign in with SMS code (test)'),
+                    ),
                   ],
                 );
               },
