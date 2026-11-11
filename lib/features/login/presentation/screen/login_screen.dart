@@ -10,8 +10,9 @@ import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_co
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_brand_header.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_dark_scaffold.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_ui.dart';
-import 'package:hudhud_delivery/features/login/presentation/screen/phone_sign_in_test_screen.dart';
+// import 'package:hudhud_delivery/features/login/presentation/screen/phone_sign_in_test_screen.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/login_widget.dart';
+import 'package:hudhud_delivery/features/login/presentation/widgets/phone_sign_in_form.dart';
 import 'package:hudhud_delivery/features/login/utils/phone_enrollment_navigation.dart';
 import 'package:hudhud_delivery/features/signup/presentation/screen/signup_screen.dart';
 
@@ -114,18 +115,16 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
-  /// Debug-only entry to the passwordless sign-in harness. The service has
-  /// already stored the session when this returns true, and a verified phone
-  /// means phone enrollment is not needed.
-  Future<void> _openPhoneSignInTest(BuildContext context) async {
-    final signedIn = await Navigator.push<bool>(
-      context,
-      MaterialPageRoute<bool>(builder: (_) => const PhoneSignInTestScreen()),
-    );
-    if (signedIn == true) {
-      await _navigateAfterSuccess(phoneEnrollmentRequired: false);
-    }
-  }
+  // Debug-only entry to the passwordless sign-in harness (no longer shown).
+  // Future<void> _openPhoneSignInTest(BuildContext context) async {
+  //   final signedIn = await Navigator.push<bool>(
+  //     context,
+  //     MaterialPageRoute<bool>(builder: (_) => const PhoneSignInTestScreen()),
+  //   );
+  //   if (signedIn == true) {
+  //     await _navigateAfterSuccess(phoneEnrollmentRequired: false);
+  //   }
+  // }
 
   Future<void> _navigateAfterSuccess({
     required bool phoneEnrollmentRequired,
@@ -180,15 +179,24 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 32),
                     const LoginTitle(),
                     const SizedBox(height: 28),
-                    const LoginForm(),
+                    // Passwordless SMS-code sign-in is now the main login.
+                    PhoneSignInForm(
+                      onSignedIn: (_) =>
+                          _navigateAfterSuccess(phoneEnrollmentRequired: false),
+                    ),
+                    // Old email/phone + password login, disabled in favour of
+                    // passwordless sign-in. Restore by uncommenting.
+                    // const LoginForm(),
                     const SizedBox(height: 28),
                     _SignUpPrompt(onPressed: () => _openSignup(context)),
-                    const SizedBox(height: 16),
-                    OutlinedButton.icon(
-                      onPressed: () => _openPhoneSignInTest(context),
-                      icon: const Icon(Icons.sms_outlined),
-                      label: const Text('Sign in with SMS code (test)'),
-                    ),
+                    // Debug harness for passwordless sign-in — superseded by
+                    // PhoneSignInForm above.
+                    // const SizedBox(height: 16),
+                    // OutlinedButton.icon(
+                    //   onPressed: () => _openPhoneSignInTest(context),
+                    //   icon: const Icon(Icons.sms_outlined),
+                    //   label: const Text('Sign in with SMS code (test)'),
+                    // ),
                   ],
                 );
               },
