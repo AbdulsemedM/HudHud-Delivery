@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:hudhud_delivery/features/courier/utils/package_type_mapping.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
@@ -313,18 +314,27 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
     );
   }
 
-  String _mapPackageType(String itemType) {
-    const mapping = {
-      'Documents': 'document',
-      'Electronics/Gadgets': 'electronics',
-      'Food': 'food',
-      'Clothing': 'clothing',
-      'Books': 'books',
-      'Fragile': 'fragile',
-      'Other': 'other',
-    };
-    return mapping[itemType] ?? 'other';
-  }
+  /// Maps a catalogue item type to the API's `package_type` vocabulary.
+  ///
+  /// These are two different taxonomies and they must not be confused.
+  /// PackageItemCatalog is what a customer recognises when choosing what they
+  /// are sending; `package_type` is what RideMessengerController accepts:
+  ///
+  ///   in:document,parcel,food,grocery,electronics,other
+  ///
+  /// Clothing, Books and Fragile were passed straight through as 'clothing',
+  /// 'books' and 'fragile'. None of those are in that list, so the booking was
+  /// rejected with a 422 at the final step — including for Clothing and
+  /// Fragile, which Easy Mode offers on its first screen.
+  ///
+  /// They map to 'parcel', the API's generic physical-goods type. Fragility is
+  /// carried by `requires_signature` / `insurance_required` rather than by the
+  /// package type, so nothing is lost by not having a 'fragile' type.
+  ///
+  /// packageTypeContractTest covers every id in PackageItemCatalog.allIds
+  /// against [apiPackageTypes], so a new catalogue entry cannot reintroduce
+  /// this silently.
+  String _mapPackageType(String itemType) => mapPackageTypeForApi(itemType);
 
   String _mapPaymentMethod(String paymentType) {
     if (paymentType.isEmpty) return 'cash_on_delivery';
