@@ -7,20 +7,28 @@ name: CI — analyze and test
 # after merge — on the app customers order through.
 #
 # FLUTTER VERSION. `pubspec.yaml` declares `sdk: ">=3.1.0 <4.0.0"`, which
-# understates the real floor by a wide margin. `pubspec.lock` is the authority:
+# understates the real floor. `pubspec.lock` on this branch is the authority:
 #
 #   sdks:
-#     dart: ">=3.12.0 <4.0.0"
-#     flutter: ">=3.44.0"
+#     dart: ">=3.9.0 <4.0.0"
+#     flutter: ">=3.35.0"
 #
-# Flutter 3.44 is the release that shipped Dart 3.12, so 3.44.0 is both the
-# bottom of the window and the SDK this lockfile was resolved against.
+# CORRECTION. An earlier version of this comment quoted dart ">=3.12.0" and
+# flutter ">=3.44.0". Those are the numbers on `feat/passwordless-phone-signin`,
+# which was the checked-out branch when they were read — not this one. The pin
+# below is unchanged and still correct, but the stated reason was not, and the
+# two branches really do carry different locks.
+#
+# 3.44.0 is therefore ABOVE this branch's floor, deliberately. It satisfies
+# both locks, so CI keeps working when the passwordless branch merges and the
+# floor rises to 3.44.0. The green run on this branch — analyze plus 500 tests
+# — is what shows it resolves here.
 #
 # It is a pin rather than `channel: stable` because this project has a ceiling
 # as well as a floor. `intl: ^0.20.2` resolves `<0.21.0`, and a newer Flutter's
 # bundled `flutter_localizations` eventually requires a 0.21.x `intl`, at which
 # point `pub get` cannot resolve at all. The driver app hit exactly that wall
-# with `channel: stable`. Pinning the floor keeps CI inside the window.
+# with `channel: stable`. A pin keeps CI inside the window.
 #
 # Worth fixing `pubspec.yaml`'s `environment:` separately — as written it tells
 # a new developer to install a Flutter that cannot resolve this project.
