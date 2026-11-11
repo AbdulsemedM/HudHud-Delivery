@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,7 +10,7 @@ import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_co
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_brand_header.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_dark_scaffold.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_ui.dart';
-import 'package:hudhud_delivery/features/login/presentation/screen/phone_sign_in_test_screen.dart';
+import 'package:hudhud_delivery/features/phone_signin/presentation/screen/phone_sign_in_screen.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/login_widget.dart';
 import 'package:hudhud_delivery/features/login/utils/phone_enrollment_navigation.dart';
 import 'package:hudhud_delivery/features/signup/presentation/screen/signup_screen.dart';
@@ -115,15 +114,30 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
-  /// Debug-only entry to the passwordless sign-in harness. The service has
-  /// already stored the session when this returns true, and a verified phone
-  /// means phone enrollment is not needed.
-  Future<void> _openPhoneSignInTest(BuildContext context) async {
-    final signedIn = await Navigator.push<bool>(
+  /// Passwordless sign-in. PhoneSignInService has already stored the token and
+  /// user by the time [PhoneSignInScreen.onSignedIn] fires, so this only has to
+  /// route — the same routing password login uses, so nothing downstream can
+  /// tell how the session arrived.
+  ///
+  /// `phoneEnrollmentRequired: false` because the number was just proved by a
+  /// code; asking the customer to verify the phone they signed in with would be
+  /// the same check twice.
+  Future<void> _openPhoneSignIn(BuildContext context) async {
+    var signedIn = false;
+
+    await Navigator.push<void>(
       context,
-      MaterialPageRoute<bool>(builder: (_) => const PhoneSignInTestScreen()),
+      MaterialPageRoute<void>(
+        builder: (_) => PhoneSignInScreen(
+          onSignedIn: (_) {
+            signedIn = true;
+            Navigator.of(context).popUntil((route) => route.isFirst);
+          },
+        ),
+      ),
     );
-    if (signedIn == true) {
+
+    if (signedIn) {
       await _navigateAfterSuccess(phoneEnrollmentRequired: false);
     }
   }
@@ -184,14 +198,15 @@ class _LoginScreenState extends State<LoginScreen> {
                     const LoginForm(),
                     const SizedBox(height: 28),
                     _SignUpPrompt(onPressed: () => _openSignup(context)),
-                    if (kDebugMode) ...[
-                      const SizedBox(height: 16),
-                      OutlinedButton.icon(
-                        onPressed: () => _openPhoneSignInTest(context),
-                        icon: const Icon(Icons.sms_outlined),
-                        label: const Text('Sign in with SMS code (test)'),
-                      ),
-                    ],
+                    const SizedBox(height: 16),
+                    // Release builds too. This sat behind a debug-only guard
+                    // with the test harness behind it, which meant the whole
+                    // passwordless path existed but no customer could reach it.
+                    OutlinedButton.icon(
+                      onPressed: () => _openPhoneSignIn(context),
+                      icon: const Icon(Icons.sms_outlined),
+                      label: Text(context.l10n.enterSmsCode),
+                    ),
                   ],
                 );
               },
