@@ -578,15 +578,33 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                 ? widget.packageDescription
                 : widget.itemType,
           },
+          // Both keys here were wrong, and both failed silently.
+          //
+          // RideMessengerController validates `pickup_address.*` and
+          // `dropoff_address.*` with an explicit field list — place_id,
+          // formatted_address, address_line_1, neighborhood, sublocality,
+          // establishment, city, state, postal_code, country, latitude,
+          // longitude. `address` is not in it, and `delivery_address` is not a
+          // key the parcel path reads at all: ParcelBookingService reads
+          // `$input['dropoff_address']`. (`delivery_address` on Order is the
+          // food-order path's own column, which makes a grep for it look
+          // reassuring.)
+          //
+          // So the structured address never arrived. legacyAddress() found no
+          // `formatted_address` and fell back to the plain `pickup_location` /
+          // `dropoff_location` strings, and every booking reached the courier
+          // with a vague address on both ends.
           'pickup_address': {
+            'formatted_address': widget.pickupLocation,
+            'address_line_1': widget.pickupLocation,
             'latitude': widget.pickupPosition?.latitude ?? 0,
             'longitude': widget.pickupPosition?.longitude ?? 0,
-            'address': widget.pickupLocation,
           },
-          'delivery_address': {
+          'dropoff_address': {
+            'formatted_address': widget.deliveryLocation,
+            'address_line_1': widget.deliveryLocation,
             'latitude': widget.deliveryPosition?.latitude ?? 0,
             'longitude': widget.deliveryPosition?.longitude ?? 0,
-            'address': widget.deliveryLocation,
           },
         };
 
