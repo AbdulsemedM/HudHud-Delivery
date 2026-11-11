@@ -99,6 +99,8 @@ class _LoginScreenState extends State<LoginScreen> {
     return false;
   }
 
+  // Sign-up entry is hidden for now; kept so it can be restored.
+  // ignore: unused_element
   void _openSignup(BuildContext context) {
     Navigator.push<bool>(
       context,
@@ -187,8 +189,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     // Old email/phone + password login, disabled in favour of
                     // passwordless sign-in. Restore by uncommenting.
                     // const LoginForm(),
-                    const SizedBox(height: 28),
-                    _SignUpPrompt(onPressed: () => _openSignup(context)),
+                    // Sign-up section removed: passwordless sign-in creates
+                    // the account on first verify.
+                    // const SizedBox(height: 28),
+                    // _SignUpPrompt(onPressed: () => _openSignup(context)),
                     // Debug harness for passwordless sign-in — superseded by
                     // PhoneSignInForm above.
                     // const SizedBox(height: 16),
@@ -208,6 +212,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
+// ignore: unused_element
 class _SignUpPrompt extends StatelessWidget {
   const _SignUpPrompt({required this.onPressed});
 

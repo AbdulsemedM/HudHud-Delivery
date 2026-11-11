@@ -202,138 +202,126 @@ class _PhoneSignInFormState extends State<PhoneSignInForm> {
     });
   }
 
+  /// Same layout as the old password form: phone field, then the code field
+  /// where the password field used to be, a link row where "Remember me /
+  /// Forgot password" was, and the full-width primary button.
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 220),
-      child: _step == _SignInStep.phone
-          ? _buildPhoneStep(l10n)
-          : _buildCodeStep(l10n),
-    );
-  }
-
-  Widget _buildPhoneStep(AppLocalizations l10n) {
-    return Form(
-      key: _phoneFormKey,
-      child: Column(
-        key: const ValueKey('phone-step'),
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          AuthFieldLabel(l10n.phoneNumber),
-          AuthPhoneNumberField(
-            countryCode: _dialCode,
-            countryIsoCode: _countryIso,
-            numberController: _phoneController,
-            hintText: l10n.hintPhoneNational,
-            enabled: !_loading,
-            onCountryChanged: (Country country) {
-              setState(() {
-                _dialCode = '+${country.phoneCode}';
-                _countryIso = country.countryCode;
-              });
-            },
-            validator: (v) {
-              if (v == null || v.trim().isEmpty) {
-                return l10n.validationPhoneRequired;
-              }
-              final digits = cleanNationalPhoneDigits(v);
-              if (digits.length < 8 || digits.length > 12) {
-                return l10n.validationPhoneInvalid;
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 28),
-          AuthGradientButton(
-            label: l10n.phoneEnrollmentSendCode,
-            loading: _loading,
-            onPressed: _loading || _resendSeconds > 0 ? null : _requestCode,
-          ),
-          if (_resendSeconds > 0) ...[
-            const SizedBox(height: 14),
-            Center(
-              child: AuthPill(
-                label: l10n.phoneEnrollmentResendIn(_resendSeconds),
+    final onCode = _step == _SignInStep.code;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Form(
+          key: _phoneFormKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AuthFieldLabel(l10n.phoneNumber),
+              AuthPhoneNumberField(
+                countryCode: _dialCode,
+                countryIsoCode: _countryIso,
+                numberController: _phoneController,
+                hintText: l10n.hintPhoneNational,
+                enabled: !_loading && !onCode,
+                onCountryChanged: (Country country) {
+                  setState(() {
+                    _dialCode = '+${country.phoneCode}';
+                    _countryIso = country.countryCode;
+                  });
+                },
+                validator: (v) {
+                  if (v == null || v.trim().isEmpty) {
+                    return l10n.validationPhoneRequired;
+                  }
+                  final digits = cleanNationalPhoneDigits(v);
+                  if (digits.length < 8 || digits.length > 12) {
+                    return l10n.validationPhoneInvalid;
+                  }
+                  return null;
+                },
               ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCodeStep(AppLocalizations l10n) {
-    final displayPhone = _requestedPhone ?? _composedPhoneInput();
-    return Form(
-      key: _codeFormKey,
-      child: Column(
-        key: const ValueKey('code-step'),
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            l10n.phoneEnrollmentOtpSubtitle(displayPhone),
-            style: TextStyle(
-              fontSize: 15,
-              height: 1.5,
-              fontWeight: FontWeight.w600,
-              color: AuthScreenColors.textSecondaryOf(context),
-            ),
+            ],
           ),
+        ),
+        if (onCode) ...[
           const SizedBox(height: 20),
-          AuthFieldLabel(l10n.forgotPasswordOtpLabel),
-          AuthCodeField(
-            controller: _codeController,
-            length: _codeLength,
-            enabled: !_loading,
-            validator: (v) {
-              if ((v?.trim() ?? '').length != _codeLength) {
-                return l10n.validationOtpLength;
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 24),
-          AuthGradientButton(
-            label: l10n.phoneEnrollmentVerify,
-            loading: _loading,
-            onPressed: _loading ? null : _verify,
-          ),
-          const SizedBox(height: 16),
-          if (_resendSeconds > 0)
-            Center(
-              child: AuthPill(
-                label: l10n.phoneEnrollmentResendIn(_resendSeconds),
-              ),
-            )
-          else
-            Center(
-              child: TextButton.icon(
-                onPressed: _loading ? null : _requestCode,
-                style: _linkStyle(AuthScreenColors.orange),
-                icon: const Icon(Icons.refresh_rounded, size: 20),
-                label: Text(l10n.phoneEnrollmentResend),
-              ),
+          Form(
+            key: _codeFormKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AuthFieldLabel(l10n.forgotPasswordOtpLabel),
+                AuthCodeField(
+                  controller: _codeController,
+                  length: _codeLength,
+                  enabled: !_loading,
+                  validator: (v) {
+                    if ((v?.trim() ?? '').length != _codeLength) {
+                      return l10n.validationOtpLength;
+                    }
+                    return null;
+                  },
+                ),
+              ],
             ),
-          const SizedBox(height: 4),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: _resendSeconds > 0
+                    ? AuthPill(
+                        label: l10n.phoneEnrollmentResendIn(_resendSeconds),
+                      )
+                    : TextButton(
+                        onPressed: _loading ? null : _requestCode,
+                        style: _linkStyle(AuthScreenColors.orange),
+                        child: Text(l10n.phoneEnrollmentResend),
+                      ),
+              ),
+              const SizedBox(width: 8),
+              Flexible(
+                child: TextButton(
+                  onPressed: _loading ? null : _changeNumber,
+                  style: _linkStyle(AuthScreenColors.orange),
+                  child: Text(
+                    l10n.phoneEnrollmentChangeNumber,
+                    textAlign: TextAlign.end,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+        const SizedBox(height: 24),
+        AuthGradientButton(
+          label: onCode ? l10n.loginTitle : l10n.phoneEnrollmentSendCode,
+          loading: _loading,
+          onPressed: _loading
+              ? null
+              : onCode
+                  ? _verify
+                  : (_resendSeconds > 0 ? null : _requestCode),
+        ),
+        if (!onCode && _resendSeconds > 0) ...[
+          const SizedBox(height: 14),
           Center(
-            child: TextButton.icon(
-              onPressed: _loading ? null : _changeNumber,
-              style: _linkStyle(AuthScreenColors.textSecondaryOf(context)),
-              icon: const Icon(Icons.edit_rounded, size: 18),
-              label: Text(l10n.phoneEnrollmentChangeNumber),
+            child: AuthPill(
+              label: l10n.phoneEnrollmentResendIn(_resendSeconds),
             ),
           ),
         ],
-      ),
+      ],
     );
   }
 
   ButtonStyle _linkStyle(Color color) => TextButton.styleFrom(
         foregroundColor: color,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
         minimumSize: const Size(48, 48),
-        padding: const EdgeInsets.symmetric(horizontal: 14),
-        textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       );
 }
