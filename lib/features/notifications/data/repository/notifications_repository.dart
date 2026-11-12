@@ -48,9 +48,14 @@ class NotificationsRepository {
     }
     var result = NotificationsListResult.fromResponse(data);
     var notifications = result.notifications;
+    // /notifications is already scoped to the signed-in user and its items
+    // carry no user id, so `n.userId == userId` dropped every item (empty
+    // list while unread_count was 33). Only drop items that name another user.
     if (userId != null) {
-      notifications =
-          notifications.where((n) => n.userId == userId).toList();
+      notifications = notifications
+          // Missing user_id parses as 0.
+          .where((n) => n.userId == 0 || n.userId == userId)
+          .toList();
     }
     notifications = _dedupeDeliveryNotifications(notifications);
     return NotificationsListResult(

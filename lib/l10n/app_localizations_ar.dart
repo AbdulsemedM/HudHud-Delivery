@@ -1849,13 +1849,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get labelDate => 'التاريخ';
 
   @override
-  String get hintDateFormat => 'DD/MM/YYYY';
+  String get hintDateFormat => 'يوم/شهر/سنة';
 
   @override
   String get labelTime => 'الوقت';
 
   @override
-  String get hintTimeFormat => 'HH:MM';
+  String get hintTimeFormat => 'ساعة:دقيقة';
 
   @override
   String get meridiemAm => 'ص';
@@ -1936,7 +1936,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get labelEstimatedCostOptional => 'التكلفة التقديرية (اختياري)';
 
   @override
-  String get hintCostExample => 'e.g. 100';
+  String get hintCostExample => 'مثال: 100';
 
   @override
   String get handymanSkillsNeeded => 'المهارات المطلوبة';
@@ -1966,7 +1966,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get labelEstimatedHoursOptional => 'الساعات التقديرية (اختياري)';
 
   @override
-  String get hintHoursExample => 'e.g. 2';
+  String get hintHoursExample => 'مثال: 2';
 
   @override
   String get handymanCreateRequestCta => 'إنشاء طلب';
@@ -2817,38 +2817,37 @@ class AppLocalizationsAr extends AppLocalizations {
   String get handymanComingSoonTeaser2 => 'إصلاحات منزلية';
 
   @override
-  String get ordersComingSoonTitle => 'Your order hub is on the way';
+  String get ordersComingSoonTitle => 'مركز طلباتك في الطريق';
 
   @override
   String get ordersComingSoonSubtitle =>
-      'Track every delivery, reorder in one tap, and keep receipts in one place — launching soon.';
+      'تتبّع كل توصيل، وأعد الطلب بلمسة واحدة، واحتفظ بالإيصالات في مكان واحد — قريباً.';
 
   @override
-  String get ordersComingSoonTeaser1 => 'Live tracking';
+  String get ordersComingSoonTeaser1 => 'تتبّع مباشر';
 
   @override
-  String get ordersComingSoonTeaser2 => 'One-tap reorder';
+  String get ordersComingSoonTeaser2 => 'إعادة الطلب بلمسة';
 
   @override
-  String get ordersComingSoonTeaser3 => 'Digital receipts';
+  String get ordersComingSoonTeaser3 => 'إيصالات رقمية';
 
   @override
   String get ordersComingSoonStep1 =>
-      'Courier deliveries on Home — available now';
+      'توصيلات الساعي في الصفحة الرئيسية — متاحة الآن';
 
   @override
-  String get ordersComingSoonStep2 =>
-      'Unified order timeline across all services';
+  String get ordersComingSoonStep2 => 'خط زمني موحّد للطلبات عبر جميع الخدمات';
 
   @override
-  String get ordersComingSoonStep3 => 'Smart reorder and saved favourites';
+  String get ordersComingSoonStep3 => 'إعادة طلب ذكية ومفضّلات محفوظة';
 
   @override
-  String get ordersComingSoonCta => 'Send a delivery now';
+  String get ordersComingSoonCta => 'أرسل توصيلاً الآن';
 
   @override
   String get ordersComingSoonFootnote =>
-      'Need a package delivered today? Use Courier on the Home tab.';
+      'تحتاج توصيل طرد اليوم؟ استخدم الساعي في تبويب الرئيسية.';
 
   @override
   String get pleaseEnterValidSenderPhone =>
@@ -3028,303 +3027,299 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get courierFindingNearestDrivers =>
-      'Finding the nearest available drivers';
+      'جارٍ البحث عن أقرب السائقين المتاحين';
 
   @override
   String get courierFindingNearestDriversSubtitle =>
-      'We are finding the nearest available driver. Live driver location appears only after acceptance.';
+      'نبحث عن أقرب سائق متاح. يظهر موقع السائق المباشر فقط بعد قبوله الطلب.';
 
   @override
-  String get courierDriverLocationUpdating => 'Driver location is updating';
+  String get courierDriverLocationUpdating => 'جارٍ تحديث موقع السائق';
 
   @override
-  String get phoneEnrollmentTitle => 'Add your phone number';
+  String get phoneEnrollmentTitle => 'أضف رقم هاتفك';
 
   @override
   String get phoneEnrollmentSubtitle =>
-      'We need a verified mobile number for deliveries, wallet, and account security.';
+      'نحتاج إلى رقم جوال موثّق للتوصيلات والمحفظة وأمان الحساب.';
 
   @override
-  String get phoneEnrollmentOtpTitle => 'Verify your phone';
+  String get phoneEnrollmentOtpTitle => 'تحقق من هاتفك';
 
   @override
   String phoneEnrollmentOtpSubtitle(String phone) {
-    return 'Enter the 6-digit code sent to $phone.';
+    return 'أدخل الرمز المكوّن من 6 أرقام المرسل إلى $phone.';
   }
 
   @override
-  String get phoneEnrollmentSendCode => 'Send code';
+  String get phoneEnrollmentSendCode => 'إرسال الرمز';
 
   @override
-  String get phoneEnrollmentVerify => 'Verify';
+  String get phoneEnrollmentVerify => 'تحقق';
 
   @override
-  String get phoneEnrollmentResend => 'Resend code';
+  String get phoneEnrollmentResend => 'إعادة إرسال الرمز';
 
   @override
   String phoneEnrollmentResendIn(int seconds) {
-    return 'Resend in ${seconds}s';
+    return 'إعادة الإرسال خلال $seconds ث';
   }
 
   @override
-  String get phoneEnrollmentContactSupport => 'Contact support';
+  String get phoneEnrollmentContactSupport => 'تواصل مع الدعم';
 
   @override
-  String get phoneEnrollmentSignOut => 'Sign out';
+  String get phoneEnrollmentSignOut => 'تسجيل الخروج';
 
   @override
-  String get phoneEnrollmentChangeNumber => 'Change phone number';
+  String get phoneEnrollmentChangeNumber => 'تغيير رقم الهاتف';
 
   @override
-  String get phoneEnrollmentRetry => 'Try again';
+  String get phoneEnrollmentRetry => 'حاول مرة أخرى';
 
   @override
-  String get phoneEnrollmentPhoneInvalid =>
-      'Enter a valid Ethiopian mobile number.';
+  String get phoneEnrollmentPhoneInvalid => 'أدخل رقم جوال إثيوبي صالحاً.';
 
   @override
   String get phoneEnrollmentPhoneInUse =>
-      'This number is already linked to another HudHud account.';
+      'هذا الرقم مرتبط بالفعل بحساب HudHud آخر.';
 
   @override
   String get phoneEnrollmentChangeRequiresSupport =>
-      'This verified number can only be changed with support help.';
+      'لا يمكن تغيير هذا الرقم الموثّق إلا بمساعدة الدعم.';
 
   @override
-  String get phoneEnrollmentCooldown =>
-      'Please wait before requesting another code.';
+  String get phoneEnrollmentCooldown => 'يرجى الانتظار قبل طلب رمز آخر.';
 
   @override
   String get phoneEnrollmentRateLimited =>
-      'Too many attempts. Please try again later.';
+      'محاولات كثيرة جداً. يرجى المحاولة لاحقاً.';
 
   @override
   String get phoneEnrollmentDeliveryFailed =>
-      'We could not send the SMS. Please try again.';
+      'تعذّر إرسال الرسالة النصية. يرجى المحاولة مرة أخرى.';
 
   @override
-  String get phoneEnrollmentNotPending =>
-      'Request a new verification code to continue.';
+  String get phoneEnrollmentNotPending => 'اطلب رمز تحقق جديداً للمتابعة.';
 
   @override
   String get phoneEnrollmentCodeExpired =>
-      'This code has expired. Request a new one.';
+      'انتهت صلاحية هذا الرمز. اطلب رمزاً جديداً.';
 
   @override
   String get phoneEnrollmentCodeInvalid =>
-      'That code is incorrect. Please try again.';
+      'الرمز غير صحيح. يرجى المحاولة مرة أخرى.';
 
   @override
   String get phoneEnrollmentGenericError =>
-      'Something went wrong. Please try again.';
+      'حدث خطأ ما. يرجى المحاولة مرة أخرى.';
 
   @override
-  String get whatAreYouSending => 'What are you sending';
+  String get whatAreYouSending => 'ماذا ترسل';
 
   @override
-  String get selectItemTypeHint => 'Select type of item';
+  String get selectItemTypeHint => 'اختر نوع الغرض';
 
   @override
-  String get senderInformation => 'Sender information';
+  String get senderInformation => 'معلومات المرسل';
 
   @override
-  String get senderPhoneLabel => 'Sender phone (09xxxxxxxx)';
+  String get senderPhoneLabel => 'هاتف المرسل (09xxxxxxxx)';
 
   @override
   String get senderPhoneExample => '0912345678';
 
   @override
-  String get recipientInformation => 'Who receives this';
+  String get recipientInformation => 'من سيستلمه';
 
   @override
-  String get takePackagePhoto => 'Take a picture of the package';
+  String get takePackagePhoto => 'التقط صورة للطرد';
 
   @override
-  String get packagePhotoAdded => 'Package photo added';
+  String get packagePhotoAdded => 'تمت إضافة صورة الطرد';
 
   @override
-  String get changePackagePhoto => 'Change photo';
+  String get changePackagePhoto => 'تغيير الصورة';
 
   @override
-  String get itemTypeElectronics => 'Electronics';
+  String get itemTypeElectronics => 'إلكترونيات';
 
   @override
-  String get itemTypeDocuments => 'Documents';
+  String get itemTypeDocuments => 'مستندات';
 
   @override
-  String get itemTypeFood => 'Food';
+  String get itemTypeFood => 'طعام';
 
   @override
-  String get itemTypeClothing => 'Clothes';
+  String get itemTypeClothing => 'ملابس';
 
   @override
-  String get itemTypeBooks => 'Books';
+  String get itemTypeBooks => 'كتب';
 
   @override
-  String get itemTypeFragile => 'Fragile';
+  String get itemTypeFragile => 'قابل للكسر';
 
   @override
-  String get itemTypeOther => 'Other';
+  String get itemTypeOther => 'أخرى';
 
   @override
-  String get callSupport => 'Call for help';
+  String get callSupport => 'اتصل للمساعدة';
 
   @override
-  String get orderByCall => 'Order by phone';
+  String get orderByCall => 'اطلب عبر الهاتف';
 
   @override
-  String get orderByCallSubtitle =>
-      'We will help you create the delivery on a call';
+  String get orderByCallSubtitle => 'سنساعدك في إنشاء طلب التوصيل عبر مكالمة';
 
   @override
-  String get easyMode => 'Easy mode';
+  String get easyMode => 'الوضع السهل';
 
   @override
-  String get easyModeSubtitle => 'Bigger buttons, pictures, and spoken help';
+  String get easyModeSubtitle => 'أزرار أكبر وصور ومساعدة صوتية';
 
   @override
-  String get navMyDeliveries => 'My deliveries';
+  String get navMyDeliveries => 'توصيلاتي';
 
   @override
-  String get navMe => 'Me';
+  String get navMe => 'حسابي';
 
   @override
-  String get courierNowTitle => 'Now';
+  String get courierNowTitle => 'الآن';
 
   @override
-  String get courierNowSubtitle => 'Send right away';
+  String get courierNowSubtitle => 'أرسل فوراً';
 
   @override
-  String get courierLaterTitle => 'Later';
+  String get courierLaterTitle => 'لاحقاً';
 
   @override
-  String get courierLaterSubtitle => 'Pick a day and time';
+  String get courierLaterSubtitle => 'اختر اليوم والوقت';
 
   @override
-  String get homeMoreServices => 'More';
+  String get homeMoreServices => 'المزيد';
 
   @override
-  String get homeHideMoreServices => 'Hide';
+  String get homeHideMoreServices => 'إخفاء';
 
   @override
-  String get homeSendPackage => 'Send a package';
+  String get homeSendPackage => 'أرسل طرداً';
 
   @override
-  String get easyPickupTitle => 'Where to pick up?';
+  String get easyPickupTitle => 'من أين الاستلام؟';
 
   @override
   String get easyPickupHint =>
-      'Move the map. Put the pin on the pickup place. Or search for an address below.';
+      'حرّك الخريطة. ضع الدبوس على مكان الاستلام. أو ابحث عن عنوان بالأسفل.';
 
   @override
-  String get easyDropTitle => 'Where to deliver?';
+  String get easyDropTitle => 'إلى أين التوصيل؟';
 
   @override
   String get easyDropHint =>
-      'Search for the delivery address first. Then drag the map to fine-tune the pin.';
+      'ابحث عن عنوان التوصيل أولاً. ثم اسحب الخريطة لضبط الدبوس بدقة.';
 
   @override
-  String get easyIAmHere => 'I am here';
+  String get easyIAmHere => 'أنا هنا';
 
   @override
-  String get easyUseThisPlace => 'Use this place';
+  String get easyUseThisPlace => 'استخدم هذا المكان';
 
   @override
-  String get easyWhoReceives => 'Who gets the package?';
+  String get easyWhoReceives => 'من سيستلم الطرد؟';
 
   @override
-  String get easyPickContact => 'Pick from contacts';
+  String get easyPickContact => 'اختر من جهات الاتصال';
 
   @override
-  String get easyOrTypePhone => 'Or enter name and phone';
+  String get easyOrTypePhone => 'أو أدخل الاسم والهاتف';
 
   @override
-  String get easyWhatIsIt => 'What are you sending?';
+  String get easyWhatIsIt => 'ماذا ترسل؟';
 
   @override
-  String get easyPackageSize => 'How big is it?';
+  String get easyPackageSize => 'ما حجمه؟';
 
   @override
-  String get easySizeSmall => 'Small';
+  String get easySizeSmall => 'صغير';
 
   @override
-  String get easySizeMedium => 'Medium';
+  String get easySizeMedium => 'متوسط';
 
   @override
-  String get easySizeLarge => 'Large';
+  String get easySizeLarge => 'كبير';
 
   @override
-  String get easyConfirmTitle => 'Check your delivery';
+  String get easyConfirmTitle => 'راجع طلب التوصيل';
 
   @override
-  String get easyConfirmPlay => 'Hear summary';
+  String get easyConfirmPlay => 'استمع إلى الملخص';
 
   @override
   String easyConfirmSummary(
       String pickup, String dropoff, String item, String recipient) {
-    return 'From $pickup to $dropoff. Package: $item. For $recipient.';
+    return 'من $pickup إلى $dropoff. الطرد: $item. إلى $recipient.';
   }
 
   @override
-  String get easySpeakHint => 'Listen';
+  String get easySpeakHint => 'استمع';
 
   @override
-  String get pleaseAddPackagePhoto => 'Please take a photo of the package';
+  String get pleaseAddPackagePhoto => 'يرجى التقاط صورة للطرد';
 
   @override
-  String get pleaseSelectPackageSize => 'Please choose how big the package is';
+  String get pleaseSelectPackageSize => 'يرجى اختيار حجم الطرد';
 
   @override
   String get pleaseEnterValidRecipientPhone =>
-      'Please enter a valid recipient phone (09xxxxxxxx)';
+      'يرجى إدخال رقم هاتف صالح للمستلم (09xxxxxxxx)';
 
   @override
-  String get voiceNoteOptional => 'Add a voice note (optional)';
+  String get voiceNoteOptional => 'أضف ملاحظة صوتية (اختياري)';
 
   @override
-  String get voiceNoteRecordHint => 'Hold to record a message for the courier';
+  String get voiceNoteRecordHint => 'اضغط مطولاً لتسجيل رسالة للساعي';
 
   @override
-  String get voiceNoteAttached => 'Voice note added';
+  String get voiceNoteAttached => 'تمت إضافة الملاحظة الصوتية';
 
   @override
-  String get voiceNoteClear => 'Remove voice note';
+  String get voiceNoteClear => 'إزالة الملاحظة الصوتية';
 
   @override
-  String get trackingStatusSearching => 'Looking for a courier';
+  String get trackingStatusSearching => 'جارٍ البحث عن ساعٍ';
 
   @override
-  String get trackingStatusOnTheWay => 'Courier is coming';
+  String get trackingStatusOnTheWay => 'الساعي في الطريق إليك';
 
   @override
-  String get trackingStatusArrived => 'Courier has arrived';
+  String get trackingStatusArrived => 'وصل الساعي';
 
   @override
-  String get trackingStatusDone => 'Delivery finished';
+  String get trackingStatusDone => 'اكتمل التوصيل';
 
   @override
-  String get pleaseSelectLocation => 'Please choose a place on the map';
+  String get pleaseSelectLocation => 'يرجى اختيار مكان على الخريطة';
 
   @override
   String get contactsPermissionRequired =>
-      'Allow contacts to pick who receives the package';
+      'اسمح بالوصول إلى جهات الاتصال لاختيار مستلم الطرد';
 
   @override
-  String get couldNotOpenContacts => 'Could not open contacts';
+  String get couldNotOpenContacts => 'تعذّر فتح جهات الاتصال';
 
   @override
   String easyStepOf(int current, int total) {
-    return 'Step $current of $total';
+    return 'الخطوة $current من $total';
   }
 
   @override
-  String get paymentCash => 'Cash';
+  String get paymentCash => 'نقداً';
 
   @override
-  String get paymentWallet => 'Wallet';
+  String get paymentWallet => 'المحفظة';
 
   @override
-  String get paymentCard => 'Card';
+  String get paymentCard => 'بطاقة';
 
   @override
   String get growthPromoTitle => 'رمز الخصم';
@@ -4278,4 +4273,44 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get p12ErrSessionExpired => 'انتهت جلستك. يرجى تسجيل الدخول مرة أخرى.';
+
+  @override
+  String get trackingStatusCancelled => 'تم إلغاء التوصيل';
+
+  @override
+  String get trackingStatusDelivering => 'طردك في الطريق';
+
+  @override
+  String get deliveryStatusSearching => 'جارٍ البحث عن ساعٍ';
+
+  @override
+  String get deliveryStatusAssigned => 'تم تعيين الساعي';
+
+  @override
+  String get deliveryStatusToPickup => 'الساعي في الطريق';
+
+  @override
+  String get deliveryStatusAtPickup => 'الساعي في موقع الاستلام';
+
+  @override
+  String get deliveryStatusOnTheWay => 'في الطريق';
+
+  @override
+  String get deliveryStatusAtDropoff => 'الساعي في موقع التسليم';
+
+  @override
+  String get deliveryStatusFailed => 'فشل';
+
+  @override
+  String get deliveryStatusReturned => 'تمت الإعادة';
+
+  @override
+  String get checkoutStoreNoBranch =>
+      'هذا المتجر غير مهيأ للتوصيل بعد. يرجى تجربة متجر آخر.';
+
+  @override
+  String get checkoutTotalExcludesDelivery => 'رسوم التوصيل غير مشمولة بعد';
+
+  @override
+  String get parcelPaidByRecipientCash => 'نقدًا، يدفعها المستلم عند التسليم';
 }

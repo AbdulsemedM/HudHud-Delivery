@@ -42,7 +42,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
         currentFilter: event.status,
       ));
     } catch (e) {
-      emit(OrdersError(e.toString()));
+      emit(_errorFrom(e));
     }
   }
 
@@ -80,8 +80,9 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
           hasReachedMax: newOrdersResponse.data.length < 15,
           currentPage: currentState.currentPage + 1,
         ));
-      } catch (e) {
-        emit(OrdersError(e.toString()));
+      } catch (_) {
+        // Keep what is already on screen; the next scroll retries.
+        emit(currentState);
       }
     }
   }
@@ -114,7 +115,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
         // Keep last good snapshot on poll failure.
         emit(keep);
       } else {
-        emit(OrdersError(e.toString()));
+        emit(_errorFrom(e));
       }
     }
   }
@@ -139,7 +140,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
       // Refresh orders list
       add(const RefreshOrdersEvent());
     } catch (e) {
-      emit(OrdersError(e.toString()));
+      emit(_errorFrom(e));
     }
   }
 
@@ -161,7 +162,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
         emit(const OrdersError('Failed to rate order'));
       }
     } catch (e) {
-      emit(OrdersError(e.toString()));
+      emit(_errorFrom(e));
     }
   }
 
@@ -170,5 +171,12 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
     Emitter<OrdersState> emit,
   ) async {
     add(FetchOrdersEvent(page: 1, status: event.status));
+  }
+
+  static OrdersError _errorFrom(Object e) {
+    if (e is OrdersRepositoryException) {
+      return OrdersError(e.message, statusCode: e.statusCode);
+    }
+    return OrdersError(e.toString());
   }
 }

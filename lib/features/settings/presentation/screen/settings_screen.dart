@@ -53,7 +53,7 @@ import 'notifications_screen.dart';
 import 'edit_profile_screen.dart';
 import 'personal_details_screen.dart';
 import 'terms_conditions_screen.dart';
-// import 'package:hudhud_delivery/features/wishlist/presentation/screen/wishlist_screen.dart';
+import 'package:hudhud_delivery/features/wishlist/presentation/screen/wishlist_screen.dart';
 // import 'package:hudhud_delivery/features/tips/presentation/screens/tips_history_screen.dart';
 
 // String _themeModeLabel(AppLocalizations l10n, ThemeController themeController) {
@@ -738,20 +738,21 @@ class _SettingsScreenState extends State<SettingsScreen>
                         },
                       ),
                       const _ProfileTileDivider(),
-                      // TODO: restore when Wishlist launches
-                      // _ProfileMenuTile(
-                      //   icon: Icons.favorite_outline,
-                      //   title: l10n.profileMenuFavorites,
-                      //   onTap: () {
-                      //     Navigator.push(
-                      //       context,
-                      //       MaterialPageRoute(
-                      //         builder: (context) => const WishlistScreen(),
-                      //       ),
-                      //     );
-                      //   },
-                      // ),
-                      // const _ProfileTileDivider(),
+                      // Items can already be hearted on product cards, so
+                      // the saved list must be reachable.
+                      _ProfileMenuTile(
+                        icon: Icons.favorite_outline,
+                        title: l10n.profileMenuFavorites,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const WishlistScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      const _ProfileTileDivider(),
                       // TODO: restore when Tip history launches
                       // _ProfileMenuTile(
                       //   icon: Icons.volunteer_activism_outlined,

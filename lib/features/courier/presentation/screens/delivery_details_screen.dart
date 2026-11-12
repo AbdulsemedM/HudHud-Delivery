@@ -1,3 +1,4 @@
+import 'package:hudhud_delivery/core/utils/localized_date.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
@@ -99,32 +100,7 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
     return resolveDeliveryStatusLabel(d);
   }
 
-  String _formatDate(dynamic value) {
-    if (value == null) return '—';
-    final str = value.toString();
-    try {
-      final dt = DateTime.tryParse(str);
-      if (dt != null) {
-        const months = [
-          'January',
-          'February',
-          'March',
-          'April',
-          'May',
-          'June',
-          'July',
-          'August',
-          'September',
-          'October',
-          'November',
-          'December',
-        ];
-        return '${months[dt.month - 1]} ${dt.day}, ${dt.year} '
-            '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
-      }
-    } catch (_) {}
-    return str;
-  }
+  String _formatDate(dynamic value) => context.formatDateTime(value);
 
   String _formatCost(Map<String, dynamic> d) {
     final cost = d['estimated_cost'];

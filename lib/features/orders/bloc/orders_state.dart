@@ -114,8 +114,12 @@ final class OrdersError extends OrdersState {
   final String message;
   final List<OrderModel> orders;
 
-  const OrdersError(this.message, {this.orders = const []});
+  /// HTTP status behind the failure, when known (403 = no access,
+  /// null = network / unexpected).
+  final int? statusCode;
+
+  const OrdersError(this.message, {this.orders = const [], this.statusCode});
 
   @override
-  List<Object?> get props => [message, orders];
+  List<Object?> get props => [message, orders, statusCode];
 }
