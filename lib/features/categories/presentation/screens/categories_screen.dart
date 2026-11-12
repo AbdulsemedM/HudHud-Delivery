@@ -632,7 +632,6 @@ class _CategoryCheckoutBar extends StatelessWidget {
                     formatMoneyAmount(
                       totalPrice,
                       currency: MarketController.catalogCurrency,
-                      fractionDigits: 1,
                     ),
                     maxLines: 1,
                     style: TextStyle(

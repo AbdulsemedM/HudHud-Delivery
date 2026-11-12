@@ -1902,5 +1902,18 @@
   "p12ErrNetwork": "No internet connection. Check your connection and try again.",
   "p12ErrTimeout": "The connection is slow. Please try again.",
   "p12ErrServer": "Something went wrong on our side. Please try again in a moment.",
-  "p12ErrSessionExpired": "Your session has expired. Please log in again."
+  "p12ErrSessionExpired": "Your session has expired. Please log in again.",
+  "trackingStatusCancelled": "Delivery cancelled",
+  "trackingStatusDelivering": "Your package is on its way",
+  "deliveryStatusSearching": "Finding a courier",
+  "deliveryStatusAssigned": "Courier assigned",
+  "deliveryStatusToPickup": "Courier on the way",
+  "deliveryStatusAtPickup": "Courier at pickup",
+  "deliveryStatusOnTheWay": "On the way",
+  "deliveryStatusAtDropoff": "Courier at drop-off",
+  "deliveryStatusFailed": "Failed",
+  "deliveryStatusReturned": "Returned",
+  "checkoutStoreNoBranch": "This store isn't set up for delivery yet. Please try another store.",
+  "checkoutTotalExcludesDelivery": "Delivery fee not included yet",
+  "parcelPaidByRecipientCash": "Cash, paid by the recipient on delivery"
 }

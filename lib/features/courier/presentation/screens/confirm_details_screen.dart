@@ -950,9 +950,13 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
           final itemLabel = PackageItemCatalog.allIds.contains(widget.itemType)
               ? PackageItemCatalog.labelFor(widget.itemType, l10n)
               : widget.itemType;
+          // Say who pays, not only how: the sender was not told the
+          // recipient will be asked for cash.
           final paymentLabel = _isWalletPayment
               ? l10n.paymentWallet
-              : l10n.paymentCashOnDelivery;
+              : (widget.whoPays == 'recipient'
+                  ? l10n.parcelPaidByRecipientCash
+                  : l10n.paymentCashOnDelivery);
           final scheduledAt = widget.scheduledPickup;
           final materialL10n = MaterialLocalizations.of(context);
           final scheduledText = scheduledAt == null
@@ -1193,7 +1197,9 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                                                     label:
                                                         'Recipient contact number',
                                                     value:
-                                                        widget.recipientPhone,
+                                                        formatPhoneForDisplay(
+                                                      widget.recipientPhone,
+                                                    ),
                                                   ),
                                                   const _Hairline(),
                                                   _DetailRow(

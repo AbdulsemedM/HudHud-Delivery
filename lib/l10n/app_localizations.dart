@@ -7940,6 +7940,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your session has expired. Please log in again.'**
   String get p12ErrSessionExpired;
+
+  /// No description provided for @trackingStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery cancelled'**
+  String get trackingStatusCancelled;
+
+  /// No description provided for @trackingStatusDelivering.
+  ///
+  /// In en, this message translates to:
+  /// **'Your package is on its way'**
+  String get trackingStatusDelivering;
+
+  /// No description provided for @deliveryStatusSearching.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding a courier'**
+  String get deliveryStatusSearching;
+
+  /// No description provided for @deliveryStatusAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Courier assigned'**
+  String get deliveryStatusAssigned;
+
+  /// No description provided for @deliveryStatusToPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Courier on the way'**
+  String get deliveryStatusToPickup;
+
+  /// No description provided for @deliveryStatusAtPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Courier at pickup'**
+  String get deliveryStatusAtPickup;
+
+  /// No description provided for @deliveryStatusOnTheWay.
+  ///
+  /// In en, this message translates to:
+  /// **'On the way'**
+  String get deliveryStatusOnTheWay;
+
+  /// No description provided for @deliveryStatusAtDropoff.
+  ///
+  /// In en, this message translates to:
+  /// **'Courier at drop-off'**
+  String get deliveryStatusAtDropoff;
+
+  /// No description provided for @deliveryStatusFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get deliveryStatusFailed;
+
+  /// No description provided for @deliveryStatusReturned.
+  ///
+  /// In en, this message translates to:
+  /// **'Returned'**
+  String get deliveryStatusReturned;
+
+  /// No description provided for @checkoutStoreNoBranch.
+  ///
+  /// In en, this message translates to:
+  /// **'This store isn\'t set up for delivery yet. Please try another store.'**
+  String get checkoutStoreNoBranch;
+
+  /// No description provided for @checkoutTotalExcludesDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery fee not included yet'**
+  String get checkoutTotalExcludesDelivery;
+
+  /// No description provided for @parcelPaidByRecipientCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash, paid by the recipient on delivery'**
+  String get parcelPaidByRecipientCash;
 }
 
 class _AppLocalizationsDelegate

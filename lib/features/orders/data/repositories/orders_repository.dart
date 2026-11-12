@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import '../models/order_cancel_result.dart';
 import '../models/order_model.dart';
 import '../models/order_tracking_model.dart';
@@ -86,13 +88,20 @@ class OrdersRepositoryImpl implements OrdersRepository {
         }
         throw const OrdersRepositoryException('Invalid orders response');
       } else {
+        final status = response['statusCode'] as int?;
+        if (kDebugMode && status == 403) {
+          // ApiService replaces the 403 text with a generic one; keep the
+          // server's own reason visible for backend diagnosis.
+          debugPrint('GET customer/orders 403 body: ${response['data']}');
+        }
         throw OrdersRepositoryException(
-            response['errorMessage'] ?? 'Failed to fetch orders');
+          response['errorMessage'] ?? 'Failed to fetch orders',
+          statusCode: status,
+        );
       }
     } catch (e) {
       if (e is OrdersRepositoryException) rethrow;
-      throw OrdersRepositoryException(
-          'Failed to fetch orders: ${e.toString()}');
+      throw const OrdersRepositoryException('Could not load your orders.');
     }
   }
 
@@ -190,8 +199,15 @@ class OrdersRepositoryImpl implements OrdersRepository {
 class OrdersRepositoryException implements Exception {
   final String message;
 
-  const OrdersRepositoryException(this.message);
+  /// HTTP status from the API when the failure came from a response
+  /// (403 → access, null → no response / parse failure).
+  final int? statusCode;
 
+  const OrdersRepositoryException(this.message, {this.statusCode});
+
+  bool get isForbidden => statusCode == 403;
+
+  /// Plain message: this text is shown to users as-is, so no class prefix.
   @override
-  String toString() => 'OrdersRepositoryException: $message';
+  String toString() => message;
 }

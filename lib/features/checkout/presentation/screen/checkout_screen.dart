@@ -851,6 +851,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     _quoteLoading = false;
   }
 
+  /// Returns null when the store has no usable branch. Throws when the
+  /// branch list could not be loaded, so a network failure is not reported
+  /// as "no delivery branch".
   Future<int?> _resolveBranchId() async {
     final cached = _branchId ?? _cart.selectedBranchId;
     if (cached != null && cached > 0) {
@@ -863,22 +866,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final lng = _deliveryLongitude;
     if (vendorId == null || lat == null || lng == null) return null;
 
-    try {
-      final branches =
-          await _branchesRepository.getBranches(vendorId: vendorId);
-      final nearest = pickNearestActiveBranch(
-        branches: branches,
-        latitude: lat,
-        longitude: lng,
-      );
-      if (nearest == null) return null;
-      _branchId = nearest.id;
-      _branchName = nearest.name;
-      _cart.setSelectedBranchId(nearest.id);
-      return nearest.id;
-    } catch (_) {
-      return null;
-    }
+    final branches = await _branchesRepository.getBranches(vendorId: vendorId);
+    final nearest = pickNearestActiveBranch(
+      branches: branches,
+      latitude: lat,
+      longitude: lng,
+    );
+    if (nearest == null) return null;
+    _branchId = nearest.id;
+    _branchName = nearest.name;
+    _cart.setSelectedBranchId(nearest.id);
+    return nearest.id;
   }
 
   Future<void> _refreshDeliveryFeeQuote({bool force = false}) async {
@@ -906,16 +904,23 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       });
     }
 
-    final branchId = await _resolveBranchId();
+    int? branchId;
+    try {
+      branchId = await _resolveBranchId();
+    } catch (_) {
+      if (!mounted || requestId != _quoteRequestId) return;
+      setState(() {
+        _invalidateQuote(error: context.l10n.p12ErrNetwork, retryable: true);
+      });
+      return;
+    }
     if (!mounted || requestId != _quoteRequestId) return;
 
     if (branchId == null || branchId <= 0) {
       setState(() {
-        _invalidateQuote(
-          error:
-              'No delivery branch is available for this restaurant. Try another store.',
-          retryable: true,
-        );
+        // The store has no branch (or none with a location) on the server.
+        // Retrying cannot fix that, so no Retry button.
+        _invalidateQuote(error: context.l10n.checkoutStoreNoBranch);
       });
       return;
     }

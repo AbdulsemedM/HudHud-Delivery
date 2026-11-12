@@ -1,3 +1,4 @@
+import 'package:hudhud_delivery/core/utils/localized_date.dart';
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/widgets/status_chip.dart';
@@ -131,29 +132,6 @@ class DeliveryHistoryCard extends StatelessWidget {
   }
 }
 
-String formatDeliveryHistoryDate(dynamic value) {
-  if (value == null) return '—';
-  final str = value.toString();
-  try {
-    final dt = DateTime.tryParse(str);
-    if (dt != null) {
-      const months = [
-        'January',
-        'February',
-        'March',
-        'April',
-        'May',
-        'June',
-        'July',
-        'August',
-        'September',
-        'October',
-        'November',
-        'December'
-      ];
-      return '${dt.day} ${months[dt.month - 1]} ${dt.year}, '
-          '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
-    }
-  } catch (_) {}
-  return str;
-}
+/// Localized "10 November 2026, 08:23" for history rows.
+String formatDeliveryHistoryDate(BuildContext context, dynamic value) =>
+    context.formatDateTime(value);

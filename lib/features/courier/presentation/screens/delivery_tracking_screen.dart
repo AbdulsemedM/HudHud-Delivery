@@ -1,3 +1,4 @@
+import 'package:hudhud_delivery/core/utils/localized_date.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -120,31 +121,8 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
     setState(() => _deliveryGuyIcon = icon);
   }
 
-  String _friendlyStatus(BuildContext context, String raw) {
-    final l10n = context.l10n;
-    final key = raw.toLowerCase();
-    if (key.contains('search') ||
-        key.contains('pending') ||
-        key.contains('finding') ||
-        key.contains('requested')) {
-      return l10n.trackingStatusSearching;
-    }
-    if (key.contains('arriv') || key.contains('pickup')) {
-      return l10n.trackingStatusArrived;
-    }
-    if (key.contains('deliver') &&
-        (key.contains('ed') ||
-            key.contains('complete') ||
-            key.contains('done'))) {
-      return l10n.trackingStatusDone;
-    }
-    if (key.contains('complete') ||
-        key.contains('done') ||
-        key.contains('finish')) {
-      return l10n.trackingStatusDone;
-    }
-    return l10n.trackingStatusOnTheWay;
-  }
+  String _friendlyStatus(BuildContext context, String raw) =>
+      trackingHeadline(context.l10n, raw);
 
   IconData _statusIcon(String raw) {
     final key = raw.toLowerCase();
@@ -334,6 +312,13 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
       if (liveResult['success'] == true) {
         final live = liveResult['tracking'] as DeliveryLiveTracking?;
         await _applyLiveTracking(live);
+        // Live tracking carries status/driver/ETA only. Load the order
+        // fields (created_at, timeline, tracking number) once from /track,
+        // otherwise "Created" stays "—" and the timeline stays empty.
+        if (!_orderFieldsLoaded) {
+          _orderFieldsLoaded = true;
+          unawaited(_mergeOrderFieldsFromTrack());
+        }
         return;
       }
 
@@ -374,6 +359,42 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
         });
       }
     }
+  }
+
+  bool _orderFieldsLoaded = false;
+
+  /// Adds the static order fields from `/track` without overwriting the
+  /// fresher live status / driver.
+  Future<void> _mergeOrderFieldsFromTrack() async {
+    try {
+      final result =
+          await _courierRepository.getDeliveryTrack(widget.deliveryId!);
+      if (!mounted || result['success'] != true) return;
+      final data = result['data'];
+      if (data is! Map) return;
+      const liveKeys = {'status', 'current_status', 'driver'};
+      setState(() {
+        _trackData = {
+          for (final e in data.entries)
+            if (!liveKeys.contains(e.key)) e.key.toString(): e.value,
+          ...?_trackData,
+        };
+      });
+    } catch (_) {
+      // Optional detail; the live view still works without it.
+    }
+    // /track has no created_at (checked against the API on 2026-11-12);
+    // the delivery details endpoint does.
+    if (_trackData?['created_at'] != null) return;
+    try {
+      final details =
+          await _courierRepository.getUserDeliveryDetails(widget.deliveryId!);
+      final createdAt = (details['data'] as Map?)?['created_at'];
+      if (!mounted || createdAt == null) return;
+      setState(() {
+        _trackData = {...?_trackData, 'created_at': createdAt};
+      });
+    } catch (_) {}
   }
 
   Future<void> _applyLiveTracking(DeliveryLiveTracking? live) async {
@@ -529,8 +550,17 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
     );
     final friendlyStatus = _friendlyStatus(context, statusText);
     final statusIcon = _statusIcon(statusText);
-    final pickupLabel =
-        _trackData?['pickup_location']?.toString() ?? widget.pickupLocation;
+    // Once the package is collected the useful address is the drop-off.
+    final normalizedStatus = normalizeDeliveryStatus(statusText);
+    final headingToDropoff = normalizedStatus == 'picked_up' ||
+        deliveryStatusRank(normalizedStatus) >=
+            deliveryStatusRank('en_route_dropoff');
+    final isTerminal = isDeliveryTerminalStatus(normalizedStatus);
+    final pickupLabel = headingToDropoff && !isTerminal
+        ? (_trackData?['dropoff_location']?.toString() ??
+            widget.deliveryLocation)
+        : (_trackData?['pickup_location']?.toString() ??
+            widget.pickupLocation);
     final etaMinutes = _etaMinutes();
     return CourierTheme.wrap(
       context,
@@ -539,7 +569,10 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
           final dark = HomeColors.isDark(context);
           final borderColor = HomeColors.borderOf(context);
           final topInset = MediaQuery.paddingOf(context).top + 10;
+          // A cancelled / finished delivery has no courier to call or
+          // message, even if the last payload still carries one.
           final hasDriver = _trackingAvailable &&
+              !isTerminal &&
               (_liveTracking?.driver != null || _trackData?['driver'] != null);
           return AnnotatedRegion<SystemUiOverlayStyle>(
             // Map is always light: keep status bar icons dark.
@@ -893,10 +926,9 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                                                             'dropoff_location']
                                                         ?.toString() ??
                                                     widget.deliveryLocation,
-                                                createdDate:
-                                                    _trackData?['created_at']
-                                                            ?.toString() ??
-                                                        '—',
+                                                createdDate: context.formatDateTime(
+                                                  _trackData?['created_at'],
+                                                ),
                                                 borderColor: borderColor,
                                               ),
                                               const SizedBox(height: 14),
@@ -1169,32 +1201,8 @@ class _TrackingOrderCard extends StatelessWidget {
 
   const _TrackingOrderCard({this.timeline, required this.borderColor});
 
-  String _formatTimestamp(dynamic value) {
-    if (value == null) return '—';
-    final str = value.toString();
-    try {
-      final dt = DateTime.tryParse(str);
-      if (dt != null) {
-        const months = [
-          'January',
-          'February',
-          'March',
-          'April',
-          'May',
-          'June',
-          'July',
-          'August',
-          'September',
-          'October',
-          'November',
-          'December'
-        ];
-        return '${months[dt.month - 1]} ${dt.day}, ${dt.year} '
-            '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
-      }
-    } catch (_) {}
-    return str;
-  }
+  String _formatTimestamp(BuildContext context, dynamic value) =>
+      context.formatDateTime(value);
 
   @override
   Widget build(BuildContext context) {
@@ -1233,7 +1241,7 @@ class _TrackingOrderCard extends StatelessWidget {
               final item = entry.value;
               return _TrackingItem(
                 title: item['event']?.toString() ?? '—',
-                date: _formatTimestamp(item['timestamp']),
+                date: _formatTimestamp(context, item['timestamp']),
                 isActive: item['status'] == 'current',
                 isCompleted: item['status'] == 'completed',
                 isLast: i == items.length - 1,

@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart' as intl;
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:lottie/lottie.dart';
@@ -411,6 +412,16 @@ class _UserProfileHeaderState extends State<UserProfileHeader>
                                 widget.location.isEmpty
                                     ? l10n.yourLocation
                                     : widget.location,
+                                // Addresses come from the geocoder in Latin
+                                // script; under Arabic RTL the leading house
+                                // number jumped to the end. Pick direction
+                                // from the text itself.
+                                textDirection: widget.location.isEmpty
+                                    ? null
+                                    : (intl.Bidi.detectRtlDirectionality(
+                                            widget.location)
+                                        ? TextDirection.rtl
+                                        : TextDirection.ltr),
                                 style: TextStyle(
                                   color: HomeColors.textPrimaryOf(context),
                                   fontWeight: FontWeight.w700,

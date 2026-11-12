@@ -162,8 +162,10 @@ class _WalletContentState extends State<_WalletContent> {
       return TransactionItem(
         date: date.toUpperCase(),
         amount: t.amount ?? '0',
-        type: t.type ??
-            t.description ??
+        // `type` is just "credit"/"debit"; the description says what the
+        // entry is (e.g. cashback), so prefer it as the title.
+        type: _cleanDescription(t.description) ??
+            t.type ??
             l10n.walletDefaultTransactionLabel,
         currency: t.currency ?? defaultCurrency,
         isCredit: t.isCredit ? true : (t.isDebit ? false : null),
@@ -242,4 +244,11 @@ class _WalletContentState extends State<_WalletContent> {
       ),
     );
   }
+
+/// Server descriptions end with an internal ledger tag, e.g.
+/// "Customer delivery reward credit [delivery_revenue_allocation:214:...]".
+static String? _cleanDescription(String? raw) {
+  final text = raw?.replaceAll(RegExp(r'\s*\[[^\]]*\]\s*$'), '').trim();
+  return (text == null || text.isEmpty) ? null : text;
+}
 }

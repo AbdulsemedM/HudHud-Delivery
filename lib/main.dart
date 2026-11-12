@@ -1,3 +1,4 @@
+import 'package:intl/date_symbol_data_local.dart';
 import 'dart:io';
 
 import 'core/api/dio_client.dart';
@@ -72,6 +73,9 @@ void main() async {
 
   // Config is compile-time (--dart-define); kept as a no-op hook.
   await loadAppEnv();
+  // Month/day names for localized dates (am, ar; so/om use built-in names
+  // in core/utils/localized_date.dart).
+  await initializeDateFormatting();
 
   // Must exist before FCM tap handlers so they can push routes.
   final navigatorKey = GlobalKey<NavigatorState>();
