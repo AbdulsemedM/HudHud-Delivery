@@ -1072,6 +1072,22 @@ class OrderSummarySection extends StatelessWidget {
               ),
             ],
           ),
+          // Without a quote the total above is items + tip only; say so, so
+          // it is not read as the final amount.
+          if (deliveryFee == null && !deliveryFeeLoading)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: Text(
+                  context.l10n.checkoutTotalExcludesDelivery,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );

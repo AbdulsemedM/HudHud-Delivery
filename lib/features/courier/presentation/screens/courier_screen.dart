@@ -368,7 +368,7 @@ class _CourierScreenState extends State<CourierScreen> {
                         orderId: id != null ? 'DEL-$id' : '—',
                         recipient: d['receiver_name']?.toString() ?? '—',
                         location: d['dropoff_location']?.toString() ?? '—',
-                        dateTime: formatDeliveryHistoryDate(d['created_at']),
+                        dateTime: formatDeliveryHistoryDate(context, d['created_at']),
                         status: resolveDeliveryStatusLabel(d),
                         borderColor: borderColor,
                         onTap: id != null

@@ -2785,38 +2785,36 @@ class AppLocalizationsAm extends AppLocalizations {
   String get handymanComingSoonTeaser2 => 'የቤት ጥገና';
 
   @override
-  String get ordersComingSoonTitle => 'Your order hub is on the way';
+  String get ordersComingSoonTitle => 'የትዕዛዝ ማዕከልዎ በቅርቡ ይመጣል';
 
   @override
   String get ordersComingSoonSubtitle =>
-      'Track every delivery, reorder in one tap, and keep receipts in one place — launching soon.';
+      'እያንዳንዱን ማድረሻ ይከታተሉ፣ በአንድ ንክኪ እንደገና ይዘዙ፣ ደረሰኞችንም በአንድ ቦታ ያስቀምጡ — በቅርቡ ይጀምራል።';
 
   @override
-  String get ordersComingSoonTeaser1 => 'Live tracking';
+  String get ordersComingSoonTeaser1 => 'የቀጥታ ክትትል';
 
   @override
-  String get ordersComingSoonTeaser2 => 'One-tap reorder';
+  String get ordersComingSoonTeaser2 => 'በአንድ ንክኪ እንደገና ማዘዝ';
 
   @override
-  String get ordersComingSoonTeaser3 => 'Digital receipts';
+  String get ordersComingSoonTeaser3 => 'ዲጂታል ደረሰኞች';
 
   @override
-  String get ordersComingSoonStep1 =>
-      'Courier deliveries on Home — available now';
+  String get ordersComingSoonStep1 => 'የመልእክተኛ ማድረሻዎች በቤት ገጽ — አሁን ይገኛሉ';
 
   @override
-  String get ordersComingSoonStep2 =>
-      'Unified order timeline across all services';
+  String get ordersComingSoonStep2 => 'ለሁሉም አገልግሎቶች አንድ ወጥ የትዕዛዝ የጊዜ መስመር';
 
   @override
-  String get ordersComingSoonStep3 => 'Smart reorder and saved favourites';
+  String get ordersComingSoonStep3 => 'ብልህ እንደገና ማዘዝ እና የተቀመጡ ተወዳጆች';
 
   @override
-  String get ordersComingSoonCta => 'Send a delivery now';
+  String get ordersComingSoonCta => 'አሁን ጥቅል ይላኩ';
 
   @override
   String get ordersComingSoonFootnote =>
-      'Need a package delivered today? Use Courier on the Home tab.';
+      'ዛሬ ጥቅል ማድረስ ይፈልጋሉ? በቤት ትር ላይ መልእክተኛን ይጠቀሙ።';
 
   @override
   String get pleaseEnterValidSenderPhone =>
@@ -2993,304 +2991,295 @@ class AppLocalizationsAm extends AppLocalizations {
   String get cancelOrder => 'ትዕዛዝ ሰርዝ';
 
   @override
-  String get courierFindingNearestDrivers =>
-      'Finding the nearest available drivers';
+  String get courierFindingNearestDrivers => 'በአቅራቢያ ያሉ አሽከርካሪዎችን በመፈለግ ላይ';
 
   @override
   String get courierFindingNearestDriversSubtitle =>
-      'We are finding the nearest available driver. Live driver location appears only after acceptance.';
+      'በአቅራቢያ ያለ አሽከርካሪ እየፈለግን ነው። የአሽከርካሪው ቀጥታ ቦታ የሚታየው ጥያቄውን ከተቀበለ በኋላ ብቻ ነው።';
 
   @override
-  String get courierDriverLocationUpdating => 'Driver location is updating';
+  String get courierDriverLocationUpdating => 'የአሽከርካሪው ቦታ እየታደሰ ነው';
 
   @override
-  String get phoneEnrollmentTitle => 'Add your phone number';
+  String get phoneEnrollmentTitle => 'ስልክ ቁጥርዎን ያክሉ';
 
   @override
   String get phoneEnrollmentSubtitle =>
-      'We need a verified mobile number for deliveries, wallet, and account security.';
+      'ለማድረሻዎች፣ ለዋሌት እና ለመለያ ደህንነት የተረጋገጠ የሞባይል ቁጥር ያስፈልገናል።';
 
   @override
-  String get phoneEnrollmentOtpTitle => 'Verify your phone';
+  String get phoneEnrollmentOtpTitle => 'ስልክዎን ያረጋግጡ';
 
   @override
   String phoneEnrollmentOtpSubtitle(String phone) {
-    return 'Enter the 6-digit code sent to $phone.';
+    return 'ወደ $phone የተላከውን ባለ 6 አሃዝ ኮድ ያስገቡ።';
   }
 
   @override
-  String get phoneEnrollmentSendCode => 'Send code';
+  String get phoneEnrollmentSendCode => 'ኮድ ላክ';
 
   @override
-  String get phoneEnrollmentVerify => 'Verify';
+  String get phoneEnrollmentVerify => 'አረጋግጥ';
 
   @override
-  String get phoneEnrollmentResend => 'Resend code';
+  String get phoneEnrollmentResend => 'ኮድ እንደገና ላክ';
 
   @override
   String phoneEnrollmentResendIn(int seconds) {
-    return 'Resend in ${seconds}s';
+    return 'በ$seconds ሰከንድ ውስጥ እንደገና ላክ';
   }
 
   @override
-  String get phoneEnrollmentContactSupport => 'Contact support';
+  String get phoneEnrollmentContactSupport => 'ድጋፍን ያግኙ';
 
   @override
-  String get phoneEnrollmentSignOut => 'Sign out';
+  String get phoneEnrollmentSignOut => 'ውጣ';
 
   @override
-  String get phoneEnrollmentChangeNumber => 'Change phone number';
+  String get phoneEnrollmentChangeNumber => 'ስልክ ቁጥር ቀይር';
 
   @override
-  String get phoneEnrollmentRetry => 'Try again';
+  String get phoneEnrollmentRetry => 'እንደገና ይሞክሩ';
 
   @override
-  String get phoneEnrollmentPhoneInvalid =>
-      'Enter a valid Ethiopian mobile number.';
+  String get phoneEnrollmentPhoneInvalid => 'ትክክለኛ የኢትዮጵያ ሞባይል ቁጥር ያስገቡ።';
 
   @override
   String get phoneEnrollmentPhoneInUse =>
-      'This number is already linked to another HudHud account.';
+      'ይህ ቁጥር አስቀድሞ ከሌላ የHudHud መለያ ጋር ተገናኝቷል።';
 
   @override
   String get phoneEnrollmentChangeRequiresSupport =>
-      'This verified number can only be changed with support help.';
+      'ይህ የተረጋገጠ ቁጥር ሊቀየር የሚችለው በድጋፍ እገዛ ብቻ ነው።';
 
   @override
-  String get phoneEnrollmentCooldown =>
-      'Please wait before requesting another code.';
+  String get phoneEnrollmentCooldown => 'ሌላ ኮድ ከመጠየቅዎ በፊት እባክዎ ይጠብቁ።';
 
   @override
   String get phoneEnrollmentRateLimited =>
-      'Too many attempts. Please try again later.';
+      'በጣም ብዙ ሙከራዎች። እባክዎ ቆይተው እንደገና ይሞክሩ።';
 
   @override
   String get phoneEnrollmentDeliveryFailed =>
-      'We could not send the SMS. Please try again.';
+      'ኤስኤምኤሱን መላክ አልቻልንም። እባክዎ እንደገና ይሞክሩ።';
 
   @override
-  String get phoneEnrollmentNotPending =>
-      'Request a new verification code to continue.';
+  String get phoneEnrollmentNotPending => 'ለመቀጠል አዲስ የማረጋገጫ ኮድ ይጠይቁ።';
 
   @override
-  String get phoneEnrollmentCodeExpired =>
-      'This code has expired. Request a new one.';
+  String get phoneEnrollmentCodeExpired => 'ይህ ኮድ ጊዜው አልፎበታል። አዲስ ይጠይቁ።';
 
   @override
-  String get phoneEnrollmentCodeInvalid =>
-      'That code is incorrect. Please try again.';
+  String get phoneEnrollmentCodeInvalid => 'ኮዱ ትክክል አይደለም። እባክዎ እንደገና ይሞክሩ።';
 
   @override
-  String get phoneEnrollmentGenericError =>
-      'Something went wrong. Please try again.';
+  String get phoneEnrollmentGenericError => 'የሆነ ችግር ተፈጥሯል። እባክዎ እንደገና ይሞክሩ።';
 
   @override
-  String get whatAreYouSending => 'What are you sending';
+  String get whatAreYouSending => 'ምን እየላኩ ነው';
 
   @override
-  String get selectItemTypeHint => 'Select type of item';
+  String get selectItemTypeHint => 'የእቃውን አይነት ይምረጡ';
 
   @override
-  String get senderInformation => 'Sender information';
+  String get senderInformation => 'የላኪ መረጃ';
 
   @override
-  String get senderPhoneLabel => 'Sender phone (09xxxxxxxx)';
+  String get senderPhoneLabel => 'የላኪ ስልክ (09xxxxxxxx)';
 
   @override
   String get senderPhoneExample => '0912345678';
 
   @override
-  String get recipientInformation => 'Who receives this';
+  String get recipientInformation => 'ማን ይቀበላል';
 
   @override
-  String get takePackagePhoto => 'Take a picture of the package';
+  String get takePackagePhoto => 'የጥቅሉን ፎቶ ያንሱ';
 
   @override
-  String get packagePhotoAdded => 'Package photo added';
+  String get packagePhotoAdded => 'የጥቅል ፎቶ ታክሏል';
 
   @override
-  String get changePackagePhoto => 'Change photo';
+  String get changePackagePhoto => 'ፎቶ ቀይር';
 
   @override
-  String get itemTypeElectronics => 'Electronics';
+  String get itemTypeElectronics => 'ኤሌክትሮኒክስ';
 
   @override
-  String get itemTypeDocuments => 'Documents';
+  String get itemTypeDocuments => 'ሰነዶች';
 
   @override
-  String get itemTypeFood => 'Food';
+  String get itemTypeFood => 'ምግብ';
 
   @override
-  String get itemTypeClothing => 'Clothes';
+  String get itemTypeClothing => 'ልብሶች';
 
   @override
-  String get itemTypeBooks => 'Books';
+  String get itemTypeBooks => 'መጻሕፍት';
 
   @override
-  String get itemTypeFragile => 'Fragile';
+  String get itemTypeFragile => 'በቀላሉ የሚሰበር';
 
   @override
-  String get itemTypeOther => 'Other';
+  String get itemTypeOther => 'ሌላ';
 
   @override
-  String get callSupport => 'Call for help';
+  String get callSupport => 'ለእርዳታ ይደውሉ';
 
   @override
-  String get orderByCall => 'Order by phone';
+  String get orderByCall => 'በስልክ ይዘዙ';
 
   @override
-  String get orderByCallSubtitle =>
-      'We will help you create the delivery on a call';
+  String get orderByCallSubtitle => 'በስልክ ጥሪ ማድረሻውን እንዲፈጥሩ እንረዳዎታለን';
 
   @override
-  String get easyMode => 'Easy mode';
+  String get easyMode => 'ቀላል ሁነታ';
 
   @override
-  String get easyModeSubtitle => 'Bigger buttons, pictures, and spoken help';
+  String get easyModeSubtitle => 'ትልልቅ ቁልፎች፣ ስዕሎች እና የድምፅ እገዛ';
 
   @override
-  String get navMyDeliveries => 'My deliveries';
+  String get navMyDeliveries => 'የእኔ ማድረሻዎች';
 
   @override
-  String get navMe => 'Me';
+  String get navMe => 'እኔ';
 
   @override
-  String get courierNowTitle => 'Now';
+  String get courierNowTitle => 'አሁን';
 
   @override
-  String get courierNowSubtitle => 'Send right away';
+  String get courierNowSubtitle => 'ወዲያውኑ ይላኩ';
 
   @override
-  String get courierLaterTitle => 'Later';
+  String get courierLaterTitle => 'በኋላ';
 
   @override
-  String get courierLaterSubtitle => 'Pick a day and time';
+  String get courierLaterSubtitle => 'ቀን እና ሰዓት ይምረጡ';
 
   @override
-  String get homeMoreServices => 'More';
+  String get homeMoreServices => 'ተጨማሪ';
 
   @override
-  String get homeHideMoreServices => 'Hide';
+  String get homeHideMoreServices => 'ደብቅ';
 
   @override
-  String get homeSendPackage => 'Send a package';
+  String get homeSendPackage => 'ጥቅል ይላኩ';
 
   @override
-  String get easyPickupTitle => 'Where to pick up?';
+  String get easyPickupTitle => 'ከየት ይወሰድ?';
 
   @override
   String get easyPickupHint =>
-      'Move the map. Put the pin on the pickup place. Or search for an address below.';
+      'ካርታውን ያንቀሳቅሱ። ምልክቱን በመውሰጃው ቦታ ላይ ያድርጉ። ወይም ከታች አድራሻ ይፈልጉ።';
 
   @override
-  String get easyDropTitle => 'Where to deliver?';
+  String get easyDropTitle => 'የት ይድረስ?';
 
   @override
   String get easyDropHint =>
-      'Search for the delivery address first. Then drag the map to fine-tune the pin.';
+      'መጀመሪያ የማድረሻ አድራሻውን ይፈልጉ። ከዚያ ምልክቱን ለማስተካከል ካርታውን ይጎትቱ።';
 
   @override
-  String get easyIAmHere => 'I am here';
+  String get easyIAmHere => 'እዚህ ነኝ';
 
   @override
-  String get easyUseThisPlace => 'Use this place';
+  String get easyUseThisPlace => 'ይህን ቦታ ተጠቀም';
 
   @override
-  String get easyWhoReceives => 'Who gets the package?';
+  String get easyWhoReceives => 'ጥቅሉን ማን ይቀበላል?';
 
   @override
-  String get easyPickContact => 'Pick from contacts';
+  String get easyPickContact => 'ከእውቂያዎች ይምረጡ';
 
   @override
-  String get easyOrTypePhone => 'Or enter name and phone';
+  String get easyOrTypePhone => 'ወይም ስም እና ስልክ ያስገቡ';
 
   @override
-  String get easyWhatIsIt => 'What are you sending?';
+  String get easyWhatIsIt => 'ምን እየላኩ ነው?';
 
   @override
-  String get easyPackageSize => 'How big is it?';
+  String get easyPackageSize => 'መጠኑ ምን ያህል ነው?';
 
   @override
-  String get easySizeSmall => 'Small';
+  String get easySizeSmall => 'ትንሽ';
 
   @override
-  String get easySizeMedium => 'Medium';
+  String get easySizeMedium => 'መካከለኛ';
 
   @override
-  String get easySizeLarge => 'Large';
+  String get easySizeLarge => 'ትልቅ';
 
   @override
-  String get easyConfirmTitle => 'Check your delivery';
+  String get easyConfirmTitle => 'ማድረሻዎን ያረጋግጡ';
 
   @override
-  String get easyConfirmPlay => 'Hear summary';
+  String get easyConfirmPlay => 'ማጠቃለያውን ያዳምጡ';
 
   @override
   String easyConfirmSummary(
       String pickup, String dropoff, String item, String recipient) {
-    return 'From $pickup to $dropoff. Package: $item. For $recipient.';
+    return 'ከ$pickup ወደ $dropoff። ጥቅል፦ $item። ለ$recipient።';
   }
 
   @override
-  String get easySpeakHint => 'Listen';
+  String get easySpeakHint => 'ያዳምጡ';
 
   @override
-  String get pleaseAddPackagePhoto => 'Please take a photo of the package';
+  String get pleaseAddPackagePhoto => 'እባክዎ የጥቅሉን ፎቶ ያንሱ';
 
   @override
-  String get pleaseSelectPackageSize => 'Please choose how big the package is';
+  String get pleaseSelectPackageSize => 'እባክዎ የጥቅሉን መጠን ይምረጡ';
 
   @override
   String get pleaseEnterValidRecipientPhone =>
-      'Please enter a valid recipient phone (09xxxxxxxx)';
+      'እባክዎ ትክክለኛ የተቀባይ ስልክ ያስገቡ (09xxxxxxxx)';
 
   @override
-  String get voiceNoteOptional => 'Add a voice note (optional)';
+  String get voiceNoteOptional => 'የድምጽ መልእክት ያክሉ (አማራጭ)';
 
   @override
-  String get voiceNoteRecordHint => 'Hold to record a message for the courier';
+  String get voiceNoteRecordHint => 'ለመልእክተኛው መልእክት ለመቅዳት ተጭነው ይያዙ';
 
   @override
-  String get voiceNoteAttached => 'Voice note added';
+  String get voiceNoteAttached => 'የድምጽ መልእክት ታክሏል';
 
   @override
-  String get voiceNoteClear => 'Remove voice note';
+  String get voiceNoteClear => 'የድምጽ መልእክቱን አስወግድ';
 
   @override
-  String get trackingStatusSearching => 'Looking for a courier';
+  String get trackingStatusSearching => 'መልእክተኛ በመፈለግ ላይ';
 
   @override
-  String get trackingStatusOnTheWay => 'Courier is coming';
+  String get trackingStatusOnTheWay => 'መልእክተኛው እየመጣ ነው';
 
   @override
-  String get trackingStatusArrived => 'Courier has arrived';
+  String get trackingStatusArrived => 'መልእክተኛው ደርሷል';
 
   @override
-  String get trackingStatusDone => 'Delivery finished';
+  String get trackingStatusDone => 'ማድረሱ ተጠናቋል';
 
   @override
-  String get pleaseSelectLocation => 'Please choose a place on the map';
+  String get pleaseSelectLocation => 'እባክዎ በካርታው ላይ ቦታ ይምረጡ';
 
   @override
-  String get contactsPermissionRequired =>
-      'Allow contacts to pick who receives the package';
+  String get contactsPermissionRequired => 'ጥቅሉን የሚቀበለውን ለመምረጥ የእውቂያዎች ፈቃድ ይስጡ';
 
   @override
-  String get couldNotOpenContacts => 'Could not open contacts';
+  String get couldNotOpenContacts => 'እውቂያዎችን መክፈት አልተቻለም';
 
   @override
   String easyStepOf(int current, int total) {
-    return 'Step $current of $total';
+    return 'ደረጃ $current ከ$total';
   }
 
   @override
-  String get paymentCash => 'Cash';
+  String get paymentCash => 'ጥሬ ገንዘብ';
 
   @override
-  String get paymentWallet => 'Wallet';
+  String get paymentWallet => 'ዋሌት';
 
   @override
-  String get paymentCard => 'Card';
+  String get paymentCard => 'ካርድ';
 
   @override
   String get growthPromoTitle => 'የማስተዋወቂያ ኮድ';
@@ -4223,4 +4212,44 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get p12ErrSessionExpired => 'ክፍለ ጊዜዎ አብቅቷል። እባክዎ እንደገና ይግቡ።';
+
+  @override
+  String get trackingStatusCancelled => 'ማድረሱ ተሰርዟል';
+
+  @override
+  String get trackingStatusDelivering => 'እቃዎ በመንገድ ላይ ነው';
+
+  @override
+  String get deliveryStatusSearching => 'መልእክተኛ በመፈለግ ላይ';
+
+  @override
+  String get deliveryStatusAssigned => 'መልእክተኛ ተመድቧል';
+
+  @override
+  String get deliveryStatusToPickup => 'መልእክተኛው በመንገድ ላይ';
+
+  @override
+  String get deliveryStatusAtPickup => 'መልእክተኛው መውሰጃ ቦታ ደርሷል';
+
+  @override
+  String get deliveryStatusOnTheWay => 'በመንገድ ላይ';
+
+  @override
+  String get deliveryStatusAtDropoff => 'መልእክተኛው ማድረሻ ቦታ ደርሷል';
+
+  @override
+  String get deliveryStatusFailed => 'አልተሳካም';
+
+  @override
+  String get deliveryStatusReturned => 'ተመልሷል';
+
+  @override
+  String get checkoutStoreNoBranch =>
+      'ይህ መደብር ገና ለማድረስ አልተዘጋጀም። እባክዎ ሌላ መደብር ይሞክሩ።';
+
+  @override
+  String get checkoutTotalExcludesDelivery => 'የማድረሻ ክፍያ ገና አልተካተተም';
+
+  @override
+  String get parcelPaidByRecipientCash => 'በጥሬ ገንዘብ፣ ተቀባዩ ሲረከብ ይከፍላል';
 }

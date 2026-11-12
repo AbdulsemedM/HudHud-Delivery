@@ -4300,4 +4300,45 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get p12ErrSessionExpired =>
       'Your session has expired. Please log in again.';
+
+  @override
+  String get trackingStatusCancelled => 'Delivery cancelled';
+
+  @override
+  String get trackingStatusDelivering => 'Your package is on its way';
+
+  @override
+  String get deliveryStatusSearching => 'Finding a courier';
+
+  @override
+  String get deliveryStatusAssigned => 'Courier assigned';
+
+  @override
+  String get deliveryStatusToPickup => 'Courier on the way';
+
+  @override
+  String get deliveryStatusAtPickup => 'Courier at pickup';
+
+  @override
+  String get deliveryStatusOnTheWay => 'On the way';
+
+  @override
+  String get deliveryStatusAtDropoff => 'Courier at drop-off';
+
+  @override
+  String get deliveryStatusFailed => 'Failed';
+
+  @override
+  String get deliveryStatusReturned => 'Returned';
+
+  @override
+  String get checkoutStoreNoBranch =>
+      'This store isn\'t set up for delivery yet. Please try another store.';
+
+  @override
+  String get checkoutTotalExcludesDelivery => 'Delivery fee not included yet';
+
+  @override
+  String get parcelPaidByRecipientCash =>
+      'Cash, paid by the recipient on delivery';
 }

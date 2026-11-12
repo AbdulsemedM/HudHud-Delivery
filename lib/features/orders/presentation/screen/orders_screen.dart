@@ -73,17 +73,9 @@ class _OrdersScreenBodyState extends State<_OrdersScreenBody> {
         child: Scaffold(
           backgroundColor: HomeColors.backgroundOf(context),
           body: SafeArea(
-            child: BlocConsumer<OrdersBloc, OrdersState>(
-              listener: (context, state) {
-                if (state is OrdersError) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(state.message),
-                      backgroundColor: AppColors.errorColor,
-                    ),
-                  );
-                }
-              },
+            // Errors render full-screen below; a snackbar on top of that
+            // only repeated the same text.
+            child: BlocBuilder<OrdersBloc, OrdersState>(
               builder: (context, state) {
                 String? filter;
                 if (state is OrdersLoaded) {
@@ -148,7 +140,13 @@ class _OrdersScreenBodyState extends State<_OrdersScreenBody> {
         SliverFillRemaining(
           hasScrollBody: false,
           child: _OrdersStateMessage(
-            icon: Icons.wifi_off_rounded,
+            // Only a missing response is a connection problem; a 403 is an
+            // access problem and must not look like Wi-Fi is off.
+            icon: switch (state.statusCode) {
+              null => Icons.wifi_off_rounded,
+              403 => Icons.lock_outline_rounded,
+              _ => Icons.error_outline_rounded,
+            },
             color: AppColors.errorColor,
             title: state.message,
             actionLabel: l10n.actionRetry,
