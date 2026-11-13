@@ -11,6 +11,34 @@ import '../../models/user_model.dart';
 import 'fcm_service.dart';
 import 'fcm_topic_service.dart';
 
+/// When a stored session should stop being trusted, or null for "until the
+/// server or the customer ends it".
+///
+/// There is exactly one rule and it lives here because three call sites used
+/// to each carry their own copy of it, and each copy defaulted to 24 hours.
+///
+/// Nothing on the server asks for that. Sanctum runs with
+/// `'expiration' => null`, the sign-in response carries neither `expires_in`
+/// nor a refresh token, and `/api/auth/refresh` does not exist — so the
+/// invented clock was the only thing ending a session, and when it fired the
+/// customer was pushed back to the code screen. Every one of those costs an
+/// SMS and a paid Telegram Gateway message to re-establish something that was
+/// never actually invalid.
+///
+/// The device is the trusted factor: the token lives in the iOS keychain or
+/// Android keystore. Signing out still revokes it server-side, and an admin
+/// can revoke with `users:revoke-tokens`.
+DateTime? sessionExpiryFrom(int? expiresInSeconds, {DateTime? now}) {
+  if (expiresInSeconds == null) return null;
+
+  // A zero or negative lifetime would mean "already expired", which no server
+  // means to say; treat it as no expiry rather than signing the customer out
+  // the instant they signed in.
+  if (expiresInSeconds <= 0) return null;
+
+  return (now ?? DateTime.now()).add(Duration(seconds: expiresInSeconds));
+}
+
 class AuthService {
   // Singleton pattern
   static final AuthService _instance = AuthService._internal();
@@ -249,16 +277,37 @@ class AuthService {
       _currentUser = user;
       _currentToken = token;
 
-      // Calculate token expiry (default to 24 hours if not provided)
-      final expiryDuration = Duration(seconds: expiresIn ?? 86400);
-      _tokenExpiry = DateTime.now().add(expiryDuration);
+      // Expire the session ONLY when the server said to.
+      //
+      // This used to default to 24 hours when the server sent no expiry, which
+      // it never does: Sanctum is configured with `'expiration' => null`, so
+      // the token is valid indefinitely, and the sign-in response carries
+      // neither `expires_in` nor a refresh token. The client-side clock was
+      // therefore the only thing ending the session — and when it fired,
+      // refreshToken() found nothing to refresh against an endpoint that does
+      // not exist, cleared the session, and sent the customer back to the code
+      // screen.
+      //
+      // Every customer re-authenticated daily, and every one of those costs an
+      // SMS and a paid Telegram Gateway message for a session the server would
+      // have honoured. The device is already the trusted factor here: the token
+      // lives in the iOS keychain / Android keystore via flutter_secure_storage.
+      //
+      // _isTokenExpired() returns false on a null expiry, so leaving it unset
+      // is "until the server or the customer ends it". Sign-out still revokes
+      // server-side, and an admin can revoke with `users:revoke-tokens`.
+      _tokenExpiry = sessionExpiryFrom(expiresIn);
 
       // Store in secure storage
       await Future.wait([
         _storeToken(token),
         _storeUser(user),
-        _storage.write(
-            key: _tokenExpiryKey, value: _tokenExpiry!.toIso8601String()),
+        // A stale expiry from an older install would outlive this sign-in, so
+        // clear the key rather than leaving whatever was there.
+        _tokenExpiry == null
+            ? _storage.delete(key: _tokenExpiryKey)
+            : _storage.write(
+                key: _tokenExpiryKey, value: _tokenExpiry!.toIso8601String()),
         if (refreshToken != null) _storeRefreshToken(refreshToken),
       ]);
 
@@ -281,12 +330,16 @@ class AuthService {
   }) async {
     await clearAllData();
     _currentToken = token;
-    _tokenExpiry =
-        DateTime.now().add(Duration(seconds: expiresIn ?? 86400));
+    // Same rule as _storeUserSession: no server expiry, no client expiry.
+    // Password login lands here, so leaving the old 24-hour default would keep
+    // signing those customers out nightly while passwordless ones stayed in.
+    _tokenExpiry = sessionExpiryFrom(expiresIn);
     await Future.wait([
       _storeToken(token),
-      _storage.write(
-          key: _tokenExpiryKey, value: _tokenExpiry!.toIso8601String()),
+      _tokenExpiry == null
+          ? _storage.delete(key: _tokenExpiryKey)
+          : _storage.write(
+              key: _tokenExpiryKey, value: _tokenExpiry!.toIso8601String()),
       _storage.write(
           key: _lastLoginKey, value: DateTime.now().toIso8601String()),
       if (refreshToken != null) _storeRefreshToken(refreshToken),
@@ -892,15 +945,17 @@ class AuthService {
           // Update tokens and expiry
           _currentToken = data['token'];
 
-          // Calculate new expiry
-          final expiresIn = data['expires_in'] ?? 86400; // default 24 hours
-          _tokenExpiry = DateTime.now().add(Duration(seconds: expiresIn));
+          // Same rule again: only the server decides when a session ends.
+          _tokenExpiry = sessionExpiryFrom(data['expires_in'] as int?);
 
           // Store updated tokens
           await Future.wait([
             _storeToken(data['token']),
-            _storage.write(
-                key: _tokenExpiryKey, value: _tokenExpiry!.toIso8601String()),
+            _tokenExpiry == null
+                ? _storage.delete(key: _tokenExpiryKey)
+                : _storage.write(
+                    key: _tokenExpiryKey,
+                    value: _tokenExpiry!.toIso8601String()),
             if (data['refresh_token'] != null)
               _storeRefreshToken(data['refresh_token']),
           ]);

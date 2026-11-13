@@ -219,6 +219,16 @@ class AuthOrDivider extends StatelessWidget {
 /// It is a real [TextFormField] (same [controller], [validator], formatters)
 /// with transparent text laid over the boxes, so paste, autofill, keyboard
 /// and form validation behave exactly like a plain text field.
+///
+/// AUTOFILL. The field declares [AutofillHints.oneTimeCode] and wraps itself
+/// in an [AutofillGroup]; without both, iOS has nothing to bind the arriving
+/// code to and falls back to offering it as an untargeted keyboard suggestion.
+/// With them, the "From Messages 249914" chip fills all six boxes in one tap.
+///
+/// On iOS that tap is as automatic as it gets: apps cannot read SMS on iOS at
+/// all, so Apple's own QuickType chip is the whole mechanism. Zero-tap filling
+/// exists only on Android, through SMS Retriever — see the screen that owns
+/// this field for that half.
 class AuthCodeField extends StatefulWidget {
   const AuthCodeField({
     super.key,
@@ -266,7 +276,8 @@ class _AuthCodeFieldState extends State<AuthCodeField> {
 
     return Opacity(
       opacity: widget.enabled ? 1 : 0.6,
-      child: Stack(
+      child: AutofillGroup(
+        child: Stack(
         children: [
           Positioned(
             top: 0,
@@ -349,6 +360,9 @@ class _AuthCodeFieldState extends State<AuthCodeField> {
             enabled: widget.enabled,
             keyboardType: TextInputType.number,
             maxLength: widget.length,
+            // The hint is what turns the keyboard's code suggestion into a
+            // fill of THIS field. Without it iOS only guesses.
+            autofillHints: const [AutofillHints.oneTimeCode],
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             showCursor: false,
             enableInteractiveSelection: false,
@@ -379,6 +393,7 @@ class _AuthCodeFieldState extends State<AuthCodeField> {
             validator: widget.validator,
           ),
         ],
+        ),
       ),
     );
   }
