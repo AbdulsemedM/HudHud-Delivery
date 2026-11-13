@@ -151,6 +151,9 @@ class DeliveryFeeQuoteException implements Exception {
   static const String branchUnavailable = 'BRANCH_UNAVAILABLE';
   static const String branchLocationUnavailable = 'BRANCH_LOCATION_UNAVAILABLE';
 
+  /// Address is beyond the market's delivery radius (`max_distance_km`).
+  static const String outOfDeliveryRange = 'OUT_OF_DELIVERY_RANGE';
+
   final String message;
   final int? statusCode;
   final String? code;
@@ -172,6 +175,7 @@ class DeliveryFeeQuoteException implements Exception {
       statusCode == 422 && (code == null || code == 'validation_error');
   bool get isBranchUnavailable => code == branchUnavailable;
   bool get isBranchLocationUnavailable => code == branchLocationUnavailable;
+  bool get isOutOfDeliveryRange => code == outOfDeliveryRange;
   bool get isRetryableNetwork {
     final s = statusCode;
     return s == null ||

@@ -6,7 +6,7 @@ class LoggerInterceptor extends Interceptor {
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     if (kDebugMode) {
       debugPrint('\n🚀 REQUEST[${options.method}] => PATH: ${options.path}');
-      debugPrint('Headers: ${_redactHeaders(options.headers)}');
+      debugPrint('Headers: ${options.headers}');
       debugPrint('Query Parameters: ${options.queryParameters}');
       if (options.data != null) {
         debugPrint('Body: ${options.data}');
@@ -41,9 +41,7 @@ class LoggerInterceptor extends Interceptor {
       debugPrint('\n❌ ERROR[${err.response?.statusCode}] => PATH: ${err.requestOptions.path}');
       debugPrint('Error Type: ${err.type}');
       debugPrint('Error Message: ${err.message}');
-      debugPrint(
-        'Request Headers: ${_redactHeaders(err.requestOptions.headers)}',
-      );
+      debugPrint('Request Headers: ${err.requestOptions.headers}');
 
       if (err.response != null) {
         debugPrint('Response Headers: ${err.response!.headers}');
@@ -60,21 +58,6 @@ class LoggerInterceptor extends Interceptor {
       debugPrint('═══════════════════════════════════════════════════════════════');
     }
     super.onError(err, handler);
-  }
-
-  Map<String, dynamic> _redactHeaders(Map<String, dynamic> headers) {
-    final copy = Map<String, dynamic>.from(headers);
-    final authKey = copy.keys.cast<String?>().firstWhere(
-          (k) => k != null && k.toLowerCase() == 'authorization',
-          orElse: () => null,
-        );
-    if (authKey != null) {
-      final value = copy[authKey]?.toString() ?? '';
-      copy[authKey] = value.toLowerCase().startsWith('bearer ')
-          ? 'Bearer ***'
-          : '***';
-    }
-    return copy;
   }
 
   String _formatResponseData(dynamic data) {

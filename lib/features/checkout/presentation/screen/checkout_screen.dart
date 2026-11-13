@@ -992,6 +992,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           _quoteError =
               'Delivery pricing is temporarily unavailable for this restaurant.';
           _quoteRetryable = false;
+        } else if (e.isOutOfDeliveryRange) {
+          // Retrying the same address cannot succeed; the user must move it.
+          _quoteError = e.message.trim().isNotEmpty
+              ? e.message
+              : 'This address is outside the delivery area. Please choose an address closer to the store.';
+          _quoteRetryable = false;
         } else if (e.isValidation || e.errors != null) {
           _quoteError =
               'Please select a valid delivery location with coordinates.';
