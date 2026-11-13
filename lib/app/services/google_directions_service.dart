@@ -20,6 +20,15 @@ class DirectionsResult {
 /// Fetches driving route (road path) from Google Directions API
 /// and decodes polylines so the drawn route follows real roads.
 class GoogleDirectionsService {
+  /// `&waypoints=lat,lng|lat,lng` in order (multi-stop), or '' when none.
+  static String _waypointsParam(List<LatLng> waypoints) {
+    if (waypoints.isEmpty) return '';
+    final joined = waypoints
+        .map((p) => '${p.latitude},${p.longitude}')
+        .join('|');
+    return '&waypoints=${Uri.encodeComponent(joined)}';
+  }
+
   static const _directionsUrl =
       'https://maps.googleapis.com/maps/api/directions/json';
 
@@ -30,6 +39,7 @@ class GoogleDirectionsService {
     required double originLng,
     required double destLat,
     required double destLng,
+    List<LatLng> waypoints = const [],
   }) async {
     final key = await GoogleMapsApiKeyProvider.getKey();
     if (key.isEmpty) {
@@ -44,6 +54,7 @@ class GoogleDirectionsService {
         '$_directionsUrl'
         '?origin=$originLat,$originLng'
         '&destination=$destLat,$destLng'
+        '${_waypointsParam(waypoints)}'
         '&mode=driving'
         '&key=$key',
       );

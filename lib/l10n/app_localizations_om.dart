@@ -4382,4 +4382,283 @@ class AppLocalizationsOm extends AppLocalizations {
   @override
   String get parcelPaidByRecipientCash =>
       'Maallaqa callaa, fudhataan yeroo geessamu kaffala';
+
+  @override
+  String get msAddStop => 'Bakka biraa dabali';
+
+  @override
+  String msStopLabel(int number) {
+    return 'Bakka $number';
+  }
+
+  @override
+  String msStopsCount(int count) {
+    return 'Bakkeewwan $count';
+  }
+
+  @override
+  String get msRemoveStop => 'Bakka haqi';
+
+  @override
+  String get msMoveStopUp => 'Ol kaasi';
+
+  @override
+  String get msMoveStopDown => 'Gad buusi';
+
+  @override
+  String get msChooseStopLocation => 'Bakka geessaa filadhu';
+
+  @override
+  String msMaxStopsReached(int max) {
+    return 'Hanga bakkeewwan $max dabaluu dandeessa.';
+  }
+
+  @override
+  String msStopReceiverTitle(int number) {
+    return 'Bakka $number irratti eenyutu fudhata?';
+  }
+
+  @override
+  String get msStopReceiverName => 'Maqaa fudhataa';
+
+  @override
+  String get msStopReceiverPhone => 'Bilbila fudhataa';
+
+  @override
+  String get msStopNoteHint => 'Yaada geejjibaaf (dirqama miti)';
+
+  @override
+  String get msStopReceiverRequired =>
+      'Bakka hundaaf maqaa fi bilbila fudhataa galchi.';
+
+  @override
+  String get msStopLocationRequired =>
+      'Bakka hundaaf iddoo filadhu, yookaan kanneen duwwaa haqi.';
+
+  @override
+  String get msSenderPaysMultiStop =>
+      'Ergaan bakka tokkoo ol qabu si (ergaa) dhaan kaffalama.';
+
+  @override
+  String get msMultiStopCashAtPickup =>
+      'Maallaqni yeroo fudhatamu geejjibaaf kaffalama.';
+
+  @override
+  String get msRouteTitle => 'Karaa';
+
+  @override
+  String get msPickupLabel => 'Fudhatama';
+
+  @override
+  String get msStopStatusPending => 'Eegaa jira';
+
+  @override
+  String get msStopStatusEnRoute => 'Karaarra jira';
+
+  @override
+  String get msStopStatusArrived => 'Geejjibaan ga\'eera';
+
+  @override
+  String get msStopStatusDelivered => 'Ga\'eera';
+
+  @override
+  String get msStopStatusFailed => 'Hin geenye';
+
+  @override
+  String get msStopStatusSkipped => 'Darbeera';
+
+  @override
+  String msHeadingToStop(int number) {
+    return 'Gara bakka $number deemaa jira';
+  }
+
+  @override
+  String msStopsProgress(int done, int total) {
+    return 'Bakkeewwan $total keessaa $done xumurameera';
+  }
+
+  @override
+  String msStopCode(String code) {
+    return 'Koodii: $code';
+  }
+
+  @override
+  String get msErrMultiStopDisabled =>
+      'Bakka tokkoo ol amma hin jiru. Itti fufuuf kanneen dabalataa haqi.';
+
+  @override
+  String get msErrTooManyStops =>
+      'Ergaa tokkoof bakkeewwan baay\'ee dha. Tokko tokko haqiitii irra deebi\'ii yaali.';
+
+  @override
+  String get msErrSenderPays =>
+      'Ergaan bakka tokkoo ol qabu ergaadhaan kaffalamuu qaba.';
+
+  @override
+  String get cpFreeCancelBody =>
+      'Ammaaf geejjibaan hin ramadamne, kanaaf haquun bilisa.';
+
+  @override
+  String get cpPenaltyTitle => 'Haqxee qabxii adabbii fudhattaa?';
+
+  @override
+  String cpPenaltyBodyDelivery(int points) {
+    return 'Geejjibaan duraan ramadameera. Amma haquun qabxii adabbii $points herrega keetti dabala.';
+  }
+
+  @override
+  String cpPenaltyBodyOrder(int points) {
+    return 'Ajajni kee hojii irra jira. Amma haquun qabxii adabbii $points herrega keetti dabala.';
+  }
+
+  @override
+  String cpPointsOfLimit(int points, int limit) {
+    return 'Qabxii $points / $limit';
+  }
+
+  @override
+  String cpWarnFineAt(int threshold) {
+    return 'Qabxii $threshold irratti osoo irra deebitee hin ajajin dura adabbii kaffaluu qabda.';
+  }
+
+  @override
+  String cpWarnBanAt(int threshold) {
+    return 'Qabxii $threshold irratti herregni kee yeroof dhaabata.';
+  }
+
+  @override
+  String cpWillFine(int threshold, String amount) {
+    return 'Kun qabxii $threshold ga\'a. $amount adabamta, hanga kaffaltutti ajajuu hin dandeessu.';
+  }
+
+  @override
+  String cpWillFineNoAmount(int threshold) {
+    return 'Kun qabxii $threshold ga\'a. Ni adabamta, hanga kaffaltutti ajajuu hin dandeessu.';
+  }
+
+  @override
+  String cpWillSuspend(int threshold, int days) {
+    return 'Kun qabxii $threshold ga\'a. Herregni kee guyyaa ${days}f ni dhaabata.';
+  }
+
+  @override
+  String cpWillSuspendNoDays(int threshold) {
+    return 'Kun qabxii $threshold ga\'a. Herregni kee ni dhaabata.';
+  }
+
+  @override
+  String cpPointsExpire(int days) {
+    return 'Qabxiin adabbii guyyaa $days booda ni haqama.';
+  }
+
+  @override
+  String get cpCancelAnyway => 'Haa ta\'u malee haqi';
+
+  @override
+  String get cpKeepDelivery => 'Ergaa koo eegi';
+
+  @override
+  String get cpKeepOrder => 'Ajaja koo eegi';
+
+  @override
+  String get cpCannotCancelPickedUp =>
+      'Kun haqamuu hin danda\'u. Geejjibaan meeshaa duraan fudhateera.';
+
+  @override
+  String get cpCannotCancelGeneric => 'Kun amma haqamuu hin danda\'u.';
+
+  @override
+  String get cpPenaltyChanged =>
+      'Adabbiin jijjiirameera. Maaloo irra deebi\'ii ilaali.';
+
+  @override
+  String cpCancelledWithPoints(int points, int total) {
+    return 'Haqameera. Qabxii adabbii $points dabalameera (amma $total qabda).';
+  }
+
+  @override
+  String cpFineIssued(String amount) {
+    return '$amount adabamteetta. Irra deebitee ajajuuf kaffali.';
+  }
+
+  @override
+  String cpSuspendedUntil(String date) {
+    return 'Herregni kee hanga ${date}tti dhaabateera.';
+  }
+
+  @override
+  String get cpStandingTitle => 'Galmee haqiinsaa';
+
+  @override
+  String get cpStandingGood => 'Haala gaarii';
+
+  @override
+  String get cpStandingWarning => 'Adabbiitti dhiyaatteetta';
+
+  @override
+  String get cpStandingFineDue => 'Adabbii kaffalamuu qabu';
+
+  @override
+  String get cpStandingSuspended => 'Herregni dhaabateera';
+
+  @override
+  String cpStandingExplainer(int points) {
+    return 'Erga geejjibaan ykn konkolaachisaan ramadamee booda haquun qabxii adabbii $points dabala. Sana dura haquun bilisa.';
+  }
+
+  @override
+  String cpNextExpiry(int points, String date) {
+    return 'Qabxiin $points $date irratti haqama.';
+  }
+
+  @override
+  String cpFineDueBody(String amount) {
+    return 'Adabbii haqiinsaa hin kaffalamne $amount qabda. Irra deebitee ajajuuf kaffali.';
+  }
+
+  @override
+  String get cpPayFine => 'Adabbii walleetii irraa kaffali';
+
+  @override
+  String get cpFinePaid =>
+      'Adabbiin kaffalameera. Irra deebitee ajajuu dandeessa.';
+
+  @override
+  String cpSuspendedBody(String date) {
+    return 'Erga geejjibaan ramadamee booda yeroo baay\'ee haqxeetta. $date irraa eegalee irra deebitee ajajuu dandeessa.';
+  }
+
+  @override
+  String get cpSuspendedBodyNoDate =>
+      'Erga geejjibaan ramadamee booda yeroo baay\'ee haqxeetta. Herrega kee deebisuuf deeggarsa qunnami.';
+
+  @override
+  String get cpTopUpToPayFine =>
+      'Walleetii kee keessa maallaqni gahaan hin jiru. Adabbii kaffaluuf guuti.';
+
+  @override
+  String get cpTopUp => 'Walleetii guuti';
+
+  @override
+  String get cpViewRecord => 'Galmee ilaali';
+
+  @override
+  String get cpBlockedTitle => 'Amma ajajuu hin dandeessu';
+
+  @override
+  String get cpMarkerFine => 'Adabbii';
+
+  @override
+  String get cpMarkerPause => 'Dhaabbii';
+
+  @override
+  String get cpHowItWorks => 'Akkamitti akka hojjetu';
+
+  @override
+  String get cpRuleFree =>
+      'Osoo geejjibaan ykn konkolaachisaan hin ramadamin haquu: bilisa.';
+
+  @override
+  String get cpRuleNoCancelAfterPickup =>
+      'Erga meeshaan ykn nyaanni fudhatamee booda haqamuu hin danda\'u.';
 }

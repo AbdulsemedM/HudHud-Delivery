@@ -84,10 +84,17 @@ class OrdersDataProvider {
   }
 
   /// Cancel an order — POST /api/customer/orders/{id}/cancel
-  Future<Map<String, dynamic>> cancelOrder(int orderId, {String? reason}) async {
+  Future<Map<String, dynamic>> cancelOrder(
+    int orderId, {
+    String? reason,
+    int? acceptPenaltyPoints,
+  }) async {
     try {
       final body = {
         if (reason != null && reason.trim().isNotEmpty) 'reason': reason.trim(),
+        // Penalty points the customer saw and accepted in the preview.
+        if (acceptPenaltyPoints != null)
+          'accept_penalty_points': acceptPenaltyPoints,
       };
       
       final response = await apiService.post(

@@ -22,6 +22,7 @@ class CourierDataProvider {
     required String serviceType,
     String? pickupLocation,
     String? scheduledPickup,
+    List<Map<String, dynamic>>? stops,
   }) async {
     try {
       final estimateData = buildDeliveryEstimateRequestBody(
@@ -35,6 +36,7 @@ class CourierDataProvider {
         serviceType: serviceType,
         pickupLocation: pickupLocation,
         scheduledPickup: scheduledPickup,
+        stops: stops,
       );
 
       final response = await apiService.post(
@@ -274,6 +276,7 @@ class CourierDataProvider {
   Future<Map<String, dynamic>> cancelDelivery({
     required int deliveryId,
     String cancellationReason = 'Changed my mind',
+    int? acceptPenaltyPoints,
   }) async {
     try {
       final response = await apiService.post(
@@ -282,6 +285,9 @@ class CourierDataProvider {
           'delivery_id': deliveryId,
           'cancellation_reason': cancellationReason,
           'cancelled_by': 'user',
+          // Penalty points the customer saw and accepted in the preview.
+          if (acceptPenaltyPoints != null)
+            'accept_penalty_points': acceptPenaltyPoints,
         },
       );
 
@@ -293,7 +299,7 @@ class CourierDataProvider {
     } on ApiException catch (apiException) {
       return {
         'statusCode': apiException.statusCode,
-        'data': null,
+        'data': apiException.data,
         'errorMessage': apiException.message,
       };
     } on Exception catch (e) {

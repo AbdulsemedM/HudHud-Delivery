@@ -4341,4 +4341,282 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get parcelPaidByRecipientCash =>
       'Cash, paid by the recipient on delivery';
+
+  @override
+  String get msAddStop => 'Add another stop';
+
+  @override
+  String msStopLabel(int number) {
+    return 'Stop $number';
+  }
+
+  @override
+  String msStopsCount(int count) {
+    return '$count stops';
+  }
+
+  @override
+  String get msRemoveStop => 'Remove stop';
+
+  @override
+  String get msMoveStopUp => 'Move up';
+
+  @override
+  String get msMoveStopDown => 'Move down';
+
+  @override
+  String get msChooseStopLocation => 'Choose drop-off place';
+
+  @override
+  String msMaxStopsReached(int max) {
+    return 'You can add up to $max drop-offs.';
+  }
+
+  @override
+  String msStopReceiverTitle(int number) {
+    return 'Who receives at stop $number?';
+  }
+
+  @override
+  String get msStopReceiverName => 'Receiver name';
+
+  @override
+  String get msStopReceiverPhone => 'Receiver phone';
+
+  @override
+  String get msStopNoteHint => 'Note for the courier (optional)';
+
+  @override
+  String get msStopReceiverRequired =>
+      'Add a receiver name and phone for every stop.';
+
+  @override
+  String get msStopLocationRequired =>
+      'Choose a place for every stop, or remove the empty ones.';
+
+  @override
+  String get msSenderPaysMultiStop =>
+      'Deliveries with more than one stop are paid by you, the sender.';
+
+  @override
+  String get msMultiStopCashAtPickup =>
+      'Cash is paid to the courier at pickup.';
+
+  @override
+  String get msRouteTitle => 'Route';
+
+  @override
+  String get msPickupLabel => 'Pickup';
+
+  @override
+  String get msStopStatusPending => 'Waiting';
+
+  @override
+  String get msStopStatusEnRoute => 'On the way';
+
+  @override
+  String get msStopStatusArrived => 'Courier arrived';
+
+  @override
+  String get msStopStatusDelivered => 'Delivered';
+
+  @override
+  String get msStopStatusFailed => 'Not delivered';
+
+  @override
+  String get msStopStatusSkipped => 'Skipped';
+
+  @override
+  String msHeadingToStop(int number) {
+    return 'Heading to stop $number';
+  }
+
+  @override
+  String msStopsProgress(int done, int total) {
+    return '$done of $total stops done';
+  }
+
+  @override
+  String msStopCode(String code) {
+    return 'Code: $code';
+  }
+
+  @override
+  String get msErrMultiStopDisabled =>
+      'More than one stop isn\'t available right now. Remove the extra stops to continue.';
+
+  @override
+  String get msErrTooManyStops =>
+      'Too many stops for one delivery. Remove some and try again.';
+
+  @override
+  String get msErrSenderPays =>
+      'Deliveries with more than one stop must be paid by the sender.';
+
+  @override
+  String get cpFreeCancelBody =>
+      'No courier has taken this yet, so cancelling is free.';
+
+  @override
+  String get cpPenaltyTitle => 'Cancel and get penalty points?';
+
+  @override
+  String cpPenaltyBodyDelivery(int points) {
+    return 'A courier is already on this job. Cancelling now adds $points penalty points to your account.';
+  }
+
+  @override
+  String cpPenaltyBodyOrder(int points) {
+    return 'Your order is already being handled. Cancelling now adds $points penalty points to your account.';
+  }
+
+  @override
+  String cpPointsOfLimit(int points, int limit) {
+    return '$points / $limit points';
+  }
+
+  @override
+  String cpWarnFineAt(int threshold) {
+    return 'At $threshold points you must pay a fine before you can book again.';
+  }
+
+  @override
+  String cpWarnBanAt(int threshold) {
+    return 'At $threshold points your account is paused for a while.';
+  }
+
+  @override
+  String cpWillFine(int threshold, String amount) {
+    return 'This reaches $threshold points. You will be fined $amount and can\'t book until it is paid.';
+  }
+
+  @override
+  String cpWillFineNoAmount(int threshold) {
+    return 'This reaches $threshold points. You will be fined and can\'t book until it is paid.';
+  }
+
+  @override
+  String cpWillSuspend(int threshold, int days) {
+    return 'This reaches $threshold points. Your account will be paused for $days days.';
+  }
+
+  @override
+  String cpWillSuspendNoDays(int threshold) {
+    return 'This reaches $threshold points. Your account will be paused.';
+  }
+
+  @override
+  String cpPointsExpire(int days) {
+    return 'Penalty points expire after $days days.';
+  }
+
+  @override
+  String get cpCancelAnyway => 'Cancel anyway';
+
+  @override
+  String get cpKeepDelivery => 'Keep my delivery';
+
+  @override
+  String get cpKeepOrder => 'Keep my order';
+
+  @override
+  String get cpCannotCancelPickedUp =>
+      'This can\'t be cancelled. The courier already picked up the package.';
+
+  @override
+  String get cpCannotCancelGeneric => 'This can\'t be cancelled now.';
+
+  @override
+  String get cpPenaltyChanged =>
+      'The penalty has changed. Please check it again.';
+
+  @override
+  String cpCancelledWithPoints(int points, int total) {
+    return 'Cancelled. $points penalty points added (you now have $total).';
+  }
+
+  @override
+  String cpFineIssued(String amount) {
+    return 'You\'ve been fined $amount. Pay it to book again.';
+  }
+
+  @override
+  String cpSuspendedUntil(String date) {
+    return 'Your account is paused until $date.';
+  }
+
+  @override
+  String get cpStandingTitle => 'Cancellation record';
+
+  @override
+  String get cpStandingGood => 'Good standing';
+
+  @override
+  String get cpStandingWarning => 'Close to a penalty';
+
+  @override
+  String get cpStandingFineDue => 'Fine to pay';
+
+  @override
+  String get cpStandingSuspended => 'Account paused';
+
+  @override
+  String cpStandingExplainer(int points) {
+    return 'Cancelling after a courier or driver is assigned adds $points penalty points. Cancelling before that is free.';
+  }
+
+  @override
+  String cpNextExpiry(int points, String date) {
+    return '$points points expire on $date.';
+  }
+
+  @override
+  String cpFineDueBody(String amount) {
+    return 'You have an unpaid cancellation fine of $amount. Pay it to book deliveries and order again.';
+  }
+
+  @override
+  String get cpPayFine => 'Pay fine from wallet';
+
+  @override
+  String get cpFinePaid => 'Fine paid. You can book again.';
+
+  @override
+  String cpSuspendedBody(String date) {
+    return 'You cancelled too many times after a courier was assigned. You can book again on $date.';
+  }
+
+  @override
+  String get cpSuspendedBodyNoDate =>
+      'You cancelled too many times after a courier was assigned. Contact support to restore your account.';
+
+  @override
+  String get cpTopUpToPayFine =>
+      'Not enough money in your wallet. Top up to pay the fine.';
+
+  @override
+  String get cpTopUp => 'Top up wallet';
+
+  @override
+  String get cpViewRecord => 'View record';
+
+  @override
+  String get cpBlockedTitle => 'You can\'t book right now';
+
+  @override
+  String get cpMarkerFine => 'Fine';
+
+  @override
+  String get cpMarkerPause => 'Pause';
+
+  @override
+  String get cpHowItWorks => 'How it works';
+
+  @override
+  String get cpRuleFree =>
+      'Cancel before a courier or driver is assigned: free.';
+
+  @override
+  String get cpRuleNoCancelAfterPickup =>
+      'Once the package or food is picked up, it can\'t be cancelled.';
 }

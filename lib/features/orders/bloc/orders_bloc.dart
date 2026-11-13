@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
+import '../../cancellation/data/cancellation_models.dart';
 import '../data/repositories/orders_repository.dart';
 import '../data/models/order_cancel_result.dart';
 import '../data/models/order_model.dart';
@@ -130,12 +131,14 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
       final result = await ordersRepository.cancelOrder(
         event.orderId,
         reason: event.reason,
+        acceptPenaltyPoints: event.acceptPenaltyPoints,
       );
 
       emit(OrderCancelled(
         event.orderId,
         'Order cancelled successfully',
         refund: result.refund,
+        penalty: result.penalty,
       ));
       // Refresh orders list
       add(const RefreshOrdersEvent());

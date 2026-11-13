@@ -1,4 +1,8 @@
 import 'dart:async';
+import 'package:hudhud_delivery/core/utils/api_error_result.dart'
+    show kCancellationPenaltyConfirmationCode;
+import 'package:hudhud_delivery/features/cancellation/data/cancellation_models.dart';
+import 'package:hudhud_delivery/features/cancellation/presentation/cancel_confirmation.dart';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
@@ -15,6 +19,8 @@ import 'package:hudhud_delivery/features/courier/easy_mode/delivery_status_sound
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/courier/data/models/delivery_live_tracking.dart';
+import 'package:hudhud_delivery/features/courier/data/models/delivery_stop.dart';
+import 'package:hudhud_delivery/features/courier/presentation/widgets/delivery_stops_timeline.dart';
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
 import 'package:hudhud_delivery/features/courier/presentation/widgets/nearby_driver_markers.dart';
 import 'package:hudhud_delivery/features/courier/utils/courier_home_refresh.dart';
@@ -43,6 +49,10 @@ class FindingCourierScreen extends StatefulWidget {
   final String? packageImagePath;
   final List<LatLng>? routePolylinePoints;
 
+  /// Multi-stop: the drop-offs (empty for single-drop). Also refreshed from
+  /// the `/track` payload while searching.
+  final List<DeliveryStop> stops;
+
   const FindingCourierScreen({
     super.key,
     this.deliveryId,
@@ -59,6 +69,7 @@ class FindingCourierScreen extends StatefulWidget {
     required this.recipientPhone,
     this.packageImagePath,
     this.routePolylinePoints,
+    this.stops = const [],
   });
 
   @override
@@ -66,6 +77,10 @@ class FindingCourierScreen extends StatefulWidget {
 }
 
 class _FindingCourierScreenState extends State<FindingCourierScreen> {
+  /// Multi-stop drop-offs: [FindingCourierScreen.stops], then `/track`.
+  late List<DeliveryStop> _stops = widget.stops;
+
+  bool get _isMultiStop => _stops.length > 1;
   late final CourierRepository _courierRepository;
   late final NearbyDriversPoller _nearbyPoller;
 
@@ -250,7 +265,19 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
             22.0,
           ),
         ),
-      if (widget.deliveryPosition != null)
+      if (_isMultiStop)
+        for (final stop in _stops)
+          if (stop.position != null)
+            gmaps.Marker(
+              markerId: gmaps.MarkerId('stop_${stop.sequence}'),
+              position: _toG(stop.position!),
+              infoWindow: gmaps.InfoWindow(
+                title: context.l10n.msStopLabel(stop.sequence),
+                snippet: stop.location,
+              ),
+              icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(266.0),
+            ),
+      if (!_isMultiStop && widget.deliveryPosition != null)
         gmaps.Marker(
           markerId: const gmaps.MarkerId('delivery'),
           position: _toG(widget.deliveryPosition!),
@@ -362,6 +389,10 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
           await _courierRepository.getDeliveryTrack(widget.deliveryId!);
       if (track['success'] == true) {
         data = track['data'] as Map<String, dynamic>?;
+        final stops = parseDeliveryStops(data);
+        if (stops.length > 1 && mounted) {
+          setState(() => _stops = stops);
+        }
       }
     }
 
@@ -414,30 +445,48 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
   Future<void> _cancelOrder() async {
     if (_isCancelling) return;
 
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(context.l10n.cancelDeliveryTitle),
-        content: Text(
-          cancelDeliveryConfirmMessage(context.l10n),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(context.l10n.actionNo),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(
-              context.l10n.actionYesCancel,
-              style: const TextStyle(color: AppColors.errorColor),
-            ),
-          ),
-        ],
-      ),
-    );
+    // Cancellation penalty points: a courier may have been assigned while
+    // this screen was open; the server preview decides.
+    int? acceptPenaltyPoints;
+    var penaltyConfirmed = false;
+    final previewId = widget.deliveryId;
+    if (previewId != null) {
+      final decision = await previewAndConfirmCancellation(
+        context,
+        subject: CancelSubject.delivery,
+        load: (repo) => repo.previewDelivery(previewId),
+      );
+      if (!mounted || decision.kind == CancelDecisionKind.abort) return;
+      acceptPenaltyPoints = decision.acceptPenaltyPoints;
+      penaltyConfirmed = decision.kind == CancelDecisionKind.confirmed;
+    }
 
-    if (confirmed != true || !mounted) return;
+    final confirmed = penaltyConfirmed ||
+        await showDialog<bool>(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: Text(context.l10n.cancelDeliveryTitle),
+                content: Text(
+                  cancelDeliveryConfirmMessage(context.l10n),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: Text(context.l10n.actionNo),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    child: Text(
+                      context.l10n.actionYesCancel,
+                      style: const TextStyle(color: AppColors.errorColor),
+                    ),
+                  ),
+                ],
+              ),
+            ) ==
+            true;
+
+    if (!confirmed || !mounted) return;
 
     final deliveryId = widget.deliveryId;
     if (deliveryId == null) {
@@ -448,15 +497,21 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
     setState(() => _isCancelling = true);
     final result = await _courierRepository.cancelDelivery(
       deliveryId: deliveryId,
+      acceptPenaltyPoints: acceptPenaltyPoints,
     );
     if (!mounted) return;
 
     if (result['success'] != true) {
       setState(() => _isCancelling = false);
+      final penaltyChanged =
+          result['code'] == kCancellationPenaltyConfirmationCode;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            result['message']?.toString() ?? "You can't cancel this delivery",
+            penaltyChanged
+                ? context.l10n.cpPenaltyChanged
+                : result['message']?.toString() ??
+                    "You can't cancel this delivery",
           ),
           backgroundColor: AppColors.errorColor,
         ),
@@ -467,7 +522,14 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
     _pollTimer?.cancel();
 
     final refund = parseDeliveryCancelRefundResponse(result['data'] ?? result);
-    final successMessage = formatDeliveryCancelMessage(refund);
+    final penaltyLine = cancellationOutcomeMessageOf(
+      context,
+      CancellationPenaltyOutcome.fromResponseBody(result['data']),
+    );
+    final successMessage = [
+      formatDeliveryCancelMessage(refund),
+      if (penaltyLine != null) penaltyLine,
+    ].join('\n');
 
     if (!mounted) return;
     setState(() => _isCancelling = false);
@@ -680,6 +742,21 @@ class _FindingCourierScreenState extends State<FindingCourierScreen> {
                                 context,
                                 Icons.lock_outline_rounded,
                                 privacy,
+                              ),
+                            ],
+                            if (_isMultiStop) ...[
+                              const SizedBox(height: 16),
+                              Container(
+                                padding: const EdgeInsets.all(14),
+                                decoration: BoxDecoration(
+                                  color: HomeColors.surfaceElevatedOf(context),
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: DeliveryStopsTimeline(
+                                  stops: _stops,
+                                  pickupLocation: widget.pickupLocation,
+                                  showHeader: false,
+                                ),
                               ),
                             ],
                             // Phase 10: handover code + share link (v2 only);

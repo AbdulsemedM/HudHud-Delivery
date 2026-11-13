@@ -17,6 +17,8 @@ import 'package:hudhud_delivery/core/widgets/status_chip.dart';
 import 'package:hudhud_delivery/features/courier/easy_mode/delivery_status_sound_service.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/models/delivery_live_tracking.dart';
+import 'package:hudhud_delivery/features/courier/data/models/delivery_stop.dart';
+import 'package:hudhud_delivery/features/courier/presentation/widgets/delivery_stops_timeline.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
 import 'package:hudhud_delivery/features/courier/presentation/widgets/driver_contact_card.dart';
@@ -267,7 +269,50 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
 
   static gmaps.LatLng _toG(LatLng p) => gmaps.LatLng(p.latitude, p.longitude);
 
+  /// Multi-stop: stops of the tracked delivery (empty for single-drop).
+  List<DeliveryStop> get _stops => parseDeliveryStops(_trackData);
+
+  bool get _isMultiStop => _stops.length > 1;
+
+  /// Multi-stop: where the courier heads next (null for single-drop).
+  LatLng? get _currentStopPosition {
+    final stops = _stops;
+    if (stops.length < 2) return null;
+    return currentDeliveryStop(_trackData, stops)?.position;
+  }
+
   void _fitBounds() {
+    final stopPoints = _stops.map((s) => s.position).whereType<LatLng>();
+    if (_isMultiStop && stopPoints.isNotEmpty) {
+      final points = [
+        if (widget.pickupPosition != null) widget.pickupPosition!,
+        ...stopPoints,
+      ];
+      var minLat = points.first.latitude, maxLat = minLat;
+      var minLng = points.first.longitude, maxLng = minLng;
+      for (final p in points) {
+        if (p.latitude < minLat) minLat = p.latitude;
+        if (p.latitude > maxLat) maxLat = p.latitude;
+        if (p.longitude < minLng) minLng = p.longitude;
+        if (p.longitude > maxLng) maxLng = p.longitude;
+      }
+      if (maxLat - minLat < 1e-6 && maxLng - minLng < 1e-6) {
+        _mapController?.moveCamera(
+          gmaps.CameraUpdate.newLatLngZoom(_toG(points.first), 15),
+        );
+        return;
+      }
+      _mapController?.moveCamera(
+        gmaps.CameraUpdate.newLatLngBounds(
+          gmaps.LatLngBounds(
+            southwest: gmaps.LatLng(minLat, minLng),
+            northeast: gmaps.LatLng(maxLat, maxLng),
+          ),
+          50,
+        ),
+      );
+      return;
+    }
     if (widget.pickupPosition != null && widget.deliveryPosition != null) {
       final bounds = gmaps.LatLngBounds(
         southwest: gmaps.LatLng(
@@ -363,6 +408,24 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
 
   bool _orderFieldsLoaded = false;
 
+  /// Multi-stop: last `destination_stop_sequence` seen from live tracking.
+  int? _lastLiveStopSequence;
+
+  /// Multi-stop: re-reads `stops` from /track when the courier moves on to
+  /// another stop and live tracking does not carry per-stop statuses.
+  Future<void> _refreshStopsFromTrack() async {
+    try {
+      final result =
+          await _courierRepository.getDeliveryTrack(widget.deliveryId!);
+      if (!mounted || result['success'] != true) return;
+      final data = result['data'];
+      if (data is! Map || data['stops'] is! List) return;
+      setState(() {
+        _trackData = {...?_trackData, 'stops': data['stops']};
+      });
+    } catch (_) {}
+  }
+
   /// Adds the static order fields from `/track` without overwriting the
   /// fresher live status / driver.
   Future<void> _mergeOrderFieldsFromTrack() async {
@@ -439,6 +502,9 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
         else
           'driver': null,
         'estimated_arrival_minutes': live.estimatedArrivalMinutes,
+        if (live.destinationStopSequence != null)
+          'current_stop_sequence': live.destinationStopSequence,
+        if (live.stops != null) 'stops': live.stops,
       };
     });
 
@@ -446,12 +512,22 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
       _startPollTimer();
     }
 
+    final liveSeq = live.destinationStopSequence;
+    if (liveSeq != null && liveSeq != _lastLiveStopSequence) {
+      final hadPrevious = _lastLiveStopSequence != null;
+      _lastLiveStopSequence = liveSeq;
+      if (hadPrevious && live.stops == null && _isMultiStop) {
+        unawaited(_refreshStopsFromTrack());
+      }
+    }
+
     final origin = live.routeOrigin ?? retained;
     GeoPoint? destination = live.routeDestination ?? live.destination;
     if (destination == null) {
       final label = live.effectiveDestinationLabel;
-      final fallback =
-          label == 'dropoff' ? widget.deliveryPosition : widget.pickupPosition;
+      final fallback = label == 'dropoff'
+          ? (_currentStopPosition ?? widget.deliveryPosition)
+          : widget.pickupPosition;
       if (fallback != null) {
         destination = GeoPoint(
           latitude: fallback.latitude,
@@ -506,7 +582,37 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
         ),
       );
     }
-    if (widget.deliveryPosition != null) {
+    final stops = _stops;
+    final multiStop = stops.length > 1;
+    final currentStop =
+        multiStop ? currentDeliveryStop(_trackData, stops) : null;
+    if (multiStop) {
+      for (final stop in stops) {
+        final pos = stop.position;
+        if (pos == null) continue;
+        final isCurrent = stop.sequence == currentStop?.sequence;
+        markers.add(
+          gmaps.Marker(
+            markerId: gmaps.MarkerId('stop_${stop.sequence}'),
+            position: _toG(pos),
+            alpha: stop.isDone ? 0.45 : 1,
+            zIndexInt: isCurrent ? 2 : 1,
+            infoWindow: gmaps.InfoWindow(
+              title: context.l10n.msStopLabel(stop.sequence),
+              snippet: stop.location,
+            ),
+            icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+              stop.isDelivered
+                  ? gmaps.BitmapDescriptor.hueGreen
+                  : isCurrent
+                      ? gmaps.BitmapDescriptor.hueAzure
+                      : 266.0,
+            ),
+          ),
+        );
+      }
+    }
+    if (!multiStop && widget.deliveryPosition != null) {
       markers.add(
         gmaps.Marker(
           markerId: const gmaps.MarkerId('delivery'),
@@ -528,7 +634,7 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
             _lastRouteDestination!.longitude,
           )
         : (_liveTracking?.effectiveDestinationLabel == 'dropoff'
-            ? widget.deliveryPosition
+            ? (currentStop?.position ?? widget.deliveryPosition)
             : widget.pickupPosition ?? widget.deliveryPosition);
     if (routeStart != null && routeEnd != null) {
       polylines.add(
@@ -556,11 +662,20 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
         deliveryStatusRank(normalizedStatus) >=
             deliveryStatusRank('en_route_dropoff');
     final isTerminal = isDeliveryTerminalStatus(normalizedStatus);
-    final pickupLabel = headingToDropoff && !isTerminal
-        ? (_trackData?['dropoff_location']?.toString() ??
-            widget.deliveryLocation)
-        : (_trackData?['pickup_location']?.toString() ??
-            widget.pickupLocation);
+    final String pickupLabel;
+    if (headingToDropoff && !isTerminal && currentStop != null) {
+      final address = currentStop.location;
+      pickupLabel = [
+        context.l10n.msHeadingToStop(currentStop.sequence),
+        if (address != null && address.isNotEmpty) address,
+      ].join(' · ');
+    } else {
+      pickupLabel = headingToDropoff && !isTerminal
+          ? (_trackData?['dropoff_location']?.toString() ??
+              widget.deliveryLocation)
+          : (_trackData?['pickup_location']?.toString() ??
+              widget.pickupLocation);
+    }
     final etaMinutes = _etaMinutes();
     return CourierTheme.wrap(
       context,
@@ -911,6 +1026,21 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                                                 deliveryId: widget.deliveryId,
                                               ),
                                               const SizedBox(height: 14),
+                                              if (multiStop) ...[
+                                                _SheetCard(
+                                                  borderColor: borderColor,
+                                                  child: DeliveryStopsTimeline(
+                                                    stops: stops,
+                                                    pickupLocation: _trackData?[
+                                                                'pickup_location']
+                                                            ?.toString() ??
+                                                        widget.pickupLocation,
+                                                    currentSequence:
+                                                        currentStop?.sequence,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 14),
+                                              ],
                                               _ReviewOrderCard(
                                                 courierNumber: _trackData?[
                                                             'tracking_number']
@@ -922,7 +1052,10 @@ class _DeliveryTrackingScreenState extends State<DeliveryTrackingScreen> {
                                                             'pickup_location']
                                                         ?.toString() ??
                                                     widget.pickupLocation,
-                                                to: _trackData?[
+                                                to: multiStopRowAddress(
+                                                      _trackData,
+                                                    ) ??
+                                                    _trackData?[
                                                             'dropoff_location']
                                                         ?.toString() ??
                                                     widget.deliveryLocation,

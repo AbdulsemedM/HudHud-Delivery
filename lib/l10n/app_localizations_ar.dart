@@ -4313,4 +4313,276 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get parcelPaidByRecipientCash => 'نقدًا، يدفعها المستلم عند التسليم';
+
+  @override
+  String get msAddStop => 'أضف محطة أخرى';
+
+  @override
+  String msStopLabel(int number) {
+    return 'المحطة $number';
+  }
+
+  @override
+  String msStopsCount(int count) {
+    return '$count محطات';
+  }
+
+  @override
+  String get msRemoveStop => 'إزالة المحطة';
+
+  @override
+  String get msMoveStopUp => 'تحريك لأعلى';
+
+  @override
+  String get msMoveStopDown => 'تحريك لأسفل';
+
+  @override
+  String get msChooseStopLocation => 'اختر مكان التسليم';
+
+  @override
+  String msMaxStopsReached(int max) {
+    return 'يمكنك إضافة حتى $max نقاط تسليم.';
+  }
+
+  @override
+  String msStopReceiverTitle(int number) {
+    return 'من يستلم في المحطة $number؟';
+  }
+
+  @override
+  String get msStopReceiverName => 'اسم المستلم';
+
+  @override
+  String get msStopReceiverPhone => 'هاتف المستلم';
+
+  @override
+  String get msStopNoteHint => 'ملاحظة للمندوب (اختياري)';
+
+  @override
+  String get msStopReceiverRequired => 'أضف اسم المستلم ورقم هاتفه لكل محطة.';
+
+  @override
+  String get msStopLocationRequired =>
+      'اختر مكانًا لكل محطة أو احذف المحطات الفارغة.';
+
+  @override
+  String get msSenderPaysMultiStop =>
+      'التوصيلات التي تحتوي على أكثر من محطة يدفعها المرسل.';
+
+  @override
+  String get msMultiStopCashAtPickup => 'يُدفع النقد للمندوب عند الاستلام.';
+
+  @override
+  String get msRouteTitle => 'المسار';
+
+  @override
+  String get msPickupLabel => 'الاستلام';
+
+  @override
+  String get msStopStatusPending => 'في الانتظار';
+
+  @override
+  String get msStopStatusEnRoute => 'في الطريق';
+
+  @override
+  String get msStopStatusArrived => 'وصل المندوب';
+
+  @override
+  String get msStopStatusDelivered => 'تم التسليم';
+
+  @override
+  String get msStopStatusFailed => 'لم يتم التسليم';
+
+  @override
+  String get msStopStatusSkipped => 'تم تخطيها';
+
+  @override
+  String msHeadingToStop(int number) {
+    return 'متجه إلى المحطة $number';
+  }
+
+  @override
+  String msStopsProgress(int done, int total) {
+    return 'تم $done من $total محطات';
+  }
+
+  @override
+  String msStopCode(String code) {
+    return 'الرمز: $code';
+  }
+
+  @override
+  String get msErrMultiStopDisabled =>
+      'تعدد المحطات غير متاح حاليًا. احذف المحطات الإضافية للمتابعة.';
+
+  @override
+  String get msErrTooManyStops =>
+      'عدد المحطات كبير جدًا لتوصيلة واحدة. احذف بعضها وحاول مجددًا.';
+
+  @override
+  String get msErrSenderPays => 'يجب أن يدفع المرسل التوصيلات متعددة المحطات.';
+
+  @override
+  String get cpFreeCancelBody => 'لم يتم تعيين مندوب بعد، لذا الإلغاء مجاني.';
+
+  @override
+  String get cpPenaltyTitle => 'الإلغاء مع نقاط جزاء؟';
+
+  @override
+  String cpPenaltyBodyDelivery(int points) {
+    return 'تم تعيين مندوب بالفعل. الإلغاء الآن يضيف $points نقاط جزاء إلى حسابك.';
+  }
+
+  @override
+  String cpPenaltyBodyOrder(int points) {
+    return 'طلبك قيد التنفيذ بالفعل. الإلغاء الآن يضيف $points نقاط جزاء إلى حسابك.';
+  }
+
+  @override
+  String cpPointsOfLimit(int points, int limit) {
+    return '$points / $limit نقطة';
+  }
+
+  @override
+  String cpWarnFineAt(int threshold) {
+    return 'عند $threshold نقطة يجب دفع غرامة قبل أن تتمكن من الحجز مجددًا.';
+  }
+
+  @override
+  String cpWarnBanAt(int threshold) {
+    return 'عند $threshold نقطة يتم إيقاف حسابك مؤقتًا.';
+  }
+
+  @override
+  String cpWillFine(int threshold, String amount) {
+    return 'سيصل هذا إلى $threshold نقطة. ستُفرض عليك غرامة $amount ولن تتمكن من الحجز حتى تدفعها.';
+  }
+
+  @override
+  String cpWillFineNoAmount(int threshold) {
+    return 'سيصل هذا إلى $threshold نقطة. ستُفرض عليك غرامة ولن تتمكن من الحجز حتى تدفعها.';
+  }
+
+  @override
+  String cpWillSuspend(int threshold, int days) {
+    return 'سيصل هذا إلى $threshold نقطة. سيتم إيقاف حسابك لمدة $days أيام.';
+  }
+
+  @override
+  String cpWillSuspendNoDays(int threshold) {
+    return 'سيصل هذا إلى $threshold نقطة. سيتم إيقاف حسابك.';
+  }
+
+  @override
+  String cpPointsExpire(int days) {
+    return 'تنتهي صلاحية نقاط الجزاء بعد $days يومًا.';
+  }
+
+  @override
+  String get cpCancelAnyway => 'إلغاء على أي حال';
+
+  @override
+  String get cpKeepDelivery => 'الإبقاء على التوصيل';
+
+  @override
+  String get cpKeepOrder => 'الإبقاء على الطلب';
+
+  @override
+  String get cpCannotCancelPickedUp =>
+      'لا يمكن الإلغاء. استلم المندوب الطرد بالفعل.';
+
+  @override
+  String get cpCannotCancelGeneric => 'لا يمكن الإلغاء الآن.';
+
+  @override
+  String get cpPenaltyChanged => 'تغيّر الجزاء. يرجى المراجعة مرة أخرى.';
+
+  @override
+  String cpCancelledWithPoints(int points, int total) {
+    return 'تم الإلغاء. أضيفت $points نقاط جزاء (لديك الآن $total).';
+  }
+
+  @override
+  String cpFineIssued(String amount) {
+    return 'فُرضت عليك غرامة $amount. ادفعها لتتمكن من الحجز مجددًا.';
+  }
+
+  @override
+  String cpSuspendedUntil(String date) {
+    return 'حسابك موقوف حتى $date.';
+  }
+
+  @override
+  String get cpStandingTitle => 'سجل الإلغاءات';
+
+  @override
+  String get cpStandingGood => 'وضع جيد';
+
+  @override
+  String get cpStandingWarning => 'قريب من العقوبة';
+
+  @override
+  String get cpStandingFineDue => 'غرامة مستحقة';
+
+  @override
+  String get cpStandingSuspended => 'الحساب موقوف';
+
+  @override
+  String cpStandingExplainer(int points) {
+    return 'الإلغاء بعد تعيين مندوب أو سائق يضيف $points نقاط جزاء. الإلغاء قبل ذلك مجاني.';
+  }
+
+  @override
+  String cpNextExpiry(int points, String date) {
+    return 'تنتهي صلاحية $points نقاط في $date.';
+  }
+
+  @override
+  String cpFineDueBody(String amount) {
+    return 'لديك غرامة إلغاء غير مدفوعة بقيمة $amount. ادفعها لتتمكن من الحجز والطلب مجددًا.';
+  }
+
+  @override
+  String get cpPayFine => 'ادفع الغرامة من المحفظة';
+
+  @override
+  String get cpFinePaid => 'تم دفع الغرامة. يمكنك الحجز مجددًا.';
+
+  @override
+  String cpSuspendedBody(String date) {
+    return 'لقد ألغيت مرات كثيرة بعد تعيين مندوب. يمكنك الحجز مجددًا في $date.';
+  }
+
+  @override
+  String get cpSuspendedBodyNoDate =>
+      'لقد ألغيت مرات كثيرة بعد تعيين مندوب. تواصل مع الدعم لاستعادة حسابك.';
+
+  @override
+  String get cpTopUpToPayFine =>
+      'لا يوجد رصيد كافٍ في محفظتك. اشحن المحفظة لدفع الغرامة.';
+
+  @override
+  String get cpTopUp => 'اشحن المحفظة';
+
+  @override
+  String get cpViewRecord => 'عرض السجل';
+
+  @override
+  String get cpBlockedTitle => 'لا يمكنك الحجز الآن';
+
+  @override
+  String get cpMarkerFine => 'غرامة';
+
+  @override
+  String get cpMarkerPause => 'إيقاف';
+
+  @override
+  String get cpHowItWorks => 'كيف يعمل';
+
+  @override
+  String get cpRuleFree => 'الإلغاء قبل تعيين مندوب أو سائق: مجاني.';
+
+  @override
+  String get cpRuleNoCancelAfterPickup =>
+      'بعد استلام الطرد أو الطعام لا يمكن الإلغاء.';
 }

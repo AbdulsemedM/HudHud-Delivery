@@ -1,3 +1,4 @@
+import 'package:hudhud_delivery/features/cancellation/cancellation_policy_controller.dart';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -108,6 +109,7 @@ class AuthService {
     _currentUser = null;
     _currentToken = null;
     _tokenExpiry = null;
+    CancellationPolicyController.instance.clear();
     await clearAllData();
   }
 

@@ -26,6 +26,7 @@ class CourierRepository {
     required String serviceType,
     String? pickupLocation,
     String? scheduledPickup,
+    List<Map<String, dynamic>>? stops,
   }) async {
     try {
       final response = await courierDataProvider.estimateDelivery(
@@ -39,6 +40,7 @@ class CourierRepository {
         serviceType: serviceType,
         pickupLocation: pickupLocation,
         scheduledPickup: scheduledPickup,
+        stops: stops,
       );
 
       if (response['statusCode'] == 200 || response['statusCode'] == 201) {
@@ -535,11 +537,13 @@ class CourierRepository {
   Future<Map<String, dynamic>> cancelDelivery({
     required int deliveryId,
     String cancellationReason = 'Changed my mind',
+    int? acceptPenaltyPoints,
   }) async {
     try {
       final response = await courierDataProvider.cancelDelivery(
         deliveryId: deliveryId,
         cancellationReason: cancellationReason,
+        acceptPenaltyPoints: acceptPenaltyPoints,
       );
 
       if (response['statusCode'] == 200) {
@@ -558,10 +562,13 @@ class CourierRepository {
       String errorMessage =
           response['errorMessage'] ?? 'Error cancelling delivery';
       errorMessage = _cleanErrorMessage(errorMessage);
+      final errorBody = response['data'];
       return {
         'success': false,
         'data': null,
         'message': errorMessage,
+        // e.g. CANCELLATION_PENALTY_CONFIRMATION_REQUIRED, CANCELLATION_NOT_ALLOWED
+        'code': errorBody is Map ? errorBody['code']?.toString() : null,
       };
     } catch (e) {
       String errorMessage = e.toString();

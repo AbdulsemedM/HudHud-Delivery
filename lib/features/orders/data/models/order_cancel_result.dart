@@ -1,5 +1,6 @@
 import 'package:intl/intl.dart';
 import 'package:hudhud_delivery/core/utils/money_format.dart';
+import 'package:hudhud_delivery/features/cancellation/data/cancellation_models.dart';
 
 /// `refund` block returned by order cancel endpoints
 /// (OrderRefundService::refundCancelledOrder): `{status, amount?, currency?}`.
@@ -59,7 +60,10 @@ class OrderCancelResult {
   final String message;
   final OrderRefund? refund;
 
-  const OrderCancelResult({required this.message, this.refund});
+  /// Penalty points added by this cancel (null when it was free).
+  final CancellationPenaltyOutcome? penalty;
+
+  const OrderCancelResult({required this.message, this.refund, this.penalty});
 
   /// Parses a cancel response body `{message, refund?, order?}` (also
   /// accepts `{data: {refund}}`).
@@ -75,6 +79,10 @@ class OrderCancelResult {
         refund = OrderRefund.tryParse(data['refund']);
       }
     }
-    return OrderCancelResult(message: message, refund: refund);
+    return OrderCancelResult(
+      message: message,
+      refund: refund,
+      penalty: CancellationPenaltyOutcome.fromResponseBody(body),
+    );
   }
 }

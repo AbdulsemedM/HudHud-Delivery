@@ -12,14 +12,17 @@ import 'package:hudhud_delivery/app/services/geocoding_service.dart';
 import 'package:hudhud_delivery/app/services/google_directions_service.dart';
 import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
+import 'package:hudhud_delivery/features/courier/data/models/delivery_stop.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
 import 'package:hudhud_delivery/features/courier/presentation/widgets/courier_vehicle_estimate_card.dart';
+import 'package:hudhud_delivery/features/courier/presentation/widgets/extra_stops_editor.dart';
 import 'package:hudhud_delivery/features/courier/presentation/widgets/nearby_driver_markers.dart';
 import 'package:hudhud_delivery/features/courier/presentation/widgets/send_package_location_row.dart';
 import 'package:hudhud_delivery/features/courier/utils/courier_vehicle_display.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_estimate.dart';
 import 'package:hudhud_delivery/features/courier/utils/fetch_courier_vehicle_estimates.dart';
+import 'package:hudhud_delivery/features/courier/utils/multi_stop_body.dart';
 import 'package:hudhud_delivery/features/courier/utils/nearby_drivers_poller.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import '../../../home/presentation/screen/location_search_screen.dart';
@@ -56,18 +59,118 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
   List<String> _supportedVehicleTypes = const [];
   Map<String, gmaps.BitmapDescriptor> _nearbyIconsByAsset = {};
 
+  /// Multi-stop (server flag): drop-offs after the first one.
+  DeliveryMultiStopConfig _multiStop = DeliveryMultiStopConfig.disabled;
+  List<DeliveryStopDraft> _extraStops = const [];
+
   bool get _canFetchEstimate =>
       _pickupPosition != null && _deliveryPosition != null;
 
   static gmaps.LatLng _toG(LatLng p) => gmaps.LatLng(p.latitude, p.longitude);
 
+  /// Where the route ends: the last extra stop, else the drop-off.
+  LatLng? get _routeEnd =>
+      _extraStops.isEmpty ? _deliveryPosition : _extraStops.last.position;
+
+  /// Drop-offs between pickup and [_routeEnd], in order.
+  List<LatLng> get _routeWaypoints => _extraStops.isEmpty
+      ? const []
+      : [
+          _deliveryPosition!,
+          for (final s in _extraStops.take(_extraStops.length - 1))
+            s.position,
+        ];
+
+  /// `stops` for the estimate (null for a single drop-off).
+  List<Map<String, dynamic>>? get _estimateStops => _deliveryPosition == null
+      ? null
+      : estimateStopsJson([
+          DeliveryStopDraft(
+            location: _deliveryLocation,
+            position: _deliveryPosition!,
+          ),
+          ..._extraStops,
+        ]);
+
+  Future<void> _loadMultiStopConfig() async {
+    final config = await DeliveryConfigRepository.instance.multiStop();
+    if (!mounted) return;
+    setState(() => _multiStop = config);
+  }
+
+  Future<({String address, LatLng position})?> _pickStopPlace() async {
+    final result = await Navigator.push<Map<String, dynamic>>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CourierTheme.wrap(
+          context,
+          child: LocationSearchScreen(currentLocation: _pickupLocation),
+        ),
+      ),
+    );
+    final address = result?['address'] as String?;
+    final coordinates = result?['coordinates'] as LatLng?;
+    if (address == null || coordinates == null) return null;
+    return (address: address, position: coordinates);
+  }
+
+  Future<void> _addStop() async {
+    final place = await _pickStopPlace();
+    if (place == null || !mounted) return;
+    setState(() {
+      _extraStops = [
+        ..._extraStops,
+        DeliveryStopDraft(location: place.address, position: place.position),
+      ];
+    });
+    _onStopsChanged();
+  }
+
+  Future<void> _editStop(int index) async {
+    final place = await _pickStopPlace();
+    if (place == null || !mounted || index >= _extraStops.length) return;
+    setState(() {
+      _extraStops = List.of(_extraStops)
+        ..[index] = _extraStops[index].copyWith(
+          location: place.address,
+          position: place.position,
+        );
+    });
+    _onStopsChanged();
+  }
+
+  void _removeStop(int index) {
+    setState(() {
+      _extraStops = List.of(_extraStops)..removeAt(index);
+    });
+    _onStopsChanged();
+  }
+
+  void _moveStop(int index, int delta) {
+    setState(() => _extraStops = movedListItem(_extraStops, index, delta));
+    _onStopsChanged();
+  }
+
+  void _onStopsChanged() {
+    setState(() => _routePolylinePoints = null);
+    if (_pickupPosition != null && _deliveryPosition != null) {
+      _fetchRouteDirections();
+      _fitBounds();
+    }
+    _scheduleEstimateFetch();
+  }
+
   Future<void> _fetchRouteDirections() async {
-    if (_pickupPosition == null || _deliveryPosition == null) return;
+    final end = _routeEnd;
+    if (_pickupPosition == null || _deliveryPosition == null || end == null) {
+      return;
+    }
     final result = await GoogleDirectionsService.getDirections(
       originLat: _pickupPosition!.latitude,
       originLng: _pickupPosition!.longitude,
-      destLat: _deliveryPosition!.latitude,
-      destLng: _deliveryPosition!.longitude,
+      destLat: end.latitude,
+      destLng: end.longitude,
+      waypoints: _routeWaypoints,
     );
     if (!mounted) return;
     setState(() {
@@ -90,6 +193,7 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
     unawaited(preloadCommonCourierVehicleMapIcons());
     _loadMapsAvailability();
     _getCurrentLocation();
+    unawaited(_loadMultiStopConfig());
   }
 
   Future<void> _onNearbyDriversUpdated() async {
@@ -205,11 +309,12 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
           packageWeight: kCourierEstimatePlaceholderWeightKg,
           pickupLatitude: _pickupPosition!.latitude,
           pickupLongitude: _pickupPosition!.longitude,
-          dropoffLatitude: _deliveryPosition!.latitude,
-          dropoffLongitude: _deliveryPosition!.longitude,
+          dropoffLatitude: _routeEnd!.latitude,
+          dropoffLongitude: _routeEnd!.longitude,
           vehicleType: mapCourierVehicleType(vehicleId),
           serviceType: deliveryServiceType(isInstantDelivery: true),
           pickupLocation: _pickupLocation,
+          stops: _estimateStops,
         );
         final error = raw['error'] as ApiErrorResult?;
         if (error?.isCityVehicleNotSupported == true) {
@@ -534,6 +639,15 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                                     isPlaceholder: dropoffEmpty,
                                     onTap: _selectDeliveryLocation,
                                   ),
+                                  ExtraStopsEditor(
+                                    stops: _extraStops,
+                                    maxExtraStops: _multiStop.maxExtraStops,
+                                    enabled: !dropoffEmpty,
+                                    onAdd: _addStop,
+                                    onEdit: _editStop,
+                                    onRemove: _removeStop,
+                                    onMove: _moveStop,
+                                  ),
                                   const SizedBox(height: 18),
                                   if (_pickupLocation.isNotEmpty &&
                                       !_isLoadingServiceArea &&
@@ -630,6 +744,7 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                                                   isInstantDelivery: true,
                                                   scheduledPickup: null,
                                                   scheduledDelivery: null,
+                                                  extraStops: _extraStops,
                                                 ),
                                               ),
                                             );
@@ -784,6 +899,21 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
   }
 
   void _fitBounds() {
+    if (_extraStops.isNotEmpty &&
+        _pickupPosition != null &&
+        _deliveryPosition != null) {
+      final bounds = boundsForPoints([
+        _pickupPosition!,
+        _deliveryPosition!,
+        for (final s in _extraStops) s.position,
+      ]);
+      if (bounds != null) {
+        _mapController?.moveCamera(
+          gmaps.CameraUpdate.newLatLngBounds(bounds, 50),
+        );
+      }
+      return;
+    }
     if (_pickupPosition != null && _deliveryPosition != null) {
       final bounds = gmaps.LatLngBounds(
         southwest: gmaps.LatLng(
@@ -865,6 +995,10 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                   266.0,
                 ),
               ),
+            ...extraStopMarkers(
+              _extraStops,
+              label: context.l10n.msStopLabel,
+            ),
             ...nearbyDriverMapMarkers(
               _nearbyPoller.result.drivers,
               iconsByAsset: _nearbyIconsByAsset,
@@ -877,7 +1011,11 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                     points: _routePolylinePoints != null &&
                             _routePolylinePoints!.length >= 2
                         ? _routePolylinePoints!.map(_toG).toList()
-                        : [_toG(_pickupPosition!), _toG(_deliveryPosition!)],
+                        : [
+                            _toG(_pickupPosition!),
+                            _toG(_deliveryPosition!),
+                            for (final s in _extraStops) _toG(s.position),
+                          ],
                     color: HomeColors.violetOf(context),
                     width: 3,
                   ),

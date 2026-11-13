@@ -3,6 +3,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/widgets/status_chip.dart';
+import 'package:hudhud_delivery/features/courier/data/models/delivery_stop.dart';
+import 'package:hudhud_delivery/features/courier/presentation/widgets/delivery_stops_timeline.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_status.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
@@ -104,10 +106,23 @@ class _ActiveDeliveryCardState extends State<ActiveDeliveryCard> {
         widget.delivery['pickup_longitude'],
       );
 
-  gmaps.LatLng? get _dropoff => parseDeliveryGLatLng(
-        widget.delivery['dropoff_latitude'],
-        widget.delivery['dropoff_longitude'],
-      );
+  /// Multi-stop: the stop the courier heads to (null for single-drop).
+  DeliveryStop? get _currentStop {
+    final stops = parseDeliveryStops(widget.delivery);
+    if (stops.length < 2) return null;
+    return currentDeliveryStop(widget.delivery, stops) ?? stops.last;
+  }
+
+  gmaps.LatLng? get _dropoff {
+    final stop = _currentStop;
+    if (stop?.latitude != null && stop?.longitude != null) {
+      return gmaps.LatLng(stop!.latitude!, stop.longitude!);
+    }
+    return parseDeliveryGLatLng(
+      widget.delivery['dropoff_latitude'],
+      widget.delivery['dropoff_longitude'],
+    );
+  }
 
   bool get _hasMapCoords => _pickup != null && _dropoff != null;
 
@@ -152,7 +167,11 @@ class _ActiveDeliveryCardState extends State<ActiveDeliveryCard> {
     final rawStatus = resolveDeliveryStatus(delivery);
     final statusMessage = activeDeliveryStatusMessage(l10n, rawStatus);
     final pickupAddress = delivery['pickup_location']?.toString() ?? '';
-    final dropoffAddress = delivery['dropoff_location']?.toString() ?? '';
+    final stopCount = parseDeliveryStops(delivery).length;
+    final currentStop = _currentStop;
+    final dropoffAddress = currentStop?.location ??
+        delivery['dropoff_location']?.toString() ??
+        '';
 
     final dark = HomeColors.isDark(context);
     final radius = BorderRadius.circular(24);
@@ -269,8 +288,15 @@ class _ActiveDeliveryCardState extends State<ActiveDeliveryCard> {
                       iconColor: HomeColors.orange,
                       showConnector: true,
                     ),
+                    if (stopCount > 1)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 2, bottom: 6),
+                        child: DeliveryStopsCountBadge(count: stopCount),
+                      ),
                     _AddressLine(
-                      label: l10n.deliveryDetailsDropoff,
+                      label: currentStop != null
+                          ? l10n.msStopLabel(currentStop.sequence)
+                          : l10n.deliveryDetailsDropoff,
                       value: _truncateAddress(dropoffAddress),
                       icon: Icons.location_on_rounded,
                       iconColor: HomeColors.violetOf(context),

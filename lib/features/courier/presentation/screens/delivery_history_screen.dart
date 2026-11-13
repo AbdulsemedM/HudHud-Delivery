@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/features/courier/data/models/delivery_stop.dart';
+import 'package:hudhud_delivery/features/courier/presentation/widgets/delivery_stops_timeline.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
@@ -325,7 +327,10 @@ class _DeliveryHistoryScreenState extends State<DeliveryHistoryScreen> {
                         return DeliveryHistoryCard(
                           orderId: id != null ? 'DEL-$id' : '—',
                           recipient: d['receiver_name']?.toString() ?? '—',
-                          location: d['dropoff_location']?.toString() ?? '—',
+                          location: multiStopRowAddress(d) ??
+                            d['dropoff_location']?.toString() ??
+                            '—',
+                        stopCount: parseDeliveryStops(d).length,
                           dateTime: formatDeliveryHistoryDate(context, d['created_at']),
                           status: resolveDeliveryStatusLabel(d),
                           borderColor: borderColor,

@@ -56,6 +56,7 @@ Map<String, dynamic> buildDeliveryEstimateRequestBody({
   required String serviceType,
   String? pickupLocation,
   String? scheduledPickup,
+  List<Map<String, dynamic>>? stops,
 }) {
   final body = <String, dynamic>{
     'package_type': packageType,
@@ -73,6 +74,10 @@ Map<String, dynamic> buildDeliveryEstimateRequestBody({
   }
   if (scheduledPickup != null && scheduledPickup.isNotEmpty) {
     body['scheduled_pickup'] = scheduledPickup;
+  }
+  // Multi-stop: every drop-off in order; dropoff_* is the route end.
+  if (stops != null && stops.length > 1) {
+    body['stops'] = stops;
   }
   return body;
 }

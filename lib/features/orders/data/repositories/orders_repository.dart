@@ -26,7 +26,11 @@ abstract class OrdersRepository {
 
   /// Throws [OrdersRepositoryException] on failure. The result carries the
   /// `refund` outcome when the endpoint reports it.
-  Future<OrderCancelResult> cancelOrder(int orderId, {String? reason});
+  Future<OrderCancelResult> cancelOrder(
+    int orderId, {
+    String? reason,
+    int? acceptPenaltyPoints,
+  });
 }
 
 class OrdersRepositoryImpl implements OrdersRepository {
@@ -177,9 +181,17 @@ class OrdersRepositoryImpl implements OrdersRepository {
   }
 
   @override
-  Future<OrderCancelResult> cancelOrder(int orderId, {String? reason}) async {
+  Future<OrderCancelResult> cancelOrder(
+    int orderId, {
+    String? reason,
+    int? acceptPenaltyPoints,
+  }) async {
     try {
-      final response = await dataProvider.cancelOrder(orderId, reason: reason);
+      final response = await dataProvider.cancelOrder(
+        orderId,
+        reason: reason,
+        acceptPenaltyPoints: acceptPenaltyPoints,
+      );
       
       if (response['statusCode'] == 200) {
         // Body is `{message, refund?}`; the old `data ?? true` returned a Map

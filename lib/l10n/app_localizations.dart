@@ -8018,6 +8018,438 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cash, paid by the recipient on delivery'**
   String get parcelPaidByRecipientCash;
+
+  /// No description provided for @msAddStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Add another stop'**
+  String get msAddStop;
+
+  /// No description provided for @msStopLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop {number}'**
+  String msStopLabel(int number);
+
+  /// No description provided for @msStopsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} stops'**
+  String msStopsCount(int count);
+
+  /// No description provided for @msRemoveStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove stop'**
+  String get msRemoveStop;
+
+  /// No description provided for @msMoveStopUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move up'**
+  String get msMoveStopUp;
+
+  /// No description provided for @msMoveStopDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Move down'**
+  String get msMoveStopDown;
+
+  /// No description provided for @msChooseStopLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose drop-off place'**
+  String get msChooseStopLocation;
+
+  /// No description provided for @msMaxStopsReached.
+  ///
+  /// In en, this message translates to:
+  /// **'You can add up to {max} drop-offs.'**
+  String msMaxStopsReached(int max);
+
+  /// No description provided for @msStopReceiverTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Who receives at stop {number}?'**
+  String msStopReceiverTitle(int number);
+
+  /// No description provided for @msStopReceiverName.
+  ///
+  /// In en, this message translates to:
+  /// **'Receiver name'**
+  String get msStopReceiverName;
+
+  /// No description provided for @msStopReceiverPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Receiver phone'**
+  String get msStopReceiverPhone;
+
+  /// No description provided for @msStopNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Note for the courier (optional)'**
+  String get msStopNoteHint;
+
+  /// No description provided for @msStopReceiverRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a receiver name and phone for every stop.'**
+  String get msStopReceiverRequired;
+
+  /// No description provided for @msStopLocationRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a place for every stop, or remove the empty ones.'**
+  String get msStopLocationRequired;
+
+  /// No description provided for @msSenderPaysMultiStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Deliveries with more than one stop are paid by you, the sender.'**
+  String get msSenderPaysMultiStop;
+
+  /// No description provided for @msMultiStopCashAtPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash is paid to the courier at pickup.'**
+  String get msMultiStopCashAtPickup;
+
+  /// No description provided for @msRouteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Route'**
+  String get msRouteTitle;
+
+  /// No description provided for @msPickupLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup'**
+  String get msPickupLabel;
+
+  /// No description provided for @msStopStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting'**
+  String get msStopStatusPending;
+
+  /// No description provided for @msStopStatusEnRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'On the way'**
+  String get msStopStatusEnRoute;
+
+  /// No description provided for @msStopStatusArrived.
+  ///
+  /// In en, this message translates to:
+  /// **'Courier arrived'**
+  String get msStopStatusArrived;
+
+  /// No description provided for @msStopStatusDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered'**
+  String get msStopStatusDelivered;
+
+  /// No description provided for @msStopStatusFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Not delivered'**
+  String get msStopStatusFailed;
+
+  /// No description provided for @msStopStatusSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped'**
+  String get msStopStatusSkipped;
+
+  /// No description provided for @msHeadingToStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Heading to stop {number}'**
+  String msHeadingToStop(int number);
+
+  /// No description provided for @msStopsProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total} stops done'**
+  String msStopsProgress(int done, int total);
+
+  /// No description provided for @msStopCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Code: {code}'**
+  String msStopCode(String code);
+
+  /// No description provided for @msErrMultiStopDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'More than one stop isn\'t available right now. Remove the extra stops to continue.'**
+  String get msErrMultiStopDisabled;
+
+  /// No description provided for @msErrTooManyStops.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many stops for one delivery. Remove some and try again.'**
+  String get msErrTooManyStops;
+
+  /// No description provided for @msErrSenderPays.
+  ///
+  /// In en, this message translates to:
+  /// **'Deliveries with more than one stop must be paid by the sender.'**
+  String get msErrSenderPays;
+
+  /// No description provided for @cpFreeCancelBody.
+  ///
+  /// In en, this message translates to:
+  /// **'No courier has taken this yet, so cancelling is free.'**
+  String get cpFreeCancelBody;
+
+  /// No description provided for @cpPenaltyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel and get penalty points?'**
+  String get cpPenaltyTitle;
+
+  /// No description provided for @cpPenaltyBodyDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'A courier is already on this job. Cancelling now adds {points} penalty points to your account.'**
+  String cpPenaltyBodyDelivery(int points);
+
+  /// No description provided for @cpPenaltyBodyOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Your order is already being handled. Cancelling now adds {points} penalty points to your account.'**
+  String cpPenaltyBodyOrder(int points);
+
+  /// No description provided for @cpPointsOfLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'{points} / {limit} points'**
+  String cpPointsOfLimit(int points, int limit);
+
+  /// No description provided for @cpWarnFineAt.
+  ///
+  /// In en, this message translates to:
+  /// **'At {threshold} points you must pay a fine before you can book again.'**
+  String cpWarnFineAt(int threshold);
+
+  /// No description provided for @cpWarnBanAt.
+  ///
+  /// In en, this message translates to:
+  /// **'At {threshold} points your account is paused for a while.'**
+  String cpWarnBanAt(int threshold);
+
+  /// No description provided for @cpWillFine.
+  ///
+  /// In en, this message translates to:
+  /// **'This reaches {threshold} points. You will be fined {amount} and can\'t book until it is paid.'**
+  String cpWillFine(int threshold, String amount);
+
+  /// No description provided for @cpWillFineNoAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'This reaches {threshold} points. You will be fined and can\'t book until it is paid.'**
+  String cpWillFineNoAmount(int threshold);
+
+  /// No description provided for @cpWillSuspend.
+  ///
+  /// In en, this message translates to:
+  /// **'This reaches {threshold} points. Your account will be paused for {days} days.'**
+  String cpWillSuspend(int threshold, int days);
+
+  /// No description provided for @cpWillSuspendNoDays.
+  ///
+  /// In en, this message translates to:
+  /// **'This reaches {threshold} points. Your account will be paused.'**
+  String cpWillSuspendNoDays(int threshold);
+
+  /// No description provided for @cpPointsExpire.
+  ///
+  /// In en, this message translates to:
+  /// **'Penalty points expire after {days} days.'**
+  String cpPointsExpire(int days);
+
+  /// No description provided for @cpCancelAnyway.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel anyway'**
+  String get cpCancelAnyway;
+
+  /// No description provided for @cpKeepDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep my delivery'**
+  String get cpKeepDelivery;
+
+  /// No description provided for @cpKeepOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep my order'**
+  String get cpKeepOrder;
+
+  /// No description provided for @cpCannotCancelPickedUp.
+  ///
+  /// In en, this message translates to:
+  /// **'This can\'t be cancelled. The courier already picked up the package.'**
+  String get cpCannotCancelPickedUp;
+
+  /// No description provided for @cpCannotCancelGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'This can\'t be cancelled now.'**
+  String get cpCannotCancelGeneric;
+
+  /// No description provided for @cpPenaltyChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'The penalty has changed. Please check it again.'**
+  String get cpPenaltyChanged;
+
+  /// No description provided for @cpCancelledWithPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled. {points} penalty points added (you now have {total}).'**
+  String cpCancelledWithPoints(int points, int total);
+
+  /// No description provided for @cpFineIssued.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve been fined {amount}. Pay it to book again.'**
+  String cpFineIssued(String amount);
+
+  /// No description provided for @cpSuspendedUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account is paused until {date}.'**
+  String cpSuspendedUntil(String date);
+
+  /// No description provided for @cpStandingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancellation record'**
+  String get cpStandingTitle;
+
+  /// No description provided for @cpStandingGood.
+  ///
+  /// In en, this message translates to:
+  /// **'Good standing'**
+  String get cpStandingGood;
+
+  /// No description provided for @cpStandingWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Close to a penalty'**
+  String get cpStandingWarning;
+
+  /// No description provided for @cpStandingFineDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Fine to pay'**
+  String get cpStandingFineDue;
+
+  /// No description provided for @cpStandingSuspended.
+  ///
+  /// In en, this message translates to:
+  /// **'Account paused'**
+  String get cpStandingSuspended;
+
+  /// No description provided for @cpStandingExplainer.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelling after a courier or driver is assigned adds {points} penalty points. Cancelling before that is free.'**
+  String cpStandingExplainer(int points);
+
+  /// No description provided for @cpNextExpiry.
+  ///
+  /// In en, this message translates to:
+  /// **'{points} points expire on {date}.'**
+  String cpNextExpiry(int points, String date);
+
+  /// No description provided for @cpFineDueBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You have an unpaid cancellation fine of {amount}. Pay it to book deliveries and order again.'**
+  String cpFineDueBody(String amount);
+
+  /// No description provided for @cpPayFine.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay fine from wallet'**
+  String get cpPayFine;
+
+  /// No description provided for @cpFinePaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Fine paid. You can book again.'**
+  String get cpFinePaid;
+
+  /// No description provided for @cpSuspendedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You cancelled too many times after a courier was assigned. You can book again on {date}.'**
+  String cpSuspendedBody(String date);
+
+  /// No description provided for @cpSuspendedBodyNoDate.
+  ///
+  /// In en, this message translates to:
+  /// **'You cancelled too many times after a courier was assigned. Contact support to restore your account.'**
+  String get cpSuspendedBodyNoDate;
+
+  /// No description provided for @cpTopUpToPayFine.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough money in your wallet. Top up to pay the fine.'**
+  String get cpTopUpToPayFine;
+
+  /// No description provided for @cpTopUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Top up wallet'**
+  String get cpTopUp;
+
+  /// No description provided for @cpViewRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'View record'**
+  String get cpViewRecord;
+
+  /// No description provided for @cpBlockedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You can\'t book right now'**
+  String get cpBlockedTitle;
+
+  /// No description provided for @cpMarkerFine.
+  ///
+  /// In en, this message translates to:
+  /// **'Fine'**
+  String get cpMarkerFine;
+
+  /// No description provided for @cpMarkerPause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get cpMarkerPause;
+
+  /// No description provided for @cpHowItWorks.
+  ///
+  /// In en, this message translates to:
+  /// **'How it works'**
+  String get cpHowItWorks;
+
+  /// No description provided for @cpRuleFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel before a courier or driver is assigned: free.'**
+  String get cpRuleFree;
+
+  /// No description provided for @cpRuleNoCancelAfterPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Once the package or food is picked up, it can\'t be cancelled.'**
+  String get cpRuleNoCancelAfterPickup;
 }
 
 class _AppLocalizationsDelegate

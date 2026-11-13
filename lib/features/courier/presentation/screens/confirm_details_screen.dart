@@ -13,7 +13,11 @@ import 'package:hudhud_delivery/core/utils/payment_idempotency.dart';
 import 'package:hudhud_delivery/core/utils/phone_util.dart';
 import 'package:hudhud_delivery/core/widgets/call_support_button.dart';
 import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data_provider.dart';
+import 'package:hudhud_delivery/features/cancellation/presentation/cancellation_block_sheet.dart';
 import 'package:hudhud_delivery/features/courier/data/models/create_delivery_result.dart';
+import 'package:hudhud_delivery/features/courier/data/models/delivery_stop.dart';
+import 'package:hudhud_delivery/features/courier/presentation/widgets/extra_stops_editor.dart';
+import 'package:hudhud_delivery/features/courier/utils/multi_stop_body.dart';
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/courier/easy_mode/package_item_catalog.dart';
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
@@ -53,6 +57,9 @@ class ConfirmDetailsScreen extends StatefulWidget {
   final String? packageImagePath;
   final Map<String, dynamic>? paymentDetails;
 
+  /// Multi-stop: drop-offs after the first, each with its receiver.
+  final List<DeliveryStopDraft> extraStops;
+
   const ConfirmDetailsScreen({
     super.key,
     required this.pickupLocation,
@@ -74,10 +81,24 @@ class ConfirmDetailsScreen extends StatefulWidget {
     required this.recipientPhone,
     this.packageImagePath,
     this.paymentDetails,
+    this.extraStops = const [],
   });
 
   @override
   State<ConfirmDetailsScreen> createState() => _ConfirmDetailsScreenState();
+}
+
+/// Multi-stop error codes from the classic delivery endpoints.
+String? _multiStopErrorMessage(BuildContext context, ApiErrorResult? error) {
+  switch (error?.code) {
+    case 'DELIVERY_MULTI_STOP_DISABLED':
+      return context.l10n.msErrMultiStopDisabled;
+    case 'DELIVERY_TOO_MANY_STOPS':
+      return context.l10n.msErrTooManyStops;
+    case 'DELIVERY_MULTI_STOP_SENDER_PAYS':
+      return context.l10n.msErrSenderPays;
+  }
+  return null;
 }
 
 class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
@@ -115,6 +136,34 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
 
   late String _paymentType;
   Map<String, dynamic> _paymentDetails = {};
+
+  bool get _isMultiStop => widget.extraStops.isNotEmpty;
+
+  /// Every drop-off in route order (stop 1 = the normal drop-off).
+  List<DeliveryStopDraft> get _allStops => widget.deliveryPosition == null
+      ? const []
+      : allDeliveryStops(
+          firstLocation: widget.deliveryLocation,
+          firstPosition: widget.deliveryPosition!,
+          firstReceiverName: widget.recipientName,
+          firstReceiverPhone: widget.recipientPhone,
+          extraStops: widget.extraStops,
+        );
+
+  /// Where the route ends: the last stop.
+  LatLng? get _routeEnd => _isMultiStop
+      ? widget.extraStops.last.position
+      : widget.deliveryPosition;
+
+  /// Drop-offs between pickup and [_routeEnd].
+  List<LatLng> get _routeWaypoints => !_isMultiStop
+      ? const []
+      : [
+          widget.deliveryPosition!,
+          for (final s
+              in widget.extraStops.take(widget.extraStops.length - 1))
+            s.position,
+        ];
 
   @override
   void initState() {
@@ -159,11 +208,13 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
     if (widget.pickupPosition == null || widget.deliveryPosition == null) {
       return;
     }
+    final end = _routeEnd!;
     final result = await GoogleDirectionsService.getDirections(
       originLat: widget.pickupPosition!.latitude,
       originLng: widget.pickupPosition!.longitude,
-      destLat: widget.deliveryPosition!.latitude,
-      destLng: widget.deliveryPosition!.longitude,
+      destLat: end.latitude,
+      destLng: end.longitude,
+      waypoints: _routeWaypoints,
     );
     if (!mounted) return;
     setState(() {
@@ -178,6 +229,18 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
 
   void _fitBounds() {
     if (widget.pickupPosition == null || widget.deliveryPosition == null) {
+      return;
+    }
+    if (_isMultiStop) {
+      final bounds = boundsForPoints([
+        widget.pickupPosition!,
+        for (final s in _allStops) s.position,
+      ]);
+      if (bounds != null) {
+        _mapController?.animateCamera(
+          gmaps.CameraUpdate.newLatLngBounds(bounds, 72),
+        );
+      }
       return;
     }
     final pickup = widget.pickupPosition!;
@@ -303,6 +366,21 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
       recipientPhone: widget.recipientPhone,
       packageImagePath: widget.packageImagePath,
       routePolylinePoints: _routePolylinePoints,
+      // Show every drop-off right away; the /track poll replaces these
+      // with server stops (statuses, delivery codes) once it answers.
+      stops: !_isMultiStop
+          ? const []
+          : [
+              for (var i = 0; i < _allStops.length; i++)
+                DeliveryStop(
+                  sequence: i + 1,
+                  location: _allStops[i].location,
+                  latitude: _allStops[i].position.latitude,
+                  longitude: _allStops[i].position.longitude,
+                  receiverName: _allStops[i].receiverName,
+                  receiverPhone: _allStops[i].receiverPhone,
+                ),
+            ],
     );
   }
 
@@ -359,13 +437,14 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
       packageWeight: widget.packageWeight,
       pickupLatitude: widget.pickupPosition!.latitude,
       pickupLongitude: widget.pickupPosition!.longitude,
-      dropoffLatitude: widget.deliveryPosition!.latitude,
-      dropoffLongitude: widget.deliveryPosition!.longitude,
+      dropoffLatitude: _routeEnd!.latitude,
+      dropoffLongitude: _routeEnd!.longitude,
       vehicleType: mapCourierVehicleType(_selectedVehicle),
       serviceType:
           deliveryServiceType(isInstantDelivery: widget.isInstantDelivery),
       pickupLocation: widget.pickupLocation,
       scheduledPickup: scheduledPickup,
+      stops: estimateStopsJson(_allStops),
     );
 
     if (mounted) {
@@ -392,6 +471,8 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
             _estimateError = result['message'] as String?;
           } else if (error?.isRouteDistanceError == true) {
             _estimateError = context.l10n.refreshQuoteRouteDistance;
+          } else if (_multiStopErrorMessage(context, error) != null) {
+            _estimateError = _multiStopErrorMessage(context, error);
           } else {
             _estimateError = result['message'] as String?;
           }
@@ -399,7 +480,10 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
           _quotedScheduledPickup = null;
         }
       });
-      if ((result['error'] as ApiErrorResult?)
+      final estimateError = result['error'] as ApiErrorResult?;
+      if (estimateError != null && estimateError.isCancellationBlock) {
+        await handleCancellationBlockError(context, estimateError);
+      } else if ((result['error'] as ApiErrorResult?)
               ?.isPickupServiceAreaUnavailable ==
           true) {
         await _handlePickupServiceAreaUnavailable();
@@ -590,6 +674,13 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
           },
         };
 
+        // Multi-stop: `stops` + dropoff_* at the route end (no-op otherwise).
+        applyMultiStopToRequestBody(
+          requestData,
+          _allStops,
+          normalizePhone: normalizePhoneToBackend,
+        );
+
         final paymentPhone = normalizePaymentPhone(
           _paymentDetails['phone']?.toString(),
           _paymentType,
@@ -645,9 +736,16 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
             await _fetchEstimate();
             return;
           }
+          if (error != null &&
+              await handleCancellationBlockError(context, error)) {
+            return;
+          }
+          if (!mounted) return;
+          final multiStopMessage = _multiStopErrorMessage(context, error);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(result['message']?.toString() ??
+              content: Text(multiStopMessage ??
+                  result['message']?.toString() ??
                   'Failed to create delivery request'),
               backgroundColor: AppColors.errorColor,
             ),
@@ -954,9 +1052,11 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
           // recipient will be asked for cash.
           final paymentLabel = _isWalletPayment
               ? l10n.paymentWallet
-              : (widget.whoPays == 'recipient'
-                  ? l10n.parcelPaidByRecipientCash
-                  : l10n.paymentCashOnDelivery);
+              : (_isMultiStop
+                  ? l10n.msMultiStopCashAtPickup
+                  : (widget.whoPays == 'recipient'
+                      ? l10n.parcelPaidByRecipientCash
+                      : l10n.paymentCashOnDelivery));
           final scheduledAt = widget.scheduledPickup;
           final materialL10n = MaterialLocalizations.of(context);
           final scheduledText = scheduledAt == null
@@ -1129,10 +1229,25 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                                                 pickupLabel:
                                                     l10n.pickupLocationLabel,
                                                 pickup: widget.pickupLocation,
-                                                dropoffLabel:
-                                                    l10n.deliveryLocationLabel,
+                                                dropoffLabel: _isMultiStop
+                                                    ? l10n.msStopLabel(1)
+                                                    : l10n.deliveryLocationLabel,
                                                 dropoff:
                                                     widget.deliveryLocation,
+                                                extraStops: [
+                                                  for (var i = 0;
+                                                      i <
+                                                          widget.extraStops
+                                                              .length;
+                                                      i++)
+                                                    (
+                                                      label:
+                                                          '${l10n.msStopLabel(i + 2)} · ${widget.extraStops[i].receiverName}',
+                                                      address: widget
+                                                          .extraStops[i]
+                                                          .location,
+                                                    ),
+                                                ],
                                               ),
                                             ),
                                             const SizedBox(height: 14),
@@ -1317,6 +1432,10 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
               266.0,
             ),
           ),
+        ...extraStopMarkers(
+          widget.extraStops,
+          label: context.l10n.msStopLabel,
+        ),
       },
       polylines:
           widget.pickupPosition != null && widget.deliveryPosition != null
@@ -1329,6 +1448,8 @@ class _ConfirmDetailsScreenState extends State<ConfirmDetailsScreen> {
                         : [
                             _toG(widget.pickupPosition!),
                             _toG(widget.deliveryPosition!),
+                            for (final s in widget.extraStops)
+                              _toG(s.position),
                           ],
                     color: HomeColors.violetOf(context),
                     width: 4,
@@ -1630,12 +1751,40 @@ class _RouteSummary extends StatelessWidget {
     required this.pickup,
     required this.dropoffLabel,
     required this.dropoff,
+    this.extraStops = const [],
   });
 
   final String pickupLabel;
   final String pickup;
   final String dropoffLabel;
   final String dropoff;
+
+  /// Multi-stop: drop-offs 2..N after [dropoff].
+  final List<({String label, String address})> extraStops;
+
+  Widget _dots(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 19),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Column(
+          children: [
+            for (var i = 0; i < 3; i++)
+              Container(
+                width: 3,
+                height: 3,
+                margin: const EdgeInsets.symmetric(vertical: 2),
+                decoration: BoxDecoration(
+                  color:
+                      HomeColors.textMutedOf(context).withValues(alpha: 0.5),
+                  shape: BoxShape.circle,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1679,6 +1828,16 @@ class _RouteSummary extends StatelessWidget {
             label: dropoffLabel,
             value: dropoff,
           ),
+          for (final stop in extraStops) ...[
+            _dots(context),
+            _RouteStop(
+              icon: Icons.location_on_rounded,
+              color: HomeColors.violetOf(context),
+              tint: HomeColors.violetTintOf(context),
+              label: stop.label,
+              value: stop.address,
+            ),
+          ],
         ],
       ),
     );

@@ -35,6 +35,11 @@ import 'package:hudhud_delivery/features/growth/market_controller.dart';
 import 'package:hudhud_delivery/features/growth/plus_controller.dart';
 import 'package:hudhud_delivery/features/growth/presentation/screens/plus_screen.dart';
 import 'package:hudhud_delivery/features/growth/presentation/screens/rewards_screen.dart';
+import 'package:hudhud_delivery/features/cancellation/cancellation_policy_controller.dart';
+import 'package:hudhud_delivery/features/cancellation/data/cancellation_models.dart';
+import 'package:hudhud_delivery/features/cancellation/presentation/cancellation_standing_screen.dart';
+import 'package:hudhud_delivery/features/cancellation/presentation/cancellation_widgets.dart'
+    show cancellationPointsColor;
 import 'package:hudhud_delivery/features/growth/presentation/widgets/plus_widgets.dart';
 import 'package:hudhud_delivery/features/growth/presentation/widgets/referral_card.dart';
 import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
@@ -229,12 +234,20 @@ class _SettingsScreenState extends State<SettingsScreen>
     WidgetsBinding.instance.addObserver(this);
     PlusController.instance.addListener(_onPlusChanged);
     WalletRefreshSignal.changes.addListener(_onWalletChanged);
+    CancellationPolicyController.instance.addListener(_onCancellationChanged);
+    CancellationPolicyController.instance.refresh();
     _loadAll();
     _startChatUnreadPolling();
   }
 
+  void _onCancellationChanged() {
+    if (mounted) setState(() {});
+  }
+
   @override
   void dispose() {
+    CancellationPolicyController.instance
+        .removeListener(_onCancellationChanged);
     PlusController.instance.removeListener(_onPlusChanged);
     WalletRefreshSignal.changes.removeListener(_onWalletChanged);
     WidgetsBinding.instance.removeObserver(this);
@@ -709,6 +722,26 @@ class _SettingsScreenState extends State<SettingsScreen>
                           ).then((_) => _loadUserData());
                         },
                       ),
+                      if (CancellationPolicyController
+                          .instance.penaltyEnabled) ...[
+                        const _ProfileTileDivider(),
+                        _ProfileMenuTile(
+                          icon: Icons.speed_rounded,
+                          color: AppColors.warningColor,
+                          title: l10n.cpStandingTitle,
+                          trailing: _CancellationPointsBadge(
+                            standing: CancellationPolicyController
+                                .instance.standing,
+                          ),
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const CancellationStandingScreen(),
+                            ),
+                          ),
+                        ),
+                      ],
                       const _ProfileTileDivider(),
                       _ProfileMenuTile(
                         icon: Icons.location_on_rounded,
@@ -1099,6 +1132,31 @@ class _ProfileTileDivider extends StatelessWidget {
       indent: 72,
       endIndent: 16,
       color: AuthScreenColors.surfaceBorderOf(context),
+    );
+  }
+}
+
+/// "30 / 50" pill coloured by how close the customer is to a fine.
+class _CancellationPointsBadge extends StatelessWidget {
+  const _CancellationPointsBadge({this.standing});
+
+  final CancellationStanding? standing;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = standing;
+    if (s == null) return const SizedBox.shrink();
+    final color = cancellationPointsColor(s.points, s.fineThreshold);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        '${s.points} / ${s.nextThreshold}',
+        style: TextStyle(color: color, fontWeight: FontWeight.w700),
+      ),
     );
   }
 }

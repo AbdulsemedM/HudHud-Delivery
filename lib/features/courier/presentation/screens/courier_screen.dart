@@ -1,4 +1,8 @@
+import 'package:hudhud_delivery/features/cancellation/presentation/cancellation_widgets.dart'
+    show CancellationStandingBanner;
 import 'package:flutter/material.dart';
+import 'package:hudhud_delivery/features/courier/data/models/delivery_stop.dart';
+import 'package:hudhud_delivery/features/courier/presentation/widgets/delivery_stops_timeline.dart';
 import 'package:flutter/rendering.dart';
 import 'package:hudhud_delivery/core/easy_mode/easy_mode_controller.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
@@ -296,6 +300,11 @@ class _CourierScreenState extends State<CourierScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Close to / over a cancellation-penalty line (hidden
+                  // otherwise, and when the server has penalties off).
+                  const CancellationStandingBanner(
+                    padding: EdgeInsets.only(bottom: 16),
+                  ),
                   if (hasActive) ...[
                     _SectionTitle(l10n.courierActiveDelivery),
                     const SizedBox(height: AppColors.spaceMD),
@@ -367,7 +376,10 @@ class _CourierScreenState extends State<CourierScreen> {
                       return DeliveryHistoryCard(
                         orderId: id != null ? 'DEL-$id' : '—',
                         recipient: d['receiver_name']?.toString() ?? '—',
-                        location: d['dropoff_location']?.toString() ?? '—',
+                        location: multiStopRowAddress(d) ??
+                            d['dropoff_location']?.toString() ??
+                            '—',
+                        stopCount: parseDeliveryStops(d).length,
                         dateTime: formatDeliveryHistoryDate(context, d['created_at']),
                         status: resolveDeliveryStatusLabel(d),
                         borderColor: borderColor,

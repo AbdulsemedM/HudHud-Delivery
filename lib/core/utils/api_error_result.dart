@@ -27,7 +27,27 @@ const Set<String> kKnownApiErrorCodes = {
   'CITY_OUTSIDE_SERVICE_AREA',
   'CITY_CROSS_MARKET',
   'CITY_MARKET_MISMATCH',
+  // Cancellation penalty points.
+  'CANCELLATION_FINE_UNPAID',
+  'ACCOUNT_SUSPENDED_CANCELLATIONS',
+  'CANCELLATION_PENALTY_CONFIRMATION_REQUIRED',
+  'CANCELLATION_NOT_ALLOWED',
+  // Multi-stop on the classic delivery endpoints.
+  'DELIVERY_MULTI_STOP_DISABLED',
+  'DELIVERY_TOO_MANY_STOPS',
+  'DELIVERY_MULTI_STOP_SENDER_PAYS',
 };
+
+/// Cancellation penalty: an unpaid fine blocks every new booking / order.
+const String kCancellationFineUnpaidCode = 'CANCELLATION_FINE_UNPAID';
+
+/// Cancellation penalty: the account is suspended until `suspended_until`.
+const String kAccountSuspendedCancellationsCode =
+    'ACCOUNT_SUSPENDED_CANCELLATIONS';
+
+/// The penalty changed since the preview; show the new preview and ask again.
+const String kCancellationPenaltyConfirmationCode =
+    'CANCELLATION_PENALTY_CONFIRMATION_REQUIRED';
 
 /// Server error codes the customer app explains in its own words.
 const String kStoreClosedCode = 'STORE_CLOSED';
@@ -57,7 +77,23 @@ class ApiErrorResult {
     this.productId,
     this.marketCode,
     this.storeStatus,
+    this.fineId,
+    this.suspendedUntil,
   });
+
+  /// `CANCELLATION_FINE_UNPAID`: the fine to pay (amount/currency above).
+  final int? fineId;
+
+  /// `ACCOUNT_SUSPENDED_CANCELLATIONS`: when ordering opens again.
+  final DateTime? suspendedUntil;
+
+  bool get isCancellationFineUnpaid => code == kCancellationFineUnpaidCode;
+  bool get isSuspendedForCancellations =>
+      code == kAccountSuspendedCancellationsCode;
+
+  /// Booking / ordering refused by the cancellation-penalty rules.
+  bool get isCancellationBlock =>
+      isCancellationFineUnpaid || isSuspendedForCancellations;
 
   final String message;
   final String? code;
@@ -275,6 +311,11 @@ ApiErrorResult parseApiErrorResult(
       ? market.trim().toLowerCase()
       : null;
   final storeStatusRaw = _asMap(root['store_status']);
+  final fineIdRaw = _parseDouble(root['fine_id'] ?? nestedData['fine_id']);
+  final suspendedUntilRaw = _firstNonEmptyString([
+    root['suspended_until'],
+    nestedData['suspended_until'],
+  ]);
 
   // First candidate that is a usable code: a free-text `error` (debug
   // message) no longer hides a real `code` next to it.
@@ -331,6 +372,10 @@ ApiErrorResult parseApiErrorResult(
     productId: productIdRaw?.toInt(),
     marketCode: marketCode,
     storeStatus: storeStatusRaw.isEmpty ? null : storeStatusRaw,
+    fineId: fineIdRaw?.toInt(),
+    suspendedUntil: suspendedUntilRaw == null
+        ? null
+        : DateTime.tryParse(suspendedUntilRaw)?.toLocal(),
   );
 }
 

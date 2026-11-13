@@ -13,6 +13,11 @@ import 'package:hudhud_delivery/features/courier/data/data_provider/courier_data
 import 'package:hudhud_delivery/features/courier/data/repository/courier_repository.dart';
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_cancel.dart';
+import 'package:hudhud_delivery/core/utils/api_error_result.dart'
+    show kCancellationPenaltyConfirmationCode;
+import 'package:hudhud_delivery/features/cancellation/cancellation_policy_controller.dart';
+import 'package:hudhud_delivery/features/cancellation/data/cancellation_models.dart';
+import 'package:hudhud_delivery/features/cancellation/presentation/cancel_confirmation.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_payment_helper.dart';
 import 'package:hudhud_delivery/features/courier/utils/delivery_status.dart';
 import 'package:hudhud_delivery/features/courier/utils/courier_home_refresh.dart';
@@ -25,6 +30,8 @@ import 'package:hudhud_delivery/features/payment/presentation/screen/payment_ini
 import 'package:hudhud_delivery/features/payment/presentation/widgets/payment_details_form.dart';
 import 'package:hudhud_delivery/features/payment/presentation/widgets/payment_methods_loader.dart';
 import 'package:hudhud_delivery/features/wallet/presentation/screens/add_funds_screen.dart';
+import 'package:hudhud_delivery/features/courier/data/models/delivery_stop.dart';
+import 'package:hudhud_delivery/features/courier/presentation/widgets/delivery_stops_timeline.dart';
 
 class _RetryPaymentChoice {
   const _RetryPaymentChoice({
@@ -64,6 +71,10 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
       ),
     );
     _fetchDetails();
+    // Penalty rules decide whether Cancel stays visible after assignment.
+    CancellationPolicyController.instance.refresh().then((_) {
+      if (mounted) setState(() {});
+    });
   }
 
   Future<void> _fetchDetails({bool refresh = false}) async {
@@ -112,8 +123,24 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
   }
 
   Future<void> _cancelOrder() async {
+    // Cancellation penalty points: the server preview decides whether this
+    // cancel is free, costs points, or is no longer allowed.
+    final decision = await previewAndConfirmCancellation(
+      context,
+      subject: CancelSubject.delivery,
+      load: (repo) => repo.previewDelivery(widget.deliveryId),
+    );
+    if (!mounted || decision.kind == CancelDecisionKind.abort) return;
+    if (decision.kind == CancelDecisionKind.legacy) {
+      final confirmed = await _confirmLegacyCancel();
+      if (confirmed != true || !mounted) return;
+    }
+    await _submitCancel(acceptPenaltyPoints: decision.acceptPenaltyPoints);
+  }
+
+  Future<bool?> _confirmLegacyCancel() {
     final paymentStatus = _delivery?['payment_status']?.toString();
-    final confirmed = await showDialog<bool>(
+    return showDialog<bool>(
       context: context,
       builder: (dialogContext) => CourierTheme.wrap(
         context,
@@ -150,20 +177,27 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
         ),
       ),
     );
-    if (confirmed != true || !mounted) return;
+  }
 
+  Future<void> _submitCancel({int? acceptPenaltyPoints}) async {
     setState(() => _isCancelling = true);
     final result = await _courierRepository.cancelDelivery(
       deliveryId: widget.deliveryId,
+      acceptPenaltyPoints: acceptPenaltyPoints,
     );
     if (!mounted) return;
 
     if (result['success'] != true) {
       setState(() => _isCancelling = false);
+      final penaltyChanged =
+          result['code'] == kCancellationPenaltyConfirmationCode;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            result['message']?.toString() ?? "You can't cancel this delivery",
+            penaltyChanged
+                ? context.l10n.cpPenaltyChanged
+                : result['message']?.toString() ??
+                    "You can't cancel this delivery",
           ),
           backgroundColor: AppColors.errorColor,
         ),
@@ -172,7 +206,14 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
     }
 
     final refund = parseDeliveryCancelRefundResponse(result['data'] ?? result);
-    final successMessage = formatDeliveryCancelMessage(refund);
+    final penaltyLine = cancellationOutcomeMessageOf(
+      context,
+      CancellationPenaltyOutcome.fromResponseBody(result['data']),
+    );
+    final successMessage = [
+      formatDeliveryCancelMessage(refund),
+      if (penaltyLine != null) penaltyLine,
+    ].join('\n');
 
     if (!mounted) return;
     setState(() => _isCancelling = false);
@@ -427,6 +468,12 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
                     borderColor: borderColor,
                   ),
                   const SizedBox(height: 14),
+                  if (isMultiStopDelivery(d))
+                    _CardShell(
+                      borderColor: borderColor,
+                      child: DeliveryStopsTimeline.fromDelivery(d),
+                    )
+                  else
                   _RouteCard(
                     pickupLabel: l10n.deliveryDetailsPickup,
                     dropoffLabel: l10n.deliveryDetailsDropoff,
@@ -522,7 +569,11 @@ class _DeliveryDetailsScreenState extends State<DeliveryDetailsScreen> {
             deliveryStatus: _deliveryStatus(d),
           ),
           canTrack: canTrackCourierDelivery(_deliveryStatus(d)),
-          canCancel: canCancelCourierDelivery(_deliveryStatus(d)),
+          canCancel: canCancelCourierDelivery(
+            _deliveryStatus(d),
+            allowUntilPickup:
+                CancellationPolicyController.instance.penaltyEnabled,
+          ),
           isRetrying: _isRetrying,
           isCancelling: _isCancelling,
           onRetry: _retryPayment,

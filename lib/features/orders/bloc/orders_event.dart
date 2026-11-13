@@ -44,10 +44,13 @@ class CancelOrderEvent extends OrdersEvent {
   final int orderId;
   final String? reason;
 
-  const CancelOrderEvent(this.orderId, {this.reason});
+  /// Penalty points accepted in the cancellation preview (null = none shown).
+  final int? acceptPenaltyPoints;
+
+  const CancelOrderEvent(this.orderId, {this.reason, this.acceptPenaltyPoints});
 
   @override
-  List<Object?> get props => [orderId, reason];
+  List<Object?> get props => [orderId, reason, acceptPenaltyPoints];
 }
 
 class FilterOrdersByStatusEvent extends OrdersEvent {

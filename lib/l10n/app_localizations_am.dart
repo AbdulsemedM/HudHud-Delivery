@@ -4252,4 +4252,273 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get parcelPaidByRecipientCash => 'በጥሬ ገንዘብ፣ ተቀባዩ ሲረከብ ይከፍላል';
+
+  @override
+  String get msAddStop => 'ሌላ ማድረሻ ጨምር';
+
+  @override
+  String msStopLabel(int number) {
+    return 'ማድረሻ $number';
+  }
+
+  @override
+  String msStopsCount(int count) {
+    return '$count ማድረሻዎች';
+  }
+
+  @override
+  String get msRemoveStop => 'ማድረሻውን አስወግድ';
+
+  @override
+  String get msMoveStopUp => 'ወደ ላይ';
+
+  @override
+  String get msMoveStopDown => 'ወደ ታች';
+
+  @override
+  String get msChooseStopLocation => 'የማድረሻ ቦታ ይምረጡ';
+
+  @override
+  String msMaxStopsReached(int max) {
+    return 'እስከ $max ማድረሻዎች ማከል ይችላሉ።';
+  }
+
+  @override
+  String msStopReceiverTitle(int number) {
+    return 'በማድረሻ $number ማን ይረከባል?';
+  }
+
+  @override
+  String get msStopReceiverName => 'የተቀባይ ስም';
+
+  @override
+  String get msStopReceiverPhone => 'የተቀባይ ስልክ';
+
+  @override
+  String get msStopNoteHint => 'ለመልእክተኛው ማስታወሻ (አማራጭ)';
+
+  @override
+  String get msStopReceiverRequired => 'ለእያንዳንዱ ማድረሻ የተቀባይ ስምና ስልክ ያስገቡ።';
+
+  @override
+  String get msStopLocationRequired => 'ለእያንዳንዱ ማድረሻ ቦታ ይምረጡ ወይም ባዶዎቹን ያስወግዱ።';
+
+  @override
+  String get msSenderPaysMultiStop =>
+      'ከአንድ በላይ ማድረሻ ያላቸው ማድረሻዎች በእርስዎ (ላኪው) ይከፈላሉ።';
+
+  @override
+  String get msMultiStopCashAtPickup => 'ጥሬ ገንዘብ እቃው ሲወሰድ ለመልእክተኛው ይከፈላል።';
+
+  @override
+  String get msRouteTitle => 'መንገድ';
+
+  @override
+  String get msPickupLabel => 'መነሻ';
+
+  @override
+  String get msStopStatusPending => 'በመጠባበቅ ላይ';
+
+  @override
+  String get msStopStatusEnRoute => 'በመንገድ ላይ';
+
+  @override
+  String get msStopStatusArrived => 'መልእክተኛው ደርሷል';
+
+  @override
+  String get msStopStatusDelivered => 'ደርሷል';
+
+  @override
+  String get msStopStatusFailed => 'አልደረሰም';
+
+  @override
+  String get msStopStatusSkipped => 'ታልፏል';
+
+  @override
+  String msHeadingToStop(int number) {
+    return 'ወደ ማድረሻ $number በመሄድ ላይ';
+  }
+
+  @override
+  String msStopsProgress(int done, int total) {
+    return 'ከ$total ማድረሻዎች $done ተጠናቀዋል';
+  }
+
+  @override
+  String msStopCode(String code) {
+    return 'ኮድ፦ $code';
+  }
+
+  @override
+  String get msErrMultiStopDisabled =>
+      'ከአንድ በላይ ማድረሻ አሁን አይገኝም። ለመቀጠል ተጨማሪዎቹን ያስወግዱ።';
+
+  @override
+  String get msErrTooManyStops =>
+      'ለአንድ ማድረሻ በጣም ብዙ ማድረሻዎች። ጥቂቶቹን አስወግደው እንደገና ይሞክሩ።';
+
+  @override
+  String get msErrSenderPays => 'ከአንድ በላይ ማድረሻ ያላቸው በላኪው መከፈል አለባቸው።';
+
+  @override
+  String get cpFreeCancelBody => 'እስካሁን መልእክተኛ አልተመደበም፣ ስለዚህ መሰረዝ ነፃ ነው።';
+
+  @override
+  String get cpPenaltyTitle => 'ሰርዘው የቅጣት ነጥብ ይወስዳሉ?';
+
+  @override
+  String cpPenaltyBodyDelivery(int points) {
+    return 'መልእክተኛ አስቀድሞ ተመድቧል። አሁን መሰረዝ $points የቅጣት ነጥቦችን ወደ መለያዎ ይጨምራል።';
+  }
+
+  @override
+  String cpPenaltyBodyOrder(int points) {
+    return 'ትዕዛዝዎ በሂደት ላይ ነው። አሁን መሰረዝ $points የቅጣት ነጥቦችን ወደ መለያዎ ይጨምራል።';
+  }
+
+  @override
+  String cpPointsOfLimit(int points, int limit) {
+    return '$points / $limit ነጥቦች';
+  }
+
+  @override
+  String cpWarnFineAt(int threshold) {
+    return '$threshold ነጥብ ሲደርሱ እንደገና ከማዘዝዎ በፊት ቅጣት መክፈል አለብዎት።';
+  }
+
+  @override
+  String cpWarnBanAt(int threshold) {
+    return '$threshold ነጥብ ሲደርሱ መለያዎ ለተወሰነ ጊዜ ይታገዳል።';
+  }
+
+  @override
+  String cpWillFine(int threshold, String amount) {
+    return 'ይህ $threshold ነጥብ ያደርሳል። $amount ይቀጣሉ፣ እስኪከፍሉም ማዘዝ አይችሉም።';
+  }
+
+  @override
+  String cpWillFineNoAmount(int threshold) {
+    return 'ይህ $threshold ነጥብ ያደርሳል። ይቀጣሉ፣ እስኪከፍሉም ማዘዝ አይችሉም።';
+  }
+
+  @override
+  String cpWillSuspend(int threshold, int days) {
+    return 'ይህ $threshold ነጥብ ያደርሳል። መለያዎ ለ$days ቀናት ይታገዳል።';
+  }
+
+  @override
+  String cpWillSuspendNoDays(int threshold) {
+    return 'ይህ $threshold ነጥብ ያደርሳል። መለያዎ ይታገዳል።';
+  }
+
+  @override
+  String cpPointsExpire(int days) {
+    return 'የቅጣት ነጥቦች ከ$days ቀናት በኋላ ይሰረዛሉ።';
+  }
+
+  @override
+  String get cpCancelAnyway => 'ቢሆንም ሰርዝ';
+
+  @override
+  String get cpKeepDelivery => 'ማድረሻዬን አቆይ';
+
+  @override
+  String get cpKeepOrder => 'ትዕዛዜን አቆይ';
+
+  @override
+  String get cpCannotCancelPickedUp =>
+      'ይህ መሰረዝ አይችልም። መልእክተኛው እቃውን አስቀድሞ ወስዷል።';
+
+  @override
+  String get cpCannotCancelGeneric => 'ይህ አሁን መሰረዝ አይችልም።';
+
+  @override
+  String get cpPenaltyChanged => 'ቅጣቱ ተቀይሯል። እባክዎ እንደገና ያረጋግጡ።';
+
+  @override
+  String cpCancelledWithPoints(int points, int total) {
+    return 'ተሰርዟል። $points የቅጣት ነጥቦች ተጨምረዋል (አሁን $total አለዎት)።';
+  }
+
+  @override
+  String cpFineIssued(String amount) {
+    return '$amount ተቀጥተዋል። እንደገና ለማዘዝ ይክፈሉ።';
+  }
+
+  @override
+  String cpSuspendedUntil(String date) {
+    return 'መለያዎ እስከ $date ታግዷል።';
+  }
+
+  @override
+  String get cpStandingTitle => 'የስረዛ መዝገብ';
+
+  @override
+  String get cpStandingGood => 'ጥሩ ሁኔታ';
+
+  @override
+  String get cpStandingWarning => 'ለቅጣት ተቃርበዋል';
+
+  @override
+  String get cpStandingFineDue => 'የሚከፈል ቅጣት';
+
+  @override
+  String get cpStandingSuspended => 'መለያ ታግዷል';
+
+  @override
+  String cpStandingExplainer(int points) {
+    return 'መልእክተኛ ወይም ሾፌር ከተመደበ በኋላ መሰረዝ $points የቅጣት ነጥቦችን ይጨምራል። ከዚያ በፊት መሰረዝ ነፃ ነው።';
+  }
+
+  @override
+  String cpNextExpiry(int points, String date) {
+    return '$points ነጥቦች በ$date ይሰረዛሉ።';
+  }
+
+  @override
+  String cpFineDueBody(String amount) {
+    return '$amount ያልተከፈለ የስረዛ ቅጣት አለብዎት። እንደገና ለማዘዝ ይክፈሉ።';
+  }
+
+  @override
+  String get cpPayFine => 'ቅጣቱን ከዋሌት ይክፈሉ';
+
+  @override
+  String get cpFinePaid => 'ቅጣቱ ተከፍሏል። እንደገና ማዘዝ ይችላሉ።';
+
+  @override
+  String cpSuspendedBody(String date) {
+    return 'መልእክተኛ ከተመደበ በኋላ ብዙ ጊዜ ሰርዘዋል። በ$date እንደገና ማዘዝ ይችላሉ።';
+  }
+
+  @override
+  String get cpSuspendedBodyNoDate =>
+      'መልእክተኛ ከተመደበ በኋላ ብዙ ጊዜ ሰርዘዋል። መለያዎን ለመመለስ ድጋፍን ያግኙ።';
+
+  @override
+  String get cpTopUpToPayFine => 'በዋሌትዎ በቂ ገንዘብ የለም። ቅጣቱን ለመክፈል ገንዘብ ያስገቡ።';
+
+  @override
+  String get cpTopUp => 'ዋሌት ሙላ';
+
+  @override
+  String get cpViewRecord => 'መዝገቡን ይመልከቱ';
+
+  @override
+  String get cpBlockedTitle => 'አሁን ማዘዝ አይችሉም';
+
+  @override
+  String get cpMarkerFine => 'ቅጣት';
+
+  @override
+  String get cpMarkerPause => 'እገዳ';
+
+  @override
+  String get cpHowItWorks => 'እንዴት እንደሚሠራ';
+
+  @override
+  String get cpRuleFree => 'መልእክተኛ ወይም ሾፌር ከመመደቡ በፊት መሰረዝ፦ ነፃ።';
+
+  @override
+  String get cpRuleNoCancelAfterPickup => 'እቃው ወይም ምግቡ ከተወሰደ በኋላ መሰረዝ አይቻልም።';
 }

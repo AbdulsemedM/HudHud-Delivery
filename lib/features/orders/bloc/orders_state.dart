@@ -88,7 +88,10 @@ final class OrderCancelled extends OrdersState {
   /// orders are refunded to the HudHud wallet automatically).
   final OrderRefund? refund;
 
-  const OrderCancelled(this.orderId, this.message, {this.refund});
+  /// Penalty points added by this cancel (null when it was free).
+  final CancellationPenaltyOutcome? penalty;
+
+  const OrderCancelled(this.orderId, this.message, {this.refund, this.penalty});
 
   @override
   List<Object?> get props => [
@@ -97,6 +100,8 @@ final class OrderCancelled extends OrdersState {
         refund?.status,
         refund?.amount,
         refund?.currency,
+        penalty?.pointsAdded,
+        penalty?.pointsTotal,
       ];
 }
 

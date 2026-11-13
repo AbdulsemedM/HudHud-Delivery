@@ -66,6 +66,8 @@ class DeliveryLiveTracking {
     this.routeOrigin,
     this.routeDestination,
     this.estimatedArrivalMinutes,
+    this.destinationStopSequence,
+    this.stops,
   });
 
   final String? kind;
@@ -81,6 +83,12 @@ class DeliveryLiveTracking {
   final GeoPoint? routeOrigin;
   final GeoPoint? routeDestination;
   final int? estimatedArrivalMinutes;
+
+  /// Multi-stop: the drop-off (sequence) the courier is heading to.
+  final int? destinationStopSequence;
+
+  /// Multi-stop: raw `stops[]` when live-tracking includes them.
+  final List<dynamic>? stops;
 
   /// Prefer the API destination label; otherwise infer from delivery status.
   String get effectiveDestinationLabel {
@@ -191,6 +199,12 @@ DeliveryLiveTracking parseDeliveryLiveTrackingResponse(dynamic response) {
     estimatedArrivalMinutes: _firstInt([
       trackingMap['estimated_arrival_minutes'],
     ]),
+    destinationStopSequence: _firstInt([
+      trackingMap['destination_stop_sequence'],
+      destMap['stop_sequence'],
+      trackingMap['current_stop_sequence'],
+    ]),
+    stops: trackingMap['stops'] is List ? trackingMap['stops'] as List : null,
   );
 }
 

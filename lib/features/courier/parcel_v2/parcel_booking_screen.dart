@@ -631,6 +631,9 @@ class _ParcelBookingScreenState extends State<ParcelBookingScreen> {
       paymentMethod: method,
       recipientName: last.recipientIsMe ? null : last.recipientName,
       recipientPhone: last.recipientIsMe ? null : last.recipientPhone,
+      stopCoordinates: [
+        for (final stop in draft.allStops) [stop.lat, stop.lng],
+      ],
     );
 
     await showParcelBookedSheet(context, parcel: parcel, toSelf: _recipientIsMe);

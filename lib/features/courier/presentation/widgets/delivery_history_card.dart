@@ -2,6 +2,7 @@ import 'package:hudhud_delivery/core/utils/localized_date.dart';
 import 'package:flutter/material.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/widgets/status_chip.dart';
+import 'package:hudhud_delivery/features/courier/presentation/widgets/delivery_stops_timeline.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
 
 /// Delivery row used on courier home history and the full history screen.
@@ -14,6 +15,9 @@ class DeliveryHistoryCard extends StatelessWidget {
   final Color borderColor;
   final VoidCallback? onTap;
 
+  /// Drop-offs of the delivery; a "N stops" badge shows when > 1.
+  final int stopCount;
+
   const DeliveryHistoryCard({
     super.key,
     required this.orderId,
@@ -23,6 +27,7 @@ class DeliveryHistoryCard extends StatelessWidget {
     required this.status,
     required this.borderColor,
     this.onTap,
+    this.stopCount = 1,
   });
 
   @override
@@ -97,6 +102,10 @@ class DeliveryHistoryCard extends StatelessWidget {
                           children: [
                             StatusChip(status: status),
                             const SizedBox(width: 8),
+                            if (stopCount > 1) ...[
+                              DeliveryStopsCountBadge(count: stopCount),
+                              const SizedBox(width: 8),
+                            ],
                             Flexible(
                               child: Text(
                                 orderId,

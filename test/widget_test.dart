@@ -21,7 +21,11 @@ import 'package:hudhud_delivery/features/orders/data/repositories/orders_reposit
 
 class _TestOrdersRepository implements OrdersRepository {
   @override
-  Future<OrderCancelResult> cancelOrder(int orderId, {String? reason}) async =>
+  Future<OrderCancelResult> cancelOrder(
+    int orderId, {
+    String? reason,
+    int? acceptPenaltyPoints,
+  }) async =>
       const OrderCancelResult(message: 'Order cancelled successfully');
 
   @override

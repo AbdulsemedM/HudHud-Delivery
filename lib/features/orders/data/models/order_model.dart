@@ -264,6 +264,13 @@ class OrderModel extends Equatable {
   /// Backend allows cancel for early states: pending, paid, accepted.
   bool get canBeCancelled => isPending || isPaid || isAccepted;
 
+  /// With cancellation penalty points switched on, a customer may also
+  /// cancel while the food is prepared / waiting for the driver (the server
+  /// preview says whether it costs points); never once it is picked up.
+  bool canBeCancelledWith({required bool allowUntilPickup}) =>
+      canBeCancelled ||
+      (allowUntilPickup && (isPreparing || isReadyForPickup));
+
   bool get isTerminal => isDelivered || isCancelled;
   
   String get statusDisplayText {

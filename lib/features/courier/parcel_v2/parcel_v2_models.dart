@@ -340,6 +340,28 @@ class ParcelV2Stop {
       status == ParcelStopStatus.failed ||
       status == ParcelStopStatus.returned;
 
+  /// `stops[]` item in the classic delivery-map shape (see
+  /// `features/courier/data/models/delivery_stop.dart`), so the legacy
+  /// finding / tracking screens can show v2 multi-drop parcels.
+  Map<String, dynamic> toLegacyStopMap() {
+    const statusMap = {
+      ParcelStopStatus.pending: 'pending',
+      ParcelStopStatus.arrived: 'arrived',
+      ParcelStopStatus.delivered: 'delivered',
+      ParcelStopStatus.failed: 'failed',
+      ParcelStopStatus.returned: 'failed',
+    };
+    return {
+      'sequence': sequence,
+      'status': statusMap[status] ?? 'pending',
+      if (address != null) 'location': address,
+      if (recipientName != null) 'receiver_name': recipientName,
+      if (recipientPhone != null) 'receiver_phone': recipientPhone,
+      if (handoverCode != null && !handoverVerified)
+        'delivery_code': handoverCode,
+    };
+  }
+
   static ParcelV2Stop? fromJson(dynamic raw) {
     final m = _map(raw);
     final sequence = _int(m?['sequence']);
@@ -462,6 +484,7 @@ class ParcelV2Parcel {
     String? paymentMethod,
     String? recipientName,
     String? recipientPhone,
+    List<List<double>>? stopCoordinates,
   }) {
     return {
       'id': id,
@@ -478,6 +501,21 @@ class ParcelV2Parcel {
       'payment_method': paymentMethod,
       'receiver_name': recipientName,
       'receiver_phone': recipientPhone,
+      if (isMultiStop)
+        'stops': [
+          for (var i = 0; i < stops.length; i++)
+            {
+              ...stops[i].toLegacyStopMap(),
+              // The parcel API has no stop coordinates; the booking draft
+              // does (same order as `stops`).
+              if (stopCoordinates != null && i < stopCoordinates.length) ...{
+                'latitude': stopCoordinates[i][0],
+                'longitude': stopCoordinates[i][1],
+              },
+            },
+        ],
+      if (isMultiStop && currentStop != null)
+        'current_stop_sequence': currentStop,
     };
   }
 }

@@ -44,6 +44,9 @@ import '../../../vendors/data/models/store_status.dart';
 import '../../../vendors/data/repository/store_status_repository.dart';
 import '../../../vendors/presentation/widgets/store_status_widgets.dart';
 import '../../../wallet/data/customer_dues_repository.dart';
+import '../../../cancellation/presentation/cancellation_block_sheet.dart';
+import '../../../cancellation/presentation/cancellation_widgets.dart'
+    show CancellationStandingBanner;
 import '../../../wallet/presentation/screens/wallet_topup_page.dart';
 import '../../data/data_provider/checkout_data_provider.dart';
 import '../../data/models/delivery_fee_quote.dart';
@@ -493,6 +496,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     if (parsed.isOutstandingDues) {
       unawaited(_loadDues());
       _showDuesDialog(amount: parsed.amount, currency: parsed.currency);
+      return true;
+    }
+    if (parsed.isCancellationBlock) {
+      // Unpaid cancellation fine / account paused for late cancels.
+      unawaited(handleCancellationBlockError(context, parsed));
       return true;
     }
     if (parsed.isStoreUnavailable ||
@@ -1568,6 +1576,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           !_issue!.isStoreUnavailable &&
                           !_issue!.isOutstandingDues)
                         _issueCard(_issue!),
+                      const CancellationStandingBanner(
+                        padding: EdgeInsets.only(bottom: 12),
+                      ),
                       if (_hasDues && !_giftMode)
                         ParcelDuesBanner(
                           dues: _dues!,

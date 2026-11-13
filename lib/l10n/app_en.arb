@@ -1915,5 +1915,197 @@
   "deliveryStatusReturned": "Returned",
   "checkoutStoreNoBranch": "This store isn't set up for delivery yet. Please try another store.",
   "checkoutTotalExcludesDelivery": "Delivery fee not included yet",
-  "parcelPaidByRecipientCash": "Cash, paid by the recipient on delivery"
+  "parcelPaidByRecipientCash": "Cash, paid by the recipient on delivery",
+  "msAddStop": "Add another stop",
+  "msStopLabel": "Stop {number}",
+  "@msStopLabel": {
+    "placeholders": {
+      "number": {"type": "int"}
+    }
+  },
+  "msStopsCount": "{count} stops",
+  "@msStopsCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "msRemoveStop": "Remove stop",
+  "msMoveStopUp": "Move up",
+  "msMoveStopDown": "Move down",
+  "msChooseStopLocation": "Choose drop-off place",
+  "msMaxStopsReached": "You can add up to {max} drop-offs.",
+  "@msMaxStopsReached": {
+    "placeholders": {
+      "max": {"type": "int"}
+    }
+  },
+  "msStopReceiverTitle": "Who receives at stop {number}?",
+  "@msStopReceiverTitle": {
+    "placeholders": {
+      "number": {"type": "int"}
+    }
+  },
+  "msStopReceiverName": "Receiver name",
+  "msStopReceiverPhone": "Receiver phone",
+  "msStopNoteHint": "Note for the courier (optional)",
+  "msStopReceiverRequired": "Add a receiver name and phone for every stop.",
+  "msStopLocationRequired": "Choose a place for every stop, or remove the empty ones.",
+  "msSenderPaysMultiStop": "Deliveries with more than one stop are paid by you, the sender.",
+  "msMultiStopCashAtPickup": "Cash is paid to the courier at pickup.",
+  "msRouteTitle": "Route",
+  "msPickupLabel": "Pickup",
+  "msStopStatusPending": "Waiting",
+  "msStopStatusEnRoute": "On the way",
+  "msStopStatusArrived": "Courier arrived",
+  "msStopStatusDelivered": "Delivered",
+  "msStopStatusFailed": "Not delivered",
+  "msStopStatusSkipped": "Skipped",
+  "msHeadingToStop": "Heading to stop {number}",
+  "@msHeadingToStop": {
+    "placeholders": {
+      "number": {"type": "int"}
+    }
+  },
+  "msStopsProgress": "{done} of {total} stops done",
+  "@msStopsProgress": {
+    "placeholders": {
+      "done": {"type": "int"}, "total": {"type": "int"}
+    }
+  },
+  "msStopCode": "Code: {code}",
+  "@msStopCode": {
+    "placeholders": {
+      "code": {"type": "String"}
+    }
+  },
+  "msErrMultiStopDisabled": "More than one stop isn't available right now. Remove the extra stops to continue.",
+  "msErrTooManyStops": "Too many stops for one delivery. Remove some and try again.",
+  "msErrSenderPays": "Deliveries with more than one stop must be paid by the sender.",
+  "cpFreeCancelBody": "No courier has taken this yet, so cancelling is free.",
+  "cpPenaltyTitle": "Cancel and get penalty points?",
+  "cpPenaltyBodyDelivery": "A courier is already on this job. Cancelling now adds {points} penalty points to your account.",
+  "@cpPenaltyBodyDelivery": {
+    "placeholders": {
+      "points": {"type": "int"}
+    }
+  },
+  "cpPenaltyBodyOrder": "Your order is already being handled. Cancelling now adds {points} penalty points to your account.",
+  "@cpPenaltyBodyOrder": {
+    "placeholders": {
+      "points": {"type": "int"}
+    }
+  },
+  "cpPointsOfLimit": "{points} / {limit} points",
+  "@cpPointsOfLimit": {
+    "placeholders": {
+      "points": {"type": "int"}, "limit": {"type": "int"}
+    }
+  },
+  "cpWarnFineAt": "At {threshold} points you must pay a fine before you can book again.",
+  "@cpWarnFineAt": {
+    "placeholders": {
+      "threshold": {"type": "int"}
+    }
+  },
+  "cpWarnBanAt": "At {threshold} points your account is paused for a while.",
+  "@cpWarnBanAt": {
+    "placeholders": {
+      "threshold": {"type": "int"}
+    }
+  },
+  "cpWillFine": "This reaches {threshold} points. You will be fined {amount} and can't book until it is paid.",
+  "@cpWillFine": {
+    "placeholders": {
+      "threshold": {"type": "int"}, "amount": {"type": "String"}
+    }
+  },
+  "cpWillFineNoAmount": "This reaches {threshold} points. You will be fined and can't book until it is paid.",
+  "@cpWillFineNoAmount": {
+    "placeholders": {
+      "threshold": {"type": "int"}
+    }
+  },
+  "cpWillSuspend": "This reaches {threshold} points. Your account will be paused for {days} days.",
+  "@cpWillSuspend": {
+    "placeholders": {
+      "threshold": {"type": "int"}, "days": {"type": "int"}
+    }
+  },
+  "cpWillSuspendNoDays": "This reaches {threshold} points. Your account will be paused.",
+  "@cpWillSuspendNoDays": {
+    "placeholders": {
+      "threshold": {"type": "int"}
+    }
+  },
+  "cpPointsExpire": "Penalty points expire after {days} days.",
+  "@cpPointsExpire": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+  "cpCancelAnyway": "Cancel anyway",
+  "cpKeepDelivery": "Keep my delivery",
+  "cpKeepOrder": "Keep my order",
+  "cpCannotCancelPickedUp": "This can't be cancelled. The courier already picked up the package.",
+  "cpCannotCancelGeneric": "This can't be cancelled now.",
+  "cpPenaltyChanged": "The penalty has changed. Please check it again.",
+  "cpCancelledWithPoints": "Cancelled. {points} penalty points added (you now have {total}).",
+  "@cpCancelledWithPoints": {
+    "placeholders": {
+      "points": {"type": "int"}, "total": {"type": "int"}
+    }
+  },
+  "cpFineIssued": "You've been fined {amount}. Pay it to book again.",
+  "@cpFineIssued": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "cpSuspendedUntil": "Your account is paused until {date}.",
+  "@cpSuspendedUntil": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "cpStandingTitle": "Cancellation record",
+  "cpStandingGood": "Good standing",
+  "cpStandingWarning": "Close to a penalty",
+  "cpStandingFineDue": "Fine to pay",
+  "cpStandingSuspended": "Account paused",
+  "cpStandingExplainer": "Cancelling after a courier or driver is assigned adds {points} penalty points. Cancelling before that is free.",
+  "@cpStandingExplainer": {
+    "placeholders": {
+      "points": {"type": "int"}
+    }
+  },
+  "cpNextExpiry": "{points} points expire on {date}.",
+  "@cpNextExpiry": {
+    "placeholders": {
+      "points": {"type": "int"}, "date": {"type": "String"}
+    }
+  },
+  "cpFineDueBody": "You have an unpaid cancellation fine of {amount}. Pay it to book deliveries and order again.",
+  "@cpFineDueBody": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "cpPayFine": "Pay fine from wallet",
+  "cpFinePaid": "Fine paid. You can book again.",
+  "cpSuspendedBody": "You cancelled too many times after a courier was assigned. You can book again on {date}.",
+  "@cpSuspendedBody": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "cpSuspendedBodyNoDate": "You cancelled too many times after a courier was assigned. Contact support to restore your account.",
+  "cpTopUpToPayFine": "Not enough money in your wallet. Top up to pay the fine.",
+  "cpTopUp": "Top up wallet",
+  "cpViewRecord": "View record",
+  "cpBlockedTitle": "You can't book right now",
+  "cpMarkerFine": "Fine",
+  "cpMarkerPause": "Pause",
+  "cpHowItWorks": "How it works",
+  "cpRuleFree": "Cancel before a courier or driver is assigned: free.",
+  "cpRuleNoCancelAfterPickup": "Once the package or food is picked up, it can't be cancelled."
 }

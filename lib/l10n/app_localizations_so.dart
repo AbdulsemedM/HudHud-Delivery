@@ -4392,4 +4392,284 @@ class AppLocalizationsSo extends AppLocalizations {
   @override
   String get parcelPaidByRecipientCash =>
       'Lacag caddaan ah, qaataha ayaa bixinaya marka la gaarsiiyo';
+
+  @override
+  String get msAddStop => 'Ku dar meel kale';
+
+  @override
+  String msStopLabel(int number) {
+    return 'Meesha $number';
+  }
+
+  @override
+  String msStopsCount(int count) {
+    return '$count meelood';
+  }
+
+  @override
+  String get msRemoveStop => 'Ka saar meesha';
+
+  @override
+  String get msMoveStopUp => 'Kor u qaad';
+
+  @override
+  String get msMoveStopDown => 'Hoos u dhig';
+
+  @override
+  String get msChooseStopLocation => 'Dooro meesha la geynayo';
+
+  @override
+  String msMaxStopsReached(int max) {
+    return 'Waxaad ku dari kartaa ilaa $max meelood.';
+  }
+
+  @override
+  String msStopReceiverTitle(int number) {
+    return 'Yaa ka qaata meesha $number?';
+  }
+
+  @override
+  String get msStopReceiverName => 'Magaca qaataha';
+
+  @override
+  String get msStopReceiverPhone => 'Taleefanka qaataha';
+
+  @override
+  String get msStopNoteHint =>
+      'Qoraal loogu talagalay gaarsiiyaha (ikhtiyaari)';
+
+  @override
+  String get msStopReceiverRequired =>
+      'Meel kasta ku dar magaca iyo taleefanka qaataha.';
+
+  @override
+  String get msStopLocationRequired =>
+      'Meel kasta dooro goob, ama ka saar kuwa banaan.';
+
+  @override
+  String get msSenderPaysMultiStop =>
+      'Gaarsiinta leh in ka badan hal meel adiga (diraha) ayaa bixinaya.';
+
+  @override
+  String get msMultiStopCashAtPickup =>
+      'Lacagta caddaanka ah waxaa la siinayaa gaarsiiyaha marka la qaado.';
+
+  @override
+  String get msRouteTitle => 'Waddada';
+
+  @override
+  String get msPickupLabel => 'Qaadis';
+
+  @override
+  String get msStopStatusPending => 'Sugaya';
+
+  @override
+  String get msStopStatusEnRoute => 'Waddada ku jira';
+
+  @override
+  String get msStopStatusArrived => 'Gaarsiiyuhu wuu yimid';
+
+  @override
+  String get msStopStatusDelivered => 'La gaarsiiyay';
+
+  @override
+  String get msStopStatusFailed => 'Lama gaarsiin';
+
+  @override
+  String get msStopStatusSkipped => 'Waa laga gudbay';
+
+  @override
+  String msHeadingToStop(int number) {
+    return 'Wuxuu u socdaa meesha $number';
+  }
+
+  @override
+  String msStopsProgress(int done, int total) {
+    return '$done ka mid ah $total meelood waa la dhammeeyay';
+  }
+
+  @override
+  String msStopCode(String code) {
+    return 'Koodh: $code';
+  }
+
+  @override
+  String get msErrMultiStopDisabled =>
+      'In ka badan hal meel hadda lama heli karo. Ka saar meelaha dheeraadka ah si aad u sii wadato.';
+
+  @override
+  String get msErrTooManyStops =>
+      'Meelo aad u badan hal gaarsiin. Qaar ka saar oo isku day mar kale.';
+
+  @override
+  String get msErrSenderPays =>
+      'Gaarsiinta leh in ka badan hal meel waa in uu bixiyo diruhu.';
+
+  @override
+  String get cpFreeCancelBody =>
+      'Weli gaarsiiye lama magacaabin, markaa joojintu waa bilaash.';
+
+  @override
+  String get cpPenaltyTitle =>
+      'Ma joojinaysaa oo dhibcaha ciqaabta qaadanaysaa?';
+
+  @override
+  String cpPenaltyBodyDelivery(int points) {
+    return 'Gaarsiiye ayaa horay loo magacaabay. Joojinta hadda waxay xisaabtaada ku daraysaa $points dhibcood oo ciqaab ah.';
+  }
+
+  @override
+  String cpPenaltyBodyOrder(int points) {
+    return 'Dalabkaaga horay ayaa loo bilaabay. Joojinta hadda waxay xisaabtaada ku daraysaa $points dhibcood oo ciqaab ah.';
+  }
+
+  @override
+  String cpPointsOfLimit(int points, int limit) {
+    return '$points / $limit dhibcood';
+  }
+
+  @override
+  String cpWarnFineAt(int threshold) {
+    return 'Marka aad gaarto $threshold dhibcood waa inaad bixisaa ganaax ka hor intaadan dalban mar kale.';
+  }
+
+  @override
+  String cpWarnBanAt(int threshold) {
+    return 'Marka aad gaarto $threshold dhibcood xisaabtaada waa la hakinayaa muddo.';
+  }
+
+  @override
+  String cpWillFine(int threshold, String amount) {
+    return 'Tani waxay gaaraysaa $threshold dhibcood. Waxaa lagu ganaaxayaa $amount, mana dalban kartid ilaa aad bixiso.';
+  }
+
+  @override
+  String cpWillFineNoAmount(int threshold) {
+    return 'Tani waxay gaaraysaa $threshold dhibcood. Waa lagu ganaaxayaa, mana dalban kartid ilaa aad bixiso.';
+  }
+
+  @override
+  String cpWillSuspend(int threshold, int days) {
+    return 'Tani waxay gaaraysaa $threshold dhibcood. Xisaabtaada waa la hakinayaa $days maalmood.';
+  }
+
+  @override
+  String cpWillSuspendNoDays(int threshold) {
+    return 'Tani waxay gaaraysaa $threshold dhibcood. Xisaabtaada waa la hakinayaa.';
+  }
+
+  @override
+  String cpPointsExpire(int days) {
+    return 'Dhibcaha ciqaabtu waxay dhacaan $days maalmood kadib.';
+  }
+
+  @override
+  String get cpCancelAnyway => 'Si kastaba jooji';
+
+  @override
+  String get cpKeepDelivery => 'Hay gaarsiintayda';
+
+  @override
+  String get cpKeepOrder => 'Hay dalabkayga';
+
+  @override
+  String get cpCannotCancelPickedUp =>
+      'Tan lama joojin karo. Gaarsiiyuhu horay ayuu u qaatay xidhmada.';
+
+  @override
+  String get cpCannotCancelGeneric => 'Tan hadda lama joojin karo.';
+
+  @override
+  String get cpPenaltyChanged => 'Ciqaabtu way isbedeshay. Fadlan dib u eeg.';
+
+  @override
+  String cpCancelledWithPoints(int points, int total) {
+    return 'Waa la joojiyay. $points dhibcood oo ciqaab ah ayaa lagu daray (hadda waxaad leedahay $total).';
+  }
+
+  @override
+  String cpFineIssued(String amount) {
+    return 'Waxaa lagu ganaaxay $amount. Bixi si aad mar kale u dalbato.';
+  }
+
+  @override
+  String cpSuspendedUntil(String date) {
+    return 'Xisaabtaada waa la hakiyay ilaa $date.';
+  }
+
+  @override
+  String get cpStandingTitle => 'Diiwaanka joojinta';
+
+  @override
+  String get cpStandingGood => 'Xaalad wanaagsan';
+
+  @override
+  String get cpStandingWarning => 'Waxaad ku dhow tahay ciqaab';
+
+  @override
+  String get cpStandingFineDue => 'Ganaax la bixinayo';
+
+  @override
+  String get cpStandingSuspended => 'Xisaabta waa la hakiyay';
+
+  @override
+  String cpStandingExplainer(int points) {
+    return 'Joojinta kadib marka gaarsiiye ama darawal la magacaabo waxay ku daraysaa $points dhibcood oo ciqaab ah. Joojinta ka hor waa bilaash.';
+  }
+
+  @override
+  String cpNextExpiry(int points, String date) {
+    return '$points dhibcood ayaa dhacaya $date.';
+  }
+
+  @override
+  String cpFineDueBody(String amount) {
+    return 'Waxaad leedahay ganaax joojin oo aan la bixin $amount. Bixi si aad mar kale u dalbato.';
+  }
+
+  @override
+  String get cpPayFine => 'Ka bixi ganaaxa boorsada';
+
+  @override
+  String get cpFinePaid =>
+      'Ganaaxa waa la bixiyay. Mar kale waad dalban kartaa.';
+
+  @override
+  String cpSuspendedBody(String date) {
+    return 'Waxaad joojisay marar badan kadib markii gaarsiiye la magacaabay. Waxaad mar kale dalban kartaa $date.';
+  }
+
+  @override
+  String get cpSuspendedBodyNoDate =>
+      'Waxaad joojisay marar badan kadib markii gaarsiiye la magacaabay. La xiriir taageerada si aad u soo celiso xisaabtaada.';
+
+  @override
+  String get cpTopUpToPayFine =>
+      'Lacag kugu filan kuma jirto boorsadaada. Ku shub si aad u bixiso ganaaxa.';
+
+  @override
+  String get cpTopUp => 'Ku shub boorsada';
+
+  @override
+  String get cpViewRecord => 'Eeg diiwaanka';
+
+  @override
+  String get cpBlockedTitle => 'Hadda ma dalban kartid';
+
+  @override
+  String get cpMarkerFine => 'Ganaax';
+
+  @override
+  String get cpMarkerPause => 'Hakin';
+
+  @override
+  String get cpHowItWorks => 'Sida ay u shaqeyso';
+
+  @override
+  String get cpRuleFree =>
+      'Joojinta ka hor intaan gaarsiiye ama darawal la magacaabin: bilaash.';
+
+  @override
+  String get cpRuleNoCancelAfterPickup =>
+      'Marka xidhmada ama cuntada la qaado, lama joojin karo.';
 }

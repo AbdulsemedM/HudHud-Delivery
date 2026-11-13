@@ -3,14 +3,33 @@ import 'package:hudhud_delivery/l10n/app_localizations.dart';
 
 /// Whether a courier delivery can still be cancelled by the customer.
 ///
-/// Cancellation is blocked once a courier is assigned (and for all later /
+/// Old rule: blocked once a courier is assigned (and for all later /
 /// terminal states).
-bool canCancelCourierDelivery(String? status) {
+///
+/// [allowUntilPickup] (cancellation penalty points switched on — see
+/// `CancellationPolicyController.penaltyEnabled`): still allowed while the
+/// courier is assigned / on the way / at pickup; blocked once the package
+/// is picked up. The server's cancellation preview has the final say.
+bool canCancelCourierDelivery(String? status, {bool allowUntilPickup = false}) {
   if (status == null || status.trim().isEmpty) return true;
   if (isDeliveryTerminalStatus(status)) return false;
-  if (isDeliveryAcceptedForTracking(status)) return false;
 
   final normalized = status.toLowerCase().trim().replaceAll(' ', '_');
+
+  if (allowUntilPickup) {
+    if (normalized.contains('picked_up') ||
+        normalized.contains('in_transit') ||
+        normalized.contains('out_for_delivery') ||
+        normalized.contains('delivered') ||
+        normalized.contains('completed') ||
+        normalized.contains('cancel')) {
+      return false;
+    }
+    // Before pickup: pending … at_pickup (rank < en_route_dropoff).
+    return deliveryStatusRank(status) < deliveryStatusRank('en_route_dropoff');
+  }
+
+  if (isDeliveryAcceptedForTracking(status)) return false;
 
   // Legacy statuses that may not map cleanly into lifecycle ranks.
   const blockedExact = {

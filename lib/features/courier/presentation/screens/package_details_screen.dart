@@ -7,6 +7,7 @@ import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/utils/phone_util.dart';
 import 'package:hudhud_delivery/core/widgets/call_support_button.dart';
+import 'package:hudhud_delivery/features/courier/data/models/delivery_stop.dart';
 import 'package:hudhud_delivery/features/courier/easy_mode/package_item_catalog.dart';
 import 'package:hudhud_delivery/features/courier/presentation/theme/courier_theme.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
@@ -24,6 +25,10 @@ class PackageDetailsScreen extends StatefulWidget {
   final DateTime? scheduledPickup;
   final DateTime? scheduledDelivery;
 
+  /// Multi-stop: drop-offs after the first (location only; this screen adds
+  /// each one's receiver). Empty for a normal single drop-off.
+  final List<DeliveryStopDraft> extraStops;
+
   const PackageDetailsScreen({
     super.key,
     required this.pickupLocation,
@@ -34,10 +39,24 @@ class PackageDetailsScreen extends StatefulWidget {
     required this.isInstantDelivery,
     this.scheduledPickup,
     this.scheduledDelivery,
+    this.extraStops = const [],
   });
 
   @override
   State<PackageDetailsScreen> createState() => _PackageDetailsScreenState();
+}
+
+/// Receiver fields for one extra drop-off.
+class _StopReceiverForm {
+  final name = TextEditingController();
+  final phone = TextEditingController();
+  final note = TextEditingController();
+
+  void dispose() {
+    name.dispose();
+    phone.dispose();
+    note.dispose();
+  }
 }
 
 class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
@@ -57,6 +76,16 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
   bool _senderManuallyCleared = false;
   String _lastSenderText = '';
   final ImagePicker _imagePicker = ImagePicker();
+
+  late final List<_StopReceiverForm> _stopForms = [
+    for (final stop in widget.extraStops)
+      _StopReceiverForm()
+        ..name.text = stop.receiverName
+        ..phone.text = stop.receiverPhone
+        ..note.text = stop.note,
+  ];
+
+  bool get _isMultiStop => widget.extraStops.isNotEmpty;
 
   @override
   void initState() {
@@ -106,6 +135,9 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
     _recipientPhoneController.dispose();
     _senderPhoneController.removeListener(_onSenderPhoneChanged);
     _senderPhoneController.dispose();
+    for (final form in _stopForms) {
+      form.dispose();
+    }
     super.dispose();
   }
 
@@ -247,6 +279,28 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
       return;
     }
 
+    final extraStops = <DeliveryStopDraft>[];
+    for (var i = 0; i < widget.extraStops.length; i++) {
+      final form = _stopForms[i];
+      final name = form.name.text.trim();
+      final phone = normalizePhoneToBackend(form.phone.text);
+      if (name.isEmpty) {
+        _snack(l10n.msStopReceiverRequired);
+        return;
+      }
+      if (!RegExp(r'^2519\d{8}$').hasMatch(phone)) {
+        _snack(l10n.pleaseEnterValidRecipientPhone);
+        return;
+      }
+      extraStops.add(
+        widget.extraStops[i].copyWith(
+          receiverName: name,
+          receiverPhone: phone,
+          note: form.note.text.trim(),
+        ),
+      );
+    }
+
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -263,12 +317,14 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
           isInstantDelivery: widget.isInstantDelivery,
           scheduledPickup: widget.scheduledPickup,
           scheduledDelivery: widget.scheduledDelivery,
-          whoPays: 'recipient',
+          // Multi-stop deliveries are always paid by the sender.
+          whoPays: _isMultiStop ? 'sender' : 'recipient',
           paymentType: 'cash_on_delivery',
           senderPhone: senderPhone,
           recipientName: _recipientNameController.text.trim(),
           recipientPhone: recipientPhone,
           packageImagePath: _packageImagePath,
+          extraStops: extraStops,
         ),
       ),
     );
@@ -433,8 +489,12 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                         const SizedBox(height: 26),
                         _SectionHeader(
                           icon: Icons.download_rounded,
-                          title: l10n.recipientInformation,
+                          title: _isMultiStop
+                              ? l10n.msStopReceiverTitle(1)
+                              : l10n.recipientInformation,
                         ),
+                        if (_isMultiStop)
+                          _StopAddress(address: widget.deliveryLocation),
                         const SizedBox(height: 12),
                         _FormCard(
                           children: [
@@ -462,6 +522,60 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                             ),
                           ],
                         ),
+                        for (var i = 0; i < _stopForms.length; i++) ...[
+                          const SizedBox(height: 26),
+                          _SectionHeader(
+                            icon: Icons.download_rounded,
+                            title: l10n.msStopReceiverTitle(i + 2),
+                          ),
+                          _StopAddress(
+                            address: widget.extraStops[i].location,
+                          ),
+                          const SizedBox(height: 12),
+                          _FormCard(
+                            children: [
+                              TextFormField(
+                                controller: _stopForms[i].name,
+                                style: fieldText,
+                                decoration: _fieldDecoration(
+                                  labelText: l10n.msStopReceiverName,
+                                  fieldFill: fieldFill,
+                                  outline: outline,
+                                  icon: Icons.person_rounded,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              TextFormField(
+                                controller: _stopForms[i].phone,
+                                keyboardType: TextInputType.phone,
+                                style: fieldText,
+                                decoration: _fieldDecoration(
+                                  labelText: l10n.msStopReceiverPhone,
+                                  fieldFill: fieldFill,
+                                  outline: outline,
+                                  icon: Icons.phone_rounded,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              TextFormField(
+                                controller: _stopForms[i].note,
+                                style: fieldText,
+                                maxLines: 2,
+                                minLines: 1,
+                                decoration: _fieldDecoration(
+                                  labelText: l10n.msStopNoteHint,
+                                  fieldFill: fieldFill,
+                                  outline: outline,
+                                  icon: Icons.sticky_note_2_rounded,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                        if (_isMultiStop) ...[
+                          const SizedBox(height: 16),
+                          _InfoNote(text: l10n.msSenderPaysMultiStop),
+                        ],
                         const SizedBox(height: 26),
                         _PhotoCard(
                           imagePath: _packageImagePath,
@@ -532,6 +646,78 @@ class _SectionHeader extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Drop-off address under a stop's receiver heading (multi-stop).
+class _StopAddress extends StatelessWidget {
+  const _StopAddress({required this.address});
+
+  final String address;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 52, top: 4),
+      child: Row(
+        children: [
+          Icon(
+            Icons.location_on_rounded,
+            size: 16,
+            color: HomeColors.textMutedOf(context),
+          ),
+          const SizedBox(width: 4),
+          Expanded(
+            child: Text(
+              address,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 13.5,
+                fontWeight: FontWeight.w600,
+                color: HomeColors.textMutedOf(context),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Indigo info note (icon + text).
+class _InfoNote extends StatelessWidget {
+  const _InfoNote({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final violet = HomeColors.violetOf(context);
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: HomeColors.violetTintOf(context),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.info_rounded, size: 22, color: violet),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 14,
+                height: 1.3,
+                fontWeight: FontWeight.w600,
+                color: HomeColors.textPrimaryOf(context),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

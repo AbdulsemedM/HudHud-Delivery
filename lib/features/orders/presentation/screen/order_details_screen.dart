@@ -7,6 +7,8 @@ import 'package:shimmer/shimmer.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/theme/system_ui_style.dart';
+import 'package:hudhud_delivery/features/cancellation/cancellation_policy_controller.dart';
+import 'package:hudhud_delivery/features/cancellation/presentation/cancel_confirmation.dart';
 import 'package:hudhud_delivery/features/growth/growth_scope.dart';
 import 'package:hudhud_delivery/features/growth/presentation/reorder_flow.dart';
 import 'package:hudhud_delivery/features/home/presentation/theme/home_colors.dart';
@@ -35,6 +37,10 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     super.initState();
     context.read<OrdersBloc>().add(FetchOrderDetailsEvent(widget.orderId));
     _startPolling();
+    // Penalty rules decide whether Cancel stays visible while preparing.
+    CancellationPolicyController.instance.refresh().then((_) {
+      if (mounted) setState(() {});
+    });
   }
 
   @override
@@ -60,6 +66,12 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   /// "ETB 1,005 refunded to your HudHud wallet" when the server reports a
   /// wallet refund; the plain cancel message otherwise.
   String _cancelMessage(BuildContext context, OrderCancelled state) {
+    final penaltyLine = cancellationOutcomeMessageOf(context, state.penalty);
+    final base = _refundMessage(context, state);
+    return penaltyLine == null ? base : '$base\n$penaltyLine';
+  }
+
+  String _refundMessage(BuildContext context, OrderCancelled state) {
     final refund = state.refund;
     if (refund == null) return state.message;
     if (refund.isToWallet) {
@@ -235,7 +247,10 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
             ),
           ),
           actions: [
-            if (order.canBeCancelled)
+            if (order.canBeCancelledWith(
+              allowUntilPickup:
+                  CancellationPolicyController.instance.penaltyEnabled,
+            ))
               Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: IconButton(
@@ -440,16 +455,31 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     );
   }
 
-  void _showCancelOrderDialog(BuildContext context, OrderModel order) {
+  Future<void> _showCancelOrderDialog(
+    BuildContext context,
+    OrderModel order,
+  ) async {
+    final bloc = context.read<OrdersBloc>();
+    // Cancellation penalty points: free, costs points, or not allowed.
+    final decision = await previewAndConfirmCancellation(
+      context,
+      subject: CancelSubject.order,
+      load: (repo) => repo.previewOrder(order.id),
+    );
+    if (!context.mounted || decision.kind == CancelDecisionKind.abort) return;
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
         return CancelOrderDialog(
           order: order,
           onCancel: (reason) {
-            context.read<OrdersBloc>().add(
-                  CancelOrderEvent(order.id, reason: reason),
-                );
+            bloc.add(
+              CancelOrderEvent(
+                order.id,
+                reason: reason,
+                acceptPenaltyPoints: decision.acceptPenaltyPoints,
+              ),
+            );
           },
         );
       },

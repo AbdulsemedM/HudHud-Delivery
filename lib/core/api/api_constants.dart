@@ -266,6 +266,26 @@ class ApiConstants {
   /// parcels with OUTSTANDING_DUES; a wallet top-up collects them.
   static const String customerDues = 'customer/dues';
 
+  // Multi-stop on the classic delivery endpoints (docs/backend-multi-stop-
+  // and-cancellation-penalty.md). Older backends 404 → feature stays off.
+  /// GET /api/services/delivery/config — `{multi_stop: {enabled, max_stops}}`.
+  static const String deliveryConfig = 'services/delivery/config';
+
+  // Cancellation penalty points (same spec). Older backends 404 → the app
+  // keeps the old rules (no cancel after a courier is assigned).
+  /// GET /api/customer/cancellation-standing — points, thresholds, fine, ban.
+  static const String customerCancellationStanding =
+      'customer/cancellation-standing';
+  /// GET /api/services/delivery/{id}/cancellation-preview
+  static const String deliveryCancellationPreview =
+      'services/delivery/{id}/cancellation-preview';
+  /// GET /api/customer/orders/{id}/cancellation-preview
+  static const String customerOrderCancellationPreview =
+      'customer/orders/{id}/cancellation-preview';
+  /// POST /api/customer/cancellation-fines/{id}/pay {payment_method: wallet}
+  static const String customerCancellationFinePay =
+      'customer/cancellation-fines/{id}/pay';
+
   // Ride/Taxi endpoints
   static const String rideEstimate = 'services/ride/estimate';
   static const String rideRequest = 'services/ride/request';

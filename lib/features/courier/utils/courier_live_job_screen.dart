@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:hudhud_delivery/features/courier/data/models/delivery_stop.dart';
 import 'package:hudhud_delivery/features/courier/presentation/screens/delivery_tracking_screen.dart';
 import 'package:hudhud_delivery/features/courier/presentation/screens/finding_courier_screen.dart';
 import 'package:hudhud_delivery/features/courier/presentation/widgets/active_delivery_card.dart';
@@ -42,6 +43,7 @@ Widget courierLiveJobScreenFromDelivery(Map<String, dynamic> delivery) {
       paymentType: paymentType,
       recipientName: recipientName,
       recipientPhone: recipientPhone,
+      stops: parseDeliveryStops(delivery),
     );
   }
 
