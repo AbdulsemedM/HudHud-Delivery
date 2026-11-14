@@ -39,7 +39,51 @@ env:
   SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
 
 jobs:
+  # One run, one list. Before this existed, a missing secret was found a job
+  # at a time: the Android job stopped at the keystore, the iOS job stopped at
+  # "You must be logged in", and neither mentioned the other three. Somebody
+  # fixed one, re-ran, and met the next.
+  #
+  # This job names everything that is missing at once, and fails before any
+  # build starts, so nothing is half-shipped while a credential is absent.
+  preflight:
+    name: Check the credentials exist
+    runs-on: ubuntu-latest
+    steps:
+      - name: Which secrets are set
+        env:
+          SB: ${{ secrets.SHOREBIRD_TOKEN }}
+          KS: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KPW: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          SPW: ${{ secrets.ANDROID_STORE_PASSWORD }}
+        run: |
+          set -uo pipefail
+          missing=0
+          check () {
+            if [ -z "${2:-}" ]; then
+              echo "::error::MISSING  $1 — $3"
+              missing=1
+            else
+              echo "ok       $1"
+            fi
+          }
+          check SHOREBIRD_TOKEN          "${SB:-}"    "console.shorebird.dev -> service account key. Without it nothing can be released or patched, on either platform."
+          check ANDROID_KEYSTORE_BASE64  "${KS:-}"    "the Play upload keystore: base64 -w0 upload-keystore.jks"
+          check ANDROID_KEY_ALIAS        "${ALIAS:-}" "the alias inside that keystore"
+          check ANDROID_KEY_PASSWORD     "${KPW:-}"   "the key password"
+          check ANDROID_STORE_PASSWORD   "${SPW:-}"   "the keystore password"
+          if [ "$missing" = "1" ]; then
+            echo
+            echo "Add them at Settings -> Secrets and variables -> Actions."
+            echo "Only the four ANDROID_* ones are needed for an Android build;"
+            echo "iOS needs SHOREBIRD_TOKEN alone."
+            exit 1
+          fi
+          echo "All five present."
+
   resolve:
+    needs: preflight
     runs-on: ubuntu-latest
     outputs:
       release_version: ${{ steps.version.outputs.release_version }}
@@ -76,7 +120,7 @@ jobs:
           echo "Resolved release_version=${VERSION} platform=${PLATFORM} track=${TRACK}"
 
   patch-android:
-    needs: resolve
+    needs: [preflight, resolve]
     if: needs.resolve.outputs.platform == 'android' || needs.resolve.outputs.platform == 'both'
     runs-on: ubuntu-latest
     defaults:
@@ -137,7 +181,7 @@ jobs:
             --no-confirm
 
   patch-ios:
-    needs: resolve
+    needs: [preflight, resolve]
     if: needs.resolve.outputs.platform == 'ios' || needs.resolve.outputs.platform == 'both'
     runs-on: macos-latest
     defaults:
