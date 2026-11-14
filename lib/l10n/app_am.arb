@@ -718,6 +718,7 @@
   "emailVerificationTitle": "የኢሜል ማረጋገጫ",
   "phoneVerificationTitle": "የስልክ ማረጋገጫ",
   "enterEmailCode": "የኢሜል ኮድ ያስገቡ",
+  "signInWithPassword": "በይለፍ ቃል ይግቡ",
   "enterSmsCode": "የኤስኤምኤስ ኮድ ያስገቡ",
   "noEmailAvailableShort": "ምንም ኢሜይል የለም።",
   "addMoney": "ገንዘብ ጨምር",

@@ -687,6 +687,7 @@
   "emailVerificationTitle": "Email Verification",
   "phoneVerificationTitle": "Phone Verification",
   "enterEmailCode": "Enter email code",
+  "signInWithPassword": "Sign in with password",
   "enterSmsCode": "Enter SMS code",
   "noEmailAvailableShort": "No email available",
   "addMoney": "Add Money",

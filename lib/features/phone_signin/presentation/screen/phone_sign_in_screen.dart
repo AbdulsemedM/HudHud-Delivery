@@ -21,7 +21,11 @@ class PhoneSignInScreen extends StatefulWidget {
     super.key,
     required this.onSignedIn,
     this.service,
+    this.footer,
   });
+
+  /// Shown under the Next button. The landing screen puts the
+  /// "sign in with password" link here; a pushed instance passes nothing.
 
   /// Called once a session exists and is persisted.
   ///
@@ -30,6 +34,8 @@ class PhoneSignInScreen extends StatefulWidget {
   /// request step: it returns an identical response either way, on purpose, so
   /// the endpoint cannot be used to discover who is registered.
   final void Function(PhoneSignInVerifyResult result) onSignedIn;
+
+  final Widget? footer;
 
   final PhoneSignInService? service;
 
@@ -164,6 +170,10 @@ class _PhoneSignInScreenState extends State<PhoneSignInScreen> {
               loading: _submitting,
               onPressed: _submitting ? null : _submit,
             ),
+            if (widget.footer != null) ...[
+              const SizedBox(height: 16),
+              widget.footer!,
+            ],
           ],
         ),
       ),

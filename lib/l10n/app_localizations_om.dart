@@ -1666,6 +1666,9 @@ class AppLocalizationsOm extends AppLocalizations {
   String get enterSmsCode => 'Koodii ergaa gabaabaa galchaa';
 
   @override
+  String get signInWithPassword => 'Jecha icciitiin seeni';
+
+  @override
   String get noEmailAvailableShort => 'Email hin jiru';
 
   @override

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hudhud_delivery/features/login/presentation/screen/auth_entry_screen.dart';
 import 'package:hudhud_delivery/app/services/biometric_credential_service.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -37,7 +38,6 @@ import 'package:hudhud_delivery/features/growth/presentation/screens/plus_screen
 import 'package:hudhud_delivery/features/growth/presentation/screens/rewards_screen.dart';
 import 'package:hudhud_delivery/features/growth/presentation/widgets/plus_widgets.dart';
 import 'package:hudhud_delivery/features/growth/presentation/widgets/referral_card.dart';
-import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
 // import 'package:hudhud_delivery/features/onboarding_tour/presentation/onboarding_tour_controller.dart';
 import 'package:hudhud_delivery/features/wallet/data/providers/wallet_data_provider.dart';
 import 'package:hudhud_delivery/features/wallet/data/repositories/wallet_repository.dart';
@@ -548,7 +548,7 @@ class _SettingsScreenState extends State<SettingsScreen>
 
         if (context.mounted) {
           Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => const LoginScreen()),
+            MaterialPageRoute(builder: (context) => const AuthEntryScreen()),
             (route) => false,
           );
         }

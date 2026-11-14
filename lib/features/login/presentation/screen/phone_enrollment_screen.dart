@@ -5,6 +5,7 @@ import 'package:country_picker/country_picker.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:sms_autofill/sms_autofill.dart';
+import 'package:hudhud_delivery/features/login/presentation/screen/auth_entry_screen.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/app/services/phone_enrollment_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
@@ -12,7 +13,6 @@ import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/utils/phone_util.dart';
 import 'package:hudhud_delivery/features/chat/presentation/screens/support_chat_start_screen.dart';
 import 'package:hudhud_delivery/features/dashboard/presentation/screen/dashboard_screen.dart';
-import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_dark_scaffold.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_gradient_button.dart';
@@ -332,7 +332,7 @@ class _PhoneEnrollmentScreenState extends State<PhoneEnrollmentScreen>
       await AuthService().logout();
       if (!mounted) return;
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        MaterialPageRoute(builder: (_) => const AuthEntryScreen()),
         (route) => false,
       );
     } catch (e) {

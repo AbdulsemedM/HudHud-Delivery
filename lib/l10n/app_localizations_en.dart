@@ -1652,6 +1652,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enterSmsCode => 'Enter SMS code';
 
   @override
+  String get signInWithPassword => 'Sign in with password';
+
+  @override
   String get noEmailAvailableShort => 'No email available';
 
   @override
