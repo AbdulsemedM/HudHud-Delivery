@@ -203,6 +203,8 @@ DeliveryLiveTracking parseDeliveryLiveTrackingResponse(dynamic response) {
       trackingMap['destination_stop_sequence'],
       destMap['stop_sequence'],
       trackingMap['current_stop_sequence'],
+      // Parcel-model name the backend uses for classic multi-stop too.
+      trackingMap['current_stop'],
     ]),
     stops: trackingMap['stops'] is List ? trackingMap['stops'] as List : null,
   );

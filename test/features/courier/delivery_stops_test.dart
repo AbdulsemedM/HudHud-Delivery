@@ -196,4 +196,57 @@ void main() {
       expect(currentDeliveryStop(map)?.sequence, 2);
     });
   });
+  group('parcel-shaped stops (backend package_delivery_stops)', () {
+    test('reads lat/lng, recipient, nested handover code and current_stop', () {
+      final map = <String, dynamic>{
+        'current_stop': 2,
+        'stops': [
+          {
+            'sequence': 1,
+            'status': 'returned',
+            'address': 'Kazanchis',
+            'lat': 9.01,
+            'lng': 38.76,
+            'recipient_name': 'Abebe',
+            'recipient_phone': '251911000001',
+            'handover': {'code': '4821', 'verified': true},
+          },
+          {
+            'sequence': 2,
+            'status': 'pending',
+            'address': 'Piassa',
+            'lat': '9.03',
+            'lng': '38.75',
+            'recipient_name': 'Sara',
+            'handover': {'code': '1234', 'verified': false},
+            'is_current': true,
+          },
+        ],
+      };
+      final stops = parseDeliveryStops(map);
+      expect(stops, hasLength(2));
+      expect(stops[0].status, DeliveryStopStatus.failed);
+      expect(stops[0].isDone, isTrue);
+      expect(stops[0].deliveryCode, isNull); // verified: nothing to share
+      expect(stops[0].position, isNotNull);
+      expect(stops[1].latitude, 9.03);
+      expect(stops[1].receiverName, 'Sara');
+      expect(stops[1].deliveryCode, '1234');
+      expect(stops[1].isCurrent, isTrue);
+      expect(currentDeliveryStop(map)?.sequence, 2);
+      expect(
+        currentDeliveryStop({'stops': map['stops']})?.sequence,
+        2, // falls back to is_current
+      );
+    });
+
+    test('live tracking accepts current_stop', () {
+      final t = parseDeliveryLiveTrackingResponse({
+        'data': {
+          'tracking': {'status': 'en_route_dropoff', 'current_stop': 3},
+        },
+      });
+      expect(t.destinationStopSequence, 3);
+    });
+  });
 }

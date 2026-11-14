@@ -168,6 +168,9 @@ class DeliveryStop {
   final DateTime? deliveredAt;
   final String? failureReason;
 
+  /// Server marks the stop being served now (`is_current`, parcel shape).
+  final bool isCurrent;
+
   const DeliveryStop({
     required this.sequence,
     this.status = DeliveryStopStatus.pending,
@@ -180,6 +183,7 @@ class DeliveryStop {
     this.arrivedAt,
     this.deliveredAt,
     this.failureReason,
+    this.isCurrent = false,
   });
 
   bool get isDone => DeliveryStopStatus.done.contains(status);
@@ -192,27 +196,40 @@ class DeliveryStop {
       ? null
       : LatLng(latitude!, longitude!);
 
+  /// Reads the spec'd keys and, as fallbacks, the parcel stop shape the
+  /// backend stores classic multi-stop deliveries in (`package_delivery_stops`:
+  /// `address`, `lat`/`lng`, `recipient_*`, `handover{code,verified}`,
+  /// `is_current`, status `returned`).
   static DeliveryStop? fromJson(dynamic raw) {
     if (raw is! Map) return null;
     final sequence = _int(raw['sequence']);
     if (sequence == null) return null;
+    final handover = raw['handover'] is Map ? raw['handover'] as Map : null;
+    final handoverVerified = handover?['verified'] == true;
+    var status =
+        (_string(raw['status']) ?? DeliveryStopStatus.pending).toLowerCase();
+    // Parcel model: a failed drop-off whose item went back to the sender.
+    if (status == 'returned') status = DeliveryStopStatus.failed;
     return DeliveryStop(
       sequence: sequence,
-      status: (_string(raw['status']) ?? DeliveryStopStatus.pending)
-          .toLowerCase(),
+      status: status,
       location: _string(raw['location']) ?? _string(raw['address']),
-      latitude: _double(raw['latitude']),
-      longitude: _double(raw['longitude']),
+      latitude: _double(raw['latitude']) ?? _double(raw['lat']),
+      longitude: _double(raw['longitude']) ?? _double(raw['lng']),
       receiverName: _string(raw['receiver_name']) ??
           _string(raw['recipient_name']),
       receiverPhone: _string(raw['receiver_phone']) ??
           _string(raw['recipient_phone']),
       deliveryCode: _string(raw['delivery_code']) ??
           _string(raw['otp']) ??
-          _string(raw['handover_code']),
+          _string(raw['handover_code']) ??
+          // Once the receiver's code was verified there is nothing to share.
+          (handoverVerified ? null : _string(handover?['code'])),
       arrivedAt: _date(raw['arrived_at']),
       deliveredAt: _date(raw['delivered_at']),
-      failureReason: _string(raw['failure_reason']),
+      failureReason:
+          _string(raw['failure_reason']) ?? _string(raw['fail_reason']),
+      isCurrent: raw['is_current'] == true,
     );
   }
 }
@@ -250,11 +267,15 @@ DeliveryStop? currentDeliveryStop(
 ]) {
   final list = stops ?? parseDeliveryStops(delivery);
   if (list.isEmpty) return null;
-  final seq = _int(delivery?['current_stop_sequence']);
+  final seq = _int(delivery?['current_stop_sequence']) ??
+      _int(delivery?['current_stop']);
   if (seq != null) {
     for (final s in list) {
       if (s.sequence == seq) return s;
     }
+  }
+  for (final s in list) {
+    if (s.isCurrent && !s.isDone) return s;
   }
   for (final s in list) {
     if (!s.isDone) return s;
