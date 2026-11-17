@@ -34,6 +34,13 @@ on:
         required: true
         default: stable
         type: string
+      dry_run:
+        description: >-
+          Validate the whole patch path without publishing. Nothing is
+          delivered to installed builds and no patch install is consumed.
+        required: false
+        default: false
+        type: boolean
 
 env:
   SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
@@ -392,7 +399,7 @@ jobs:
           platform: android
           release-version: ${{ needs.resolve.outputs.release_version }}
           track: ${{ needs.resolve.outputs.track }}
-          args: --no-confirm
+          args: ${{ inputs.dry_run == true && '--no-confirm --dry-run' || '--no-confirm' }}
 
   patch-ios:
     needs: [preflight, resolve]
@@ -429,4 +436,4 @@ jobs:
           platform: ios
           release-version: ${{ needs.resolve.outputs.release_version }}
           track: ${{ needs.resolve.outputs.track }}
-          args: --no-confirm
+          args: ${{ inputs.dry_run == true && '--no-confirm --dry-run' || '--no-confirm' }}
