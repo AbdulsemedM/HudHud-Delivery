@@ -28,6 +28,13 @@ on:
           is exactly one.
         required: false
         type: string
+      flutter_version:
+        description: >-
+          Override the Flutter version. Left blank, it is read from ci.yml's
+          flutter-version, so this job builds on the same SDK the repository
+          already tests on.
+        required: false
+        type: string
       force:
         description: >-
           Replace an existing shorebird.yaml. Needed for an app whose
@@ -64,10 +71,72 @@ jobs:
           fi
           echo "ok  SHOREBIRD_TOKEN present"
 
+      # `shorebird init` probes the Android project for product flavors, and
+      # that probe runs gradlew. So this job needs the toolchain a build needs,
+      # even though it builds nothing: Java, the Flutter SDK, and a Gradle
+      # wrapper.
+      - name: Which Flutter version does this repository test on
+        id: flutter
+        run: |
+          set -uo pipefail
+          V="${{ inputs.flutter_version }}"
+          if [ -z "${V}" ]; then
+            V="$(grep -oE "flutter-version:[[:space:]]*'?[0-9]+\.[0-9]+\.[0-9]+'?" .github/workflows/ci.yml \
+                 | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')"
+          fi
+          if [ -z "${V}" ]; then
+            echo "::error::Could not read flutter-version from ci.yml. Re-run and set flutter_version."
+            exit 1
+          fi
+          echo "Using Flutter ${V}"
+          echo "version=${V}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ steps.flutter.outputs.version }}
+          channel: stable
+          cache: true
+
       - name: Setup Shorebird
         uses: shorebirdtech/setup-shorebird@v1
         with:
           cache: true
+
+      # android/.gitignore excludes /gradlew, /gradlew.bat and
+      # gradle-wrapper.jar - the standard Flutter template does - so a fresh
+      # checkout has gradle-wrapper.properties and no wrapper to run. That is
+      # what the first attempt at this job died on: "Could not find
+      # android/gradlew".
+      #
+      # `flutter create` restores exactly the platform scaffolding that is
+      # missing and leaves existing files alone. The PR step below stages only
+      # shorebird.yaml and pubspec.yaml and refuses to commit anything else, so
+      # whatever this regenerates stays on the runner.
+      - name: Restore the Gradle wrapper
+        run: |
+          set -euo pipefail
+          flutter --version
+          flutter pub get
+          if [ ! -f android/gradlew ]; then
+            flutter create --platforms=android .
+          fi
+          test -f android/gradlew || { echo "::error::android/gradlew still missing after flutter create."; exit 1; }
+          chmod +x android/gradlew
+
+          # Gradle reads both of these out of local.properties; it is gitignored
+          # because the paths are per-machine.
+          {
+            echo "sdk.dir=${ANDROID_SDK_ROOT:-${ANDROID_HOME}}"
+            echo "flutter.sdk=$(dirname "$(dirname "$(readlink -f "$(command -v flutter)")")")"
+          } > android/local.properties
+          cat android/local.properties
 
       - name: Which organisations can this key see
         id: orgs
@@ -128,7 +197,7 @@ jobs:
           # for that is not obvious. Say so here rather than leaving somebody
           # to guess at a permission failure.
           if ! shorebird init "${ARGS[@]}"; then
-            echo "::error::shorebird init failed. If it mentions permissions or access, the API key's role in this organisation is too low to create an app - `shorebird orgs list` showed it as 'developer'. An owner or admin must either raise that role or create the app in the Shorebird console and hand over its app_id."
+            echo "::error::shorebird init failed. If it mentions permissions or access, the API key's role in this organisation may be too low to create an app - the orgs list above prints that role as its last column. An owner must then raise it in the Shorebird console."
             exit 1
           fi
 
@@ -176,6 +245,16 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "${BRANCH}"
           git add shorebird.yaml pubspec.yaml
+
+          # This job regenerated the Gradle wrapper and wrote local.properties
+          # to get the flavor probe to run. None of that belongs in the
+          # repository, and the two files below are the entire point of the job,
+          # so anything else staged means something went wrong.
+          STAGED="$(git diff --cached --name-only | sort | tr '\n' ' ')"
+          if [ "${STAGED}" != "pubspec.yaml shorebird.yaml " ]; then
+            echo "::error::Unexpected files staged: ${STAGED}"
+            exit 1
+          fi
           git commit -F - <<EOF
           Register this app with Shorebird
 
