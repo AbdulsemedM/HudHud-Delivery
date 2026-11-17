@@ -8,10 +8,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'features/wishlist/bloc/wishlist_bloc.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:hudhud_delivery/features/login/presentation/screen/auth_entry_screen.dart';
+import 'package:hudhud_delivery/features/login/presentation/screen/auth_screen_presence.dart';
 import 'package:hudhud_delivery/core/l10n/fallback_localizations.dart';
 import 'package:hudhud_delivery/l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
 import 'package:hudhud_delivery/features/splash/presentation/screen/splash_screen.dart';
 
 // Core imports
@@ -150,9 +151,9 @@ void main() async {
 
   // Register 401 redirect to login (skip if login is already showing).
   DioClient.instance.setOnUnauthorized(() {
-    if (loginScreenIsActive) return;
+    if (authScreenIsActive) return;
     navigatorKey.currentState?.pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      MaterialPageRoute(builder: (_) => const AuthEntryScreen()),
       (route) => false,
     );
   });

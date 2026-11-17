@@ -1648,6 +1648,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get enterEmailCode => 'أدخل رمز البريد الإلكتروني';
 
   @override
+  String get signInWithPassword => 'تسجيل الدخول بكلمة المرور';
+
+  @override
   String get enterSmsCode => 'أدخل رمز الرسائل القصيرة';
 
   @override

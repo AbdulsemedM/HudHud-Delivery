@@ -1,23 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
-import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/features/login/bloc/login_bloc.dart';
 import 'package:hudhud_delivery/features/login/data/data_provider/login_data_provider.dart';
 import 'package:hudhud_delivery/features/login/data/repository/login_repository.dart';
-import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_brand_header.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_dark_scaffold.dart';
-import 'package:hudhud_delivery/features/login/presentation/widgets/auth_ui.dart';
-// import 'package:hudhud_delivery/features/login/presentation/screen/phone_sign_in_test_screen.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/login_widget.dart';
-import 'package:hudhud_delivery/features/login/presentation/widgets/phone_sign_in_form.dart';
+import 'package:hudhud_delivery/features/login/presentation/screen/auth_screen_presence.dart';
 import 'package:hudhud_delivery/features/login/utils/phone_enrollment_navigation.dart';
-import 'package:hudhud_delivery/features/signup/presentation/screen/signup_screen.dart';
-
-/// True while a [LoginScreen] is in the widget tree (used to avoid 401 re-push loops).
-bool loginScreenIsActive = false;
 
 class LoginScreen extends StatefulWidget {
   /// When true, successful auth pops back to the caller instead of opening dashboard.
@@ -35,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    loginScreenIsActive = true;
+    authScreenMounted();
     _loginBloc = LoginBloc(
       LoginRepository(LoginDataProvider(apiService: ApiService.instance)),
     );
@@ -43,90 +34,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void dispose() {
-    loginScreenIsActive = false;
+    authScreenUnmounted();
     _loginBloc.close();
     super.dispose();
   }
 
-  Future<bool> _onWillPop() async {
-    final l10n = context.l10n;
-    final shouldExit = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: AuthScreenColors.surfaceOf(dialogContext),
-        title: Text(
-          l10n.exitAppTitle,
-          style:
-              TextStyle(color: AuthScreenColors.textPrimaryOf(dialogContext)),
-        ),
-        content: Text(
-          l10n.exitAppMessage,
-          style:
-              TextStyle(color: AuthScreenColors.textSecondaryOf(dialogContext)),
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(28),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(
-              l10n.actionCancel,
-              style: TextStyle(
-                  color: AuthScreenColors.textSecondaryOf(dialogContext)),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AuthScreenColors.orange,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-            ),
-            child: Text(l10n.actionExit),
-          ),
-        ],
-      ),
-    );
 
-    if (shouldExit == true) {
-      SystemNavigator.pop();
-      return true;
-    }
-    return false;
-  }
 
-  // Sign-up entry is hidden for now; kept so it can be restored.
-  // ignore: unused_element
-  void _openSignup(BuildContext context) {
-    Navigator.push<bool>(
-      context,
-      MaterialPageRoute<bool>(
-        builder: (context) => SignupScreen(
-          resumeAfterAuth: widget.resumeAfterAuth,
-        ),
-      ),
-    ).then((signupSucceeded) {
-      if (!context.mounted) return;
-      if (signupSucceeded == true && widget.resumeAfterAuth) {
-        Navigator.of(context).pop(true);
-      }
-    });
-  }
-
-  // Debug-only entry to the passwordless sign-in harness (no longer shown).
-  // Future<void> _openPhoneSignInTest(BuildContext context) async {
-  //   final signedIn = await Navigator.push<bool>(
-  //     context,
-  //     MaterialPageRoute<bool>(builder: (_) => const PhoneSignInTestScreen()),
-  //   );
-  //   if (signedIn == true) {
-  //     await _navigateAfterSuccess(phoneEnrollmentRequired: false);
-  //   }
-  // }
 
   Future<void> _navigateAfterSuccess({
     required bool phoneEnrollmentRequired,
@@ -144,15 +58,10 @@ class _LoginScreenState extends State<LoginScreen> {
     return BlocProvider.value(
       value: _loginBloc,
       child: PopScope(
-        canPop: widget.resumeAfterAuth,
-        onPopInvokedWithResult: (didPop, result) async {
-          if (didPop) return;
-          if (widget.resumeAfterAuth) {
-            Navigator.of(context).pop(false);
-            return;
-          }
-          await _onWillPop();
-        },
+        // Always pushed from AuthEntryScreen now, so back simply returns
+        // there; the "exit app?" confirmation moved with the root.
+        canPop: true,
+        onPopInvokedWithResult: (didPop, result) {},
         child: BlocListener<LoginBloc, LoginState>(
           listenWhen: (previous, current) =>
               current is LoginSuccess || current is LoginFailure,
@@ -171,7 +80,8 @@ class _LoginScreenState extends State<LoginScreen> {
             }
           },
           child: AuthDarkScaffold(
-            showBackButton: widget.resumeAfterAuth,
+            // Always reachable from the phone screen, so always escapable.
+            showBackButton: true,
             child: Builder(
               builder: (context) {
                 return Column(
@@ -181,26 +91,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 32),
                     const LoginTitle(),
                     const SizedBox(height: 28),
-                    // Passwordless SMS-code sign-in is now the main login.
-                    PhoneSignInForm(
-                      onSignedIn: (_) =>
-                          _navigateAfterSuccess(phoneEnrollmentRequired: false),
-                    ),
-                    // Old email/phone + password login, disabled in favour of
-                    // passwordless sign-in. Restore by uncommenting.
-                    // const LoginForm(),
-                    // Sign-up section removed: passwordless sign-in creates
-                    // the account on first verify.
-                    // const SizedBox(height: 28),
-                    // _SignUpPrompt(onPressed: () => _openSignup(context)),
-                    // Debug harness for passwordless sign-in — superseded by
-                    // PhoneSignInForm above.
-                    // const SizedBox(height: 16),
-                    // OutlinedButton.icon(
-                    //   onPressed: () => _openPhoneSignInTest(context),
-                    //   icon: const Icon(Icons.sms_outlined),
-                    //   label: const Text('Sign in with SMS code (test)'),
-                    // ),
+                    const LoginForm(),
+                    const SizedBox(height: 28),
                   ],
                 );
               },
@@ -212,70 +104,3 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
-// ignore: unused_element
-class _SignUpPrompt extends StatelessWidget {
-  const _SignUpPrompt({required this.onPressed});
-
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final label = '${l10n.loginNoAccountPrompt}${l10n.actionSignUp}';
-    final radius = BorderRadius.circular(18);
-    return Semantics(
-      label: label,
-      button: true,
-      excludeSemantics: true,
-      onTap: onPressed,
-      child: Material(
-        color: AuthScreenColors.surfaceOf(context),
-        shape: RoundedRectangleBorder(
-          borderRadius: radius,
-          side: BorderSide(color: AuthScreenColors.surfaceBorderOf(context)),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onPressed,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.person_add_alt_1_rounded,
-                  size: 22,
-                  color: authIndigoOf(context),
-                ),
-                const SizedBox(width: 10),
-                Flexible(
-                  child: Text.rich(
-                    TextSpan(
-                      style: TextStyle(
-                        color: AuthScreenColors.textSecondaryOf(context),
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                        height: 1.3,
-                      ),
-                      children: [
-                        TextSpan(text: l10n.loginNoAccountPrompt),
-                        TextSpan(
-                          text: l10n.actionSignUp,
-                          style: const TextStyle(
-                            color: AuthScreenColors.orange,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ],
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}

@@ -718,6 +718,7 @@
   "emailVerificationTitle": "التحقق من البريد الإلكتروني",
   "phoneVerificationTitle": "التحقق من الهاتف",
   "enterEmailCode": "أدخل رمز البريد الإلكتروني",
+  "signInWithPassword": "تسجيل الدخول بكلمة المرور",
   "enterSmsCode": "أدخل رمز الرسائل القصيرة",
   "noEmailAvailableShort": "لا يوجد بريد إلكتروني متاح",
   "addMoney": "أضف المال",

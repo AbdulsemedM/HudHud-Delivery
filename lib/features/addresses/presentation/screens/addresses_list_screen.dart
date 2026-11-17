@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hudhud_delivery/features/login/presentation/screen/auth_entry_screen.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
@@ -10,7 +11,6 @@ import 'package:hudhud_delivery/features/addresses/data/addresses_repository.dar
 import 'package:hudhud_delivery/features/addresses/presentation/screens/address_form_screen.dart';
 import 'package:hudhud_delivery/features/addresses/presentation/screens/address_map_picker_screen.dart';
 import 'package:hudhud_delivery/features/addresses/presentation/widgets/address_list_tile.dart';
-import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
 import 'package:hudhud_delivery/features/settings/presentation/widgets/auth_feedback.dart';
 import 'package:hudhud_delivery/features/settings/presentation/widgets/profile_dark_page.dart';
@@ -236,7 +236,7 @@ class _AddressesListScreenState extends State<AddressesListScreen> {
                   onPressed: () {
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (_) => const LoginScreen()),
+                      MaterialPageRoute(builder: (_) => const AuthEntryScreen()),
                     );
                   },
                   child: Text(l10n.actionSignIn),

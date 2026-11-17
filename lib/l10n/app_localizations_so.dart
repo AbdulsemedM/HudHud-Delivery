@@ -1665,6 +1665,9 @@ class AppLocalizationsSo extends AppLocalizations {
   String get enterEmailCode => 'Geli lambarka iimaylka';
 
   @override
+  String get signInWithPassword => 'Furaha sirta ku gal';
+
+  @override
   String get enterSmsCode => 'Geli lambarka SMS';
 
   @override

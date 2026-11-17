@@ -1629,6 +1629,9 @@ class AppLocalizationsAm extends AppLocalizations {
   String get enterEmailCode => 'የኢሜል ኮድ ያስገቡ';
 
   @override
+  String get signInWithPassword => 'በይለፍ ቃል ይግቡ';
+
+  @override
   String get enterSmsCode => 'የኤስኤምኤስ ኮድ ያስገቡ';
 
   @override

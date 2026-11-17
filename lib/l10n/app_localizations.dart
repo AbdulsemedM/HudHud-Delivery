@@ -3188,6 +3188,12 @@ abstract class AppLocalizations {
   /// **'Enter email code'**
   String get enterEmailCode;
 
+  /// No description provided for @signInWithPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with password'**
+  String get signInWithPassword;
+
   /// No description provided for @enterSmsCode.
   ///
   /// In en, this message translates to:

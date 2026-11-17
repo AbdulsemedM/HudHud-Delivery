@@ -1,0 +1,93 @@
+name: CI — analyze and test
+
+# The customer app has 82 test files and nothing has ever run them. There is no
+# compile check on a pull request either: the only workflows here are the two
+# Shorebird ones, which build a release *after* code is already on the default
+# branch. A Dart mistake is caught by whoever next builds locally, which may be
+# after merge — on the app customers order through.
+#
+# FLUTTER VERSION. `pubspec.yaml` declares `sdk: ">=3.1.0 <4.0.0"`, which
+# understates the real floor. `pubspec.lock` on this branch is the authority:
+#
+#   sdks:
+#     dart: ">=3.9.0 <4.0.0"
+#     flutter: ">=3.35.0"
+#
+# CORRECTION. An earlier version of this comment quoted dart ">=3.12.0" and
+# flutter ">=3.44.0". Those are the numbers on `feat/passwordless-phone-signin`,
+# which was the checked-out branch when they were read — not this one. The pin
+# below is unchanged and still correct, but the stated reason was not, and the
+# two branches really do carry different locks.
+#
+# 3.44.0 is therefore ABOVE this branch's floor, deliberately. It satisfies
+# both locks, so CI keeps working when the passwordless branch merges and the
+# floor rises to 3.44.0. The green run on this branch — analyze plus 500 tests
+# — is what shows it resolves here.
+#
+# It is a pin rather than `channel: stable` because this project has a ceiling
+# as well as a floor. `intl: ^0.20.2` resolves `<0.21.0`, and a newer Flutter's
+# bundled `flutter_localizations` eventually requires a 0.21.x `intl`, at which
+# point `pub get` cannot resolve at all. The driver app hit exactly that wall
+# with `channel: stable`. A pin keeps CI inside the window.
+#
+# Worth fixing `pubspec.yaml`'s `environment:` separately — as written it tells
+# a new developer to install a Flutter that cannot resolve this project.
+on:
+  pull_request:
+    branches: [feature/low-literacy-easy-mode, main]
+  workflow_dispatch:
+
+concurrency:
+  group: flutter-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: Analyze and test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.0'
+          channel: stable
+          cache: true
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      # pubspec.yaml declares `.env` as an asset (line 133) and `.env` is
+      # gitignored, correctly — so `flutter test` cannot build the asset bundle
+      # at all without one:
+      #
+      #   No file or variants found for asset: .env
+      #   Error: Failed to build asset bundle
+      #
+      # There is no `.env.example` to copy, so CI writes the minimum the app
+      # reads. `lib/app/config/app_env.dart` loads `.env` through
+      # flutter_dotenv and `ApiEnv.baseUrl` *throws* when BASE_URL is missing —
+      # there is no fallback — so the key has to be present. The value is the
+      # public API host, not a secret.
+      #
+      # NOTE: `feat/passwordless-phone-signin` replaces this whole arrangement
+      # with `--dart-define` and drops `.env` from the asset list. That is the
+      # better design — a gitignored required asset means no fresh clone and no
+      # CI can build — and once it merges, this step should be deleted.
+      - name: Seed .env (gitignored, required asset)
+        run: printf 'BASE_URL=https://deliveryapi.hudhudexpress.com\n' > .env
+
+      # Errors only. Infos and warnings stay non-fatal on purpose: this is an
+      # existing codebase of some size, and failing every pull request over a
+      # style lint on day one is how a check loses its credibility and gets
+      # switched off. Errors are the things that would not compile.
+      - name: Analyze
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+
+      # The first run of this is the interesting one: 82 test files that have
+      # never been executed together. Expect failures to be real findings
+      # rather than flakes.
+      - name: Test
+        run: flutter test
