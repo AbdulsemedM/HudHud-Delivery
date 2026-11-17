@@ -111,5 +111,14 @@
 	</array>
 	<key>FlutterDeepLinkingEnabled</key>
 	<false/>
+	<!-- Without remote-notification iOS delivers no notification to the app
+	     while it is backgrounded or closed, so a data payload is dropped and
+	     an order update arrives only if the customer happens to have the app
+	     open. The rider app has had these two since it was set up. -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>remote-notification</string>
+	</array>
 </dict>
 </plist>
