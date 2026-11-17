@@ -211,13 +211,49 @@ jobs:
             echo "google-services.json already in the checkout; leaving it alone."
           else
             echo "${GOOGLE_SERVICES_JSON}" | base64 --decode > android/app/google-services.json
-            # A truncated or non-base64 secret decodes to junk, and the Gradle
-            # failure that follows is about JSON parsing rather than the secret.
-            python3 -c "import json,sys; json.load(open('android/app/google-services.json'))" || {
-              echo "::error::GOOGLE_SERVICES_JSON did not decode to valid JSON. Re-copy it with: base64 -w0 google-services.json"
-              exit 1
-            }
             echo "google-services.json written from the secret."
+          fi
+
+          # Valid JSON is not enough. A file downloaded from one app's page in
+          # the Firebase console may carry only that app's client entry, and
+          # both repos read the same organisation-level secret - so the wrong
+          # app's file decodes perfectly and then dies deep in the Gradle run
+          # with "No matching client found for package name". This project also
+          # has four Android apps with near-identical names, one of them the
+          # Flutter template's com.example.hudhud_delivery, so picking the wrong
+          # one is easy.
+          APP_ID_PKG="$(grep -oE 'applicationId[[:space:]]*=?[[:space:]]*"[^"]+"' android/app/build.gradle \
+                        | head -1 | grep -oE '"[^"]+"' | tr -d '"')"
+          if [ -z "${APP_ID_PKG}" ]; then
+            echo "::warning::Could not read applicationId from android/app/build.gradle; skipping the package-match check."
+          else
+            echo "applicationId: ${APP_ID_PKG}"
+            GS_FILE=android/app/google-services.json APP_PKG="${APP_ID_PKG}" python3 - <<'PY'
+          import json, os, sys
+
+          path, want = os.environ["GS_FILE"], os.environ["APP_PKG"]
+          try:
+              data = json.load(open(path))
+          except Exception as e:
+              print(f"::error::{path} is not valid JSON ({e}). Re-copy the secret with: base64 -w0 google-services.json")
+              sys.exit(1)
+
+          found = []
+          for client in data.get("client", []):
+              pkg = client.get("client_info", {}).get("android_client_info", {}).get("package_name")
+              if pkg:
+                  found.append(pkg)
+
+          if want in found:
+              print(f"ok       google-services.json contains a client for {want}")
+              sys.exit(0)
+
+          print(f"::error::google-services.json has no client for {want}. It contains: {', '.join(found) or '(none)'}")
+          print("Download it from the Firebase console page for THAT app, or use a file that")
+          print("contains every app in the project. Beware com.example.hudhud_delivery - it is a")
+          print("leftover placeholder registration, not this app.")
+          sys.exit(1)
+          PY
           fi
 
           # build.gradle reads this key out of android/local.properties, which is
