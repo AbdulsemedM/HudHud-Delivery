@@ -30,6 +30,20 @@ on:
           - android
           - ios
           - both
+      flutter_version:
+        description: >-
+          Flutter version to build with. Blank reads it from ci.yml, so the
+          release is built on the same SDK the repository tests on. "latest"
+          follows Shorebird's newest stable instead.
+        required: false
+        type: string
+      dry_run:
+        description: >-
+          Validate the whole release path without publishing. Nothing is
+          registered with Shorebird and no version number is consumed.
+        required: false
+        default: false
+        type: boolean
 
 env:
   SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
@@ -229,11 +243,45 @@ jobs:
           echo "GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}" >> android/local.properties
           echo "Maps key appended to android/local.properties."
 
+      # shorebird-release declares flutter-version as REQUIRED and forwards it
+      # unconditionally - `shorebird release <platform> --flutter-version "$V"`
+      # - so leaving it out sends an empty string and the CLI answers:
+      #
+      #     Flutter  is not available to Shorebird.
+      #
+      # That doubled space IS the empty version, and nothing in the message
+      # points back at a missing workflow input. It is what the first real
+      # release attempt died on.
+      #
+      # The version is read from ci.yml so a release is built on the SDK this
+      # repository already tests on, rather than a second pin that drifts away
+      # from it. Shorebird only offers Flutter versions it has built its engine
+      # for, so if it does not have this one, the list printed here says what it
+      # does have.
+      - name: Which Flutter version to build with
+        id: flutter
+        run: |
+          set -uo pipefail
+          V="${{ inputs.flutter_version }}"
+          if [ -z "${V}" ]; then
+            V="$(grep -oE "flutter-version:[[:space:]]*'?[0-9]+\.[0-9]+\.[0-9]+'?" .github/workflows/ci.yml \
+                 | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')"
+          fi
+          if [ -z "${V}" ]; then
+            echo "::error::Could not read flutter-version from ci.yml. Re-run and set flutter_version (or 'latest')."
+            exit 1
+          fi
+          echo "Building with Flutter ${V}"
+          echo "--- Flutter versions Shorebird offers ---"
+          shorebird flutter versions list || true
+          echo "flutter_version=${V}" >> "$GITHUB_OUTPUT"
+
       - name: Shorebird release Android
         uses: shorebirdtech/shorebird-release@v1
         with:
           platform: android
-          args: --no-confirm
+          flutter-version: ${{ steps.flutter.outputs.flutter_version }}
+          args: ${{ inputs.dry_run == true && '--no-confirm --dry-run' || '--no-confirm' }}
 
   release-ios:
     if: >
@@ -253,8 +301,42 @@ jobs:
         with:
           cache: true
 
+      # shorebird-release declares flutter-version as REQUIRED and forwards it
+      # unconditionally - `shorebird release <platform> --flutter-version "$V"`
+      # - so leaving it out sends an empty string and the CLI answers:
+      #
+      #     Flutter  is not available to Shorebird.
+      #
+      # That doubled space IS the empty version, and nothing in the message
+      # points back at a missing workflow input. It is what the first real
+      # release attempt died on.
+      #
+      # The version is read from ci.yml so a release is built on the SDK this
+      # repository already tests on, rather than a second pin that drifts away
+      # from it. Shorebird only offers Flutter versions it has built its engine
+      # for, so if it does not have this one, the list printed here says what it
+      # does have.
+      - name: Which Flutter version to build with
+        id: flutter
+        run: |
+          set -uo pipefail
+          V="${{ inputs.flutter_version }}"
+          if [ -z "${V}" ]; then
+            V="$(grep -oE "flutter-version:[[:space:]]*'?[0-9]+\.[0-9]+\.[0-9]+'?" .github/workflows/ci.yml \
+                 | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')"
+          fi
+          if [ -z "${V}" ]; then
+            echo "::error::Could not read flutter-version from ci.yml. Re-run and set flutter_version (or 'latest')."
+            exit 1
+          fi
+          echo "Building with Flutter ${V}"
+          echo "--- Flutter versions Shorebird offers ---"
+          shorebird flutter versions list || true
+          echo "flutter_version=${V}" >> "$GITHUB_OUTPUT"
+
       - name: Shorebird release iOS
         uses: shorebirdtech/shorebird-release@v1
         with:
           platform: ios
-          args: --no-confirm
+          flutter-version: ${{ steps.flutter.outputs.flutter_version }}
+          args: ${{ inputs.dry_run == true && '--no-confirm --dry-run' || '--no-confirm' }}
