@@ -364,6 +364,40 @@ jobs:
       # from it. Shorebird only offers Flutter versions it has built its engine
       # for, so if it does not have this one, the list printed here says what it
       # does have.
+      # The release build died here once:
+      #
+      #   Execution failed for JetifyTransform: ...arm64_v8a_release-1.0.0-...jar
+      #     > Java heap space
+      #
+      # android/gradle.properties allots -Xmx2G (rider) / -Xmx3072m (customer),
+      # both tuned on developer machines - their own comments say so - while
+      # these are PRIVATE repositories, so ubuntu-latest is a 2-core / 7 GB
+      # runner and both apps still set android.enableJetifier=true. Jetifier
+      # rewriting the Flutter engine jars is what runs out of heap.
+      #
+      # Appended in CI only, never committed, so developers keep the values
+      # their comments were written for. Later keys win in a properties file.
+      #
+      # parallel and workers are pinned down too: two concurrent Jetify
+      # transforms on a 2-core runner is how the heap gets exhausted, and the
+      # customer app ships parallel=true with workers.max=2.
+      - name: Give Gradle enough heap for this runner
+        run: |
+          set -euo pipefail
+          echo "--- before ---"
+          grep -E '^org\.gradle\.(jvmargs|parallel|workers)' android/gradle.properties || echo "(none set)"
+          cat >> android/gradle.properties <<'PROPS'
+
+          # --- appended by CI; not committed ---
+          org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8
+          org.gradle.parallel=false
+          org.gradle.workers.max=1
+          org.gradle.daemon=false
+          PROPS
+          sed -i 's/^          //' android/gradle.properties
+          echo "--- after (last key wins) ---"
+          tail -6 android/gradle.properties
+
       - name: Which Flutter version to build with
         id: flutter
         run: |
@@ -422,6 +456,40 @@ jobs:
       # from it. Shorebird only offers Flutter versions it has built its engine
       # for, so if it does not have this one, the list printed here says what it
       # does have.
+      # The release build died here once:
+      #
+      #   Execution failed for JetifyTransform: ...arm64_v8a_release-1.0.0-...jar
+      #     > Java heap space
+      #
+      # android/gradle.properties allots -Xmx2G (rider) / -Xmx3072m (customer),
+      # both tuned on developer machines - their own comments say so - while
+      # these are PRIVATE repositories, so ubuntu-latest is a 2-core / 7 GB
+      # runner and both apps still set android.enableJetifier=true. Jetifier
+      # rewriting the Flutter engine jars is what runs out of heap.
+      #
+      # Appended in CI only, never committed, so developers keep the values
+      # their comments were written for. Later keys win in a properties file.
+      #
+      # parallel and workers are pinned down too: two concurrent Jetify
+      # transforms on a 2-core runner is how the heap gets exhausted, and the
+      # customer app ships parallel=true with workers.max=2.
+      - name: Give Gradle enough heap for this runner
+        run: |
+          set -euo pipefail
+          echo "--- before ---"
+          grep -E '^org\.gradle\.(jvmargs|parallel|workers)' android/gradle.properties || echo "(none set)"
+          cat >> android/gradle.properties <<'PROPS'
+
+          # --- appended by CI; not committed ---
+          org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8
+          org.gradle.parallel=false
+          org.gradle.workers.max=1
+          org.gradle.daemon=false
+          PROPS
+          sed -i 's/^          //' android/gradle.properties
+          echo "--- after (last key wins) ---"
+          tail -6 android/gradle.properties
+
       - name: Which Flutter version to build with
         id: flutter
         run: |
