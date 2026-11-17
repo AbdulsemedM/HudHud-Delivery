@@ -57,6 +57,8 @@ jobs:
           ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           KPW: ${{ secrets.ANDROID_KEY_PASSWORD }}
           SPW: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          GSJ: ${{ secrets.GOOGLE_SERVICES_JSON }}
+          MAPS: ${{ secrets.GOOGLE_MAPS_API_KEY }}
         run: |
           set -uo pipefail
           missing=0
@@ -73,14 +75,33 @@ jobs:
           check ANDROID_KEY_ALIAS        "${ALIAS:-}" "the alias inside that keystore"
           check ANDROID_KEY_PASSWORD     "${KPW:-}"   "the key password"
           check ANDROID_STORE_PASSWORD   "${SPW:-}"   "the keystore password"
+
+          # android/app/build.gradle applies com.google.gms.google-services,
+          # and android/app/google-services.json is gitignored, so unless it is
+          # supplied here the Android build fails on the Firebase task.
+          if [ -f android/app/google-services.json ]; then
+            echo "ok       google-services.json is in the repository"
+          else
+            check GOOGLE_SERVICES_JSON "${GSJ:-}" "base64 -w0 android/app/google-services.json — download it from Firebase console → Project settings → Your apps"
+          fi
+
+          # THE ONE THAT WOULD NOT HAVE FAILED THE BUILD.
+          #
+          # build.gradle reads this from .env or android/local.properties and
+          # defaults it to an empty string, so without it the build succeeds
+          # and ships an app whose map is blank - build.gradle's own warning
+          # says exactly that. A delivery app with no map is worth failing a
+          # build over.
+          check GOOGLE_MAPS_API_KEY "${MAPS:-}" "the Android Maps SDK key; without it the build passes and the map ships blank"
           if [ "$missing" = "1" ]; then
             echo
             echo "Add them at Settings -> Secrets and variables -> Actions."
-            echo "Only the four ANDROID_* ones are needed for an Android build;"
+            echo "Only the ANDROID_*, GOOGLE_SERVICES_JSON and GOOGLE_MAPS_API_KEY"
+            echo "ones are needed for an Android build;"
             echo "iOS needs SHOREBIRD_TOKEN alone."
             exit 1
           fi
-          echo "All five present."
+          echo "Every secret this build needs is present."
 
   resolve:
     needs: preflight
@@ -162,6 +183,39 @@ jobs:
             echo "keyAlias=${ANDROID_KEY_ALIAS}"
             echo "keyPassword=${ANDROID_KEY_PASSWORD}"
           } > android/key.properties
+
+      # Two more build inputs that live outside the repository.
+      #
+      # google-services.json is gitignored and the Firebase Gradle plugin fails
+      # without it. The Maps key is the quieter one: build.gradle defaults it to
+      # an empty string, so leaving it out produces a build that works and a map
+      # that doesn't.
+      - name: Create Firebase and Maps config from secrets
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+        run: |
+          set -euo pipefail
+
+          if [ -f android/app/google-services.json ]; then
+            echo "google-services.json already in the checkout; leaving it alone."
+          else
+            echo "${GOOGLE_SERVICES_JSON}" | base64 --decode > android/app/google-services.json
+            # A truncated or non-base64 secret decodes to junk, and the Gradle
+            # failure that follows is about JSON parsing rather than the secret.
+            python3 -c "import json,sys; json.load(open('android/app/google-services.json'))" || {
+              echo "::error::GOOGLE_SERVICES_JSON did not decode to valid JSON. Re-copy it with: base64 -w0 google-services.json"
+              exit 1
+            }
+            echo "google-services.json written from the secret."
+          fi
+
+          # build.gradle reads this key out of android/local.properties, which is
+          # gitignored, so it is appended rather than written over whatever the
+          # runner already put there.
+          touch android/local.properties
+          echo "GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}" >> android/local.properties
+          echo "Maps key appended to android/local.properties."
 
       - name: Verify release exists
         run: |
