@@ -58,7 +58,8 @@ jobs:
           KPW: ${{ secrets.ANDROID_KEY_PASSWORD }}
           SPW: ${{ secrets.ANDROID_STORE_PASSWORD }}
           GSJ: ${{ secrets.GOOGLE_SERVICES_JSON }}
-          MAPS: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+          MAPS: ${{ secrets.GOOGLE_MAPS_API_KEY || secrets.VITE_GOOGLE_MAPS_API_KEY }}
+          MAPS_DEDICATED: ${{ secrets.GOOGLE_MAPS_API_KEY }}
         run: |
           set -uo pipefail
           missing=0
@@ -92,7 +93,16 @@ jobs:
           # and ships an app whose map is blank - build.gradle's own warning
           # says exactly that. A delivery app with no map is worth failing a
           # build over.
-          check GOOGLE_MAPS_API_KEY "${MAPS:-}" "the Android Maps SDK key; without it the build passes and the map ships blank"
+          check GOOGLE_MAPS_API_KEY "${MAPS:-}" "the Android Maps SDK key, as GOOGLE_MAPS_API_KEY or VITE_GOOGLE_MAPS_API_KEY; without it the build passes and the map ships blank"
+
+          # Reached the fallback, which is a web key by its name. A Maps key
+          # restricted to HTTP referrers is rejected by the Maps SDK for
+          # Android, and the symptom is the same blank map. Android needs a key
+          # either unrestricted or restricted to Android apps (package name plus
+          # signing SHA-1), with "Maps SDK for Android" enabled on the project.
+          if [ -n "${MAPS:-}" ] && [ -z "${MAPS_DEDICATED:-}" ]; then
+            echo "::warning::Using VITE_GOOGLE_MAPS_API_KEY. That name belongs to a web bundle; if the key is restricted to HTTP referrers, Android will reject it and the map ships blank anyway. Check its Application restrictions in Google Cloud Console, or add a separate Android key as GOOGLE_MAPS_API_KEY."
+          fi
           if [ "$missing" = "1" ]; then
             echo
             echo "Add them at Settings -> Secrets and variables -> Actions."
@@ -193,7 +203,7 @@ jobs:
       - name: Create Firebase and Maps config from secrets
         env:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
-          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY || secrets.VITE_GOOGLE_MAPS_API_KEY }}
         run: |
           set -euo pipefail
 
@@ -214,6 +224,10 @@ jobs:
           # gitignored, so it is appended rather than written over whatever the
           # runner already put there.
           touch android/local.properties
+          if [ -z "${GOOGLE_MAPS_API_KEY:-}" ]; then
+            echo "::error::No Maps key in GOOGLE_MAPS_API_KEY or VITE_GOOGLE_MAPS_API_KEY. build.gradle would default it to an empty string and ship a blank map."
+            exit 1
+          fi
           echo "GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}" >> android/local.properties
           echo "Maps key appended to android/local.properties."
 
