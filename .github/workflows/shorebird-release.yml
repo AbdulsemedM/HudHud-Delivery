@@ -243,6 +243,112 @@ jobs:
           echo "GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}" >> android/local.properties
           echo "Maps key appended to android/local.properties."
 
+      # pubspec declares `.env` as an asset in both apps and `.env` is
+      # gitignored, so a fresh checkout cannot bundle assets at all:
+      #
+      #   Error detected in pubspec.yaml:
+      #   No file or variants found for asset: .env.
+      #
+      # Copying .env.example verbatim is NOT enough, for two reasons.
+      #
+      # android/app/build.gradle reads GOOGLE_MAPS_API_KEY from .env FIRST and
+      # only then from local.properties, so the example's
+      # `your_google_maps_api_key_here` would override the real key written
+      # above and ship a blank map.
+      #
+      # And the customer app has no fallback base url - ApiEnv.baseUrl throws
+      # StateError('BASE_URL is missing in .env') - so a .env with only the
+      # Maps key builds green and crashes on the first API call.
+      #
+      # Neither value is invented here: BASE_URL comes from the APP_BASE_URL
+      # secret, else .env.example, else the repo's own ci.yml.
+      - name: Create .env (declared as a Flutter asset)
+        env:
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY || secrets.VITE_GOOGLE_MAPS_API_KEY }}
+          APP_BASE_URL: ${{ secrets.APP_BASE_URL }}
+        run: |
+          set -euo pipefail
+
+          if ! grep -qE '^[[:space:]]*-[[:space:]]*\.env[[:space:]]*$' pubspec.yaml; then
+            echo "pubspec does not declare .env as an asset; nothing to do."
+            exit 0
+          fi
+
+          if [ -f .env ]; then
+            echo ".env already present in the checkout; leaving it alone."
+            exit 0
+          fi
+
+          BASE="${APP_BASE_URL:-}"
+          SOURCE="the APP_BASE_URL secret"
+          if [ -z "${BASE}" ] && [ -f .env.example ]; then
+            BASE="$(grep -oE '^[[:space:]]*BASE_URL[[:space:]]*=[[:space:]]*[^[:space:]]+' .env.example \
+                    | head -1 | sed -E 's/.*=[[:space:]]*//')"
+            SOURCE=".env.example"
+          fi
+          if [ -z "${BASE}" ]; then
+            # ci.yml writes this inside a printf, as
+            #   printf 'BASE_URL=https://host\n' > .env
+            # so the character class must EXCLUDE the backslash. A looser match
+            # swallows the trailing \n and ships a BASE_URL ending in a literal
+            # backslash-n, which normalizeApiBaseUrl then turns into
+            # https://host\n/api/ - a green build that cannot reach the API.
+            BASE="$(grep -oE "BASE_URL=https://[A-Za-z0-9._~:/?#@%+-]+" .github/workflows/ci.yml \
+                    | head -1 | sed 's/^BASE_URL=//')"
+            SOURCE="ci.yml"
+          fi
+          if [ -z "${BASE}" ]; then
+            echo "::error::No BASE_URL available. Set the APP_BASE_URL secret, or add BASE_URL to .env.example."
+            exit 1
+          fi
+          if ! printf '%s' "${BASE}" | grep -qE '^https://[A-Za-z0-9._~:/?#@%+-]+$'; then
+            echo "::error::BASE_URL from ${SOURCE} does not look like a clean https url: ${BASE}"
+            exit 1
+          fi
+          echo "BASE_URL from ${SOURCE}: ${BASE}"
+
+          if [ -f .env.example ]; then
+            cp .env.example .env
+          else
+            : > .env
+          fi
+
+          BASE_URL_VALUE="${BASE}" python3 - <<'PY'
+          import os, re, pathlib
+
+          path = pathlib.Path(".env")
+          wanted = {
+              "GOOGLE_MAPS_API_KEY": os.environ.get("GOOGLE_MAPS_API_KEY", ""),
+              "BASE_URL": os.environ["BASE_URL_VALUE"],
+          }
+
+          lines = path.read_text().splitlines() if path.exists() else []
+          seen = set()
+          out = []
+          for line in lines:
+              m = re.match(r"^\s*([A-Z0-9_]+)\s*=", line)
+              if m and m.group(1) in wanted:
+                  key = m.group(1)
+                  out.append(f"{key}={wanted[key]}")
+                  seen.add(key)
+              else:
+                  out.append(line)
+          for key, value in wanted.items():
+              if key not in seen:
+                  out.append(f"{key}={value}")
+          path.write_text("\n".join(out) + "\n")
+          PY
+
+          # A placeholder here is not harmless: .env is bundled into the app and
+          # read ahead of local.properties, so it would ship as a real value.
+          if grep -nE 'your_[a-z_]*_here|REPLACE_ME|changeme|CHANGEME' .env; then
+            echo "::error::.env still contains a placeholder (shown above). It is bundled into the app, so that value would ship."
+            exit 1
+          fi
+
+          echo "--- .env (values hidden) ---"
+          sed -E 's/=.*/=<set>/' .env | grep -vE '^\s*(#|$)' || true
+
       # shorebird-release declares flutter-version as REQUIRED and forwards it
       # unconditionally - `shorebird release <platform> --flutter-version "$V"`
       # - so leaving it out sends an empty string and the CLI answers:
