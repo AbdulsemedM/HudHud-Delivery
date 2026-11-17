@@ -117,11 +117,76 @@ class CartService extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Local estimate of one unit: base (or discount) price, or the selected
+  /// variant's price, plus selected add-ons. The server stays authoritative.
   double unitPrice(CategoriesProductsModel product) {
+    double base;
     if (product.discount_price?.isNotEmpty == true) {
-      return double.tryParse(product.discount_price!) ?? 0;
+      base = double.tryParse(product.discount_price!) ?? 0;
+    } else {
+      base = double.tryParse(product.price ?? '0') ?? 0;
     }
-    return double.tryParse(product.price ?? '0') ?? 0;
+    final options = product.options;
+    if (options == null) return base;
+    return _variantUnitPrice(options, base) + _modifiersPrice(options);
+  }
+
+  static const _deltaPriceKeys = [
+    'price_adjustment',
+    'additional_price',
+    'price_delta',
+    'extra_price',
+  ];
+
+  static int? _asInt(dynamic raw) =>
+      raw is int ? raw : int.tryParse(raw?.toString() ?? '');
+
+  static double? _asDouble(dynamic raw) =>
+      raw is num ? raw.toDouble() : double.tryParse(raw?.toString() ?? '');
+
+  /// Selected variant: an absolute `price` replaces the base price, a delta
+  /// key (`price_adjustment`, …) is added to it.
+  static double _variantUnitPrice(Map<String, dynamic> options, double base) {
+    final selected = _asInt(options['variant_id']);
+    final variants = options['variants'] ?? options['variant_options'];
+    if (selected == null || variants is! List) return base;
+    for (final v in variants) {
+      if (v is! Map || _asInt(v['id']) != selected) continue;
+      for (final key in _deltaPriceKeys) {
+        final delta = _asDouble(v[key]);
+        if (delta != null) return base + delta;
+      }
+      final discount = _asDouble(v['discount_price']);
+      if (discount != null && discount > 0) return discount;
+      final price = _asDouble(v['price']);
+      if (price != null && price > 0) return price;
+      return base;
+    }
+    return base;
+  }
+
+  /// Sum of the selected add-on option prices.
+  static double _modifiersPrice(Map<String, dynamic> options) {
+    final ids = options['modifier_option_ids'];
+    final groups = options['modifier_groups'] ?? options['modifiers'];
+    if (ids is! List || ids.isEmpty || groups is! List) return 0;
+    final selected = ids.map(_asInt).whereType<int>().toSet();
+    var total = 0.0;
+    for (final group in groups) {
+      if (group is! Map) continue;
+      final opts = group['options'] ?? group['modifier_options'];
+      if (opts is! List) continue;
+      for (final opt in opts) {
+        if (opt is! Map || !selected.contains(_asInt(opt['id']))) continue;
+        double? price;
+        for (final key in [..._deltaPriceKeys, 'price']) {
+          price = _asDouble(opt[key]);
+          if (price != null) break;
+        }
+        total += price ?? 0;
+      }
+    }
+    return total;
   }
 
   /// Local estimate only — never use as the payable total.

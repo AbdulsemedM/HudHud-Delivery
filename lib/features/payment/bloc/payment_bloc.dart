@@ -38,6 +38,17 @@ class GetPaymentMethodsEvent extends PaymentEvent {
   const GetPaymentMethodsEvent();
 }
 
+/// Customer accepted the server total after [PaymentTotalChanged]:
+/// continue payment for the already-created order.
+class ConfirmChangedTotalEvent extends PaymentEvent {
+  const ConfirmChangedTotalEvent();
+}
+
+/// Customer declined the server total; the UI cancels the order.
+class DiscardChangedTotalEvent extends PaymentEvent {
+  const DiscardChangedTotalEvent();
+}
+
 // States
 abstract class PaymentState extends Equatable {
   const PaymentState();
@@ -145,6 +156,26 @@ class PaymentFailure extends PaymentState {
   List<Object?> get props => [error, code, statusCode, details];
 }
 
+/// The order was created but the server's total differs from the total
+/// checkout showed. Payment is paused until the customer confirms
+/// ([ConfirmChangedTotalEvent]) or the order is cancelled.
+class PaymentTotalChanged extends PaymentState {
+  final String orderId;
+  final double shownAmount;
+  final double serverAmount;
+  final String currency;
+
+  const PaymentTotalChanged({
+    required this.orderId,
+    required this.shownAmount,
+    required this.serverAmount,
+    required this.currency,
+  });
+
+  @override
+  List<Object?> get props => [orderId, shownAmount, serverAmount, currency];
+}
+
 class PaymentMethodsLoaded extends PaymentState {
   final List<Map<String, dynamic>> paymentMethods;
 
@@ -168,6 +199,25 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
   }) : super(const PaymentInitial()) {
     on<ProcessPaymentEvent>(_onProcessPayment);
     on<GetPaymentMethodsEvent>(_onGetPaymentMethods);
+    on<ConfirmChangedTotalEvent>(_onConfirmChangedTotal);
+    on<DiscardChangedTotalEvent>((_, emit) {
+      _pendingInitiation = null;
+      emit(const PaymentInitial());
+    });
+  }
+
+  /// Payment held back while the customer reviews a changed total.
+  _PendingInitiation? _pendingInitiation;
+
+  Future<void> _onConfirmChangedTotal(
+    ConfirmChangedTotalEvent event,
+    Emitter<PaymentState> emit,
+  ) async {
+    final pending = _pendingInitiation;
+    _pendingInitiation = null;
+    if (pending == null) return;
+    emit(const PaymentLoading());
+    await _initiatePayment(pending, emit);
   }
 
   Future<void> _onProcessPayment(
@@ -296,57 +346,89 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
         orderId: created.orderId,
       );
 
-      try {
-        final raw = await paymentRepository.initiatePayment(
-          paymentMethodCode: event.paymentMethod,
-          type: 'order',
-          orderId: created.orderId,
-          amount: amount,
-          currency: currency,
-          paymentDetails: initiateDetails,
-          idempotencyKey: createPaymentIdempotencyKey(
-            type: 'order',
-            entityId: created.orderId,
-          ),
-        );
+      final pending = _PendingInitiation(
+        paymentMethod: event.paymentMethod,
+        orderId: created.orderId,
+        amount: amount,
+        currency: currency,
+        paymentDetails: initiateDetails,
+        deliveryFeeUpdated: deliveryFeeUpdated,
+        finalDeliveryFee: created.deliveryFee,
+        giftRecipientName: gift == null
+            ? null
+            : (giftRecipientName?.trim().isNotEmpty == true
+                ? giftRecipientName!.trim()
+                : gift['recipient_phone']?.toString() ?? ''),
+      );
 
-        final result = PaymentInitiateResult.fromJson(raw);
-        if (!result.isSuccess) {
-          emit(PaymentFailure(
-            error:
-                '${result.message ?? 'Payment initiation failed'} (order #${created.orderId} was created)',
-          ));
-          return;
-        }
-
-        emit(PaymentInitiated(
-          result: result,
+      // The server prices the order itself. If its total is not what the
+      // customer saw on checkout, ask before taking payment.
+      final serverTotal = created.totalAmount;
+      if (serverTotal != null && (serverTotal - event.amount).abs() > 0.009) {
+        _pendingInitiation = pending;
+        emit(PaymentTotalChanged(
           orderId: created.orderId.toString(),
-          deliveryFeeUpdated: deliveryFeeUpdated,
-          finalDeliveryFee: created.deliveryFee,
-          giftRecipientName: gift == null
-              ? null
-              : (giftRecipientName?.trim().isNotEmpty == true
-                  ? giftRecipientName!.trim()
-                  : gift['recipient_phone']?.toString() ?? ''),
+          shownAmount: event.amount,
+          serverAmount: serverTotal,
+          currency: currency,
         ));
-      } catch (e) {
-        final issue = classifyOrderPaymentError(e);
-        if (issue != null) {
-          emit(PaymentOrderNeedsAttention(
-            issue: issue,
-            orderId: created.orderId.toString(),
-            message: userFacingApiError(e),
-          ));
-          return;
-        }
-        emit(PaymentFailure(
-          error:
-              '${userFacingApiError(e)} Order #${created.orderId} was already created — avoid checking out again (duplicate order).',
-        ));
+        return;
       }
+
+      await _initiatePayment(pending, emit);
     } catch (e) {
       emit(PaymentFailure(error: userFacingApiError(e)));
+    }
+  }
+
+  Future<void> _initiatePayment(
+    _PendingInitiation p,
+    Emitter<PaymentState> emit,
+  ) async {
+    try {
+      final raw = await paymentRepository.initiatePayment(
+        paymentMethodCode: p.paymentMethod,
+        type: 'order',
+        orderId: p.orderId,
+        amount: p.amount,
+        currency: p.currency,
+        paymentDetails: p.paymentDetails,
+        idempotencyKey: createPaymentIdempotencyKey(
+          type: 'order',
+          entityId: p.orderId,
+        ),
+      );
+
+      final result = PaymentInitiateResult.fromJson(raw);
+      if (!result.isSuccess) {
+        emit(PaymentFailure(
+          error:
+              '${result.message ?? 'Payment initiation failed'} (order #${p.orderId} was created)',
+        ));
+        return;
+      }
+
+      emit(PaymentInitiated(
+        result: result,
+        orderId: p.orderId.toString(),
+        deliveryFeeUpdated: p.deliveryFeeUpdated,
+        finalDeliveryFee: p.finalDeliveryFee,
+        giftRecipientName: p.giftRecipientName,
+      ));
+    } catch (e) {
+      final issue = classifyOrderPaymentError(e);
+      if (issue != null) {
+        emit(PaymentOrderNeedsAttention(
+          issue: issue,
+          orderId: p.orderId.toString(),
+          message: userFacingApiError(e),
+        ));
+        return;
+      }
+      emit(PaymentFailure(
+        error:
+            '${userFacingApiError(e)} Order #${p.orderId} was already created — avoid checking out again (duplicate order).',
+      ));
     }
   }
 
@@ -369,4 +451,27 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
       emit(PaymentFailure(error: userFacingApiError(e)));
     }
   }
+}
+
+/// Everything needed to initiate payment for a created order.
+class _PendingInitiation {
+  final String paymentMethod;
+  final int orderId;
+  final double amount;
+  final String currency;
+  final Map<String, dynamic> paymentDetails;
+  final bool deliveryFeeUpdated;
+  final double? finalDeliveryFee;
+  final String? giftRecipientName;
+
+  const _PendingInitiation({
+    required this.paymentMethod,
+    required this.orderId,
+    required this.amount,
+    required this.currency,
+    required this.paymentDetails,
+    required this.deliveryFeeUpdated,
+    required this.finalDeliveryFee,
+    required this.giftRecipientName,
+  });
 }

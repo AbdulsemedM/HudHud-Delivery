@@ -37,7 +37,9 @@ import '../../../payment/bloc/payment_bloc.dart';
 import '../../../payment/data/data_provider/payment_data_provider.dart';
 import '../../../payment/data/repository/payment_repository.dart';
 import '../../../payment/model/payment_initiate_result.dart';
+import '../../../orders/data/repositories/orders_repository.dart';
 import '../../../payment/presentation/order_payment_issue_flow.dart';
+import '../../../payment/utils/order_payment_issue.dart';
 import '../../../payment/presentation/screen/payment_initiate_result_screen.dart';
 import '../../../payment/presentation/widgets/payment_details_form.dart';
 import '../../../vendors/data/models/store_status.dart';
@@ -1282,6 +1284,79 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         );
   }
 
+  /// The created order's server total differs from the total shown here.
+  /// Ask before taking payment; declining cancels the order.
+  Future<void> _onServerTotalChanged(
+    BuildContext blocContext,
+    PaymentTotalChanged state,
+  ) async {
+    final bloc = blocContext.read<PaymentBloc>();
+    final shown = _formatMoney(state.shownAmount);
+    final server = _formatMoney(state.serverAmount);
+    final accepted = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Order total updated'),
+        content: Text(
+          'The final total for order #${state.orderId} is $server, '
+          'not $shown as shown at checkout. Continue with $server?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel order'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text('Continue ($server)'),
+          ),
+        ],
+      ),
+    );
+    if (!mounted) return;
+    if (accepted == true) {
+      bloc.add(const ConfirmChangedTotalEvent());
+      return;
+    }
+    bloc.add(const DiscardChangedTotalEvent());
+    final orderId = int.tryParse(state.orderId) ?? 0;
+    OrdersRepository? repo;
+    try {
+      repo = context.read<OrdersRepository>();
+    } on ProviderNotFoundException {
+      repo = null;
+    }
+    var cancelled = false;
+    if (repo != null && orderId > 0) {
+      try {
+        await repo.cancelOrder(
+          orderId,
+          reason: 'Total changed at checkout',
+        );
+        cancelled = true;
+      } catch (_) {}
+    }
+    if (!mounted) return;
+    if (cancelled) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Order #$orderId was cancelled.'),
+          backgroundColor: AppColors.primaryColor,
+        ),
+      );
+      // Cart is kept so the customer can adjust and order again.
+      _scheduleGrowthQuote(immediate: true);
+    } else {
+      // Could not cancel: show the order so it can be handled there.
+      openOrderAfterPaymentIssue(
+        context,
+        issue: OrderPaymentIssue.totalsChanged,
+        orderId: state.orderId,
+      );
+    }
+  }
+
   List<Map<String, dynamic>> _orderItems() {
     return _cartItems
         .map((item) {
@@ -1299,10 +1374,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           final variantId = variantRaw is int
               ? variantRaw
               : int.tryParse(variantRaw?.toString() ?? '');
+          final modifiers = item['modifier_option_ids'];
+          final notes = item['notes'];
           return <String, dynamic>{
             'product_id': pid,
             'quantity': qty,
             if (variantId != null && variantId > 0) 'variant_id': variantId,
+            // Add-ons must reach the order (restaurant + server pricing).
+            if (modifiers is List && modifiers.isNotEmpty)
+              'modifier_option_ids': modifiers,
+            if (notes is String && notes.trim().isNotEmpty)
+              'notes': notes.trim(),
           };
         })
         .where((e) => (e['product_id'] as int) > 0)
@@ -1460,6 +1542,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     _paymentDetails = {};
                   }
                 });
+              } else if (state is PaymentTotalChanged) {
+                _onServerTotalChanged(context, state);
               } else if (state is PaymentInitiated) {
                 if (state.deliveryFeeUpdated) {
                   ScaffoldMessenger.of(context).showSnackBar(
