@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hudhud_delivery/features/login/presentation/screen/auth_entry_screen.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/core/utils/money_format.dart';
 import 'package:hudhud_delivery/core/utils/snackbar_util.dart';
 import 'package:hudhud_delivery/features/categories/model/categories_products_model.dart';
 import 'package:hudhud_delivery/features/delivery/presentation/screens/product_detail_screen.dart';
-import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
 import 'package:hudhud_delivery/features/settings/presentation/widgets/auth_feedback.dart';
 import 'package:hudhud_delivery/features/settings/presentation/widgets/profile_dark_page.dart';
@@ -209,7 +209,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const LoginScreen()),
+                      MaterialPageRoute(builder: (_) => const AuthEntryScreen()),
                     ).then((_) {
                       if (context.mounted) _resolveUser();
                     });

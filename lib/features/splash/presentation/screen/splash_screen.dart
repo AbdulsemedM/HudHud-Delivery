@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hudhud_delivery/features/login/presentation/screen/auth_entry_screen.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/app/services/force_update_service.dart';
 import 'package:hudhud_delivery/app/services/remote_config_service.dart';
@@ -10,7 +11,6 @@ import 'package:hudhud_delivery/features/dashboard/presentation/screen/dashboard
 import 'package:hudhud_delivery/features/force_update/presentation/screen/force_update_screen.dart';
 import 'package:hudhud_delivery/features/force_update/presentation/widgets/soft_update_dialog.dart';
 import 'package:hudhud_delivery/features/growth/market_controller.dart';
-import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
 import 'package:hudhud_delivery/features/login/presentation/screen/phone_enrollment_screen.dart';
 import 'package:hudhud_delivery/features/login/utils/phone_enrollment_gate.dart';
 import 'package:hudhud_delivery/core/theme/system_ui_style.dart';
@@ -136,7 +136,7 @@ class _SplashScreenState extends State<SplashScreen>
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => const LoginScreen(),
+          builder: (context) => const AuthEntryScreen(),
         ),
       );
       return;

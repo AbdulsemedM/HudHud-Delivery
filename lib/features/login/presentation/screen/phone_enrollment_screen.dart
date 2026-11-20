@@ -1,7 +1,11 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 
 import 'package:country_picker/country_picker.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:sms_autofill/sms_autofill.dart';
+import 'package:hudhud_delivery/features/login/presentation/screen/auth_entry_screen.dart';
 import 'package:hudhud_delivery/app/services/auth_service.dart';
 import 'package:hudhud_delivery/app/services/phone_enrollment_service.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
@@ -9,7 +13,6 @@ import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/utils/phone_util.dart';
 import 'package:hudhud_delivery/features/chat/presentation/screens/support_chat_start_screen.dart';
 import 'package:hudhud_delivery/features/dashboard/presentation/screen/dashboard_screen.dart';
-import 'package:hudhud_delivery/features/login/presentation/screen/login_screen.dart';
 import 'package:hudhud_delivery/features/login/presentation/theme/auth_screen_colors.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_dark_scaffold.dart';
 import 'package:hudhud_delivery/features/login/presentation/widgets/auth_gradient_button.dart';
@@ -37,7 +40,8 @@ class PhoneEnrollmentScreen extends StatefulWidget {
   State<PhoneEnrollmentScreen> createState() => _PhoneEnrollmentScreenState();
 }
 
-class _PhoneEnrollmentScreenState extends State<PhoneEnrollmentScreen> {
+class _PhoneEnrollmentScreenState extends State<PhoneEnrollmentScreen>
+    with CodeAutoFill {
   final _phoneFormKey = GlobalKey<FormState>();
   final _otpFormKey = GlobalKey<FormState>();
   final _phoneController = TextEditingController();
@@ -60,9 +64,47 @@ class _PhoneEnrollmentScreenState extends State<PhoneEnrollmentScreen> {
     _prefillFromSession();
   }
 
+  static const int _codeLength = 6;
+
+  /// Android only. iOS forbids an app reading SMS at all — there the code
+  /// arrives through the keyboard's own one-time-code chip, which is why
+  /// AuthCodeField declares AutofillHints.oneTimeCode.
+  bool get _isAndroid => !kIsWeb && Platform.isAndroid;
+
+  /// sms_autofill calls this when SMS Retriever hands over a matching message.
+  ///
+  /// Retriever needs the 11-character app hash on the SMS's last line, which
+  /// the backend appends from SMS_APP_HASH_CUSTOMER. If that is unset, or the
+  /// app has been re-signed since the hash was generated, the SMS still
+  /// arrives and the customer types the code — this just never fires.
+  @override
+  void codeUpdated() {
+    if (!mounted || _step != _EnrollmentStep.otp) return;
+
+    final digits = (code ?? '').replaceAll(RegExp(r'\D'), '');
+    if (digits.isEmpty) return;
+
+    setState(() {
+      _otpController.text = digits.length > _codeLength
+          ? digits.substring(0, _codeLength)
+          : digits;
+    });
+
+    // Filled and not rate-limited: finish the job rather than leaving a
+    // complete code sitting under a button nobody asked the customer to press.
+    if (_otpController.text.length == _codeLength &&
+        !_loading &&
+        _verifyLockSeconds <= 0) {
+      _verifyOtp();
+    }
+  }
+
   @override
   void dispose() {
     _countdownTimer?.cancel();
+    if (_isAndroid) {
+      cancel();
+    }
     _phoneController.dispose();
     _otpController.dispose();
     super.dispose();
@@ -176,6 +218,14 @@ class _PhoneEnrollmentScreenState extends State<PhoneEnrollmentScreen> {
         _otpController.clear();
         _loading = false;
       });
+      // Start listening only once a code is actually on its way; arming the
+      // Retriever on the phone-number step would expire before it arrived.
+      // A resend comes back through here, so drop the previous listener first
+      // rather than stacking one per attempt.
+      if (_isAndroid) {
+        cancel();
+        listenForCode();
+      }
       _startCountdown(result.resendAvailableInSeconds, forResend: true);
       if (result.message.isNotEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -282,7 +332,7 @@ class _PhoneEnrollmentScreenState extends State<PhoneEnrollmentScreen> {
       await AuthService().logout();
       if (!mounted) return;
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        MaterialPageRoute(builder: (_) => const AuthEntryScreen()),
         (route) => false,
       );
     } catch (e) {

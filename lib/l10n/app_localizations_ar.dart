@@ -1648,6 +1648,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get enterEmailCode => 'أدخل رمز البريد الإلكتروني';
 
   @override
+  String get signInWithPassword => 'تسجيل الدخول بكلمة المرور';
+
+  @override
   String get enterSmsCode => 'أدخل رمز الرسائل القصيرة';
 
   @override
@@ -4585,4 +4588,13 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get cpRuleNoCancelAfterPickup =>
       'بعد استلام الطرد أو الطعام لا يمكن الإلغاء.';
+
+  @override
+  String get deliveryCodeTitle => 'رمز التسليم الخاص بك';
+
+  @override
+  String get deliveryCodePrompt => 'اقرأ هذه الأرقام الأربعة للمندوب لتأكيد استلامك طلبك.';
+
+  @override
+  String get deliveryCodeWarning => 'لا تشارك هذا الرمز إلا عندما يكون المندوب أمامك.';
 }

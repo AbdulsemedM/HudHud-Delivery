@@ -98,11 +98,14 @@ String retryPaymentPhone({
 String formatPaymentMethodLabel(String? code) {
   if (code == null || code.trim().isEmpty) return '—';
   final normalized = code.trim();
-  for (final method in kDefaultAllowedPaymentMethods) {
-    if (method['id'] == normalized) {
-      return method['name'] as String? ?? normalized;
-    }
-  }
+
+  // kPaymentMethodDisplayNames, not kDefaultAllowedPaymentMethods: the
+  // fallback list is what a customer may choose today and shrinks when a
+  // gateway is retired, while a label has to keep working for every code that
+  // appears on a past delivery.
+  final name = kPaymentMethodDisplayNames[normalized];
+  if (name != null) return name;
+
   return normalized
       .split('_')
       .where((part) => part.isNotEmpty)

@@ -120,16 +120,16 @@ class FcmService {
     await _setForegroundPresentationOptions();
     _subscribeToTokenRefresh();
     _subscribeToMessageHandlers();
-    try {
-      _fcmToken = await _messaging.getToken();
-    } catch (e, st) {
-      // FCM often fails on emulators (Firebase Installations Service unavailable).
-      // App continues without push; token will work on real devices with Google Play.
-      if (kDebugMode) {
-        debugPrint('FCM getToken failed (emulator?): $e');
-        debugPrint('$st');
-      }
-    }
+
+    // Through getToken(), not _messaging.getToken(): that one waits for the
+    // APNs token on iOS and retries. Calling the plugin directly here was the
+    // earliest and most likely place to hit `apns-token-not-set`, and it
+    // swallowed the failure.
+    //
+    // FCM also fails on emulators (Firebase Installations Service
+    // unavailable). The app runs without push there; a real device with Play
+    // Services gets a token.
+    await getToken();
   }
 
   Future<void> _setupLocalNotifications() async {
@@ -217,12 +217,70 @@ class FcmService {
   /// Returns null if FCM is unavailable (e.g. on emulator without Google Play).
   Future<String?> getToken() async {
     if (_fcmToken != null) return _fcmToken;
-    try {
-      _fcmToken = await _messaging.getToken();
-    } catch (e) {
-      if (kDebugMode) debugPrint('FCM getToken failed: $e');
+
+    // iOS cannot mint an FCM token until APNs has registered the device.
+    // Asked too early, getToken() throws `apns-token-not-set` - which used to
+    // be caught, logged in debug only, and returned as null. The caller
+    // (AuthService._sendFcmTokenToBackend) then returned early, so the user
+    // finished signing in with NO DEVICE REGISTERED and nothing said so. The
+    // backend records it as skipped/no_active_tokens and the customer simply
+    // never receives a push again until something else happens to retry.
+    //
+    // That matters more now that SMS is rationed: a customer with no device
+    // hears nothing at all for the statuses that no longer text.
+    await _waitForApnsToken();
+
+    // A short retry for the same reason, and for the transient failures FCM
+    // has on a cold start before Play Services or the network settle.
+    for (var attempt = 0; attempt < 3; attempt++) {
+      try {
+        _fcmToken = await _messaging.getToken();
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint('FCM getToken attempt ${attempt + 1} failed: $e');
+        }
+      }
+
+      if (_fcmToken != null && _fcmToken!.isNotEmpty) return _fcmToken;
+
+      if (attempt < 2) {
+        await Future<void>.delayed(Duration(milliseconds: 400 * (attempt + 1)));
+      }
     }
+
+    // Still nothing. onTokenRefresh remains subscribed and registers the token
+    // with the backend the moment FCM produces one, so this is a delay rather
+    // than a permanent loss - but it is worth seeing in the log.
+    if (kDebugMode) {
+      debugPrint('FCM getToken: no token after retries; '
+          'waiting for onTokenRefresh to supply one.');
+    }
+
     return _fcmToken;
+  }
+
+  /// Wait briefly for the APNs token on iOS. No-op everywhere else.
+  ///
+  /// Bounded on purpose: this runs on the sign-in path, and a user must never
+  /// wait on push registration. Giving up here costs nothing, because
+  /// onTokenRefresh still registers the token when it arrives.
+  Future<void> _waitForApnsToken() async {
+    if (!Platform.isIOS) return;
+
+    for (var attempt = 0; attempt < 5; attempt++) {
+      try {
+        final apns = await _messaging.getAPNSToken();
+        if (apns != null && apns.isNotEmpty) return;
+      } catch (e) {
+        if (kDebugMode) debugPrint('APNs token not ready yet: $e');
+      }
+
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+    }
+
+    if (kDebugMode) {
+      debugPrint('APNs token still unavailable; requesting FCM token anyway.');
+    }
   }
 
   /// Subscribe to a topic (e.g. 'driver_orders', 'driver_<id>').

@@ -1665,6 +1665,9 @@ class AppLocalizationsSo extends AppLocalizations {
   String get enterEmailCode => 'Geli lambarka iimaylka';
 
   @override
+  String get signInWithPassword => 'Furaha sirta ku gal';
+
+  @override
   String get enterSmsCode => 'Geli lambarka SMS';
 
   @override
@@ -4672,4 +4675,13 @@ class AppLocalizationsSo extends AppLocalizations {
   @override
   String get cpRuleNoCancelAfterPickup =>
       'Marka xidhmada ama cuntada la qaado, lama joojin karo.';
+
+  @override
+  String get deliveryCodeTitle => 'Koodhkaaga gaarsiinta';
+
+  @override
+  String get deliveryCodePrompt => 'U akhri darawalka 4-da nambar si aad u xaqiijiso inaad dalabkaaga heshay.';
+
+  @override
+  String get deliveryCodeWarning => 'Koodhkan la wadaag kaliya marka darawalka hortaada joogo.';
 }

@@ -469,14 +469,20 @@
   "courierEstimateFromPrice": "laga bilaabo {currency} {amount}",
   "@courierEstimateFromPrice": {
     "placeholders": {
-      "currency": {"type": "String"},
-      "amount": {"type": "String"}
+      "currency": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "courierEstimateMinutes": "{minutes} daqiiqo",
   "@courierEstimateMinutes": {
     "placeholders": {
-      "minutes": {"type": "int"}
+      "minutes": {
+        "type": "int"
+      }
     }
   },
   "fromWallet": "Laga soo bilaabo Wallet",
@@ -718,6 +724,7 @@
   "emailVerificationTitle": "Xaqiijinta iimaylka",
   "phoneVerificationTitle": "Xaqiijinta Taleefanka",
   "enterEmailCode": "Geli lambarka iimaylka",
+  "signInWithPassword": "Furaha sirta ku gal",
   "enterSmsCode": "Geli lambarka SMS",
   "noEmailAvailableShort": "Iimayl lama hayo",
   "addMoney": "Lacag ku darso",
@@ -1231,9 +1238,15 @@
   "timeBandPickupSurcharge": "Kharashka qaadista {band}: {currency} {amount}",
   "@timeBandPickupSurcharge": {
     "placeholders": {
-      "band": {"type": "String"},
-      "currency": {"type": "String"},
-      "amount": {"type": "String"}
+      "band": {
+        "type": "String"
+      },
+      "currency": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "chooseValidFuturePickup": "Fadlan dooro taariikh iyo waqti qaadis mustaqbal ah oo sax ah.",
@@ -1342,7 +1355,9 @@
   "phoneEnrollmentOtpSubtitle": "Geli koodhka 6-lambar ah ee loo diray {phone}.",
   "@phoneEnrollmentOtpSubtitle": {
     "placeholders": {
-      "phone": {"type": "String"}
+      "phone": {
+        "type": "String"
+      }
     }
   },
   "phoneEnrollmentSendCode": "Dir koodhka",
@@ -1351,7 +1366,9 @@
   "phoneEnrollmentResendIn": "Dib u dir {seconds}s kadib",
   "@phoneEnrollmentResendIn": {
     "placeholders": {
-      "seconds": {"type": "int"}
+      "seconds": {
+        "type": "int"
+      }
     }
   },
   "phoneEnrollmentContactSupport": "La xidhiidh taageerada",
@@ -1417,10 +1434,18 @@
   "easyConfirmSummary": "Laga bilaabo {pickup} ilaa {dropoff}. Xidhmo: {item}. Loogu talagalay {recipient}.",
   "@easyConfirmSummary": {
     "placeholders": {
-      "pickup": {"type": "String"},
-      "dropoff": {"type": "String"},
-      "item": {"type": "String"},
-      "recipient": {"type": "String"}
+      "pickup": {
+        "type": "String"
+      },
+      "dropoff": {
+        "type": "String"
+      },
+      "item": {
+        "type": "String"
+      },
+      "recipient": {
+        "type": "String"
+      }
     }
   },
   "easySpeakHint": "Dhageyso",
@@ -1441,8 +1466,12 @@
   "easyStepOf": "Tallaabada {current} ee {total}",
   "@easyStepOf": {
     "placeholders": {
-      "current": {"type": "int"},
-      "total": {"type": "int"}
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "paymentCash": "Lacag caddaan",
@@ -1458,21 +1487,29 @@
   "growthPromoSavedForCheckout": "Koodhka {code} waxaa lagu dabaqi doonaa marka aad bixinayso",
   "@growthPromoSavedForCheckout": {
     "placeholders": {
-      "code": {"type": "String"}
+      "code": {
+        "type": "String"
+      }
     }
   },
   "growthPointsToggle": "Isticmaal {points} dhibcood (−{amount} gaarsiinta)",
   "@growthPointsToggle": {
     "placeholders": {
-      "points": {"type": "int"},
-      "amount": {"type": "String"}
+      "points": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "growthPointsSubtitle": "Dhibcuhu waxay dhimaan kharashka gaarsiinta oo keliya",
   "growthPointsCount": "{points} dhibcood",
   "@growthPointsCount": {
     "placeholders": {
-      "points": {"type": "int"}
+      "points": {
+        "type": "int"
+      }
     }
   },
   "growthPointsDiscount": "Dhimista dhibcaha",
@@ -1480,7 +1517,9 @@
   "growthCouponDiscountWithCode": "Dhimis ({code})",
   "@growthCouponDiscountWithCode": {
     "placeholders": {
-      "code": {"type": "String"}
+      "code": {
+        "type": "String"
+      }
     }
   },
   "growthDeliveryFeeLabel": "Kharashka gaarsiinta",
@@ -1488,7 +1527,9 @@
   "growthFreeDeliveryHint": "Ku dar {amount} kale si aad u hesho gaarsiin bilaash ah",
   "@growthFreeDeliveryHint": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "growthFreeDeliveryUnlocked": "Waxaad heshay gaarsiin bilaash ah!",
@@ -1496,7 +1537,9 @@
   "growthRewardsWorth": "Qiimihiisu waa {amount}",
   "@growthRewardsWorth": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "growthRewardsHowItWorks": "Sida ay u shaqeyso",
@@ -1504,14 +1547,20 @@
   "growthRewardsRateLine": "{points} dhibcood = {amount} dhimis kharashka gaarsiinta.",
   "@growthRewardsRateLine": {
     "placeholders": {
-      "points": {"type": "int"},
-      "amount": {"type": "String"}
+      "points": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "growthRewardsUseLine": "Isticmaal marka aad bixinayso markaad haysato {points} dhibcood.",
   "@growthRewardsUseLine": {
     "placeholders": {
-      "points": {"type": "int"}
+      "points": {
+        "type": "int"
+      }
     }
   },
   "growthRewardsHistory": "Taariikhda",
@@ -1524,13 +1573,17 @@
   "growthReferralTitle": "Casuun saaxiibbada, hel {amount}",
   "@growthReferralTitle": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "growthReferralSubtitle": "Adiga iyo saaxiibkaa mid walba wuxuu helayaa {amount} kadib dalabkooda ugu horreeya.",
   "@growthReferralSubtitle": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "growthReferralCopy": "Koobiyee",
@@ -1540,9 +1593,15 @@
   "growthReferralShareFallback": "Hel {amount} HudHud Delivery adigoo isticmaalaya koodhkayga {code}: {link}",
   "@growthReferralShareFallback": {
     "placeholders": {
-      "amount": {"type": "String"},
-      "code": {"type": "String"},
-      "link": {"type": "String"}
+      "amount": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      },
+      "link": {
+        "type": "String"
+      }
     }
   },
   "growthReferralInvited": "La casuumay",
@@ -1563,7 +1622,9 @@
   "growthOrderAgainOrderLabel": "Dalab #{order}",
   "@growthOrderAgainOrderLabel": {
     "placeholders": {
-      "order": {"type": "String"}
+      "order": {
+        "type": "String"
+      }
     }
   },
   "growthSeeAll": "Arag dhammaan",
@@ -1577,22 +1638,30 @@
   "p3PlusPricePerPeriod": "{price} / {days} maalmood",
   "@p3PlusPricePerPeriod": {
     "placeholders": {
-      "price": {"type": "String"},
-      "days": {"type": "int"}
+      "price": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
     }
   },
   "p3PlusBenefitsTitle": "Faa'iidooyinkaaga",
   "p3PlusBenefitFreeDelivery": "Gaarsiin bilaash ah dalabyada cuntada iyo raashinka ee ka badan {amount}",
   "@p3PlusBenefitFreeDelivery": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "p3PlusBenefitFreeDeliveryAll": "Gaarsiin bilaash ah dalabyada cuntada iyo raashinka",
   "p3PlusBenefitParcelDiscount": "{percent}% dhimis gaarsiinta xirmooyinka",
   "@p3PlusBenefitParcelDiscount": {
     "placeholders": {
-      "percent": {"type": "String"}
+      "percent": {
+        "type": "String"
+      }
     }
   },
   "p3PlusSubscribe": "Ku biir HudHud Plus",
@@ -1602,20 +1671,26 @@
   "p3PlusRenewsOn": "Waxay cusboonaanaysaa {date}",
   "@p3PlusRenewsOn": {
     "placeholders": {
-      "date": {"type": "String"}
+      "date": {
+        "type": "String"
+      }
     }
   },
   "p3PlusEndsOn": "Wuxuu dhamaanayaa {date} — waad sii hayn kartaa",
   "@p3PlusEndsOn": {
     "placeholders": {
-      "date": {"type": "String"}
+      "date": {
+        "type": "String"
+      }
     }
   },
   "p3PlusPastDue": "Lacag bixinta cusboonaysiinta way fashilantay. Ku shubo jeebkaaga si aad u sii haysato Plus.",
   "p3PlusSavings": "Waxaad badbaadisay qiyaastii {amount} 30-kii maalmood ee la soo dhaafay",
   "@p3PlusSavings": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "p3PlusPaidFromWallet": "Waxaa laga bixiyaa jeebkaaga HudHud. Jooji wakhti kasta.",
@@ -1628,7 +1703,9 @@
   "p3PlusInsufficientMessage": "Ku dar {amount} jeebkaaga si aad ugu biirto Plus.",
   "@p3PlusInsufficientMessage": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "p3PlusTopUp": "Ku shubo jeebka",
@@ -1644,7 +1721,9 @@
   "p3MarketChanged": "Magaalada waxaa loo beddelay {market}",
   "@p3MarketChanged": {
     "placeholders": {
-      "market": {"type": "String"}
+      "market": {
+        "type": "String"
+      }
     }
   },
   "p3MarketChangeBlocked": "Ma beddeli kartid magaalada inta jeebkaagu haysto haraa lacag kale ah. Marka hore isticmaal ama la bax.",
@@ -1717,7 +1796,9 @@
   "@p9GiftRecipientPhoneHint": {
     "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
     "placeholders": {
-      "example": {"type": "String"}
+      "example": {
+        "type": "String"
+      }
     }
   },
   "p9GiftMessageLabel": "Fariinta hadiyadda (ikhtiyaari)",
@@ -1736,7 +1817,9 @@
   "@p9GiftPhoneInvalid": {
     "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
     "placeholders": {
-      "prefix": {"type": "String"}
+      "prefix": {
+        "type": "String"
+      }
     }
   },
   "p9GiftNoCash": "Lacag caddaan ah marka la keeno looma oggola hadiyadaha. Dooro hab lacag-bixin online ah.",
@@ -1759,14 +1842,18 @@
   "@p9GiftPlacedBody": {
     "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
     "placeholders": {
-      "name": {"type": "String"}
+      "name": {
+        "type": "String"
+      }
     }
   },
   "p9GiftForName": "Hadiyad loogu talagalay {name}",
   "@p9GiftForName": {
     "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
     "placeholders": {
-      "name": {"type": "String"}
+      "name": {
+        "type": "String"
+      }
     }
   },
   "p9GiftRecipientLabel": "Qofka helaya",
@@ -1785,7 +1872,9 @@
   "@p9GiftModeBanner": {
     "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
     "placeholders": {
-      "market": {"type": "String"}
+      "market": {
+        "type": "String"
+      }
     }
   },
   "p9GiftStop": "Jooji hadiyadda",
@@ -2016,7 +2105,9 @@
   "@p10ParcelPriceHeld": {
     "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
     "placeholders": {
-      "time": {"type": "String"}
+      "time": {
+        "type": "String"
+      }
     }
   },
   "p10ParcelPriceExpired": "Xajinta qiimaha way dhacday",
@@ -2039,7 +2130,9 @@
   "@p10ParcelBook": {
     "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
     "placeholders": {
-      "price": {"type": "String"}
+      "price": {
+        "type": "String"
+      }
     }
   },
   "p10ParcelContinue": "Sii wad",
@@ -2094,14 +2187,18 @@
   "@p10ParcelTrackingShareText": {
     "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
     "placeholders": {
-      "link": {"type": "String"}
+      "link": {
+        "type": "String"
+      }
     }
   },
   "p10ParcelEta": "Wuxuu imanayaa qiyaastii {minutes} daqiiqo",
   "@p10ParcelEta": {
     "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
     "placeholders": {
-      "minutes": {"type": "String"}
+      "minutes": {
+        "type": "String"
+      }
     }
   },
   "p10ParcelCancel": "Jooji xirmada",
@@ -2116,7 +2213,9 @@
   "@p10ParcelCancelFee": {
     "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
     "placeholders": {
-      "fee": {"type": "String"}
+      "fee": {
+        "type": "String"
+      }
     }
   },
   "p10ParcelCancelReason": "Diraha ayaa ka joojiyay app-ka",
@@ -2135,7 +2234,9 @@
   "@p11ParcelStopN": {
     "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker.",
     "placeholders": {
-      "number": {"type": "String"}
+      "number": {
+        "type": "String"
+      }
     }
   },
   "p11ParcelRemoveStop": "Ka saar joogsiga",
@@ -2154,7 +2255,9 @@
   "@p11ParcelStopsLimit": {
     "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker.",
     "placeholders": {
-      "max": {"type": "String"}
+      "max": {
+        "type": "String"
+      }
     }
   },
   "p11ParcelMultiStopSenderPays": "Marka meelo badan la geynayo, adiga ayaa bixinaya waddada oo dhan.",
@@ -2177,7 +2280,9 @@
   "@p11ParcelPayAtPickupDue": {
     "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker.",
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "p11ParcelPaidAtPickup": "Waxaa la siiyay darawalka markii la qaaday",
@@ -2232,14 +2337,18 @@
   "@p11ParcelCancelCashFee": {
     "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker.",
     "placeholders": {
-      "fee": {"type": "String"}
+      "fee": {
+        "type": "String"
+      }
     }
   },
   "p11ParcelOutstandingBalance": "Waxaad ku leedahay {amount} baakad la joojiyay. Waxaa laga jarayaa boorsadaada marka xigta ee aad lacag ku shubto ama dalbato.",
   "@p11ParcelOutstandingBalance": {
     "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker.",
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "p12StoreOpen": "Furan",
@@ -2258,21 +2367,27 @@
   "@p12StoreOpensAt": {
     "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
     "placeholders": {
-      "time": {"type": "String"}
+      "time": {
+        "type": "String"
+      }
     }
   },
   "p12StoreOpensTomorrowAt": "Berri ayuu furmayaa {time}",
   "@p12StoreOpensTomorrowAt": {
     "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
     "placeholders": {
-      "time": {"type": "String"}
+      "time": {
+        "type": "String"
+      }
     }
   },
   "p12StoreBackAt": "Wuu soo laabanayaa {time}",
   "@p12StoreBackAt": {
     "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
     "placeholders": {
-      "time": {"type": "String"}
+      "time": {
+        "type": "String"
+      }
     }
   },
   "p12StoreClosedToday": "Maanta waa xiran yahay",
@@ -2319,7 +2434,9 @@
   "@p12ErrItemSoldOutNamed": {
     "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
     "placeholders": {
-      "item": {"type": "String"}
+      "item": {
+        "type": "String"
+      }
     }
   },
   "p12RemoveItem": "Ka saar shayga",
@@ -2330,7 +2447,9 @@
   "@p12ErrOutstandingDues": {
     "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "p12DuesTitle": "Lacag aan la bixin",
@@ -2341,7 +2460,9 @@
   "@p12DuesCheckoutBody": {
     "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "p12PayNow": "Hadda bixi",
@@ -2368,7 +2489,9 @@
   "@p12ErrCityMismatch": {
     "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
     "placeholders": {
-      "city": {"type": "String"}
+      "city": {
+        "type": "String"
+      }
     }
   },
   "p12ErrCityMismatchGeneric": "Cinwaankani wuxuu ku yaal magaalo kale. Beddel magaaladaada si aad u sii wadato.",
@@ -2479,5 +2602,8 @@
   "cpMarkerPause": "Hakin",
   "cpHowItWorks": "Sida ay u shaqeyso",
   "cpRuleFree": "Joojinta ka hor intaan gaarsiiye ama darawal la magacaabin: bilaash.",
-  "cpRuleNoCancelAfterPickup": "Marka xidhmada ama cuntada la qaado, lama joojin karo."
+  "cpRuleNoCancelAfterPickup": "Marka xidhmada ama cuntada la qaado, lama joojin karo.",
+  "deliveryCodeTitle": "Koodhkaaga gaarsiinta",
+  "deliveryCodePrompt": "U akhri darawalka 4-da nambar si aad u xaqiijiso inaad dalabkaaga heshay.",
+  "deliveryCodeWarning": "Koodhkan la wadaag kaliya marka darawalka hortaada joogo."
 }

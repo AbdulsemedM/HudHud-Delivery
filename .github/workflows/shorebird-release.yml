@@ -30,16 +30,105 @@ on:
           - android
           - ios
           - both
+      flutter_version:
+        description: >-
+          Flutter version to build with. Blank reads it from ci.yml, so the
+          release is built on the same SDK the repository tests on. "latest"
+          follows Shorebird's newest stable instead.
+        required: false
+        type: string
+      dry_run:
+        description: >-
+          Validate the whole release path without publishing. Nothing is
+          registered with Shorebird and no version number is consumed.
+        required: false
+        default: false
+        type: boolean
 
 env:
   SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
 
 jobs:
+  # One run, one list. Before this existed, a missing secret was found a job
+  # at a time: the Android job stopped at the keystore, the iOS job stopped at
+  # "You must be logged in", and neither mentioned the other three. Somebody
+  # fixed one, re-ran, and met the next.
+  #
+  # This job names everything that is missing at once, and fails before any
+  # build starts, so nothing is half-shipped while a credential is absent.
+  preflight:
+    name: Check the credentials exist
+    runs-on: ubuntu-latest
+    steps:
+      - name: Which secrets are set
+        env:
+          SB: ${{ secrets.SHOREBIRD_TOKEN }}
+          KS: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KPW: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          SPW: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          GSJ: ${{ secrets.GOOGLE_SERVICES_JSON }}
+          MAPS: ${{ secrets.GOOGLE_MAPS_API_KEY || secrets.VITE_GOOGLE_MAPS_API_KEY }}
+          MAPS_DEDICATED: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+        run: |
+          set -uo pipefail
+          missing=0
+          check () {
+            if [ -z "${2:-}" ]; then
+              echo "::error::MISSING  $1 — $3"
+              missing=1
+            else
+              echo "ok       $1"
+            fi
+          }
+          check SHOREBIRD_TOKEN          "${SB:-}"    "console.shorebird.dev -> service account key. Without it nothing can be released or patched, on either platform."
+          check ANDROID_KEYSTORE_BASE64  "${KS:-}"    "the Play upload keystore: base64 -w0 upload-keystore.jks"
+          check ANDROID_KEY_ALIAS        "${ALIAS:-}" "the alias inside that keystore"
+          check ANDROID_KEY_PASSWORD     "${KPW:-}"   "the key password"
+          check ANDROID_STORE_PASSWORD   "${SPW:-}"   "the keystore password"
+
+          # android/app/build.gradle applies com.google.gms.google-services,
+          # and android/app/google-services.json is gitignored, so unless it is
+          # supplied here the Android build fails on the Firebase task.
+          if [ -f android/app/google-services.json ]; then
+            echo "ok       google-services.json is in the repository"
+          else
+            check GOOGLE_SERVICES_JSON "${GSJ:-}" "base64 -w0 android/app/google-services.json — download it from Firebase console → Project settings → Your apps"
+          fi
+
+          # THE ONE THAT WOULD NOT HAVE FAILED THE BUILD.
+          #
+          # build.gradle reads this from .env or android/local.properties and
+          # defaults it to an empty string, so without it the build succeeds
+          # and ships an app whose map is blank - build.gradle's own warning
+          # says exactly that. A delivery app with no map is worth failing a
+          # build over.
+          check GOOGLE_MAPS_API_KEY "${MAPS:-}" "the Android Maps SDK key, as GOOGLE_MAPS_API_KEY or VITE_GOOGLE_MAPS_API_KEY; without it the build passes and the map ships blank"
+
+          # Reached the fallback, which is a web key by its name. A Maps key
+          # restricted to HTTP referrers is rejected by the Maps SDK for
+          # Android, and the symptom is the same blank map. Android needs a key
+          # either unrestricted or restricted to Android apps (package name plus
+          # signing SHA-1), with "Maps SDK for Android" enabled on the project.
+          if [ -n "${MAPS:-}" ] && [ -z "${MAPS_DEDICATED:-}" ]; then
+            echo "::warning::Using VITE_GOOGLE_MAPS_API_KEY. That name belongs to a web bundle; if the key is restricted to HTTP referrers, Android will reject it and the map ships blank anyway. Check its Application restrictions in Google Cloud Console, or add a separate Android key as GOOGLE_MAPS_API_KEY."
+          fi
+          if [ "$missing" = "1" ]; then
+            echo
+            echo "Add them at Settings -> Secrets and variables -> Actions."
+            echo "Only the ANDROID_*, GOOGLE_SERVICES_JSON and GOOGLE_MAPS_API_KEY"
+            echo "ones are needed for an Android build;"
+            echo "iOS needs SHOREBIRD_TOKEN alone."
+            exit 1
+          fi
+          echo "Every secret this build needs is present."
+
   release-android:
     if: >
       github.event_name == 'push' ||
       inputs.platform == 'android' ||
       inputs.platform == 'both'
+    needs: preflight
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -81,16 +170,284 @@ jobs:
             echo "keyPassword=${ANDROID_KEY_PASSWORD}"
           } > android/key.properties
 
+      # Two more build inputs that live outside the repository.
+      #
+      # google-services.json is gitignored and the Firebase Gradle plugin fails
+      # without it. The Maps key is the quieter one: build.gradle defaults it to
+      # an empty string, so leaving it out produces a build that works and a map
+      # that doesn't.
+      - name: Create Firebase and Maps config from secrets
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY || secrets.VITE_GOOGLE_MAPS_API_KEY }}
+        run: |
+          set -euo pipefail
+
+          if [ -f android/app/google-services.json ]; then
+            echo "google-services.json already in the checkout; leaving it alone."
+          else
+            echo "${GOOGLE_SERVICES_JSON}" | base64 --decode > android/app/google-services.json
+            echo "google-services.json written from the secret."
+          fi
+
+          # Valid JSON is not enough. A file downloaded from one app's page in
+          # the Firebase console may carry only that app's client entry, and
+          # both repos read the same organisation-level secret - so the wrong
+          # app's file decodes perfectly and then dies deep in the Gradle run
+          # with "No matching client found for package name". This project also
+          # has four Android apps with near-identical names, one of them the
+          # Flutter template's com.example.hudhud_delivery, so picking the wrong
+          # one is easy.
+          APP_ID_PKG="$(grep -oE 'applicationId[[:space:]]*=?[[:space:]]*"[^"]+"' android/app/build.gradle \
+                        | head -1 | grep -oE '"[^"]+"' | tr -d '"')"
+          if [ -z "${APP_ID_PKG}" ]; then
+            echo "::warning::Could not read applicationId from android/app/build.gradle; skipping the package-match check."
+          else
+            echo "applicationId: ${APP_ID_PKG}"
+            GS_FILE=android/app/google-services.json APP_PKG="${APP_ID_PKG}" python3 - <<'PY'
+          import json, os, sys
+
+          path, want = os.environ["GS_FILE"], os.environ["APP_PKG"]
+          try:
+              data = json.load(open(path))
+          except Exception as e:
+              print(f"::error::{path} is not valid JSON ({e}). Re-copy the secret with: base64 -w0 google-services.json")
+              sys.exit(1)
+
+          found = []
+          for client in data.get("client", []):
+              pkg = client.get("client_info", {}).get("android_client_info", {}).get("package_name")
+              if pkg:
+                  found.append(pkg)
+
+          if want in found:
+              print(f"ok       google-services.json contains a client for {want}")
+              sys.exit(0)
+
+          print(f"::error::google-services.json has no client for {want}. It contains: {', '.join(found) or '(none)'}")
+          print("Download it from the Firebase console page for THAT app, or use a file that")
+          print("contains every app in the project. Beware com.example.hudhud_delivery - it is a")
+          print("leftover placeholder registration, not this app.")
+          sys.exit(1)
+          PY
+          fi
+
+          # build.gradle reads this key out of android/local.properties, which is
+          # gitignored, so it is appended rather than written over whatever the
+          # runner already put there.
+          touch android/local.properties
+          if [ -z "${GOOGLE_MAPS_API_KEY:-}" ]; then
+            echo "::error::No Maps key in GOOGLE_MAPS_API_KEY or VITE_GOOGLE_MAPS_API_KEY. build.gradle would default it to an empty string and ship a blank map."
+            exit 1
+          fi
+          echo "GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}" >> android/local.properties
+          echo "Maps key appended to android/local.properties."
+
+      # pubspec declares `.env` as an asset in both apps and `.env` is
+      # gitignored, so a fresh checkout cannot bundle assets at all:
+      #
+      #   Error detected in pubspec.yaml:
+      #   No file or variants found for asset: .env.
+      #
+      # Copying .env.example verbatim is NOT enough, for two reasons.
+      #
+      # android/app/build.gradle reads GOOGLE_MAPS_API_KEY from .env FIRST and
+      # only then from local.properties, so the example's
+      # `your_google_maps_api_key_here` would override the real key written
+      # above and ship a blank map.
+      #
+      # And the customer app has no fallback base url - ApiEnv.baseUrl throws
+      # StateError('BASE_URL is missing in .env') - so a .env with only the
+      # Maps key builds green and crashes on the first API call.
+      #
+      # Neither value is invented here: BASE_URL comes from the APP_BASE_URL
+      # secret, else .env.example, else the repo's own ci.yml.
+      - name: Create .env (declared as a Flutter asset)
+        env:
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY || secrets.VITE_GOOGLE_MAPS_API_KEY }}
+          APP_BASE_URL: ${{ secrets.APP_BASE_URL }}
+        run: |
+          set -euo pipefail
+
+          if ! grep -qE '^[[:space:]]*-[[:space:]]*\.env[[:space:]]*$' pubspec.yaml; then
+            echo "pubspec does not declare .env as an asset; nothing to do."
+            exit 0
+          fi
+
+          if [ -f .env ]; then
+            echo ".env already present in the checkout; leaving it alone."
+            exit 0
+          fi
+
+          BASE="${APP_BASE_URL:-}"
+          SOURCE="the APP_BASE_URL secret"
+          if [ -z "${BASE}" ] && [ -f .env.example ]; then
+            BASE="$(grep -oE '^[[:space:]]*BASE_URL[[:space:]]*=[[:space:]]*[^[:space:]]+' .env.example \
+                    | head -1 | sed -E 's/.*=[[:space:]]*//')"
+            SOURCE=".env.example"
+          fi
+          if [ -z "${BASE}" ]; then
+            # ci.yml writes this inside a printf, as
+            #   printf 'BASE_URL=https://host\n' > .env
+            # so the character class must EXCLUDE the backslash. A looser match
+            # swallows the trailing \n and ships a BASE_URL ending in a literal
+            # backslash-n, which normalizeApiBaseUrl then turns into
+            # https://host\n/api/ - a green build that cannot reach the API.
+            BASE="$(grep -oE "BASE_URL=https://[A-Za-z0-9._~:/?#@%+-]+" .github/workflows/ci.yml \
+                    | head -1 | sed 's/^BASE_URL=//')"
+            SOURCE="ci.yml"
+          fi
+          if [ -z "${BASE}" ]; then
+            echo "::error::No BASE_URL available. Set the APP_BASE_URL secret, or add BASE_URL to .env.example."
+            exit 1
+          fi
+          if ! printf '%s' "${BASE}" | grep -qE '^https://[A-Za-z0-9._~:/?#@%+-]+$'; then
+            echo "::error::BASE_URL from ${SOURCE} does not look like a clean https url: ${BASE}"
+            exit 1
+          fi
+          echo "BASE_URL from ${SOURCE}: ${BASE}"
+
+          if [ -f .env.example ]; then
+            cp .env.example .env
+          else
+            : > .env
+          fi
+
+          BASE_URL_VALUE="${BASE}" python3 - <<'PY'
+          import os, re, pathlib
+
+          path = pathlib.Path(".env")
+          wanted = {
+              "GOOGLE_MAPS_API_KEY": os.environ.get("GOOGLE_MAPS_API_KEY", ""),
+              "BASE_URL": os.environ["BASE_URL_VALUE"],
+          }
+
+          lines = path.read_text().splitlines() if path.exists() else []
+          seen = set()
+          out = []
+          for line in lines:
+              m = re.match(r"^\s*([A-Z0-9_]+)\s*=", line)
+              if m and m.group(1) in wanted:
+                  key = m.group(1)
+                  out.append(f"{key}={wanted[key]}")
+                  seen.add(key)
+              else:
+                  out.append(line)
+          for key, value in wanted.items():
+              if key not in seen:
+                  out.append(f"{key}={value}")
+          path.write_text("\n".join(out) + "\n")
+          PY
+
+          # A placeholder here is not harmless: .env is bundled into the app and
+          # read ahead of local.properties, so it would ship as a real value.
+          if grep -nE 'your_[a-z_]*_here|REPLACE_ME|changeme|CHANGEME' .env; then
+            echo "::error::.env still contains a placeholder (shown above). It is bundled into the app, so that value would ship."
+            exit 1
+          fi
+
+          echo "--- .env (values hidden) ---"
+          sed -E 's/=.*/=<set>/' .env | grep -vE '^\s*(#|$)' || true
+
+      # shorebird-release declares flutter-version as REQUIRED and forwards it
+      # unconditionally - `shorebird release <platform> --flutter-version "$V"`
+      # - so leaving it out sends an empty string and the CLI answers:
+      #
+      #     Flutter  is not available to Shorebird.
+      #
+      # That doubled space IS the empty version, and nothing in the message
+      # points back at a missing workflow input. It is what the first real
+      # release attempt died on.
+      #
+      # The version is read from ci.yml so a release is built on the SDK this
+      # repository already tests on, rather than a second pin that drifts away
+      # from it. Shorebird only offers Flutter versions it has built its engine
+      # for, so if it does not have this one, the list printed here says what it
+      # does have.
+      # The release build died here once:
+      #
+      #   Execution failed for JetifyTransform: ...arm64_v8a_release-1.0.0-...jar
+      #     > Java heap space
+      #
+      # android/gradle.properties allots -Xmx2G (rider) / -Xmx3072m (customer),
+      # both tuned on developer machines - their own comments say so - while
+      # these are PRIVATE repositories, so ubuntu-latest is a 2-core / 7 GB
+      # runner and both apps still set android.enableJetifier=true. Jetifier
+      # rewriting the Flutter engine jars is what runs out of heap.
+      #
+      # Appended in CI only, never committed, so developers keep the values
+      # their comments were written for. Later keys win in a properties file.
+      #
+      # parallel and workers are pinned down too: two concurrent Jetify
+      # transforms on a 2-core runner is how the heap gets exhausted, and the
+      # customer app ships parallel=true with workers.max=2.
+      - name: Give Gradle enough heap for this runner
+        run: |
+          set -euo pipefail
+          echo "--- before ---"
+          grep -E '^org\.gradle\.(jvmargs|parallel|workers)' android/gradle.properties || echo "(none set)"
+          cat >> android/gradle.properties <<'PROPS'
+
+          # --- appended by CI; not committed ---
+          org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8
+          org.gradle.parallel=false
+          org.gradle.workers.max=1
+          org.gradle.daemon=false
+          PROPS
+          sed -i 's/^          //' android/gradle.properties
+          echo "--- after (last key wins) ---"
+          tail -6 android/gradle.properties
+
+      - name: Which Flutter version to build with
+        id: flutter
+        run: |
+          set -uo pipefail
+          V="${{ inputs.flutter_version }}"
+          if [ -z "${V}" ]; then
+            V="$(grep -oE "flutter-version:[[:space:]]*'?[0-9]+\.[0-9]+\.[0-9]+'?" .github/workflows/ci.yml \
+                 | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')"
+          fi
+          if [ -z "${V}" ]; then
+            echo "::error::Could not read flutter-version from ci.yml. Re-run and set flutter_version (or 'latest')."
+            exit 1
+          fi
+          echo "Building with Flutter ${V}"
+          echo "--- Flutter versions Shorebird offers ---"
+          shorebird flutter versions list || true
+          echo "flutter_version=${V}" >> "$GITHUB_OUTPUT"
+
       - name: Shorebird release Android
         uses: shorebirdtech/shorebird-release@v1
         with:
           platform: android
-          args: --no-confirm
+          flutter-version: ${{ steps.flutter.outputs.flutter_version }}
+          args: ${{ inputs.dry_run == true && '--no-confirm --dry-run' || '--no-confirm' }}
+
+      # Keep the AAB Shorebird just built so it can be downloaded from the run
+      # page (Summary -> Artifacts) and uploaded to Play Console. Without this
+      # the bundle only exists on the runner and is gone when the job ends.
+      - name: Read app version
+        id: version
+        run: |
+          set -euo pipefail
+          V="$(grep -E '^version:' pubspec.yaml | head -1 | sed -E 's/^version:[[:space:]]*//' | tr '+' '-')"
+          echo "version=${V}" >> "$GITHUB_OUTPUT"
+          echo "App version: ${V}"
+          ls -la build/app/outputs/bundle/release/ || true
+
+      - name: Upload AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: hudhud-customer-${{ steps.version.outputs.version }}${{ inputs.dry_run == true && '-dry-run' || '' }}-aab
+          path: build/app/outputs/bundle/release/*.aab
+          if-no-files-found: error
+          retention-days: 30
 
   release-ios:
     if: >
       (github.event_name == 'workflow_dispatch' &&
         (inputs.platform == 'ios' || inputs.platform == 'both'))
+    needs: preflight
     runs-on: macos-latest
     defaults:
       run:
@@ -104,8 +461,76 @@ jobs:
         with:
           cache: true
 
+      # shorebird-release declares flutter-version as REQUIRED and forwards it
+      # unconditionally - `shorebird release <platform> --flutter-version "$V"`
+      # - so leaving it out sends an empty string and the CLI answers:
+      #
+      #     Flutter  is not available to Shorebird.
+      #
+      # That doubled space IS the empty version, and nothing in the message
+      # points back at a missing workflow input. It is what the first real
+      # release attempt died on.
+      #
+      # The version is read from ci.yml so a release is built on the SDK this
+      # repository already tests on, rather than a second pin that drifts away
+      # from it. Shorebird only offers Flutter versions it has built its engine
+      # for, so if it does not have this one, the list printed here says what it
+      # does have.
+      # The release build died here once:
+      #
+      #   Execution failed for JetifyTransform: ...arm64_v8a_release-1.0.0-...jar
+      #     > Java heap space
+      #
+      # android/gradle.properties allots -Xmx2G (rider) / -Xmx3072m (customer),
+      # both tuned on developer machines - their own comments say so - while
+      # these are PRIVATE repositories, so ubuntu-latest is a 2-core / 7 GB
+      # runner and both apps still set android.enableJetifier=true. Jetifier
+      # rewriting the Flutter engine jars is what runs out of heap.
+      #
+      # Appended in CI only, never committed, so developers keep the values
+      # their comments were written for. Later keys win in a properties file.
+      #
+      # parallel and workers are pinned down too: two concurrent Jetify
+      # transforms on a 2-core runner is how the heap gets exhausted, and the
+      # customer app ships parallel=true with workers.max=2.
+      - name: Give Gradle enough heap for this runner
+        run: |
+          set -euo pipefail
+          echo "--- before ---"
+          grep -E '^org\.gradle\.(jvmargs|parallel|workers)' android/gradle.properties || echo "(none set)"
+          cat >> android/gradle.properties <<'PROPS'
+
+          # --- appended by CI; not committed ---
+          org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8
+          org.gradle.parallel=false
+          org.gradle.workers.max=1
+          org.gradle.daemon=false
+          PROPS
+          sed -i 's/^          //' android/gradle.properties
+          echo "--- after (last key wins) ---"
+          tail -6 android/gradle.properties
+
+      - name: Which Flutter version to build with
+        id: flutter
+        run: |
+          set -uo pipefail
+          V="${{ inputs.flutter_version }}"
+          if [ -z "${V}" ]; then
+            V="$(grep -oE "flutter-version:[[:space:]]*'?[0-9]+\.[0-9]+\.[0-9]+'?" .github/workflows/ci.yml \
+                 | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')"
+          fi
+          if [ -z "${V}" ]; then
+            echo "::error::Could not read flutter-version from ci.yml. Re-run and set flutter_version (or 'latest')."
+            exit 1
+          fi
+          echo "Building with Flutter ${V}"
+          echo "--- Flutter versions Shorebird offers ---"
+          shorebird flutter versions list || true
+          echo "flutter_version=${V}" >> "$GITHUB_OUTPUT"
+
       - name: Shorebird release iOS
         uses: shorebirdtech/shorebird-release@v1
         with:
           platform: ios
-          args: --no-confirm
+          flutter-version: ${{ steps.flutter.outputs.flutter_version }}
+          args: ${{ inputs.dry_run == true && '--no-confirm --dry-run' || '--no-confirm' }}

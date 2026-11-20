@@ -25,15 +25,52 @@ const Set<String> kAllowedPaymentMethodCodes = {
 };
 
 /// Fallback display list when API methods are unavailable.
+/// What to offer when the server's own method list cannot be loaded.
+///
+/// This is a fallback, so every entry has to be something that actually works
+/// without asking the server first. It used to list Sahay, eBirr (Kaafi) and
+/// eBirr (Coop) alongside Waafi and eDahab — none of which are enabled. A
+/// customer who opened checkout while the list request failed would be shown a
+/// gateway that could not take their money, pick it, and fail at the provider.
+///
+/// Wallet and cash settle without a gateway. QPay is the one fully
+/// credentialed gateway (the 11 Nov launch preflight found credentials missing
+/// for every other one), so it is the only gateway safe to assume.
+///
+/// Adding a gateway back belongs on the server — PAYMENT_GATEWAYS_ENABLED plus
+/// its credentials — and the live list will carry it. Add it here only once it
+/// is genuinely always available, because this list is used precisely when the
+/// server cannot be asked.
 const List<Map<String, dynamic>> kDefaultAllowedPaymentMethods = [
   {'id': 'wallet', 'name': 'Wallet', 'enabled': true},
   {'id': 'cash_on_delivery', 'name': 'Cash on Delivery', 'enabled': true},
-  {'id': 'waafi', 'name': 'Waafi Pay', 'enabled': true},
-  {'id': 'edahab', 'name': 'eDahab', 'enabled': true},
-  {'id': 'sahay', 'name': 'Sahay', 'enabled': true},
-  {'id': 'ebirr_kaafi', 'name': 'eBirr (Kaafi)', 'enabled': true},
-  {'id': 'ebirr_coop', 'name': 'eBirr (Coop)', 'enabled': true},
+  {'id': 'qpay', 'name': 'QPay', 'enabled': true},
 ];
+
+/// Display names for every payment code that can appear on a record.
+///
+/// Separate from the list above on purpose: these are two different questions.
+/// What may a customer CHOOSE today is the fallback list, and it must shrink
+/// when a gateway is retired. What is this code CALLED must keep covering
+/// retired gateways forever, because deliveries paid with them still exist and
+/// still have to render.
+///
+/// Narrowing the fallback list without this split relabelled historical eBirr
+/// deliveries from "eBirr (Coop)" to "Ebirr Coop" — the title-cased fallback.
+const Map<String, String> kPaymentMethodDisplayNames = {
+  'wallet': 'Wallet',
+  'cash': 'Cash',
+  'cash_on_delivery': 'Cash on Delivery',
+  'qpay': 'QPay',
+  // Retired from checkout, kept here: past deliveries still reference them.
+  'sahay': 'Sahay',
+  'telebirr': 'Telebirr',
+  'ebirr': 'eBirr',
+  'ebirr_kaafi': 'eBirr (Kaafi)',
+  'ebirr_coop': 'eBirr (Coop)',
+  'waafi': 'Waafi Pay',
+  'edahab': 'eDahab',
+};
 
 /// True for legacy `ebirr` and provider-specific API codes.
 bool isEbirrPaymentMethodCode(String? code) {

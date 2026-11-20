@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Release signs against PRODUCTION APNs. Runner.entitlements says
+	     "development" and every build configuration pointed at it, so a
+	     TestFlight or App Store build registered its device token with the
+	     development APNs environment - which production APNs does not
+	     recognise. Push then fails for reasons nothing in the app can see.
+
+	     Debug and Profile keep Runner.entitlements, because a locally signed
+	     build uses a development provisioning profile and aps-environment has
+	     to match the profile it is signed with. -->
+	<key>aps-environment</key>
+	<string>production</string>
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:hudhuddelivery.com</string>
+	</array>
+</dict>
+</plist>
