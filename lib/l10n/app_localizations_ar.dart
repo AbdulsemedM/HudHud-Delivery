@@ -4588,4 +4588,13 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get cpRuleNoCancelAfterPickup =>
       'بعد استلام الطرد أو الطعام لا يمكن الإلغاء.';
+
+  @override
+  String get deliveryCodeTitle => 'رمز التسليم الخاص بك';
+
+  @override
+  String get deliveryCodePrompt => 'اقرأ هذه الأرقام الأربعة للمندوب لتأكيد استلامك طلبك.';
+
+  @override
+  String get deliveryCodeWarning => 'لا تشارك هذا الرمز إلا عندما يكون المندوب أمامك.';
 }

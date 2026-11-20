@@ -469,14 +469,20 @@
   "courierEstimateFromPrice": "{currency} {amount} irraa",
   "@courierEstimateFromPrice": {
     "placeholders": {
-      "currency": {"type": "String"},
-      "amount": {"type": "String"}
+      "currency": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "courierEstimateMinutes": "daq {minutes}",
   "@courierEstimateMinutes": {
     "placeholders": {
-      "minutes": {"type": "int"}
+      "minutes": {
+        "type": "int"
+      }
     }
   },
   "fromWallet": "Wallet irraa",
@@ -1232,9 +1238,15 @@
   "timeBandPickupSurcharge": "Kaffaltii fudhatinsa {band}: {currency} {amount}",
   "@timeBandPickupSurcharge": {
     "placeholders": {
-      "band": {"type": "String"},
-      "currency": {"type": "String"},
-      "amount": {"type": "String"}
+      "band": {
+        "type": "String"
+      },
+      "currency": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "chooseValidFuturePickup": "Maalifiiduu fi sa'aatii fudhatinsa gara fuulduraa ta'e sirrii ta'e filadhu.",
@@ -1343,7 +1355,9 @@
   "phoneEnrollmentOtpSubtitle": "Koodii dijiitii 6 gara {phone} ergame galchi.",
   "@phoneEnrollmentOtpSubtitle": {
     "placeholders": {
-      "phone": {"type": "String"}
+      "phone": {
+        "type": "String"
+      }
     }
   },
   "phoneEnrollmentSendCode": "Koodii ergi",
@@ -1352,7 +1366,9 @@
   "phoneEnrollmentResendIn": "Sekondii {seconds} booda irra deebi'ii ergi",
   "@phoneEnrollmentResendIn": {
     "placeholders": {
-      "seconds": {"type": "int"}
+      "seconds": {
+        "type": "int"
+      }
     }
   },
   "phoneEnrollmentContactSupport": "Deeggarsa qunnami",
@@ -1418,10 +1434,18 @@
   "easyConfirmSummary": "{pickup} irraa gara {dropoff}. Paakeejii: {item}. Kan {recipient}.",
   "@easyConfirmSummary": {
     "placeholders": {
-      "pickup": {"type": "String"},
-      "dropoff": {"type": "String"},
-      "item": {"type": "String"},
-      "recipient": {"type": "String"}
+      "pickup": {
+        "type": "String"
+      },
+      "dropoff": {
+        "type": "String"
+      },
+      "item": {
+        "type": "String"
+      },
+      "recipient": {
+        "type": "String"
+      }
     }
   },
   "easySpeakHint": "Dhaggeeffadhu",
@@ -1442,8 +1466,12 @@
   "easyStepOf": "Tarkaanfii {current} kan {total} keessaa",
   "@easyStepOf": {
     "placeholders": {
-      "current": {"type": "int"},
-      "total": {"type": "int"}
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "paymentCash": "Maallaqa callaa",
@@ -1459,21 +1487,29 @@
   "growthPromoSavedForCheckout": "Koodiin {code} yeroo kaffaltii ni hojiirra oola",
   "@growthPromoSavedForCheckout": {
     "placeholders": {
-      "code": {"type": "String"}
+      "code": {
+        "type": "String"
+      }
     }
   },
   "growthPointsToggle": "Qabxii {points} fayyadami (geejjiba irratti −{amount})",
   "@growthPointsToggle": {
     "placeholders": {
-      "points": {"type": "int"},
-      "amount": {"type": "String"}
+      "points": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "growthPointsSubtitle": "Qabxiin kaffaltii geejjibaa qofa hir'isa",
   "growthPointsCount": "Qabxii {points}",
   "@growthPointsCount": {
     "placeholders": {
-      "points": {"type": "int"}
+      "points": {
+        "type": "int"
+      }
     }
   },
   "growthPointsDiscount": "Hir'isa qabxii",
@@ -1481,7 +1517,9 @@
   "growthCouponDiscountWithCode": "Hir'isa ({code})",
   "@growthCouponDiscountWithCode": {
     "placeholders": {
-      "code": {"type": "String"}
+      "code": {
+        "type": "String"
+      }
     }
   },
   "growthDeliveryFeeLabel": "Kaffaltii geejjibaa",
@@ -1489,7 +1527,9 @@
   "growthFreeDeliveryHint": "Geejjiba bilisaaf {amount} dabalataa ida'i",
   "@growthFreeDeliveryHint": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "growthFreeDeliveryUnlocked": "Geejjiba bilisaa argattee!",
@@ -1497,7 +1537,9 @@
   "growthRewardsWorth": "Gatiin isaa {amount}",
   "@growthRewardsWorth": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "growthRewardsHowItWorks": "Akkamitti akka hojjetu",
@@ -1505,14 +1547,20 @@
   "growthRewardsRateLine": "Qabxii {points} = kaffaltii geejjibaa irraa {amount} hir'isa.",
   "@growthRewardsRateLine": {
     "placeholders": {
-      "points": {"type": "int"},
-      "amount": {"type": "String"}
+      "points": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "growthRewardsUseLine": "Yeroo qabxii {points} qabaattu kaffaltii irratti fayyadami.",
   "@growthRewardsUseLine": {
     "placeholders": {
-      "points": {"type": "int"}
+      "points": {
+        "type": "int"
+      }
     }
   },
   "growthRewardsHistory": "Seenaa",
@@ -1525,13 +1573,17 @@
   "growthReferralTitle": "Hiriyoota affeeri, {amount} argadhu",
   "@growthReferralTitle": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "growthReferralSubtitle": "Ajaja isaanii jalqabaa booda atii fi hiriyaan kee tokkoon tokkoon {amount} argattu.",
   "@growthReferralSubtitle": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "growthReferralCopy": "Garagalchi",
@@ -1541,9 +1593,15 @@
   "growthReferralShareFallback": "Koodii koo {code} fayyadamuun HudHud Delivery irratti {amount} argadhu: {link}",
   "@growthReferralShareFallback": {
     "placeholders": {
-      "amount": {"type": "String"},
-      "code": {"type": "String"},
-      "link": {"type": "String"}
+      "amount": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      },
+      "link": {
+        "type": "String"
+      }
     }
   },
   "growthReferralInvited": "Kan affeeraman",
@@ -1564,7 +1622,9 @@
   "growthOrderAgainOrderLabel": "Ajaja #{order}",
   "@growthOrderAgainOrderLabel": {
     "placeholders": {
-      "order": {"type": "String"}
+      "order": {
+        "type": "String"
+      }
     }
   },
   "growthSeeAll": "Hunda ilaali",
@@ -1578,22 +1638,30 @@
   "p3PlusPricePerPeriod": "{price} / guyyaa {days}",
   "@p3PlusPricePerPeriod": {
     "placeholders": {
-      "price": {"type": "String"},
-      "days": {"type": "int"}
+      "price": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
     }
   },
   "p3PlusBenefitsTitle": "Faayidaa kee",
   "p3PlusBenefitFreeDelivery": "Ajajoota nyaataa fi meeshaalee {amount} ol ta'aniif geejjiba bilisaa",
   "@p3PlusBenefitFreeDelivery": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "p3PlusBenefitFreeDeliveryAll": "Ajajoota nyaataa fi meeshaaleetiif geejjiba bilisaa",
   "p3PlusBenefitParcelDiscount": "Geejjiba paakeejii irratti {percent}% hir'isa",
   "@p3PlusBenefitParcelDiscount": {
     "placeholders": {
-      "percent": {"type": "String"}
+      "percent": {
+        "type": "String"
+      }
     }
   },
   "p3PlusSubscribe": "HudHud Plus makamaa",
@@ -1603,20 +1671,26 @@
   "p3PlusRenewsOn": "Guyyaa {date} haaromfama",
   "@p3PlusRenewsOn": {
     "placeholders": {
-      "date": {"type": "String"}
+      "date": {
+        "type": "String"
+      }
     }
   },
   "p3PlusEndsOn": "Guyyaa {date} xumurama — itti fufsiisuu dandeessa",
   "@p3PlusEndsOn": {
     "placeholders": {
-      "date": {"type": "String"}
+      "date": {
+        "type": "String"
+      }
     }
   },
   "p3PlusPastDue": "Kaffaltiin haaromsaa hin milkoofne. Plus itti fufsiisuuf waaletii kee guuti.",
   "p3PlusSavings": "Guyyoota 30 darban keessatti gara {amount} qusatteetta",
   "@p3PlusSavings": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "p3PlusPaidFromWallet": "Waaletii HudHud kee irraa kaffalama. Yeroo barbaadde haquu dandeessa.",
@@ -1629,7 +1703,9 @@
   "p3PlusInsufficientMessage": "Plus makamuuf waaletii keetti {amount} dabali.",
   "@p3PlusInsufficientMessage": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "p3PlusTopUp": "Waaletii guuti",
@@ -1645,7 +1721,9 @@
   "p3MarketChanged": "Magaalaan gara {market} jijjiirameera",
   "@p3MarketChanged": {
     "placeholders": {
-      "market": {"type": "String"}
+      "market": {
+        "type": "String"
+      }
     }
   },
   "p3MarketChangeBlocked": "Yeroo waaletiin kee haftee maallaqa biraa qabutti magaalaa jijjiiruu hin dandeessu. Dura itti fayyadami ykn baasi.",
@@ -1718,7 +1796,9 @@
   "@p9GiftRecipientPhoneHint": {
     "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
     "placeholders": {
-      "example": {"type": "String"}
+      "example": {
+        "type": "String"
+      }
     }
   },
   "p9GiftMessageLabel": "Ergaa kennaa (dirqama miti)",
@@ -1737,7 +1817,9 @@
   "@p9GiftPhoneInvalid": {
     "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
     "placeholders": {
-      "prefix": {"type": "String"}
+      "prefix": {
+        "type": "String"
+      }
     }
   },
   "p9GiftNoCash": "Kennaaf kaffaltiin maallaqa harkaa yeroo geejjibaa hin hayyamamu. Mala kaffaltii toora interneetii filadhu.",
@@ -1760,14 +1842,18 @@
   "@p9GiftPlacedBody": {
     "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
     "placeholders": {
-      "name": {"type": "String"}
+      "name": {
+        "type": "String"
+      }
     }
   },
   "p9GiftForName": "Kennaa {name}f",
   "@p9GiftForName": {
     "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
     "placeholders": {
-      "name": {"type": "String"}
+      "name": {
+        "type": "String"
+      }
     }
   },
   "p9GiftRecipientLabel": "Nama fudhatu",
@@ -1786,7 +1872,9 @@
   "@p9GiftModeBanner": {
     "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
     "placeholders": {
-      "market": {"type": "String"}
+      "market": {
+        "type": "String"
+      }
     }
   },
   "p9GiftStop": "Kennaa dhaabi",
@@ -2017,7 +2105,9 @@
   "@p10ParcelPriceHeld": {
     "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
     "placeholders": {
-      "time": {"type": "String"}
+      "time": {
+        "type": "String"
+      }
     }
   },
   "p10ParcelPriceExpired": "Yeroon qabannaa gatii darbeera",
@@ -2040,7 +2130,9 @@
   "@p10ParcelBook": {
     "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
     "placeholders": {
-      "price": {"type": "String"}
+      "price": {
+        "type": "String"
+      }
     }
   },
   "p10ParcelContinue": "Itti fufi",
@@ -2095,14 +2187,18 @@
   "@p10ParcelTrackingShareText": {
     "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
     "placeholders": {
-      "link": {"type": "String"}
+      "link": {
+        "type": "String"
+      }
     }
   },
   "p10ParcelEta": "Gara daqiiqaa {minutes} keessatti ga'a",
   "@p10ParcelEta": {
     "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
     "placeholders": {
-      "minutes": {"type": "String"}
+      "minutes": {
+        "type": "String"
+      }
     }
   },
   "p10ParcelCancel": "Paakeejii haqi",
@@ -2117,7 +2213,9 @@
   "@p10ParcelCancelFee": {
     "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
     "placeholders": {
-      "fee": {"type": "String"}
+      "fee": {
+        "type": "String"
+      }
     }
   },
   "p10ParcelCancelReason": "Ergaan appii keessatti haqe",
@@ -2136,7 +2234,9 @@
   "@p11ParcelStopN": {
     "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker.",
     "placeholders": {
-      "number": {"type": "String"}
+      "number": {
+        "type": "String"
+      }
     }
   },
   "p11ParcelRemoveStop": "Dhaabbata haqi",
@@ -2155,7 +2255,9 @@
   "@p11ParcelStopsLimit": {
     "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker.",
     "placeholders": {
-      "max": {"type": "String"}
+      "max": {
+        "type": "String"
+      }
     }
   },
   "p11ParcelMultiStopSenderPays": "Bakka geessaa hedduu yoo qabaatte, karaa guutuu ati kaffalta.",
@@ -2178,7 +2280,9 @@
   "@p11ParcelPayAtPickupDue": {
     "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker.",
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "p11ParcelPaidAtPickup": "Yeroo fudhatame ergamaaf kaffalameera",
@@ -2233,14 +2337,18 @@
   "@p11ParcelCancelCashFee": {
     "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker.",
     "placeholders": {
-      "fee": {"type": "String"}
+      "fee": {
+        "type": "String"
+      }
     }
   },
   "p11ParcelOutstandingBalance": "Paakeejii haqame irraa {amount} liqii qabda. Yeroo itti aanu yoo guuttu ykn ajajattu waletii irraa hir'ifama.",
   "@p11ParcelOutstandingBalance": {
     "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker.",
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "p12StoreOpen": "Banaa dha",
@@ -2259,21 +2367,27 @@
   "@p12StoreOpensAt": {
     "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
     "placeholders": {
-      "time": {"type": "String"}
+      "time": {
+        "type": "String"
+      }
     }
   },
   "p12StoreOpensTomorrowAt": "Boru {time} banama",
   "@p12StoreOpensTomorrowAt": {
     "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
     "placeholders": {
-      "time": {"type": "String"}
+      "time": {
+        "type": "String"
+      }
     }
   },
   "p12StoreBackAt": "Sa'aatii {time} deebi'a",
   "@p12StoreBackAt": {
     "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
     "placeholders": {
-      "time": {"type": "String"}
+      "time": {
+        "type": "String"
+      }
     }
   },
   "p12StoreClosedToday": "Har'a cufaa dha",
@@ -2320,7 +2434,9 @@
   "@p12ErrItemSoldOutNamed": {
     "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
     "placeholders": {
-      "item": {"type": "String"}
+      "item": {
+        "type": "String"
+      }
     }
   },
   "p12RemoveItem": "Meeshaa haqi",
@@ -2331,7 +2447,9 @@
   "@p12ErrOutstandingDues": {
     "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "p12DuesTitle": "Kaffaltii hin kaffalamne",
@@ -2342,7 +2460,9 @@
   "@p12DuesCheckoutBody": {
     "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "p12PayNow": "Amma kaffali",
@@ -2369,7 +2489,9 @@
   "@p12ErrCityMismatch": {
     "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
     "placeholders": {
-      "city": {"type": "String"}
+      "city": {
+        "type": "String"
+      }
     }
   },
   "p12ErrCityMismatchGeneric": "Teessoon kun magaalaa biraa keessa jira. Itti fufuuf magaalaa kee jijjiiri.",
@@ -2480,5 +2602,8 @@
   "cpMarkerPause": "Dhaabbii",
   "cpHowItWorks": "Akkamitti akka hojjetu",
   "cpRuleFree": "Osoo geejjibaan ykn konkolaachisaan hin ramadamin haquu: bilisa.",
-  "cpRuleNoCancelAfterPickup": "Erga meeshaan ykn nyaanni fudhatamee booda haqamuu hin danda'u."
+  "cpRuleNoCancelAfterPickup": "Erga meeshaan ykn nyaanni fudhatamee booda haqamuu hin danda'u.",
+  "deliveryCodeTitle": "Koodii geejjibaa keessan",
+  "deliveryCodePrompt": "Ajaja keessan akka fudhattan mirkaneessuuf lakkoofsota 4 kanneen konkolaachisaaf dubbisaa.",
+  "deliveryCodeWarning": "Koodii kana konkolaachisaan fuula keessan dura yoo jiraate qofa qoodaa."
 }

@@ -8495,4 +8495,22 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
       'an issue with the localizations generation tool. Please file an issue '
       'on GitHub with a reproducible sample app and the gen-l10n configuration '
       'that was used.');
+
+  /// Heading on the delivery-code card shown at the door
+  ///
+  /// In en, this message translates to:
+  /// **'Your delivery code'**
+  String get deliveryCodeTitle;
+
+  /// Tells the customer to read the 4-digit code aloud to the driver
+  ///
+  /// In en, this message translates to:
+  /// **'Read these 4 digits to your driver to confirm you received your order.'**
+  String get deliveryCodePrompt;
+
+  /// Warns the customer not to share the code before the driver arrives
+  ///
+  /// In en, this message translates to:
+  /// **'Only share this code once the driver is in front of you.'**
+  String get deliveryCodeWarning;
 }

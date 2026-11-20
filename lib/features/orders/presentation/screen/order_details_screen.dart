@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
+import 'package:hudhud_delivery/features/orders/presentation/widgets/delivery_code_card.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/theme/system_ui_style.dart';
 import 'package:hudhud_delivery/features/cancellation/cancellation_policy_controller.dart';
@@ -280,6 +281,13 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                   trackingEstimatedTime: tracking?.estimatedTime,
                 ),
                 const SizedBox(height: 14),
+                // The 4 digits to read out at the door. Renders nothing until
+                // the driver asks for a code, which is most of a delivery, and
+                // nothing at all once the order is terminal.
+                if (!order.isTerminal) ...[
+                  DeliveryCodeCard(orderId: order.id),
+                  const SizedBox(height: 14),
+                ],
                 if (order.isGift) ...[
                   GiftOrderCard(order: order),
                   const SizedBox(height: 14),

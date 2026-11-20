@@ -4664,4 +4664,13 @@ class AppLocalizationsOm extends AppLocalizations {
   @override
   String get cpRuleNoCancelAfterPickup =>
       'Erga meeshaan ykn nyaanni fudhatamee booda haqamuu hin danda\'u.';
+
+  @override
+  String get deliveryCodeTitle => 'Koodii geejjibaa keessan';
+
+  @override
+  String get deliveryCodePrompt => 'Ajaja keessan akka fudhattan mirkaneessuuf lakkoofsota 4 kanneen konkolaachisaaf dubbisaa.';
+
+  @override
+  String get deliveryCodeWarning => 'Koodii kana konkolaachisaan fuula keessan dura yoo jiraate qofa qoodaa.';
 }

@@ -469,14 +469,20 @@
   "courierEstimateFromPrice": "من {currency} {amount}",
   "@courierEstimateFromPrice": {
     "placeholders": {
-      "currency": {"type": "String"},
-      "amount": {"type": "String"}
+      "currency": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "courierEstimateMinutes": "{minutes} د",
   "@courierEstimateMinutes": {
     "placeholders": {
-      "minutes": {"type": "int"}
+      "minutes": {
+        "type": "int"
+      }
     }
   },
   "fromWallet": "من المحفظة",
@@ -1232,9 +1238,15 @@
   "timeBandPickupSurcharge": "رسوم استلام {band}: {currency} {amount}",
   "@timeBandPickupSurcharge": {
     "placeholders": {
-      "band": {"type": "String"},
-      "currency": {"type": "String"},
-      "amount": {"type": "String"}
+      "band": {
+        "type": "String"
+      },
+      "currency": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "chooseValidFuturePickup": "يرجى اختيار تاريخ ووقت استلام مستقبلي صالح.",
@@ -1343,7 +1355,9 @@
   "phoneEnrollmentOtpSubtitle": "أدخل الرمز المكوّن من 6 أرقام المرسل إلى {phone}.",
   "@phoneEnrollmentOtpSubtitle": {
     "placeholders": {
-      "phone": {"type": "String"}
+      "phone": {
+        "type": "String"
+      }
     }
   },
   "phoneEnrollmentSendCode": "إرسال الرمز",
@@ -1352,7 +1366,9 @@
   "phoneEnrollmentResendIn": "إعادة الإرسال خلال {seconds} ث",
   "@phoneEnrollmentResendIn": {
     "placeholders": {
-      "seconds": {"type": "int"}
+      "seconds": {
+        "type": "int"
+      }
     }
   },
   "phoneEnrollmentContactSupport": "تواصل مع الدعم",
@@ -1418,10 +1434,18 @@
   "easyConfirmSummary": "من {pickup} إلى {dropoff}. الطرد: {item}. إلى {recipient}.",
   "@easyConfirmSummary": {
     "placeholders": {
-      "pickup": {"type": "String"},
-      "dropoff": {"type": "String"},
-      "item": {"type": "String"},
-      "recipient": {"type": "String"}
+      "pickup": {
+        "type": "String"
+      },
+      "dropoff": {
+        "type": "String"
+      },
+      "item": {
+        "type": "String"
+      },
+      "recipient": {
+        "type": "String"
+      }
     }
   },
   "easySpeakHint": "استمع",
@@ -1442,8 +1466,12 @@
   "easyStepOf": "الخطوة {current} من {total}",
   "@easyStepOf": {
     "placeholders": {
-      "current": {"type": "int"},
-      "total": {"type": "int"}
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "paymentCash": "نقداً",
@@ -1459,21 +1487,29 @@
   "growthPromoSavedForCheckout": "سيتم تطبيق الرمز {code} عند الدفع",
   "@growthPromoSavedForCheckout": {
     "placeholders": {
-      "code": {"type": "String"}
+      "code": {
+        "type": "String"
+      }
     }
   },
   "growthPointsToggle": "استخدم {points} نقطة (−{amount} من رسوم التوصيل)",
   "@growthPointsToggle": {
     "placeholders": {
-      "points": {"type": "int"},
-      "amount": {"type": "String"}
+      "points": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "growthPointsSubtitle": "النقاط تخفض رسوم التوصيل فقط",
   "growthPointsCount": "{points} نقطة",
   "@growthPointsCount": {
     "placeholders": {
-      "points": {"type": "int"}
+      "points": {
+        "type": "int"
+      }
     }
   },
   "growthPointsDiscount": "خصم النقاط",
@@ -1481,7 +1517,9 @@
   "growthCouponDiscountWithCode": "خصم ({code})",
   "@growthCouponDiscountWithCode": {
     "placeholders": {
-      "code": {"type": "String"}
+      "code": {
+        "type": "String"
+      }
     }
   },
   "growthDeliveryFeeLabel": "رسوم التوصيل",
@@ -1489,7 +1527,9 @@
   "growthFreeDeliveryHint": "أضف {amount} للحصول على توصيل مجاني",
   "@growthFreeDeliveryHint": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "growthFreeDeliveryUnlocked": "لقد حصلت على توصيل مجاني!",
@@ -1497,7 +1537,9 @@
   "growthRewardsWorth": "بقيمة {amount}",
   "@growthRewardsWorth": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "growthRewardsHowItWorks": "كيف تعمل",
@@ -1505,14 +1547,20 @@
   "growthRewardsRateLine": "{points} نقطة = خصم {amount} من رسوم التوصيل.",
   "@growthRewardsRateLine": {
     "placeholders": {
-      "points": {"type": "int"},
-      "amount": {"type": "String"}
+      "points": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "growthRewardsUseLine": "استخدمها عند الدفع عندما يكون لديك {points} نقطة.",
   "@growthRewardsUseLine": {
     "placeholders": {
-      "points": {"type": "int"}
+      "points": {
+        "type": "int"
+      }
     }
   },
   "growthRewardsHistory": "السجل",
@@ -1525,13 +1573,17 @@
   "growthReferralTitle": "ادعُ أصدقاءك واحصل على {amount}",
   "@growthReferralTitle": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "growthReferralSubtitle": "تحصل أنت وصديقك على {amount} لكل منكما بعد طلبه الأول.",
   "@growthReferralSubtitle": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "growthReferralCopy": "نسخ",
@@ -1541,9 +1593,15 @@
   "growthReferralShareFallback": "احصل على {amount} في هدهد للتوصيل باستخدام رمزي {code}: {link}",
   "@growthReferralShareFallback": {
     "placeholders": {
-      "amount": {"type": "String"},
-      "code": {"type": "String"},
-      "link": {"type": "String"}
+      "amount": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      },
+      "link": {
+        "type": "String"
+      }
     }
   },
   "growthReferralInvited": "المدعوون",
@@ -1564,7 +1622,9 @@
   "growthOrderAgainOrderLabel": "الطلب #{order}",
   "@growthOrderAgainOrderLabel": {
     "placeholders": {
-      "order": {"type": "String"}
+      "order": {
+        "type": "String"
+      }
     }
   },
   "growthSeeAll": "عرض الكل",
@@ -1578,22 +1638,30 @@
   "p3PlusPricePerPeriod": "{price} / {days} يومًا",
   "@p3PlusPricePerPeriod": {
     "placeholders": {
-      "price": {"type": "String"},
-      "days": {"type": "int"}
+      "price": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
     }
   },
   "p3PlusBenefitsTitle": "مزاياك",
   "p3PlusBenefitFreeDelivery": "توصيل مجاني لطلبات الطعام والبقالة فوق {amount}",
   "@p3PlusBenefitFreeDelivery": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "p3PlusBenefitFreeDeliveryAll": "توصيل مجاني لطلبات الطعام والبقالة",
   "p3PlusBenefitParcelDiscount": "خصم {percent}% على توصيل الطرود",
   "@p3PlusBenefitParcelDiscount": {
     "placeholders": {
-      "percent": {"type": "String"}
+      "percent": {
+        "type": "String"
+      }
     }
   },
   "p3PlusSubscribe": "اشترك في هدهد بلس",
@@ -1603,20 +1671,26 @@
   "p3PlusRenewsOn": "يتجدد في {date}",
   "@p3PlusRenewsOn": {
     "placeholders": {
-      "date": {"type": "String"}
+      "date": {
+        "type": "String"
+      }
     }
   },
   "p3PlusEndsOn": "ينتهي في {date} — يمكنك الاحتفاظ به",
   "@p3PlusEndsOn": {
     "placeholders": {
-      "date": {"type": "String"}
+      "date": {
+        "type": "String"
+      }
     }
   },
   "p3PlusPastDue": "فشل دفع التجديد. اشحن محفظتك للاحتفاظ ببلس.",
   "p3PlusSavings": "وفرت حوالي {amount} خلال آخر 30 يومًا",
   "@p3PlusSavings": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "p3PlusPaidFromWallet": "يُدفع من محفظة هدهد. يمكنك الإلغاء في أي وقت.",
@@ -1629,7 +1703,9 @@
   "p3PlusInsufficientMessage": "أضف {amount} إلى محفظتك للاشتراك في بلس.",
   "@p3PlusInsufficientMessage": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "p3PlusTopUp": "شحن المحفظة",
@@ -1645,7 +1721,9 @@
   "p3MarketChanged": "تم تغيير المدينة إلى {market}",
   "@p3MarketChanged": {
     "placeholders": {
-      "market": {"type": "String"}
+      "market": {
+        "type": "String"
+      }
     }
   },
   "p3MarketChangeBlocked": "لا يمكنك تغيير المدينة ومحفظتك تحتوي على رصيد بعملة أخرى. استخدمه أو اسحبه أولًا.",
@@ -1718,7 +1796,9 @@
   "@p9GiftRecipientPhoneHint": {
     "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
     "placeholders": {
-      "example": {"type": "String"}
+      "example": {
+        "type": "String"
+      }
     }
   },
   "p9GiftMessageLabel": "رسالة الهدية (اختياري)",
@@ -1737,7 +1817,9 @@
   "@p9GiftPhoneInvalid": {
     "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
     "placeholders": {
-      "prefix": {"type": "String"}
+      "prefix": {
+        "type": "String"
+      }
     }
   },
   "p9GiftNoCash": "الدفع عند الاستلام غير متاح للهدايا. اختر طريقة دفع إلكترونية.",
@@ -1760,14 +1842,18 @@
   "@p9GiftPlacedBody": {
     "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
     "placeholders": {
-      "name": {"type": "String"}
+      "name": {
+        "type": "String"
+      }
     }
   },
   "p9GiftForName": "هدية إلى {name}",
   "@p9GiftForName": {
     "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
     "placeholders": {
-      "name": {"type": "String"}
+      "name": {
+        "type": "String"
+      }
     }
   },
   "p9GiftRecipientLabel": "المستلم",
@@ -1786,7 +1872,9 @@
   "@p9GiftModeBanner": {
     "description": "NEEDS NATIVE REVIEW: Phase 9 gifting draft, not checked by a native speaker.",
     "placeholders": {
-      "market": {"type": "String"}
+      "market": {
+        "type": "String"
+      }
     }
   },
   "p9GiftStop": "إيقاف الهدية",
@@ -2017,7 +2105,9 @@
   "@p10ParcelPriceHeld": {
     "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
     "placeholders": {
-      "time": {"type": "String"}
+      "time": {
+        "type": "String"
+      }
     }
   },
   "p10ParcelPriceExpired": "انتهت مدة حجز السعر",
@@ -2040,7 +2130,9 @@
   "@p10ParcelBook": {
     "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
     "placeholders": {
-      "price": {"type": "String"}
+      "price": {
+        "type": "String"
+      }
     }
   },
   "p10ParcelContinue": "متابعة",
@@ -2095,14 +2187,18 @@
   "@p10ParcelTrackingShareText": {
     "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
     "placeholders": {
-      "link": {"type": "String"}
+      "link": {
+        "type": "String"
+      }
     }
   },
   "p10ParcelEta": "يصل خلال {minutes} دقيقة تقريبًا",
   "@p10ParcelEta": {
     "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
     "placeholders": {
-      "minutes": {"type": "String"}
+      "minutes": {
+        "type": "String"
+      }
     }
   },
   "p10ParcelCancel": "إلغاء الطرد",
@@ -2117,7 +2213,9 @@
   "@p10ParcelCancelFee": {
     "description": "NEEDS NATIVE REVIEW: Phase 10 parcel draft, not checked by a native speaker.",
     "placeholders": {
-      "fee": {"type": "String"}
+      "fee": {
+        "type": "String"
+      }
     }
   },
   "p10ParcelCancelReason": "ألغاه المرسل من التطبيق",
@@ -2136,7 +2234,9 @@
   "@p11ParcelStopN": {
     "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker.",
     "placeholders": {
-      "number": {"type": "String"}
+      "number": {
+        "type": "String"
+      }
     }
   },
   "p11ParcelRemoveStop": "إزالة المحطة",
@@ -2155,7 +2255,9 @@
   "@p11ParcelStopsLimit": {
     "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker.",
     "placeholders": {
-      "max": {"type": "String"}
+      "max": {
+        "type": "String"
+      }
     }
   },
   "p11ParcelMultiStopSenderPays": "مع عدة نقاط تسليم تدفع أنت ثمن المسار كاملاً.",
@@ -2178,7 +2280,9 @@
   "@p11ParcelPayAtPickupDue": {
     "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker.",
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "p11ParcelPaidAtPickup": "تم الدفع للمندوب عند الاستلام",
@@ -2233,14 +2337,18 @@
   "@p11ParcelCancelCashFee": {
     "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker.",
     "placeholders": {
-      "fee": {"type": "String"}
+      "fee": {
+        "type": "String"
+      }
     }
   },
   "p11ParcelOutstandingBalance": "عليك {amount} من طرد ملغى. سيُخصم من محفظتك عند الشحن أو الطلب التالي.",
   "@p11ParcelOutstandingBalance": {
     "description": "NEEDS NATIVE REVIEW: Phase 11 parcel draft, not checked by a native speaker.",
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "p12StoreOpen": "مفتوح",
@@ -2259,21 +2367,27 @@
   "@p12StoreOpensAt": {
     "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
     "placeholders": {
-      "time": {"type": "String"}
+      "time": {
+        "type": "String"
+      }
     }
   },
   "p12StoreOpensTomorrowAt": "يفتح غدًا {time}",
   "@p12StoreOpensTomorrowAt": {
     "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
     "placeholders": {
-      "time": {"type": "String"}
+      "time": {
+        "type": "String"
+      }
     }
   },
   "p12StoreBackAt": "يعود {time}",
   "@p12StoreBackAt": {
     "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
     "placeholders": {
-      "time": {"type": "String"}
+      "time": {
+        "type": "String"
+      }
     }
   },
   "p12StoreClosedToday": "مغلق اليوم",
@@ -2320,7 +2434,9 @@
   "@p12ErrItemSoldOutNamed": {
     "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
     "placeholders": {
-      "item": {"type": "String"}
+      "item": {
+        "type": "String"
+      }
     }
   },
   "p12RemoveItem": "إزالة المنتج",
@@ -2331,7 +2447,9 @@
   "@p12ErrOutstandingDues": {
     "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "p12DuesTitle": "رصيد غير مدفوع",
@@ -2342,7 +2460,9 @@
   "@p12DuesCheckoutBody": {
     "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "p12PayNow": "ادفع الآن",
@@ -2369,7 +2489,9 @@
   "@p12ErrCityMismatch": {
     "description": "NEEDS NATIVE REVIEW: pre-launch audit (store status, dues, city and network errors) draft, not checked by a native speaker.",
     "placeholders": {
-      "city": {"type": "String"}
+      "city": {
+        "type": "String"
+      }
     }
   },
   "p12ErrCityMismatchGeneric": "هذا العنوان في مدينة أخرى. غيّر مدينتك للمتابعة.",
@@ -2480,5 +2602,8 @@
   "cpMarkerPause": "إيقاف",
   "cpHowItWorks": "كيف يعمل",
   "cpRuleFree": "الإلغاء قبل تعيين مندوب أو سائق: مجاني.",
-  "cpRuleNoCancelAfterPickup": "بعد استلام الطرد أو الطعام لا يمكن الإلغاء."
+  "cpRuleNoCancelAfterPickup": "بعد استلام الطرد أو الطعام لا يمكن الإلغاء.",
+  "deliveryCodeTitle": "رمز التسليم الخاص بك",
+  "deliveryCodePrompt": "اقرأ هذه الأرقام الأربعة للمندوب لتأكيد استلامك طلبك.",
+  "deliveryCodeWarning": "لا تشارك هذا الرمز إلا عندما يكون المندوب أمامك."
 }

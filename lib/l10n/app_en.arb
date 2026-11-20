@@ -117,7 +117,9 @@
   "logoutError": "Error during logout: {error}",
   "@logoutError": {
     "placeholders": {
-      "error": {"type": "String"}
+      "error": {
+        "type": "String"
+      }
     }
   },
   "themeLight": "Light",
@@ -175,13 +177,17 @@
   "verifyEmailBody": "We sent a verification code to {email}. Enter it below.",
   "@verifyEmailBody": {
     "placeholders": {
-      "email": {"type": "String"}
+      "email": {
+        "type": "String"
+      }
     }
   },
   "verifyPhoneBody": "We sent a verification code to {phone}. Enter it below.",
   "@verifyPhoneBody": {
     "placeholders": {
-      "phone": {"type": "String"}
+      "phone": {
+        "type": "String"
+      }
     }
   },
   "enterVerificationCodeError": "Enter the verification code",
@@ -195,7 +201,9 @@
   "failedToLoadOrders": "Failed to load orders: {error}",
   "@failedToLoadOrders": {
     "placeholders": {
-      "error": {"type": "String"}
+      "error": {
+        "type": "String"
+      }
     }
   },
   "homeWhatToDo": "What would you like to do?",
@@ -232,7 +240,9 @@
   "recipientLabel": "Recipient: {name}",
   "@recipientLabel": {
     "placeholders": {
-      "name": {"type": "String"}
+      "name": {
+        "type": "String"
+      }
     }
   },
   "inProgress": "In progress",
@@ -278,13 +288,17 @@
   "themeSwitched": "Theme switched to {mode}",
   "@themeSwitched": {
     "placeholders": {
-      "mode": {"type": "String"}
+      "mode": {
+        "type": "String"
+      }
     }
   },
   "themeModeSet": "Theme mode set to {mode}",
   "@themeModeSet": {
     "placeholders": {
-      "mode": {"type": "String"}
+      "mode": {
+        "type": "String"
+      }
     }
   },
   "welcomeTitle": "Welcome back",
@@ -292,20 +306,26 @@
   "currentThemeLabel": "Current theme: {mode}",
   "@currentThemeLabel": {
     "placeholders": {
-      "mode": {"type": "String"}
+      "mode": {
+        "type": "String"
+      }
     }
   },
   "counterDemo": "Counter Demo",
   "counterDecreased": "Counter decreased to {count}",
   "@counterDecreased": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "counterIncreased": "Counter increased to {count}",
   "@counterIncreased": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "buttonShowcase": "Button Showcase",
@@ -343,13 +363,17 @@
   "loginSuccessWelcome": "Login successful! Welcome {name}",
   "@loginSuccessWelcome": {
     "placeholders": {
-      "name": {"type": "String"}
+      "name": {
+        "type": "String"
+      }
     }
   },
   "loginFailed": "Login failed: {error}",
   "@loginFailed": {
     "placeholders": {
-      "error": {"type": "String"}
+      "error": {
+        "type": "String"
+      }
     }
   },
   "getUserProfile": "Get User Profile",
@@ -357,7 +381,9 @@
   "profileRefreshFailed": "Failed to refresh profile: {error}",
   "@profileRefreshFailed": {
     "placeholders": {
-      "error": {"type": "String"}
+      "error": {
+        "type": "String"
+      }
     }
   },
   "currentUser": "Current User:",
@@ -368,7 +394,9 @@
   "errorPrefix": "Error: {message}",
   "@errorPrefix": {
     "placeholders": {
-      "message": {"type": "String"}
+      "message": {
+        "type": "String"
+      }
     }
   },
   "utilityButtonsDemo": "Utility Buttons Demo",
@@ -446,14 +474,20 @@
   "courierEstimateFromPrice": "from {currency} {amount}",
   "@courierEstimateFromPrice": {
     "placeholders": {
-      "currency": {"type": "String"},
-      "amount": {"type": "String"}
+      "currency": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "courierEstimateMinutes": "{minutes} min",
   "@courierEstimateMinutes": {
     "placeholders": {
-      "minutes": {"type": "int"}
+      "minutes": {
+        "type": "int"
+      }
     }
   },
   "fromWallet": "From Wallet",
@@ -629,26 +663,34 @@
   "profileUpdateFailed": "Failed to update profile: {error}",
   "@profileUpdateFailed": {
     "placeholders": {
-      "error": {"type": "String"}
+      "error": {
+        "type": "String"
+      }
     }
   },
   "profileLoadFailed": "Failed to load profile: {error}",
   "@profileLoadFailed": {
     "placeholders": {
-      "error": {"type": "String"}
+      "error": {
+        "type": "String"
+      }
     }
   },
   "servicesTryAgain": "Try again",
   "unexpectedCheckoutError": "An unexpected error occurred: {error}",
   "@unexpectedCheckoutError": {
     "placeholders": {
-      "error": {"type": "String"}
+      "error": {
+        "type": "String"
+      }
     }
   },
   "failedOrderHistory": "Failed to load order history: {error}",
   "@failedOrderHistory": {
     "placeholders": {
-      "error": {"type": "String"}
+      "error": {
+        "type": "String"
+      }
     }
   },
   "timelineOrderPlaced": "Order Placed",
@@ -708,20 +750,26 @@
   "paymentFailedWithError": "Payment failed: {error}",
   "@paymentFailedWithError": {
     "placeholders": {
-      "error": {"type": "String"}
+      "error": {
+        "type": "String"
+      }
     }
   },
   "paymentPayAmountBr": "Pay {amount} Br",
   "@paymentPayAmountBr": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "paymentSuccessTitle": "Payment Successful!",
   "paymentTransactionIdLabel": "Transaction ID: {id}",
   "@paymentTransactionIdLabel": {
     "placeholders": {
-      "id": {"type": "String"}
+      "id": {
+        "type": "String"
+      }
     }
   },
   "continueShopping": "Continue Shopping",
@@ -742,7 +790,9 @@
   "errorGettingAddress": "Error getting address: {error}",
   "@errorGettingAddress": {
     "placeholders": {
-      "error": {"type": "String"}
+      "error": {
+        "type": "String"
+      }
     }
   },
   "googleMapsIosMissingKey": "Google Maps is not configured on iOS. Add GOOGLE_MAPS_API_KEY and restart the app.",
@@ -984,7 +1034,9 @@
   "addressesBulkDeleteMessage": "Delete {count} address(es)?",
   "@addressesBulkDeleteMessage": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "addressesBulkDeleteForce": "Also delete default address",
@@ -1198,9 +1250,15 @@
   "timeBandPickupSurcharge": "{band} pickup surcharge: {currency} {amount}",
   "@timeBandPickupSurcharge": {
     "placeholders": {
-      "band": {"type": "String"},
-      "currency": {"type": "String"},
-      "amount": {"type": "String"}
+      "band": {
+        "type": "String"
+      },
+      "currency": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "chooseValidFuturePickup": "Please choose a valid future pickup date and time.",
@@ -1212,8 +1270,12 @@
   "topUpAmount": "Top up {currency} {amount}",
   "@topUpAmount": {
     "placeholders": {
-      "currency": {"type": "String"},
-      "amount": {"type": "String"}
+      "currency": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "loadMore": "Load more",
@@ -1225,13 +1287,17 @@
   "promoCodeApplied": "Promo code \"{promoCode}\" applied",
   "@promoCodeApplied": {
     "placeholders": {
-      "promoCode": {"type": "String"}
+      "promoCode": {
+        "type": "String"
+      }
     }
   },
   "addressUpdatedTo": "Address updated to: {address}",
   "@addressUpdatedTo": {
     "placeholders": {
-      "address": {"type": "String"}
+      "address": {
+        "type": "String"
+      }
     }
   },
   "addValidProductsToCart": "Please add valid products to your cart",
@@ -1244,7 +1310,9 @@
   "couldNotOpenPhotoPicker": "Could not open photo picker: {error}",
   "@couldNotOpenPhotoPicker": {
     "placeholders": {
-      "error": {"type": "String"}
+      "error": {
+        "type": "String"
+      }
     }
   },
   "pleaseEnterYourName": "Please enter your name",
@@ -1279,8 +1347,12 @@
   "deliveryBookedWalletBalance": "Delivery booked. Wallet balance: {currency} {balance}",
   "@deliveryBookedWalletBalance": {
     "placeholders": {
-      "currency": {"type": "String"},
-      "balance": {"type": "String"}
+      "currency": {
+        "type": "String"
+      },
+      "balance": {
+        "type": "String"
+      }
     }
   },
   "cancelDeliveryConfirm": "Are you sure you want to cancel this delivery?",
@@ -1295,7 +1367,9 @@
   "phoneEnrollmentOtpSubtitle": "Enter the 6-digit code sent to {phone}.",
   "@phoneEnrollmentOtpSubtitle": {
     "placeholders": {
-      "phone": {"type": "String"}
+      "phone": {
+        "type": "String"
+      }
     }
   },
   "phoneEnrollmentSendCode": "Send code",
@@ -1304,7 +1378,9 @@
   "phoneEnrollmentResendIn": "Resend in {seconds}s",
   "@phoneEnrollmentResendIn": {
     "placeholders": {
-      "seconds": {"type": "int"}
+      "seconds": {
+        "type": "int"
+      }
     }
   },
   "phoneEnrollmentContactSupport": "Contact support",
@@ -1370,10 +1446,18 @@
   "easyConfirmSummary": "From {pickup} to {dropoff}. Package: {item}. For {recipient}.",
   "@easyConfirmSummary": {
     "placeholders": {
-      "pickup": {"type": "String"},
-      "dropoff": {"type": "String"},
-      "item": {"type": "String"},
-      "recipient": {"type": "String"}
+      "pickup": {
+        "type": "String"
+      },
+      "dropoff": {
+        "type": "String"
+      },
+      "item": {
+        "type": "String"
+      },
+      "recipient": {
+        "type": "String"
+      }
     }
   },
   "easySpeakHint": "Listen",
@@ -1394,8 +1478,12 @@
   "easyStepOf": "Step {current} of {total}",
   "@easyStepOf": {
     "placeholders": {
-      "current": {"type": "int"},
-      "total": {"type": "int"}
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "paymentCash": "Cash",
@@ -1411,21 +1499,29 @@
   "growthPromoSavedForCheckout": "Code {code} will be applied at checkout",
   "@growthPromoSavedForCheckout": {
     "placeholders": {
-      "code": {"type": "String"}
+      "code": {
+        "type": "String"
+      }
     }
   },
   "growthPointsToggle": "Use {points} points (−{amount} on delivery)",
   "@growthPointsToggle": {
     "placeholders": {
-      "points": {"type": "int"},
-      "amount": {"type": "String"}
+      "points": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "growthPointsSubtitle": "Points reduce the delivery fee only",
   "growthPointsCount": "{points} points",
   "@growthPointsCount": {
     "placeholders": {
-      "points": {"type": "int"}
+      "points": {
+        "type": "int"
+      }
     }
   },
   "growthPointsDiscount": "Points discount",
@@ -1433,7 +1529,9 @@
   "growthCouponDiscountWithCode": "Promo ({code})",
   "@growthCouponDiscountWithCode": {
     "placeholders": {
-      "code": {"type": "String"}
+      "code": {
+        "type": "String"
+      }
     }
   },
   "growthDeliveryFeeLabel": "Delivery fee",
@@ -1441,7 +1539,9 @@
   "growthFreeDeliveryHint": "Add {amount} more for free delivery",
   "@growthFreeDeliveryHint": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "growthFreeDeliveryUnlocked": "You unlocked free delivery!",
@@ -1449,7 +1549,9 @@
   "growthRewardsWorth": "Worth {amount}",
   "@growthRewardsWorth": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "growthRewardsHowItWorks": "How it works",
@@ -1457,14 +1559,20 @@
   "growthRewardsRateLine": "{points} points = {amount} off your delivery fee.",
   "@growthRewardsRateLine": {
     "placeholders": {
-      "points": {"type": "int"},
-      "amount": {"type": "String"}
+      "points": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "growthRewardsUseLine": "Use them at checkout once you have {points} points.",
   "@growthRewardsUseLine": {
     "placeholders": {
-      "points": {"type": "int"}
+      "points": {
+        "type": "int"
+      }
     }
   },
   "growthRewardsHistory": "History",
@@ -1477,13 +1585,17 @@
   "growthReferralTitle": "Invite friends, get {amount}",
   "@growthReferralTitle": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "growthReferralSubtitle": "You and your friend each get {amount} after their first order.",
   "@growthReferralSubtitle": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "growthReferralCopy": "Copy",
@@ -1493,9 +1605,15 @@
   "growthReferralShareFallback": "Get {amount} on HudHud Delivery with my code {code}: {link}",
   "@growthReferralShareFallback": {
     "placeholders": {
-      "amount": {"type": "String"},
-      "code": {"type": "String"},
-      "link": {"type": "String"}
+      "amount": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      },
+      "link": {
+        "type": "String"
+      }
     }
   },
   "growthReferralInvited": "Invited",
@@ -1516,7 +1634,9 @@
   "growthOrderAgainOrderLabel": "Order #{order}",
   "@growthOrderAgainOrderLabel": {
     "placeholders": {
-      "order": {"type": "String"}
+      "order": {
+        "type": "String"
+      }
     }
   },
   "growthSeeAll": "See all",
@@ -1530,22 +1650,30 @@
   "p3PlusPricePerPeriod": "{price} / {days} days",
   "@p3PlusPricePerPeriod": {
     "placeholders": {
-      "price": {"type": "String"},
-      "days": {"type": "int"}
+      "price": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
     }
   },
   "p3PlusBenefitsTitle": "Your benefits",
   "p3PlusBenefitFreeDelivery": "Free delivery on food and grocery orders over {amount}",
   "@p3PlusBenefitFreeDelivery": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "p3PlusBenefitFreeDeliveryAll": "Free delivery on food and grocery orders",
   "p3PlusBenefitParcelDiscount": "{percent}% off parcel delivery",
   "@p3PlusBenefitParcelDiscount": {
     "placeholders": {
-      "percent": {"type": "String"}
+      "percent": {
+        "type": "String"
+      }
     }
   },
   "p3PlusSubscribe": "Join HudHud Plus",
@@ -1555,20 +1683,26 @@
   "p3PlusRenewsOn": "Renews on {date}",
   "@p3PlusRenewsOn": {
     "placeholders": {
-      "date": {"type": "String"}
+      "date": {
+        "type": "String"
+      }
     }
   },
   "p3PlusEndsOn": "Ends on {date} — you can keep it",
   "@p3PlusEndsOn": {
     "placeholders": {
-      "date": {"type": "String"}
+      "date": {
+        "type": "String"
+      }
     }
   },
   "p3PlusPastDue": "Renewal payment failed. Top up your wallet to keep Plus.",
   "p3PlusSavings": "You saved about {amount} in the last 30 days",
   "@p3PlusSavings": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "p3PlusPaidFromWallet": "Paid from your HudHud wallet. Cancel anytime.",
@@ -1581,7 +1715,9 @@
   "p3PlusInsufficientMessage": "Add {amount} to your wallet to join Plus.",
   "@p3PlusInsufficientMessage": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "p3PlusTopUp": "Top up wallet",
@@ -1597,7 +1733,9 @@
   "p3MarketChanged": "City changed to {market}",
   "@p3MarketChanged": {
     "placeholders": {
-      "market": {"type": "String"}
+      "market": {
+        "type": "String"
+      }
     }
   },
   "p3MarketChangeBlocked": "You can't change city while your wallet has a balance in another currency. Use or withdraw it first.",
@@ -1608,14 +1746,18 @@
   "p5SetsMaxPerOrder": "Up to {count} per order",
   "@p5SetsMaxPerOrder": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "p5QuoteSetDeliveryIncluded": "HudHud Set: delivery included",
   "p5SetOverMaxQuantity": "Delivery is included for up to {count} HudHud Sets per order.",
   "@p5SetOverMaxQuantity": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "p5SetMixedCart": "Delivery is included only when your cart has HudHud Sets only.",
@@ -1628,7 +1770,9 @@
   "p5RefundedToWallet": "{amount} refunded to your HudHud wallet",
   "@p5RefundedToWallet": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "p5RefundManual": "Order cancelled. Our team will process your refund shortly.",
@@ -1648,7 +1792,9 @@
   "p9GiftRecipientPhoneHint": "e.g. {example}",
   "@p9GiftRecipientPhoneHint": {
     "placeholders": {
-      "example": {"type": "String"}
+      "example": {
+        "type": "String"
+      }
     }
   },
   "p9GiftMessageLabel": "Gift message (optional)",
@@ -1657,7 +1803,9 @@
   "p9GiftPhoneInvalid": "Enter a valid mobile number ({prefix} …)",
   "@p9GiftPhoneInvalid": {
     "placeholders": {
-      "prefix": {"type": "String"}
+      "prefix": {
+        "type": "String"
+      }
     }
   },
   "p9GiftNoCash": "Cash on delivery is not available for gifts. Choose an online payment method.",
@@ -1667,13 +1815,17 @@
   "p9GiftPlacedBody": "When the payment is confirmed, {name} gets an SMS with a tracking link and a 4-digit delivery code. They give the code to the rider when the order arrives.",
   "@p9GiftPlacedBody": {
     "placeholders": {
-      "name": {"type": "String"}
+      "name": {
+        "type": "String"
+      }
     }
   },
   "p9GiftForName": "Gift for {name}",
   "@p9GiftForName": {
     "placeholders": {
-      "name": {"type": "String"}
+      "name": {
+        "type": "String"
+      }
     }
   },
   "p9GiftRecipientLabel": "Recipient",
@@ -1682,7 +1834,9 @@
   "p9GiftModeBanner": "Sending a gift to {market}",
   "@p9GiftModeBanner": {
     "placeholders": {
-      "market": {"type": "String"}
+      "market": {
+        "type": "String"
+      }
     }
   },
   "p9GiftStop": "Stop gift",
@@ -1739,7 +1893,9 @@
   "p10ParcelPriceHeld": "Price held for {time}",
   "@p10ParcelPriceHeld": {
     "placeholders": {
-      "time": {"type": "String"}
+      "time": {
+        "type": "String"
+      }
     }
   },
   "p10ParcelPriceExpired": "Price lock expired",
@@ -1749,7 +1905,9 @@
   "p10ParcelBook": "Book for {price}",
   "@p10ParcelBook": {
     "placeholders": {
-      "price": {"type": "String"}
+      "price": {
+        "type": "String"
+      }
     }
   },
   "p10ParcelContinue": "Continue",
@@ -1767,13 +1925,17 @@
   "p10ParcelTrackingShareText": "Track my HudHud parcel: {link}",
   "@p10ParcelTrackingShareText": {
     "placeholders": {
-      "link": {"type": "String"}
+      "link": {
+        "type": "String"
+      }
     }
   },
   "p10ParcelEta": "Arriving in about {minutes} min",
   "@p10ParcelEta": {
     "placeholders": {
-      "minutes": {"type": "String"}
+      "minutes": {
+        "type": "String"
+      }
     }
   },
   "p10ParcelCancel": "Cancel parcel",
@@ -1781,7 +1943,9 @@
   "p10ParcelCancelFee": "A courier is already on the way. Cancelling now costs {fee}.",
   "@p10ParcelCancelFee": {
     "placeholders": {
-      "fee": {"type": "String"}
+      "fee": {
+        "type": "String"
+      }
     }
   },
   "p10ParcelCancelReason": "Cancelled by the sender in the app",
@@ -1790,7 +1954,9 @@
   "p11ParcelStopN": "Stop {number}",
   "@p11ParcelStopN": {
     "placeholders": {
-      "number": {"type": "String"}
+      "number": {
+        "type": "String"
+      }
     }
   },
   "p11ParcelRemoveStop": "Remove stop",
@@ -1799,7 +1965,9 @@
   "p11ParcelStopsLimit": "Up to {max} drop-offs per parcel",
   "@p11ParcelStopsLimit": {
     "placeholders": {
-      "max": {"type": "String"}
+      "max": {
+        "type": "String"
+      }
     }
   },
   "p11ParcelMultiStopSenderPays": "With several drop-offs you pay for the whole route.",
@@ -1809,7 +1977,9 @@
   "p11ParcelPayAtPickupDue": "Pay {amount} cash to the courier at pickup",
   "@p11ParcelPayAtPickupDue": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "p11ParcelPaidAtPickup": "Paid to the courier at pickup",
@@ -1827,13 +1997,17 @@
   "p11ParcelCancelCashFee": "A courier is already on the way. Cancelling now costs {fee}. It is taken from your wallet or added to your balance.",
   "@p11ParcelCancelCashFee": {
     "placeholders": {
-      "fee": {"type": "String"}
+      "fee": {
+        "type": "String"
+      }
     }
   },
   "p11ParcelOutstandingBalance": "You owe {amount} from a cancelled parcel. It is taken from your wallet at your next top-up or order.",
   "@p11ParcelOutstandingBalance": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "p12StoreOpen": "Open",
@@ -1842,19 +2016,25 @@
   "p12StoreOpensAt": "Opens {time}",
   "@p12StoreOpensAt": {
     "placeholders": {
-      "time": {"type": "String"}
+      "time": {
+        "type": "String"
+      }
     }
   },
   "p12StoreOpensTomorrowAt": "Opens tomorrow {time}",
   "@p12StoreOpensTomorrowAt": {
     "placeholders": {
-      "time": {"type": "String"}
+      "time": {
+        "type": "String"
+      }
     }
   },
   "p12StoreBackAt": "Back at {time}",
   "@p12StoreBackAt": {
     "placeholders": {
-      "time": {"type": "String"}
+      "time": {
+        "type": "String"
+      }
     }
   },
   "p12StoreClosedToday": "Closed today",
@@ -1870,21 +2050,27 @@
   "p12ErrItemSoldOutNamed": "{item} is sold out today. Remove it to continue.",
   "@p12ErrItemSoldOutNamed": {
     "placeholders": {
-      "item": {"type": "String"}
+      "item": {
+        "type": "String"
+      }
     }
   },
   "p12RemoveItem": "Remove item",
   "p12ErrOutstandingDues": "You have an unpaid balance of {amount}. Cash is not available until it is paid. Top up your wallet or choose another way to pay.",
   "@p12ErrOutstandingDues": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "p12DuesTitle": "Unpaid balance",
   "p12DuesCheckoutBody": "You owe {amount} from a cancelled parcel. Cash on delivery is off until it is paid. Topping up your wallet pays it automatically.",
   "@p12DuesCheckoutBody": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "p12PayNow": "Pay now",
@@ -1895,7 +2081,9 @@
   "p12ErrCityMismatch": "This address is in {city}. Switch your city to {city} to continue.",
   "@p12ErrCityMismatch": {
     "placeholders": {
-      "city": {"type": "String"}
+      "city": {
+        "type": "String"
+      }
     }
   },
   "p12ErrCityMismatchGeneric": "This address is in another city. Switch your city to continue.",
@@ -1921,13 +2109,17 @@
   "msStopLabel": "Stop {number}",
   "@msStopLabel": {
     "placeholders": {
-      "number": {"type": "int"}
+      "number": {
+        "type": "int"
+      }
     }
   },
   "msStopsCount": "{count} stops",
   "@msStopsCount": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "msRemoveStop": "Remove stop",
@@ -1937,13 +2129,17 @@
   "msMaxStopsReached": "You can add up to {max} drop-offs.",
   "@msMaxStopsReached": {
     "placeholders": {
-      "max": {"type": "int"}
+      "max": {
+        "type": "int"
+      }
     }
   },
   "msStopReceiverTitle": "Who receives at stop {number}?",
   "@msStopReceiverTitle": {
     "placeholders": {
-      "number": {"type": "int"}
+      "number": {
+        "type": "int"
+      }
     }
   },
   "msStopReceiverName": "Receiver name",
@@ -1964,19 +2160,28 @@
   "msHeadingToStop": "Heading to stop {number}",
   "@msHeadingToStop": {
     "placeholders": {
-      "number": {"type": "int"}
+      "number": {
+        "type": "int"
+      }
     }
   },
   "msStopsProgress": "{done} of {total} stops done",
   "@msStopsProgress": {
     "placeholders": {
-      "done": {"type": "int"}, "total": {"type": "int"}
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "msStopCode": "Code: {code}",
   "@msStopCode": {
     "placeholders": {
-      "code": {"type": "String"}
+      "code": {
+        "type": "String"
+      }
     }
   },
   "msErrMultiStopDisabled": "More than one stop isn't available right now. Remove the extra stops to continue.",
@@ -1987,61 +2192,90 @@
   "cpPenaltyBodyDelivery": "A courier is already on this job. Cancelling now adds {points} penalty points to your account.",
   "@cpPenaltyBodyDelivery": {
     "placeholders": {
-      "points": {"type": "int"}
+      "points": {
+        "type": "int"
+      }
     }
   },
   "cpPenaltyBodyOrder": "Your order is already being handled. Cancelling now adds {points} penalty points to your account.",
   "@cpPenaltyBodyOrder": {
     "placeholders": {
-      "points": {"type": "int"}
+      "points": {
+        "type": "int"
+      }
     }
   },
   "cpPointsOfLimit": "{points} / {limit} points",
   "@cpPointsOfLimit": {
     "placeholders": {
-      "points": {"type": "int"}, "limit": {"type": "int"}
+      "points": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "int"
+      }
     }
   },
   "cpWarnFineAt": "At {threshold} points you must pay a fine before you can book again.",
   "@cpWarnFineAt": {
     "placeholders": {
-      "threshold": {"type": "int"}
+      "threshold": {
+        "type": "int"
+      }
     }
   },
   "cpWarnBanAt": "At {threshold} points your account is paused for a while.",
   "@cpWarnBanAt": {
     "placeholders": {
-      "threshold": {"type": "int"}
+      "threshold": {
+        "type": "int"
+      }
     }
   },
   "cpWillFine": "This reaches {threshold} points. You will be fined {amount} and can't book until it is paid.",
   "@cpWillFine": {
     "placeholders": {
-      "threshold": {"type": "int"}, "amount": {"type": "String"}
+      "threshold": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "cpWillFineNoAmount": "This reaches {threshold} points. You will be fined and can't book until it is paid.",
   "@cpWillFineNoAmount": {
     "placeholders": {
-      "threshold": {"type": "int"}
+      "threshold": {
+        "type": "int"
+      }
     }
   },
   "cpWillSuspend": "This reaches {threshold} points. Your account will be paused for {days} days.",
   "@cpWillSuspend": {
     "placeholders": {
-      "threshold": {"type": "int"}, "days": {"type": "int"}
+      "threshold": {
+        "type": "int"
+      },
+      "days": {
+        "type": "int"
+      }
     }
   },
   "cpWillSuspendNoDays": "This reaches {threshold} points. Your account will be paused.",
   "@cpWillSuspendNoDays": {
     "placeholders": {
-      "threshold": {"type": "int"}
+      "threshold": {
+        "type": "int"
+      }
     }
   },
   "cpPointsExpire": "Penalty points expire after {days} days.",
   "@cpPointsExpire": {
     "placeholders": {
-      "days": {"type": "int"}
+      "days": {
+        "type": "int"
+      }
     }
   },
   "cpCancelAnyway": "Cancel anyway",
@@ -2053,19 +2287,28 @@
   "cpCancelledWithPoints": "Cancelled. {points} penalty points added (you now have {total}).",
   "@cpCancelledWithPoints": {
     "placeholders": {
-      "points": {"type": "int"}, "total": {"type": "int"}
+      "points": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "cpFineIssued": "You've been fined {amount}. Pay it to book again.",
   "@cpFineIssued": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "cpSuspendedUntil": "Your account is paused until {date}.",
   "@cpSuspendedUntil": {
     "placeholders": {
-      "date": {"type": "String"}
+      "date": {
+        "type": "String"
+      }
     }
   },
   "cpStandingTitle": "Cancellation record",
@@ -2076,19 +2319,28 @@
   "cpStandingExplainer": "Cancelling after a courier or driver is assigned adds {points} penalty points. Cancelling before that is free.",
   "@cpStandingExplainer": {
     "placeholders": {
-      "points": {"type": "int"}
+      "points": {
+        "type": "int"
+      }
     }
   },
   "cpNextExpiry": "{points} points expire on {date}.",
   "@cpNextExpiry": {
     "placeholders": {
-      "points": {"type": "int"}, "date": {"type": "String"}
+      "points": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
     }
   },
   "cpFineDueBody": "You have an unpaid cancellation fine of {amount}. Pay it to book deliveries and order again.",
   "@cpFineDueBody": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "cpPayFine": "Pay fine from wallet",
@@ -2096,7 +2348,9 @@
   "cpSuspendedBody": "You cancelled too many times after a courier was assigned. You can book again on {date}.",
   "@cpSuspendedBody": {
     "placeholders": {
-      "date": {"type": "String"}
+      "date": {
+        "type": "String"
+      }
     }
   },
   "cpSuspendedBodyNoDate": "You cancelled too many times after a courier was assigned. Contact support to restore your account.",
@@ -2108,5 +2362,17 @@
   "cpMarkerPause": "Pause",
   "cpHowItWorks": "How it works",
   "cpRuleFree": "Cancel before a courier or driver is assigned: free.",
-  "cpRuleNoCancelAfterPickup": "Once the package or food is picked up, it can't be cancelled."
+  "cpRuleNoCancelAfterPickup": "Once the package or food is picked up, it can't be cancelled.",
+  "deliveryCodeTitle": "Your delivery code",
+  "@deliveryCodeTitle": {
+    "description": "Heading on the delivery-code card shown at the door"
+  },
+  "deliveryCodePrompt": "Read these 4 digits to your driver to confirm you received your order.",
+  "@deliveryCodePrompt": {
+    "description": "Tells the customer to read the 4-digit code aloud to the driver"
+  },
+  "deliveryCodeWarning": "Only share this code once the driver is in front of you.",
+  "@deliveryCodeWarning": {
+    "description": "Warns the customer not to share the code before the driver arrives"
+  }
 }

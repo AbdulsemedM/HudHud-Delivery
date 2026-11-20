@@ -4524,4 +4524,13 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get cpRuleNoCancelAfterPickup => 'እቃው ወይም ምግቡ ከተወሰደ በኋላ መሰረዝ አይቻልም።';
+
+  @override
+  String get deliveryCodeTitle => 'የማስረከቢያ ኮድዎ';
+
+  @override
+  String get deliveryCodePrompt => 'ትዕዛዝዎን እንደተቀበሉ ለማረጋገጥ እነዚህን 4 ቁጥሮች ለአሽከርካሪው ያንብቡ።';
+
+  @override
+  String get deliveryCodeWarning => 'ይህን ኮድ አሽከርካሪው ፊትዎ ሲሆን ብቻ ያጋሩ።';
 }

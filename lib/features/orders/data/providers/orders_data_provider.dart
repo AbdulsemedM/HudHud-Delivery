@@ -215,6 +215,38 @@ class OrdersDataProvider {
     }
   }
 
+  /// The 4-digit handover code — GET /api/customer/orders/{id}/delivery-code
+  ///
+  /// Returns `data.code` (four digits) once the driver has asked for one, and
+  /// `data.state == 'not_issued'` before that, which is the normal state for
+  /// most of a delivery rather than an error.
+  Future<Map<String, dynamic>> getDeliveryCode(int orderId) async {
+    try {
+      final response = await apiService.get(
+        ApiConstants.replacePathParams(
+            ApiConstants.customerOrderDeliveryCode, {'id': orderId}),
+      );
+
+      return {
+        'statusCode': response.statusCode,
+        'data': response.data,
+        'errorMessage': null
+      };
+    } on ApiException catch (apiError) {
+      return {
+        'statusCode': apiError.statusCode,
+        'data': apiError.data,
+        'errorMessage': apiError.message,
+      };
+    } on Exception catch (e) {
+      return {
+        'statusCode': 500,
+        'data': null,
+        'errorMessage': 'Unexpected error: ${e.toString()}',
+      };
+    }
+  }
+
   /// Get order details by ID — GET /api/customer/orders/{id}
   Future<Map<String, dynamic>> getOrderById(int orderId) async {
     try {

@@ -119,6 +119,18 @@ class ApiConstants {
   static const String customerOrdersAvailable = 'customer/orders/available';
   static const String customerOrderRate = 'customer/orders/{id}/rate';
   static const String customerOrderCancel = 'customer/orders/{id}/cancel';
+
+  /// The 4-digit code to read out to the driver at the door
+  /// (GET customer/orders/{id}/delivery-code).
+  ///
+  /// The code is NEVER in a push payload - push text shows on a lock screen
+  /// and FCM data is readable on the device - so this authenticated read is
+  /// the only way the app gets it. `delivery_code_ready` only says to look.
+  ///
+  /// `data.state` is `not_issued` until the driver asks for one, which is the
+  /// normal state for most of a delivery and not an error.
+  static const String customerOrderDeliveryCode =
+      'customer/orders/{id}/delivery-code';
   /// POST /api/customer/delivery-fee/quote — checkout delivery-fee preview.
   static const String customerDeliveryFeeQuote = 'customer/delivery-fee/quote';
 

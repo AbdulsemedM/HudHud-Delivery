@@ -4622,4 +4622,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get cpRuleNoCancelAfterPickup =>
       'Once the package or food is picked up, it can\'t be cancelled.';
+
+  @override
+  String get deliveryCodeTitle => 'Your delivery code';
+
+  @override
+  String get deliveryCodePrompt => 'Read these 4 digits to your driver to confirm you received your order.';
+
+  @override
+  String get deliveryCodeWarning => 'Only share this code once the driver is in front of you.';
 }
