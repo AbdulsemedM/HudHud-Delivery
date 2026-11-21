@@ -2605,5 +2605,13 @@
   "cpRuleNoCancelAfterPickup": "بعد استلام الطرد أو الطعام لا يمكن الإلغاء.",
   "deliveryCodeTitle": "رمز التسليم الخاص بك",
   "deliveryCodePrompt": "اقرأ هذه الأرقام الأربعة للمندوب لتأكيد استلامك طلبك.",
-  "deliveryCodeWarning": "لا تشارك هذا الرمز إلا عندما يكون المندوب أمامك."
+  "deliveryCodeWarning": "لا تشارك هذا الرمز إلا عندما يكون المندوب أمامك.",
+  "sectorAll": "الكل",
+  "sectorRestaurants": "مطاعم",
+  "sectorBakery": "مخبز",
+  "sectorSupermarket": "سوبر ماركت",
+  "sectorMarket": "سوق",
+  "sectorPharmacy": "صيدلية",
+  "sectorSpareParts": "قطع غيار السيارات",
+  "sectorGeneral": "عام"
 }

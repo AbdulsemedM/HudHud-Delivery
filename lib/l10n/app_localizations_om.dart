@@ -1071,6 +1071,30 @@ class AppLocalizationsOm extends AppLocalizations {
   String get categoryGrocery => 'Dukkaana nyaataa';
 
   @override
+  String get sectorAll => 'Hunda';
+
+  @override
+  String get sectorRestaurants => 'Mana nyaataa';
+
+  @override
+  String get sectorBakery => 'Mana daabboo';
+
+  @override
+  String get sectorSupermarket => 'Suupermaarkeetii';
+
+  @override
+  String get sectorMarket => 'Gabaa';
+
+  @override
+  String get sectorPharmacy => 'Mana qorichaa';
+
+  @override
+  String get sectorSpareParts => 'Meeshaalee konkolaataa';
+
+  @override
+  String get sectorGeneral => 'Waliigala';
+
+  @override
   String get categoryAmerican => 'Ameerikaa';
 
   @override

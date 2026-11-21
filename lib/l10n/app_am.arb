@@ -2612,5 +2612,13 @@
   "cpRuleNoCancelAfterPickup": "እቃው ወይም ምግቡ ከተወሰደ በኋላ መሰረዝ አይቻልም።",
   "deliveryCodeTitle": "የማስረከቢያ ኮድዎ",
   "deliveryCodePrompt": "ትዕዛዝዎን እንደተቀበሉ ለማረጋገጥ እነዚህን 4 ቁጥሮች ለአሽከርካሪው ያንብቡ።",
-  "deliveryCodeWarning": "ይህን ኮድ አሽከርካሪው ፊትዎ ሲሆን ብቻ ያጋሩ።"
+  "deliveryCodeWarning": "ይህን ኮድ አሽከርካሪው ፊትዎ ሲሆን ብቻ ያጋሩ።",
+  "sectorAll": "ሁሉም",
+  "sectorRestaurants": "ምግብ ቤቶች",
+  "sectorBakery": "ዳቦ ቤት",
+  "sectorSupermarket": "ሱፐርማርኬት",
+  "sectorMarket": "ገበያ",
+  "sectorPharmacy": "መድኃኒት ቤት",
+  "sectorSpareParts": "የመኪና መለዋወጫ",
+  "sectorGeneral": "አጠቃላይ"
 }

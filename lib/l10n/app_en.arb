@@ -2374,5 +2374,13 @@
   "deliveryCodeWarning": "Only share this code once the driver is in front of you.",
   "@deliveryCodeWarning": {
     "description": "Warns the customer not to share the code before the driver arrives"
-  }
+  },
+  "sectorAll": "All",
+  "sectorRestaurants": "Restaurants",
+  "sectorBakery": "Bakery",
+  "sectorSupermarket": "Supermarket",
+  "sectorMarket": "Market",
+  "sectorPharmacy": "Pharmacy",
+  "sectorSpareParts": "Auto parts",
+  "sectorGeneral": "General"
 }

@@ -2605,5 +2605,13 @@
   "cpRuleNoCancelAfterPickup": "Marka xidhmada ama cuntada la qaado, lama joojin karo.",
   "deliveryCodeTitle": "Koodhkaaga gaarsiinta",
   "deliveryCodePrompt": "U akhri darawalka 4-da nambar si aad u xaqiijiso inaad dalabkaaga heshay.",
-  "deliveryCodeWarning": "Koodhkan la wadaag kaliya marka darawalka hortaada joogo."
+  "deliveryCodeWarning": "Koodhkan la wadaag kaliya marka darawalka hortaada joogo.",
+  "sectorAll": "Dhammaan",
+  "sectorRestaurants": "Maqaayado",
+  "sectorBakery": "Rootiga",
+  "sectorSupermarket": "Suubarmaarkeed",
+  "sectorMarket": "Suuq",
+  "sectorPharmacy": "Farmashiye",
+  "sectorSpareParts": "Qalabka baabuurka",
+  "sectorGeneral": "Guud"
 }

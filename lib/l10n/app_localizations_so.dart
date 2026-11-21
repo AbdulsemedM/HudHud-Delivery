@@ -1067,6 +1067,30 @@ class AppLocalizationsSo extends AppLocalizations {
   String get categoryGrocery => 'Raashinka';
 
   @override
+  String get sectorAll => 'Dhammaan';
+
+  @override
+  String get sectorRestaurants => 'Maqaayado';
+
+  @override
+  String get sectorBakery => 'Rootiga';
+
+  @override
+  String get sectorSupermarket => 'Suubarmaarkeed';
+
+  @override
+  String get sectorMarket => 'Suuq';
+
+  @override
+  String get sectorPharmacy => 'Farmashiye';
+
+  @override
+  String get sectorSpareParts => 'Qalabka baabuurka';
+
+  @override
+  String get sectorGeneral => 'Guud';
+
+  @override
   String get categoryAmerican => 'Maraykan';
 
   @override

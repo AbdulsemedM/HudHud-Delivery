@@ -618,23 +618,33 @@ class _SectionHeader extends StatelessWidget {
 ///
 /// KEYS, NOT LABELS. The server refuses anything outside the eight in
 /// config/catalog.php with a 422 and `code: SECTOR_UNRECOGNISED`, so "Auto
-/// parts" has to travel as `spare_parts`.
+/// parts" has to travel as `spare_parts` — which is exactly why the label is
+/// resolved separately from the key instead of being sent as one.
 ///
-/// Labels are literal English, matching the rest of this file — 'Most
-/// Popular', 'Browse by store' and 'All categories' are all hardcoded here
-/// too. They want l10n keys before the next store release; left as strings so
-/// this ships as a Dart-only Shorebird patch tonight.
-const List<({String? key, String label})> _sectorChipSpecs = [
-  (key: null, label: 'All'),
-  (key: 'restaurant', label: 'Restaurants'),
-  (key: 'bakery', label: 'Bakery'),
-  (key: 'supermarket', label: 'Supermarket'),
-  (key: 'grocery', label: 'Grocery'),
-  (key: 'market', label: 'Market'),
-  (key: 'pharmacy', label: 'Pharmacy'),
-  (key: 'spare_parts', label: 'Auto parts'),
-  (key: 'general', label: 'General'),
-];
+/// `label` reads from AppLocalizations, so it needs a BuildContext and this
+/// can no longer be a const list. That is the point: the app ships five
+/// locales — en, am, ar, om, so — and Addis reads Amharic and Oromo while
+/// Hargeisa reads Somali. A hardcoded English chip row under a correctly
+/// translated "Browse by store" heading is worse than no chips.
+///
+/// Grocery reuses `categoryGrocery`, which already carried the word in all
+/// five locales before this screen existed. A second key for the same word
+/// is a second thing to keep in step.
+List<({String? key, String label})> _sectorChipSpecs(BuildContext context) {
+  final l10n = context.l10n;
+
+  return [
+    (key: null, label: l10n.sectorAll),
+    (key: 'restaurant', label: l10n.sectorRestaurants),
+    (key: 'bakery', label: l10n.sectorBakery),
+    (key: 'supermarket', label: l10n.sectorSupermarket),
+    (key: 'grocery', label: l10n.categoryGrocery),
+    (key: 'market', label: l10n.sectorMarket),
+    (key: 'pharmacy', label: l10n.sectorPharmacy),
+    (key: 'spare_parts', label: l10n.sectorSpareParts),
+    (key: 'general', label: l10n.sectorGeneral),
+  ];
+}
 
 /// Sector chips above "Browse by store".
 ///
@@ -657,7 +667,7 @@ class _SectorChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const chips = _sectorChipSpecs;
+    final chips = _sectorChipSpecs(context);
 
     return SizedBox(
       height: 44,

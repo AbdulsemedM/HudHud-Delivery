@@ -2605,5 +2605,13 @@
   "cpRuleNoCancelAfterPickup": "Erga meeshaan ykn nyaanni fudhatamee booda haqamuu hin danda'u.",
   "deliveryCodeTitle": "Koodii geejjibaa keessan",
   "deliveryCodePrompt": "Ajaja keessan akka fudhattan mirkaneessuuf lakkoofsota 4 kanneen konkolaachisaaf dubbisaa.",
-  "deliveryCodeWarning": "Koodii kana konkolaachisaan fuula keessan dura yoo jiraate qofa qoodaa."
+  "deliveryCodeWarning": "Koodii kana konkolaachisaan fuula keessan dura yoo jiraate qofa qoodaa.",
+  "sectorAll": "Hunda",
+  "sectorRestaurants": "Mana nyaataa",
+  "sectorBakery": "Mana daabboo",
+  "sectorSupermarket": "Suupermaarkeetii",
+  "sectorMarket": "Gabaa",
+  "sectorPharmacy": "Mana qorichaa",
+  "sectorSpareParts": "Meeshaalee konkolaataa",
+  "sectorGeneral": "Waliigala"
 }

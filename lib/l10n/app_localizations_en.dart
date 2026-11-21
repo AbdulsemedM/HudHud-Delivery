@@ -1055,6 +1055,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categoryGrocery => 'Grocery';
 
   @override
+  String get sectorAll => 'All';
+
+  @override
+  String get sectorRestaurants => 'Restaurants';
+
+  @override
+  String get sectorBakery => 'Bakery';
+
+  @override
+  String get sectorSupermarket => 'Supermarket';
+
+  @override
+  String get sectorMarket => 'Market';
+
+  @override
+  String get sectorPharmacy => 'Pharmacy';
+
+  @override
+  String get sectorSpareParts => 'Auto parts';
+
+  @override
+  String get sectorGeneral => 'General';
+
+  @override
   String get categoryAmerican => 'American';
 
   @override

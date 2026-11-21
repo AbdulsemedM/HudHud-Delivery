@@ -2078,6 +2078,54 @@ abstract class AppLocalizations {
   /// **'Grocery'**
   String get categoryGrocery;
 
+  /// No description provided for @sectorAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get sectorAll;
+
+  /// No description provided for @sectorRestaurants.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurants'**
+  String get sectorRestaurants;
+
+  /// No description provided for @sectorBakery.
+  ///
+  /// In en, this message translates to:
+  /// **'Bakery'**
+  String get sectorBakery;
+
+  /// No description provided for @sectorSupermarket.
+  ///
+  /// In en, this message translates to:
+  /// **'Supermarket'**
+  String get sectorSupermarket;
+
+  /// No description provided for @sectorMarket.
+  ///
+  /// In en, this message translates to:
+  /// **'Market'**
+  String get sectorMarket;
+
+  /// No description provided for @sectorPharmacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Pharmacy'**
+  String get sectorPharmacy;
+
+  /// No description provided for @sectorSpareParts.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto parts'**
+  String get sectorSpareParts;
+
+  /// No description provided for @sectorGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get sectorGeneral;
+
   /// No description provided for @categoryAmerican.
   ///
   /// In en, this message translates to:

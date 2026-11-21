@@ -1059,6 +1059,30 @@ class AppLocalizationsAr extends AppLocalizations {
   String get categoryGrocery => 'خضروات';
 
   @override
+  String get sectorAll => 'الكل';
+
+  @override
+  String get sectorRestaurants => 'مطاعم';
+
+  @override
+  String get sectorBakery => 'مخبز';
+
+  @override
+  String get sectorSupermarket => 'سوبر ماركت';
+
+  @override
+  String get sectorMarket => 'سوق';
+
+  @override
+  String get sectorPharmacy => 'صيدلية';
+
+  @override
+  String get sectorSpareParts => 'قطع غيار السيارات';
+
+  @override
+  String get sectorGeneral => 'عام';
+
+  @override
   String get categoryAmerican => 'أمريكي';
 
   @override

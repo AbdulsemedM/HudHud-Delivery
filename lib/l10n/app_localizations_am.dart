@@ -1042,6 +1042,30 @@ class AppLocalizationsAm extends AppLocalizations {
   String get categoryGrocery => 'ግሮሰሪ';
 
   @override
+  String get sectorAll => 'ሁሉም';
+
+  @override
+  String get sectorRestaurants => 'ምግብ ቤቶች';
+
+  @override
+  String get sectorBakery => 'ዳቦ ቤት';
+
+  @override
+  String get sectorSupermarket => 'ሱፐርማርኬት';
+
+  @override
+  String get sectorMarket => 'ገበያ';
+
+  @override
+  String get sectorPharmacy => 'መድኃኒት ቤት';
+
+  @override
+  String get sectorSpareParts => 'የመኪና መለዋወጫ';
+
+  @override
+  String get sectorGeneral => 'አጠቃላይ';
+
+  @override
   String get categoryAmerican => 'አሜሪካዊ';
 
   @override
