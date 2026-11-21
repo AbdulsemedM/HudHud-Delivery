@@ -41,8 +41,24 @@ class OutOfAreaSheet extends StatelessWidget {
           Icon(
             // A city we are about to open and a place we have never served
             // are different news, so they do not get the same icon.
+            //
+            // `Icons.schedule`, NOT `schedule_outlined`. Flutter tree-shakes
+            // MaterialIcons down to the icons the code actually references, so
+            // one new icon rewrites the font asset - and a Shorebird patch
+            // cannot carry asset changes. Adding `schedule_outlined` took the
+            // app from 313 referenced icons to 314 and turned a same-day patch
+            // into a store release:
+            //
+            //     Your app contains asset changes, which will not be included
+            //     in the patch.
+            //         base/assets/flutter_assets/fonts/MaterialIcons-Regular.otf
+            //
+            // `schedule` and `location_off_outlined` are both already in the
+            // shipped subset, so this renders a clock either way and the patch
+            // publishes. Worth remembering before reaching for a novel icon in
+            // anything that needs to ship as a patch.
             coverage.isComingSoon
-                ? Icons.schedule_outlined
+                ? Icons.schedule
                 : Icons.location_off_outlined,
             color: Colors.orange.shade800,
             size: 36,
