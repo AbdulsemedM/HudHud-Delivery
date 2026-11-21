@@ -3,6 +3,7 @@ import 'package:hudhud_delivery/core/api/api_service.dart';
 import 'growth_data_provider.dart';
 import 'models/checkout_quote.dart';
 import 'models/checkout_quote_request.dart';
+import 'models/city_coverage.dart';
 import 'models/growth_config.dart';
 import 'models/growth_json.dart';
 import 'models/home_feed.dart';
@@ -251,6 +252,27 @@ class GrowthRepository {
       return Market.listFromResponseBody(r['data']);
     } catch (_) {
       return const [];
+    }
+  }
+
+  /// Whether we deliver at a point.
+  ///
+  /// Never throws, and returns `null` on ANY failure - including a timeout or
+  /// a 5xx. That null means "could not find out", never "not served": a
+  /// coverage check that cannot reach the server must not be what stops a
+  /// customer ordering. The quote still refuses with `CITY_NOT_SERVED` if it
+  /// comes to that, so failing open costs a late message, while failing closed
+  /// would cost an order every time the network blinked.
+  Future<CityCoverage?> coverageAt({
+    required double lat,
+    required double lng,
+  }) async {
+    final r = await dataProvider.getCoverage(lat: lat, lng: lng);
+    if (!_ok(r)) return null;
+    try {
+      return CityCoverage.fromResponseBody(r['data']);
+    } catch (_) {
+      return null;
     }
   }
 

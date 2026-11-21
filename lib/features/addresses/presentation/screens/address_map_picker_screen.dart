@@ -10,7 +10,9 @@ import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/widgets/centered_pin_map.dart';
 import 'package:hudhud_delivery/core/widgets/location_search_field.dart';
+import 'package:hudhud_delivery/core/widgets/out_of_area_sheet.dart';
 import 'package:hudhud_delivery/features/addresses/utils/address_fields_mapper.dart';
+import 'package:hudhud_delivery/features/growth/data/growth_repository.dart';
 import 'package:latlong2/latlong.dart';
 
 class AddressMapPickerScreen extends StatefulWidget {
@@ -33,6 +35,10 @@ class _AddressMapPickerScreenState extends State<AddressMapPickerScreen> {
     return const LatLng(9.0222, 38.7468);
   }
   bool _isLoadingCurrentLocation = false;
+
+  /// True while `GET /api/coverage` is in flight, so confirm cannot be tapped
+  /// twice into two pops of the navigator.
+  bool _checkingCoverage = false;
   PlaceResult? _selectedPlace;
   bool _skipNextIdleGeocode = false;
 
@@ -95,17 +101,40 @@ class _AddressMapPickerScreenState extends State<AddressMapPickerScreen> {
     );
   }
 
-  void _confirm() {
-    if (_selectedPlace == null) return;
-    if (!CityScope.allowsPin(
-      _selectedPlace!.coordinates.latitude,
-      _selectedPlace!.coordinates.longitude,
-    )) {
+  Future<void> _confirm() async {
+    if (_selectedPlace == null || _checkingCoverage) return;
+
+    final lat = _selectedPlace!.coordinates.latitude;
+    final lng = _selectedPlace!.coordinates.longitude;
+
+    // Instant, costs no request, but only knows geometry - and says nothing
+    // at all while city enforcement is off, which is the default.
+    if (!CityScope.allowsPin(lat, lng)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.l10n.p10CityNotServed)),
       );
       return;
     }
+
+    // The authority: a city is open only when its market is active AND
+    // priced, and the device knows nothing about pricing zones. Saving an
+    // address we cannot deliver to is worse here than on the map screen -
+    // the customer keeps it and reuses it.
+    setState(() => _checkingCoverage = true);
+    final coverage = await GrowthRepository.create().coverageAt(
+      lat: lat,
+      lng: lng,
+    );
+    if (!mounted) return;
+    setState(() => _checkingCoverage = false);
+
+    // null is "could not find out", never "not served": fail open.
+    if (coverage != null && !coverage.served) {
+      await OutOfAreaSheet.show(context, coverage);
+      return;
+    }
+
+    if (!mounted) return;
     final mapped = AddressFieldsMapper.fromPlaceResult(_selectedPlace!);
     Navigator.pop(context, {
       ...mapped,
@@ -180,8 +209,17 @@ class _AddressMapPickerScreenState extends State<AddressMapPickerScreen> {
                         style: FilledButton.styleFrom(
                           backgroundColor: AppColors.primaryColor,
                         ),
-                        onPressed: _confirm,
-                        child: Text(l10n.addressMapUseLocation),
+                        onPressed: _checkingCoverage ? null : _confirm,
+                        child: _checkingCoverage
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Text(l10n.addressMapUseLocation),
                       ),
                     ),
                   ],

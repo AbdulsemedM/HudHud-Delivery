@@ -11,6 +11,8 @@ import 'package:hudhud_delivery/app/models/place_result.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/theme/app_colors.dart';
 import 'package:hudhud_delivery/core/widgets/centered_pin_map.dart';
+import 'package:hudhud_delivery/core/widgets/out_of_area_sheet.dart';
+import 'package:hudhud_delivery/features/growth/data/growth_repository.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../../../core/widgets/city_outside_area_banner.dart';
@@ -49,6 +51,45 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
       );
   bool _isLoadingCurrentLocation = false;
   bool _hasUserLocation = false;
+
+  /// True while `GET /api/coverage` is in flight.
+  bool _checkingCoverage = false;
+
+  /// Confirms the pin, once the server agrees we deliver there.
+  ///
+  /// [_pinInsideCity] above drives the live banner off local geometry, which
+  /// is instant and free as the customer pans. It cannot answer this: a city
+  /// is open only when its market is active AND has a price list, and the
+  /// device knows nothing about pricing zones. It also says nothing at all
+  /// while city enforcement is off, which is the default.
+  Future<void> _confirmPin() async {
+    if (_selectedPlace == null || _checkingCoverage) return;
+
+    final lat = _currentPosition.latitude;
+    final lng = _currentPosition.longitude;
+
+    setState(() => _checkingCoverage = true);
+    final coverage = await GrowthRepository.create().coverageAt(
+      lat: lat,
+      lng: lng,
+    );
+    if (!mounted) return;
+    setState(() => _checkingCoverage = false);
+
+    // null is "could not find out", never "not served": carrying on is
+    // correct, because the quote still refuses if it comes to that.
+    if (coverage != null && !coverage.served) {
+      await OutOfAreaSheet.show(context, coverage);
+      return;
+    }
+
+    if (!mounted) return;
+    // Pin center is authoritative — must match the address.
+    Navigator.pop(context, {
+      'address': _selectedPlace!.formattedAddress,
+      'coordinates': LatLng(lat, lng),
+    });
+  }
   /// Bumps [CenteredPinMap] key so it remounts already centered on GPS.
   int _mapGeneration = 0;
   PlaceResult? _selectedPlace;
@@ -489,25 +530,25 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        onPressed: !_pinInsideCity
+                        onPressed: !_pinInsideCity || _checkingCoverage
                             ? null
-                            : () {
-                                // Pin center is authoritative — must match the address.
-                                Navigator.pop(context, {
-                                  'address': _selectedPlace!.formattedAddress,
-                                  'coordinates': LatLng(
-                                    _currentPosition.latitude,
-                                    _currentPosition.longitude,
-                                  ),
-                                });
-                              },
-                        child: Text(
-                          l10n.locationConfirmButton,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                            : _confirmPin,
+                        child: _checkingCoverage
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Text(
+                                l10n.locationConfirmButton,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                       ),
                     ),
                   ],

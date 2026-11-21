@@ -159,6 +159,13 @@ class ApiConstants {
   static const String markets = 'markets';
   /// GET /api/markets/resolve?lat=&lng= — nearest active market or null.
   static const String marketsResolve = 'markets/resolve';
+
+  /// GET /api/coverage?lat=&lng= — whether we deliver there, and what to say.
+  ///
+  /// Authoritative in a way the device cannot be: a market is only open when
+  /// it is active AND has an enabled pricing zone, and the app has no idea
+  /// about pricing zones. A city with none can only produce failed checkouts.
+  static const String coverage = 'coverage';
   /// PUT /api/customer/market {market_code}
   static const String customerMarket = 'customer/market';
   /// GET /api/customer/plus — HudHud Plus status.

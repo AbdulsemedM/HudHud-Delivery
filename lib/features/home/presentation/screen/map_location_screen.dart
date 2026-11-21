@@ -9,6 +9,8 @@ import 'package:hudhud_delivery/app/services/startup_location_service.dart';
 import 'package:hudhud_delivery/app/config/google_maps_api_key_provider.dart';
 import 'package:hudhud_delivery/core/l10n/context_l10n.dart';
 import 'package:hudhud_delivery/core/widgets/centered_pin_map.dart';
+import 'package:hudhud_delivery/core/widgets/out_of_area_sheet.dart';
+import 'package:hudhud_delivery/features/growth/data/growth_repository.dart';
 
 class MapLocationScreen extends StatefulWidget {
   final String? currentLocation;
@@ -42,6 +44,10 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
 
   /// After programmatic [moveCamera], skip the next idle geocode from [CenteredPinMap].
   bool _skipNextIdleGeocode = false;
+
+  /// True while `GET /api/coverage` is in flight, so the confirm button cannot
+  /// be tapped twice into two pops of the navigator.
+  bool _checkingCoverage = false;
 
   static gmaps.LatLng _toG(LatLng p) => gmaps.LatLng(p.latitude, p.longitude);
 
@@ -361,7 +367,9 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () => _confirmLocation(place),
+                    onPressed: _checkingCoverage
+                        ? null
+                        : () => _confirmLocation(place),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orange,
                       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -384,22 +392,49 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
     );
   }
 
-  void _confirmLocation(PlaceResult place) {
+  Future<void> _confirmLocation(PlaceResult place) async {
+    if (_checkingCoverage) return;
+
+    final lat = place.coordinates.latitude;
+    final lng = place.coordinates.longitude;
+
     // Phase 10: no pins outside the selected city when the rule is enforced.
-    if (!CityScope.allowsPin(
-      place.coordinates.latitude,
-      place.coordinates.longitude,
-    )) {
+    // This is instant and costs no request, but it only knows geometry.
+    if (!CityScope.allowsPin(lat, lng)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.l10n.p10CityNotServed)),
       );
       return;
     }
+
+    // Then the authority. A city counts as open only when its market is
+    // active AND priced, and the device has no idea about pricing zones - so
+    // the check above cannot answer this, and with enforcement off (the
+    // default) it answers nothing at all. Without this the customer walked
+    // the whole order and met the refusal at checkout.
+    setState(() => _checkingCoverage = true);
+    final coverage = await GrowthRepository.create().coverageAt(
+      lat: lat,
+      lng: lng,
+    );
+    if (!mounted) return;
+    setState(() => _checkingCoverage = false);
+
+    // A null answer means "could not find out", never "not served": see
+    // GrowthRepository.coverageAt. Carrying on is correct - the quote still
+    // refuses if it comes to that, and a blinking network must not cost an
+    // order.
+    if (coverage != null && !coverage.served) {
+      await OutOfAreaSheet.show(context, coverage);
+      return;
+    }
+
+    if (!mounted) return;
     Navigator.pop(context);
     Navigator.pop(context, {
       'address': place.shortAddress,
-      'latitude': place.coordinates.latitude,
-      'longitude': place.coordinates.longitude,
+      'latitude': lat,
+      'longitude': lng,
     });
   }
 
@@ -628,9 +663,17 @@ class _MapLocationScreenState extends State<MapLocationScreen> {
                       ),
                     ),
                     TextButton(
-                      onPressed: () =>
-                          _confirmLocation(_centerPickPlace!),
-                      child: Text(context.l10n.usePin),
+                      onPressed: _checkingCoverage
+                          ? null
+                          : () => _confirmLocation(_centerPickPlace!),
+                      child: _checkingCoverage
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child:
+                                  CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text(context.l10n.usePin),
                     ),
                   ],
                 ),

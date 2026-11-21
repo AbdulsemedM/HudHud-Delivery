@@ -141,6 +141,17 @@ class GrowthDataProvider {
         ),
       );
 
+  Future<Map<String, dynamic>> getCoverage({
+    required double lat,
+    required double lng,
+  }) =>
+      _wrap(
+        () => apiService.get(
+          _url(ApiConstants.coverage),
+          queryParameters: {'lat': lat, 'lng': lng},
+        ),
+      );
+
   Future<Map<String, dynamic>> putCustomerMarket(String marketCode) => _wrap(
         () => apiService.put(
           _url(ApiConstants.customerMarket),
