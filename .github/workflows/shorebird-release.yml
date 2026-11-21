@@ -134,6 +134,32 @@ jobs:
       run:
         shell: bash
     steps:
+      # Free the runner's disk BEFORE anything builds.
+      #
+      # The 21 Nov patch run failed its post-job cache save with "No space left
+      # on device". The patch itself had already succeeded, so it cost nothing
+      # that day - but the next build with slightly more output fails earlier,
+      # and a build that dies after `shorebird patch` has published is a much
+      # worse failure than one that dies before.
+      #
+      # Clearing the Actions cache would have bought one run; the cache refills.
+      # This removes preinstalled toolchains this build never touches: .NET,
+      # Haskell, Boost, CodeQL and the Docker image store, roughly 8-10 GB.
+      #
+      # DELIBERATELY NOT the Android SDK or NDK. This build installs CMake and
+      # compiles native code through Gradle, so removing them - the usual
+      # headline advice for freeing runner disk - would break it.
+      - name: Free disk space
+        run: |
+          set -uo pipefail
+          echo "before:"; df -h / | tail -1
+          sudo rm -rf /usr/share/dotnet || true
+          sudo rm -rf /opt/ghc || true
+          sudo rm -rf /usr/local/share/boost || true
+          sudo rm -rf /opt/hostedtoolcache/CodeQL || true
+          docker image prune -af >/dev/null 2>&1 || true
+          echo "after:"; df -h / | tail -1
+
       - name: Checkout
         uses: actions/checkout@v4
 
