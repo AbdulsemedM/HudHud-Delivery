@@ -6,6 +6,14 @@ class VendorsDataProvider {
   VendorsDataProvider({required this.apiService});
 
   /// GET /api/public/vendors — preferred discovery route (lat/lng optional).
+  ///
+  /// [sector] is one of the platform's eight vendor sectors: restaurant,
+  /// bakery, supermarket, grocery, market, pharmacy, spare_parts, general.
+  /// The server resolves it from the vendor's organization record, falling
+  /// back to business_type, and narrows BEFORE paginating — so asking for
+  /// pharmacies returns pharmacies rather than the pharmacies that happened
+  /// to land on page one. An unrecognised value is refused with 422 and
+  /// `code: SECTOR_UNRECOGNISED`, so send a key, not a label.
   Future<Map<String, dynamic>> getVendors({
     int page = 1,
     int perPage = 20,
@@ -13,6 +21,7 @@ class VendorsDataProvider {
     int? categoryId,
     double? latitude,
     double? longitude,
+    String? sector,
   }) async {
     try {
       final query = <String, dynamic>{
@@ -25,6 +34,9 @@ class VendorsDataProvider {
       if (categoryId != null) query['category_id'] = categoryId;
       if (latitude != null) query['latitude'] = latitude;
       if (longitude != null) query['longitude'] = longitude;
+      if (sector != null && sector.trim().isNotEmpty) {
+        query['sector'] = sector.trim();
+      }
 
       final response = await apiService.get(
         '${ApiConstants.baseUrl}${ApiConstants.publicVendors}',

@@ -17,6 +17,7 @@ class VendorsRepository {
     int? categoryId,
     double? latitude,
     double? longitude,
+    String? sector,
   }) async {
     final response = await vendorsDataProvider.getVendors(
       page: page,
@@ -25,6 +26,7 @@ class VendorsRepository {
       categoryId: categoryId,
       latitude: latitude,
       longitude: longitude,
+      sector: sector,
     );
     if (response['statusCode'] != 200) {
       throw Exception(

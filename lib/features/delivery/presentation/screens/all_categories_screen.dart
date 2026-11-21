@@ -107,6 +107,17 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
   List<VendorModel> _vendors = [];
   bool _vendorsLoading = true;
   String? _vendorsError;
+
+  /// Which vendor sector "Browse by store" is narrowed to; null = all of them.
+  ///
+  /// The platform has had eight sectors for a while - each with its own
+  /// catalogue fields, licence gate and tested order lifecycle - and this app
+  /// had no way to ask for one, so a pharmacy or an auto-parts shop could only
+  /// be found mixed into the general store list, by name or by luck. The
+  /// sector was in the /api/public/vendors payload the whole time
+  /// (vendors.business_type) and nothing used it.
+  String? _sector;
+
   List<PopularProductModel> _popularProducts = [];
   bool _popularLoading = true;
   late final VendorsRepository _vendorsRepository;
@@ -270,6 +281,17 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
     ]);
   }
 
+  /// Narrow "Browse by store" to one sector, or clear it with All.
+  ///
+  /// Lives here because this state owns the vendors request; _CategoriesGrid
+  /// is handed the value and this callback, the same way it is handed the
+  /// vendor list itself.
+  void _onSectorSelected(String? key) {
+    if (key == _sector) return;
+    setState(() => _sector = key);
+    _loadVendors();
+  }
+
   Future<void> _loadVendors() async {
     if (!mounted) return;
     setState(() {
@@ -294,6 +316,7 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
         page: 1,
         latitude: latitude,
         longitude: longitude,
+        sector: _sector,
       );
       if (!mounted) return;
       setState(() {
@@ -359,6 +382,8 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
               vendors: _vendors,
               vendorsLoading: _vendorsLoading,
               vendorsError: _vendorsError,
+              selectedSector: _sector,
+              onSectorSelected: _onSectorSelected,
               popularProducts: _popularProducts,
               popularLoading: _popularLoading,
               onCategoryTap: (category) => _onCategoryTap(context, category),
@@ -392,6 +417,8 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
             vendors: _vendors,
             vendorsLoading: _vendorsLoading,
             vendorsError: _vendorsError,
+            selectedSector: _sector,
+            onSectorSelected: _onSectorSelected,
             popularProducts: _popularProducts,
             popularLoading: _popularLoading,
             onCategoryTap: (category) => _onCategoryTap(context, category),
@@ -410,6 +437,8 @@ class _AllCategoriesBodyState extends State<_AllCategoriesBody> {
             vendors: _vendors,
             vendorsLoading: _vendorsLoading,
             vendorsError: _vendorsError,
+            selectedSector: _sector,
+            onSectorSelected: _onSectorSelected,
             popularProducts: _popularProducts,
             popularLoading: _popularLoading,
             onCategoryTap: (category) => _onCategoryTap(context, category),
@@ -580,6 +609,106 @@ class _SectionHeader extends StatelessWidget {
           letterSpacing: -0.4,
           color: HomeColors.textPrimaryOf(context),
         ),
+      ),
+    );
+  }
+}
+
+/// The sector chips, in the order they are shown.
+///
+/// KEYS, NOT LABELS. The server refuses anything outside the eight in
+/// config/catalog.php with a 422 and `code: SECTOR_UNRECOGNISED`, so "Auto
+/// parts" has to travel as `spare_parts`.
+///
+/// Labels are literal English, matching the rest of this file — 'Most
+/// Popular', 'Browse by store' and 'All categories' are all hardcoded here
+/// too. They want l10n keys before the next store release; left as strings so
+/// this ships as a Dart-only Shorebird patch tonight.
+const List<({String? key, String label})> _sectorChipSpecs = [
+  (key: null, label: 'All'),
+  (key: 'restaurant', label: 'Restaurants'),
+  (key: 'bakery', label: 'Bakery'),
+  (key: 'supermarket', label: 'Supermarket'),
+  (key: 'grocery', label: 'Grocery'),
+  (key: 'market', label: 'Market'),
+  (key: 'pharmacy', label: 'Pharmacy'),
+  (key: 'spare_parts', label: 'Auto parts'),
+  (key: 'general', label: 'General'),
+];
+
+/// Sector chips above "Browse by store".
+///
+/// The door to the sectors this app could never reach: pharmacy and auto
+/// parts have had their own catalogue fields, licence gates and tested order
+/// lifecycles on the server for a while, and no entry point here.
+///
+/// TEXT ONLY, NO ICONS, and that is deliberate rather than plain. Flutter
+/// tree-shakes MaterialIcons down to the icons the code actually references,
+/// so one new icon rewrites MaterialIcons-Regular.otf — and a Shorebird patch
+/// cannot carry asset changes. Adding a single `Icons.schedule_outlined` in
+/// customer #31 took the referenced set from 313 icons to 314 and turned a
+/// same-day patch into a store release. Nine chips with nine new icons would
+/// do the same, and this change exists to be testable tonight.
+class _SectorChips extends StatelessWidget {
+  const _SectorChips({required this.selected, required this.onSelected});
+
+  final String? selected;
+  final ValueChanged<String?> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    const chips = _sectorChipSpecs;
+
+    return SizedBox(
+      height: 44,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: chips.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          final chip = chips[index];
+          final isSelected = chip.key == selected;
+
+          return Semantics(
+            selected: isSelected,
+            button: true,
+            child: Material(
+              color: isSelected
+                  ? HomeColors.orange
+                  : HomeColors.surfaceOf(context),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(22),
+                side: BorderSide(
+                  color: isSelected
+                      ? Colors.transparent
+                      : HomeColors.borderOf(context),
+                ),
+              ),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(22),
+                onTap: () => onSelected(chip.key),
+                child: Padding(
+                  // 44px tall with this padding, which is the minimum
+                  // comfortable touch target.
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Center(
+                    child: Text(
+                      chip.label,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: isSelected
+                            ? Colors.white
+                            : HomeColors.textPrimaryOf(context),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -952,6 +1081,13 @@ class _CategoriesGrid extends StatelessWidget {
   final List<VendorModel> vendors;
   final bool vendorsLoading;
   final String? vendorsError;
+
+  /// Which sector "Browse by store" is narrowed to, and how to change it.
+  /// Passed in rather than held here for the same reason `vendors` is: the
+  /// list and the filter that produced it live in _AllCategoriesBodyState,
+  /// which owns the request.
+  final String? selectedSector;
+  final ValueChanged<String?> onSectorSelected;
   final List<PopularProductModel> popularProducts;
   final bool popularLoading;
   final void Function(CategoryTreeModel) onCategoryTap;
@@ -971,6 +1107,8 @@ class _CategoriesGrid extends StatelessWidget {
     required this.vendors,
     required this.vendorsLoading,
     required this.vendorsError,
+    required this.selectedSector,
+    required this.onSectorSelected,
     required this.popularProducts,
     required this.popularLoading,
     required this.onCategoryTap,
@@ -1104,8 +1242,22 @@ class _CategoriesGrid extends StatelessWidget {
             ),
           ),
         ],
+        // THE CHIPS SIT OUTSIDE THE THREE BRANCHES BELOW, on purpose.
+        //
+        // The empty branch hides the whole section "for cleaner UI". Put the
+        // chips inside it and picking a sector with no shops would take the
+        // chips away with the list, leaving no way back to All - the customer
+        // would be stuck on an empty screen with nothing to press. So the
+        // header and the chips are rendered once, here, and only the CONTENT
+        // below varies.
+        const SliverToBoxAdapter(child: _SectionHeader('Browse by store')),
+        SliverToBoxAdapter(
+          child: _SectorChips(
+            selected: selectedSector,
+            onSelected: onSectorSelected,
+          ),
+        ),
         if (vendorsLoading) ...[
-          const SliverToBoxAdapter(child: _SectionHeader('Browse by store')),
           SliverToBoxAdapter(
             child: SizedBox(
               height: 140,
@@ -1113,9 +1265,23 @@ class _CategoriesGrid extends StatelessWidget {
             ),
           ),
         ] else if (vendorsError != null || vendors.isEmpty) ...[
-          // Hide section for cleaner UI
+          // Nothing in this sector. Said plainly rather than hidden, because
+          // the chip that produced it is still on screen above.
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+              child: Text(
+                selectedSector == null
+                    ? 'No stores to show right now.'
+                    : 'No stores in this category yet.',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ),
         ] else ...[
-          const SliverToBoxAdapter(child: _SectionHeader('Browse by store')),
           SliverToBoxAdapter(
             child: SizedBox(
               height: 140,
