@@ -30,7 +30,18 @@ class GooglePlacesService {
 
   /// A named place (shop, building, office…) within this distance of the pin
   /// gives the address its name.
-  static const double namedPlaceRadiusMeters = 50;
+  ///
+  /// This was 50 m, which is the right number for "am I standing in this
+  /// shop" and the wrong one for a pin dropped on a map: at the zoom level
+  /// customers actually pick from, a tap lands 50-150 m from the door. So
+  /// almost every pin missed its venue and fell back to the reverse-geocoded
+  /// area - "Bole, Addis Ababa" where "Edna Mall, Bole, Addis Ababa" was
+  /// available - which is what made pickup and drop-off read as vague.
+  ///
+  /// 150 m is a landmark radius, which is what the label is for. The pin's own
+  /// coordinates are never moved (see [placeAtPoint]), so the rider still
+  /// navigates to the exact point the customer chose; only the words change.
+  static const double namedPlaceRadiusMeters = 150;
 
   /// Geocode hits further than this from the pin are ignored (stale fixes).
   static const double _maxGeocodeDistanceKm = 50;
@@ -58,20 +69,26 @@ class GooglePlacesService {
   static const String _countryRestriction = 'country:et';
 
   /// Query parameters for Place Autocomplete in [area] (null = Ethiopia only).
+  ///
+  /// The rectangle is a hard `locationrestriction` whenever the city is known,
+  /// regardless of whether ORDER enforcement is on: see
+  /// [CityServiceArea.searchRestriction] for why those were wrongly the same
+  /// decision.
   static Map<String, String> autocompleteScope(CityServiceArea? area) {
     final params = <String, String>{
       'components': area?.countryComponent ?? _countryRestriction,
     };
-    final rectangle = area?.autocompleteRestriction;
+    final rectangle = area?.searchRestriction;
     if (rectangle != null) {
-      // Hard limit when the city rule is enforced, otherwise a preference.
-      params[area!.enforced ? 'locationrestriction' : 'locationbias'] =
-          rectangle;
+      params['locationrestriction'] = rectangle;
     }
     return params;
   }
 
   /// Query parameters for Text Search in [area] (bias only; filtered after).
+  ///
+  /// Text Search has no `locationrestriction`, only a bias, which is exactly
+  /// why [filterToSearchArea] runs on the merged results.
   static Map<String, String> textSearchScope(CityServiceArea? area) {
     final cc = area?.countryCode?.trim().toLowerCase();
     final params = <String, String>{
@@ -79,13 +96,17 @@ class GooglePlacesService {
     };
     if (area != null && area.hasCenter) {
       params['location'] = '${area.centerLat},${area.centerLng}';
-      final radius = (area.radiusKm * 1000).round().clamp(1000, 50000);
+      final radius =
+          (area.effectiveSearchRadiusKm * 1000).round().clamp(1000, 50000);
       params['radius'] = radius.toString();
     }
     return params;
   }
 
   /// Drops places outside an enforced city.
+  ///
+  /// This is the ORDER rule - "may we serve here" - and still waits for
+  /// enforcement. Search results go through [filterToSearchArea] instead.
   static List<PlaceResult> filterToCity(
     List<PlaceResult> places,
     CityServiceArea? area,
@@ -99,6 +120,33 @@ class GooglePlacesService {
           ),
         )
         .toList();
+  }
+
+  /// Drops search results outside the customer's city.
+  ///
+  /// Always applied once the city is known. Text Search can only be biased,
+  /// not restricted, so without this a query like "bole" still returns the
+  /// Bole in another city whenever Google rates it more prominent.
+  ///
+  /// If filtering would leave nothing at all the unfiltered list is returned:
+  /// a customer who searched for something real and got an empty screen is
+  /// worse off than one offered a far-away match they can reject, and an empty
+  /// result here would also hide any mistake in a market's geometry.
+  static List<PlaceResult> filterToSearchArea(
+    List<PlaceResult> places,
+    CityServiceArea? area,
+  ) {
+    if (area == null || places.isEmpty) return places;
+    final inside = places
+        .where(
+          (p) => area.containsForSearch(
+            p.coordinates.latitude,
+            p.coordinates.longitude,
+          ),
+        )
+        .toList();
+
+    return inside.isEmpty ? places : inside;
   }
 
   /// Fetch place suggestions for the given [input]. Only returns places in Ethiopia.
@@ -118,7 +166,7 @@ class GooglePlacesService {
         _searchAutocomplete(key, query, area),
         _searchTextSearch(key, query, area),
       ]);
-      return filterToCity(_mergePlaces(results[0], results[1]), area);
+      return filterToSearchArea(_mergePlaces(results[0], results[1]), area);
     } catch (e) {
       return [];
     }
@@ -373,15 +421,34 @@ class GooglePlacesService {
     }
   }
 
-  /// Picks the closest named place in a Nearby Search [results] list.
+  /// Within this distance the pin is treated as being AT the place, so the
+  /// nearest one wins outright.
+  ///
+  /// Beyond it the label is a landmark rather than an address, and Google's
+  /// own prominence ordering is the better judge: an unnamed kiosk 40 m away
+  /// is nearer than the mall at 120 m and a far worse thing to call the spot.
+  /// Below this band distance decides; above it, prominence does.
+  static const double venueCertaintyMeters = 60;
+
+  /// Picks the named place that best labels [point] in a Nearby Search list.
+  ///
+  /// Nearby Search returns results in prominence order, which the previous
+  /// implementation discarded in favour of strict nearest-wins. That was
+  /// right while the radius was 50 m and everything in range was underfoot.
   /// Visible for tests.
   static NamedPlaceHit? nearestNamedPlaceFrom(
     List<Map<String, dynamic>> results,
     LatLng point,
   ) {
     const distance = Distance();
-    NamedPlaceHit? best;
+
+    // The nearest place inside the certainty band, and - separately - the
+    // most prominent acceptable place anywhere in range, which is simply the
+    // first one Google listed.
+    NamedPlaceHit? nearest;
     double? bestMeters;
+    NamedPlaceHit? mostProminent;
+
     for (final r in results) {
       final name = (r['name'] as String?)?.trim() ?? '';
       if (name.isEmpty || HumanReadableAddress.isNoiseSegment(name)) continue;
@@ -399,17 +466,24 @@ class GooglePlacesService {
 
       final meters = distance.as(LengthUnit.Meter, point, LatLng(lat, lng));
       if (meters > namedPlaceRadiusMeters) continue;
-      if (bestMeters == null || meters < bestMeters) {
+
+      final hit = NamedPlaceHit(
+        name: name,
+        placeId: r['place_id'] as String?,
+        vicinity: (r['vicinity'] as String?)?.trim(),
+        meters: meters,
+      );
+
+      mostProminent ??= hit;
+
+      if (meters <= venueCertaintyMeters &&
+          (bestMeters == null || meters < bestMeters)) {
         bestMeters = meters;
-        best = NamedPlaceHit(
-          name: name,
-          placeId: r['place_id'] as String?,
-          vicinity: (r['vicinity'] as String?)?.trim(),
-          meters: meters,
-        );
+        nearest = hit;
       }
     }
-    return best;
+
+    return nearest ?? mostProminent;
   }
 
   /// Reverse geocode: get address(es) for the given coordinates. Uses Google Geocoding API.

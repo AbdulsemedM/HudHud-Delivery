@@ -163,7 +163,14 @@ void main() {
       expect(filtered.map((p) => p.displayName), ['Maroodi Jeex']);
     });
 
-    test('a city that is not enforced only biases the search', () {
+    // Was 'a city that is not enforced only biases the search', asserting
+    // locationbias and an unfiltered list. That is the behaviour customers
+    // complained about: `enforced` says whether an ORDER may cross a city
+    // line, and it was also deciding whether SEARCH was limited to the city.
+    // Enforcement is off by default, so every shipped build searched all of
+    // Ethiopia and merely preferred the city - a customer in Addis typing
+    // "bole" was offered Hargeisa.
+    test('a city that is not enforced still restricts the search', () {
       const relaxed = CityServiceArea(
         marketCode: 'hargeisa',
         marketName: 'Hargeisa',
@@ -172,13 +179,98 @@ void main() {
         bounds: CityBounds(south: 9.45, west: 43.95, north: 9.65, east: 44.15),
         countryCode: 'SO',
       );
+
       final scope = GooglePlacesService.autocompleteScope(relaxed);
-      expect(scope['locationbias'], 'rectangle:9.45,43.95|9.65,44.15');
-      expect(scope.containsKey('locationrestriction'), isFalse);
+      expect(scope['locationrestriction'], 'rectangle:9.45,43.95|9.65,44.15');
+      expect(scope.containsKey('locationbias'), isFalse);
+
+      final places = [
+        PlaceResult(
+            displayName: 'Maroodi Jeex',
+            coordinates: const LatLng(9.56, 44.06)),
+        PlaceResult(displayName: 'Bole', coordinates: const LatLng(9.0, 38.76)),
+      ];
+      expect(
+        GooglePlacesService.filterToSearchArea(places, relaxed)
+            .map((p) => p.displayName),
+        ['Maroodi Jeex'],
+        reason: 'the out-of-city hit goes even with enforcement off',
+      );
+
+      // ... while the ORDER rule is untouched and still waits for the flag.
+      expect(GooglePlacesService.filterToCity(places, relaxed), hasLength(2));
+    });
+
+    test('search_bounds narrows the search without touching the service area',
+        () {
+      final market = Market.fromJson({
+        'code': 'addis_ababa',
+        'name': 'Addis Ababa',
+        'currency': 'ETB',
+        'service_area': {
+          'center': {'lat': 9.0192, 'lng': 38.7525},
+          'radius_km': 60,
+          'bounds': {
+            'south': 8.4802,
+            'west': 38.2074,
+            'north': 9.5582,
+            'east': 39.2976
+          },
+          'search_radius_km': 25,
+          'search_bounds': {
+            'south': 8.7946,
+            'west': 38.5250,
+            'north': 9.2438,
+            'east': 38.9800
+          },
+          'shape': 'radius',
+          'country_code': 'ET',
+          'enforced': false,
+        },
+      });
+      final area = market.serviceArea!;
+
+      expect(area.effectiveSearchRadiusKm, 25);
+      expect(area.searchRestriction,
+          'rectangle:8.7946,38.525|9.2438,38.98');
+
+      // Bishoftu: a different town, inside the 60 km service box and outside
+      // the search box. This is the case that produced the complaint.
+      expect(area.contains(8.7520, 38.9800), isTrue);
+      expect(area.containsForSearch(8.7520, 38.9800), isFalse);
+
+      // Bole is in the city on both readings.
+      expect(area.containsForSearch(9.0105, 38.7870), isTrue);
+    });
+
+    test('an older backend without search_bounds falls back to the service box',
+        () {
+      const area = CityServiceArea(
+        marketCode: 'hargeisa',
+        marketName: 'Hargeisa',
+        centerLat: 9.56,
+        centerLng: 44.065,
+        bounds: CityBounds(south: 9.45, west: 43.95, north: 9.65, east: 44.15),
+        countryCode: 'SO',
+      );
+
+      expect(area.searchRestriction, 'rectangle:9.45,43.95|9.65,44.15');
+      expect(area.effectiveSearchRadiusKm, 60);
+      expect(area.containsForSearch(9.56, 44.06), isTrue);
+      expect(area.containsForSearch(9.03, 38.74), isFalse);
+    });
+
+    test('filtering never hands back an empty result list', () {
+      // A market whose geometry is wrong, or a customer searching for
+      // somewhere genuinely outside it, should see the far-away match and
+      // judge it - not an empty screen that looks like a broken search.
       final places = [
         PlaceResult(displayName: 'Bole', coordinates: const LatLng(9.0, 38.76)),
       ];
-      expect(GooglePlacesService.filterToCity(places, relaxed), hasLength(1));
+      expect(
+        GooglePlacesService.filterToSearchArea(places, _hargeisaArea),
+        hasLength(1),
+      );
     });
   });
 
